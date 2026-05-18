@@ -195,6 +195,10 @@ export type Database = {
           city: string | null
           postal_code: string | null
           country: string | null
+          apartment_detail: string | null
+          floor_number: number | null
+          building_letter: string | null
+          address_complement: string | null
           siret: string | null
           notes: string | null
           tags: (unknown)[] | null
@@ -217,6 +221,10 @@ export type Database = {
           city?: string | null
           postal_code?: string | null
           country?: string | null
+          apartment_detail?: string | null
+          floor_number?: number | null
+          building_letter?: string | null
+          address_complement?: string | null
           siret?: string | null
           notes?: string | null
           tags?: (unknown)[] | null
@@ -239,6 +247,10 @@ export type Database = {
           city?: string | null
           postal_code?: string | null
           country?: string | null
+          apartment_detail?: string | null
+          floor_number?: number | null
+          building_letter?: string | null
+          address_complement?: string | null
           siret?: string | null
           notes?: string | null
           tags?: (unknown)[] | null

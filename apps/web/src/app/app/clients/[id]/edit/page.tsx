@@ -19,7 +19,7 @@ export default async function EditClientPage({
   const { data: client } = await supabase
     .from('clients')
     .select(
-      'id, type, display_name, first_name, last_name, company_name, email, phone, notes',
+      'id, type, display_name, first_name, last_name, company_name, email, phone, address, postal_code, city, apartment_detail, building_letter, floor_number, address_complement, siret, notes',
     )
     .eq('id', id)
     .eq('organization_id', orgId)

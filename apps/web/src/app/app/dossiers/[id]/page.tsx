@@ -19,8 +19,8 @@ import { CoherenceWarnings } from './coherence-warnings'
 import { DiagnosticStatusPills } from './diagnostic-status-pills'
 import { DossierInfoEdit } from './dossier-info-edit'
 import { DossierMoreMenu } from './dossier-more-menu'
-import { MissionCardCollapsible } from './mission-card-collapsible'
 import { MissionChecklist } from './mission-checklist'
+import { type MissionDrawerItem, MissionsWithDrawer } from './missions-with-drawer'
 import { OwnerDocumentsList } from './owner-documents-list'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
@@ -475,42 +475,113 @@ export default async function DossierDetailPage({
           }
         />
       ) : (
-        <div className="space-y-3">
-          {missionsWithChecklist.map(
-            ({ mission: m, checklist, percentage, missingRequiredCount }) => (
-              <MissionCardCollapsible
-                key={m.id}
-                missionId={m.id}
-                typeLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
-                reference={m.reference}
-                percentage={percentage}
-                missingRequiredCount={missingRequiredCount}
-                headerActions={
-                  <>
-                    <ResumeButton missionId={m.id} status={m.status} />
-                    <MissionStatusButton missionId={m.id} currentStatus={m.status as never} />
-                    <ShareMissionButton
-                      missionId={m.id}
-                      missionReference={m.reference}
-                      clientEmail={client?.email ?? null}
-                    />
-                    <RemoveMissionButton
-                      missionId={m.id}
-                      missionLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
-                    />
-                  </>
-                }
-              >
+        (() => {
+          // Sections embarquées dans le drawer (réutilisent les composants existants).
+          // Photos / voice notes / pièces restent au niveau dossier — pas de mission_id.
+          const photoCountsByRoom: Record<string, number> = {}
+          for (const p of photos ?? []) {
+            if (p.room_id) photoCountsByRoom[p.room_id] = (photoCountsByRoom[p.room_id] ?? 0) + 1
+          }
+          const roomIndexById: Record<string, number> = {}
+          ;(rooms ?? []).forEach((r, idx) => {
+            roomIndexById[r.id] = idx + 1
+          })
+          const roomsArr = (rooms ?? []).map((r) => ({ id: r.id, name: r.name }))
+
+          const sharedPhotoSection = (
+            <>
+              <PhotoCapture
+                dossierId={dossier.id}
+                dossierReference={dossier.reference}
+                orgId={orgId}
+                rooms={roomsArr}
+                photoCountsByRoom={photoCountsByRoom}
+                roomIndexById={roomIndexById}
+              />
+              <PhotoGallery
+                dossierId={dossier.id}
+                rooms={roomsArr}
+                photos={(photos ?? []).map((p) => ({
+                  id: p.id,
+                  storage_path: p.storage_path,
+                  width: p.width,
+                  height: p.height,
+                  size_bytes: p.size_bytes,
+                  room_id: p.room_id,
+                  taken_at: p.taken_at,
+                  view_type: (p as { view_type?: string | null }).view_type ?? null,
+                  location_text: null,
+                }))}
+              />
+            </>
+          )
+
+          const sharedVoiceSection = (
+            <>
+              <VoiceRecorder dossierId={dossier.id} orgId={orgId} rooms={roomsArr} />
+              <VoiceNotesList
+                dossierId={dossier.id}
+                rooms={roomsArr}
+                notes={(voiceNotes ?? []).map((n) => ({
+                  id: n.id,
+                  storage_path: n.storage_path,
+                  duration_seconds: n.duration_seconds,
+                  transcript_raw: n.transcript_raw,
+                  transcript_structured: n.transcript_structured as VoiceParsedData | null,
+                  ai_confidence: n.ai_confidence,
+                  parser_used: n.parser_used,
+                  room_id: n.room_id,
+                  created_at: n.created_at,
+                }))}
+              />
+            </>
+          )
+
+          const sharedRoomsSection = <RoomsList dossierId={dossier.id} rooms={rooms ?? []} />
+
+          const items: MissionDrawerItem[] = missionsWithChecklist.map(
+            ({ mission: m, checklist, percentage, missingRequiredCount }) => ({
+              id: m.id,
+              type: m.type,
+              typeLabel: MISSION_TYPE_LABELS[m.type] ?? m.type,
+              reference: m.reference,
+              status: m.status,
+              percentage,
+              missingRequiredCount,
+              checklistItems: checklist.items,
+              checklistCompletion: checklist.completion,
+              checklistRequiredOk: checklist.requiredOk,
+              headerActions: (
+                <>
+                  <ResumeButton missionId={m.id} status={m.status} />
+                  <MissionStatusButton missionId={m.id} currentStatus={m.status as never} />
+                  <ShareMissionButton
+                    missionId={m.id}
+                    missionReference={m.reference}
+                    clientEmail={client?.email ?? null}
+                  />
+                  <RemoveMissionButton
+                    missionId={m.id}
+                    missionLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
+                  />
+                </>
+              ),
+              checklistContent: (
                 <MissionChecklist
                   missionId={m.id}
                   items={checklist.items}
                   completion={checklist.completion}
                   requiredOk={checklist.requiredOk}
                 />
-              </MissionCardCollapsible>
-            ),
-          )}
-        </div>
+              ),
+              roomsSection: sharedRoomsSection,
+              photoSection: sharedPhotoSection,
+              voiceSection: sharedVoiceSection,
+            }),
+          )
+
+          return <MissionsWithDrawer missions={items} propertyAddress={fullAddress} />
+        })()
       )}
 
       {dossier.notes && (
