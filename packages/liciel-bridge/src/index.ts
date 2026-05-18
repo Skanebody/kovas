@@ -31,7 +31,7 @@ export type LicielExportResult = {
  * Implémentation Sprint MVP J12.
  */
 export async function buildLicielZip(
-  payload: LicielExportPayload,
+  _payload: LicielExportPayload,
 ): Promise<LicielExportResult> {
   // TODO Task 4.2 sprint MVP J12
   throw new Error('Not implemented yet — Sprint MVP J12')

@@ -31,8 +31,8 @@ export type TranscriptionResult = {
  * Stub — implémentation complète dans Edge Function `transcribe-voice-note`.
  */
 export async function transcribeAudio(
-  audioBlob: Blob,
-  missionType: string,
+  _audioBlob: Blob,
+  _missionType: string,
 ): Promise<TranscriptionResult> {
   // TODO Task 2.3 sprint MVP J5
   throw new Error('Not implemented yet — Task 2.3 sprint MVP')

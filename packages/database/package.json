@@ -14,7 +14,7 @@
     "gen-types": "supabase gen types typescript --linked > src/types.ts"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.5.2",
+    "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.46.1"
   }
 }
