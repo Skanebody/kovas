@@ -221,3 +221,39 @@ export async function deleteVoiceNoteAction(missionId: string, voiceNoteId: stri
   if (error) throw new Error(error.message)
   revalidatePath(`/app/missions/${missionId}`)
 }
+
+// ============================================
+// Mission status transitions
+// ============================================
+
+const MISSION_STATUSES = [
+  'draft', 'scheduled', 'in_progress', 'to_review', 'done', 'exported', 'archived', 'cancelled',
+] as const
+type MissionStatus = (typeof MISSION_STATUSES)[number]
+
+export async function updateMissionStatusAction(missionId: string, newStatus: MissionStatus) {
+  if (!MISSION_STATUSES.includes(newStatus)) {
+    throw new Error(`Statut invalide: ${newStatus}`)
+  }
+  const { supabase, orgId } = await getCurrentUser()
+
+  const now = new Date().toISOString()
+  const updates: {
+    status: MissionStatus
+    started_at?: string
+    completed_at?: string
+  } = { status: newStatus }
+  if (newStatus === 'in_progress') updates.started_at = now
+  if (newStatus === 'done') updates.completed_at = now
+
+  const { error } = await supabase
+    .from('missions')
+    .update(updates)
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/missions/${missionId}`)
+  revalidatePath('/app/missions')
+  revalidatePath('/app/dashboard')
+}

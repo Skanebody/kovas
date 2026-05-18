@@ -2,19 +2,15 @@ import { ArrowLeft, Building2, Calendar, Camera, Mic, User } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import {
-  MISSION_STATUS_LABELS,
-  MISSION_STATUS_VARIANT,
-  MISSION_TYPE_LABELS,
-} from '@/lib/mission-helpers'
+import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import type { VoiceParsedData } from '@/lib/voice-parser'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
 import { RoomsList } from './rooms-list'
+import { MissionStatusButton } from './status-button'
 import { VoiceNotesList } from './voice-notes-list'
 import { VoiceRecorder } from './voice-recorder'
 
@@ -82,10 +78,8 @@ export default async function MissionDetailPage({
           <h1 className="text-2xl font-bold tracking-tight">
             {MISSION_TYPE_LABELS[mission.type] ?? mission.type}
           </h1>
-          <Badge variant={MISSION_STATUS_VARIANT[mission.status] ?? 'muted'}>
-            {MISSION_STATUS_LABELS[mission.status] ?? mission.status}
-          </Badge>
         </div>
+        <MissionStatusButton missionId={mission.id} currentStatus={mission.status as never} />
       </div>
 
       <Card>

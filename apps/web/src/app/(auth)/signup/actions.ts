@@ -139,5 +139,5 @@ export async function signupAction(
     return { error: signInError.message }
   }
 
-  redirect('/app/dashboard')
+  redirect('/app/onboarding')
 }
