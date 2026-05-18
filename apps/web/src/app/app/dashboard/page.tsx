@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { OverviewDonutsBlock } from './overview-donuts-block'
 import { RecentActivityBlock } from './recent-activity-block'
+import { RecentClientsBlock } from './recent-clients-block'
 import { ToFinalizeBlock } from './to-finalize-block'
 import { TodayBlock } from './today-block'
 import { WeekStatsBlock } from './week-stats-block'
@@ -63,6 +64,8 @@ export default async function DashboardPage() {
       <WeekStatsBlock />
 
       <OverviewDonutsBlock />
+
+      <RecentClientsBlock />
 
       <RecentActivityBlock />
 

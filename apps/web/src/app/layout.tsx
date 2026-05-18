@@ -1,8 +1,9 @@
+import { AddToHomeScreen } from '@/components/add-to-home-screen'
+import { QueryProvider } from '@/components/query-provider'
+import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/toaster'
 import type { Metadata, Viewport } from 'next'
 import { Manrope } from 'next/font/google'
-import { ThemeProvider } from '@/components/theme-provider'
-import { QueryProvider } from '@/components/query-provider'
-import { AddToHomeScreen } from '@/components/add-to-home-screen'
 import './globals.css'
 
 const manrope = Manrope({
@@ -72,6 +73,7 @@ export default function RootLayout({
           <QueryProvider>
             {children}
             <AddToHomeScreen />
+            <Toaster />
           </QueryProvider>
         </ThemeProvider>
       </body>

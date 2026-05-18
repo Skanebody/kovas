@@ -3,12 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
-import { ArrowRight, CalendarClock, MapPin } from 'lucide-react'
+import { ArrowRight, CalendarClock, FileWarning, MapPin } from 'lucide-react'
 import Link from 'next/link'
+import { TodayMissionActions } from './today-mission-actions'
 
 /**
  * Bornes du jour en timezone Europe/Paris.
- * Stockage UTC ISO 8601 → on calcule [début_jour_local, fin_jour_local] côté serveur.
  */
 function todayBoundsParis(): { startIso: string; endIso: string } {
   const now = new Date()
@@ -24,6 +24,19 @@ function todayBoundsParis(): { startIso: string; endIso: string } {
   return { startIso: start.toISOString(), endIso: end.toISOString() }
 }
 
+/**
+ * Mission types qui consomment au moins un document propriétaire utile.
+ * Si un dossier contient ≥1 de ces types, on attend au moins 1 doc reçu.
+ */
+const DOC_RELEVANT_TYPES = new Set([
+  'dpe_vente',
+  'dpe_location',
+  'copropriete',
+  'amiante_vente',
+  'amiante_avant_travaux',
+  'plomb_crep',
+])
+
 export async function TodayBlock() {
   const { supabase, orgId } = await getCurrentUser()
   const { startIso, endIso } = todayBoundsParis()
@@ -31,7 +44,7 @@ export async function TodayBlock() {
   const { data: dossiers } = await supabase
     .from('dossiers')
     .select(
-      'id, reference, status, scheduled_at, properties(address, postal_code, city), missions(id, type, status)',
+      'id, reference, status, scheduled_at, client_upload_token, properties(address, postal_code, city), clients(display_name, email, phone), missions(id, type, status), owner_documents(id)',
     )
     .eq('organization_id', orgId)
     .is('deleted_at', null)
@@ -66,7 +79,12 @@ export async function TodayBlock() {
           <ul className="divide-y divide-border">
             {list.map((d) => {
               const prop = Array.isArray(d.properties) ? d.properties[0] : d.properties
-              const missions = (d.missions ?? []) as { id: string; type: string; status: string }[]
+              const client = Array.isArray(d.clients) ? d.clients[0] : d.clients
+              const missions = (d.missions ?? []) as {
+                id: string
+                type: string
+                status: string
+              }[]
               const firstActive = missions.find(
                 (m) => m.status !== 'done' && m.status !== 'cancelled',
               )
@@ -77,50 +95,69 @@ export async function TodayBlock() {
                     timeZone: 'Europe/Paris',
                   })
                 : null
+              const fullAddress = prop
+                ? [prop.address, prop.postal_code, prop.city].filter(Boolean).join(', ')
+                : ''
+              const docsReceived = (d.owner_documents ?? []).length
+              const needsDocs = missions.some((m) => DOC_RELEVANT_TYPES.has(m.type))
+              const docsMissing = needsDocs && docsReceived === 0
+              const startHref = firstActive
+                ? `/app/dossiers/${d.id}#mission-${firstActive.id}`
+                : `/app/dossiers/${d.id}`
+
               return (
-                <li key={d.id} className="px-4 py-3 hover:bg-muted/30 transition-colors">
-                  <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {time && (
-                        <span className="text-base font-semibold tracking-tight shrink-0 w-14 tabular-nums">
-                          {time}
+                <li key={d.id} className="px-4 py-3 hover:bg-muted/30 transition-colors space-y-2">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {time && (
+                      <span className="text-base font-semibold tracking-tight shrink-0 w-14 tabular-nums">
+                        {time}
+                      </span>
+                    )}
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {d.reference}
                         </span>
-                      )}
-                      <div className="flex-1 min-w-0 space-y-0.5">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono text-xs text-muted-foreground">
-                            {d.reference}
+                        {missions.slice(0, 3).map((m) => (
+                          <Badge key={m.id} variant="muted" className="text-[10px] py-0">
+                            {MISSION_TYPE_LABELS[m.type]?.split(' ')[0] ?? m.type}
+                          </Badge>
+                        ))}
+                        {missions.length > 3 && (
+                          <span className="text-[10px] text-muted-foreground">
+                            +{missions.length - 3}
                           </span>
-                          {missions.slice(0, 3).map((m) => (
-                            <Badge key={m.id} variant="muted" className="text-[10px] py-0">
-                              {MISSION_TYPE_LABELS[m.type]?.split(' ')[0] ?? m.type}
-                            </Badge>
-                          ))}
-                          {missions.length > 3 && (
-                            <span className="text-[10px] text-muted-foreground">
-                              +{missions.length - 3}
-                            </span>
-                          )}
-                        </div>
-                        {prop?.address && (
-                          <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
-                            <MapPin className="size-3 shrink-0" />
-                            <span className="truncate">
-                              {prop.address}
-                              {prop.city ? `, ${prop.postal_code ?? ''} ${prop.city}` : ''}
-                            </span>
-                          </div>
+                        )}
+                        {docsMissing && (
+                          <Badge variant="orange" className="text-[10px] py-0 gap-1">
+                            <FileWarning className="size-3" />
+                            Docs manquants
+                          </Badge>
                         )}
                       </div>
+                      {fullAddress && (
+                        <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                          <MapPin className="size-3 shrink-0" />
+                          <span className="truncate">{fullAddress}</span>
+                        </div>
+                      )}
+                      {client?.display_name && (
+                        <div className="text-xs text-muted-foreground truncate">
+                          {client.display_name}
+                        </div>
+                      )}
                     </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-1 flex-wrap pl-[3.75rem] sm:pl-0">
+                    <TodayMissionActions
+                      phone={client?.phone ?? null}
+                      address={fullAddress}
+                      dossierId={d.id}
+                      uploadToken={d.client_upload_token ?? null}
+                      docsMissing={docsMissing}
+                    />
                     <Button size="sm" asChild>
-                      <Link
-                        href={
-                          firstActive
-                            ? `/app/dossiers/${d.id}#mission-${firstActive.id}`
-                            : `/app/dossiers/${d.id}`
-                        }
-                      >
+                      <Link href={startHref}>
                         Démarrer <ArrowRight className="size-4" />
                       </Link>
                     </Button>

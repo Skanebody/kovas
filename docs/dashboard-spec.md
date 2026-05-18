@@ -71,6 +71,80 @@ Déjà présent. Conserver, juste s'assurer qu'il est très visible (CTA navy KO
 - ❌ Workflow Bézier 4 colonnes connectées (overkill — `WorkflowStepper` linéaire suffit)
 - ❌ Recherche universelle FTS (V1.1)
 
+## 8 features dashboard haute valeur (révision 2026-05-18)
+
+Ajout au scope V1/V1.5 selon ROI utilisateur estimé. Spec source : message produit
+2026-05-18 ("Dashboard haute valeur + génération rapports conformes").
+
+| # | Feature | Statut | Effort | ROI util. |
+|---|---|---|---|---|
+| F1 | **Mission imminente** — card auto T-30/T-15/T+0/T+60 | V1.5 (Edge cron) | 1 j | 50 €/mois |
+| F2 | **Clients récents** — top 5 derniers clients dashboard | ✅ V1 | 0,5 j | 120 €/mois |
+| F3 | **Indicateur sync** — badge online/syncing/offline | V1.5 (queue offline incomplète) | 1 j | NPS +10 |
+| F4 | **Badges docs manquants** — sur cards mission + bouton Relancer | ✅ V1 | 0,5 j | 200 €/mois |
+| F5 | **Actions rapides** — tel / SMS / GPS / Démarrer | ✅ V1 | 0,5 j | 100 €/mois |
+| F6 | **Quick Add Mission vocal** — Whisper + Claude Haiku parsing | V1.5 (BAN+géocodage) | 1,5 j | 150 €/mois |
+| F7 | **Compteur DPE 1000/an** — protection certif | V1.5 (champ certif manquant) | 0,5 j | protection cert. |
+| F8 | **Micro-feedback Sonner** — toasts standardisés | ✅ V1 | 1 j | NPS +10 |
+
+**Livrable V1 courant** : F2 + F4 + F5 + F8 (~2,5 j) — ROI ~520 €/mois utilisateur sans nouveau
+risque infrastructure.
+
+### F2 Clients récents — détail
+
+5 derniers clients avec dossier le plus récent. Sur tap, ouvre fiche client.
+
+```sql
+select c.id, c.display_name, c.email, c.phone,
+       max(d.created_at) as last_dossier_at,
+       (select count(*) from dossiers d2
+        where d2.client_id = c.id
+          and d2.organization_id = c.organization_id
+          and d2.deleted_at is null) as total_dossiers
+from clients c
+left join dossiers d on d.client_id = c.id and d.deleted_at is null
+where c.organization_id = $1 and c.deleted_at is null
+group by c.id
+order by last_dossier_at desc nulls last
+limit 5;
+```
+
+### F4 Badges docs manquants — détail
+
+Sur chaque mission de la TodayBlock, afficher les docs propriétaire requis non encore reçus
+(check `owner_documents` + types attendus par type de diagnostic). Bouton "Relancer client"
+ouvre lien public upload existant.
+
+Check par type :
+- DPE : facture énergie, plan, ancien DPE, année construction
+- Amiante : permis construire, anciens diag
+- Plomb CREP : année construction
+- Gaz/Élec : justificatif compteur
+
+### F5 Actions rapides — détail
+
+4 boutons sur chaque card mission de la TodayBlock :
+- 📞 Appeler : `tel:{phone}`
+- 🗺️ GPS : iOS `maps:?daddr=...`, Android `geo:0,0?q=...`, desktop Google Maps fallback
+- 💬 SMS : `sms:{phone}?body={template}`
+- ▶️ Démarrer : route vers la mission active du dossier
+
+### F8 Toasts Sonner — détail
+
+Sonner installé (~5 kb). Helper `toast()` exposé :
+- `toast.success("Mission démarrée à 11:08")` — vert 2,5 s
+- `toast.error("Erreur upload")` — rouge 5 s
+- `toast.warning("Connexion perdue, mode offline")` — orange 5 s
+- `toast.info("...")` — neutre
+
+Skeleton loaders et haptic feedback (Web Vibration API) reportés V1.5.
+
+## Génération de rapports conformes
+
+**Hors-scope V1.** Cf. [docs/report-templates.md](report-templates.md) — Phase 2 (M10-M18) après
+certification ADEME 3CL-2021 + recrutement advisor diagnostiqueur certifié + audit legal
+(CLAUDE.md §14 Vague 2). Conflit dur avec CLAUDE.md §2 si tenté en V1.
+
 ## Performance
 
 - **Promise.all** sur les queries de chaque bloc → 1 round-trip côté server component
