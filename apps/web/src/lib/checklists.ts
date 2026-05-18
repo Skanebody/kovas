@@ -284,7 +284,14 @@ export function getChecklistForMissionType(missionType: string): ChecklistItem[]
   return [...COMMON_CHECKLIST, ...(CHECKLISTS_BY_TYPE[missionType] ?? [])]
 }
 
-export interface ChecklistRunItem extends ChecklistItem {
+/**
+ * Item sérialisable (sans la fonction `autoCheck`) pour passage RSC → Client.
+ */
+export interface ChecklistRunItem {
+  id: string
+  label: string
+  category: ChecklistItem['category']
+  required: boolean
   status: 'auto_ok' | 'auto_pending' | 'manual'
   manualChecked?: boolean
 }
@@ -295,10 +302,16 @@ export function runChecklist(
   manualState: Record<string, boolean> = {},
 ): { items: ChecklistRunItem[]; completion: number; requiredOk: boolean } {
   const items = getChecklistForMissionType(missionType).map((it): ChecklistRunItem => {
-    if (it.autoCheck) {
-      return { ...it, status: it.autoCheck(ctx) ? 'auto_ok' : 'auto_pending' }
+    const base = {
+      id: it.id,
+      label: it.label,
+      category: it.category,
+      required: it.required,
     }
-    return { ...it, status: 'manual', manualChecked: manualState[it.id] === true }
+    if (it.autoCheck) {
+      return { ...base, status: it.autoCheck(ctx) ? 'auto_ok' : 'auto_pending' }
+    }
+    return { ...base, status: 'manual', manualChecked: manualState[it.id] === true }
   })
 
   const total = items.length
