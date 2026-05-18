@@ -1,5 +1,6 @@
 'use server'
 
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
@@ -26,27 +27,41 @@ export async function signupAction(
     return { error: parsed.error.issues[0]?.message ?? 'Données invalides' }
   }
 
-  const supabase = await createClient()
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  // Phase 1 dev : signup via admin endpoint (service_role) avec email_confirm: true
+  // pour éviter de dépendre de la config SMTP Supabase (plafonnée à 4 mails/h sur le
+  // SMTP par défaut, et Resend custom pas encore configuré).
+  // V2 (avant beta publique) : switch vers supabase.auth.signUp() + Resend SMTP custom
+  // + email confirmation activé pour validation domaine pro.
+  const admin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  )
 
-  const { data, error } = await supabase.auth.signUp({
+  const { data: createdUser, error: adminError } = await admin.auth.admin.createUser({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: {
-      data: { full_name: parsed.data.fullName },
-      emailRedirectTo: `${origin}/api/auth/callback`,
-    },
+    email_confirm: true,
+    user_metadata: { full_name: parsed.data.fullName },
   })
 
-  if (error) {
-    return { error: error.message }
+  if (adminError || !createdUser?.user) {
+    if (adminError?.message?.includes('already')) {
+      return { error: 'Un compte existe déjà avec cet email.' }
+    }
+    return { error: adminError?.message ?? 'Création du compte impossible.' }
   }
 
-  // Si confirmations email désactivées (Supabase Studio Auth settings) → user connecté direct.
-  if (data.session) {
-    redirect('/app/dashboard')
+  // Connexion immédiate via password (établit la session côté browser via cookies)
+  const supabase = await createClient()
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  })
+
+  if (signInError) {
+    return { error: signInError.message }
   }
 
-  // Sinon : email de confirmation envoyé.
-  return { success: true }
+  redirect('/app/dashboard')
 }

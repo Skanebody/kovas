@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,19 +12,6 @@ export function SignupForm() {
     signupAction,
     undefined,
   )
-
-  if (state?.success) {
-    return (
-      <div className="rounded-xl border border-border bg-card p-6 text-center space-y-3">
-        <CheckCircle2 className="size-10 text-accent-green mx-auto" />
-        <h2 className="text-lg font-semibold">Vérifiez votre boîte mail</h2>
-        <p className="text-sm text-muted-foreground">
-          Un email de confirmation vient d'être envoyé. Cliquez sur le lien pour activer votre
-          compte.
-        </p>
-      </div>
-    )
-  }
 
   return (
     <form action={formAction} className="space-y-4">
