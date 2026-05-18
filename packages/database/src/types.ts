@@ -1,5 +1,5 @@
 // Auto-generated TypeScript types from Supabase schema
-// Generated: 2026-05-18T17:43:42.322Z
+// Generated: 2026-05-18T18:18:13.162Z
 // Source: db.jlizdkffwjdiokvmhcwg.supabase.co:5432 (public schema)
 // Do NOT edit manually. Regenerate via: pnpm db:gen-types
 
@@ -1448,6 +1448,10 @@ export type Database = {
           created_at: string
           updated_at: string
           deleted_at: string | null
+          apartment_detail: string | null
+          floor_number: number | null
+          building_letter: string | null
+          lot_number: string | null
         }
         Insert: {
           id?: string
@@ -1476,6 +1480,10 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          apartment_detail?: string | null
+          floor_number?: number | null
+          building_letter?: string | null
+          lot_number?: string | null
         }
         Update: {
           id?: string
@@ -1504,6 +1512,10 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          apartment_detail?: string | null
+          floor_number?: number | null
+          building_letter?: string | null
+          lot_number?: string | null
         }
         Relationships: [
           {

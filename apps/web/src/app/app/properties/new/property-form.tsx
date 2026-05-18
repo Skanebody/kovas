@@ -1,6 +1,7 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
+import { Building2, Loader2 } from 'lucide-react'
+import { useState } from 'react'
 import { useActionState } from 'react'
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete'
 import { Button } from '@/components/ui/button'
@@ -14,11 +15,19 @@ interface PropertyFormProps {
   clients: { id: string; display_name: string }[]
 }
 
+/**
+ * Types de biens pour lesquels les champs appartement/lot/étage/bât. sont affichés.
+ * On les montre uniquement quand pertinent pour éviter d'encombrer le form maison.
+ */
+const COLLECTIVE_TYPES = new Set(['appartement', 'immeuble', 'local_commercial', 'bureau'])
+
 export function PropertyForm({ clients }: PropertyFormProps) {
   const [state, formAction, pending] = useActionState<PropertyFormState, FormData>(
     createPropertyAction,
     undefined,
   )
+  const [propertyType, setPropertyType] = useState<string>('')
+  const showCollectiveFields = COLLECTIVE_TYPES.has(propertyType)
 
   const fieldErrors = state?.fieldErrors ?? {}
 
@@ -30,7 +39,12 @@ export function PropertyForm({ clients }: PropertyFormProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label="Type de bien" htmlFor="propertyType">
-          <Select id="propertyType" name="propertyType" defaultValue="">
+          <Select
+            id="propertyType"
+            name="propertyType"
+            value={propertyType}
+            onChange={(e) => setPropertyType(e.target.value)}
+          >
             <option value="">Non précisé</option>
             <option value="maison">Maison</option>
             <option value="appartement">Appartement</option>
@@ -42,13 +56,74 @@ export function PropertyForm({ clients }: PropertyFormProps) {
         </FormField>
 
         <FormField label="Année de construction" htmlFor="yearBuilt">
-          <Input id="yearBuilt" name="yearBuilt" type="number" min={1000} max={2100} placeholder="1975" />
+          <Input
+            id="yearBuilt"
+            name="yearBuilt"
+            type="number"
+            min={1000}
+            max={2100}
+            placeholder="1975"
+          />
         </FormField>
       </div>
 
       <FormField label="Surface totale (m²)" htmlFor="surfaceTotal">
-        <Input id="surfaceTotal" name="surfaceTotal" type="number" min={0} step="0.01" placeholder="85" />
+        <Input
+          id="surfaceTotal"
+          name="surfaceTotal"
+          type="number"
+          min={0}
+          step="0.01"
+          placeholder="85"
+        />
       </FormField>
+
+      {showCollectiveFields && (
+        <div className="rounded-xl border border-border bg-card/50 p-4 space-y-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <Building2 className="size-4" /> Détails appartement / lot
+          </div>
+
+          <FormField
+            label="Identification appartement"
+            htmlFor="apartmentDetail"
+            hint="Ex : « Apt 12B », « 3ème étage gauche », « Studio 04 »"
+          >
+            <Input
+              id="apartmentDetail"
+              name="apartmentDetail"
+              type="text"
+              maxLength={120}
+              placeholder="Apt 12B"
+            />
+          </FormField>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <FormField label="Bâtiment" htmlFor="buildingLetter" hint="Ex : A, B, C">
+              <Input id="buildingLetter" name="buildingLetter" type="text" maxLength={10} />
+            </FormField>
+
+            <FormField label="Étage" htmlFor="floorNumber" hint="0 = RDC, -1 = sous-sol">
+              <Input
+                id="floorNumber"
+                name="floorNumber"
+                type="number"
+                min={-5}
+                max={60}
+                placeholder="3"
+              />
+            </FormField>
+
+            <FormField
+              label="N° lot copropriété"
+              htmlFor="lotNumber"
+              hint="Si connu (règlement copro)"
+            >
+              <Input id="lotNumber" name="lotNumber" type="text" maxLength={20} />
+            </FormField>
+          </div>
+        </div>
+      )}
 
       <FormField label="Client donneur d'ordre (optionnel)" htmlFor="clientId">
         <Select id="clientId" name="clientId" defaultValue="">

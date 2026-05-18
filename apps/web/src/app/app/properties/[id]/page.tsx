@@ -43,6 +43,24 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="text-2xl font-bold tracking-tight">{property.address}</h1>
+          {(() => {
+            const aptParts: string[] = []
+            if (property.building_letter) aptParts.push(`Bât. ${property.building_letter}`)
+            if (property.apartment_detail) aptParts.push(property.apartment_detail)
+            if (typeof property.floor_number === 'number') {
+              aptParts.push(
+                property.floor_number === 0
+                  ? 'RDC'
+                  : property.floor_number > 0
+                    ? `${property.floor_number}e étage`
+                    : `sous-sol ${Math.abs(property.floor_number)}`,
+              )
+            }
+            if (property.lot_number) aptParts.push(`Lot ${property.lot_number}`)
+            return aptParts.length > 0 ? (
+              <p className="text-sm font-medium">{aptParts.join(' · ')}</p>
+            ) : null
+          })()}
           <p className="text-sm text-muted-foreground flex items-center gap-1.5">
             <MapPin className="size-4" />
             {[property.postal_code, property.city].filter(Boolean).join(' ') || 'Localisation non précisée'}
@@ -52,8 +70,8 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           )}
         </div>
         <Button asChild>
-          <Link href={`/app/missions/new?propertyId=${property.id}`}>
-            <Plus className="size-4" /> Nouvelle mission
+          <Link href={`/app/dossiers/new?propertyId=${property.id}`}>
+            <Plus className="size-4" /> Nouveau dossier
           </Link>
         </Button>
       </div>
