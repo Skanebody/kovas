@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/button'
 import { generateClientUploadLinkAction, revokeClientUploadLinkAction } from './actions'
 
 interface ClientUploadLinkProps {
-  missionId: string
+  dossierId: string
   token: string | null
   expiresAt: string | null
 }
 
-export function ClientUploadLink({ missionId, token, expiresAt }: ClientUploadLinkProps) {
+export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLinkProps) {
   const [isPending, startTransition] = useTransition()
   const [copied, setCopied] = useState(false)
 
@@ -31,14 +31,14 @@ export function ClientUploadLink({ missionId, token, expiresAt }: ClientUploadLi
 
   function generate() {
     startTransition(async () => {
-      await generateClientUploadLinkAction(missionId)
+      await generateClientUploadLinkAction(dossierId)
     })
   }
 
   function revoke() {
     if (!confirm('Révoquer le lien ? Le client ne pourra plus uploader.')) return
     startTransition(async () => {
-      await revokeClientUploadLinkAction(missionId)
+      await revokeClientUploadLinkAction(dossierId)
     })
   }
 

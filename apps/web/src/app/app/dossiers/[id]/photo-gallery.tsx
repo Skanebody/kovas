@@ -21,12 +21,12 @@ interface Photo {
 }
 
 interface PhotoGalleryProps {
-  missionId: string
+  dossierId: string
   photos: Photo[]
   rooms: { id: string; name: string }[]
 }
 
-export function PhotoGallery({ missionId, photos, rooms }: PhotoGalleryProps) {
+export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({})
   const [, startTransition] = useTransition()
 
@@ -67,13 +67,13 @@ export function PhotoGallery({ missionId, photos, rooms }: PhotoGalleryProps) {
   function handleDelete(photoId: string, storagePath: string) {
     if (!confirm('Supprimer cette photo ? Action irréversible.')) return
     startTransition(async () => {
-      await deletePhotoAction(missionId, photoId, storagePath)
+      await deletePhotoAction(dossierId, photoId, storagePath)
     })
   }
 
   function handleAssign(photoId: string, roomId: string) {
     startTransition(async () => {
-      await assignPhotoToRoomAction(missionId, photoId, roomId || null)
+      await assignPhotoToRoomAction(dossierId, photoId, roomId || null)
     })
   }
 

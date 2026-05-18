@@ -33,25 +33,29 @@ export async function POST(request: Request) {
 
   const formData = await request.formData()
   const file = formData.get('audio') as File | null
-  const missionId = formData.get('missionId') as string | null
+  // Accept dossierId (new) or missionId (legacy) — we treat both as dossierId.
+  const dossierId = (formData.get('dossierId') ?? formData.get('missionId')) as string | null
 
-  if (!file || !missionId) {
-    return NextResponse.json({ error: 'missing audio or missionId' }, { status: 400 })
+  if (!file || !dossierId) {
+    return NextResponse.json({ error: 'missing audio or dossierId' }, { status: 400 })
   }
 
-  // Verify mission belongs to user's org (RLS guarantees this if user is org member)
-  const { data: mission, error: missionError } = await supabase
-    .from('missions')
-    .select('id, organization_id, type')
-    .eq('id', missionId)
+  // Verify dossier belongs to user's org + fetch the included mission types
+  // pour booster Whisper avec le vocab pertinent (DPE + Amiante + ...).
+  const { data: dossier, error: dossierError } = await supabase
+    .from('dossiers')
+    .select('id, organization_id, missions(type)')
+    .eq('id', dossierId)
     .single()
-  if (missionError || !mission) {
-    return NextResponse.json({ error: 'mission not found' }, { status: 404 })
+  if (dossierError || !dossier) {
+    return NextResponse.json({ error: 'dossier not found' }, { status: 404 })
   }
+
+  const missionTypes = ((dossier.missions ?? []) as { type: string }[]).map((m) => m.type)
 
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   const model = process.env.OPENAI_MODEL_TRANSCRIBE ?? 'gpt-4o-mini-transcribe'
-  const prompt = buildWhisperPrompt(mission.type)
+  const prompt = buildWhisperPrompt(missionTypes)
 
   try {
     const t0 = Date.now()

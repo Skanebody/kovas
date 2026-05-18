@@ -1,5 +1,5 @@
 // Auto-generated TypeScript types from Supabase schema
-// Generated: 2026-05-18T16:30:04.411Z
+// Generated: 2026-05-18T17:12:48.198Z
 // Source: db.jlizdkffwjdiokvmhcwg.supabase.co:5432 (public schema)
 // Do NOT edit manually. Regenerate via: pnpm db:gen-types
 
@@ -257,10 +257,155 @@ export type Database = {
           },
         ]
       }
+      dossier_rooms: {
+        Row: {
+          id: string
+          dossier_id: string
+          organization_id: string
+          name: string
+          room_type: string | null
+          position: number | null
+          surface_m2: number | null
+          ceiling_height_m: number | null
+          has_heating: boolean | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          dossier_id: string
+          organization_id: string
+          name: string
+          room_type?: string | null
+          position?: number | null
+          surface_m2?: number | null
+          ceiling_height_m?: number | null
+          has_heating?: boolean | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          dossier_id?: string
+          organization_id?: string
+          name?: string
+          room_type?: string | null
+          position?: number | null
+          surface_m2?: number | null
+          ceiling_height_m?: number | null
+          has_heating?: boolean | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'dossier_rooms_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'mission_rooms_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      dossiers: {
+        Row: {
+          id: string
+          organization_id: string
+          property_id: string
+          client_id: string | null
+          reference: string
+          scheduled_at: string | null
+          started_at: string | null
+          completed_at: string | null
+          status: string
+          client_upload_token: string | null
+          client_upload_expires_at: string | null
+          metadata: Json
+          notes: string | null
+          assigned_to: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          property_id: string
+          client_id?: string | null
+          reference: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          status?: string
+          client_upload_token?: string | null
+          client_upload_expires_at?: string | null
+          metadata?: Json
+          notes?: string | null
+          assigned_to?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          property_id?: string
+          client_id?: string | null
+          reference?: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          completed_at?: string | null
+          status?: string
+          client_upload_token?: string | null
+          client_upload_expires_at?: string | null
+          metadata?: Json
+          notes?: string | null
+          assigned_to?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'dossiers_client_id_fkey'
+            columns: ['client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'dossiers_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'dossiers_property_id_fkey'
+            columns: ['property_id']
+            isOneToOne: false
+            referencedRelation: 'properties'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       equipment_findings: {
         Row: {
           id: string
-          mission_id: string
+          dossier_id: string
           organization_id: string
           room_id: string | null
           photo_id: string | null
@@ -281,7 +426,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          mission_id: string
+          dossier_id: string
           organization_id: string
           room_id?: string | null
           photo_id?: string | null
@@ -302,7 +447,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          mission_id?: string
+          dossier_id?: string
           organization_id?: string
           room_id?: string | null
           photo_id?: string | null
@@ -327,20 +472,20 @@ export type Database = {
             columns: ['created_at']
             isOneToOne: false
             referencedRelation: 'photos'
-            referencedColumns: ['id']
+            referencedColumns: ['created_at']
           },
           {
             foreignKeyName: 'fk_finding_photo'
             columns: ['created_at']
             isOneToOne: false
             referencedRelation: 'photos'
-            referencedColumns: ['created_at']
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'equipment_findings_mission_id_fkey'
-            columns: ['mission_id']
+            foreignKeyName: 'equipment_findings_dossier_id_fkey'
+            columns: ['dossier_id']
             isOneToOne: false
-            referencedRelation: 'missions'
+            referencedRelation: 'dossiers'
             referencedColumns: ['id']
           },
           {
@@ -368,7 +513,7 @@ export type Database = {
             foreignKeyName: 'equipment_findings_room_id_fkey'
             columns: ['room_id']
             isOneToOne: false
-            referencedRelation: 'mission_rooms'
+            referencedRelation: 'dossier_rooms'
             referencedColumns: ['id']
           },
         ]
@@ -673,86 +818,20 @@ export type Database = {
           },
         ]
       }
-      mission_rooms: {
-        Row: {
-          id: string
-          mission_id: string
-          organization_id: string
-          name: string
-          room_type: string | null
-          position: number | null
-          surface_m2: number | null
-          ceiling_height_m: number | null
-          has_heating: boolean | null
-          notes: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          mission_id: string
-          organization_id: string
-          name: string
-          room_type?: string | null
-          position?: number | null
-          surface_m2?: number | null
-          ceiling_height_m?: number | null
-          has_heating?: boolean | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          mission_id?: string
-          organization_id?: string
-          name?: string
-          room_type?: string | null
-          position?: number | null
-          surface_m2?: number | null
-          ceiling_height_m?: number | null
-          has_heating?: boolean | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'mission_rooms_mission_id_fkey'
-            columns: ['mission_id']
-            isOneToOne: false
-            referencedRelation: 'missions'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'mission_rooms_organization_id_fkey'
-            columns: ['organization_id']
-            isOneToOne: false
-            referencedRelation: 'organizations'
-            referencedColumns: ['id']
-          },
-        ]
-      }
       missions: {
         Row: {
           id: string
           organization_id: string
-          property_id: string
-          client_id: string | null
           assigned_to: string | null
           created_by: string | null
           reference: string
           type: 'dpe_vente' | 'dpe_location' | 'copropriete' | 'amiante_vente' | 'amiante_avant_travaux' | 'plomb_crep' | 'gaz' | 'electricite' | 'termites' | 'carrez_boutin' | 'erp'
           status: 'draft' | 'scheduled' | 'in_progress' | 'to_review' | 'done' | 'exported' | 'archived' | 'cancelled'
           priority: number | null
-          scheduled_at: string | null
-          started_at: string | null
           completed_at: string | null
           exported_at: string | null
           liciel_export_path: string | null
           liciel_export_hash: string | null
-          client_upload_token: string | null
-          client_upload_expires_at: string | null
           dpe_letter: string | null
           ges_letter: string | null
           energy_value: number | null
@@ -766,26 +845,21 @@ export type Database = {
           created_at: string
           updated_at: string
           deleted_at: string | null
+          dossier_id: string
         }
         Insert: {
           id?: string
           organization_id: string
-          property_id: string
-          client_id?: string | null
           assigned_to?: string | null
           created_by?: string | null
           reference: string
           type: 'dpe_vente' | 'dpe_location' | 'copropriete' | 'amiante_vente' | 'amiante_avant_travaux' | 'plomb_crep' | 'gaz' | 'electricite' | 'termites' | 'carrez_boutin' | 'erp'
           status?: 'draft' | 'scheduled' | 'in_progress' | 'to_review' | 'done' | 'exported' | 'archived' | 'cancelled'
           priority?: number | null
-          scheduled_at?: string | null
-          started_at?: string | null
           completed_at?: string | null
           exported_at?: string | null
           liciel_export_path?: string | null
           liciel_export_hash?: string | null
-          client_upload_token?: string | null
-          client_upload_expires_at?: string | null
           dpe_letter?: string | null
           ges_letter?: string | null
           energy_value?: number | null
@@ -799,26 +873,21 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          dossier_id: string
         }
         Update: {
           id?: string
           organization_id?: string
-          property_id?: string
-          client_id?: string | null
           assigned_to?: string | null
           created_by?: string | null
           reference?: string
           type?: 'dpe_vente' | 'dpe_location' | 'copropriete' | 'amiante_vente' | 'amiante_avant_travaux' | 'plomb_crep' | 'gaz' | 'electricite' | 'termites' | 'carrez_boutin' | 'erp'
           status?: 'draft' | 'scheduled' | 'in_progress' | 'to_review' | 'done' | 'exported' | 'archived' | 'cancelled'
           priority?: number | null
-          scheduled_at?: string | null
-          started_at?: string | null
           completed_at?: string | null
           exported_at?: string | null
           liciel_export_path?: string | null
           liciel_export_hash?: string | null
-          client_upload_token?: string | null
-          client_upload_expires_at?: string | null
           dpe_letter?: string | null
           ges_letter?: string | null
           energy_value?: number | null
@@ -832,13 +901,14 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
+          dossier_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: 'missions_client_id_fkey'
-            columns: ['client_id']
+            foreignKeyName: 'missions_dossier_id_fkey'
+            columns: ['dossier_id']
             isOneToOne: false
-            referencedRelation: 'clients'
+            referencedRelation: 'dossiers'
             referencedColumns: ['id']
           },
           {
@@ -846,13 +916,6 @@ export type Database = {
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'missions_property_id_fkey'
-            columns: ['property_id']
-            isOneToOne: false
-            referencedRelation: 'properties'
             referencedColumns: ['id']
           },
         ]
@@ -926,7 +989,7 @@ export type Database = {
       owner_documents: {
         Row: {
           id: string
-          mission_id: string
+          dossier_id: string
           organization_id: string
           storage_path: string
           original_name: string | null
@@ -938,7 +1001,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          mission_id: string
+          dossier_id: string
           organization_id: string
           storage_path: string
           original_name?: string | null
@@ -950,7 +1013,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          mission_id?: string
+          dossier_id?: string
           organization_id?: string
           storage_path?: string
           original_name?: string | null
@@ -962,10 +1025,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'owner_documents_mission_id_fkey'
-            columns: ['mission_id']
+            foreignKeyName: 'owner_documents_dossier_id_fkey'
+            columns: ['dossier_id']
             isOneToOne: false
-            referencedRelation: 'missions'
+            referencedRelation: 'dossiers'
             referencedColumns: ['id']
           },
         ]
@@ -974,7 +1037,7 @@ export type Database = {
         Row: {
           id: string
           organization_id: string
-          mission_id: string
+          dossier_id: string
           room_id: string | null
           storage_path: string
           thumb_path: string | null
@@ -994,7 +1057,7 @@ export type Database = {
         Insert: {
           id?: string
           organization_id: string
-          mission_id: string
+          dossier_id: string
           room_id?: string | null
           storage_path: string
           thumb_path?: string | null
@@ -1014,7 +1077,7 @@ export type Database = {
         Update: {
           id?: string
           organization_id?: string
-          mission_id?: string
+          dossier_id?: string
           room_id?: string | null
           storage_path?: string
           thumb_path?: string | null
@@ -1031,7 +1094,260 @@ export type Database = {
           sync_status?: string | null
           created_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -1365,7 +1681,7 @@ export type Database = {
             foreignKeyName: 'sketches_room_id_fkey'
             columns: ['room_id']
             isOneToOne: false
-            referencedRelation: 'mission_rooms'
+            referencedRelation: 'dossier_rooms'
             referencedColumns: ['id']
           },
         ]
@@ -1583,7 +1899,7 @@ export type Database = {
       voice_notes: {
         Row: {
           id: string
-          mission_id: string
+          dossier_id: string
           organization_id: string
           room_id: string | null
           recorded_by: string | null
@@ -1602,7 +1918,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          mission_id: string
+          dossier_id: string
           organization_id: string
           room_id?: string | null
           recorded_by?: string | null
@@ -1621,7 +1937,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          mission_id?: string
+          dossier_id?: string
           organization_id?: string
           room_id?: string | null
           recorded_by?: string | null
@@ -1640,10 +1956,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'voice_notes_mission_id_fkey'
-            columns: ['mission_id']
+            foreignKeyName: 'voice_notes_dossier_id_fkey'
+            columns: ['dossier_id']
             isOneToOne: false
-            referencedRelation: 'missions'
+            referencedRelation: 'dossiers'
             referencedColumns: ['id']
           },
           {
@@ -1657,7 +1973,7 @@ export type Database = {
             foreignKeyName: 'voice_notes_room_id_fkey'
             columns: ['room_id']
             isOneToOne: false
-            referencedRelation: 'mission_rooms'
+            referencedRelation: 'dossier_rooms'
             referencedColumns: ['id']
           },
         ]

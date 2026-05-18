@@ -45,28 +45,28 @@ export async function POST(request: Request) {
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
-  // Validate token
-  const { data: mission } = await admin
-    .from('missions')
+  // Validate token (on dossiers)
+  const { data: dossier } = await admin
+    .from('dossiers')
     .select('id, organization_id, client_upload_expires_at')
     .eq('client_upload_token', token)
     .is('deleted_at', null)
     .maybeSingle()
 
-  if (!mission) {
+  if (!dossier) {
     return NextResponse.json({ error: 'Token invalide' }, { status: 404 })
   }
   if (
-    mission.client_upload_expires_at &&
-    new Date(mission.client_upload_expires_at) < new Date()
+    dossier.client_upload_expires_at &&
+    new Date(dossier.client_upload_expires_at) < new Date()
   ) {
     return NextResponse.json({ error: 'Lien expiré' }, { status: 410 })
   }
 
-  // Storage path : <org_id>/<mission_id>/<timestamp>-<random>.<ext>
+  // Storage path : <org_id>/<dossier_id>/<timestamp>-<random>.<ext>
   const ext = (file.name.split('.').pop() ?? 'bin').toLowerCase().slice(0, 5)
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`
-  const storagePath = `${mission.organization_id}/${mission.id}/${filename}`
+  const storagePath = `${dossier.organization_id}/${dossier.id}/${filename}`
 
   const buffer = Buffer.from(await file.arrayBuffer())
   const { error: uploadError } = await admin.storage
@@ -83,8 +83,8 @@ export async function POST(request: Request) {
 
   // Record metadata
   const { error: insertError } = await admin.from('owner_documents').insert({
-    mission_id: mission.id,
-    organization_id: mission.organization_id,
+    dossier_id: dossier.id,
+    organization_id: dossier.organization_id,
     storage_path: storagePath,
     original_name: file.name.slice(0, 200),
     size_bytes: file.size,

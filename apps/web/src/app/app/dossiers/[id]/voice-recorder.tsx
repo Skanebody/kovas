@@ -10,14 +10,14 @@ import { parseVoiceTranscript, VOICE_PARSER_THRESHOLD } from '@/lib/voice-parser
 import { createVoiceNoteAction } from './actions'
 
 interface VoiceRecorderProps {
-  missionId: string
+  dossierId: string
   orgId: string
   rooms: { id: string; name: string }[]
 }
 
 type Status = 'idle' | 'recording' | 'uploading' | 'transcribing' | 'parsing' | 'error'
 
-export function VoiceRecorder({ missionId, orgId, rooms }: VoiceRecorderProps) {
+export function VoiceRecorder({ dossierId, orgId, rooms }: VoiceRecorderProps) {
   const [status, setStatus] = useState<Status>('idle')
   const [selectedRoom, setSelectedRoom] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
@@ -60,7 +60,7 @@ export function VoiceRecorder({ missionId, orgId, rooms }: VoiceRecorderProps) {
       const supabase = createClient()
       const ext = rec.mimeType.includes('mp4') ? 'mp4' : 'webm'
       const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-      const storagePath = `${orgId}/${missionId}/${filename}`
+      const storagePath = `${orgId}/${dossierId}/${filename}`
 
       const { error: uploadErr } = await supabase.storage
         .from('voice-notes')
@@ -75,7 +75,7 @@ export function VoiceRecorder({ missionId, orgId, rooms }: VoiceRecorderProps) {
       setStatus('transcribing')
       const fd = new FormData()
       fd.append('audio', rec.blob, filename)
-      fd.append('missionId', missionId)
+      fd.append('dossierId', dossierId)
 
       const resp = await fetch('/api/transcribe', { method: 'POST', body: fd })
       const data = await resp.json()
@@ -83,7 +83,7 @@ export function VoiceRecorder({ missionId, orgId, rooms }: VoiceRecorderProps) {
       // Stub mode (no API key) — save audio + minimal note
       if (resp.status === 503 && data.stub) {
         await createVoiceNoteAction({
-          missionId,
+          dossierId,
           roomId: selectedRoom,
           storagePath,
           durationSeconds: rec.durationSeconds,
@@ -112,7 +112,7 @@ export function VoiceRecorder({ missionId, orgId, rooms }: VoiceRecorderProps) {
           const claudeResp = await fetch('/api/structure', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ transcript: data.transcript, missionId }),
+            body: JSON.stringify({ transcript: data.transcript, dossierId }),
           })
           if (claudeResp.ok) {
             const claudeData = await claudeResp.json()
@@ -126,7 +126,7 @@ export function VoiceRecorder({ missionId, orgId, rooms }: VoiceRecorderProps) {
       }
 
       await createVoiceNoteAction({
-        missionId,
+        dossierId,
         roomId: selectedRoom,
         storagePath,
         durationSeconds: data.durationSeconds ?? rec.durationSeconds,

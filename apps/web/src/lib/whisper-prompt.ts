@@ -75,12 +75,22 @@ const VOCAB_BY_MISSION_TYPE: Record<string, string[]> = {
  * Construit le `prompt` Whisper pour un type de mission donné.
  * Max ~80 termes (estimation token : 0,75 token par mot français).
  */
-export function buildWhisperPrompt(missionType?: string | null): string {
-  const specific = missionType ? VOCAB_BY_MISSION_TYPE[missionType] ?? [] : []
-  const terms = [...VOCAB_COMMON, ...specific].slice(0, 80)
+export function buildWhisperPrompt(missionTypes?: string | string[] | null): string {
+  const typesArray = Array.isArray(missionTypes)
+    ? missionTypes
+    : missionTypes
+      ? [missionTypes]
+      : []
+
+  const specificSet = new Set<string>()
+  for (const t of typesArray) {
+    for (const term of VOCAB_BY_MISSION_TYPE[t] ?? []) specificSet.add(term)
+  }
+
+  const terms = [...VOCAB_COMMON, ...specificSet].slice(0, 80)
   return [
-    'Transcription d\'une mission de diagnostic immobilier en France.',
+    "Transcription d'une visite de diagnostic immobilier en France.",
     'Vocabulaire métier :',
-    terms.join(', ') + '.',
+    `${terms.join(', ')}.`,
   ].join(' ')
 }

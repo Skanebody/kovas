@@ -43,11 +43,11 @@ interface Room {
 }
 
 interface RoomsListProps {
-  missionId: string
+  dossierId: string
   rooms: Room[]
 }
 
-export function RoomsList({ missionId, rooms }: RoomsListProps) {
+export function RoomsList({ dossierId, rooms }: RoomsListProps) {
   const [showForm, setShowForm] = useState(rooms.length === 0)
   const [state, formAction, pending] = useActionState<RoomFormState, FormData>(
     addRoomAction,
@@ -63,7 +63,7 @@ export function RoomsList({ missionId, rooms }: RoomsListProps) {
   function handleDelete(roomId: string) {
     if (!confirm('Supprimer cette pièce ? Les photos associées seront orphelines.')) return
     startTransition(async () => {
-      await deleteRoomAction(missionId, roomId)
+      await deleteRoomAction(dossierId, roomId)
     })
   }
 
@@ -85,7 +85,7 @@ export function RoomsList({ missionId, rooms }: RoomsListProps) {
                   key={t.id}
                   onClick={() => {
                     startTransition(async () => {
-                      await applyRoomTemplateAction(missionId, t.id)
+                      await applyRoomTemplateAction(dossierId, t.id)
                     })
                   }}
                 >
@@ -102,7 +102,7 @@ export function RoomsList({ missionId, rooms }: RoomsListProps) {
                   key={t.id}
                   onClick={() => {
                     startTransition(async () => {
-                      await applyRoomTemplateAction(missionId, t.id)
+                      await applyRoomTemplateAction(dossierId, t.id)
                     })
                   }}
                 >
@@ -127,7 +127,7 @@ export function RoomsList({ missionId, rooms }: RoomsListProps) {
       {showForm && (
         <form
           action={(fd) => {
-            fd.append('missionId', missionId)
+            fd.append('dossierId', dossierId)
             formAction(fd)
             // Hide form after submit — useActionState will reset
             requestAnimationFrame(() => setShowForm(rooms.length === 0))

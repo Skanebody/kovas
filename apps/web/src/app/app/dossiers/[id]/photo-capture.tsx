@@ -10,14 +10,14 @@ import { createClient } from '@/lib/supabase/client'
 import { createPhotoAction } from './actions'
 
 interface PhotoCaptureProps {
-  missionId: string
+  dossierId: string
   orgId: string
   rooms: { id: string; name: string }[]
   defaultRoomId?: string
   onUploaded?: () => void
 }
 
-export function PhotoCapture({ missionId, orgId, rooms, defaultRoomId, onUploaded }: PhotoCaptureProps) {
+export function PhotoCapture({ dossierId, orgId, rooms, defaultRoomId, onUploaded }: PhotoCaptureProps) {
   const inputId = useId()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -43,7 +43,7 @@ export function PhotoCapture({ missionId, orgId, rooms, defaultRoomId, onUploade
 
         // Path : <org>/<mission>/<timestamp>-<rand>.webp
         const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`
-        const storagePath = `${orgId}/${missionId}/${filename}`
+        const storagePath = `${orgId}/${dossierId}/${filename}`
 
         const { error: uploadError } = await supabase.storage
           .from('mission-photos')
@@ -58,7 +58,7 @@ export function PhotoCapture({ missionId, orgId, rooms, defaultRoomId, onUploade
         }
 
         await createPhotoAction({
-          missionId,
+          dossierId,
           roomId: selectedRoom || '',
           storagePath,
           width: compressed.width,

@@ -24,8 +24,8 @@ export default async function PublicUploadPage({ params }: PageProps) {
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
-  const { data: mission } = await admin
-    .from('missions')
+  const { data: dossier } = await admin
+    .from('dossiers')
     .select(
       'id, reference, organization_id, client_upload_expires_at, properties(address, city, postal_code)',
     )
@@ -34,25 +34,25 @@ export default async function PublicUploadPage({ params }: PageProps) {
     .maybeSingle()
 
   // Token inconnu → 404 stylé
-  if (!mission) {
+  if (!dossier) {
     return <InvalidTokenPage />
   }
 
   // Token expiré
   if (
-    mission.client_upload_expires_at &&
-    new Date(mission.client_upload_expires_at) < new Date()
+    dossier.client_upload_expires_at &&
+    new Date(dossier.client_upload_expires_at) < new Date()
   ) {
     return <ExpiredTokenPage />
   }
 
-  const prop = Array.isArray(mission.properties) ? mission.properties[0] : mission.properties
+  const prop = Array.isArray(dossier.properties) ? dossier.properties[0] : dossier.properties
 
   // Liste des documents déjà uploadés (visible côté client pour feedback)
   const { data: existing } = await admin
     .from('owner_documents')
     .select('id, original_name, doc_kind, uploaded_at')
-    .eq('mission_id', mission.id)
+    .eq('dossier_id', dossier.id)
     .order('uploaded_at', { ascending: false })
 
   return (
@@ -79,12 +79,12 @@ export default async function PublicUploadPage({ params }: PageProps) {
             </p>
             {prop && (
               <p className="text-sm text-subtle-foreground">
-                Mission {mission.reference} · {prop.address}, {prop.postal_code} {prop.city}
+                Dossier {dossier.reference} · {prop.address}, {prop.postal_code} {prop.city}
               </p>
             )}
           </div>
 
-          <UploadForm token={token} missionId={mission.id} orgId={mission.organization_id} />
+          <UploadForm token={token} />
 
           {existing && existing.length > 0 && (
             <div className="rounded-xl border border-border bg-card p-4 space-y-2">

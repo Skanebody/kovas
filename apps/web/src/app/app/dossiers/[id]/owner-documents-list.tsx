@@ -31,11 +31,11 @@ interface OwnerDoc {
 }
 
 interface OwnerDocumentsListProps {
-  missionId: string
+  dossierId: string
   documents: OwnerDoc[]
 }
 
-export function OwnerDocumentsList({ missionId, documents }: OwnerDocumentsListProps) {
+export function OwnerDocumentsList({ dossierId, documents }: OwnerDocumentsListProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({})
   const [, startTransition] = useTransition()
 
@@ -64,14 +64,14 @@ export function OwnerDocumentsList({ missionId, documents }: OwnerDocumentsListP
 
   function handleToggleReviewed(docId: string, current: boolean) {
     startTransition(async () => {
-      await toggleDocumentReviewedAction(missionId, docId, !current)
+      await toggleDocumentReviewedAction(dossierId, docId, !current)
     })
   }
 
   function handleDelete(docId: string, storagePath: string) {
     if (!confirm('Supprimer ce document ?')) return
     startTransition(async () => {
-      await deleteOwnerDocumentAction(missionId, docId, storagePath)
+      await deleteOwnerDocumentAction(dossierId, docId, storagePath)
     })
   }
 

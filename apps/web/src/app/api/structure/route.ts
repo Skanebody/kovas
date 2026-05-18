@@ -29,25 +29,25 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null)
   const transcript = body?.transcript as string | undefined
-  const missionId = body?.missionId as string | undefined
+  // Accept dossierId (new) or missionId (legacy)
+  const contextId = (body?.dossierId ?? body?.missionId) as string | undefined
 
-  if (!transcript || !missionId) {
-    return NextResponse.json({ error: 'missing transcript or missionId' }, { status: 400 })
+  if (!transcript || !contextId) {
+    return NextResponse.json({ error: 'missing transcript or dossierId' }, { status: 400 })
   }
 
   try {
     const result = await structureWithClaude(transcript)
 
-    // Track usage
+    // Track usage (sans lien mission spécifique — la note vocale est dossier-level)
     const { orgId } = await getCurrentUser()
     await supabase.from('ai_usage').insert({
       organization_id: orgId,
       user_id: user.id,
-      mission_id: missionId,
       provider: 'anthropic',
       model: process.env.ANTHROPIC_MODEL_VOICE ?? 'claude-haiku-4-5',
       operation: 'structure_voice_transcript',
-      input_tokens: 0, // détaillé V1.5 via headers Anthropic
+      input_tokens: 0,
       output_tokens: 0,
       cost_eur: result.costEur,
       latency_ms: result.latencyMs,

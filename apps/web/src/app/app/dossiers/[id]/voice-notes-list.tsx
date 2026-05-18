@@ -20,7 +20,7 @@ interface VoiceNote {
 }
 
 interface VoiceNotesListProps {
-  missionId: string
+  dossierId: string
   notes: VoiceNote[]
   rooms: { id: string; name: string }[]
 }
@@ -38,7 +38,7 @@ const KIND_LABELS: Record<string, string> = {
   autre: 'Autre',
 }
 
-export function VoiceNotesList({ missionId, notes, rooms }: VoiceNotesListProps) {
+export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps) {
   const [, startTransition] = useTransition()
 
   if (notes.length === 0) {
@@ -54,7 +54,7 @@ export function VoiceNotesList({ missionId, notes, rooms }: VoiceNotesListProps)
   function handleDelete(noteId: string, storagePath: string) {
     if (!confirm('Supprimer cette note vocale ?')) return
     startTransition(async () => {
-      await deleteVoiceNoteAction(missionId, noteId, storagePath)
+      await deleteVoiceNoteAction(dossierId, noteId, storagePath)
     })
   }
 

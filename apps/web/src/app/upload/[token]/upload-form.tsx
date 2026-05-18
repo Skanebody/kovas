@@ -17,8 +17,6 @@ const DOC_KINDS = [
 
 interface UploadFormProps {
   token: string
-  missionId: string
-  orgId: string
 }
 
 interface UploadedItem {

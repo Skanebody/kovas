@@ -1,6 +1,8 @@
 /**
  * Agrégateur de données mission pour export.
- * Récupère tout ce qui est nécessaire pour générer les rapports (PDF/Word/CSV/JSON/ZIP).
+ * Une mission appartient à un dossier qui contient les pièces, photos,
+ * notes vocales et documents propriétaire partagés entre toutes les missions
+ * du dossier.
  */
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Database } from '@kovas/database/types'
@@ -80,8 +82,24 @@ export async function buildMissionExportData(
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
+  // 1. Récupère la mission + le dossier parent + property/client (via dossier)
+  const { data: mission } = await admin
+    .from('missions')
+    .select(
+      'id, reference, type, status, completed_at, created_at, dossier_id, dossiers(scheduled_at, started_at, notes, property_id, client_id, properties(address, postal_code, city, property_type, year_built, surface_total, surface_carrez), clients(display_name, type, email, phone, address))',
+    )
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+    .single()
+
+  if (!mission) throw new Error(`Mission ${missionId} not found`)
+
+  const dossier = Array.isArray(mission.dossiers) ? mission.dossiers[0] : mission.dossiers
+  if (!dossier) throw new Error(`Dossier introuvable pour mission ${missionId}`)
+
+  // 2. Récupère les données partagées depuis le dossier
+  const dossierId = mission.dossier_id
   const [
-    { data: mission },
     { data: rooms },
     { data: photos },
     { data: voiceNotes },
@@ -90,20 +108,21 @@ export async function buildMissionExportData(
     { data: trial },
   ] = await Promise.all([
     admin
-      .from('missions')
-      .select(
-        'id, reference, type, status, scheduled_at, started_at, completed_at, notes, created_at, properties(address, postal_code, city, property_type, year_built, surface_total, surface_carrez), clients(display_name, type, email, phone, address)',
-      )
-      .eq('id', missionId)
-      .eq('organization_id', orgId)
-      .single(),
-    admin.from('mission_rooms').select('id, name, room_type, surface_m2').eq('mission_id', missionId),
-    admin.from('photos').select('id, storage_path, room_id, width, height, taken_at, caption').eq('mission_id', missionId),
+      .from('dossier_rooms')
+      .select('id, name, room_type, surface_m2')
+      .eq('dossier_id', dossierId),
+    admin
+      .from('photos')
+      .select('id, storage_path, room_id, width, height, taken_at, caption')
+      .eq('dossier_id', dossierId),
     admin
       .from('voice_notes')
       .select('id, room_id, duration_seconds, transcript_raw, transcript_structured, created_at')
-      .eq('mission_id', missionId),
-    admin.from('owner_documents').select('id, storage_path, original_name, doc_kind').eq('mission_id', missionId),
+      .eq('dossier_id', dossierId),
+    admin
+      .from('owner_documents')
+      .select('id, storage_path, original_name, doc_kind')
+      .eq('dossier_id', dossierId),
     admin.from('organizations').select('name').eq('id', orgId).single(),
     admin
       .from('cabinet_trials')
@@ -112,11 +131,8 @@ export async function buildMissionExportData(
       .maybeSingle(),
   ])
 
-  if (!mission) throw new Error(`Mission ${missionId} not found`)
-
-  const prop = Array.isArray(mission.properties) ? mission.properties[0] : mission.properties
-  const client = Array.isArray(mission.clients) ? mission.clients[0] : mission.clients
-
+  const prop = Array.isArray(dossier.properties) ? dossier.properties[0] : dossier.properties
+  const client = Array.isArray(dossier.clients) ? dossier.clients[0] : dossier.clients
   const isTrial = Boolean(trial && !trial.converted_to_paid)
 
   return {
@@ -125,10 +141,10 @@ export async function buildMissionExportData(
       reference: mission.reference,
       type: mission.type,
       status: mission.status,
-      scheduled_at: mission.scheduled_at,
-      started_at: mission.started_at,
+      scheduled_at: dossier.scheduled_at,
+      started_at: dossier.started_at,
       completed_at: mission.completed_at,
-      notes: mission.notes,
+      notes: dossier.notes,
       created_at: mission.created_at,
     },
     property: prop ?? null,
