@@ -17,6 +17,7 @@ import { OwnerDocumentsList } from './owner-documents-list'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
 import { RoomsList } from './rooms-list'
+import { ShareMissionButton } from './share-button'
 import { MissionStatusButton } from './status-button'
 import { VoiceNotesList } from './voice-notes-list'
 import { VoiceRecorder } from './voice-recorder'
@@ -41,7 +42,7 @@ export default async function MissionDetailPage({
     supabase
       .from('missions')
       .select(
-        'id, reference, type, status, scheduled_at, notes, metadata, created_at, property_id, client_id, properties(address, city, postal_code, surface_total, year_built, property_type), clients(display_name)',
+        'id, reference, type, status, scheduled_at, notes, metadata, created_at, property_id, client_id, properties(address, city, postal_code, surface_total, year_built, property_type), clients(display_name, email)',
       )
       .eq('id', id)
       .eq('organization_id', orgId)
@@ -140,7 +141,14 @@ export default async function MissionDetailPage({
             {MISSION_TYPE_LABELS[mission.type] ?? mission.type}
           </h1>
         </div>
-        <MissionStatusButton missionId={mission.id} currentStatus={mission.status as never} />
+        <div className="flex items-center gap-2 flex-wrap">
+          <MissionStatusButton missionId={mission.id} currentStatus={mission.status as never} />
+          <ShareMissionButton
+            missionId={mission.id}
+            missionReference={mission.reference}
+            clientEmail={client?.email ?? null}
+          />
+        </div>
       </div>
 
       <Card>

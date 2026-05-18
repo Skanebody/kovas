@@ -32,6 +32,18 @@ export default function LoginPage() {
           Essai gratuit 14 jours
         </Link>
       </p>
+
+      {process.env.NODE_ENV === 'development' && process.env.KOVAS_DEV_ENTER === '1' ? (
+        <p className="text-center text-xs text-muted-foreground">
+          <Link
+            href="/api/dev/enter"
+            className="font-medium underline-offset-4 hover:underline"
+            prefetch={false}
+          >
+            Mode dev : ouvrir une session sans saisie
+          </Link>
+        </p>
+      ) : null}
     </div>
   )
 }
