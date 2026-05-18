@@ -1,7 +1,5 @@
 'use client'
 
-import { Loader2, Plus } from 'lucide-react'
-import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -12,12 +10,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
+import { Loader2, Plus } from 'lucide-react'
+import { useState, useTransition } from 'react'
 import { addMissionToDossierAction } from './actions'
 
 const GROUPS: { label: string; types: string[] }[] = [
   { label: 'DPE', types: ['dpe_vente', 'dpe_location', 'copropriete'] },
   { label: 'Amiante', types: ['amiante_vente', 'amiante_avant_travaux'] },
-  { label: 'Autres', types: ['plomb_crep', 'gaz', 'electricite', 'termites', 'carrez_boutin', 'erp'] },
+  {
+    label: 'Autres',
+    types: ['plomb_crep', 'gaz', 'electricite', 'termites', 'carrez_boutin', 'erp'],
+  },
 ]
 
 export function AddMissionButton({
@@ -45,11 +48,7 @@ export function AddMissionButton({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" disabled={pending}>
-          {pending ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Plus className="size-4" />
-          )}
+          {pending ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
           Ajouter un diagnostic
         </Button>
       </DropdownMenuTrigger>

@@ -1,8 +1,8 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { Loader2, Trash2 } from 'lucide-react'
 import { useTransition } from 'react'
-import { Button } from '@/components/ui/button'
 import { removeMissionFromDossierAction } from './actions'
 
 export function RemoveMissionButton({
