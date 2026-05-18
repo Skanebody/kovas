@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, Calendar, Camera, User } from 'lucide-react'
+import { ArrowLeft, Building2, Calendar, Camera, Mic, User } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -11,9 +11,12 @@ import {
   MISSION_STATUS_VARIANT,
   MISSION_TYPE_LABELS,
 } from '@/lib/mission-helpers'
+import type { VoiceParsedData } from '@/lib/voice-parser'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
 import { RoomsList } from './rooms-list'
+import { VoiceNotesList } from './voice-notes-list'
+import { VoiceRecorder } from './voice-recorder'
 
 export const metadata: Metadata = { title: 'Détail mission' }
 
@@ -29,6 +32,7 @@ export default async function MissionDetailPage({
     { data: mission },
     { data: rooms },
     { data: photos },
+    { data: voiceNotes },
   ] = await Promise.all([
     supabase
       .from('missions')
@@ -51,6 +55,12 @@ export default async function MissionDetailPage({
       .eq('mission_id', id)
       .eq('organization_id', orgId)
       .order('taken_at', { ascending: false }),
+    supabase
+      .from('voice_notes')
+      .select('id, storage_path, duration_seconds, transcript_raw, transcript_structured, ai_confidence, parser_used, room_id, created_at')
+      .eq('mission_id', id)
+      .eq('organization_id', orgId)
+      .order('created_at', { ascending: false }),
   ])
 
   if (!mission) notFound()
@@ -144,6 +154,36 @@ export default async function MissionDetailPage({
               room_id: p.room_id,
               taken_at: p.taken_at,
               location_text: null,
+            }))}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Mic className="size-4" /> Notes vocales ({voiceNotes?.length ?? 0})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <VoiceRecorder
+            missionId={mission.id}
+            orgId={orgId}
+            rooms={(rooms ?? []).map((r) => ({ id: r.id, name: r.name }))}
+          />
+          <VoiceNotesList
+            missionId={mission.id}
+            rooms={(rooms ?? []).map((r) => ({ id: r.id, name: r.name }))}
+            notes={(voiceNotes ?? []).map((n) => ({
+              id: n.id,
+              storage_path: n.storage_path,
+              duration_seconds: n.duration_seconds,
+              transcript_raw: n.transcript_raw,
+              transcript_structured: n.transcript_structured as VoiceParsedData | null,
+              ai_confidence: n.ai_confidence,
+              parser_used: n.parser_used,
+              room_id: n.room_id,
+              created_at: n.created_at,
             }))}
           />
         </CardContent>

@@ -158,3 +158,66 @@ export async function assignPhotoToRoomAction(
   if (error) throw new Error(error.message)
   revalidatePath(`/app/missions/${missionId}`)
 }
+
+// ============================================
+// Voice notes
+// ============================================
+
+const voiceNoteSchema = z.object({
+  missionId: z.string().uuid(),
+  roomId: z.string().uuid().optional().or(z.literal('')),
+  storagePath: z.string().min(5),
+  durationSeconds: z.coerce.number().int().min(0).max(3600),
+  transcriptRaw: z.string().optional().or(z.literal('')),
+  transcriptStructured: z.unknown().optional(),
+  provider: z.string().max(50).optional(),
+  parserUsed: z.string().max(50).optional(),
+  aiCostEur: z.coerce.number().min(0).optional(),
+  aiConfidence: z.coerce.number().min(0).max(1).optional(),
+})
+
+export async function createVoiceNoteAction(input: z.infer<typeof voiceNoteSchema>) {
+  const parsed = voiceNoteSchema.safeParse(input)
+  if (!parsed.success) {
+    throw new Error(`Voice note invalid: ${parsed.error.issues[0]?.message}`)
+  }
+  const { supabase, orgId, user } = await getCurrentUser()
+
+  const { data, error } = await supabase
+    .from('voice_notes')
+    .insert({
+      mission_id: parsed.data.missionId,
+      organization_id: orgId,
+      room_id: parsed.data.roomId || null,
+      storage_path: parsed.data.storagePath,
+      duration_seconds: parsed.data.durationSeconds,
+      language: 'fr',
+      provider: parsed.data.provider ?? 'openai',
+      transcript_raw: parsed.data.transcriptRaw || null,
+      transcript_structured: (parsed.data.transcriptStructured ?? null) as never,
+      parser_used: parsed.data.parserUsed ?? 'custom_js',
+      ai_cost_eur: parsed.data.aiCostEur ?? null,
+      ai_confidence: parsed.data.aiConfidence ?? null,
+      status: 'transcribed',
+      recorded_by: user.id,
+      transcribed_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single()
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/missions/${parsed.data.missionId}`)
+  return { id: data.id }
+}
+
+export async function deleteVoiceNoteAction(missionId: string, voiceNoteId: string, storagePath: string) {
+  const { supabase, orgId } = await getCurrentUser()
+  await supabase.storage.from('voice-notes').remove([storagePath])
+  const { error } = await supabase
+    .from('voice_notes')
+    .delete()
+    .eq('id', voiceNoteId)
+    .eq('organization_id', orgId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/missions/${missionId}`)
+}
