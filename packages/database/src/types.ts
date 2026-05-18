@@ -1,5 +1,5 @@
 // Auto-generated TypeScript types from Supabase schema
-// Generated: 2026-05-18T15:31:55.795Z
+// Generated: 2026-05-18T16:30:04.411Z
 // Source: db.jlizdkffwjdiokvmhcwg.supabase.co:5432 (public schema)
 // Do NOT edit manually. Regenerate via: pnpm db:gen-types
 
@@ -327,14 +327,14 @@ export type Database = {
             columns: ['created_at']
             isOneToOne: false
             referencedRelation: 'photos'
-            referencedColumns: ['created_at']
+            referencedColumns: ['id']
           },
           {
             foreignKeyName: 'fk_finding_photo'
             columns: ['created_at']
             isOneToOne: false
             referencedRelation: 'photos'
-            referencedColumns: ['id']
+            referencedColumns: ['created_at']
           },
           {
             foreignKeyName: 'equipment_findings_mission_id_fkey'
@@ -1370,6 +1370,65 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          id: string
+          organization_id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          status: string
+          tier: string | null
+          missions_included: number | null
+          overage_price_cents: number | null
+          current_period_start: string | null
+          current_period_end: string | null
+          cancel_at_period_end: boolean
+          monthly_cap_eur: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          status?: string
+          tier?: string | null
+          missions_included?: number | null
+          overage_price_cents?: number | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancel_at_period_end?: boolean
+          monthly_cap_eur?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          status?: string
+          tier?: string | null
+          missions_included?: number | null
+          overage_price_cents?: number | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancel_at_period_end?: boolean
+          monthly_cap_eur?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'subscriptions_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       support_messages: {
         Row: {
           id: string
@@ -1618,6 +1677,10 @@ export type Database = {
           p_kind: string
         }
         Returns: string
+      }
+      subscriptions_set_updated_at: {
+        Args: Record<string, never>
+        Returns: unknown
       }
     }
     Enums: {

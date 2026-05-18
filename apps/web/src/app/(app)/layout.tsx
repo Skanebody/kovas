@@ -5,6 +5,7 @@ import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { UsageWidget } from '@/components/usage-widget'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { logoutAction } from './actions'
 
@@ -21,6 +22,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             <span className="text-base font-semibold tracking-tight">KOVAS</span>
           </Link>
           <div className="flex items-center gap-2">
+            <UsageWidget />
             <ThemeToggle />
             <span className="text-sm text-muted-foreground hidden lg:inline ml-2">
               {displayName}

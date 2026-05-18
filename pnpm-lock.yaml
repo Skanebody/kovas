@@ -134,6 +134,9 @@ importers:
       serwist:
         specifier: ^9.0.11
         version: 9.5.11(browserslist@4.28.2)(typescript@5.9.3)
+      stripe:
+        specifier: ^22.1.1
+        version: 22.1.1(@types/node@22.19.19)
       tailwind-merge:
         specifier: ^2.5.5
         version: 2.6.1
@@ -1930,6 +1933,15 @@ packages:
 
   string_decoder@1.1.1:
     resolution: {integrity: sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==}
+
+  stripe@22.1.1:
+    resolution: {integrity: sha512-cmodIYP27tBkJ8G7DuGgWw0PFuemlFZbuF3Wwr1TrjFjUa3T7NIgCe6TVwX8BO2ynu+xtTuDGfHafNDCPt9lXA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
 
   styled-jsx@5.1.6:
     resolution: {integrity: sha512-qSVyDTeMotdvQYoHWLNGwRFJHC+i+ZvdBRYosOFgC+Wg1vx4frN2/RG/NA7SYqqvKNLf39P2LSRA2pu6n0XYZA==}
@@ -3732,6 +3744,10 @@ snapshots:
   string_decoder@1.1.1:
     dependencies:
       safe-buffer: 5.1.2
+
+  stripe@22.1.1(@types/node@22.19.19):
+    optionalDependencies:
+      '@types/node': 22.19.19
 
   styled-jsx@5.1.6(react@19.2.6):
     dependencies:
