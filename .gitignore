@@ -68,3 +68,9 @@ m2c1/
 playwright-report/
 test-results/
 playwright/.cache/
+
+# Serwist generated Service Workers (built from src/app/sw.ts)
+apps/web/public/sw.js
+apps/web/public/sw.js.map
+apps/web/public/swe-worker-*.js
+apps/web/public/swe-worker-*.js.map

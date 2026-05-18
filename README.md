@@ -2,7 +2,7 @@
 
 > SaaS B2B PWA pour diagnostiqueurs immobiliers français — IA-first, focus 8 diagnostics standards (92% volume métier FR).
 
-**Statut** : Phase 0 setup (M0, mai 2026). Sprint MVP V1 démarrage avril 2026.
+**Statut** : Sprint MVP V1 — **14/14 jours done** (mai 2026). 10 features cœur livrées + 10 suites E2E tests vertes. Prêt pour onboarding bêta-testeurs (M6).
 
 ## Authority documents
 
@@ -36,9 +36,52 @@ cp .env.example .env.local
 
 # 4. Lancer le dev server
 pnpm dev
+
+# 5. (optionnel) Régénérer les types Supabase si schéma modifié
+SUPABASE_DB_PASSWORD='...' node tools/gen-types.mjs
 ```
 
 Cf. [CURSOR_SETUP.md](CURSOR_SETUP.md) pour les étapes complètes (Supabase setup, etc.).
+
+## Sprint MVP V1 — features livrées
+
+| Feature | Statut | Doc |
+|---|---|---|
+| 1. Saisie vocale terrain (Whisper + parser hybride 80% custom + 20% Claude) | ✅ J5+J6 | [voice-parser.ts](apps/web/src/lib/voice-parser.ts) |
+| 2. Photos géolocalisées WebP (Camera API + Geolocation EXIF) | ✅ J4 | [photo-capture.tsx](apps/web/src/app/(app)/missions/[id]/photo-capture.tsx) |
+| 3. Auto-complétion adresse (API BAN gouv FR) | ✅ J3 | [ban.ts](apps/web/src/lib/ban.ts) |
+| 4. Templates pièces (T1-T5 maison/appartement, 8 templates) | ✅ J8 | [room-templates.ts](apps/web/src/lib/room-templates.ts) |
+| 5. Check-lists par diagnostic (DPE/Amiante/Plomb/Gaz/Élec/Termites/Carrez/ERP) | ✅ J8 | [checklists.ts](apps/web/src/lib/checklists.ts) |
+| 6. Upload documents propriétaire via lien public (token-validated) | ✅ J9 | [/upload/[token]](apps/web/src/app/upload/[token]) |
+| 7. Validation cohérence métier (6 règles sans IA) | ✅ J10 | [coherence-validation.ts](apps/web/src/lib/coherence-validation.ts) |
+| 8. Bouton "Partager vers Liciel" 3 modes (Email + GDrive + DL) | ✅ J11+J12 | [share-button.tsx](apps/web/src/app/(app)/missions/[id]/share-button.tsx) |
+| 9. Exports multi-format (PDF + Word + CSV + JSON + ZIP Liciel stub) | ✅ J11+J12 | [lib/exports/](apps/web/src/lib/exports) |
+| 10. Sync Realtime + offline (Supabase Realtime + Serwist SW) | ✅ J10 | [mission-realtime.tsx](apps/web/src/components/mission-realtime.tsx) |
+| **Bonus J3.5** Trial protection (email pro + SIRET Luhn + cabinet_trials) | ✅ | [trial-protection.md](docs/trial-protection.md) |
+| **Bonus J13** Stripe 3 tiers + widget transparence + portal | ✅ | [/app/billing](apps/web/src/app/(app)/billing) |
+
+## Tests E2E (10 suites, toutes vertes)
+
+```bash
+node tools/test-signup-trigger.mjs       # trigger handle_new_user → profile + org + membership
+node tools/test-trial-protection.mjs     # SIRET Luhn + email pro + UNIQUE constraint
+node tools/test-j3-flow.mjs              # client → property → mission avec next_reference
+node tools/test-j4-flow.mjs              # rooms + photos + tagging
+node tools/test-voice-parser.mjs         # parser custom 5 cas (DPE, cuisine, PAC...)
+node tools/test-j6-hybrid.mjs            # Whisper vocab + fallback Claude decision
+node tools/test-j8-checklists.mjs        # checklists DPE + Amiante (4 cas)
+node tools/test-j9-upload-link.mjs       # /upload/[token] + /api/upload-owner-document
+node tools/test-j10-coherence.mjs        # 8 règles cohérence métier
+node tools/test-j11-export.mjs           # PDF + DOCX + CSV + ZIP universel + ZIP Liciel
+```
+
+## Build production
+
+```bash
+pnpm -F @kovas/web build
+```
+
+28 routes compilées, max 231 kB First Load JS (page mission detail). Middleware 88 kB.
 
 ## Structure monorepo
 
