@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { createClient } from '@/lib/supabase/client'
+import { getViewType } from '@/lib/photo-view-types'
 import { assignPhotoToRoomAction, deletePhotoAction } from './actions'
 
 interface Photo {
@@ -17,6 +18,7 @@ interface Photo {
   size_bytes: number | null
   room_id: string | null
   taken_at: string | null
+  view_type: string | null
   location_text: string | null // "POINT(lng lat)" extracted by parent server query
 }
 
@@ -115,6 +117,13 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
                   />
                 ) : (
                   <div className="size-full bg-muted animate-pulse" />
+                )}
+                {p.view_type && (
+                  <div className="absolute top-1 left-1">
+                    <Badge variant="default" className="text-[9px] py-0 px-1.5 bg-foreground/80 backdrop-blur-sm">
+                      {getViewType(p.view_type)?.label ?? p.view_type}
+                    </Badge>
+                  </div>
                 )}
                 <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1">
                   <Select

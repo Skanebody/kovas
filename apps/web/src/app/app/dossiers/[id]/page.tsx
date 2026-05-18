@@ -97,7 +97,7 @@ export default async function DossierDetailPage({
       .order('position', { ascending: true }),
     supabase
       .from('photos')
-      .select('id, storage_path, width, height, size_bytes, room_id, taken_at')
+      .select('id, storage_path, width, height, size_bytes, room_id, taken_at, view_type')
       .eq('dossier_id', id)
       .eq('organization_id', orgId)
       .order('taken_at', { ascending: false }),
@@ -292,11 +292,27 @@ export default async function DossierDetailPage({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <PhotoCapture
-            dossierId={dossier.id}
-            orgId={orgId}
-            rooms={(rooms ?? []).map((r) => ({ id: r.id, name: r.name }))}
-          />
+          {(() => {
+            // Compteurs photos par pièce + index pièce (pour nommage)
+            const photoCountsByRoom: Record<string, number> = {}
+            for (const p of photos ?? []) {
+              if (p.room_id) photoCountsByRoom[p.room_id] = (photoCountsByRoom[p.room_id] ?? 0) + 1
+            }
+            const roomIndexById: Record<string, number> = {}
+            ;(rooms ?? []).forEach((r, idx) => {
+              roomIndexById[r.id] = idx + 1
+            })
+            return (
+              <PhotoCapture
+                dossierId={dossier.id}
+                dossierReference={dossier.reference}
+                orgId={orgId}
+                rooms={(rooms ?? []).map((r) => ({ id: r.id, name: r.name }))}
+                photoCountsByRoom={photoCountsByRoom}
+                roomIndexById={roomIndexById}
+              />
+            )
+          })()}
           <PhotoGallery
             dossierId={dossier.id}
             rooms={(rooms ?? []).map((r) => ({ id: r.id, name: r.name }))}
@@ -308,6 +324,7 @@ export default async function DossierDetailPage({
               size_bytes: p.size_bytes,
               room_id: p.room_id,
               taken_at: p.taken_at,
+              view_type: (p as { view_type?: string | null }).view_type ?? null,
               location_text: null,
             }))}
           />
