@@ -1,5 +1,5 @@
 // Auto-generated TypeScript types from Supabase schema
-// Generated: 2026-05-18T15:23:34.966Z
+// Generated: 2026-05-18T15:31:55.795Z
 // Source: db.jlizdkffwjdiokvmhcwg.supabase.co:5432 (public schema)
 // Do NOT edit manually. Regenerate via: pnpm db:gen-types
 

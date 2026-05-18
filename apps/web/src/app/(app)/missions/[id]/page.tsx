@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, Calendar, FileText, User } from 'lucide-react'
+import { ArrowLeft, Building2, Calendar, Camera, User } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -11,6 +11,9 @@ import {
   MISSION_STATUS_VARIANT,
   MISSION_TYPE_LABELS,
 } from '@/lib/mission-helpers'
+import { PhotoCapture } from './photo-capture'
+import { PhotoGallery } from './photo-gallery'
+import { RoomsList } from './rooms-list'
 
 export const metadata: Metadata = { title: 'Détail mission' }
 
@@ -22,15 +25,33 @@ export default async function MissionDetailPage({
   const { id } = await params
   const { supabase, orgId } = await getCurrentUser()
 
-  const { data: mission } = await supabase
-    .from('missions')
-    .select(
-      'id, reference, type, status, scheduled_at, notes, created_at, property_id, client_id, properties(address, city, postal_code), clients(display_name)',
-    )
-    .eq('id', id)
-    .eq('organization_id', orgId)
-    .is('deleted_at', null)
-    .single()
+  const [
+    { data: mission },
+    { data: rooms },
+    { data: photos },
+  ] = await Promise.all([
+    supabase
+      .from('missions')
+      .select(
+        'id, reference, type, status, scheduled_at, notes, created_at, property_id, client_id, properties(address, city, postal_code), clients(display_name)',
+      )
+      .eq('id', id)
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .single(),
+    supabase
+      .from('mission_rooms')
+      .select('id, name, room_type, surface_m2, position')
+      .eq('mission_id', id)
+      .eq('organization_id', orgId)
+      .order('position', { ascending: true }),
+    supabase
+      .from('photos')
+      .select('id, storage_path, width, height, size_bytes, room_id, taken_at')
+      .eq('mission_id', id)
+      .eq('organization_id', orgId)
+      .order('taken_at', { ascending: false }),
+  ])
 
   if (!mission) notFound()
 
@@ -38,7 +59,7 @@ export default async function MissionDetailPage({
   const client = Array.isArray(mission.clients) ? mission.clients[0] : mission.clients
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/app/missions">
           <ArrowLeft className="size-4" /> Retour aux missions
@@ -93,6 +114,41 @@ export default async function MissionDetailPage({
         </CardContent>
       </Card>
 
+      <Card>
+        <CardContent className="pt-6">
+          <RoomsList missionId={mission.id} rooms={rooms ?? []} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Camera className="size-4" /> Photos terrain ({photos?.length ?? 0})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <PhotoCapture
+            missionId={mission.id}
+            orgId={orgId}
+            rooms={(rooms ?? []).map((r) => ({ id: r.id, name: r.name }))}
+          />
+          <PhotoGallery
+            missionId={mission.id}
+            rooms={(rooms ?? []).map((r) => ({ id: r.id, name: r.name }))}
+            photos={(photos ?? []).map((p) => ({
+              id: p.id,
+              storage_path: p.storage_path,
+              width: p.width,
+              height: p.height,
+              size_bytes: p.size_bytes,
+              room_id: p.room_id,
+              taken_at: p.taken_at,
+              location_text: null,
+            }))}
+          />
+        </CardContent>
+      </Card>
+
       {mission.notes && (
         <Card>
           <CardHeader>
@@ -101,17 +157,6 @@ export default async function MissionDetailPage({
           <CardContent className="text-sm whitespace-pre-wrap">{mission.notes}</CardContent>
         </Card>
       )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="size-4" /> Saisie terrain
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          <p>Photos, saisie vocale, équipements détectés — disponibles à partir du Sprint MVP J4.</p>
-        </CardContent>
-      </Card>
     </div>
   )
 }
