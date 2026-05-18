@@ -288,6 +288,83 @@ export async function toggleChecklistItemAction(
   revalidatePath(`/app/missions/${missionId}`)
 }
 
+// ============================================
+// Lien public upload client (documents propriétaire)
+// ============================================
+
+function randomToken(length = 24): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
+  let out = ''
+  const bytes = new Uint8Array(length)
+  crypto.getRandomValues(bytes)
+  for (const b of bytes) out += chars[b % chars.length]
+  return out
+}
+
+export async function generateClientUploadLinkAction(missionId: string) {
+  const { supabase, orgId } = await getCurrentUser()
+  const token = randomToken(24)
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+
+  const { error } = await supabase
+    .from('missions')
+    .update({
+      client_upload_token: token,
+      client_upload_expires_at: expiresAt,
+    })
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/missions/${missionId}`)
+  return { token, expiresAt }
+}
+
+export async function revokeClientUploadLinkAction(missionId: string) {
+  const { supabase, orgId } = await getCurrentUser()
+  const { error } = await supabase
+    .from('missions')
+    .update({
+      client_upload_token: null,
+      client_upload_expires_at: null,
+    })
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/missions/${missionId}`)
+}
+
+export async function toggleDocumentReviewedAction(
+  missionId: string,
+  documentId: string,
+  reviewed: boolean,
+) {
+  const { supabase, orgId } = await getCurrentUser()
+  const { error } = await supabase
+    .from('owner_documents')
+    .update({ reviewed_by_diag: reviewed })
+    .eq('id', documentId)
+    .eq('organization_id', orgId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/missions/${missionId}`)
+}
+
+export async function deleteOwnerDocumentAction(
+  missionId: string,
+  documentId: string,
+  storagePath: string,
+) {
+  const { supabase, orgId } = await getCurrentUser()
+  await supabase.storage.from('owner-uploads').remove([storagePath])
+  const { error } = await supabase
+    .from('owner_documents')
+    .delete()
+    .eq('id', documentId)
+    .eq('organization_id', orgId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/missions/${missionId}`)
+}
+
 export async function updateMissionStatusAction(missionId: string, newStatus: MissionStatus) {
   if (!MISSION_STATUSES.includes(newStatus)) {
     throw new Error(`Statut invalide: ${newStatus}`)

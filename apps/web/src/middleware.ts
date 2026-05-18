@@ -12,6 +12,6 @@ export const config = {
      * - _next/static, _next/image, favicon, sw.js, manifest.json
      * - Image extensions
      */
-    '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons|upload|api/upload-owner-document|api/ban|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

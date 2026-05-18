@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, Calendar, Camera, Mic, User } from 'lucide-react'
+import { ArrowLeft, Building2, Calendar, Camera, FileText, Mic, User } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -8,7 +8,9 @@ import { getCurrentUser } from '@/lib/auth/current-user'
 import { runChecklist } from '@/lib/checklists'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import type { VoiceParsedData } from '@/lib/voice-parser'
+import { ClientUploadLink } from './client-upload-link'
 import { MissionChecklist } from './mission-checklist'
+import { OwnerDocumentsList } from './owner-documents-list'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
 import { RoomsList } from './rooms-list'
@@ -31,6 +33,7 @@ export default async function MissionDetailPage({
     { data: rooms },
     { data: photos },
     { data: voiceNotes },
+    { data: ownerDocs },
   ] = await Promise.all([
     supabase
       .from('missions')
@@ -59,12 +62,25 @@ export default async function MissionDetailPage({
       .eq('mission_id', id)
       .eq('organization_id', orgId)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('owner_documents')
+      .select('id, storage_path, original_name, size_bytes, mime_type, doc_kind, uploaded_at, reviewed_by_diag')
+      .eq('mission_id', id)
+      .eq('organization_id', orgId)
+      .order('uploaded_at', { ascending: false }),
   ])
 
   if (!mission) notFound()
 
   const prop = Array.isArray(mission.properties) ? mission.properties[0] : mission.properties
   const client = Array.isArray(mission.clients) ? mission.clients[0] : mission.clients
+
+  // Get mission with token for upload link UI
+  const { data: missionFull } = await supabase
+    .from('missions')
+    .select('client_upload_token, client_upload_expires_at')
+    .eq('id', id)
+    .single()
 
   // Compute checklist state
   const metadata = (mission.metadata as Record<string, unknown> | null) ?? {}
@@ -148,6 +164,22 @@ export default async function MissionDetailPage({
         completion={checklist.completion}
         requiredOk={checklist.requiredOk}
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileText className="size-4" /> Documents propriétaire ({ownerDocs?.length ?? 0})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <ClientUploadLink
+            missionId={mission.id}
+            token={missionFull?.client_upload_token ?? null}
+            expiresAt={missionFull?.client_upload_expires_at ?? null}
+          />
+          <OwnerDocumentsList missionId={mission.id} documents={ownerDocs ?? []} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="pt-6">
