@@ -77,6 +77,55 @@ export async function createClientAction(
   redirect(`/app/clients/${data.id}`)
 }
 
+export async function updateClientAction(
+  clientId: string,
+  _prev: ClientFormState,
+  formData: FormData,
+): Promise<ClientFormState> {
+  const parsed = clientSchema.safeParse({
+    type: formData.get('type'),
+    displayName: formData.get('displayName'),
+    firstName: formData.get('firstName'),
+    lastName: formData.get('lastName'),
+    companyName: formData.get('companyName'),
+    email: formData.get('email'),
+    phone: formData.get('phone'),
+    notes: formData.get('notes'),
+  })
+
+  if (!parsed.success) {
+    return {
+      error: 'Données invalides',
+      fieldErrors: Object.fromEntries(
+        parsed.error.issues.map((i) => [i.path.join('.'), i.message]),
+      ),
+    }
+  }
+
+  const { supabase, orgId } = await getCurrentUser()
+
+  const { error } = await supabase
+    .from('clients')
+    .update({
+      type: parsed.data.type,
+      display_name: parsed.data.displayName,
+      first_name: parsed.data.firstName || null,
+      last_name: parsed.data.lastName || null,
+      company_name: parsed.data.companyName || null,
+      email: parsed.data.email || null,
+      phone: parsed.data.phone || null,
+      notes: parsed.data.notes || null,
+    })
+    .eq('id', clientId)
+    .eq('organization_id', orgId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/clients')
+  revalidatePath(`/app/clients/${clientId}`)
+  redirect(`/app/clients/${clientId}`)
+}
+
 export async function deleteClientAction(clientId: string) {
   const { supabase, orgId } = await getCurrentUser()
   const { error } = await supabase

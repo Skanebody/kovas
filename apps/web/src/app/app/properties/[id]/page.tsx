@@ -1,11 +1,13 @@
-import { ArrowLeft, MapPin, Plus } from 'lucide-react'
+import { ArrowLeft, MapPin, Pencil, Plus } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { DangerZone } from '@/components/danger-zone'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { softDeletePropertyAction } from '../actions'
 
 export const metadata: Metadata = { title: 'Détail bien' }
 
@@ -69,11 +71,18 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             <Badge variant="muted">{TYPE_LABELS[property.property_type] ?? property.property_type}</Badge>
           )}
         </div>
-        <Button asChild>
-          <Link href={`/app/dossiers/new?propertyId=${property.id}`}>
-            <Plus className="size-4" /> Nouveau dossier
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" asChild>
+            <Link href={`/app/properties/${property.id}/edit`}>
+              <Pencil className="size-4" /> Modifier
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href={`/app/dossiers/new?propertyId=${property.id}`}>
+              <Plus className="size-4" /> Nouveau dossier
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -98,6 +107,11 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
           <CardContent className="text-sm whitespace-pre-wrap">{property.notes}</CardContent>
         </Card>
       )}
+
+      <DangerZone
+        entityLabel="bien"
+        onDelete={softDeletePropertyAction.bind(null, property.id)}
+      />
     </div>
   )
 }

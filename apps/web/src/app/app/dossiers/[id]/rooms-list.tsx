@@ -1,6 +1,6 @@
 'use client'
 
-import { DoorOpen, Loader2, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { DoorOpen, Loader2, Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react'
 import { useActionState, useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,7 +15,13 @@ import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { ROOM_TEMPLATES } from '@/lib/room-templates'
-import { addRoomAction, applyRoomTemplateAction, deleteRoomAction, type RoomFormState } from './actions'
+import {
+  addRoomAction,
+  applyRoomTemplateAction,
+  deleteRoomAction,
+  type RoomFormState,
+  updateRoomAction,
+} from './actions'
 
 const ROOM_TYPE_LABELS: Record<string, string> = {
   salon: 'Salon',
@@ -161,33 +167,7 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
       {rooms.length > 0 ? (
         <ul className="space-y-1">
           {rooms.map((r) => (
-            <li
-              key={r.id}
-              className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <DoorOpen className="size-4 text-muted-foreground shrink-0" />
-                <span className="font-medium truncate">{r.name}</span>
-                {r.room_type && (
-                  <span className="text-xs text-muted-foreground">
-                    · {ROOM_TYPE_LABELS[r.room_type] ?? r.room_type}
-                  </span>
-                )}
-                {r.surface_m2 && (
-                  <span className="text-xs text-muted-foreground">
-                    · {r.surface_m2} m²
-                  </span>
-                )}
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(r.id)}
-                aria-label={`Supprimer ${r.name}`}
-              >
-                <Trash2 className="size-4 text-muted-foreground" />
-              </Button>
-            </li>
+            <RoomItem key={r.id} room={r} onDelete={() => handleDelete(r.id)} />
           ))}
         </ul>
       ) : (
@@ -196,5 +176,113 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
         )
       )}
     </div>
+  )
+}
+
+function RoomItem({ room, onDelete }: { room: Room; onDelete: () => void }) {
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState(room.name)
+  const [roomType, setRoomType] = useState(room.room_type ?? '')
+  const [surface, setSurface] = useState(room.surface_m2?.toString() ?? '')
+  const [saving, startSave] = useTransition()
+
+  function save() {
+    startSave(async () => {
+      await updateRoomAction(room.id, {
+        name: name.trim() || room.name,
+        room_type: roomType || null,
+        surface_m2: surface ? Number(surface) : null,
+      })
+      setEditing(false)
+    })
+  }
+
+  if (editing) {
+    return (
+      <li className="rounded-md border border-foreground/40 bg-card px-3 py-3 text-sm space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nom"
+            className="h-9"
+          />
+          <Select
+            value={roomType}
+            onChange={(e) => setRoomType(e.target.value)}
+            className="h-9"
+          >
+            <option value="">— Type —</option>
+            {Object.entries(ROOM_TYPE_LABELS).map(([v, l]) => (
+              <option key={v} value={v}>{l}</option>
+            ))}
+          </Select>
+          <Input
+            value={surface}
+            onChange={(e) => setSurface(e.target.value)}
+            type="number"
+            min={0}
+            step="0.01"
+            placeholder="Surface m²"
+            className="h-9"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={save} disabled={saving}>
+            {saving && <Loader2 className="size-4 animate-spin" />}
+            Enregistrer
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              setEditing(false)
+              setName(room.name)
+              setRoomType(room.room_type ?? '')
+              setSurface(room.surface_m2?.toString() ?? '')
+            }}
+          >
+            <X className="size-4" /> Annuler
+          </Button>
+        </div>
+      </li>
+    )
+  }
+
+  return (
+    <li className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm hover:bg-muted/30 transition-colors">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <DoorOpen className="size-4 text-muted-foreground shrink-0" />
+        <span className="font-medium truncate">{room.name}</span>
+        {room.room_type && (
+          <span className="text-xs text-muted-foreground">
+            · {ROOM_TYPE_LABELS[room.room_type] ?? room.room_type}
+          </span>
+        )}
+        {room.surface_m2 && (
+          <span className="text-xs text-muted-foreground">
+            · {room.surface_m2} m²
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setEditing(true)}
+          aria-label={`Modifier ${room.name}`}
+        >
+          <Pencil className="size-4 text-muted-foreground" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onDelete}
+          aria-label={`Supprimer ${room.name}`}
+        >
+          <Trash2 className="size-4 text-muted-foreground" />
+        </Button>
+      </div>
+    </li>
   )
 }

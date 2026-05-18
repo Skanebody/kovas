@@ -1,11 +1,13 @@
-import { ArrowLeft, Mail, Phone } from 'lucide-react'
+import { ArrowLeft, Mail, Pencil, Phone } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { DangerZone } from '@/components/danger-zone'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { deleteClientAction } from '../actions'
 
 export const metadata: Metadata = { title: 'Détail client' }
 
@@ -45,6 +47,11 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           <h1 className="text-2xl font-bold tracking-tight">{client.display_name}</h1>
           <Badge variant="muted">{TYPE_LABELS[client.type] ?? client.type}</Badge>
         </div>
+        <Button variant="outline" asChild>
+          <Link href={`/app/clients/${client.id}/edit`}>
+            <Pencil className="size-4" /> Modifier
+          </Link>
+        </Button>
       </div>
 
       <Card>
@@ -82,6 +89,11 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           <CardContent className="text-sm whitespace-pre-wrap">{client.notes}</CardContent>
         </Card>
       )}
+
+      <DangerZone
+        entityLabel="client"
+        onDelete={deleteClientAction.bind(null, client.id)}
+      />
     </div>
   )
 }

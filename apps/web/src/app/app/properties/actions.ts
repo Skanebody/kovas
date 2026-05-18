@@ -94,3 +94,84 @@ export async function createPropertyAction(
   revalidatePath('/app/properties')
   redirect(`/app/properties/${data.id}`)
 }
+
+export async function updatePropertyAction(
+  propertyId: string,
+  _prev: PropertyFormState,
+  formData: FormData,
+): Promise<PropertyFormState> {
+  const parsed = propertySchema.safeParse({
+    address: formData.get('address'),
+    postalCode: (formData.get('address_postcode') || formData.get('postalCode')) ?? '',
+    city: (formData.get('address_city') || formData.get('city')) ?? '',
+    insee: formData.get('address_insee') ?? '',
+    lng: formData.get('address_lng') || undefined,
+    lat: formData.get('address_lat') || undefined,
+    propertyType: formData.get('propertyType') || undefined,
+    yearBuilt: formData.get('yearBuilt') || undefined,
+    surfaceTotal: formData.get('surfaceTotal') || undefined,
+    apartmentDetail: formData.get('apartmentDetail') ?? '',
+    buildingLetter: formData.get('buildingLetter') ?? '',
+    floorNumber: formData.get('floorNumber') || undefined,
+    lotNumber: formData.get('lotNumber') ?? '',
+    clientId: formData.get('clientId') ?? '',
+    notes: formData.get('notes') ?? '',
+  })
+
+  if (!parsed.success) {
+    return {
+      error: 'Données invalides',
+      fieldErrors: Object.fromEntries(
+        parsed.error.issues.map((i) => [i.path.join('.'), i.message]),
+      ),
+    }
+  }
+
+  const { supabase, orgId } = await getCurrentUser()
+
+  const location =
+    parsed.data.lng && parsed.data.lat
+      ? `SRID=4326;POINT(${parsed.data.lng} ${parsed.data.lat})`
+      : undefined
+
+  const updates: Record<string, unknown> = {
+    address: parsed.data.address,
+    city: parsed.data.city || null,
+    postal_code: parsed.data.postalCode || null,
+    property_type: parsed.data.propertyType ?? null,
+    year_built: parsed.data.yearBuilt ?? null,
+    surface_total: parsed.data.surfaceTotal ?? null,
+    apartment_detail: parsed.data.apartmentDetail || null,
+    building_letter: parsed.data.buildingLetter || null,
+    floor_number: parsed.data.floorNumber ?? null,
+    lot_number: parsed.data.lotNumber || null,
+    client_id: parsed.data.clientId || null,
+    notes: parsed.data.notes || null,
+  }
+  if (parsed.data.insee) updates.insee_code = parsed.data.insee
+  if (location !== undefined) updates.location = location
+
+  const { error } = await supabase
+    .from('properties')
+    .update(updates as never)
+    .eq('id', propertyId)
+    .eq('organization_id', orgId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/app/properties')
+  revalidatePath(`/app/properties/${propertyId}`)
+  redirect(`/app/properties/${propertyId}`)
+}
+
+export async function softDeletePropertyAction(propertyId: string) {
+  const { supabase, orgId } = await getCurrentUser()
+  const { error } = await supabase
+    .from('properties')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', propertyId)
+    .eq('organization_id', orgId)
+  if (error) throw new Error(error.message)
+  revalidatePath('/app/properties')
+  redirect('/app/properties')
+}

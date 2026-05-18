@@ -10,6 +10,7 @@ import {
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { DangerZone } from '@/components/danger-zone'
 import { MissionRealtime } from '@/components/mission-realtime'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,12 +21,16 @@ import { runCoherenceChecks } from '@/lib/coherence-validation'
 import { runWorkflow } from '@/lib/dossier-workflow'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import type { VoiceParsedData } from '@/lib/voice-parser'
+import { softDeleteDossierAction } from '../actions'
+import { AddMissionButton } from './add-mission'
 import { ClientUploadLink } from './client-upload-link'
 import { CoherenceWarnings } from './coherence-warnings'
+import { DossierInfoEdit } from './dossier-info-edit'
 import { MissionChecklist } from './mission-checklist'
 import { OwnerDocumentsList } from './owner-documents-list'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
+import { RemoveMissionButton } from './remove-mission-button'
 import { RoomsList } from './rooms-list'
 import { ResumeButton } from './resume-button'
 import { RoomsMatrixView } from './rooms-matrix-view'
@@ -73,6 +78,7 @@ export default async function DossierDetailPage({
     { data: photos },
     { data: voiceNotes },
     { data: ownerDocs },
+    { data: clientsList },
   ] = await Promise.all([
     supabase
       .from('dossiers')
@@ -117,6 +123,12 @@ export default async function DossierDetailPage({
       .eq('dossier_id', id)
       .eq('organization_id', orgId)
       .order('uploaded_at', { ascending: false }),
+    supabase
+      .from('clients')
+      .select('id, display_name')
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .order('display_name', { ascending: true }),
   ])
 
   if (!dossier) notFound()
@@ -203,8 +215,15 @@ export default async function DossierDetailPage({
 
       {/* Détails bien + client */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle className="text-base">Détails de la visite</CardTitle>
+          <DossierInfoEdit
+            dossierId={dossier.id}
+            scheduledAt={dossier.scheduled_at ?? null}
+            notes={dossier.notes ?? null}
+            clientId={dossier.client_id ?? null}
+            clients={clientsList ?? []}
+          />
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           {prop && (
@@ -374,7 +393,15 @@ export default async function DossierDetailPage({
               : "Vue bureau : pour chaque diagnostic, sa check-list de complétude et son export."}
           </p>
         </div>
-        <ViewToggle dossierId={dossier.id} current={viewPreference} />
+        <div className="flex items-center gap-2">
+          {viewPreference === 'diags' && (
+            <AddMissionButton
+              dossierId={dossier.id}
+              existingTypes={missionsList.map((m) => m.type)}
+            />
+          )}
+          <ViewToggle dossierId={dossier.id} current={viewPreference} />
+        </div>
       </div>
 
       {viewPreference === 'rooms' ? (
@@ -436,6 +463,10 @@ export default async function DossierDetailPage({
                         missionReference={m.reference}
                         clientEmail={client?.email ?? null}
                       />
+                      <RemoveMissionButton
+                        missionId={m.id}
+                        missionLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
+                      />
                     </div>
                   </div>
                 </CardHeader>
@@ -461,6 +492,11 @@ export default async function DossierDetailPage({
           <CardContent className="text-sm whitespace-pre-wrap">{dossier.notes}</CardContent>
         </Card>
       )}
+
+      <DangerZone
+        entityLabel="dossier"
+        onDelete={softDeleteDossierAction.bind(null, dossier.id)}
+      />
     </div>
   )
 }

@@ -622,6 +622,119 @@ export async function setDossierViewPreferenceAction(dossierId: string, view: 'r
   revalidatePath(`/app/dossiers/${dossierId}`)
 }
 
+/**
+ * Édite les meta-infos du dossier (date prévue, notes, client).
+ */
+export async function updateDossierInfoAction(
+  dossierId: string,
+  updates: { scheduled_at?: string | null; notes?: string | null; client_id?: string | null },
+) {
+  const { supabase, orgId } = await getCurrentUser()
+  const patch: Record<string, unknown> = {}
+  if (updates.scheduled_at !== undefined) {
+    patch.scheduled_at = updates.scheduled_at ? new Date(updates.scheduled_at).toISOString() : null
+  }
+  if (updates.notes !== undefined) patch.notes = updates.notes || null
+  if (updates.client_id !== undefined) patch.client_id = updates.client_id || null
+
+  const { error } = await supabase
+    .from('dossiers')
+    .update(patch as never)
+    .eq('id', dossierId)
+    .eq('organization_id', orgId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/dossiers/${dossierId}`)
+}
+
+/**
+ * Ajoute un diagnostic (mission) à un dossier existant.
+ */
+const ALL_MISSION_TYPES = [
+  'dpe_vente', 'dpe_location', 'copropriete',
+  'amiante_vente', 'amiante_avant_travaux',
+  'plomb_crep', 'gaz', 'electricite', 'termites', 'carrez_boutin', 'erp',
+] as const
+type AnyMissionType = (typeof ALL_MISSION_TYPES)[number]
+
+export async function addMissionToDossierAction(dossierId: string, type: string) {
+  if (!ALL_MISSION_TYPES.includes(type as AnyMissionType)) {
+    throw new Error(`Type de diagnostic invalide : ${type}`)
+  }
+  const { supabase, orgId, user } = await getCurrentUser()
+
+  const { data: refData, error: refErr } = await supabase.rpc('next_reference', {
+    p_org: orgId,
+    p_kind: 'mission',
+  })
+  if (refErr) throw new Error(refErr.message)
+
+  const { error } = await supabase.from('missions').insert({
+    organization_id: orgId,
+    dossier_id: dossierId,
+    type: type as AnyMissionType,
+    reference: refData as string,
+    status: 'draft',
+    created_by: user.id,
+    assigned_to: user.id,
+  })
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/dossiers/${dossierId}`)
+}
+
+/**
+ * Retire (soft-delete) un diagnostic du dossier.
+ */
+export async function removeMissionFromDossierAction(missionId: string) {
+  const { supabase, orgId } = await getCurrentUser()
+  const { data: m } = await supabase
+    .from('missions')
+    .select('dossier_id')
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+    .single()
+
+  const { error } = await supabase
+    .from('missions')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+
+  if (error) throw new Error(error.message)
+  if (m?.dossier_id) revalidatePath(`/app/dossiers/${m.dossier_id}`)
+}
+
+/**
+ * Édite une pièce (nom, type, surface).
+ */
+export async function updateRoomAction(
+  roomId: string,
+  updates: { name?: string; room_type?: string | null; surface_m2?: number | null },
+) {
+  const { supabase, orgId } = await getCurrentUser()
+  const { data: room } = await supabase
+    .from('dossier_rooms')
+    .select('dossier_id')
+    .eq('id', roomId)
+    .eq('organization_id', orgId)
+    .single()
+
+  const patch: Record<string, unknown> = {}
+  if (updates.name !== undefined) patch.name = updates.name
+  if (updates.room_type !== undefined) patch.room_type = updates.room_type || null
+  if (updates.surface_m2 !== undefined) patch.surface_m2 = updates.surface_m2 ?? null
+
+  const { error } = await supabase
+    .from('dossier_rooms')
+    .update(patch as never)
+    .eq('id', roomId)
+    .eq('organization_id', orgId)
+
+  if (error) throw new Error(error.message)
+  if (room?.dossier_id) revalidatePath(`/app/dossiers/${room.dossier_id}`)
+}
+
 export async function toggleDossierStepItemAction(
   dossierId: string,
   itemId: string,
