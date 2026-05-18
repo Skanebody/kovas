@@ -1,6 +1,7 @@
 import { Building2, FolderOpen, Plus, Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { InProgressMissions } from '@/components/in-progress-missions'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -101,6 +102,8 @@ export default async function DashboardPage() {
           href="/app/properties"
         />
       </div>
+
+      <InProgressMissions />
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">

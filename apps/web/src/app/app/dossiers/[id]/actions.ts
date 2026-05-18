@@ -329,6 +329,50 @@ const MISSION_STATUSES = [
 ] as const
 type MissionStatus = (typeof MISSION_STATUSES)[number]
 
+/**
+ * Reprendre un diagnostic — passe en 'in_progress' depuis 'scheduled' ou 'to_review',
+ * stamp started_at si pas déjà fait. Redirige vers la card focus.
+ */
+export async function resumeMissionAction(missionId: string) {
+  const { supabase, orgId } = await getCurrentUser()
+  const now = new Date().toISOString()
+
+  // Récupère le statut actuel + dossier_id pour le redirect
+  const { data: current } = await supabase
+    .from('missions')
+    .select('status, dossier_id')
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+    .single()
+
+  if (!current) throw new Error('Mission introuvable')
+
+  const finalStates: MissionStatus[] = ['done', 'exported', 'archived', 'cancelled']
+  const newStatus: MissionStatus = finalStates.includes(current.status as MissionStatus)
+    ? (current.status as MissionStatus)
+    : 'in_progress'
+
+  const { error } = await supabase
+    .from('missions')
+    .update({ status: newStatus })
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+
+  if (error) throw new Error(error.message)
+
+  // Active aussi le dossier en 'on_site' si pas déjà engagé
+  await supabase
+    .from('dossiers')
+    .update({ status: 'on_site', started_at: now })
+    .eq('id', current.dossier_id)
+    .eq('organization_id', orgId)
+    .in('status', ['draft', 'scheduled'])
+
+  revalidatePath(`/app/dossiers/${current.dossier_id}`)
+  revalidatePath('/app/dossiers')
+  revalidatePath('/app/dashboard')
+}
+
 export async function updateMissionStatusAction(missionId: string, newStatus: MissionStatus) {
   if (!MISSION_STATUSES.includes(newStatus)) {
     throw new Error(`Statut invalide: ${newStatus}`)

@@ -27,6 +27,7 @@ import { OwnerDocumentsList } from './owner-documents-list'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
 import { RoomsList } from './rooms-list'
+import { ResumeButton } from './resume-button'
 import { ShareMissionButton } from './share-button'
 import { MissionStatusButton } from './status-button'
 import { VoiceNotesList } from './voice-notes-list'
@@ -361,7 +362,7 @@ export default async function DossierDetailPage({
             )
 
             return (
-              <Card key={m.id}>
+              <Card key={m.id} id={`mission-${m.id}`} className="scroll-mt-20">
                 <CardHeader>
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="space-y-1">
@@ -371,6 +372,7 @@ export default async function DossierDetailPage({
                       <p className="text-xs font-mono text-muted-foreground">{m.reference}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
+                      <ResumeButton missionId={m.id} status={m.status} />
                       <MissionStatusButton missionId={m.id} currentStatus={m.status as never} />
                       <ShareMissionButton
                         missionId={m.id}
