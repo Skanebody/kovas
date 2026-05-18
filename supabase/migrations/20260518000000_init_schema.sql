@@ -18,19 +18,21 @@ CREATE EXTENSION IF NOT EXISTS "vector";     -- pgvector RAG KB Phase 2+ + auto-
 -- 1. Helper SECURITY DEFINER (PERFORMANCE CRITIQUE)
 -- Cf. research/supabase-architecture.md §2 — #1 production gotcha
 -- ============================================
-CREATE OR REPLACE FUNCTION auth.is_member_of(p_org uuid)
+CREATE OR REPLACE FUNCTION public.is_member_of(p_org uuid)
 RETURNS boolean
-LANGUAGE sql
+LANGUAGE plpgsql
 STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT EXISTS (
+BEGIN
+  RETURN EXISTS (
     SELECT 1 FROM memberships m
     WHERE m.organization_id = p_org
-      AND m.user_id = (SELECT auth.uid())
+      AND m.user_id = auth.uid()
       AND m.status = 'active'
   );
+END;
 $$;
 
 -- ============================================
@@ -791,12 +793,12 @@ ALTER TABLE vision_corrections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
--- 25. RLS POLICIES (via auth.is_member_of() helper)
+-- 25. RLS POLICIES (via public.is_member_of() helper)
 -- ============================================
 
 -- Organizations : user can see orgs they belong to
 CREATE POLICY "members read orgs" ON organizations FOR SELECT TO authenticated
-  USING (auth.is_member_of(id));
+  USING (public.is_member_of(id));
 
 -- Profiles : user reads own + members of same orgs
 CREATE POLICY "user reads own profile" ON profiles FOR SELECT TO authenticated
@@ -806,89 +808,89 @@ CREATE POLICY "user updates own profile" ON profiles FOR UPDATE TO authenticated
 
 -- Memberships : members read their memberships
 CREATE POLICY "members read own memberships" ON memberships FOR SELECT TO authenticated
-  USING (user_id = (SELECT auth.uid()) OR auth.is_member_of(organization_id));
+  USING (user_id = (SELECT auth.uid()) OR public.is_member_of(organization_id));
 
 -- Clients : members CRUD within their org
 CREATE POLICY "members read clients" ON clients FOR SELECT TO authenticated
-  USING (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id));
 CREATE POLICY "members write clients" ON clients FOR INSERT TO authenticated
-  WITH CHECK (auth.is_member_of(organization_id));
+  WITH CHECK (public.is_member_of(organization_id));
 CREATE POLICY "members update clients" ON clients FOR UPDATE TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Properties (idem)
 CREATE POLICY "members read properties" ON properties FOR SELECT TO authenticated
-  USING (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id));
 CREATE POLICY "members write properties" ON properties FOR INSERT TO authenticated
-  WITH CHECK (auth.is_member_of(organization_id));
+  WITH CHECK (public.is_member_of(organization_id));
 CREATE POLICY "members update properties" ON properties FOR UPDATE TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Missions
 CREATE POLICY "members read missions" ON missions FOR SELECT TO authenticated
-  USING (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id));
 CREATE POLICY "members write missions" ON missions FOR INSERT TO authenticated
-  WITH CHECK (auth.is_member_of(organization_id));
+  WITH CHECK (public.is_member_of(organization_id));
 CREATE POLICY "members update missions" ON missions FOR UPDATE TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Mission rooms
 CREATE POLICY "members crud mission_rooms" ON mission_rooms FOR ALL TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Equipment findings
 CREATE POLICY "members crud findings" ON equipment_findings FOR ALL TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Voice notes
 CREATE POLICY "members crud voice_notes" ON voice_notes FOR ALL TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Sketches
 CREATE POLICY "members crud sketches" ON sketches FOR ALL TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Photos
 CREATE POLICY "members crud photos" ON photos FOR ALL TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Owner documents (members CRUD + public via client_upload_token handled in Edge Function)
 CREATE POLICY "members read owner_docs" ON owner_documents FOR SELECT TO authenticated
-  USING (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id));
 CREATE POLICY "members write owner_docs" ON owner_documents FOR INSERT TO authenticated
-  WITH CHECK (auth.is_member_of(organization_id));
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Quotes
 CREATE POLICY "members crud quotes" ON quotes FOR ALL TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Invoices
 CREATE POLICY "members crud invoices" ON invoices FOR ALL TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Events (read-only client side, INSERTs via SECURITY DEFINER trigger)
 CREATE POLICY "members read events" ON events FOR SELECT TO authenticated
-  USING (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id));
 
 -- AI usage
 CREATE POLICY "members read ai_usage" ON ai_usage FOR SELECT TO authenticated
-  USING (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id));
 
 -- Support tickets : user reads own + members of same org
 CREATE POLICY "user reads own tickets" ON support_tickets FOR SELECT TO authenticated
-  USING (user_id = (SELECT auth.uid()) OR auth.is_member_of(organization_id));
+  USING (user_id = (SELECT auth.uid()) OR public.is_member_of(organization_id));
 CREATE POLICY "user creates own tickets" ON support_tickets FOR INSERT TO authenticated
-  WITH CHECK (user_id = (SELECT auth.uid()) AND auth.is_member_of(organization_id));
+  WITH CHECK (user_id = (SELECT auth.uid()) AND public.is_member_of(organization_id));
 
 CREATE POLICY "ticket owners read messages" ON support_messages FOR SELECT TO authenticated
   USING (ticket_id IN (SELECT id FROM support_tickets WHERE user_id = (SELECT auth.uid())));
@@ -897,12 +899,12 @@ CREATE POLICY "ticket owners write messages" ON support_messages FOR INSERT TO a
 
 -- Vision corrections (members add corrections within their org)
 CREATE POLICY "members crud vision_corrections" ON vision_corrections FOR ALL TO authenticated
-  USING (auth.is_member_of(organization_id))
-  WITH CHECK (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id))
+  WITH CHECK (public.is_member_of(organization_id));
 
 -- Jobs (members read their org's jobs)
 CREATE POLICY "members read jobs" ON jobs FOR SELECT TO authenticated
-  USING (auth.is_member_of(organization_id));
+  USING (public.is_member_of(organization_id));
 
 -- ============================================
 -- 26. REPLICA IDENTITY FULL (pour Supabase Realtime DELETE events complets)
