@@ -1,41 +1,28 @@
 import { LogOut } from 'lucide-react'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
+import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { logoutAction } from './actions'
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, email')
-    .eq('id', user.id)
-    .single()
-
-  const displayName = profile?.full_name ?? profile?.email ?? user.email ?? ''
+  const { profile } = await getCurrentUser()
+  const displayName = profile.full_name ?? profile.email
 
   return (
     <div className="min-h-dvh flex flex-col">
       <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
-          <Link href="/app/dashboard" className="text-base font-semibold tracking-tight">
-            KOVAS
+        <div className="px-4 md:px-6 h-14 flex items-center justify-between gap-4">
+          <Link href="/app/dashboard" className="flex items-center gap-2">
+            <div className="size-7 rounded-md bg-cta" aria-hidden />
+            <span className="text-base font-semibold tracking-tight">KOVAS</span>
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <span className="text-sm text-muted-foreground hidden sm:inline ml-2">
+            <span className="text-sm text-muted-foreground hidden lg:inline ml-2">
               {displayName}
             </span>
             <Avatar name={displayName} size="sm" />
@@ -47,7 +34,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="flex-1 mx-auto w-full max-w-6xl px-6 py-8">{children}</main>
+      <div className="flex-1 flex">
+        <AppSidebar />
+        <main className="flex-1 px-4 md:px-8 py-6 pb-20 md:pb-8 max-w-6xl">{children}</main>
+      </div>
+      <AppMobileNav />
     </div>
   )
 }

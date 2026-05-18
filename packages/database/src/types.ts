@@ -1,5 +1,5 @@
 // Auto-generated TypeScript types from Supabase schema
-// Generated: 2026-05-18T14:44:42.144Z
+// Generated: 2026-05-18T15:05:29.951Z
 // Source: db.jlizdkffwjdiokvmhcwg.supabase.co:5432 (public schema)
 // Do NOT edit manually. Regenerate via: pnpm db:gen-types
 
@@ -69,7 +69,22 @@ export type Database = {
           fallback_used?: boolean | null
           created_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'ai_usage_mission_id_fkey'
+            columns: ['mission_id']
+            isOneToOne: false
+            referencedRelation: 'missions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ai_usage_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       clients: {
         Row: {
@@ -138,7 +153,15 @@ export type Database = {
           updated_at?: string
           deleted_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'clients_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       equipment_findings: {
         Row: {
@@ -204,7 +227,57 @@ export type Database = {
           reviewed_at?: string | null
           created_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'fk_finding_photo'
+            columns: ['created_at']
+            isOneToOne: false
+            referencedRelation: 'photos'
+            referencedColumns: ['created_at']
+          },
+          {
+            foreignKeyName: 'fk_finding_photo'
+            columns: ['created_at']
+            isOneToOne: false
+            referencedRelation: 'photos'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'equipment_findings_mission_id_fkey'
+            columns: ['mission_id']
+            isOneToOne: false
+            referencedRelation: 'missions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'equipment_findings_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fk_finding_photo'
+            columns: ['photo_id']
+            isOneToOne: false
+            referencedRelation: 'photos'
+            referencedColumns: ['created_at']
+          },
+          {
+            foreignKeyName: 'fk_finding_photo'
+            columns: ['photo_id']
+            isOneToOne: false
+            referencedRelation: 'photos'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'equipment_findings_room_id_fkey'
+            columns: ['room_id']
+            isOneToOne: false
+            referencedRelation: 'mission_rooms'
+            referencedColumns: ['id']
+          },
+        ]
       }
       events: {
         Row: {
@@ -378,7 +451,36 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'invoices_client_id_fkey'
+            columns: ['client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'invoices_mission_id_fkey'
+            columns: ['mission_id']
+            isOneToOne: false
+            referencedRelation: 'missions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'invoices_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'invoices_quote_id_fkey'
+            columns: ['quote_id']
+            isOneToOne: false
+            referencedRelation: 'quotes'
+            referencedColumns: ['id']
+          },
+        ]
       }
       jobs: {
         Row: {
@@ -426,7 +528,15 @@ export type Database = {
           finished_at?: string | null
           created_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'jobs_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       memberships: {
         Row: {
@@ -459,7 +569,15 @@ export type Database = {
           status?: string
           created_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'memberships_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       mission_rooms: {
         Row: {
@@ -504,7 +622,22 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'mission_rooms_mission_id_fkey'
+            columns: ['mission_id']
+            isOneToOne: false
+            referencedRelation: 'missions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'mission_rooms_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       missions: {
         Row: {
@@ -606,7 +739,29 @@ export type Database = {
           updated_at?: string
           deleted_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'missions_client_id_fkey'
+            columns: ['client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'missions_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'missions_property_id_fkey'
+            columns: ['property_id']
+            isOneToOne: false
+            referencedRelation: 'properties'
+            referencedColumns: ['id']
+          },
+        ]
       }
       organizations: {
         Row: {
@@ -711,7 +866,15 @@ export type Database = {
           uploaded_at?: string | null
           reviewed_by_diag?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'owner_documents_mission_id_fkey'
+            columns: ['mission_id']
+            isOneToOne: false
+            referencedRelation: 'missions'
+            referencedColumns: ['id']
+          },
+        ]
       }
       photos: {
         Row: {
@@ -822,7 +985,15 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_default_org_id_fkey'
+            columns: ['default_org_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       properties: {
         Row: {
@@ -909,7 +1080,22 @@ export type Database = {
           updated_at?: string
           deleted_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'properties_client_id_fkey'
+            columns: ['client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'properties_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       quotes: {
         Row: {
@@ -975,7 +1161,29 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'quotes_client_id_fkey'
+            columns: ['client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'quotes_mission_id_fkey'
+            columns: ['mission_id']
+            isOneToOne: false
+            referencedRelation: 'missions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'quotes_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       reference_counters: {
         Row: {
@@ -1044,7 +1252,29 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'sketches_mission_id_fkey'
+            columns: ['mission_id']
+            isOneToOne: false
+            referencedRelation: 'missions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sketches_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sketches_room_id_fkey'
+            columns: ['room_id']
+            isOneToOne: false
+            referencedRelation: 'mission_rooms'
+            referencedColumns: ['id']
+          },
+        ]
       }
       support_messages: {
         Row: {
@@ -1071,7 +1301,15 @@ export type Database = {
           attachments?: Json | null
           created_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'support_messages_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'support_tickets'
+            referencedColumns: ['id']
+          },
+        ]
       }
       support_tickets: {
         Row: {
@@ -1122,7 +1360,15 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'support_tickets_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       vision_corrections: {
         Row: {
@@ -1239,11 +1485,47 @@ export type Database = {
           created_at?: string
           transcribed_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'voice_notes_mission_id_fkey'
+            columns: ['mission_id']
+            isOneToOne: false
+            referencedRelation: 'missions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'voice_notes_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'voice_notes_room_id_fkey'
+            columns: ['room_id']
+            isOneToOne: false
+            referencedRelation: 'mission_rooms'
+            referencedColumns: ['id']
+          },
+        ]
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      is_member_of: {
+        Args: {
+          p_org: string
+        }
+        Returns: boolean
+      }
+      next_reference: {
+        Args: {
+          p_org: string
+          p_kind: string
+        }
+        Returns: string
+      }
+    }
     Enums: {
       client_type: 'particulier' | 'agence' | 'notaire' | 'syndic' | 'entreprise' | 'collectivite'
       equipment_kind: 'chaudiere' | 'chauffe_eau' | 'radiateur' | 'pac' | 'climatisation' | 'fenetre' | 'isolation' | 'ventilation' | 'tableau_elec' | 'autre'
