@@ -3,15 +3,25 @@
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { getEmailValidationMessage, validateProEmail } from '@/lib/validation/email'
+import {
+  getSiretValidationMessage,
+  isFakeSiretAllowed,
+  validateSiret,
+} from '@/lib/validation/siret'
 import { createClient } from '@/lib/supabase/server'
+import type { Database } from '@kovas/database/types'
 
 const signupSchema = z.object({
   email: z.string().email('Email invalide'),
   password: z.string().min(8, '8 caractères minimum'),
   fullName: z.string().min(2, 'Nom complet requis').max(80),
+  siret: z.string().min(1, 'SIRET requis'),
 })
 
-export type SignupState = { error?: string; success?: boolean } | undefined
+export type SignupState =
+  | { error?: string; fieldErrors?: Partial<Record<keyof z.infer<typeof signupSchema>, string>> }
+  | undefined
 
 export async function signupAction(
   _prev: SignupState,
@@ -21,23 +31,69 @@ export async function signupAction(
     email: formData.get('email'),
     password: formData.get('password'),
     fullName: formData.get('fullName'),
+    siret: formData.get('siret'),
   })
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? 'Données invalides' }
+    return {
+      error: 'Données invalides',
+      fieldErrors: Object.fromEntries(
+        parsed.error.issues.map((i) => [i.path[0], i.message]),
+      ),
+    }
   }
 
-  // Phase 1 dev : signup via admin endpoint (service_role) avec email_confirm: true
-  // pour éviter de dépendre de la config SMTP Supabase (plafonnée à 4 mails/h sur le
-  // SMTP par défaut, et Resend custom pas encore configuré).
-  // V2 (avant beta publique) : switch vers supabase.auth.signUp() + Resend SMTP custom
-  // + email confirmation activé pour validation domaine pro.
-  const admin = createAdminClient(
+  // Protection 1 — Email pro obligatoire
+  const emailCheck = validateProEmail(parsed.data.email)
+  if (!emailCheck.valid) {
+    return {
+      fieldErrors: { email: getEmailValidationMessage(emailCheck.reason) },
+    }
+  }
+
+  // Protection 2 — Validation SIRET (Luhn, V1 sans INSEE)
+  const cleanedSiret = parsed.data.siret.replace(/\s/g, '')
+  if (!isFakeSiretAllowed()) {
+    const siretCheck = validateSiret(cleanedSiret)
+    if (!siretCheck.valid) {
+      return {
+        fieldErrors: { siret: getSiretValidationMessage(siretCheck.reason) },
+      }
+    }
+  }
+
+  const admin = createAdminClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
+  // Protection 3 — 1 SIRET = 1 essai à vie
+  const { data: existingTrial } = await admin
+    .from('cabinet_trials')
+    .select('id, converted_to_paid, blocked_reason')
+    .eq('siret', cleanedSiret)
+    .maybeSingle()
+
+  if (existingTrial) {
+    if (existingTrial.blocked_reason) {
+      return {
+        error:
+          'Votre cabinet a été suspendu suite à des comportements suspects. Contactez benjamin@kovas.fr.',
+      }
+    }
+    if (existingTrial.converted_to_paid) {
+      return {
+        error: 'Un compte payant existe déjà pour ce SIRET. Connectez-vous.',
+      }
+    }
+    return {
+      error:
+        'Votre cabinet a déjà bénéficié d\'un essai KOVAS. Choisissez un abonnement à partir de 29€/mois.',
+    }
+  }
+
+  // Création user (auto-confirm en V1 dev — cf. CLAUDE.md §6)
   const { data: createdUser, error: adminError } = await admin.auth.admin.createUser({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -47,12 +103,32 @@ export async function signupAction(
 
   if (adminError || !createdUser?.user) {
     if (adminError?.message?.includes('already')) {
-      return { error: 'Un compte existe déjà avec cet email.' }
+      return { fieldErrors: { email: 'Un compte existe déjà avec cet email.' } }
     }
     return { error: adminError?.message ?? 'Création du compte impossible.' }
   }
 
-  // Connexion immédiate via password (établit la session côté browser via cookies)
+  // Récupère l'organization auto-créée par le trigger handle_new_user()
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('default_org_id')
+    .eq('id', createdUser.user.id)
+    .single()
+
+  // Enregistre le trial dans cabinet_trials
+  const { error: trialError } = await admin.from('cabinet_trials').insert({
+    siret: cleanedSiret,
+    email: parsed.data.email,
+    user_id: createdUser.user.id,
+    organization_id: profile?.default_org_id ?? null,
+  })
+
+  if (trialError && !trialError.message.includes('duplicate')) {
+    // Non bloquant en V1 — log et continue
+    console.error('cabinet_trials insert failed:', trialError)
+  }
+
+  // Connexion immédiate
   const supabase = await createClient()
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,

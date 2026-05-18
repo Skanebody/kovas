@@ -1,5 +1,5 @@
 // Auto-generated TypeScript types from Supabase schema
-// Generated: 2026-05-18T15:05:29.951Z
+// Generated: 2026-05-18T15:23:34.966Z
 // Source: db.jlizdkffwjdiokvmhcwg.supabase.co:5432 (public schema)
 // Do NOT edit manually. Regenerate via: pnpm db:gen-types
 
@@ -17,6 +17,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      abuse_detection_logs: {
+        Row: {
+          id: string
+          organization_id: string | null
+          user_id: string | null
+          signal_type: string
+          severity: number
+          details: Json | null
+          ip_address: string | null
+          user_agent: string | null
+          detected_at: string
+          action_taken: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          user_id?: string | null
+          signal_type: string
+          severity: number
+          details?: Json | null
+          ip_address?: string | null
+          user_agent?: string | null
+          detected_at?: string
+          action_taken?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          user_id?: string | null
+          signal_type?: string
+          severity?: number
+          details?: Json | null
+          ip_address?: string | null
+          user_agent?: string | null
+          detected_at?: string
+          action_taken?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'abuse_detection_logs_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       ai_usage: {
         Row: {
           id: string
@@ -79,6 +126,53 @@ export type Database = {
           },
           {
             foreignKeyName: 'ai_usage_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      cabinet_trials: {
+        Row: {
+          id: string
+          siret: string
+          email: string
+          user_id: string | null
+          organization_id: string | null
+          trial_started_at: string
+          trial_ended_at: string | null
+          converted_to_paid: boolean
+          blocked_reason: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          siret: string
+          email: string
+          user_id?: string | null
+          organization_id?: string | null
+          trial_started_at?: string
+          trial_ended_at?: string | null
+          converted_to_paid?: boolean
+          blocked_reason?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          siret?: string
+          email?: string
+          user_id?: string | null
+          organization_id?: string | null
+          trial_started_at?: string
+          trial_ended_at?: string | null
+          converted_to_paid?: boolean
+          blocked_reason?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'cabinet_trials_organization_id_fkey'
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
