@@ -564,6 +564,62 @@ export async function toggleChecklistItemAction(
 // Workflow stepper (items du dossier, étapes guidées)
 // ============================================
 
+/**
+ * Toggle un item manuel de la matrice room×diag (vue "par pièce").
+ * Persisté dans dossier.metadata.roomTasksState
+ */
+export async function toggleRoomTaskAction(
+  dossierId: string,
+  itemId: string,
+  checked: boolean,
+) {
+  const { supabase, orgId } = await getCurrentUser()
+
+  const { data: current } = await supabase
+    .from('dossiers')
+    .select('metadata')
+    .eq('id', dossierId)
+    .eq('organization_id', orgId)
+    .single()
+
+  const meta = (current?.metadata as Record<string, unknown> | null) ?? {}
+  const roomTasks = (meta.roomTasksState as Record<string, boolean> | undefined) ?? {}
+  roomTasks[itemId] = checked
+  meta.roomTasksState = roomTasks
+
+  const { error } = await supabase
+    .from('dossiers')
+    .update({ metadata: meta as never })
+    .eq('id', dossierId)
+    .eq('organization_id', orgId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/dossiers/${dossierId}`)
+}
+
+/**
+ * Persiste la préférence de vue (par pièce / par diag) côté dossier.
+ */
+export async function setDossierViewPreferenceAction(dossierId: string, view: 'rooms' | 'diags') {
+  const { supabase, orgId } = await getCurrentUser()
+  const { data: current } = await supabase
+    .from('dossiers')
+    .select('metadata')
+    .eq('id', dossierId)
+    .eq('organization_id', orgId)
+    .single()
+  const meta = (current?.metadata as Record<string, unknown> | null) ?? {}
+  meta.viewPreference = view
+
+  const { error } = await supabase
+    .from('dossiers')
+    .update({ metadata: meta as never })
+    .eq('id', dossierId)
+    .eq('organization_id', orgId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/dossiers/${dossierId}`)
+}
+
 export async function toggleDossierStepItemAction(
   dossierId: string,
   itemId: string,

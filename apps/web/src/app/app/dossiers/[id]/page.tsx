@@ -28,8 +28,10 @@ import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
 import { RoomsList } from './rooms-list'
 import { ResumeButton } from './resume-button'
+import { RoomsMatrixView } from './rooms-matrix-view'
 import { ShareMissionButton } from './share-button'
 import { MissionStatusButton } from './status-button'
+import { ViewToggle } from './view-toggle'
 import { VoiceNotesList } from './voice-notes-list'
 import { VoiceRecorder } from './voice-recorder'
 import { WorkflowStepper } from './workflow-stepper'
@@ -125,6 +127,8 @@ export default async function DossierDetailPage({
 
   // Workflow stepper state
   const dossierMeta = (dossier.metadata as Record<string, unknown> | null) ?? {}
+  const viewPreference: 'rooms' | 'diags' =
+    (dossierMeta.viewPreference as 'rooms' | 'diags' | undefined) ?? 'diags'
   const workflowState =
     (dossierMeta.workflowSteps as Record<string, boolean> | undefined) ?? {}
 
@@ -341,12 +345,39 @@ export default async function DossierDetailPage({
         </CardContent>
       </Card>
 
-      {/* Missions (diagnostics) — chaque diag a son propre statut + check-list + export */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">Diagnostics ({missionsList.length})</h2>
-        <p className="text-sm text-muted-foreground">
-          Chaque diagnostic a son propre statut, sa check-list de complétude et son export dédié.
-        </p>
+      {/* Toggle Vue par pièce / Vue par diag */}
+      <div className="flex items-center justify-between gap-3 flex-wrap pt-2">
+        <div>
+          <h2 className="text-lg font-semibold">
+            {viewPreference === 'rooms' ? `Pièces (${rooms?.length ?? 0})` : `Diagnostics (${missionsList.length})`}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {viewPreference === 'rooms'
+              ? 'Vue terrain : pour chaque pièce, les tâches de tous les diagnostics applicables.'
+              : "Vue bureau : pour chaque diagnostic, sa check-list de complétude et son export."}
+          </p>
+        </div>
+        <ViewToggle dossierId={dossier.id} current={viewPreference} />
+      </div>
+
+      {viewPreference === 'rooms' ? (
+        <RoomsMatrixView
+          dossierId={dossier.id}
+          rooms={(rooms ?? []).map((r) => ({ id: r.id, name: r.name, room_type: r.room_type }))}
+          missionTypes={missionsList.map((m) => m.type as never)}
+          photos={(photos ?? []).map((p) => ({ id: p.id, room_id: p.room_id }))}
+          voiceNotes={(voiceNotes ?? []).map((v) => ({
+            id: v.id,
+            room_id: v.room_id,
+            transcript_structured: v.transcript_structured,
+          }))}
+          manualState={
+            (((dossier.metadata as Record<string, unknown> | null) ?? {}).roomTasksState as
+              | Record<string, boolean>
+              | undefined) ?? {}
+          }
+        />
+      ) : (
         <div className="space-y-4">
           {missionsList.map((m) => {
             const missionMeta = (m.metadata as Record<string, unknown> | null) ?? {}
@@ -403,7 +434,7 @@ export default async function DossierDetailPage({
             )
           })}
         </div>
-      </div>
+      )}
 
       {dossier.notes && (
         <Card>
