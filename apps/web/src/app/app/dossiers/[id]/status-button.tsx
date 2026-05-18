@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, ChevronDown, Loader2 } from 'lucide-react'
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -47,6 +47,13 @@ export function MissionStatusButton({
 }) {
   const [isPending, startTransition] = useTransition()
   const [optimistic, setOptimistic] = useState<Status>(currentStatus)
+
+  // Sync depuis le serveur quand la prop change (après revalidatePath
+  // déclenché par une autre action — ex. ResumeButton).
+  useEffect(() => {
+    setOptimistic(currentStatus)
+  }, [currentStatus])
+
   const transitions = NEXT_STATUSES[optimistic] ?? []
 
   function handleChange(next: Status) {

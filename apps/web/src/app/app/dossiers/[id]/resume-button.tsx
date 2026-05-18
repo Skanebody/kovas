@@ -1,25 +1,15 @@
 'use client'
 
-import { Loader2, Play } from 'lucide-react'
-import { useTransition } from 'react'
+import { CheckCircle2, Loader2, Play } from 'lucide-react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { resumeMissionAction } from './actions'
 
 interface ResumeButtonProps {
   missionId: string
-  /** Statut courant — détermine le label */
   status: string
 }
 
-/**
- * Diagnostics qui peuvent être "repris" :
- * - scheduled : pas encore commencé
- * - in_progress : en cours, juste re-focus
- * - to_review : à relire au bureau, on retourne dessus
- * - draft : pas planifié mais on peut le démarrer
- *
- * États finaux non reprenables : done, exported, archived, cancelled.
- */
 const RESUMABLE_STATES = ['draft', 'scheduled', 'in_progress', 'to_review']
 
 const STATUS_VERB: Record<string, string> = {
@@ -31,6 +21,14 @@ const STATUS_VERB: Record<string, string> = {
 
 export function ResumeButton({ missionId, status }: ResumeButtonProps) {
   const [isPending, startTransition] = useTransition()
+  const [justActed, setJustActed] = useState(false)
+  const justActedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (justActedTimer.current) clearTimeout(justActedTimer.current)
+    }
+  }, [])
 
   if (!RESUMABLE_STATES.includes(status)) return null
 
@@ -40,13 +38,18 @@ export function ResumeButton({ missionId, status }: ResumeButtonProps) {
     startTransition(async () => {
       try {
         await resumeMissionAction(missionId)
+        // Visual feedback : check vert pendant 1.2s
+        setJustActed(true)
+        if (justActedTimer.current) clearTimeout(justActedTimer.current)
+        justActedTimer.current = setTimeout(() => setJustActed(false), 1200)
+
         // Highlight la card concernée
         const el = document.getElementById(`mission-${missionId}`)
-        el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
         el?.animate(
           [
-            { backgroundColor: 'hsl(var(--cta) / 0.05)' },
-            { backgroundColor: 'transparent' },
+            { boxShadow: '0 0 0 2px hsl(var(--accent-green))', offset: 0 },
+            { boxShadow: '0 0 0 2px transparent', offset: 1 },
           ],
           { duration: 1500, easing: 'ease-out' },
         )
@@ -54,6 +57,15 @@ export function ResumeButton({ missionId, status }: ResumeButtonProps) {
         alert(err instanceof Error ? err.message : 'Erreur')
       }
     })
+  }
+
+  if (justActed) {
+    return (
+      <Button size="sm" variant="default" disabled>
+        <CheckCircle2 className="size-4 text-accent-green" />
+        Démarré
+      </Button>
+    )
   }
 
   return (
