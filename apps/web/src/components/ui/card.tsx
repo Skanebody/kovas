@@ -1,14 +1,20 @@
+import { cn } from '@/lib/utils'
 import { forwardRef } from 'react'
 import type { HTMLAttributes } from 'react'
-import { cn } from '@/lib/utils'
 
-export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  /** 'glass' (défaut) = blanc semi-transparent + blur ; 'accent' = navy plein */
+  variant?: 'glass' | 'accent'
+}
+
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant = 'glass', ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        // border-radius xl (24px) cf. CLAUDE.md §9.4
-        'rounded-xl border border-border bg-card text-foreground shadow-sm',
+        variant === 'glass' &&
+          'rounded-xl border border-cta/[0.08] bg-card/85 backdrop-blur-xl text-foreground shadow-glass',
+        variant === 'accent' && 'rounded-lg bg-card-accent text-cta-foreground shadow-accent',
         className,
       )}
       {...props}

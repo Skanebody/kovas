@@ -1,16 +1,16 @@
+import { cn } from '@/lib/utils'
 import { type VariantProps, cva } from 'class-variance-authority'
 import type { HTMLAttributes } from 'react'
-import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
   'inline-flex items-center rounded-pill border px-2.5 py-0.5 text-xs font-medium transition-colors',
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-foreground text-background',
-        outline: 'border-border text-foreground',
+        default: 'border-transparent bg-cta text-cta-foreground',
+        outline: 'border-cta/15 text-foreground',
         muted: 'border-transparent bg-muted text-muted-foreground',
-        // Accents délavés (cf. CLAUDE.md §9.3) — pills/badges seulement
+        // Accents vifs (cf. design-system.md) — pills/badges/indicators uniquement
         blue: 'border-transparent bg-accent-blue/15 text-accent-blue',
         green: 'border-transparent bg-accent-green/15 text-accent-green',
         red: 'border-transparent bg-accent-red/15 text-accent-red',

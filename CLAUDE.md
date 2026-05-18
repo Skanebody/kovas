@@ -314,43 +314,84 @@ D-U-N-S 281 515 446 **gardé** (gratuit, lifetime, débloquera Apple Dev enrollm
 
 ---
 
-## 9. Identité visuelle — Glassmorphism Premium Soft UI
+## 9. Identité visuelle — Glassmorphism Premium Soft UI (révision 2026-05-18)
+
+> **Authority** : ce document est la référence canonique du design system. Détails composants + tokens CSS dans [`docs/design-system.md`](docs/design-system.md).
+> Décision 2026-05-18 : passage de la palette monochrome noir → **navy KOVAS** + accents vifs sobres, inspiration "SugarCRM Customer Journeys" (Glassmorphism Premium Soft UI). Anciennes valeurs (noir + accents délavés) **abandonnées**.
 
 ### Palette light
 
-`#F4F4F5` fond / `#FFFFFF` cartes / `#0A0A0A` texte / `#404040` secondaire / `#737373` tertiaire / `#D4D4D8` bordures / `#0A0A0A` CTA / `#262626` hover CTA
+| Rôle | Valeur |
+|---|---|
+| Background page | dégradé `linear-gradient(135deg, #F5F7FA 0%, #EDF0F5 100%)` |
+| Card transparente | `rgba(255, 255, 255, 0.85)` + `backdrop-filter: blur(20px)` |
+| Card pleine (mise en avant) | `#0F1E3D` (navy) |
+| Navy KOVAS principal (CTA, titres) | `#0F1E3D` |
+| Navy hover | `#1A2F52` |
+| Texte body | `#1F2937` |
+| Texte secondaire | `#6B7280` |
+| Texte tertiaire / icônes | `#9CA3AF` |
+| Borders | `rgba(229, 231, 235, 0.5)` / `rgba(15, 30, 61, 0.08)` |
 
-### Palette dark
+### Palette dark (V1.5)
 
-`#0A0A0A` fond / `#171717` cartes / `#FAFAFA` texte / `#A1A1A9` secondaire / `#27272A` bordures / `#FFFFFF` CTA
+| Rôle | Valeur |
+|---|---|
+| Background page | `#0A0F1A` |
+| Card transparente | `rgba(255, 255, 255, 0.05)` + blur(20px) |
+| Card pleine | `#1E2A47` |
+| CTA | `#FFFFFF` sur fond `#0F1E3D` |
+| Titre | `#F9FAFB` |
+| Body | `#E5E7EB` |
+| Secondaire | `#9CA3AF` |
+| Borders | `rgba(255, 255, 255, 0.08)` |
 
-### Accents délavés (pills/badges seulement)
+### Accents (badges, indicateurs, status)
 
-- Bleu doux `#7B96C4` (info, mission planifiée)
-- Rouge doux `#C46969` (alertes, DPE F/G)
-- Vert doux `#8AB57B` (validations, DPE A-C)
-- Orange doux `#D4A574` (DPE D-E)
+| Couleur | Valeur light | Valeur dark | Usage |
+|---|---|---|---|
+| Bleu info | `#3B82F6` | `#60A5FA` | Mission planifiée, status info |
+| Rouge alerte | `#EF4444` | `#F87171` | DPE F/G, impayés, danger |
+| Orange attention | `#F59E0B` | `#FBBF24` | DPE D/E, en cours, à relire |
+| Vert validation | `#10B981` | `#34D399` | DPE A-C, exporté, payé |
 
 ### Typo : **Manrope** (Google Fonts gratuite)
 
-| Élément | Taille | Graisse |
-|---|---|---|
-| H1 | 32-40px | Bold 700 |
-| H2 | 24-28px | Semibold 600 |
-| H3 | 18-22px | Semibold 600 |
-| Body | 14-16px | Regular 400 |
-| Label | 12-13px | Medium 500 |
+| Élément | Taille | Graisse | Letter-spacing |
+|---|---|---|---|
+| H1 (page) | 36px | Extrabold 800 | -0.02em |
+| H2 (section) | 24px | Bold 700 | -0.02em |
+| H3 (sous-section) | 18px | Semibold 600 | 0 |
+| H4 (card title) | 16px | Semibold 600 | 0 |
+| Body large | 16px | Medium 500 | 0 |
+| Body | 14px | Regular 400 | 0 |
+| Small | 13px | Medium 500 | 0 |
+| Caption | 12px | Medium 500 | 0 |
+| Micro (badges) | 11px | Semibold 600 | 0.05em |
+
+Line-height : 1.2 titres, 1.5 body, 1.3 compact.
 
 ### Règles strictes (non négociables)
 
-- Border-radius cohérents (16-24px cartes, 12px boutons, 100px pills)
-- `backdrop-blur-md` + opacité 70-90% glassmorphism
-- Pas de gradients colorés vifs (sauf noir→gris ou blanc→transparent)
-- Pas de shadow-lg/2xl (max shadow-sm/md)
-- Pas de couleurs saturées en surface large
-- Bordures 1px max
-- Dark + Light obligatoires avec **auto système + override manuel** (next-themes web, useColorScheme mobile)
-- PDF générés toujours en clair (impression)
+- **Border-radius** : `20px` cards, `16px` cards intérieures, `100px` pills/CTA, `12px` icon-buttons et inputs
+- **Glassmorphism** : `backdrop-blur(20px)` + opacité 60-85% (cards) ou 70% (header sticky)
+- **Ombres** : ultra-douces, double-couche `0 4px 24px rgba(15, 30, 61, 0.04), 0 1px 2px rgba(15, 30, 61, 0.02)` (cards) ; **JAMAIS** `shadow-lg` / `shadow-2xl`
+- **CTA** : pillule navy `#0F1E3D`, padding `12px 32px`, font-weight 600, ombre `0 4px 16px rgba(15, 30, 61, 0.2)`, hover lift `-1px`
+- **Tabs nav** : pillule active navy fill, inactive `#6B7280` ghost
+- **Gradients** : autorisés UNIQUEMENT pour le fond page (`#F5F7FA → #EDF0F5`) et hero landing (navy → dark) ; JAMAIS multicolores
+- **Couleurs flashy/néon** : interdits sur surface large ; accents OK uniquement en pastille
+- **Bordures** : 1px max, opacité 8-50%
+- **Dark + Light** : auto système + override manuel (next-themes), V1.5
+- **PDF** : toujours en clair (impression)
+
+### Composants canoniques (cf. `docs/design-system.md` pour le détail)
+
+- `Button` : variants `default` (navy pillule CTA), `outline` (bordure navy 10%), `ghost`, `destructive` (rouge), `icon` (cercle 40px)
+- `Card` : glass standard (`bg-card/85 backdrop-blur-xl border-glass shadow-glass`) ou `accent` (navy pleine)
+- `Badge` : variants `blue` `red` `orange` `green` `muted` — accents vifs avec ombre subtile
+- `Tabs` : pillules navigation
+- `Donut` (V1.5) : Recharts, segments arrondis cornerRadius 10
+- `WorkflowStepper` : timeline linéaire (les connecteurs Bézier sont **rejetés V1**, on garde linéaire jusqu'à V2)
 
 ---
 

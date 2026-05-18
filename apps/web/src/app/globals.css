@@ -4,60 +4,128 @@
 
 /* ============================================
    KOVAS Design Tokens — Glassmorphism Premium Soft UI
-   Cf. CLAUDE.md §9
+   Référence : CLAUDE.md §9 + docs/design-system.md
+   Révision 2026-05-18 : palette monochrome → navy KOVAS + accents vifs
    ============================================ */
 
 @layer base {
   :root {
-    /* Light mode (par défaut) */
-    --background: 240 5% 96%; /* #F4F4F5 */
-    --card: 0 0% 100%; /* #FFFFFF */
-    --foreground: 0 0% 4%; /* #0A0A0A */
-    --muted: 240 5% 96%;
-    --muted-foreground: 0 0% 25%; /* #404040 */
-    --subtle: 240 5% 96%;
-    --subtle-foreground: 0 0% 45%; /* #737373 */
-    --border: 240 6% 84%; /* #D4D4D8 */
-    --cta: 0 0% 4%; /* #0A0A0A */
-    --cta-hover: 0 0% 15%; /* #262626 */
-    --cta-foreground: 0 0% 98%; /* #FAFAFA */
+    /* Surface — dégradé page */
+    --bg-gradient-from: 220 24% 97%; /* #F5F7FA */
+    --bg-gradient-to: 220 17% 94%; /* #EDF0F5 */
+    --background: 220 24% 97%; /* fallback flat */
 
-    /* Accents délavés (pills/badges seulement) */
-    --accent-blue: 217 27% 63%; /* #7B96C4 */
-    --accent-red: 0 38% 59%; /* #C46969 */
-    --accent-green: 100 30% 60%; /* #8AB57B */
-    --accent-orange: 28 49% 64%; /* #D4A574 */
+    /* Cards & glass */
+    --card: 0 0% 100%; /* #FFFFFF (utiliser avec /85 ou /60 selon usage) */
+    --card-accent: 218 60% 15%; /* #0F1E3D card mise en avant */
+
+    /* Navy KOVAS — primaire (CTA, titres) */
+    --cta: 218 60% 15%; /* #0F1E3D */
+    --cta-hover: 218 50% 21%; /* #1A2F52 */
+    --cta-foreground: 0 0% 100%;
+
+    /* Texte */
+    --foreground: 218 24% 11%; /* #1F2937 body */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%; /* #6B7280 secondaire */
+    --subtle: 220 14% 96%;
+    --subtle-foreground: 220 14% 65%; /* #9CA3AF tertiaire */
+
+    /* Borders */
+    --border: 220 13% 91%; /* #E5E7EB */
+
+    /* Accents vifs (badges/indicators uniquement, JAMAIS surface large) */
+    --accent-blue: 217 91% 60%; /* #3B82F6 */
+    --accent-red: 0 84% 60%; /* #EF4444 */
+    --accent-orange: 38 92% 50%; /* #F59E0B */
+    --accent-green: 158 64% 52%; /* #10B981 */
   }
 
   .dark {
-    --background: 0 0% 4%; /* #0A0A0A */
-    --card: 0 0% 9%; /* #171717 */
-    --foreground: 0 0% 98%; /* #FAFAFA */
-    --muted: 0 0% 9%;
-    --muted-foreground: 240 4% 65%; /* #A1A1A9 */
-    --subtle: 0 0% 9%;
-    --subtle-foreground: 240 4% 65%;
-    --border: 240 4% 16%; /* #27272A */
-    --cta: 0 0% 100%; /* #FFFFFF inversé */
-    --cta-hover: 0 0% 90%;
-    --cta-foreground: 0 0% 4%;
+    --bg-gradient-from: 220 50% 7%; /* #0A0F1A */
+    --bg-gradient-to: 220 40% 10%;
+    --background: 220 50% 7%;
+    --card: 0 0% 100%; /* utiliser avec /5 pour glass dark */
+    --card-accent: 220 30% 23%; /* #1E2A47 */
+    --cta: 0 0% 100%;
+    --cta-hover: 0 0% 88%;
+    --cta-foreground: 218 60% 15%;
+    --foreground: 220 14% 96%; /* #F9FAFB */
+    --muted: 220 30% 13%;
+    --muted-foreground: 220 9% 65%;
+    --subtle: 220 30% 13%;
+    --subtle-foreground: 220 9% 65%;
+    --border: 0 0% 100%; /* utiliser avec /8 */
+    --accent-blue: 213 94% 68%; /* #60A5FA */
+    --accent-red: 0 91% 71%; /* #F87171 */
+    --accent-orange: 43 96% 56%; /* #FBBF24 */
+    --accent-green: 158 64% 52%; /* #34D399 */
   }
 
   * {
     @apply border-border;
   }
+  html,
   body {
-    @apply bg-background text-foreground antialiased;
+    min-height: 100dvh;
+  }
+  body {
+    @apply text-foreground antialiased;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--bg-gradient-from)) 0%,
+      hsl(var(--bg-gradient-to)) 100%
+    );
+    background-attachment: fixed;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 }
 
-/* Glassmorphism utility — backdrop-blur + opacité 70-90% (cf. CLAUDE.md §9.4) */
+/* ============================================
+   Utilities — glassmorphism, shadows, gradient bg
+   ============================================ */
 @layer utilities {
+  /* Glass card standard (cf. design-system.md) */
   .glass {
-    @apply backdrop-blur-md bg-card/80 border border-border/50;
+    @apply bg-card/85 backdrop-blur-xl border;
+    border-color: hsl(var(--cta) / 0.08);
+    box-shadow:
+      0 4px 24px hsl(var(--cta) / 0.04),
+      0 1px 2px hsl(var(--cta) / 0.02);
   }
-  .glass-dark {
-    @apply backdrop-blur-md bg-card/90 border border-border/40;
+  .glass-hover {
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
+  }
+  .glass-hover:hover {
+    box-shadow:
+      0 8px 32px hsl(var(--cta) / 0.08),
+      0 2px 4px hsl(var(--cta) / 0.04);
+    transform: translateY(-2px);
+  }
+  /* Card mise en avant (navy pleine) */
+  .glass-accent {
+    background: hsl(var(--card-accent));
+    color: hsl(var(--cta-foreground));
+    border-radius: 16px;
+    box-shadow: 0 8px 24px hsl(var(--cta) / 0.15);
+  }
+  /* Header sticky glass */
+  .glass-header {
+    @apply bg-card/70 backdrop-blur-xl;
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
+  }
+  /* Sidebar glass */
+  .glass-sidebar {
+    @apply bg-card/60 backdrop-blur-xl;
+    border-right: 1px solid hsl(var(--border) / 0.5);
+  }
+  /* Shadow tokens spécifiques (les CTA/glass passent par Tailwind boxShadow extension) */
+  .shadow-badge-blue {
+    box-shadow: 0 2px 8px hsl(var(--accent-blue) / 0.3);
+  }
+  .shadow-badge-red {
+    box-shadow: 0 2px 8px hsl(var(--accent-red) / 0.3);
   }
 }
