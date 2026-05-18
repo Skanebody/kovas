@@ -304,6 +304,103 @@ export async function toggleDocumentReviewedAction(
   revalidatePath(`/app/dossiers/${dossierId}`)
 }
 
+/**
+ * Importe les valeurs extraites d'un document dans le bien / les missions du dossier.
+ * Le user choisit explicitement quelles valeurs importer (UI checkboxes).
+ * On n'écrase JAMAIS automatiquement — seules les colonnes nulles sont remplies.
+ */
+export async function importExtractedDataAction(
+  dossierId: string,
+  documentId: string,
+  selectedTargets: string[],
+) {
+  const { supabase, orgId } = await getCurrentUser()
+
+  // Récupère le doc + ses données extraites
+  const { data: doc } = await supabase
+    .from('owner_documents')
+    .select('extracted_data')
+    .eq('id', documentId)
+    .eq('organization_id', orgId)
+    .single()
+
+  if (!doc?.extracted_data) throw new Error('Aucune donnée extraite pour ce document')
+
+  const suggestions = (
+    (doc.extracted_data as Record<string, unknown>).suggested_imports as
+      | { target: string; value: string | number | null }[]
+      | undefined
+  ) ?? []
+
+  // Récupère le property_id depuis le dossier
+  const { data: dossier } = await supabase
+    .from('dossiers')
+    .select('property_id, missions(id, type)')
+    .eq('id', dossierId)
+    .eq('organization_id', orgId)
+    .single()
+
+  if (!dossier?.property_id) throw new Error('Dossier sans bien rattaché')
+
+  // Sépare property.* / mission.*
+  const propertyUpdates: Record<string, string | number | null> = {}
+  const missionUpdates: Record<string, string | number | null> = {}
+
+  for (const sug of suggestions) {
+    if (!selectedTargets.includes(sug.target)) continue
+    if (sug.value === null || sug.value === undefined) continue
+    if (sug.target.startsWith('property.')) {
+      const col = sug.target.slice('property.'.length)
+      propertyUpdates[col] = sug.value
+    } else if (sug.target.startsWith('mission.')) {
+      const col = sug.target.slice('mission.'.length)
+      missionUpdates[col] = sug.value
+    }
+  }
+
+  // Apply property updates (only on null columns, ne pas ecraser)
+  if (Object.keys(propertyUpdates).length > 0) {
+    const { data: current } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('id', dossier.property_id)
+      .single()
+
+    // Garde uniquement les champs encore nuls
+    const safePropUpdates: Record<string, string | number> = {}
+    for (const [col, val] of Object.entries(propertyUpdates)) {
+      if (current && (current as Record<string, unknown>)[col] == null) {
+        safePropUpdates[col] = val as string | number
+      }
+    }
+
+    if (Object.keys(safePropUpdates).length > 0) {
+      await supabase
+        .from('properties')
+        .update(safePropUpdates as never)
+        .eq('id', dossier.property_id)
+        .eq('organization_id', orgId)
+    }
+  }
+
+  // Apply mission updates : on cible les missions DPE du dossier
+  if (Object.keys(missionUpdates).length > 0) {
+    const dpeMissions = ((dossier.missions ?? []) as { id: string; type: string }[]).filter((m) =>
+      m.type.startsWith('dpe_') || m.type === 'copropriete',
+    )
+
+    for (const m of dpeMissions) {
+      await supabase
+        .from('missions')
+        .update(missionUpdates as never)
+        .eq('id', m.id)
+        .eq('organization_id', orgId)
+    }
+  }
+
+  revalidatePath(`/app/dossiers/${dossierId}`)
+}
+
 export async function deleteOwnerDocumentAction(
   dossierId: string,
   documentId: string,

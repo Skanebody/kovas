@@ -1,5 +1,5 @@
 // Auto-generated TypeScript types from Supabase schema
-// Generated: 2026-05-18T17:12:48.198Z
+// Generated: 2026-05-18T17:43:42.322Z
 // Source: db.jlizdkffwjdiokvmhcwg.supabase.co:5432 (public schema)
 // Do NOT edit manually. Regenerate via: pnpm db:gen-types
 
@@ -998,6 +998,11 @@ export type Database = {
           doc_kind: string | null
           uploaded_at: string | null
           reviewed_by_diag: boolean | null
+          extracted_data: Json | null
+          extraction_status: string | null
+          extracted_at: string | null
+          extraction_cost_eur: number | null
+          extraction_error: string | null
         }
         Insert: {
           id?: string
@@ -1010,6 +1015,11 @@ export type Database = {
           doc_kind?: string | null
           uploaded_at?: string | null
           reviewed_by_diag?: boolean | null
+          extracted_data?: Json | null
+          extraction_status?: string | null
+          extracted_at?: string | null
+          extraction_cost_eur?: number | null
+          extraction_error?: string | null
         }
         Update: {
           id?: string
@@ -1022,6 +1032,11 @@ export type Database = {
           doc_kind?: string | null
           uploaded_at?: string | null
           reviewed_by_diag?: boolean | null
+          extracted_data?: Json | null
+          extraction_status?: string | null
+          extracted_at?: string | null
+          extraction_cost_eur?: number | null
+          extraction_error?: string | null
         }
         Relationships: [
           {

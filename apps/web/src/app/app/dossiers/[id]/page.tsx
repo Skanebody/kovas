@@ -109,7 +109,9 @@ export default async function DossierDetailPage({
       .order('created_at', { ascending: false }),
     supabase
       .from('owner_documents')
-      .select('id, storage_path, original_name, size_bytes, mime_type, doc_kind, uploaded_at, reviewed_by_diag')
+      .select(
+        'id, storage_path, original_name, size_bytes, mime_type, doc_kind, uploaded_at, reviewed_by_diag, extracted_data, extraction_status, extraction_error',
+      )
       .eq('dossier_id', id)
       .eq('organization_id', orgId)
       .order('uploaded_at', { ascending: false }),
@@ -260,7 +262,14 @@ export default async function DossierDetailPage({
             token={dossier.client_upload_token ?? null}
             expiresAt={dossier.client_upload_expires_at ?? null}
           />
-          <OwnerDocumentsList dossierId={dossier.id} documents={ownerDocs ?? []} />
+          <OwnerDocumentsList
+            dossierId={dossier.id}
+            documents={(ownerDocs ?? []).map((d) => ({
+              ...d,
+              // Json → typed ExtractedData (cast safe car structure validée par Claude)
+              extracted_data: d.extracted_data as never,
+            }))}
+          />
         </CardContent>
       </Card>
 
