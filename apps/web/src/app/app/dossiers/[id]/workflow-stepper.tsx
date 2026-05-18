@@ -1,5 +1,9 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import type { WorkflowStepRun } from '@/lib/dossier-workflow'
+import { cn } from '@/lib/utils'
 import {
   ArrowRight,
   CheckCircle2,
@@ -9,10 +13,6 @@ import {
   ListChecks,
 } from 'lucide-react'
 import { useState, useTransition } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import type { WorkflowStepRun } from '@/lib/dossier-workflow'
-import { cn } from '@/lib/utils'
 import { toggleDossierStepItemAction } from './actions'
 
 interface WorkflowStepperProps {
@@ -25,7 +25,7 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
   // Default-open the first non-completed step
   const firstIncomplete = steps.findIndex((s) => !s.completed)
   const [openStep, setOpenStep] = useState<string>(
-    firstIncomplete >= 0 ? steps[firstIncomplete]!.id : steps[0]?.id ?? '',
+    firstIncomplete >= 0 ? steps[firstIncomplete]!.id : (steps[0]?.id ?? ''),
   )
   const [, startTransition] = useTransition()
 
@@ -50,7 +50,9 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
               <CheckCircle2 className="size-3 mr-1" /> Prêt à exporter
             </Badge>
           ) : (
-            <Badge variant="muted">{steps.filter((s) => s.completed).length}/{steps.length} étapes</Badge>
+            <Badge variant="muted">
+              {steps.filter((s) => s.completed).length}/{steps.length} étapes
+            </Badge>
           )}
         </div>
 
@@ -67,12 +69,16 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
                 key={step.id}
                 className={cn(
                   'rounded-lg border transition-colors',
-                  isOpen ? 'border-foreground/30 bg-muted/30' : 'border-border',
+                  isOpen && 'border-cta/30 bg-card/60',
+                  !isOpen && step.completed && 'border-accent-green/20 bg-accent-green/5',
+                  !isOpen && !step.completed && 'border-border',
                 )}
               >
                 <button
                   type="button"
                   onClick={() => setOpenStep(isOpen ? '' : step.id)}
+                  aria-expanded={isOpen}
+                  aria-controls={`step-${step.id}-body`}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left"
                 >
                   <span
@@ -86,13 +92,15 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
                     {step.completed ? <CheckCircle2 className="size-4" /> : idx + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-sm">{step.title}</span>
                       <Badge variant={step.completed ? 'green' : 'muted'} className="text-[10px]">
                         {percent}%
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
+                    {isOpen && (
+                      <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
+                    )}
                   </div>
                   {isOpen ? (
                     <ChevronDown className="size-4 text-muted-foreground" />
@@ -102,7 +110,7 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
                 </button>
 
                 {isOpen && (
-                  <div className="px-4 pb-4 space-y-1.5">
+                  <div id={`step-${step.id}-body`} className="px-4 pb-4 space-y-1.5">
                     {step.items.length === 0 ? (
                       <p className="text-xs text-muted-foreground italic">
                         Aucun item applicable pour les diagnostics inclus.
@@ -110,7 +118,8 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
                     ) : (
                       step.items.map((item) => {
                         const isDone =
-                          item.status === 'auto_ok' || (item.status === 'manual' && item.checked === true)
+                          item.status === 'auto_ok' ||
+                          (item.status === 'manual' && item.checked === true)
                         const isManual = item.status === 'manual'
                         return (
                           <button

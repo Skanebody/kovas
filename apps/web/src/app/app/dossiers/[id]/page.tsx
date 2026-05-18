@@ -1,38 +1,32 @@
-import {
-  ArrowLeft,
-  Building2,
-  Calendar,
-  Camera,
-  FileText,
-  Mic,
-  User,
-} from 'lucide-react'
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { DangerZone } from '@/components/danger-zone'
 import { MissionRealtime } from '@/components/mission-realtime'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CollapsibleSection } from '@/components/ui/collapsible-section'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { runChecklist } from '@/lib/checklists'
 import { runCoherenceChecks } from '@/lib/coherence-validation'
 import { runWorkflow } from '@/lib/dossier-workflow'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import type { VoiceParsedData } from '@/lib/voice-parser'
-import { softDeleteDossierAction } from '../actions'
+import { ArrowLeft, Calendar, Camera, FileText, MapPin, Mic, User } from 'lucide-react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { AddMissionButton } from './add-mission'
 import { ClientUploadLink } from './client-upload-link'
 import { CoherenceWarnings } from './coherence-warnings'
+import { DiagnosticStatusPills } from './diagnostic-status-pills'
 import { DossierInfoEdit } from './dossier-info-edit'
+import { DossierMoreMenu } from './dossier-more-menu'
+import { MissionCardCollapsible } from './mission-card-collapsible'
 import { MissionChecklist } from './mission-checklist'
 import { OwnerDocumentsList } from './owner-documents-list'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
 import { RemoveMissionButton } from './remove-mission-button'
-import { RoomsList } from './rooms-list'
 import { ResumeButton } from './resume-button'
+import { RoomsList } from './rooms-list'
 import { RoomsMatrixView } from './rooms-matrix-view'
 import { ShareMissionButton } from './share-button'
 import { MissionStatusButton } from './status-button'
@@ -61,6 +55,24 @@ const DOSSIER_STATUS_VARIANT: Record<string, 'muted' | 'blue' | 'green' | 'orang
   done: 'green',
   archived: 'muted',
   cancelled: 'red',
+}
+
+/**
+ * Compose l'adresse en évitant la duplication ville si BAN l'a déjà mise dans `address`.
+ */
+function compactAddress(
+  prop: {
+    address: string | null
+    postal_code: string | null
+    city: string | null
+  } | null,
+): string {
+  if (!prop) return ''
+  const a = prop.address ?? ''
+  const c = prop.city ?? ''
+  const cp = prop.postal_code ?? ''
+  if (c && a.toLowerCase().includes(c.toLowerCase())) return a
+  return [a, [cp, c].filter(Boolean).join(' ')].filter(Boolean).join(', ')
 }
 
 export default async function DossierDetailPage({
@@ -141,8 +153,7 @@ export default async function DossierDetailPage({
   const dossierMeta = (dossier.metadata as Record<string, unknown> | null) ?? {}
   const viewPreference: 'rooms' | 'diags' =
     (dossierMeta.viewPreference as 'rooms' | 'diags' | undefined) ?? 'diags'
-  const workflowState =
-    (dossierMeta.workflowSteps as Record<string, boolean> | undefined) ?? {}
+  const workflowState = (dossierMeta.workflowSteps as Record<string, boolean> | undefined) ?? {}
 
   const workflow = runWorkflow(
     {
@@ -183,8 +194,40 @@ export default async function DossierDetailPage({
     }),
   })
 
+  // Pré-calcul checklist par mission (utilisé pour les pills + cards)
+  const missionsWithChecklist = missionsList.map((m) => {
+    const missionMeta = (m.metadata as Record<string, unknown> | null) ?? {}
+    const manualChecklistState =
+      (missionMeta.checklist as Record<string, boolean> | undefined) ?? {}
+    const checklist = runChecklist(
+      m.type,
+      {
+        rooms: (rooms ?? []).map((r) => ({ id: r.id, room_type: r.room_type })),
+        photos: (photos ?? []).map((p) => ({ room_id: p.room_id })),
+        voiceNotes: (voiceNotes ?? []).map((v) => ({
+          room_id: v.room_id,
+          transcript_structured: v.transcript_structured,
+        })),
+        property: {
+          surface_total: prop?.surface_total ?? null,
+          year_built: prop?.year_built ?? null,
+          property_type: prop?.property_type ?? null,
+        },
+      },
+      manualChecklistState,
+    )
+    const percentage = Math.round(checklist.completion * 100)
+    const missingRequiredCount = checklist.items.filter((it) => {
+      const done = it.status === 'auto_ok' || it.manualChecked === true
+      return it.required && !done
+    }).length
+    return { mission: m, checklist, percentage, missingRequiredCount }
+  })
+
+  const fullAddress = compactAddress(prop)
+
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="max-w-4xl space-y-4">
       <MissionRealtime missionId={dossier.id} />
 
       <Button variant="ghost" size="sm" asChild>
@@ -193,30 +236,52 @@ export default async function DossierDetailPage({
         </Link>
       </Button>
 
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2">
+      {/* Header compact */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-1 min-w-0 flex-1">
           <p className="text-xs font-mono text-muted-foreground">{dossier.reference}</p>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Dossier de visite
-          </h1>
-          <div className="flex flex-wrap gap-2">
-            {missionsList.map((m) => (
-              <Badge key={m.id} variant="muted">
-                {MISSION_TYPE_LABELS[m.type] ?? m.type}
-              </Badge>
-            ))}
-          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Dossier de visite</h1>
         </div>
-        <Badge variant={DOSSIER_STATUS_VARIANT[dossier.status] ?? 'muted'}>
-          {DOSSIER_STATUS_LABELS[dossier.status] ?? dossier.status}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant={DOSSIER_STATUS_VARIANT[dossier.status] ?? 'muted'}>
+            {DOSSIER_STATUS_LABELS[dossier.status] ?? dossier.status}
+          </Badge>
+          <DossierMoreMenu dossierId={dossier.id} />
+        </div>
       </div>
 
-      {/* Détails bien + client */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3">
-          <CardTitle className="text-base">Détails de la visite</CardTitle>
+      {/* Pills statut diagnostics — scan visuel rapide */}
+      {missionsWithChecklist.length > 0 && (
+        <DiagnosticStatusPills
+          pills={missionsWithChecklist.map(({ mission, percentage }) => ({
+            missionId: mission.id,
+            type: mission.type,
+            label: MISSION_TYPE_LABELS[mission.type]?.split(' ')[0] ?? mission.type,
+            percentage,
+          }))}
+        />
+      )}
+
+      {/* Détails compactés — 1 à 2 lignes */}
+      <Card className="p-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <MapPin className="size-4 text-muted-foreground shrink-0" />
+          {prop ? (
+            <Link
+              href={`/app/properties/${dossier.property_id}`}
+              className="text-sm font-medium hover:underline truncate flex-1 min-w-0"
+            >
+              {fullAddress || 'Bien sans adresse'}
+            </Link>
+          ) : (
+            <span className="text-sm text-muted-foreground flex-1">Aucun bien rattaché</span>
+          )}
+          {prop?.year_built && (
+            <span className="text-xs text-muted-foreground">{prop.year_built}</span>
+          )}
+          {prop?.surface_total && (
+            <span className="text-xs text-muted-foreground">· {prop.surface_total} m²</span>
+          )}
           <DossierInfoEdit
             dossierId={dossier.id}
             scheduledAt={dossier.scheduled_at ?? null}
@@ -224,43 +289,28 @@ export default async function DossierDetailPage({
             clientId={dossier.client_id ?? null}
             clients={clientsList ?? []}
           />
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          {prop && (
-            <div className="flex items-start gap-2">
-              <Building2 className="size-4 mt-0.5 text-muted-foreground shrink-0" />
-              <Link href={`/app/properties/${dossier.property_id}`} className="hover:underline">
-                {prop.address}
-                {prop.city ? `, ${prop.postal_code ?? ''} ${prop.city}` : ''}
-                {prop.year_built && (
-                  <span className="text-muted-foreground"> · {prop.year_built}</span>
-                )}
-                {prop.surface_total && (
-                  <span className="text-muted-foreground"> · {prop.surface_total} m²</span>
-                )}
+        </div>
+        {(client || dossier.scheduled_at) && (
+          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
+            {client && dossier.client_id && (
+              <Link
+                href={`/app/clients/${dossier.client_id}`}
+                className="flex items-center gap-1 hover:text-foreground transition-colors"
+              >
+                <User className="size-3" /> {client.display_name}
               </Link>
-            </div>
-          )}
-          {client && dossier.client_id && (
-            <div className="flex items-start gap-2">
-              <User className="size-4 mt-0.5 text-muted-foreground shrink-0" />
-              <Link href={`/app/clients/${dossier.client_id}`} className="hover:underline">
-                {client.display_name}
-              </Link>
-            </div>
-          )}
-          {dossier.scheduled_at && (
-            <div className="flex items-start gap-2">
-              <Calendar className="size-4 mt-0.5 text-muted-foreground shrink-0" />
-              <span>
+            )}
+            {dossier.scheduled_at && (
+              <span className="flex items-center gap-1">
+                <Calendar className="size-3" />
                 {new Date(dossier.scheduled_at).toLocaleString('fr-FR', {
-                  dateStyle: 'full',
+                  dateStyle: 'long',
                   timeStyle: 'short',
                 })}
               </span>
-            </div>
-          )}
-        </CardContent>
+            )}
+          </div>
+        )}
       </Card>
 
       {/* WORKFLOW STEPPER — la pièce maîtresse */}
@@ -272,14 +322,17 @@ export default async function DossierDetailPage({
 
       <CoherenceWarnings warnings={coherenceWarnings} />
 
-      {/* Documents propriétaire */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="size-4" /> Documents propriétaire ({ownerDocs?.length ?? 0})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      {/* Documents propriétaire — collapsible */}
+      <CollapsibleSection
+        storageKey={`kovas_dossier_${dossier.id}_owner_docs`}
+        title={
+          <>
+            <FileText className="size-4" /> Documents propriétaire
+          </>
+        }
+        meta={`(${ownerDocs?.length ?? 0})`}
+      >
+        <div className="space-y-6">
           <ClientUploadLink
             dossierId={dossier.id}
             token={dossier.client_upload_token ?? null}
@@ -289,12 +342,11 @@ export default async function DossierDetailPage({
             dossierId={dossier.id}
             documents={(ownerDocs ?? []).map((d) => ({
               ...d,
-              // Json → typed ExtractedData (cast safe car structure validée par Claude)
               extracted_data: d.extracted_data as never,
             }))}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
       {/* Pièces */}
       <Card>
@@ -312,7 +364,6 @@ export default async function DossierDetailPage({
         </CardHeader>
         <CardContent className="space-y-6">
           {(() => {
-            // Compteurs photos par pièce + index pièce (pour nommage)
             const photoCountsByRoom: Record<string, number> = {}
             for (const p of photos ?? []) {
               if (p.room_id) photoCountsByRoom[p.room_id] = (photoCountsByRoom[p.room_id] ?? 0) + 1
@@ -385,12 +436,14 @@ export default async function DossierDetailPage({
       <div className="flex items-center justify-between gap-3 flex-wrap pt-2">
         <div>
           <h2 className="text-lg font-semibold">
-            {viewPreference === 'rooms' ? `Pièces (${rooms?.length ?? 0})` : `Diagnostics (${missionsList.length})`}
+            {viewPreference === 'rooms'
+              ? `Pièces (${rooms?.length ?? 0})`
+              : `Diagnostics (${missionsList.length})`}
           </h2>
           <p className="text-sm text-muted-foreground">
             {viewPreference === 'rooms'
               ? 'Vue terrain : pour chaque pièce, les tâches de tous les diagnostics applicables.'
-              : "Vue bureau : pour chaque diagnostic, sa check-list de complétude et son export."}
+              : 'Vue bureau : pour chaque diagnostic, sa check-list de complétude et son export.'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -422,65 +475,41 @@ export default async function DossierDetailPage({
           }
         />
       ) : (
-        <div className="space-y-4">
-          {missionsList.map((m) => {
-            const missionMeta = (m.metadata as Record<string, unknown> | null) ?? {}
-            const manualChecklistState =
-              (missionMeta.checklist as Record<string, boolean> | undefined) ?? {}
-            const checklist = runChecklist(
-              m.type,
-              {
-                rooms: (rooms ?? []).map((r) => ({ id: r.id, room_type: r.room_type })),
-                photos: (photos ?? []).map((p) => ({ room_id: p.room_id })),
-                voiceNotes: (voiceNotes ?? []).map((v) => ({
-                  room_id: v.room_id,
-                  transcript_structured: v.transcript_structured,
-                })),
-                property: {
-                  surface_total: prop?.surface_total ?? null,
-                  year_built: prop?.year_built ?? null,
-                  property_type: prop?.property_type ?? null,
-                },
-              },
-              manualChecklistState,
-            )
-
-            return (
-              <Card key={m.id} id={`mission-${m.id}`} className="scroll-mt-20">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div className="space-y-1">
-                      <CardTitle className="text-base">
-                        {MISSION_TYPE_LABELS[m.type] ?? m.type}
-                      </CardTitle>
-                      <p className="text-xs font-mono text-muted-foreground">{m.reference}</p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <ResumeButton missionId={m.id} status={m.status} />
-                      <MissionStatusButton missionId={m.id} currentStatus={m.status as never} />
-                      <ShareMissionButton
-                        missionId={m.id}
-                        missionReference={m.reference}
-                        clientEmail={client?.email ?? null}
-                      />
-                      <RemoveMissionButton
-                        missionId={m.id}
-                        missionLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <MissionChecklist
-                    missionId={m.id}
-                    items={checklist.items}
-                    completion={checklist.completion}
-                    requiredOk={checklist.requiredOk}
-                  />
-                </CardContent>
-              </Card>
-            )
-          })}
+        <div className="space-y-3">
+          {missionsWithChecklist.map(
+            ({ mission: m, checklist, percentage, missingRequiredCount }) => (
+              <MissionCardCollapsible
+                key={m.id}
+                missionId={m.id}
+                typeLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
+                reference={m.reference}
+                percentage={percentage}
+                missingRequiredCount={missingRequiredCount}
+                headerActions={
+                  <>
+                    <ResumeButton missionId={m.id} status={m.status} />
+                    <MissionStatusButton missionId={m.id} currentStatus={m.status as never} />
+                    <ShareMissionButton
+                      missionId={m.id}
+                      missionReference={m.reference}
+                      clientEmail={client?.email ?? null}
+                    />
+                    <RemoveMissionButton
+                      missionId={m.id}
+                      missionLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
+                    />
+                  </>
+                }
+              >
+                <MissionChecklist
+                  missionId={m.id}
+                  items={checklist.items}
+                  completion={checklist.completion}
+                  requiredOk={checklist.requiredOk}
+                />
+              </MissionCardCollapsible>
+            ),
+          )}
         </div>
       )}
 
@@ -492,11 +521,6 @@ export default async function DossierDetailPage({
           <CardContent className="text-sm whitespace-pre-wrap">{dossier.notes}</CardContent>
         </Card>
       )}
-
-      <DangerZone
-        entityLabel="dossier"
-        onDelete={softDeleteDossierAction.bind(null, dossier.id)}
-      />
     </div>
   )
 }

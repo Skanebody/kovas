@@ -1,0 +1,126 @@
+'use client'
+
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { toast } from '@/components/ui/toaster'
+import { Loader2, MoreVertical, Trash2 } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { softDeleteDossierAction } from '../actions'
+
+interface DossierMoreMenuProps {
+  dossierId: string
+}
+
+/**
+ * Menu Plus (⋮) en haut à droite du dossier.
+ * Pour V1 : seul Supprimer (soft-delete) est disponible. Dupliquer/Archiver/
+ * Exporter dossier seront ajoutés quand les server actions existeront.
+ */
+export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [typed, setTyped] = useState('')
+  const [pending, startTransition] = useTransition()
+
+  function handleDelete() {
+    if (typed.trim().toLowerCase() !== 'supprimer') {
+      toast.error('Tapez "supprimer" pour confirmer')
+      return
+    }
+    startTransition(async () => {
+      try {
+        await softDeleteDossierAction(dossierId)
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : 'Erreur suppression')
+      }
+    })
+  }
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" aria-label="Plus d'actions">
+            <MoreVertical className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem disabled className="text-muted-foreground">
+            Dupliquer le dossier (bientôt)
+          </DropdownMenuItem>
+          <DropdownMenuItem disabled className="text-muted-foreground">
+            Archiver (bientôt)
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => setConfirmOpen(true)}
+            className="text-accent-red focus:text-accent-red"
+          >
+            <Trash2 className="size-4" /> Supprimer le dossier
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {confirmOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirmer la suppression"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={() => !pending && setConfirmOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm glass rounded-xl p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-2">
+              <h3 className="text-base font-semibold">Supprimer ce dossier ?</h3>
+              <p className="text-sm text-muted-foreground">
+                Le dossier sera invisible (soft-delete). Les données restent en base 30 jours puis
+                sont purgées. Tapez{' '}
+                <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">supprimer</code>{' '}
+                pour confirmer.
+              </p>
+            </div>
+            <input
+              type="text"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              className="flex h-9 w-full rounded-md border border-cta/10 bg-card/80 px-3 text-sm"
+              placeholder="supprimer"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfirmOpen(false)}
+                disabled={pending}
+              >
+                Annuler
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDelete}
+                disabled={pending || typed.trim().toLowerCase() !== 'supprimer'}
+              >
+                {pending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Trash2 className="size-4" />
+                )}
+                Supprimer
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
