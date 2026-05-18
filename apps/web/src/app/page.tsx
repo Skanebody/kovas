@@ -1,83 +1,319 @@
+import {
+  ArrowRight,
+  Camera,
+  CheckCircle2,
+  FileText,
+  Mic,
+  Share2,
+  ShieldCheck,
+  Zap,
+} from 'lucide-react'
 import Link from 'next/link'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 /**
  * KOVAS — Landing page marketing (kovas.fr/)
- * À enrichir Sprint MVP J2 avec composants Glassmorphism Premium Soft UI.
+ * Avatar client : diagnostiqueur 43 ans, ex-cadre. Ton SOBRE PROFESSIONNEL.
+ * Cf. docs/avatar-client.md
  */
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-background">
-      <header className="container mx-auto px-4 py-6">
-        <nav className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="size-8 rounded-md bg-cta" aria-hidden />
-            <span className="text-xl font-semibold tracking-tight">KOVAS</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition"
-            >
-              Se connecter
-            </Link>
-            <Link
-              href="/signup"
-              className="rounded-md bg-cta px-4 py-2 text-sm font-medium text-cta-foreground hover:bg-cta-hover transition"
-            >
-              Essai gratuit 14j
-            </Link>
-          </div>
+    <div className="min-h-dvh flex flex-col bg-background">
+      <SiteHeader />
+      <main className="flex-1">
+        <Hero />
+        <Stats />
+        <Features />
+        <HowItWorks />
+        <PricingTeaser />
+        <FinalCTA />
+      </main>
+      <SiteFooter />
+    </div>
+  )
+}
+
+function SiteHeader() {
+  return (
+    <header className="sticky top-0 z-50 border-b border-border bg-card/70 backdrop-blur-md">
+      <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="size-7 rounded-md bg-cta" aria-hidden />
+          <span className="text-base font-semibold tracking-tight">KOVAS</span>
+        </Link>
+        <nav className="hidden sm:flex items-center gap-6 text-sm">
+          <Link href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">
+            Fonctionnalités
+          </Link>
+          <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+            Tarifs
+          </Link>
+          <Link
+            href="/#faq"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            FAQ
+          </Link>
         </nav>
-      </header>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/login">Se connecter</Link>
+          </Button>
+          <Button size="sm" asChild>
+            <Link href="/signup">Essai 14j</Link>
+          </Button>
+        </div>
+      </div>
+    </header>
+  )
+}
 
-      <section className="container mx-auto px-4 py-20 md:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-            L'app iPad qui transforme 3h de DPE en 30 minutes.
-          </h1>
-          <p className="mt-6 text-lg text-muted-foreground sm:text-xl">
-            KOVAS est l'app moderne pour les 13 000 diagnostiqueurs immobiliers français.
-            <br />
-            Saisie vocale, photos, exports universels vers votre logiciel actuel.
-          </p>
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/signup"
-              className="rounded-md bg-cta px-6 py-3 text-base font-medium text-cta-foreground hover:bg-cta-hover transition"
-            >
-              Essayer 14 jours gratuitement
+function Hero() {
+  return (
+    <section className="px-6 py-20 sm:py-28 md:py-32">
+      <div className="mx-auto max-w-3xl text-center space-y-8">
+        <Badge variant="outline" className="mx-auto">
+          Pour les diagnostiqueurs immobiliers indépendants
+        </Badge>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+          3 heures de DPE.
+          <br />
+          <span className="text-muted-foreground">30 minutes avec KOVAS.</span>
+        </h1>
+        <p className="text-lg text-muted-foreground sm:text-xl max-w-2xl mx-auto">
+          Saisie vocale terrain, photos géolocalisées, exports universels. Compagnon de votre
+          logiciel actuel — Liciel, AnalysImmo ou autre.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <Button size="lg" asChild>
+            <Link href="/signup">
+              Commencer mon essai 14 jours <ArrowRight className="size-4" />
             </Link>
-            <Link
-              href="/pourquoi-kovas"
-              className="text-base font-medium text-muted-foreground hover:text-foreground transition"
-            >
-              Pourquoi KOVAS →
-            </Link>
+          </Button>
+          <Button size="lg" variant="ghost" asChild>
+            <Link href="/#how-it-works">Voir comment ça marche</Link>
+          </Button>
+        </div>
+        <p className="text-sm text-subtle-foreground">
+          Sans carte bancaire · 30 missions incluses · 8 diagnostics couverts
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function Stats() {
+  const stats = [
+    { value: '1h30', label: 'gagnée par mission DPE typique' },
+    { value: '92%', label: 'des diagnostics standards français couverts' },
+    { value: '< 30s', label: 'pour partager vers votre logiciel principal' },
+  ]
+  return (
+    <section className="px-6 py-12 border-y border-border bg-muted/30">
+      <div className="mx-auto max-w-5xl grid grid-cols-1 sm:grid-cols-3 gap-8">
+        {stats.map((s) => (
+          <div key={s.label} className="text-center space-y-1">
+            <div className="text-3xl sm:text-4xl font-bold tracking-tight">{s.value}</div>
+            <div className="text-sm text-muted-foreground">{s.label}</div>
           </div>
-          <p className="mt-4 text-sm text-subtle-foreground">
-            Sans carte bancaire · 8 diagnostics couverts · Exports universels
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function Features() {
+  const features = [
+    {
+      icon: Mic,
+      title: 'Saisie vocale terrain',
+      description:
+        'Décrivez l\'état d\'une pièce à voix haute. KOVAS structure les données automatiquement (Whisper + IA hybride à 0,01€/mission).',
+    },
+    {
+      icon: Camera,
+      title: 'Photos géolocalisées',
+      description:
+        'Capturez équipements, défauts, étiquettes énergétiques. Géolocalisation EXIF + annotations basiques intégrées.',
+    },
+    {
+      icon: Share2,
+      title: 'Bouton « Partager »',
+      description:
+        '3 modes vers votre logiciel principal : email, Google Drive auto-sync, téléchargement direct. 30 secondes au lieu d\'1h30 de re-saisie.',
+    },
+    {
+      icon: FileText,
+      title: 'Exports universels',
+      description:
+        'PDF, Word, CSV, JSON, ZIP Liciel. Aucune dépendance à un éditeur unique — vos données sont à vous.',
+    },
+    {
+      icon: CheckCircle2,
+      title: 'Validation cohérence',
+      description:
+        'Règles métier intégrées. KOVAS détecte les incohérences avant export (« Surface 100m² + chaudière 5kW = à vérifier »).',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'RGPD & hébergement EU',
+      description:
+        'Supabase Paris (eu-west-3), Vercel Europe, chiffrement bout-en-bout. Conformité dès le démarrage.',
+    },
+  ]
+
+  return (
+    <section id="features" className="px-6 py-20 sm:py-28">
+      <div className="mx-auto max-w-6xl space-y-12">
+        <div className="text-center space-y-3 max-w-2xl mx-auto">
+          <Badge variant="muted">10 fonctionnalités cœur</Badge>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            Le terrain plus rapide. Le retour bureau quasi inutile.
+          </h2>
+          <p className="text-muted-foreground">
+            KOVAS ne remplace pas Liciel en Phase 1. Il le complète, élimine la friction terrain et
+            vous fait gagner 1h30 par mission.
           </p>
         </div>
-      </section>
-
-      <footer className="container mx-auto px-4 py-12 border-t border-border">
-        <div className="flex flex-col items-center gap-4 text-sm text-subtle-foreground md:flex-row md:justify-between">
-          <p>
-            © 2026 SASU Nexus 1993 · 66 Av Champs Elysées, 75008 Paris · SIREN 982 786 154
-          </p>
-          <div className="flex gap-6">
-            <Link href="/mentions-legales" className="hover:text-foreground transition">
-              Mentions légales
-            </Link>
-            <Link href="/cgu" className="hover:text-foreground transition">
-              CGU
-            </Link>
-            <Link href="/confidentialite" className="hover:text-foreground transition">
-              Confidentialité
-            </Link>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {features.map((f) => (
+            <Card key={f.title}>
+              <CardHeader>
+                <div className="size-9 rounded-md bg-muted flex items-center justify-center mb-2">
+                  <f.icon className="size-4" />
+                </div>
+                <CardTitle className="text-base">{f.title}</CardTitle>
+                <CardDescription>{f.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
-      </footer>
-    </main>
+      </div>
+    </section>
+  )
+}
+
+function HowItWorks() {
+  const steps = [
+    {
+      n: '1',
+      title: 'Sur place',
+      description:
+        'Vous démarrez une mission depuis votre iPad ou iPhone. Saisie vocale par pièce, photos automatiquement géolocalisées, templates T2/T3/T4 pré-remplis.',
+    },
+    {
+      n: '2',
+      title: 'Validation',
+      description:
+        'KOVAS détecte les incohérences et incomplétudes. « Tu n\'as pas saisi la VMC, c\'est volontaire ? » Avant export, pas après.',
+    },
+    {
+      n: '3',
+      title: 'Export & partage',
+      description:
+        'Un bouton, trois modes : email vers vous-même, sync Google Drive automatique, téléchargement direct. Import dans Liciel en 30 secondes.',
+    },
+  ]
+  return (
+    <section id="how-it-works" className="px-6 py-20 sm:py-28 bg-muted/30 border-y border-border">
+      <div className="mx-auto max-w-5xl space-y-12">
+        <div className="text-center space-y-3 max-w-xl mx-auto">
+          <Badge variant="muted">Workflow</Badge>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            De la visite au logiciel principal. Sans re-saisie.
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {steps.map((s) => (
+            <div key={s.n} className="space-y-3">
+              <div className="size-9 rounded-full bg-cta text-cta-foreground flex items-center justify-center text-sm font-semibold">
+                {s.n}
+              </div>
+              <h3 className="text-lg font-semibold">{s.title}</h3>
+              <p className="text-sm text-muted-foreground">{s.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PricingTeaser() {
+  return (
+    <section className="px-6 py-20 sm:py-28">
+      <div className="mx-auto max-w-3xl text-center space-y-8">
+        <div className="space-y-3">
+          <Badge variant="muted">Tarification</Badge>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            À partir de 29€/mois. Sans engagement.
+          </h2>
+          <p className="text-muted-foreground">
+            Découverte (20 missions), Standard (60 missions, recommandé), Volume (150 missions).
+            Surplus à l'usage si vous dépassez, plafond mensuel auto-protecteur activable.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Button size="lg" variant="outline" asChild>
+            <Link href="/pricing">
+              Voir les 3 tiers <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+          <Button size="lg" asChild>
+            <Link href="/signup">Commencer l'essai</Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function FinalCTA() {
+  return (
+    <section className="px-6 py-20 sm:py-28 bg-muted/30 border-t border-border">
+      <div className="mx-auto max-w-2xl text-center space-y-6">
+        <Zap className="size-10 mx-auto" />
+        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          Prêt à gagner 1h30 par mission ?
+        </h2>
+        <p className="text-muted-foreground">
+          Essai gratuit 14 jours, sans carte bancaire. 30 missions complètes pour vous faire votre
+          propre opinion.
+        </p>
+        <Button size="lg" asChild>
+          <Link href="/signup">
+            Commencer mon essai <ArrowRight className="size-4" />
+          </Link>
+        </Button>
+      </div>
+    </section>
+  )
+}
+
+function SiteFooter() {
+  return (
+    <footer className="px-6 py-10 border-t border-border">
+      <div className="mx-auto max-w-6xl flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-sm text-subtle-foreground">
+        <p>
+          © 2026 SASU Nexus 1993 · 66 Av Champs Elysées, 75008 Paris · SIREN 982 786 154
+        </p>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <Link href="/mentions-legales" className="hover:text-foreground transition-colors">
+            Mentions légales
+          </Link>
+          <Link href="/cgu" className="hover:text-foreground transition-colors">
+            CGU
+          </Link>
+          <Link href="/confidentialite" className="hover:text-foreground transition-colors">
+            Confidentialité
+          </Link>
+          <Link href="/contact" className="hover:text-foreground transition-colors">
+            Contact
+          </Link>
+        </div>
+      </div>
+    </footer>
   )
 }

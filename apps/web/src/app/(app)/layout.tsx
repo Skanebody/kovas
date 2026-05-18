@@ -2,6 +2,8 @@ import { LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
 import { logoutAction } from './actions'
@@ -31,12 +33,15 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           <Link href="/app/dashboard" className="text-base font-semibold tracking-tight">
             KOVAS
           </Link>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground hidden sm:inline">{displayName}</span>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <span className="text-sm text-muted-foreground hidden sm:inline ml-2">
+              {displayName}
+            </span>
+            <Avatar name={displayName} size="sm" />
             <form action={logoutAction}>
-              <Button variant="ghost" size="sm" type="submit" aria-label="Se déconnecter">
+              <Button variant="ghost" size="icon" type="submit" aria-label="Se déconnecter">
                 <LogOut className="size-4" />
-                <span className="hidden sm:inline">Déconnexion</span>
               </Button>
             </form>
           </div>
