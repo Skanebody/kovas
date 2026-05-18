@@ -57,8 +57,8 @@ importers:
         specifier: ^9.0.11
         version: 9.5.11(next@15.5.18(@opentelemetry/api@1.9.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(typescript@5.9.3)
       '@supabase/ssr':
-        specifier: ^0.5.2
-        version: 0.5.2(@supabase/supabase-js@2.106.0)
+        specifier: ^0.10.3
+        version: 0.10.3(@supabase/supabase-js@2.106.0)
       '@supabase/supabase-js':
         specifier: ^2.46.1
         version: 2.106.0
@@ -1038,11 +1038,6 @@ packages:
     peerDependencies:
       '@supabase/supabase-js': ^2.105.3
 
-  '@supabase/ssr@0.5.2':
-    resolution: {integrity: sha512-n3plRhr2Bs8Xun1o4S3k1CDv17iH5QY9YcoEvXX3bxV1/5XSasA0mNXYycFmADIdtdE6BG9MRjP5CGIs8qxC8A==}
-    peerDependencies:
-      '@supabase/supabase-js': ^2.43.4
-
   '@supabase/storage-js@2.106.0':
     resolution: {integrity: sha512-BHc3nIjD3zfdDxBenphXrLJSoQ+qwo24VD96cVzmjBFbQVk5krvwRNUXrA5ozPplA3Vhlst2d/hy9R9ViqH2lg==}
     engines: {node: '>=20.0.0'}
@@ -1070,9 +1065,6 @@ packages:
     resolution: {integrity: sha512-FLaZf2RCrA/Zgp4aiu5tG3TyasTRO7aZ99skxQpr3Hg/zXOhu6yq5FZCYQ/tRaJtM9ylnoK8tFK7PolXQadv6Q==}
     peerDependencies:
       react: ^18 || ^19
-
-  '@types/cookie@0.6.0':
-    resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
 
   '@types/node-fetch@2.6.13':
     resolution: {integrity: sha512-QGpRVpzSaUs30JBSGPjOg4Uveu384erbHBoT1zeONvyCfwQxIkUshLAOqN/k9EjGviPRmWTTe6aH2qySWKTVSw==}
@@ -1193,10 +1185,6 @@ packages:
   common-tags@1.8.2:
     resolution: {integrity: sha512-gk/Z852D2Wtb//0I+kRFNKKE9dIIVirjoqPoA1wJU+XePVXZfGeBpk45+A1rKO4Q43prqWBNY/MiIeRLbPWUaA==}
     engines: {node: '>=4.0.0'}
-
-  cookie@0.7.2:
-    resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
-    engines: {node: '>= 0.6'}
 
   cookie@1.1.1:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
@@ -2743,12 +2731,6 @@ snapshots:
       '@supabase/supabase-js': 2.106.0
       cookie: 1.1.1
 
-  '@supabase/ssr@0.5.2(@supabase/supabase-js@2.106.0)':
-    dependencies:
-      '@supabase/supabase-js': 2.106.0
-      '@types/cookie': 0.6.0
-      cookie: 0.7.2
-
   '@supabase/storage-js@2.106.0':
     dependencies:
       iceberg-js: 0.8.1
@@ -2780,8 +2762,6 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.100.10
       react: 19.2.6
-
-  '@types/cookie@0.6.0': {}
 
   '@types/node-fetch@2.6.13':
     dependencies:
@@ -2900,8 +2880,6 @@ snapshots:
   commander@4.1.1: {}
 
   common-tags@1.8.2: {}
-
-  cookie@0.7.2: {}
 
   cookie@1.1.1: {}
 

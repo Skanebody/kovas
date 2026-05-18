@@ -1,5 +1,5 @@
 // Auto-generated TypeScript types from Supabase schema
-// Generated: 2026-05-18T14:09:31.412Z
+// Generated: 2026-05-18T14:44:42.144Z
 // Source: db.jlizdkffwjdiokvmhcwg.supabase.co:5432 (public schema)
 // Do NOT edit manually. Regenerate via: pnpm db:gen-types
 
@@ -69,6 +69,7 @@ export type Database = {
           fallback_used?: boolean | null
           created_at?: string
         }
+        Relationships: []
       }
       clients: {
         Row: {
@@ -137,6 +138,7 @@ export type Database = {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       equipment_findings: {
         Row: {
@@ -202,6 +204,7 @@ export type Database = {
           reviewed_at?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       events: {
         Row: {
@@ -246,6 +249,7 @@ export type Database = {
           changes?: Json | null
           created_at?: string
         }
+        Relationships: []
       }
       incidents: {
         Row: {
@@ -278,6 +282,7 @@ export type Database = {
           root_cause?: string | null
           resolution_notes?: string | null
         }
+        Relationships: []
       }
       invoices: {
         Row: {
@@ -373,6 +378,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       jobs: {
         Row: {
@@ -420,6 +426,7 @@ export type Database = {
           finished_at?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       memberships: {
         Row: {
@@ -452,6 +459,7 @@ export type Database = {
           status?: string
           created_at?: string
         }
+        Relationships: []
       }
       mission_rooms: {
         Row: {
@@ -496,6 +504,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       missions: {
         Row: {
@@ -597,6 +606,7 @@ export type Database = {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       organizations: {
         Row: {
@@ -662,6 +672,7 @@ export type Database = {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       owner_documents: {
         Row: {
@@ -700,6 +711,7 @@ export type Database = {
           uploaded_at?: string | null
           reviewed_by_diag?: boolean | null
         }
+        Relationships: []
       }
       photos: {
         Row: {
@@ -762,6 +774,7 @@ export type Database = {
           sync_status?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -809,6 +822,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       properties: {
         Row: {
@@ -895,6 +909,7 @@ export type Database = {
           updated_at?: string
           deleted_at?: string | null
         }
+        Relationships: []
       }
       quotes: {
         Row: {
@@ -960,6 +975,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       reference_counters: {
         Row: {
@@ -980,6 +996,7 @@ export type Database = {
           year?: number
           last_value?: string
         }
+        Relationships: []
       }
       sketches: {
         Row: {
@@ -1027,6 +1044,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       support_messages: {
         Row: {
@@ -1053,6 +1071,7 @@ export type Database = {
           attachments?: Json | null
           created_at?: string
         }
+        Relationships: []
       }
       support_tickets: {
         Row: {
@@ -1103,6 +1122,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       vision_corrections: {
         Row: {
@@ -1159,6 +1179,7 @@ export type Database = {
           used_in_training?: boolean | null
           training_session_id?: string | null
         }
+        Relationships: []
       }
       voice_notes: {
         Row: {
@@ -1218,6 +1239,7 @@ export type Database = {
           created_at?: string
           transcribed_at?: string | null
         }
+        Relationships: []
       }
     }
     Views: Record<string, never>

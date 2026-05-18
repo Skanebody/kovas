@@ -146,6 +146,9 @@ export type Json =
   | Json[]
 
 export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: '12'
+  }
   public: {
     Tables: {
 `
@@ -172,7 +175,7 @@ for (const [tableName, columns] of Object.entries(tables)) {
     const nullable = col.is_nullable === 'YES' ? ' | null' : ''
     ts += `          ${col.column_name}?: ${tsType}${nullable}\n`
   }
-  ts += `        }\n      }\n`
+  ts += `        }\n        Relationships: []\n      }\n`
 }
 
 ts += `    }\n    Views: Record<string, never>\n    Functions: Record<string, never>\n    Enums: {\n`
