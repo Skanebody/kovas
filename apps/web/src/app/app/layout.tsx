@@ -1,6 +1,5 @@
 import { AppNavTabs } from '@/components/app-nav-tabs'
-import { AppMobileNav } from '@/components/app-sidebar'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { UsageWidget } from '@/components/usage-widget'
@@ -25,7 +24,6 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           <AppNavTabs />
           <div className="flex items-center gap-2 shrink-0">
             <UsageWidget />
-            <ThemeToggle />
             <span className="text-sm text-muted-foreground hidden lg:inline ml-1">
               {displayName}
             </span>
@@ -38,9 +36,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="flex-1 px-4 md:px-8 py-6 pb-20 md:pb-8 mx-auto w-full max-w-6xl">
-        {children}
-      </main>
+      <div className="flex-1 flex">
+        <AppSidebar />
+        <main className="flex-1 px-4 md:px-8 py-6 pb-20 md:pb-8 mx-auto w-full max-w-6xl">
+          {children}
+        </main>
+      </div>
       <AppMobileNav />
     </div>
   )

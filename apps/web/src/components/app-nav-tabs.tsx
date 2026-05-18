@@ -2,14 +2,14 @@
 
 import { cn } from '@/lib/utils'
 import { Building2, FileText, Home, Users } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import type { ComponentType } from 'react'
 
 type NavItem = {
   href: string
   label: string
-  icon: ComponentType<{ className?: string }>
+  icon: LucideIcon
 }
 
 const NAV: readonly NavItem[] = [
