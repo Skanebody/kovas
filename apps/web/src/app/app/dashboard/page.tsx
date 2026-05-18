@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Bonjour {firstName}</h1>
+          <h1 className="text-4xl font-extrabold tracking-tight">Bonjour {firstName}</h1>
           <p className="text-muted-foreground text-sm">
             {dossiersCount && dossiersCount > 0
               ? `${dossiersCount} dossier${dossiersCount > 1 ? 's' : ''} suivi${dossiersCount > 1 ? 's' : ''} au total.`

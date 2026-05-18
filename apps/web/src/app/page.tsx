@@ -1,3 +1,6 @@
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   ArrowRight,
   Camera,
@@ -9,9 +12,6 @@ import {
   Zap,
 } from 'lucide-react'
 import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 /**
  * KOVAS — Landing page marketing (kovas.fr/)
@@ -20,7 +20,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
  */
 export default function HomePage() {
   return (
-    <div className="min-h-dvh flex flex-col bg-background">
+    <div className="min-h-dvh flex flex-col">
       <SiteHeader />
       <main className="flex-1">
         <Hero />
@@ -37,17 +37,23 @@ export default function HomePage() {
 
 function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card/70 backdrop-blur-md">
-      <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-50 glass-header">
+      <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="size-7 rounded-md bg-cta" aria-hidden />
-          <span className="text-base font-semibold tracking-tight">KOVAS</span>
+          <div className="size-8 rounded-md bg-cta shadow-cta" aria-hidden />
+          <span className="text-base font-bold tracking-tight">KOVAS</span>
         </Link>
         <nav className="hidden sm:flex items-center gap-6 text-sm">
-          <Link href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/#features"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             Fonctionnalités
           </Link>
-          <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/pricing"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             Tarifs
           </Link>
           <Link
@@ -72,12 +78,17 @@ function SiteHeader() {
 
 function Hero() {
   return (
-    <section className="px-6 py-20 sm:py-28 md:py-32">
+    <section className="relative px-6 py-20 sm:py-28 md:py-32 overflow-hidden">
+      {/* Halo navy subtil derrière le titre, sans surcharger */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 -z-10 h-[500px] bg-[radial-gradient(ellipse_at_center,hsl(var(--cta)/0.06),transparent_60%)]"
+      />
       <div className="mx-auto max-w-3xl text-center space-y-8">
         <Badge variant="outline" className="mx-auto">
           Pour les diagnostiqueurs immobiliers indépendants
         </Badge>
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
           3 heures de DPE.
           <br />
           <span className="text-muted-foreground">30 minutes avec KOVAS.</span>
@@ -111,14 +122,16 @@ function Stats() {
     { value: '< 30s', label: 'pour partager vers votre logiciel principal' },
   ]
   return (
-    <section className="px-6 py-12 border-y border-border bg-muted/30">
-      <div className="mx-auto max-w-5xl grid grid-cols-1 sm:grid-cols-3 gap-8">
-        {stats.map((s) => (
-          <div key={s.label} className="text-center space-y-1">
-            <div className="text-3xl sm:text-4xl font-bold tracking-tight">{s.value}</div>
-            <div className="text-sm text-muted-foreground">{s.label}</div>
-          </div>
-        ))}
+    <section className="px-6 py-16">
+      <div className="mx-auto max-w-5xl">
+        <Card className="grid grid-cols-1 sm:grid-cols-3 gap-8 p-10">
+          {stats.map((s) => (
+            <div key={s.label} className="text-center space-y-1">
+              <div className="text-3xl sm:text-4xl font-extrabold tracking-tight">{s.value}</div>
+              <div className="text-sm text-muted-foreground">{s.label}</div>
+            </div>
+          ))}
+        </Card>
       </div>
     </section>
   )
@@ -130,7 +143,7 @@ function Features() {
       icon: Mic,
       title: 'Saisie vocale terrain',
       description:
-        'Décrivez l\'état d\'une pièce à voix haute. KOVAS structure les données automatiquement (Whisper + IA hybride à 0,01€/mission).',
+        "Décrivez l'état d'une pièce à voix haute. KOVAS structure les données automatiquement (Whisper + IA hybride à 0,01€/mission).",
     },
     {
       icon: Camera,
@@ -142,7 +155,7 @@ function Features() {
       icon: Share2,
       title: 'Bouton « Partager »',
       description:
-        '3 modes vers votre logiciel principal : email, Google Drive auto-sync, téléchargement direct. 30 secondes au lieu d\'1h30 de re-saisie.',
+        "3 modes vers votre logiciel principal : email, Google Drive auto-sync, téléchargement direct. 30 secondes au lieu d'1h30 de re-saisie.",
     },
     {
       icon: FileText,
@@ -207,7 +220,7 @@ function HowItWorks() {
       n: '2',
       title: 'Validation',
       description:
-        'KOVAS détecte les incohérences et incomplétudes. « Tu n\'as pas saisi la VMC, c\'est volontaire ? » Avant export, pas après.',
+        "KOVAS détecte les incohérences et incomplétudes. « Tu n'as pas saisi la VMC, c'est volontaire ? » Avant export, pas après.",
     },
     {
       n: '3',
@@ -217,23 +230,23 @@ function HowItWorks() {
     },
   ]
   return (
-    <section id="how-it-works" className="px-6 py-20 sm:py-28 bg-muted/30 border-y border-border">
+    <section id="how-it-works" className="px-6 py-20 sm:py-28">
       <div className="mx-auto max-w-5xl space-y-12">
         <div className="text-center space-y-3 max-w-xl mx-auto">
           <Badge variant="muted">Workflow</Badge>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             De la visite au logiciel principal. Sans re-saisie.
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {steps.map((s) => (
-            <div key={s.n} className="space-y-3">
-              <div className="size-9 rounded-full bg-cta text-cta-foreground flex items-center justify-center text-sm font-semibold">
+            <Card key={s.n} className="p-6 space-y-3">
+              <div className="size-10 rounded-full bg-cta text-cta-foreground flex items-center justify-center text-base font-bold shadow-cta">
                 {s.n}
               </div>
               <h3 className="text-lg font-semibold">{s.title}</h3>
               <p className="text-sm text-muted-foreground">{s.description}</p>
-            </div>
+            </Card>
           ))}
         </div>
       </div>
@@ -272,21 +285,23 @@ function PricingTeaser() {
 
 function FinalCTA() {
   return (
-    <section className="px-6 py-20 sm:py-28 bg-muted/30 border-t border-border">
-      <div className="mx-auto max-w-2xl text-center space-y-6">
-        <Zap className="size-10 mx-auto" />
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-          Prêt à gagner 1h30 par mission ?
-        </h2>
-        <p className="text-muted-foreground">
-          Essai gratuit 14 jours, sans carte bancaire. 30 missions complètes pour vous faire votre
-          propre opinion.
-        </p>
-        <Button size="lg" asChild>
-          <Link href="/signup">
-            Commencer mon essai <ArrowRight className="size-4" />
-          </Link>
-        </Button>
+    <section className="px-6 py-20 sm:py-28">
+      <div className="mx-auto max-w-4xl">
+        <Card variant="accent" className="p-10 sm:p-14 text-center space-y-6">
+          <Zap className="size-10 mx-auto text-cta-foreground/80" />
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+            Prêt à gagner 1h30 par mission ?
+          </h2>
+          <p className="text-cta-foreground/70">
+            Essai gratuit 14 jours, sans carte bancaire. 30 missions complètes pour vous faire votre
+            propre opinion.
+          </p>
+          <Button size="lg" variant="outline" asChild className="bg-card text-foreground">
+            <Link href="/signup">
+              Commencer mon essai <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </Card>
       </div>
     </section>
   )
@@ -296,9 +311,7 @@ function SiteFooter() {
   return (
     <footer className="px-6 py-10 border-t border-border">
       <div className="mx-auto max-w-6xl flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-sm text-subtle-foreground">
-        <p>
-          © 2026 SASU Nexus 1993 · 66 Av Champs Elysées, 75008 Paris · SIREN 982 786 154
-        </p>
+        <p>© 2026 SASU Nexus 1993 · 66 Av Champs Elysées, 75008 Paris · SIREN 982 786 154</p>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
           <Link href="/mentions-legales" className="hover:text-foreground transition-colors">
             Mentions légales
