@@ -4,11 +4,14 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MissionRealtime } from '@/components/mission-realtime'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { runChecklist } from '@/lib/checklists'
+import { runCoherenceChecks } from '@/lib/coherence-validation'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import type { VoiceParsedData } from '@/lib/voice-parser'
 import { ClientUploadLink } from './client-upload-link'
+import { CoherenceWarnings } from './coherence-warnings'
 import { MissionChecklist } from './mission-checklist'
 import { OwnerDocumentsList } from './owner-documents-list'
 import { PhotoCapture } from './photo-capture'
@@ -104,8 +107,26 @@ export default async function MissionDetailPage({
     manualChecklistState,
   )
 
+  // Coherence warnings (règles métier sans IA)
+  const coherenceWarnings = runCoherenceChecks({
+    property: {
+      surface_total: prop?.surface_total ?? null,
+      year_built: prop?.year_built ?? null,
+      property_type: prop?.property_type ?? null,
+    },
+    voiceNotes: (voiceNotes ?? []).map((v) => {
+      const parsed = (v.transcript_structured as VoiceParsedData | null) ?? null
+      return {
+        surface_m2: parsed?.surface_m2,
+        year_built: parsed?.year_built,
+        equipment: parsed?.equipment ?? [],
+      }
+    }),
+  })
+
   return (
     <div className="max-w-4xl space-y-6">
+      <MissionRealtime missionId={mission.id} />
       <Button variant="ghost" size="sm" asChild>
         <Link href="/app/missions">
           <ArrowLeft className="size-4" /> Retour aux missions
@@ -164,6 +185,8 @@ export default async function MissionDetailPage({
         completion={checklist.completion}
         requiredOk={checklist.requiredOk}
       />
+
+      <CoherenceWarnings warnings={coherenceWarnings} />
 
       <Card>
         <CardHeader>

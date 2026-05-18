@@ -1,0 +1,45 @@
+import { AlertTriangle, Info } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { CoherenceWarning } from '@/lib/coherence-validation'
+import { cn } from '@/lib/utils'
+
+interface CoherenceWarningsProps {
+  warnings: CoherenceWarning[]
+}
+
+const SEVERITY_STYLES: Record<CoherenceWarning['severity'], string> = {
+  info: 'text-muted-foreground',
+  warning: 'text-accent-orange',
+  error: 'text-accent-red',
+}
+
+export function CoherenceWarnings({ warnings }: CoherenceWarningsProps) {
+  if (warnings.length === 0) return null
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <AlertTriangle className="size-4 text-accent-orange" />
+          Cohérence ({warnings.length} {warnings.length > 1 ? 'alertes' : 'alerte'})
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2">
+          {warnings.map((w) => (
+            <li key={w.id} className="flex items-start gap-2 text-sm">
+              {w.severity === 'info' ? (
+                <Info className={cn('size-4 mt-0.5 shrink-0', SEVERITY_STYLES[w.severity])} />
+              ) : (
+                <AlertTriangle
+                  className={cn('size-4 mt-0.5 shrink-0', SEVERITY_STYLES[w.severity])}
+                />
+              )}
+              <span className={cn(SEVERITY_STYLES[w.severity])}>{w.message}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  )
+}

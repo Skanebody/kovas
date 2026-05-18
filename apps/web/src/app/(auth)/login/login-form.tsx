@@ -7,7 +7,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { type LoginState, loginAction } from './actions'
 
-export function LoginForm() {
+type LoginFormProps = {
+  /** Renseigné en dev via KOVAS_DEV_LOGIN_PREFILL_* (cf. .env.example) */
+  defaultEmail?: string
+  defaultPassword?: string
+}
+
+export function LoginForm({ defaultEmail = '', defaultPassword = '' }: LoginFormProps) {
   const [state, formAction, pending] = useActionState<LoginState, FormData>(loginAction, undefined)
 
   return (
@@ -21,6 +27,7 @@ export function LoginForm() {
           autoComplete="email"
           required
           placeholder="nom@cabinet.fr"
+          defaultValue={defaultEmail}
         />
       </div>
 
@@ -32,6 +39,7 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
+          defaultValue={defaultPassword}
         />
       </div>
 

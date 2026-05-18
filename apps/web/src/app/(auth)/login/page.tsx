@@ -7,6 +7,14 @@ export const metadata: Metadata = {
 }
 
 export default function LoginPage() {
+  const devPrefill =
+    process.env.NODE_ENV === 'development'
+      ? {
+          email: process.env.KOVAS_DEV_LOGIN_PREFILL_EMAIL ?? '',
+          password: process.env.KOVAS_DEV_LOGIN_PREFILL_PASSWORD ?? '',
+        }
+      : { email: '', password: '' }
+
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="space-y-2 text-center">
@@ -16,7 +24,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <LoginForm />
+      <LoginForm defaultEmail={devPrefill.email} defaultPassword={devPrefill.password} />
 
       <p className="text-center text-sm text-muted-foreground">
         Pas encore de compte ?{' '}

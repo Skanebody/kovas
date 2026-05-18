@@ -42,16 +42,16 @@ export function AddToHomeScreen() {
       <div className="mx-auto max-w-md rounded-xl bg-card p-6 shadow-md ring-1 ring-border">
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">
-            Ajoute KOVAS à ton écran d'accueil
+            Installez KOVAS sur votre écran d'accueil
           </h2>
           <p className="text-sm text-muted-foreground">
-            Pour utiliser KOVAS comme une vraie app et garder tes données en sécurité, ajoute-le à
-            ton écran d'accueil en 3 clics.
+            Pour utiliser KOVAS comme une vraie app et garder vos données en sécurité, ajoutez-le à
+            votre écran d'accueil en 3 étapes.
           </p>
           <ol className="space-y-2 text-sm text-foreground">
-            <li>1. Appuie sur le bouton Partager ⎙ en bas</li>
-            <li>2. Choisis "Sur l'écran d'accueil"</li>
-            <li>3. Appuie sur Ajouter</li>
+            <li>1. Touchez le bouton Partager ⎙ en bas</li>
+            <li>2. Choisissez « Sur l'écran d'accueil »</li>
+            <li>3. Touchez Ajouter</li>
           </ol>
           <div className="flex gap-2 pt-2">
             <button
