@@ -138,25 +138,27 @@ export async function RecentActivityBlock() {
     .slice(0, 10)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <History className="size-4" /> Activité récente
+    <Card className="h-full flex flex-col">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-2">
+          <History className="size-3.5" /> Activité récente
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 flex-1">
         {top.length === 0 ? (
           <p className="px-4 pb-5 text-sm text-muted-foreground">
             Pas d'activité sur les 14 derniers jours.
           </p>
         ) : (
           <ul className="divide-y divide-border">
-            {top.map((e) => (
-              <li key={e.key} className="px-4 py-2.5 hover:bg-muted/30 transition-colors">
-                <Link href={e.href} className="flex items-center gap-3 text-sm">
+            {top.slice(0, 6).map((e) => (
+              <li key={e.key} className="px-4 py-2 hover:bg-muted/30 transition-colors">
+                <Link href={e.href} className="flex items-center gap-3 text-xs">
                   <EventIcon kind={e.icon} />
                   <span className="flex-1 min-w-0 truncate">{e.label}</span>
-                  <span className="text-xs text-muted-foreground shrink-0">{timeAgoFr(e.at)}</span>
+                  <span className="text-[10px] text-muted-foreground shrink-0">
+                    {timeAgoFr(e.at)}
+                  </span>
                 </Link>
               </li>
             ))}
