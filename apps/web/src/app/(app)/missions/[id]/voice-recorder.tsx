@@ -102,9 +102,28 @@ export function VoiceRecorder({ missionId, orgId, rooms }: VoiceRecorderProps) {
 
       // Parse transcript localement
       setStatus('parsing')
-      const parsed = parseVoiceTranscript(data.transcript ?? '')
-      const usedClaude = parsed.confidence < VOICE_PARSER_THRESHOLD
-      // V1 : on note la confiance, fallback Claude implémenté en J6
+      let parsed = parseVoiceTranscript(data.transcript ?? '')
+      let parserUsed = 'custom_js'
+      let claudeCostEur = 0
+
+      // Fallback Claude si confiance insuffisante (J6 hybride)
+      if (parsed.confidence < VOICE_PARSER_THRESHOLD && (data.transcript ?? '').length > 20) {
+        try {
+          const claudeResp = await fetch('/api/structure', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transcript: data.transcript, missionId }),
+          })
+          if (claudeResp.ok) {
+            const claudeData = await claudeResp.json()
+            parsed = claudeData.structured
+            parserUsed = 'custom_js_then_claude_haiku'
+            claudeCostEur = claudeData.costEur ?? 0
+          }
+        } catch {
+          // Fallback silencieux : on garde le parsing custom même si Claude échoue
+        }
+      }
 
       await createVoiceNoteAction({
         missionId,
@@ -114,8 +133,8 @@ export function VoiceRecorder({ missionId, orgId, rooms }: VoiceRecorderProps) {
         transcriptRaw: data.transcript,
         transcriptStructured: parsed,
         provider: 'openai',
-        parserUsed: usedClaude ? 'custom_js_then_claude_pending' : 'custom_js',
-        aiCostEur: data.costEur,
+        parserUsed,
+        aiCostEur: (data.costEur ?? 0) + claudeCostEur,
         aiConfidence: parsed.confidence,
       })
 

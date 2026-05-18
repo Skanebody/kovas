@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
+import { buildWhisperPrompt } from '@/lib/whisper-prompt'
 
 /**
  * Transcription audio via OpenAI Whisper.
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
   // Verify mission belongs to user's org (RLS guarantees this if user is org member)
   const { data: mission, error: missionError } = await supabase
     .from('missions')
-    .select('id, organization_id')
+    .select('id, organization_id, type')
     .eq('id', missionId)
     .single()
   if (missionError || !mission) {
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
 
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   const model = process.env.OPENAI_MODEL_TRANSCRIBE ?? 'gpt-4o-mini-transcribe'
+  const prompt = buildWhisperPrompt(mission.type)
 
   try {
     const t0 = Date.now()
@@ -58,7 +60,7 @@ export async function POST(request: Request) {
       model,
       language: 'fr',
       response_format: 'verbose_json',
-      // prompt: 'Diagnostic immobilier français...' // injection vocab dans J6
+      prompt,
     })
     const latencyMs = Date.now() - t0
 
