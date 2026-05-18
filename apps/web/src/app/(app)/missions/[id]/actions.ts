@@ -72,6 +72,33 @@ export async function deleteRoomAction(missionId: string, roomId: string) {
   revalidatePath(`/app/missions/${missionId}`)
 }
 
+export async function applyRoomTemplateAction(missionId: string, templateId: string) {
+  const { ROOM_TEMPLATES } = await import('@/lib/room-templates')
+  const template = ROOM_TEMPLATES.find((t) => t.id === templateId)
+  if (!template) throw new Error(`Template inconnu: ${templateId}`)
+
+  const { supabase, orgId } = await getCurrentUser()
+
+  const { count } = await supabase
+    .from('mission_rooms')
+    .select('*', { count: 'exact', head: true })
+    .eq('mission_id', missionId)
+    .eq('organization_id', orgId)
+  const startPosition = count ?? 0
+
+  const rows = template.rooms.map((r, i) => ({
+    mission_id: missionId,
+    organization_id: orgId,
+    name: r.name,
+    room_type: r.room_type,
+    position: startPosition + i,
+  }))
+
+  const { error } = await supabase.from('mission_rooms').insert(rows)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/missions/${missionId}`)
+}
+
 // ============================================
 // Photos
 // ============================================
@@ -230,6 +257,36 @@ const MISSION_STATUSES = [
   'draft', 'scheduled', 'in_progress', 'to_review', 'done', 'exported', 'archived', 'cancelled',
 ] as const
 type MissionStatus = (typeof MISSION_STATUSES)[number]
+
+// Toggle d'un item manuel de la check-list (persisté dans missions.metadata.checklist).
+export async function toggleChecklistItemAction(
+  missionId: string,
+  itemId: string,
+  checked: boolean,
+) {
+  const { supabase, orgId } = await getCurrentUser()
+
+  const { data: current } = await supabase
+    .from('missions')
+    .select('metadata')
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+    .single()
+
+  const meta = (current?.metadata as Record<string, unknown> | null) ?? {}
+  const checklist = (meta.checklist as Record<string, boolean> | undefined) ?? {}
+  checklist[itemId] = checked
+  meta.checklist = checklist
+
+  const { error } = await supabase
+    .from('missions')
+    .update({ metadata: meta as never })
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/app/missions/${missionId}`)
+}
 
 export async function updateMissionStatusAction(missionId: string, newStatus: MissionStatus) {
   if (!MISSION_STATUSES.includes(newStatus)) {

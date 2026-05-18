@@ -1,12 +1,21 @@
 'use client'
 
-import { DoorOpen, Loader2, Plus, Trash2 } from 'lucide-react'
+import { DoorOpen, Loader2, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useActionState, useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { addRoomAction, deleteRoomAction, type RoomFormState } from './actions'
+import { ROOM_TEMPLATES } from '@/lib/room-templates'
+import { addRoomAction, applyRoomTemplateAction, deleteRoomAction, type RoomFormState } from './actions'
 
 const ROOM_TYPE_LABELS: Record<string, string> = {
   salon: 'Salon',
@@ -60,15 +69,59 @@ export function RoomsList({ missionId, rooms }: RoomsListProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <h2 className="text-lg font-semibold">Pièces ({rooms.length})</h2>
-        <Button
-          variant={showForm ? 'ghost' : 'outline'}
-          size="sm"
-          onClick={() => setShowForm((s) => !s)}
-        >
-          {showForm ? 'Annuler' : <><Plus className="size-4" /> Ajouter</>}
-        </Button>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Sparkles className="size-4" /> Template
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto">
+              <DropdownMenuLabel>Appartements</DropdownMenuLabel>
+              {ROOM_TEMPLATES.filter((t) => t.id.startsWith('appt_')).map((t) => (
+                <DropdownMenuItem
+                  key={t.id}
+                  onClick={() => {
+                    startTransition(async () => {
+                      await applyRoomTemplateAction(missionId, t.id)
+                    })
+                  }}
+                >
+                  <div className="flex flex-col items-start">
+                    <span>{t.label}</span>
+                    <span className="text-xs text-muted-foreground">{t.rooms.length} pièces · {t.description}</span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Maisons</DropdownMenuLabel>
+              {ROOM_TEMPLATES.filter((t) => t.id.startsWith('maison_')).map((t) => (
+                <DropdownMenuItem
+                  key={t.id}
+                  onClick={() => {
+                    startTransition(async () => {
+                      await applyRoomTemplateAction(missionId, t.id)
+                    })
+                  }}
+                >
+                  <div className="flex flex-col items-start">
+                    <span>{t.label}</span>
+                    <span className="text-xs text-muted-foreground">{t.rooms.length} pièces · {t.description}</span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            variant={showForm ? 'ghost' : 'outline'}
+            size="sm"
+            onClick={() => setShowForm((s) => !s)}
+          >
+            {showForm ? 'Annuler' : <><Plus className="size-4" /> Ajouter</>}
+          </Button>
+        </div>
       </div>
 
       {showForm && (

@@ -5,8 +5,10 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { runChecklist } from '@/lib/checklists'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import type { VoiceParsedData } from '@/lib/voice-parser'
+import { MissionChecklist } from './mission-checklist'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
 import { RoomsList } from './rooms-list'
@@ -33,7 +35,7 @@ export default async function MissionDetailPage({
     supabase
       .from('missions')
       .select(
-        'id, reference, type, status, scheduled_at, notes, created_at, property_id, client_id, properties(address, city, postal_code), clients(display_name)',
+        'id, reference, type, status, scheduled_at, notes, metadata, created_at, property_id, client_id, properties(address, city, postal_code, surface_total, year_built, property_type), clients(display_name)',
       )
       .eq('id', id)
       .eq('organization_id', orgId)
@@ -63,6 +65,28 @@ export default async function MissionDetailPage({
 
   const prop = Array.isArray(mission.properties) ? mission.properties[0] : mission.properties
   const client = Array.isArray(mission.clients) ? mission.clients[0] : mission.clients
+
+  // Compute checklist state
+  const metadata = (mission.metadata as Record<string, unknown> | null) ?? {}
+  const manualChecklistState =
+    (metadata.checklist as Record<string, boolean> | undefined) ?? {}
+  const checklist = runChecklist(
+    mission.type,
+    {
+      rooms: (rooms ?? []).map((r) => ({ id: r.id, room_type: r.room_type })),
+      photos: (photos ?? []).map((p) => ({ room_id: p.room_id })),
+      voiceNotes: (voiceNotes ?? []).map((v) => ({
+        room_id: v.room_id,
+        transcript_structured: v.transcript_structured,
+      })),
+      property: {
+        surface_total: prop?.surface_total ?? null,
+        year_built: prop?.year_built ?? null,
+        property_type: prop?.property_type ?? null,
+      },
+    },
+    manualChecklistState,
+  )
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -117,6 +141,13 @@ export default async function MissionDetailPage({
           )}
         </CardContent>
       </Card>
+
+      <MissionChecklist
+        missionId={mission.id}
+        items={checklist.items}
+        completion={checklist.completion}
+        requiredOk={checklist.requiredOk}
+      />
 
       <Card>
         <CardContent className="pt-6">
