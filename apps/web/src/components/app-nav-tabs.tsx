@@ -26,32 +26,31 @@ function isActive(pathname: string | null, href: string): boolean {
 }
 
 /**
- * Bottom-nav mobile (< md). Icônes + label court.
- * Desktop : la navigation primaire passe par <AppNavTabs /> dans le header.
+ * Tabs pillules navigation primaire — header desktop.
+ * cf. docs/design-system.md §2 (Tabs) + §3 (App shell).
  */
-export function AppMobileNav() {
+export function AppNavTabs() {
   const pathname = usePathname()
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 glass-header border-t">
-      <div className="flex">
-        {NAV.map((item) => {
-          const active = isActive(pathname, item.href)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex-1 flex flex-col items-center gap-1 py-2.5 text-xs transition-colors',
-                active ? 'text-cta font-semibold' : 'text-muted-foreground',
-              )}
-            >
-              <item.icon className="size-5" />
-              <span>{item.label.split(' ')[0]}</span>
-            </Link>
-          )
-        })}
-      </div>
+    <nav className="hidden md:flex items-center gap-1 rounded-pill bg-card/60 backdrop-blur-md p-1">
+      {NAV.map((item) => {
+        const active = isActive(pathname, item.href)
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              'rounded-pill px-4 py-1.5 text-sm transition-colors',
+              active
+                ? 'bg-cta text-cta-foreground font-semibold shadow-cta'
+                : 'text-muted-foreground hover:text-foreground font-medium',
+            )}
+          >
+            {item.label}
+          </Link>
+        )
+      })}
     </nav>
   )
 }

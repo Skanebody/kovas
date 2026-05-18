@@ -1,12 +1,13 @@
-import { LogOut } from 'lucide-react'
-import Link from 'next/link'
-import type { ReactNode } from 'react'
-import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
+import { AppNavTabs } from '@/components/app-nav-tabs'
+import { AppMobileNav } from '@/components/app-sidebar'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { UsageWidget } from '@/components/usage-widget'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { LogOut } from 'lucide-react'
+import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { logoutAction } from './actions'
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
@@ -15,16 +16,17 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh flex flex-col">
-      <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="px-4 md:px-6 h-14 flex items-center justify-between gap-4">
-          <Link href="/app/dashboard" className="flex items-center gap-2">
-            <div className="size-7 rounded-md bg-cta" aria-hidden />
-            <span className="text-base font-semibold tracking-tight">KOVAS</span>
+      <header className="glass-header sticky top-0 z-50">
+        <div className="px-4 md:px-6 h-16 flex items-center justify-between gap-4">
+          <Link href="/app/dashboard" className="flex items-center gap-2 shrink-0">
+            <div className="size-8 rounded-md bg-cta shadow-cta" aria-hidden />
+            <span className="text-base font-bold tracking-tight">KOVAS</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <AppNavTabs />
+          <div className="flex items-center gap-2 shrink-0">
             <UsageWidget />
             <ThemeToggle />
-            <span className="text-sm text-muted-foreground hidden lg:inline ml-2">
+            <span className="text-sm text-muted-foreground hidden lg:inline ml-1">
               {displayName}
             </span>
             <Avatar name={displayName} size="sm" />
@@ -36,10 +38,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <div className="flex-1 flex">
-        <AppSidebar />
-        <main className="flex-1 px-4 md:px-8 py-6 pb-20 md:pb-8 max-w-6xl">{children}</main>
-      </div>
+      <main className="flex-1 px-4 md:px-8 py-6 pb-20 md:pb-8 mx-auto w-full max-w-6xl">
+        {children}
+      </main>
       <AppMobileNav />
     </div>
   )
