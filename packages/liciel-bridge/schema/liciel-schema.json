@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Liciel Schema — Reverse-engineered from observations",
+  "description": "Schéma JSON des tables Liciel Diagnostics V4 (LICIEL_Dossiers.mdb). À remplir au fur et à mesure du reverse-engineering Sprint MVP J11-J12.",
+  "version": "0.1.0-stub",
+  "notes": [
+    "Cf. research/liciel-format.md §2.5 pour le schéma .mdb (gaté WikiLiciel article 84)",
+    "Stratégie : observation black-box d'exports réels via mdb-tools (read-only)",
+    "Cadre légal : L122-6-1 §III CPI + CJEU SAS Institute c/ WPL",
+    "À POPULATER au cours du Sprint J11 avec corpus 25-50 fixtures"
+  ],
+  "type": "object",
+  "properties": {
+    "tables": {
+      "type": "object",
+      "description": "Tables principales du LICIEL_Dossiers.mdb",
+      "properties": {
+        "T_Dossier": {
+          "type": "object",
+          "description": "Table racine missions/dossiers",
+          "properties": {}
+        },
+        "T_Client": {
+          "type": "object",
+          "description": "Table clients (particuliers, agences, notaires)"
+        },
+        "T_Bien": {
+          "type": "object",
+          "description": "Table biens immobiliers"
+        }
+      }
+    }
+  }
+}

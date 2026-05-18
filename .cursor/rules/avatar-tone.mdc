@@ -1,0 +1,110 @@
+---
+description: Avatar client + ton sobre professionnel - applied to ALL marketing/UI text + emails
+globs: ["**/*.tsx", "**/*.mdx", "**/*.md", "**/messages/**/*.json"]
+alwaysApply: false
+---
+
+# Avatar client + Ton KOVAS
+
+> **TEST FINAL pour chaque texte** :
+> *"Est-ce que Pierre, 43 ans, ex-cadre reconverti diagnostiqueur, solopreneur sérieux, prendrait cette communication au sérieux et ressentirait que KOVAS est un outil PROFESSIONNEL fait POUR LUI ?"*
+>
+> Si NON → refondre.
+
+## Profil cible
+
+- **Pierre, 43 ans, ex-cadre** (40% des cibles)
+- **Christophe, 51 ans, ex-BTP** (30%)
+- **Maxime, 35 ans, tech-friendly** (20%)
+- **Pierre senior, 58 ans** (10%, Phase 2)
+
+90% hommes, 70% non-bâtiment (reconversions), 40% ex-demandeurs d'emploi.
+
+**Mentalité** :
+- Professionnel sérieux, responsable juridiquement
+- Pragmatique, calcul ROI permanent
+- Pas tech-savvy par nature, mais utilise Liciel quotidiennement
+- Méfiant envers marketing "lifestyle" / gaming / millennial
+
+## Vocabulaire ✅ FAVORISER
+
+| Concept | Bon vocab |
+|---|---|
+| Pro | "Professionnel", "Sénior", "Confirmé" |
+| Récap | "Rapport mensuel d'activité", "Bilan" |
+| Interface | "Tableau de bord", "Activité" |
+| Adresse user | "Vous" (vouvoiement par défaut) |
+| Action | "économise", "génère", "exporte", "valide" |
+| Chiffres | "23h 47min économisées" (précis), pas "des heures" |
+| Émojis OK | `✓` (validation), `→` (navigation) UNIQUEMENT |
+
+## Vocabulaire ❌ INTERDIT
+
+| Anti-pattern | Pourquoi |
+|---|---|
+| "Hero", "Légende", "Pionnier", "Champion", "Master" | Gaming, infantilisation |
+| "Wrapped", "Stories", "Recap fun" | Lifestyle Spotify/Instagram |
+| "Game-changer", "Disrupt", "Révolutionnez" | Startup-speak, marketing creux |
+| "Bravo !", "Yay !", "Continue !" | Infantilisation |
+| "Toi" (sauf opt-in user) | Manque de respect métier |
+| Émojis 🚀🎯⭐🏆🎉🎊❤️ | Anti-professionnel |
+| Confettis, animations festives, sons | Hors contexte business sérieux |
+| Classements nominatifs publics | Anti-confraternité métier |
+| "Tu cartonnes !" "Tu déchires !" | Casual + manipulation |
+
+## Exemples concrets
+
+### ❌ ❌ ❌ MAUVAIS
+
+```
+"Yay! 🎉 Tu as débloqué le badge LÉGENDE !"
+"Ton wrapped KOVAS de novembre est dispo 🎊"
+"🚀 Tu cartonnes ! +5h économisées cette semaine !"
+"Partage ta réussite sur Insta avec #KOVASLife !"
+"Tu es au top 5% des KOVAS Heroes 🦸"
+```
+
+### ✅ ✅ ✅ BON
+
+```
+"Vous avez atteint le statut Diagnostiqueur Sénior (200 missions traitées)."
+"Votre rapport mensuel d'activité de novembre est disponible."
+"Bilan de la semaine : 5h 12min économisées vs vos missions sans KOVAS."
+"Partager mon rapport mensuel sur LinkedIn"
+"Vous figurez dans le top 5% des diagnostiqueurs les plus efficaces du mois."
+```
+
+## Style rédactionnel
+
+- **Phrases courtes**, factuelles, sans superlatifs
+- **Chiffres précis** (jamais "plein", "beaucoup", "des tonnes")
+- **Vouvoiement par défaut**, tutoiement après opt-in user uniquement
+- **Pas de fioritures** : si en doute, supprimer l'élément
+- **Format business** : ressemble à un rapport comptable / relevé bancaire pro
+- **Signature humaine** Benjamin Bel (pas "L'équipe KOVAS marketing")
+
+## Format emails
+
+| ✅ FAIRE | ❌ ÉVITER |
+|---|---|
+| "Bonjour Pierre," | "Hey Pierre 👋" |
+| Texte simple, chiffres en gras | HTML avec animations |
+| 1 page max | Long format storytelling |
+| Signature personnelle | "Cordialement, l'équipe KOVAS" |
+| Couleurs : navy + blanc | Multi-couleurs flashy |
+| Hashtags métier (#DPE #diagnostic) | Hashtags lifestyle (#KOVASLife #worklifebalance) |
+
+## Format UI in-app
+
+| ✅ FAIRE | ❌ ÉVITER |
+|---|---|
+| Toast 5s avec gain chiffré | Modal interrompante avec confettis |
+| Stats valorisantes ("top 30%") | "Vous êtes dans les derniers" |
+| Notifications max 1/jour | Notifications multiples |
+| Animation 200-300ms discrète | Animation Framer Motion festive 2s |
+| Sound effects : AUCUN | Sound effects "ding!" |
+
+## Liens utiles
+
+- [/docs/avatar-client.md](mdc:docs/avatar-client.md) — profil complet
+- [/docs/gain-tracker-system.md](mdc:docs/gain-tracker-system.md) — application avatar dans Gain Tracker

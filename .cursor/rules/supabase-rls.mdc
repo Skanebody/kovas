@@ -1,0 +1,150 @@
+---
+description: Supabase RLS multi-tenant + Edge Functions - applied when editing supabase/ or DB queries
+globs: ["supabase/**/*.sql", "supabase/functions/**/*.ts", "packages/database/**/*.ts", "apps/web/src/lib/supabase/**/*.ts"]
+alwaysApply: false
+---
+
+# Supabase RLS multi-tenant + Edge Functions
+
+## Authority
+
+[research/supabase-architecture.md](mdc:.claude/orchestration-kovas-app/research/supabase-architecture.md) §2-3.
+
+## Règles RLS critiques
+
+### #1 Production gotcha — Performance RLS
+
+```sql
+-- ❌ MAUVAIS (re-évalue auth.uid() par row, perf collapse)
+CREATE POLICY "tenant" ON missions
+  USING (organization_id IN (
+    SELECT organization_id FROM memberships WHERE user_id = auth.uid()
+  ));
+
+-- ✅ BON (SECURITY DEFINER helper, single call, optimal plan)
+CREATE POLICY "tenant" ON missions FOR SELECT TO authenticated
+  USING (auth.is_member_of(organization_id));
+```
+
+Le helper `auth.is_member_of(p_org uuid)` SECURITY DEFINER est DÉJÀ créé dans la migration initiale (cf. `supabase/migrations/20260518000000_init_schema.sql` §1). **L'utiliser systématiquement** dans toutes les RLS policies.
+
+### Index composite OBLIGATOIRE
+
+Chaque business table doit avoir un index composite `(organization_id, ...)` :
+
+```sql
+CREATE INDEX idx_missions_org_status ON missions (organization_id, status)
+  WHERE deleted_at IS NULL;
+```
+
+Sinon : RLS overhead 10-100× au lieu de 5-15%.
+
+### service_role JAMAIS dans bundle client
+
+- ⛔ JAMAIS `SUPABASE_SERVICE_ROLE_KEY` dans `apps/web/src/components/`, `apps/web/src/app/(client)/`, ou tout fichier `'use client'`
+- ✅ Uniquement dans :
+  - Edge Functions Supabase (`supabase/functions/*/index.ts`)
+  - Next.js API routes côté serveur (`apps/web/src/app/api/**/route.ts`)
+  - Scripts CI/CD GitHub Actions
+
+### Clients typés depuis `@kovas/database`
+
+```ts
+// Browser client (anon key)
+import { createKovasBrowserClient } from '@kovas/database'
+const supabase = createKovasBrowserClient()
+
+// Server client (anon key + cookies, Next.js Server Components)
+import { createKovasServerClient } from '@kovas/database'
+import { cookies } from 'next/headers'
+
+const cookieStore = await cookies()
+const supabase = createKovasServerClient({
+  getAll: () => cookieStore.getAll(),
+  setAll: (newCookies) => newCookies.forEach((c) => cookieStore.set(c.name, c.value, c.options)),
+})
+
+// Admin client (service_role, BACKEND ONLY)
+import { createKovasAdminClient } from '@kovas/database'
+const supabase = createKovasAdminClient() // throws if SUPABASE_SERVICE_ROLE_KEY missing
+```
+
+## Edge Functions patterns
+
+### Authentification user
+
+```ts
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+
+Deno.serve(async (req) => {
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
+    { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+  )
+
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) {
+    return new Response('Unauthorized', { status: 401 })
+  }
+
+  // ... business logic
+})
+```
+
+### Rate limiting per-user (PRD §5.6 + claude.ts)
+
+```ts
+const RATE_LIMITS = {
+  voice: { perWindow: 60, windowMin: 5 },
+  vision: { perWindow: 30, windowMin: 5 },
+  chatbot: { perWindow: 20, windowMin: 5 },
+}
+
+// Implémenter via Supabase Edge Functions ou Upstash Redis
+```
+
+### Server-side AI calls (NEVER expose API key client)
+
+```ts
+// supabase/functions/transcribe-voice-note/index.ts
+const openaiKey = Deno.env.get('OPENAI_API_KEY')! // server-side env
+
+const formData = await req.formData()
+const audio = formData.get('audio') as File
+
+const apiResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${openaiKey}` },
+  body: /* multipart with audio */,
+})
+```
+
+## Migrations workflow
+
+```bash
+# Créer une nouvelle migration
+pnpm exec supabase migration new <descriptive_name>
+
+# Appliquer localement
+pnpm exec supabase db reset
+
+# Push vers prod
+pnpm exec supabase db push
+
+# Generate types TS après changement schema
+pnpm db:gen-types
+```
+
+## Common pitfalls (cf. research §13)
+
+1. ⛔ `service_role` leaked dans le bundle client → grep pre-commit hook
+2. ⛔ Connection pool exhaustion → utiliser pooler URL `*.pooler.supabase.com:6543`
+3. ⛔ Realtime subscription leaks → wrapper Zustand auto-cleanup unmount/logout
+4. ⛔ Storage cost surprises → cache headers + compression photos avant upload
+5. ⛔ RLS bypass via service_role → validation explicite `organization_id` dans Edge Functions
+6. ⛔ N+1 RLS → SECURITY DEFINER helper (déjà fait)
+7. ⛔ `auth.uid()` null pendant SSR → utiliser `@supabase/ssr` cookies forwarding
+8. ⛔ Realtime filtré par RLS = silent drops → tester avec JWT end-user réel
+9. ⛔ Postgres replica identity → `ALTER TABLE x REPLICA IDENTITY FULL` (déjà fait dans migration)
+10. ⛔ `public` schema exposé via PostgREST → mettre tables internes dans schema séparé

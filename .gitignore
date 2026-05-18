@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# Env files (NEVER commit secrets)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Sentry
+.sentryclirc
+
+# Vercel
+.vercel
+
+# Supabase
+supabase/.branches
+supabase/.temp
+
+# Liciel discovery log (separate repo, NEVER commit here)
+kovas-discovery-log/
+
+# Fixtures Liciel raw (avant anonymisation)
+**/fixtures-raw/
+
+# EAS Build credentials (différé V2 mais on prépare le gitignore)
+credentials.json
+
+# Java services build artifacts
+services/mdb-writer/.gradle/
+services/mdb-writer/build/
+services/mdb-writer/bin/
+
+# Skill m2c1 cloned locally (pas du projet KOVAS)
+m2c1/
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/

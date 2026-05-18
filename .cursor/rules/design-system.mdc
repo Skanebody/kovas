@@ -1,0 +1,117 @@
+---
+description: Design system Glassmorphism Premium Soft UI - applied when editing components or UI
+globs: ["apps/web/src/components/**/*.tsx", "apps/web/src/app/**/*.tsx", "apps/web/src/**/*.css"]
+alwaysApply: false
+---
+
+# Design System — Glassmorphism Premium Soft UI
+
+## Palette (Tailwind tokens dans tailwind.config.ts)
+
+### Light mode (par défaut)
+- `bg-background` → `#F4F4F5` (fond principal)
+- `bg-card` → `#FFFFFF` (cartes)
+- `text-foreground` → `#0A0A0A` (texte principal)
+- `text-muted-foreground` → `#404040` (texte secondaire)
+- `text-subtle-foreground` → `#737373` (labels, meta)
+- `border-border` → `#D4D4D8` (bordures, 1px max)
+- `bg-cta` → `#0A0A0A` (CTA principal noir massif)
+- `bg-cta-hover` → `#262626`
+
+### Dark mode
+- `bg-background` → `#0A0A0A`
+- `bg-card` → `#171717`
+- `text-foreground` → `#FAFAFA`
+- `text-muted-foreground` → `#A1A1A9`
+- `border-border` → `#27272A`
+- `bg-cta` → `#FFFFFF` (inversé)
+
+### Accents délavés (PILLS/BADGES SEULEMENT, JAMAIS SURFACE LARGE)
+- `bg-accent-blue` → `#7B96C4` (info, mission planifiée)
+- `bg-accent-red` → `#C46969` (alertes, DPE F-G)
+- `bg-accent-green` → `#8AB57B` (validations, DPE A-C)
+- `bg-accent-orange` → `#D4A574` (DPE D-E)
+
+## Composants signature
+
+- **Border-radius cohérents** :
+  - `rounded-xl` (24px) cartes
+  - `rounded-md` (12px) boutons
+  - `rounded-pill` (100px) pills/badges
+- **Glassmorphism** : `backdrop-blur-md bg-card/80 border border-border/50` (utility `.glass`)
+- **CTA noir massif** : `bg-cta text-cta-foreground hover:bg-cta-hover`, padding généreux `px-6 py-3`
+- **Boutons icônes circulaires** : 40-44px, fond blanc pur, icône Lucide stroke 1.5-2px
+- **Sidebar étroite** : 60-72px largeur, icônes seules + tooltips au hover
+
+## Règles strictes (NON NÉGOCIABLES)
+
+- ❌ **Pas de gradients colorés vifs** (sauf noir→gris ou blanc→transparent glassmorphism)
+- ❌ **Pas de `shadow-lg` ou `shadow-2xl`** (max `shadow-sm` / `shadow-md`)
+- ❌ **Pas de couleurs saturées en surface large** (les accents bleu/rouge/vert NE SONT JAMAIS surface dominante)
+- ❌ **Bordures 1px max**, couleur très claire `border-border`
+- ✅ **Privilégier l'espace blanc** (white space premium)
+- ✅ **Cohérence des border-radius** dans tout le produit
+- ✅ **Mode dark + light** obligatoirement supportés (next-themes)
+
+## Typographie (Manrope)
+
+| Élément | Tailwind class |
+|---|---|
+| H1 | `text-3xl md:text-4xl font-bold tracking-tight` |
+| H2 | `text-2xl md:text-3xl font-semibold` |
+| H3 | `text-lg md:text-xl font-semibold` |
+| Body large | `text-base` |
+| Body | `text-sm` |
+| Label / meta | `text-xs font-medium text-subtle-foreground` |
+| Caption | `text-[11px] text-subtle-foreground` |
+
+## Icônes (Lucide React)
+
+- Stroke 1.5-2px (default Lucide)
+- Tailles : 20px boutons, 16px inputs, 24px headers
+- Import :
+  ```tsx
+  import { ChevronRight, Plus, Settings } from 'lucide-react'
+  ```
+
+## Exemples patterns
+
+### Card sobre
+```tsx
+<div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+  <h3 className="text-lg font-semibold text-foreground">Titre</h3>
+  <p className="mt-2 text-sm text-muted-foreground">Contenu</p>
+</div>
+```
+
+### CTA principal
+```tsx
+<button className="rounded-md bg-cta px-6 py-3 text-sm font-medium text-cta-foreground hover:bg-cta-hover transition">
+  Action principale
+</button>
+```
+
+### Pill statut (accent délavé)
+```tsx
+<span className="inline-flex items-center rounded-pill bg-accent-red/20 px-3 py-1 text-xs font-medium text-accent-red">
+  DPE F
+</span>
+```
+
+### Modal glassmorphism
+```tsx
+<div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40">
+  <div className="glass rounded-xl p-6 shadow-md max-w-md">
+    ...
+  </div>
+</div>
+```
+
+## Anti-patterns visuels
+
+- ❌ `bg-blue-500`, `bg-red-500`, etc. (Tailwind default) en surface large
+- ❌ `shadow-lg`, `shadow-2xl`, `shadow-inner`
+- ❌ `bg-gradient-to-r from-pink-500 to-purple-500` (gradients vifs)
+- ❌ `border-2`, `border-4` (toujours border-1)
+- ❌ `text-center` partout (préférer left-align en B2B)
+- ❌ Émojis dans texte UI (sauf `✓` validation et `→` navigation)

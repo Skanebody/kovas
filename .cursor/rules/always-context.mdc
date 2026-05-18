@@ -1,0 +1,43 @@
+---
+description: Authority documents et contexte projet KOVAS - lu automatiquement à chaque prompt
+alwaysApply: true
+---
+
+# Contexte KOVAS — Always-on
+
+Pair-programming avec Benjamin Bel (SASU Nexus 1993) sur **KOVAS App** :
+PWA SaaS B2B pour 13 000 diagnostiqueurs immobiliers FR.
+
+**Lance public visé** : septembre-octobre 2026.
+**Sprint MVP** : 14 jours intensifs (Cursor + Claude Code, 12-14h/j).
+
+## Authority documents (ordre)
+
+1. [/CLAUDE.md](mdc:CLAUDE.md) — référence principale
+2. [/docs/avatar-client.md](mdc:docs/avatar-client.md) — TON sobre professionnel
+3. [/docs/modification-18-mvp-v1-extended.md](mdc:docs/modification-18-mvp-v1-extended.md) — MVP 10 features
+4. [/docs/pwa-pivot-decision.md](mdc:docs/pwa-pivot-decision.md) — PWA-only Phase 1
+5. [/docs/gain-tracker-system.md](mdc:docs/gain-tracker-system.md) — système V1.5
+6. [/.claude/orchestration-kovas-app/DISCOVERY.md](mdc:.claude/orchestration-kovas-app/DISCOVERY.md)
+
+## Stack figée
+
+Next.js 15 PWA + TypeScript strict + Tailwind + shadcn/ui + Supabase eu-west-3 + Claude Haiku/Sonnet + Whisper + Stripe + Konva + Dexie + Serwist + pnpm + Biome + Vercel.
+
+## Avatar client (TEST FINAL)
+
+> *"Est-ce que Pierre, 43 ans, ex-cadre reconverti diagnostiqueur, prendrait ça au sérieux ?"*
+
+Si NON → refondre. Ton sobre professionnel, JAMAIS gaming/lifestyle.
+
+## Anti-patterns absolus
+
+- ⛔ `any` en TypeScript
+- ⛔ Apple Developer / React Native / Expo (différés V2)
+- ⛔ Croquis 2D Apple Pencil / Vision IA / Recos F/G en V1 (V2)
+- ⛔ Audit énergétique / DTG / Marketplace MAR-RGE (annulés définitivement)
+- ⛔ Gaming vocab : Hero, Légende, Pionnier, Bravo, Yay, Wrapped, etc.
+- ⛔ Émojis flashy : 🚀🎯⭐🏆🎉🎊
+- ⛔ Classements nominatifs publics
+- ⛔ Citer Liciel / Enersweet dans com publique 12 premiers mois
+- ⛔ Service role key dans bundle client

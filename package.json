@@ -1,0 +1,34 @@
+{
+  "name": "kovas-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "KOVAS App — SaaS B2B PWA diagnostic immobilier IA-first",
+  "homepage": "https://kovas.fr",
+  "author": "Benjamin Bel <benjamin@kovas.fr>",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -F @kovas/web dev",
+    "build": "pnpm -r run build",
+    "start": "pnpm -F @kovas/web start",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "pnpm -r run test",
+    "test:e2e": "pnpm -F tests-e2e test",
+    "db:gen-types": "supabase gen types typescript --linked > packages/database/src/types.ts",
+    "db:migrate": "supabase db push",
+    "db:reset": "supabase db reset"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

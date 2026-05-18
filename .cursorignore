@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# Env files (secrets)
+.env
+.env.local
+.env.*.local
+
+# OS / IDE noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# Test coverage
+coverage/
+
+# Supabase generated
+supabase/.branches
+supabase/.temp
+
+# Liciel discovery log (separate repo, NEVER in cursor context)
+kovas-discovery-log/
+
+# Fixtures raw (avant anonymisation)
+**/fixtures-raw/
+
+# Skill m2c1 cloned (pas du projet KOVAS)
+m2c1/
+
+# Playwright artifacts
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Logs
+*.log

@@ -1,0 +1,739 @@
+# CLAUDE.md — KOVAS App
+
+> Document de référence pour Cursor + Claude Code en pair-programming.
+> **Authority order** : ce CLAUDE.md > `.claude/orchestration-kovas-app/DISCOVERY.md` > PRD > recherches.
+> Tout conflit doit être résolu en faveur du document supérieur.
+> **Identité légale Nexus 1993** : [`docs/credentials-setup/nexus-1993-identity.md`](docs/credentials-setup/nexus-1993-identity.md) (source vérité)
+> **Pivot PWA-only Phase 1** : [`docs/pwa-pivot-decision.md`](docs/pwa-pivot-decision.md) (apps natives différées V2)
+> **Modification 18 MVP V1 étendu + Focus 8 diagnostics** : [`docs/modification-18-mvp-v1-extended.md`](docs/modification-18-mvp-v1-extended.md) (10 features V1, croquis V2, audit/DTG/marketplace MAR-RGE supprimés)
+> **Avatar client (TOUT décision produit doit passer ce test)** : [`docs/avatar-client.md`](docs/avatar-client.md) — diagnostiqueur 43 ans, ex-cadre reconverti, ton SOBRE PROFESSIONNEL, **JAMAIS gaming/lifestyle/millennial**
+> **Système Gain Tracker (V1.5, sprints 15-17 post-launch, 8j dev)** : [`docs/gain-tracker-system.md`](docs/gain-tracker-system.md) — compteur permanent + page activité + rapport mensuel + image LinkedIn + statuts pros + stats anonymisées
+> **Dernière mise à jour** : 2026-05-18 (Modification 19 : Gain Tracker système V1.5 + avatar client formalisé)
+
+---
+
+## 1. Identité projet
+
+| Champ | Valeur |
+|---|---|
+| Produit | **KOVAS App** |
+| Société éditrice | SASU **Nexus 1993** (siège Paris 8, fondateur en Normandie) |
+| Fondateur | Benjamin Bel (solopreneur, 100% temps, ~24 mois runway) |
+| Domaine | **kovas.fr** |
+| Date démarrage dev | avril 2026 |
+| Lancement public visé | **septembre-octobre 2026** |
+| Cible | ~13 000 diagnostiqueurs immobiliers indépendants FR |
+| Concurrence | Liciel (40-52% PdM, Enersweet/Pictet AM) + AnalysImmo + OBBC + ORIS |
+
+---
+
+## 2. Vision & positionnement
+
+**KOVAS Phase 1 = PWA Next.js 15 (iPad/iPhone/Web unifié) compagnon à Liciel**, qui élimine la friction terrain (saisie vocale, photos géolocalisées, exports multi-format, **bouton Partager 3 modes**).
+
+**Focus 8 diagnostics standards** (92% du volume métier FR) :
+- DPE, Amiante, Plomb CREP, Gaz, Électricité, Termites, Carrez/Boutin, ERP
+- **EXCLUS DÉFINITIVEMENT** : audit énergétique, DTG, marketplace MAR/RGE
+
+> **KOVAS ne remplace pas Liciel en Phase 1. Il le complète.**
+> Phase 2 (M10-M18) : KOVAS Complet remplace Liciel après certification ADEME 3CL-2021 (DPE certifié uniquement, pas audit).
+> Phase 3 (M19+) : KOVAS Augmenté = assistant IA conversationnel métier + Vision IA avancée + productivité avancée diagnostics standards.
+> Phase 4 (M30+) : **Expansion géographique** (BE/LU/CH, +15k diagnostiqueurs) **OU productivité avancée** (analytics cabinet, marketplace sous-traitance entre diagnostiqueurs). Décision M30 selon traction.
+
+**Promesse mesurable** : gain de 1h30 par mission DPE typique (terrain + retour bureau).
+
+**Objectif business** : **1 M€ ARR à M24** en solopreneur, sans levée. Cible M36 : **2,5-3 M€ ARR** avec Phase 2 lancée.
+
+---
+
+## 3. MVP V1 — 10 features cœur (post-Modification 18 du 18/05)
+
+**Philosophie** : *Faire 10 choses extrêmement bien sur 8 diagnostics standards (92% du marché FR).*
+
+| # | Feature | Effort dev (j) | Note |
+|---|---|---|---|
+| 1 | **Saisie vocale terrain structurée par pièce** (Whisper FR + parser custom JS 80% + Claude Haiku 20% hybride) | 5 | Approche IA hybride 0,01€/mission (vs 0,15€) |
+| 2 | **Photos géolocalisées + annotations basiques** (Web Camera API + Geolocation + Konva — WebP compression 5MB→250KB) | 3 | PointerEvents pression OK |
+| 3 | **Auto-complétion adresse + cadastre** (API BAN + IGN + Géorisques ERP) | 2 | Inchangé |
+| 4 | 🆕 **Templates pièces pré-remplis** (T2/T3/T4/T5 maison/appartement) | 1 | UX terrain accélérée |
+| 5 | 🆕 **Check-lists par type de diagnostic** (validation complétude pré-export) | 1,5 | "Tu n'as pas saisi la VMC, c'est volontaire ?" |
+| 6 | 🆕 **Upload documents propriétaire via lien public** | 2 | Client uploade factures énergie / plans / anciens DPE avant visite |
+| 7 | 🆕 **Validation cohérence basique** (règles métier, pas d'IA) | 1,5 | "Surface 100m² + chaudière 5kW = peu", "Maison 1850 + étiquette A = à vérifier" |
+| 8 | 🆕 **Bouton "Partager vers logiciel principal"** — 3 modes (Email + GDrive/Dropbox auto-sync + DL direct) | 3 | UX cible : 30s-1min vs 1h30-2h re-saisie |
+| 9 | **Export multi-format universel** (ZIP Liciel + PDF + Word + CSV + JSON + "Affichage côté") | 7 | Inchangé |
+| 10 | **Sync mobile/web + offline complet** (Service Worker + IndexedDB Dexie + queue mutations + LWW) | 3 | PWA-natif |
+| **Total effort dev MVP** | | **29 j** | Compressible **22-25 j intensifs** Cursor + Claude Code |
+
+### ⛔ Features RETIRÉES du MVP V1
+
+| Feature | Report |
+|---|---|
+| **Croquis 2D manuel Apple Pencil** | **V2** (utile pour amiante avancé, audit Phase 3 mais pas indispensable Phase 1) |
+| Vision IA reconnaissance équipement | **V2** (3-6 mois post-launch) |
+| Croquis IA depuis photo | **V3** |
+| Génération recommandations post-DPE F/G auto | **V2** |
+| Scan LiDAR iPad Pro 3D | **V3+** ou jamais |
+| Assistant IA conversationnel métier | **Phase 3** (M19+) |
+| **Marketplace MAR/RGE** | ❌ **ANNULÉ DÉFINITIVEMENT** |
+| Multi-utilisateurs cabinet | **V2** / Phase 2 Cabinet tier |
+| Signature eIDAS Yousign **en pack mensuel** | Option **ponctuelle 2€/sig** uniquement |
+| Télémètres BLE (Leica DISTO, Bosch GLM) | **V2** |
+| **Module audit énergétique** | ❌ **ANNULÉ DÉFINITIVEMENT** |
+| **Module DTG (Diagnostic Technique Global)** | ❌ **ANNULÉ DÉFINITIVEMENT** |
+| API publique | **Phase 2** |
+| Espace pro B2B notaires/agences | **V2** |
+
+### Plan de couverture progressive 8 diagnostics
+
+| Période | Diagnostics couverts | % marché cumulé |
+|---|---|---|
+| **Sprint 14j (V1 V0)** | DPE + Amiante (moteur générique 80% code partagé) | **65%** |
+| S3 post-launch | + Carrez/Boutin + ERP (2j) | 67% |
+| S4 | + Plomb CREP (2j) | 73% |
+| S5 | + Gaz (2j) | 81% |
+| S6 | + Électricité (2j) | 89% |
+| S7 | + Termites (1,5j) | **92%** |
+
+**Fin M2 post-launch** : 92% du volume diagnostic FR.
+
+---
+
+## 4. Pricing intelligent — 4 tiers simplifiés
+
+### Architecture
+
+**4 tiers** avec quotas missions inclus + surplus à l'usage. **AUCUN add-on activable**. Toutes les fonctionnalités sont incluses dans tous les tiers.
+
+### Phase 1 — Compagnon (M1-M9)
+
+| Tier | Prix HT/mo | Missions incluses | Surplus | Users | Stockage |
+|---|---|---|---|---|---|
+| **Découverte** | **29€** | 20 | 2€/mission | 1 | 20 Go |
+| **Standard (recommandé)** | **59€** | 60 | 1,50€/mission | 1 | 50 Go |
+| **Volume** | **99€** | 150 | 1€/mission | 1 | 100 Go |
+
+### Phase 2 — Complet (M10-M18, après cert ADEME)
+
+| Tier | Prix HT/mo | Missions | Surplus | Users |
+|---|---|---|---|---|
+| Standard Complet | **99€** | 60 | 1,50€ | 1 |
+| Volume Complet | **149€** | 150 | 1€ | 1 |
+| **Cabinet** | **199€** | 400 | 0,80€ | jusqu'à 3 |
+
+### Phase 3 — Augmenté (M19+)
+
+| Tier | Prix HT/mo |
+|---|---|
+| Standard Augmenté | 149€ |
+| Volume Augmenté | 199€ |
+| Cabinet Augmenté | 299€ |
+| **Enterprise** (4-10 users) | 499€ |
+
+### Tarif Founder à vie (40-50 bêta-testeurs M6-M9)
+
+- **M6-M7** : accès gratuit total (1 mois, validation fonctionnelle)
+- **M7-M9** : tier Découverte à 29€/mo (validation économique willingness-to-pay)
+- **M9+** : **Standard Founder à vie = 49€/mo** (vs 59€ public) avec **70 missions inclus** (vs 60) et **surplus 1€/mission** (vs 1,50€)
+- **Cabinet Phase 2 Founder** : **169€/mo à vie** (vs 199€ public, rabais ~15%)
+- Badge Founder + accès anticipé Phase 2 + influence roadmap
+
+### Options ponctuelles (paiement à l'usage, AUCUN pack mensuel)
+
+| Action | Tarif unitaire |
+|---|---|
+| Signature eIDAS Yousign (tiers Découverte/Standard/Volume) | **2€/signature** |
+| Rapport bilingue FR/EN | **5€/rapport** |
+| SMS rappel client J-1 | **0,15€/SMS** |
+
+### Annuel : 2 mois offerts (10 mois payés sur 12) sur tous les tiers.
+
+---
+
+## 5. UX anti-friction paiement
+
+| Composant | Comportement |
+|---|---|
+| **CB enregistrée 1 seule fois** (Stripe Customer + PaymentMethod) | Saisie à la conversion essai → payant. **Jamais redemandée** pour dépassements ou changement de tier |
+| **Widget transparence permanent** (dashboard, en haut à droite) | `Ce mois : 73 missions • 13 au-delà du forfait — Estimation : 78,50€ [Voir le détail]` — temps réel |
+| **Notifications positives aux seuils** | 80% : info contextuelle. 100% : valorisation gain de temps + suggestion upgrade. 150% : calcul économies upgrade explicite |
+| **Plafond mensuel auto-protecteur activable** | `Plafond max : [120€] — Au-delà, missions restent fonctionnelles mais branding KOVAS revient sur PDF` |
+| **Email récap mensuel transparent** (28 du mois) | Missions réalisées, temps économisé, détail facturation, prélèvement annoncé |
+| **Email "Tu paies trop" auto** | Si dépassement régulier 3 mois consécutifs → suggestion upgrade tier économique (même si MRR baisse temporairement) |
+
+---
+
+## 6. Essai gratuit 14 jours
+
+| Paramètre | Valeur |
+|---|---|
+| Durée | **14 jours calendaires** |
+| CB requise | Non |
+| Email pro requis | Oui (pas de gmail/yahoo perso) — validation domaine pro |
+| Missions max | 30 (plafond technique caché anti-abus) |
+| Whisper | 60 min max (cap caché anti-abus) |
+| Exports | Illimités |
+| Branding PDF | "Essai KOVAS" en footer |
+| Anti-abus | 1 essai par SIRET vérifié (API INSEE Sirene) |
+
+### Séquence emails
+
+| Jour | Type | Sujet |
+|---|---|---|
+| J+1 | Auto | Tutoriel "Première mission réussie" |
+| J+4 | **Humain (Benjamin)** | Check personnel |
+| J+8 | Auto | "Comment ça se passe ?" + tips |
+| J+11 | Auto | "Plus que 3 jours, voici votre offre" |
+| J+13 | Auto | "Demain dernier jour" |
+
+### Conversion à J14
+
+- Choix : Découverte 29€ OU Standard 59€ OU Volume 99€
+- Sans conversion : compte gelé 90j, données conservées, réactivation possible
+
+### Cibles conversion essai → payant (glissante)
+
+- M0-6 : **22-28%** (early adopters préqualifiés via outreach LinkedIn, tier d'entrée 29€ faible friction)
+- M6-12 : **18-25%** (phase d'élargissement)
+- M12+ : **20-25%** (remontée par maturité produit + social proof + parrainage)
+
+---
+
+## 7. Économie réaliste
+
+### Marge brute par profil (Phase 1)
+
+| Profil | Missions | Coûts variables | ARPU | Marge brute |
+|---|---|---|---|---|
+| Démarrant (Découverte) | 30 | ~8€ | 49€ (29+10×2) | **41€ (84%)** |
+| Solopreneur typique (Standard) | 75 | ~16€ | 81,50€ (59+15×1,50) | **65,50€ (80%)** |
+| Power user (Volume) | 110 | ~26€ | 99€ | **73€ (74%)** |
+| Cabinet Phase 2 (2 users) | 220 | ~48€ | 199€ | **151€ (76%)** |
+
+**ARPU moyen pondéré Phase 1** : ~75€/mo. **Marge brute moyenne : ~77%**.
+
+### 7bis. Stratégie d'autonomisation IA progressive sur 36 mois
+
+> **Document détaillé** : [`/docs/ai-autonomy-strategy.md`](docs/ai-autonomy-strategy.md)
+
+Objectif : **marge brute 77% (M12) → 85%+ (M36)** via réduction progressive de la dépendance Claude/Whisper.
+
+**Principe directeur** : *remplacer 60-80% des appels IA par compute propre, garder Claude pour les 20-40% de cas complexes*. L'indépendance 100% est un mythe.
+
+| Phase | Période | Coût IA (à 2000 users) | Économie vs P1 |
+|---|---|---|---|
+| Phase 1 — APIs externes 100% | M0-M12 | 6-8 k€/mois | – |
+| Phase 2 — Optimisations Anthropic (cache + hybride + batch) | M12-M18 | 4-5 k€/mois | -30% |
+| Phase 3 — Whisper self-hosted + Vision YOLO on-device | M18-M24 | 2,5-3,5 k€/mois | -55% |
+| Phase 4 — Llama 3.3 70B fine-tuné sur 100k+ missions | M24-M36 | 1-1,5 k€/mois | -80% |
+| Phase 5+ — 80/20 algos propres + Claude | M36+ | 1-2 k€/mois | stable |
+
+**Investissement total 36 mois** : 60-110k€. **ROI récurrent M36** : 150-200k€/an + moat technologique (valorisation revente +20-40%).
+
+**Auto-apprentissage continu** : corrections utilisateurs Vision IA + profil linguistique personnalisé + détection patterns métier (100k+ missions).
+
+**Métriques à tracker dès J0** : `ai.claude.cost_eur`, `ai.whisper.cost_eur`, `ai.cache_hit_rate`, `vision.user_correction_rate`, `ai.{operation}.latency_p95_ms`.
+
+### Projections corrigées
+
+| Horizon | Abonnés | ARPU moyen | MRR | ARR | Marge brute | Marge nette annuelle |
+|---|---|---|---|---|---|---|
+| **M12** | 140 | 70€ | 9 800€ | 117 600€ | ~90 600€ | **~85 800€** |
+| **M24** | 800 | 80€ | 64 000€ | 768 000€ | ~591 000€ | **~582 600€** |
+| **M36** | 2 100 | 110€ | 231 000€ | 2,77 M€ | ~2,15 M€ | **~2,13 M€** |
+
+**Objectif révisé** : **1 M€ ARR à M24** (vs initial 500-600k€).
+
+### CAC & LTV réalistes
+
+- **CAC essai blended** : ~80€
+- **CAC payant blended** : ~400€ (conversion 22-28%)
+- **LTV** (24 mois moyenne à 80€/mois) : ~1 920€
+- **LTV/CAC** : **4,8** (cible standard SaaS B2B > 3, OK)
+- **Payback period** : **5 mois**
+
+---
+
+## 8. Stack technique (figée — PWA-only Phase 1)
+
+> **Modification 17 (18/05)** : pivot PWA-only Phase 1. Apps natives RN+Expo différées V2/Phase 2.
+> Détail : [`docs/pwa-pivot-decision.md`](docs/pwa-pivot-decision.md)
+
+### Frontend unifié — Next.js 15 PWA
+
+- **Next.js 15 App Router** + TypeScript strict (**zéro `any`**)
+- **Tailwind CSS** + **shadcn/ui** + **Lucide React**
+- **next-intl** (i18n) + **next-themes** (dark mode auto + override)
+- **Framer Motion**, **Recharts** ou **Visx**
+- **PWA** : `next-pwa` ou `serwist` (Service Worker + manifest + cache strategies)
+- **Croquis 2D** : **Konva.js + react-konva** (PointerEvents API pour Apple Pencil pressure)
+- **Caméra** : `<input type="file" capture="environment">` + `getUserMedia` (HEIF dégradé en JPEG q=80 1920px)
+- **Audio** : `MediaRecorder` API + Web Audio API
+- **Offline DB** : **Dexie.js** sur IndexedDB (au lieu d'op-sqlite + Drizzle)
+- **State** : Zustand + TanStack Query
+- **Persistence cache** : IndexedDB + Cache Storage (Service Worker)
+
+### Apps natives — DIFFÉRÉES V2
+
+Apple Developer Program + Google Play + Expo EAS + RN+Expo SDK 52 → **différés V2/Phase 2**. Trigger pour re-activation : ≥ 20% users payants demandent app native OU ≥ 30% taux browser (pas "Added to Home Screen") après 30j.
+
+D-U-N-S 281 515 446 **gardé** (gratuit, lifetime, débloquera Apple Dev enrollment instantanément si retour native plus tard).
+
+### Backend / Data
+
+- **Supabase complet** : PostgreSQL + Auth + Storage + Realtime + Edge Functions + RLS
+- Region : **eu-west-3 (Paris)**
+- Multi-tenant from day 1 via `organization_id` + `auth.is_member_of()` SECURITY DEFINER helper
+
+### IA
+
+- **Anthropic Claude** :
+  - `claude-haiku-4-5` (voice structuration, chatbot)
+  - `claude-sonnet-4-6` (vision Phase 2, génération Phase 2, recos Phase 2)
+  - `claude-opus-4-7` réservé escape hatch (feature flag)
+  - Prompt caching 1h TTL agressif
+- **OpenAI Whisper** (`gpt-4o-mini-transcribe`) — primary
+- **Deepgram Nova-3 Frankfurt** — fallback EU
+- **iOS SFSpeechRecognizer** — offline fallback
+
+### Paiement / Comm
+
+- **Stripe** : Billing (subscriptions 4 tiers), SEPA priorité + CB fallback, Stripe Tax (TVA 20%)
+- **Resend** (emails)
+- **DocuSeal** self-hosted Railway (signature SES) + **Yousign** ponctuel à 2€/sig (eIDAS)
+- **Brevo SMS** (~0,15€/SMS, sourceanté FR)
+
+### Hosting / DevOps
+
+- **Vercel** (web EU Paris)
+- **Expo EAS** (builds mobile + OTA)
+- **Railway** (DocuSeal + microservice Java/Jackcess MDB writer + outreach agent)
+- **Cloudflare** (DNS + CDN + SSL gratuit)
+- **GitHub Actions** CI/CD
+- **pnpm workspaces** monorepo
+- **Sentry** (error tracking) + **PostHog** (analytics + feature flags + session replay)
+
+---
+
+## 9. Identité visuelle — Glassmorphism Premium Soft UI
+
+### Palette light
+
+`#F4F4F5` fond / `#FFFFFF` cartes / `#0A0A0A` texte / `#404040` secondaire / `#737373` tertiaire / `#D4D4D8` bordures / `#0A0A0A` CTA / `#262626` hover CTA
+
+### Palette dark
+
+`#0A0A0A` fond / `#171717` cartes / `#FAFAFA` texte / `#A1A1A9` secondaire / `#27272A` bordures / `#FFFFFF` CTA
+
+### Accents délavés (pills/badges seulement)
+
+- Bleu doux `#7B96C4` (info, mission planifiée)
+- Rouge doux `#C46969` (alertes, DPE F/G)
+- Vert doux `#8AB57B` (validations, DPE A-C)
+- Orange doux `#D4A574` (DPE D-E)
+
+### Typo : **Manrope** (Google Fonts gratuite)
+
+| Élément | Taille | Graisse |
+|---|---|---|
+| H1 | 32-40px | Bold 700 |
+| H2 | 24-28px | Semibold 600 |
+| H3 | 18-22px | Semibold 600 |
+| Body | 14-16px | Regular 400 |
+| Label | 12-13px | Medium 500 |
+
+### Règles strictes (non négociables)
+
+- Border-radius cohérents (16-24px cartes, 12px boutons, 100px pills)
+- `backdrop-blur-md` + opacité 70-90% glassmorphism
+- Pas de gradients colorés vifs (sauf noir→gris ou blanc→transparent)
+- Pas de shadow-lg/2xl (max shadow-sm/md)
+- Pas de couleurs saturées en surface large
+- Bordures 1px max
+- Dark + Light obligatoires avec **auto système + override manuel** (next-themes web, useColorScheme mobile)
+- PDF générés toujours en clair (impression)
+
+---
+
+## 10. Contraintes techniques non négociables
+
+- **TypeScript strict** partout, zéro `any`
+- **Composants fonctionnels** uniquement
+- **Mobile-first**, responsive web
+- **Mode offline complet** mobile (sync différée)
+- **Sync temps réel** mobile ↔ web via Supabase Realtime
+- **Hébergement EU** (Supabase Paris + Vercel EU)
+- **RGPD complet** dès le démarrage (consentements, droit à l'oubli, export 1 clic)
+- **Code en anglais** (variables/fonctions/classes), **UI strings + commentaires métier en français**
+- **Dark + Light** obligatoires
+- **Conventions formats régionaux strictes dès J0** :
+  - Monnaie : centimes integer (jamais float/string)
+  - Pourcentages : 0-1 float
+  - Dates : UTC ISO 8601 stockées, timezone utilisateur stockée (default Europe/Paris)
+  - Téléphone : E.164 (`+33...`), parse via `libphonenumber-js`
+  - Surface : m² float
+- **Architecture i18n prête J0** (clés + namespace), FR seule active
+
+---
+
+## 11. Structure monorepo cible
+
+```
+kovas-app/
+├── apps/
+│   └── web/           # Next.js 15 PWA (iPad + iPhone + Web — unifié post-pivot 18/05)
+├── packages/
+│   ├── shared/        # types TypeScript, enums, utilitaires
+│   ├── database/      # client Supabase, types générés
+│   ├── ai/            # wrappers Claude + Whisper + provider fallback
+│   └── liciel-bridge/ # schéma JSON + MDB writer + XML CII pour Imports spécifiques
+├── services/
+│   └── mdb-writer/    # microservice Java/Jackcess (Linux Railway primary)
+├── supabase/
+│   ├── migrations/    # schéma SQL versionné
+│   └── functions/     # Edge Functions
+├── tests/e2e/         # Playwright E2E sur PWA
+├── pnpm-workspace.yaml, package.json, tsconfig.json, .env.example
+└── CLAUDE.md (ce fichier), README.md
+```
+
+⚠️ **Apps natives (`apps/mobile/`) supprimées Phase 1** — différées V2. Cf. [`docs/pwa-pivot-decision.md`](docs/pwa-pivot-decision.md).
+
+---
+
+## 12. Méthode de travail (sprints intensifs)
+
+### Sprint MVP 14 jours (12-14h/jour, solo + Cursor + Claude Code)
+
+| Jour | Tâche |
+|---|---|
+| 1 | Setup monorepo + Supabase + auth + design system base |
+| 2 | Design system complet (Glassmorphism, composants, Manrope) |
+| 3 | CRUD missions/clients/biens + auto-complétion adresse BAN/cadastre |
+| 4 | Saisie terrain mobile photos + géolocalisation |
+| 5 | Saisie vocale + transcription Whisper |
+| 6 | Structuration vocale IA (Claude API) |
+| 7 | **Checkpoint mi-parcours** + démo terrain réelle |
+| 8 | Croquis 2D Apple Pencil + symboles + calcul surface Carrez/Boutin |
+| 9 | Dashboard + sync Realtime mobile/web |
+| 10 | Mode offline complet + queue mutations |
+| 11 | Export multi-format (PDF + Word + CSV + JSON) |
+| 12 | Export ZIP Liciel (reverse-engineering) + tests sur 25-30 cas réels |
+| 13 | Stripe abonnements 4 tiers + page pricing + widget transparence + tests E2E Playwright |
+| 14 | Build prod (Vercel + Expo EAS) + onboarding 10 bêta-testeurs initiaux |
+
+**Buffer polish post-MVP** : jours 15-18 (4 jours réserve).
+
+### Activités parallèles M0-M5
+
+- 50 entretiens découverte LinkedIn (Playwright agent + ADEME public)
+- Recrutement advisor diagnostiqueur (terms : 0,5-1% BSPCE, vesting 2 ans, cliff 6 mois)
+- Préparation 20 articles KB (génération Claude + relecture)
+- Setup INPI dépôt marque KOVAS (classes 9 + 42)
+- D-U-N-S + Apple Developer Program
+
+### Discipline qualité
+
+- **Conventional Commits**
+- **TypeScript strict** zéro `any`
+- **Tests Vitest/Jest** ≥ 80% couverture
+- **Tests e2e Playwright** sur flux critiques
+- **Sentry** errors + **PostHog** analytics dès J0
+- **Branch protection** sur `main` (1 review minimum, CI verte)
+
+---
+
+## 13. Stratégie Liciel — résilience multi-voies
+
+> Référence complète : [`.claude/orchestration-kovas-app/kovas-defense-strategy.md`](.claude/orchestration-kovas-app/kovas-defense-strategy.md)
+
+### Architecture "résilience par diversification"
+
+**Ne jamais avoir un seul chemin d'import vers Liciel.** Tester 3 voies en Sprint 1-2, supporter **au moins 2 voies en production**.
+
+| Voie | Robustesse | Priorité |
+|---|---|---|
+| **Imports spécifiques XML/Excel** (passerelles publiques Liciel) | 🟢 Solide | **Priorité 1** |
+| ZIP "Importer format ZIP" générique | 🔴 Fragile | Priorité 2 |
+| Pilotage UI Liciel (pywinauto) | 🟡 Très fragile | Fallback |
+| Phase 2 : envoi ADEME direct | 🟢 Indépendance totale | Roadmap M10-M18 |
+
+### Cadre légal sécurisé
+
+- **Art. L122-6-1 III CPI** (observation/étude) + jurisprudence **CJUE SAS Institute c/ WPL (2012)** : format de fichiers de données **non protégé**
+- Licence Liciel achetée légitimement à Benjamin Bel + fixtures anonymisées + journal de découverte versionné GPG dans repo `kovas-discovery-log` séparé
+
+### Interdits absolus
+
+- ⛔ Pas de désassembleur (Ghidra, IDA, dotPeek, dnSpy) sur Liciel.exe
+- ⛔ Pas d'employé/stagiaire ex-Liciel sur rôles tech
+- ⛔ Pas de scraping de WikiLiciel privé via compte tiers
+- ⛔ Pas de mention publique de Liciel dans marketing KOVAS 12 premiers mois
+- ⛔ Pas de communication sur forums Diagnostic-immo.com
+
+---
+
+## 14. Légal & conformité — IA-first 3 vagues
+
+### Vague 1 (M0-M9) — 100% IA Claude Max + INPI DIY
+
+Budget : **300€** (frais INPI uniquement).
+Génération via Claude Max : CGU, CGV, Politique confidentialité RGPD, Politique cookies, Mentions légales, DPA, Charte bêta-testeurs.
+Dépôt INPI marque KOVAS DIY (classes 9 et 42).
+
+### Vague 2 (M9-M18) — Audit avocat IP/Tech ciblé
+
+Cabinet boutique **Lefèvre Avocats** ou **Lex2B**.
+Budget : **1 000-1 500€**, déclenchement quand MRR atteint 5k€.
+Sujets : mémorandum reverse-engineering Liciel + CGU spécifiques métier diagnostic.
+
+### Vague 3 (M18+) — Conseil stratégique au cas par cas
+
+300-500€/h à la demande.
+
+**Budget cumulé 24 mois : 2 800-4 800€**.
+
+---
+
+## 15. Assurance RC pro Hiscox
+
+| Phase | Plafonds | Sous-couvertures | Prime annuelle |
+|---|---|---|---|
+| Phase 1 (M5-M18) | 500k€/sinistre, 1M€/an | Cyber 500k€, RGPD 50k€, défense juridique 100k€, erreurs IA inclusion explicite, **litiges IP 100k€ (extension obligatoire)** | ~900€ |
+| Phase 2 (M10+ post-ADEME) | 2M€/5M€ | + "Responsabilité diagnostic immobilier certifié" 1M€ | 2 500-3 500€ |
+| Phase 3 (M19+ marketplace) | 3M€/10M€ | + "Plateforme mise en relation" 2M€ | 4 000-6 000€ |
+
+Souscription Hiscox direct **M5** avant lancement bêta.
+
+---
+
+## 16. Support IA-first custom
+
+- **Ticketing custom Supabase + Resend** (pas de Crisp/Plain externe)
+- Tables `support_tickets`, `support_messages`, `support_notifications`
+- Bouton Aide flottant in-app + admin `/admin/support`
+- Pipeline IA Claude Haiku : classification + suggestion réponse + escalade humaine si confidence < 90%
+- **KB 20 articles essentiels** Sprint 13-14 + 30 articles bonus 4 semaines suivantes (calibrés sur tickets bêta réels)
+- **Status page custom Supabase + Resend** (pas Better Stack) : banner in-app temps réel + email automatique + page `/status` historique
+- **Coût** : 0€ infrastructure
+
+---
+
+## 17. Bêta privée en 2 phases (M6-M9)
+
+**40-50 bêta-testeurs** sélectionnés via outreach LinkedIn + ADEME.
+
+### Phase A — M6 à M7 (1 mois) : GRATUITE
+
+- Tests fonctionnels intensifs
+- Identification bugs critiques
+- 1 visio mensuelle obligatoire avec Benjamin
+- Charte bêta-testeurs signée à l'entrée
+
+### Phase B — M7 à M9 (2 mois) : tier Découverte 29€/mo
+
+- Validation économique willingness-to-pay
+- Filtre sérieux vs opportunistes
+- Premiers revenus cash-flow positif dès M7
+
+### À M9+ (lancement public)
+
+- Founders passent au **tarif Founder à vie** : Standard 49€/mo (70 missions, surplus 1€)
+- Cabinet Phase 2 Founder : 169€/mo
+- Nouveaux clients : tarif public (Découverte 29€ / Standard 59€ / Volume 99€)
+
+### Charte bêta-testeurs
+
+| KOVAS s'engage à | Bêta-testeur s'engage à |
+|---|---|
+| Accès complet gratuit M6-M7 + tier Découverte M7-M9 | Min 10 missions réelles pendant la période |
+| Tarif Founder Standard 49€/mo à vie M9+ | Remontée bugs et frictions (1-2 retours/semaine) |
+| Cabinet Founder Phase 2 169€/mo à vie | 1 visio feedback mensuelle (30 min) |
+| Badge Founder + accès anticipé Phase 2 | Accord écrit pour citation témoignage si satisfait |
+| Influence directe roadmap | Pas de partage d'accès sans validation |
+
+---
+
+## 18. Advisor diagnostiqueur (lacune comblée)
+
+### Profil cible
+
+- **10+ ans d'expérience** diagnostic immobilier
+- Cabinet personnel ou senior dans grand cabinet
+- **Maîtrise Liciel** + connaît pain points en profondeur
+- Influence métier (LinkedIn 500+ connexions, formateur, etc.)
+- Âge 35-50 ans (early adopter tech mais expérimenté)
+
+### Termes
+
+- **0,5 à 1% BSPCE ou phantom equity** sur 2 ans
+- **Vesting 2 ans, cliff 6 mois**
+- 1 visio mensuelle obligatoire (1h)
+- Review features critiques Phase 2 ADEME
+- Validation décisions réglementaires
+- Citation publique "Senior Advisor KOVAS" sur kovas.fr + LinkedIn
+- Accès gratuit à vie
+
+### Recrutement
+
+Pendant les **50 entretiens découverte M0-M5**. Poser la question directement à 3-5 candidats au mois **M3-M4**.
+
+---
+
+## 19. Comptes services (révisé 18/05)
+
+### M0 (impératifs)
+
+Anthropic Console / OpenAI Platform / Stripe / Supabase (Free → Pro M2 → PITR M5) / GitHub / Resend / Vercel / Expo EAS / Railway / **Cloudflare** / **Google Workspace Business Starter** / **D-U-N-S Dun & Bradstreet** (5-15j délai)
+
+### M1
+
+Apple Developer Program / **Google Play Developer** ($25 lifetime, créer tôt) / **INPI dépôt marque KOVAS** / LinkedIn Premium Business
+
+### M2-M3
+
+Sentry / PostHog / Brevo SMS / INSEE Sirene API / Géorisques API
+
+### M5 (avant bêta)
+
+Hiscox RC Pro + Cyber + **extension PI**
+
+### Différés / conditionnels
+
+- **Yousign** : M9+ (Phase 2 Cabinet tier seulement + option ponctuelle 2€/sig)
+- **Iopole PDP Factur-X** : M24+ (obligation TPE 09/2027-2028, dates à vérifier)
+- **Hetzner Windows VM** : conditionnel (tester Linux Jackcess d'abord)
+
+### Rejetés (économie ~1750€/an)
+
+- OVHcloud Object Storage (Supabase backup suffit)
+- Cookiebot (banner custom 4h dev)
+- Preventimmo (Géorisques API gratuit)
+- Sales Navigator (LinkedIn Premium Business suffit M0-M6)
+- Better Stack (status page custom)
+- Captain Contrat (IA-first via Claude Max)
+- Crisp/Plain ticketing (custom Supabase + Resend)
+
+### Budget mensuel projeté
+
+| Phase | Budget |
+|---|---|
+| M0-M3 | ~120€/mo |
+| M3-M6 | ~300-350€/mo |
+| M6-M9 | ~500€/mo |
+| M9-M12 | ~900-1 100€/mo |
+
+---
+
+## 20. Différenciateurs Phase 1 (révisés Modification 18)
+
+> Avec Vision IA reportée V2, croquis 2D reporté V2, audit/DTG/marketplace MAR-RGE supprimés, les différenciateurs Phase 1 deviennent **3 piliers cohérents** :
+
+1. **Saisie vocale terrain hybride FR** (Whisper + parser custom JS 80% + Claude Haiku 20% → 0,01€/mission, marge brute 80%)
+2. **Exports multi-format universels** (PDF + Word + CSV + JSON + ZIP Liciel — indépendance totale vs tout éditeur, **Plan B sans Liciel**)
+3. **Simplicité d'usage et de migration** : bouton "Partager vers Liciel" 3 modes (Email + GDrive auto-sync + DL direct), UX cible **30s-1min vs 1h30-2h** re-saisie + templates pièces + check-lists + validation cohérence
+
+**Différenciateurs Phase 2** (M10-M18) ajoutent :
+4. Calcul DPE certifié ADEME 3CL-2021 (remplace Liciel pour le calcul)
+5. Vision IA reconnaissance équipement (chaudières, étiquettes énergétiques)
+6. Recommandations post-DPE F/G générées automatiquement
+7. Croquis 2D Apple Pencil (utile amiante avancé)
+8. Modules amiante/plomb/gaz/élec/termites étendus
+
+**Différenciateurs Phase 3** (M19+) ajoutent :
+9. Assistant IA conversationnel métier (réglementation FR diagnostic)
+10. Productivité avancée diagnostics standards (analytics cabinet, reporting)
+
+❌ Audit énergétique, DTG, marketplace MAR/RGE = **DÉFINITIVEMENT supprimés** du périmètre KOVAS.
+
+---
+
+## 21bis. Gain Tracker — Système de mesure et récompense (V1.5, sprints 15-17 post-launch)
+
+> **Document détaillé** : [`docs/gain-tracker-system.md`](docs/gain-tracker-system.md)
+> **Avatar client référent** : [`docs/avatar-client.md`](docs/avatar-client.md) — **TON SOBRE PROFESSIONNEL OBLIGATOIRE, JAMAIS gaming/lifestyle**
+
+### Objectifs business (mesurés post-déploiement V1.5)
+
+| KPI | Baseline | Cible M6 | Cible M12 |
+|---|---|---|---|
+| Churn mensuel | 6% | < 5% | **< 4%** |
+| NPS | 35 | > 40 | **> 55** |
+| Coefficient viral K | 1,2 | 1,3 | **1,5** |
+| LTV | 1 800€ | +25% | **+50% (2 700€)** |
+
+### 7 éléments constitutifs
+
+1. **Compteur permanent dashboard** — Top-right, temps réel, "23h 47min économisées ce mois", animation 300ms (PAS confettis)
+2. **Page "Mon activité"** — Stats cumulées, évolution mensuelle, répartition diagnostics, statuts pros
+3. **Tracking comparatif Avant/Après** — Baseline 2 questions au signup, toast post-mission avec gain mesuré
+4. **Statuts professionnels (7 niveaux)** — Utilisateur Pro / Confirmé / Sénior / Premium / Ambassadeur / Fidèle / Expert (format "diplôme professionnel" SOBRE, vocabulaire métier — JAMAIS Hero/Légende/Pionnier)
+5. **Rapport mensuel email** — 1er du mois 8h CET, format "rapport business" sobre, 1 page max, signature humaine Benjamin
+6. **Image LinkedIn 1080×1080** — Sobre, business, texte pré-rédigé pro, hashtags métier — **LinkedIn ONLY** (pas Instagram/TikTok/Twitter)
+7. **Statistiques anonymisées comparatives** — Tranches (top 10/25/50%, "proche moyenne"), JAMAIS classement nominatif, opt-out possible
+
+### Notifications strictes
+
+**MAX 1 push/jour** + événementielles occasionnelles (statut débloqué 3-4x/an, anniversaire 1x/an, rapport mensuel 12x/an).
+
+### Ton et vocabulaire
+
+| ✅ FAVORISER | ❌ ÉVITER |
+|---|---|
+| "Professionnel", "Sénior", "Confirmé" | "Hero", "Légende", "Pionnier" |
+| "Rapport mensuel d'activité" | "Wrapped", "Stories" |
+| "Tableau de bord" | "Dashboard fun" |
+| "Vous" (vouvoiement par défaut) | "Toi" (sauf opt-in user) |
+| Émojis `✓` et `→` uniquement | 🚀🎯⭐🏆🎉🎊 |
+| Chiffres précis ("23h 47min") | Phrases vagues ("plein de temps économisé") |
+
+### Effort dev : 8 jours (sprints 15-17 post-launch)
+
+| Sprint | Jours | Livrable |
+|---|---|---|
+| Sprint 15 (semaine 3 post-launch) | J1-J3 | Tables DB + compteur permanent + page "Mon activité" |
+| Sprint 16 (semaine 4) | J4-J6 | Statuts pros (7 niveaux) + rapport mensuel email + image LinkedIn |
+| Sprint 17 (semaine 5) | J7-J8 | Statistiques anonymisées + notifications push + polish |
+
+---
+
+## 21. Vision Phase 4 — RECENTRÉE (M30+, post-Modification 18)
+
+**Plus de "Field Compliance OS" élargi.** Les 5 verticales précédentes (audit RGE, EDL, contrôle technique, expertise assurance, conformité ERP) sont **abandonnées** au profit d'un focus stratégique recentré.
+
+À DÉCIDER au M30 selon traction réelle :
+
+### Option A — Expansion géographique
+
+| Pays | Marché diagnostiqueurs | Réglementation |
+|---|---|---|
+| Belgique | ~5 000 | Équivalents DPE/amiante FR |
+| Luxembourg | ~500 | Cadre proche FR |
+| Suisse romande | ~10 000 (multi-canton) | Plus complexe (cantonale) |
+| **Total** | **~15 000 diagnostiqueurs additionnels** | |
+
+### Option B — Productivité avancée diagnostics standards
+
+Si marché FR saturé (50%+ de part KOVAS) :
+
+- IA conversationnelle métier 24/7
+- Reporting et analytics avancés cabinet (KPI fines, benchmarks)
+- Marketplace **sous-traitance entre diagnostiqueurs** (pas MAR/RGE qui est définitivement annulée)
+
+**Décision M30** selon métriques traction + parts de marché atteintes.
+
+---
+
+## 22. Quick reference — où trouver quoi
+
+| Sujet | Document de référence |
+|---|---|
+| Décisions produit/business | `.claude/orchestration-kovas-app/DISCOVERY.md` (authority) |
+| Stratégie défensive Liciel | `.claude/orchestration-kovas-app/kovas-defense-strategy.md` |
+| Recherches techniques | `.claude/orchestration-kovas-app/research/{liciel-format,mobile-stack,supabase-architecture,anthropic-claude,whisper-transcription,stripe-facturx-signature}.md` |
+| Planning sprint 14j | `.claude/orchestration-kovas-app/planning-14-jours.md` |
+| Pricing détaillé + mécaniques anti-friction | `.claude/orchestration-kovas-app/pricing-strategy.md` |
+| Économie détaillée | `.claude/orchestration-kovas-app/economics.md` |
+| Go-to-Market plan | `.claude/orchestration-kovas-app/gtm.md` |
+| Roadmap features V1/V2/V3/Phase 2-4 | `.claude/orchestration-kovas-app/features-roadmap.md` |
+| Recrutement advisor + équipe | `.claude/orchestration-kovas-app/team.md` |
+| PRD complet (Phase 1) | `.claude/orchestration-kovas-app/PRD.md` |

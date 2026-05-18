@@ -1,0 +1,111 @@
+---
+description: TypeScript strict conventions KOVAS - applied when editing .ts/.tsx files
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: false
+---
+
+# TypeScript strict — KOVAS conventions
+
+## Rules
+
+1. **Zéro `any`** : si tu vois un `any`, REFUSE-LE. Utilise `unknown` puis narrow type via zod schema.
+2. **Imports** : `import type { X } from '...'` pour types-only imports.
+3. **Naming** :
+   - Code identifiers : **anglais**
+   - UI strings + commentaires métier : **français**
+   - Fichiers : kebab-case (`mission-card.tsx`)
+   - Composants : PascalCase (`MissionCard`)
+4. **Composants fonctionnels** uniquement. Pas de classes React.
+5. **Server Components vs Client Components** :
+   - Default = Server Components (Next.js 15 App Router)
+   - `'use client'` UNIQUEMENT si interactivité nécessaire (hooks, état, browser APIs)
+6. **Types depuis @kovas packages** :
+   ```ts
+   import type { Mission, Client, Property } from '@kovas/shared'
+   import type { Database } from '@kovas/database'
+   ```
+7. **Zod schemas** pour toute validation runtime (forms, API responses, env vars).
+
+## Conventions formats régionaux (D310 DISCOVERY)
+
+- **Monnaie** : centimes integer. JAMAIS float, JAMAIS string.
+  ```ts
+  // ✅ OK
+  const priceCents = 5900 // = 59,00 €
+  formatPriceEUR(5900) // → "59,00 €"
+
+  // ❌ JAMAIS
+  const price = 59.00 // float = perte précision
+  const price = "59,00 €" // string = parsing fragile
+  ```
+
+- **Pourcentages** : 0-1 float.
+  ```ts
+  // ✅ OK
+  const ratio = 0.2 // = 20%
+  formatPercent(0.2) // → "20 %"
+  ```
+
+- **Dates** : UTC ISO 8601 stockées, `Intl.DateTimeFormat('fr-FR')` affichage.
+  ```ts
+  // Storage
+  const completedAt = new Date().toISOString() // "2026-05-18T14:30:00.000Z"
+
+  // Display
+  formatDateFR(completedAt) // → "18/05/2026"
+  ```
+
+- **Téléphone** : E.164.
+  ```ts
+  parsePhoneE164("07 45 02 56 42") // → "+33745025642"
+  formatPhoneFR("+33745025642")    // → "+33 7 45 02 56 42"
+  ```
+
+## Sécurité
+
+- ⛔ JAMAIS `process.env.SUPABASE_SERVICE_ROLE_KEY` dans un composant client
+- ⛔ JAMAIS `process.env.ANTHROPIC_API_KEY` dans un composant client
+- ✅ Toujours via Edge Functions Supabase ou Next.js API routes server-side
+- ✅ `NEXT_PUBLIC_*` UNIQUEMENT pour clés publiques anon
+
+## Patterns recommandés
+
+### Server Component (default)
+
+```tsx
+import { createKovasServerClient } from '@kovas/database'
+import { cookies } from 'next/headers'
+
+export default async function MissionsPage() {
+  const cookieStore = await cookies()
+  const supabase = createKovasServerClient({
+    getAll: () => cookieStore.getAll(),
+    setAll: (newCookies) => newCookies.forEach((c) => cookieStore.set(c.name, c.value, c.options)),
+  })
+
+  const { data: missions } = await supabase.from('missions').select('*').limit(20)
+
+  return <MissionsList missions={missions ?? []} />
+}
+```
+
+### Client Component (interactivité requise)
+
+```tsx
+'use client'
+
+import { useQuery } from '@tanstack/react-query'
+
+export function MissionsList({ initial }: { initial: Mission[] }) {
+  const { data } = useQuery({
+    queryKey: ['missions'],
+    queryFn: async () => {
+      const res = await fetch('/api/missions')
+      return res.json() as Promise<Mission[]>
+    },
+    initialData: initial,
+  })
+
+  return <ul>{data.map((m) => <li key={m.id}>{m.reference}</li>)}</ul>
+}
+```

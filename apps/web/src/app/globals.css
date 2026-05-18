@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   KOVAS Design Tokens — Glassmorphism Premium Soft UI
+   Cf. CLAUDE.md §9
+   ============================================ */
+
+@layer base {
+  :root {
+    /* Light mode (par défaut) */
+    --background: 240 5% 96%; /* #F4F4F5 */
+    --card: 0 0% 100%; /* #FFFFFF */
+    --foreground: 0 0% 4%; /* #0A0A0A */
+    --muted: 240 5% 96%;
+    --muted-foreground: 0 0% 25%; /* #404040 */
+    --subtle: 240 5% 96%;
+    --subtle-foreground: 0 0% 45%; /* #737373 */
+    --border: 240 6% 84%; /* #D4D4D8 */
+    --cta: 0 0% 4%; /* #0A0A0A */
+    --cta-hover: 0 0% 15%; /* #262626 */
+    --cta-foreground: 0 0% 98%; /* #FAFAFA */
+
+    /* Accents délavés (pills/badges seulement) */
+    --accent-blue: 217 27% 63%; /* #7B96C4 */
+    --accent-red: 0 38% 59%; /* #C46969 */
+    --accent-green: 100 30% 60%; /* #8AB57B */
+    --accent-orange: 28 49% 64%; /* #D4A574 */
+  }
+
+  .dark {
+    --background: 0 0% 4%; /* #0A0A0A */
+    --card: 0 0% 9%; /* #171717 */
+    --foreground: 0 0% 98%; /* #FAFAFA */
+    --muted: 0 0% 9%;
+    --muted-foreground: 240 4% 65%; /* #A1A1A9 */
+    --subtle: 0 0% 9%;
+    --subtle-foreground: 240 4% 65%;
+    --border: 240 4% 16%; /* #27272A */
+    --cta: 0 0% 100%; /* #FFFFFF inversé */
+    --cta-hover: 0 0% 90%;
+    --cta-foreground: 0 0% 4%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+}
+
+/* Glassmorphism utility — backdrop-blur + opacité 70-90% (cf. CLAUDE.md §9.4) */
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-md bg-card/80 border border-border/50;
+  }
+  .glass-dark {
+    @apply backdrop-blur-md bg-card/90 border border-border/40;
+  }
+}

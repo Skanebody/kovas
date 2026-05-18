@@ -1,0 +1,43 @@
+{
+  "name": "KOVAS — Diagnostic immobilier IA",
+  "short_name": "KOVAS",
+  "description": "L'app iPad qui transforme 3h de DPE en 30 minutes",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0A0A0A",
+  "background_color": "#F4F4F5",
+  "lang": "fr-FR",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Nouvelle mission",
+      "short_name": "Mission",
+      "url": "/missions/new"
+    },
+    {
+      "name": "Mes clients",
+      "short_name": "Clients",
+      "url": "/clients"
+    }
+  ]
+}

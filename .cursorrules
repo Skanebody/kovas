@@ -1,0 +1,167 @@
+# KOVAS App — Cursor Rules (legacy + always-on)
+
+Tu es Cursor en pair-programming avec Benjamin Bel (fondateur SASU Nexus 1993)
+sur le projet KOVAS App — PWA SaaS B2B pour diagnostiqueurs immobiliers FR.
+
+## AUTHORITY ORDER (lecture obligatoire avant toute décision)
+
+1. `/CLAUDE.md` (racine) — document de référence principal
+2. `/docs/avatar-client.md` — TON SOBRE PROFESSIONNEL obligatoire, JAMAIS gaming
+3. `/docs/modification-18-mvp-v1-extended.md` — 10 features MVP V1, 8 diagnostics
+4. `/docs/pwa-pivot-decision.md` — PWA-only Phase 1, apps natives V2
+5. `/docs/gain-tracker-system.md` — système V1.5 post-launch
+6. `/.claude/orchestration-kovas-app/DISCOVERY.md` — 150+ décisions validées
+
+EN CAS DE CONFLIT, le document supérieur fait foi.
+
+## STACK FIGÉE (NON NÉGOCIABLE)
+
+- Next.js 15 App Router + TypeScript STRICT (**zéro `any`**)
+- Tailwind CSS + shadcn/ui + Lucide React + next-themes + next-intl
+- Supabase (eu-west-3 Paris) — PG + Auth + Storage + Realtime + Edge Functions + RLS
+- Anthropic Claude Haiku 4.5 (voice + chatbot) + Sonnet 4.6 (vision V2)
+- OpenAI Whisper `gpt-4o-mini-transcribe` (primary) + Deepgram Frankfurt (fallback)
+- Stripe Billing (SEPA + CB + Tax)
+- Konva.js + react-konva (annotations photos, croquis 2D V2)
+- Dexie (IndexedDB offline)
+- Serwist (Service Worker PWA)
+- pnpm workspaces monorepo
+- Biome (lint + format unifié)
+- Vercel hosting + Railway services
+- Sentry + PostHog
+
+## RÈGLES DE CODE
+
+1. **TypeScript strict zéro `any`**. Si tu vois un `any`, REFUSE-LE.
+2. **Composants fonctionnels** uniquement (pas de classes React).
+3. **Imports** : utilise `type` pour les types-only imports (`import type { X } from '...'`).
+4. **Naming** :
+   - Code (variables, fonctions, classes) : **anglais**
+   - UI strings + commentaires métier : **français**
+   - Fichiers TS/TSX : kebab-case (`mission-card.tsx`)
+   - Composants React : PascalCase (`MissionCard`)
+5. **Conventions formats régionaux (D310 DISCOVERY.md)** :
+   - Monnaie : **centimes integer** (jamais float, jamais string)
+   - Pourcentages : **0-1 float**
+   - Dates : **UTC ISO 8601** stockées, `Intl.DateTimeFormat('fr-FR')` affichage
+   - Téléphone : **E.164** (`+33...`), parse via `libphonenumber-js`
+   - Surface : **m² float**
+6. **Server-side AI** : JAMAIS exposer `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY` dans le bundle client. Toujours via Edge Functions ou Next.js API routes.
+7. **RLS multi-tenant** : toute query DB doit passer par `@supabase/ssr` ou client typé `@kovas/database`, RLS policies via `auth.is_member_of()` helper.
+8. **Conventional Commits** : `feat(missions):`, `fix(voice):`, `chore(deps):`, etc.
+9. **Tests** : Vitest pour unit/integration, Playwright pour E2E. ≥ 80% couverture sur logique métier.
+10. **Mobile-first** : Tailwind avec breakpoints `sm:`, `md:`, `lg:`. Tester iPad portrait + landscape EN PRIORITÉ.
+
+## TON ET POSTURE (CRITIQUE)
+
+Avatar cible : **Pierre, 43 ans, ex-cadre reconverti diagnostiqueur, solopreneur sérieux**.
+
+### Vocabulaire FAVORISER (sobre, business, professionnel)
+
+- "Professionnel" / "Sénior" / "Confirmé"
+- "Rapport mensuel d'activité"
+- "Tableau de bord"
+- "Vous" (vouvoiement par défaut, tutoiement après opt-in user)
+- "Productivité", "ROI", "Gain de temps mesurable"
+- Émojis acceptés : `✓` (validation) et `→` (flèche action) UNIQUEMENT
+
+### Vocabulaire INTERDIT (anti-patterns absolus)
+
+- ❌ "Hero", "Légende", "Pionnier", "Champion", "Master"
+- ❌ "Wrapped", "Stories", "Dashboard fun"
+- ❌ "Game-changer", "Disrupt", "Révolutionnez"
+- ❌ "Bravo !", "Yay !", "Continue comme ça !" (infantilisation)
+- ❌ Émojis flashy : 🚀🎯⭐🏆🎉🎊❤️
+- ❌ Confettis, animations festives, sons "ding!"
+- ❌ Classements nominatifs publics
+- ❌ Tutoiement sans opt-in user
+
+### Test final avant tout commit
+
+> *"Est-ce que Pierre, 43 ans, ex-cadre reconverti, prendrait cette communication / feature / UI au sérieux ?"*
+
+Si NON → refondre.
+
+## DESIGN SYSTEM (Glassmorphism Premium Soft UI)
+
+Palette light : `#F4F4F5` fond / `#FFFFFF` cartes / `#0A0A0A` texte / `#404040` muted / `#737373` subtle / `#D4D4D8` border / `#0A0A0A` CTA.
+
+Palette dark : `#0A0A0A` fond / `#171717` cartes / `#FAFAFA` texte / `#A1A1A9` muted / `#27272A` border / `#FFFFFF` CTA inverse.
+
+Accents délavés (pills/badges seulement, JAMAIS surface large) :
+- Bleu doux `#7B96C4` (info), Rouge `#C46969` (alertes/F-G), Vert `#8AB57B` (validations/A-C), Orange `#D4A574` (D-E).
+
+Border-radius : 16-24px cartes, 12px boutons, 100px pills.
+Glassmorphism : `backdrop-blur-md` + opacité 70-90%.
+
+**Règles strictes** :
+- ❌ Pas de gradients colorés vifs
+- ❌ Pas de shadow-lg ou shadow-2xl (max shadow-sm/md)
+- ❌ Pas de couleurs saturées en surface large
+- ❌ Bordures 1px max
+- ✅ Manrope (Google Fonts) typographie
+
+## MVP V1 — 10 FEATURES CŒUR (post-Modification 18)
+
+1. Saisie vocale terrain (Whisper + parser custom JS 80% + Claude Haiku 20%)
+2. Photos géolocalisées + annotations basiques (Web Camera API + Konva)
+3. Auto-complétion adresse + cadastre (BAN + IGN + Géorisques)
+4. Templates pièces pré-remplis (T2/T3/T4/T5 maison/appartement)
+5. Check-lists par type de diagnostic
+6. Upload documents propriétaire (lien public client uploade avant visite)
+7. Validation cohérence basique (règles métier sans IA)
+8. Bouton "Partager vers logiciel principal" (3 modes : Email + GDrive + DL direct)
+9. Export multi-format universel (ZIP Liciel + PDF + Word + CSV + JSON)
+10. Sync mobile/web + offline complet (Service Worker + IndexedDB Dexie + LWW)
+
+## 8 DIAGNOSTICS COUVERTS V1 (92% volume FR)
+
+DPE / Amiante / Plomb CREP / Gaz / Électricité / Termites / Carrez-Boutin / ERP.
+
+❌ **DÉFINITIVEMENT EXCLUS** : audit énergétique, DTG, marketplace MAR/RGE.
+
+## ANTI-PATTERNS PROJET (NE JAMAIS FAIRE)
+
+- ⛔ Implémenter Vision IA équipement V1 (reporté V2)
+- ⛔ Implémenter croquis 2D Apple Pencil V1 (reporté V2)
+- ⛔ Implémenter recos post-DPE F/G auto V1 (reporté V2)
+- ⛔ Implémenter audit énergétique (annulé définitivement)
+- ⛔ Implémenter marketplace MAR/RGE (annulé définitivement)
+- ⛔ Citer "Liciel" ou "Enersweet" dans marketing/CGU public 12 premiers mois
+- ⛔ Mention publique de désassembleur (Ghidra, IDA, dotPeek) — sort du périmètre L122-6-1 §III
+- ⛔ Embaucher / consulter ex-employé Liciel (concurrence déloyale)
+- ⛔ Apple Developer Program (différé V2)
+- ⛔ React Native + Expo (différé V2)
+
+## CONTEXT-AWARE BEHAVIOR
+
+Quand tu travailles sur :
+- **Migration SQL** → lire `/.claude/orchestration-kovas-app/research/supabase-architecture.md` + `supabase/migrations/20260518000000_init_schema.sql`
+- **Whisper / Voice** → lire `/.claude/orchestration-kovas-app/research/whisper-transcription.md`
+- **Anthropic Claude** → lire `/.claude/orchestration-kovas-app/research/anthropic-claude.md`
+- **Liciel ZIP export** → lire `/.claude/orchestration-kovas-app/research/liciel-format.md` + `/.claude/orchestration-kovas-app/kovas-defense-strategy.md`
+- **Pricing / Stripe** → lire `/.claude/orchestration-kovas-app/pricing-strategy.md` + research/stripe-facturx-signature.md
+- **UI / Design system** → lire CLAUDE.md §9
+- **Marketing / com** → lire `/docs/avatar-client.md` AVANT tout
+- **Gain Tracker** → lire `/docs/gain-tracker-system.md`
+
+## RESPONSE STYLE
+
+- Phrases courtes, sans bullshit
+- Réponse directe à la question
+- Si tu proposes du code, montre-le et explique brièvement les choix critiques
+- Si tu détectes un conflit avec les authority documents, signale-le et propose une résolution
+- Si une décision dépasse le scope MVP V1, dis-le et propose de la différer V2/V3
+
+## COMMANDES UTILES
+
+```bash
+pnpm dev                    # Next.js dev server localhost:3000
+pnpm typecheck              # TypeScript strict tous workspaces
+pnpm lint                   # Biome check
+pnpm lint:fix               # Biome auto-fix
+pnpm db:gen-types           # Génère types depuis Supabase schema
+pnpm db:migrate             # Push migrations
+pnpm test                   # Tests unitaires
+pnpm test:e2e               # Playwright E2E
+```
