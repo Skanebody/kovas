@@ -52,53 +52,53 @@ function MorningHero({
   return (
     <section
       aria-label="Cockpit du matin"
-      className="bg-fluid-cyan px-4 md:px-8 py-10 md:py-14 animate-fade-in"
+      className="px-4 md:px-8 py-10 md:py-14 animate-fade-in"
     >
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="flex items-start justify-between gap-4">
-          <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-paper/85 capitalize">
+          <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-ink-mute capitalize">
             Bonjour {firstName} · {todayLabel}
           </p>
-          <DashboardModeToggle className="border-paper/30 bg-paper/20 text-paper hover:bg-paper/30" />
+          <DashboardModeToggle />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-7 items-start">
           <div>
-            <p className="font-serif italic text-kpi-l md:text-[140px] text-paper leading-[0.85] tracking-tight drop-shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
+            <p className="font-serif italic text-7xl md:text-[120px] text-ink leading-[0.9] tracking-tight">
               {visitsToday}
             </p>
-            <p className="font-display font-light text-display-s md:text-[38px] text-paper -mt-2 max-w-lg leading-tight">
-              {visitsToday <= 1 ? 'visite vous attend' : 'visites vous attendent'} 
-              <span className="font-serif italic">aujourd&apos;hui</span>.
+            <p className="font-sans font-light text-2xl md:text-3xl text-ink -mt-1 max-w-lg leading-tight">
+              {visitsToday <= 1 ? 'visite vous attend' : 'visites vous attendent'}{' '}
+              <span className="font-serif italic font-normal">aujourd&apos;hui</span>.
             </p>
-            <p className="text-paper/90 max-w-md mt-3 text-[14px] leading-[1.55]">
+            <p className="text-ink-mute max-w-md mt-3 text-[14px] leading-[1.55]">
               {visitsToday === 0 ? (
                 'Aucune visite planifiée — bon moment pour finaliser vos exports.'
               ) : nextMission ? (
                 <>
                   Première mission à{' '}
-                  <span className="font-serif italic">{nextMission.time}</span> chez{' '}
-                  <span className="font-serif italic">{nextMission.clientName}</span>.
+                  <span className="font-serif italic text-ink">{nextMission.time}</span> chez{' '}
+                  <span className="font-serif italic text-ink">{nextMission.clientName}</span>.
                 </>
               ) : (
                 'Consultez le détail de vos visites ci-dessous.'
               )}
             </p>
-            <div className="flex flex-wrap gap-3 mt-5">
+            <div className="flex flex-wrap gap-3 mt-6">
               <Button asChild variant="accent" size="lg">
                 <Link href={tourHref}>
                   Démarrer la tournée
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
-              <Button asChild variant="glass" size="lg">
+              <Button asChild variant="outline" size="lg">
                 <Link href="/app/calendar">Voir le planning</Link>
               </Button>
             </div>
           </div>
 
           {nextMission ? (
-            <Card variant="glass" padding="default" className="w-full">
+            <Card variant="opaque" padding="default" className="w-full">
               <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute mb-3">
                 Prochaine mission
               </p>
