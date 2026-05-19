@@ -27,6 +27,7 @@ import { MissionActionsMenu } from './mission-actions-menu'
 import { ResumeButton } from './resume-button'
 import { RoomsList } from './rooms-list'
 import { RoomsMatrixView } from './rooms-matrix-view'
+import { ShareMissionButton } from './share-button'
 import { ViewToggle } from './view-toggle'
 import { VoiceNotesList } from './voice-notes-list'
 import { VoiceRecorder } from './voice-recorder'
@@ -569,6 +570,11 @@ export default async function DossierDetailPage({
               headerActions: (
                 <>
                   <ResumeButton missionId={m.id} status={m.status} />
+                  <ShareMissionButton
+                    missionId={m.id}
+                    missionReference={m.reference}
+                    clientEmail={client?.email ?? null}
+                  />
                   <MissionActionsMenu
                     missionId={m.id}
                     missionLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
