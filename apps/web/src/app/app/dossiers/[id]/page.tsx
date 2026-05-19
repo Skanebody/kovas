@@ -9,7 +9,16 @@ import { runCoherenceChecks } from '@/lib/coherence-validation'
 import { runWorkflow } from '@/lib/dossier-workflow'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import type { VoiceParsedData } from '@/lib/voice-parser'
-import { ArrowLeft, Calendar, Camera, FileText, MapPin, Mic, User } from 'lucide-react'
+import {
+  ArrowLeft,
+  Calendar,
+  CalendarPlus,
+  Camera,
+  FileText,
+  MapPin,
+  Mic,
+  User,
+} from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -18,12 +27,12 @@ import { ClientUploadLink } from './client-upload-link'
 import { CoherenceWarnings } from './coherence-warnings'
 import { DossierInfoEdit } from './dossier-info-edit'
 import { DossierMoreMenu } from './dossier-more-menu'
+import { MissionActionsMenu } from './mission-actions-menu'
 import { MissionChecklist } from './mission-checklist'
 import { type MissionDrawerItem, MissionsWithDrawer } from './missions-with-drawer'
 import { OwnerDocumentsList } from './owner-documents-list'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
-import { MissionActionsMenu } from './mission-actions-menu'
 import { ResumeButton } from './resume-button'
 import { RoomsList } from './rooms-list'
 import { RoomsMatrixView } from './rooms-matrix-view'
@@ -268,7 +277,7 @@ export default async function DossierDetailPage({
               </Link>
             )}
             {dossier.scheduled_at && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-2">
                 <Calendar className="size-3.5" />
                 {new Date(dossier.scheduled_at).toLocaleString('fr-FR', {
                   dateStyle: 'long',
@@ -277,9 +286,10 @@ export default async function DossierDetailPage({
                 <a
                   href={`/api/dossiers/${dossier.id}/calendar.ics`}
                   download
-                  className="ml-2 underline-offset-4 hover:underline hover:text-ink"
+                  className="inline-flex items-center gap-1 ml-1 rounded-pill border border-rule bg-paper hover:bg-cream-deep/40 px-2.5 py-1 text-[11px] font-medium text-ink-soft hover:text-ink transition-colors"
+                  title="Ajouter au calendrier (Google, Apple, Outlook)"
                 >
-                  .ics
+                  <CalendarPlus className="size-3" /> Ajouter au calendrier
                 </a>
               </span>
             )}
@@ -301,9 +311,7 @@ export default async function DossierDetailPage({
         ) : (
           <span className="text-[13px] text-ink-mute flex-1">Aucun bien rattaché</span>
         )}
-        {prop?.year_built && (
-          <span className="text-[11px] text-ink-mute">{prop.year_built}</span>
-        )}
+        {prop?.year_built && <span className="text-[11px] text-ink-mute">{prop.year_built}</span>}
         {prop?.surface_total && (
           <span className="text-[11px] text-ink-mute">· {prop.surface_total} m²</span>
         )}
@@ -607,7 +615,9 @@ export default async function DossierDetailPage({
           <CardHeader>
             <CardTitle className="text-base">Notes internes</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm whitespace-pre-wrap text-ink-soft">{dossier.notes}</CardContent>
+          <CardContent className="text-sm whitespace-pre-wrap text-ink-soft">
+            {dossier.notes}
+          </CardContent>
         </Card>
       )}
     </div>

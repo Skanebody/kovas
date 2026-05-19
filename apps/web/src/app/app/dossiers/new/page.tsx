@@ -1,13 +1,12 @@
 import { AppPageHeader } from '@/components/app-page-header'
-import { ArrowLeft, Building2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { getCurrentUser } from '@/lib/auth/current-user'
+import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { DossierForm } from './dossier-form'
 
-export const metadata: Metadata = { title: 'Nouveau dossier' }
+export const metadata: Metadata = { title: 'Nouveau RDV' }
 
 export default async function NewDossierPage({
   searchParams,
@@ -41,35 +40,18 @@ export default async function NewDossierPage({
       </Button>
 
       <AppPageHeader
-        title="Nouveau"
+        title="Nouveau RDV"
         accent="dossier"
-        eyebrow="90 secondes chrono"
-        description="Un dossier = une visite. Cochez tous les diagnostics à faire — KOVAS créera une fiche par diagnostic et partagera pièces, photos et notes."
+        eyebrow="📞 PRISE DE RDV · 90 SECONDES CHRONO"
+        description="Optimisé pour saisir pendant l'appel — adresse BAN autocomplete, contact en 3 champs, pack en 1 clic. Tout se crée d'un coup à la validation."
       />
 
-      {!properties || properties.length === 0 ? (
-        <Card variant="opaque" padding="default" className="text-center">
-          <CardContent className="space-y-4 pt-2">
-            <Building2 className="size-10 mx-auto text-ink-mute" />
-            <div className="space-y-1">
-              <h2 className="font-semibold text-ink">Aucun bien disponible</h2>
-              <p className="text-[13px] text-ink-mute">
-                Ajoutez d&apos;abord un bien — le dossier s&apos;y rattachera.
-              </p>
-            </div>
-            <Button asChild variant="accent">
-              <Link href="/app/properties/new">Créer un bien</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <DossierForm
-          properties={properties}
-          clients={clients ?? []}
-          defaultPropertyId={params.propertyId}
-          defaultClientId={params.clientId}
-        />
-      )}
+      <DossierForm
+        properties={properties ?? []}
+        clients={clients ?? []}
+        defaultPropertyId={params.propertyId}
+        defaultClientId={params.clientId}
+      />
     </div>
   )
 }
