@@ -10,11 +10,14 @@ const badgeVariants = cva(
         default: 'border-transparent bg-cta text-cta-foreground',
         outline: 'border-cta/15 text-foreground',
         muted: 'border-transparent bg-muted text-muted-foreground',
-        // Accents vifs (cf. design-system.md) — pills/badges/indicators uniquement
+        // Accents vifs (cf. CLAUDE.md §9) — pills/badges/indicators uniquement
+        // blue = info/planifié · green = success/DPE A-C · red = danger/DPE F-G
+        // orange = warning/DPE D-E · yellow = butter Ron, alerte douce/compteur missions
         blue: 'border-transparent bg-accent-blue/15 text-accent-blue',
         green: 'border-transparent bg-accent-green/15 text-accent-green',
         red: 'border-transparent bg-accent-red/15 text-accent-red',
         orange: 'border-transparent bg-accent-orange/15 text-accent-orange',
+        yellow: 'border-transparent bg-accent-yellow/45 text-foreground',
       },
     },
     defaultVariants: { variant: 'default' },
