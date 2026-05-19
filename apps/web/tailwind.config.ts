@@ -19,6 +19,7 @@ const config: Config = {
         card: {
           DEFAULT: 'hsl(var(--card) / <alpha-value>)',
           accent: 'hsl(var(--card-accent) / <alpha-value>)',
+          'accent-foreground': 'hsl(var(--card-accent-foreground) / <alpha-value>)',
         },
         foreground: 'hsl(var(--foreground) / <alpha-value>)',
         muted: {

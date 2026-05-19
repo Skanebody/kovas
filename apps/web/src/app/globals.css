@@ -18,6 +18,7 @@
     /* Cards & glass */
     --card: 0 0% 100%; /* #FFFFFF (utiliser avec /85 ou /60 selon usage) */
     --card-accent: 218 60% 15%; /* #0F1E3D card mise en avant */
+    --card-accent-foreground: 0 0% 100%; /* texte/divider sur card-accent (toujours clair) */
 
     /* Navy KOVAS — primaire (CTA, titres) */
     --cta: 218 60% 15%; /* #0F1E3D */
@@ -42,24 +43,36 @@
   }
 
   .dark {
-    --bg-gradient-from: 220 50% 7%; /* #0A0F1A */
-    --bg-gradient-to: 220 40% 10%;
-    --background: 220 50% 7%;
-    --card: 0 0% 100%; /* utiliser avec /5 pour glass dark */
-    --card-accent: 220 30% 23%; /* #1E2A47 */
+    /* Surface — fond page très sombre, légère teinte navy */
+    --bg-gradient-from: 222 47% 8%; /* #0B0F1A */
+    --bg-gradient-to: 220 33% 12%; /* #141925 */
+    --background: 222 47% 8%;
+
+    /* Cards : surface visible, légèrement plus claire que le fond */
+    --card: 220 26% 14%; /* #1B202C — surface card */
+    --card-accent: 218 45% 24%; /* #2A3656 — accent card (lighter, navy-tinted) */
+    --card-accent-foreground: 0 0% 100%; /* blanc sur card-accent */
+
+    /* CTA inversé : blanc en dark, texte navy sombre */
     --cta: 0 0% 100%;
     --cta-hover: 0 0% 88%;
-    --cta-foreground: 218 60% 15%;
-    --foreground: 220 14% 96%; /* #F9FAFB */
-    --muted: 220 30% 13%;
-    --muted-foreground: 220 9% 65%;
-    --subtle: 220 30% 13%;
-    --subtle-foreground: 220 9% 65%;
-    --border: 0 0% 100%; /* utiliser avec /8 */
+    --cta-foreground: 218 60% 15%; /* #0F1E3D — navy sombre sur fond blanc CTA */
+
+    /* Texte */
+    --foreground: 220 14% 96%; /* #F1F3F8 — quasi-blanc */
+    --muted: 220 22% 18%; /* #232938 — surface muted légèrement au-dessus de card */
+    --muted-foreground: 220 12% 68%; /* #9CA3AF — gris lisible secondaire */
+    --subtle: 220 22% 16%;
+    --subtle-foreground: 220 10% 55%;
+
+    /* Border visible mais subtile (utilisée SANS alpha dans .border-border) */
+    --border: 220 18% 24%; /* #2F3645 */
+
+    /* Accents vifs (plus saturés en dark pour rester lisibles) */
     --accent-blue: 213 94% 68%; /* #60A5FA */
     --accent-red: 0 91% 71%; /* #F87171 */
     --accent-orange: 43 96% 56%; /* #FBBF24 */
-    --accent-green: 158 64% 52%; /* #34D399 */
+    --accent-green: 158 60% 56%; /* #34D399 */
   }
 
   * {
@@ -128,7 +141,7 @@
   /* Card mise en avant (navy pleine) */
   .glass-accent {
     background: hsl(var(--card-accent));
-    color: hsl(var(--cta-foreground));
+    color: hsl(var(--card-accent-foreground));
     border-radius: 16px;
     box-shadow: 0 8px 24px hsl(var(--cta) / 0.15);
   }

@@ -129,7 +129,7 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
                   <Select
                     defaultValue={p.room_id ?? ''}
                     onChange={(e) => handleAssign(p.id, e.target.value)}
-                    className="h-7 text-xs bg-white/90 text-foreground"
+                    className="h-7 text-xs bg-white/90 text-zinc-900"
                     aria-label="Assigner à une pièce"
                   >
                     <option value="">— Sans pièce —</option>

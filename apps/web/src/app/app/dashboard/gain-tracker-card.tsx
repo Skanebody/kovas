@@ -69,7 +69,7 @@ export async function GainTrackerCard() {
           value={count > 0 ? `${hoursSaved}h ${String(remainderMinutes).padStart(2, '0')}min` : '—'}
           label="Temps économisé estimé"
         />
-        <div className="h-px bg-cta-foreground/15" />
+        <div className="h-px bg-card-accent-foreground/15" />
         <Metric
           icon={TrendingUp}
           value={`${count}`}
@@ -84,9 +84,9 @@ export async function GainTrackerCard() {
           </span>
           <span className="tabular-nums">{targetPct}%</span>
         </div>
-        <div className="h-1.5 rounded-full bg-cta-foreground/15 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-card-accent-foreground/15 overflow-hidden">
           <div
-            className="h-full bg-cta-foreground transition-all"
+            className="h-full bg-card-accent-foreground transition-all"
             style={{ width: `${targetPct}%` }}
           />
         </div>
@@ -100,7 +100,7 @@ export async function GainTrackerCard() {
         type="button"
         className={cn(
           'flex items-center justify-between text-xs font-medium',
-          'border-t border-cta-foreground/15 pt-3',
+          'border-t border-card-accent-foreground/15 pt-3',
           'hover:opacity-80 transition-opacity',
         )}
       >

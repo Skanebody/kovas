@@ -338,11 +338,11 @@ function FinalCTA() {
     <section className="px-6 py-20 sm:py-28">
       <div className="mx-auto max-w-4xl">
         <Card variant="accent" className="p-10 sm:p-14 text-center space-y-6">
-          <Zap className="size-10 mx-auto text-cta-foreground/80" />
+          <Zap className="size-10 mx-auto text-card-accent-foreground/80" />
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             Prêt à gagner 1h30 par mission ?
           </h2>
-          <p className="text-cta-foreground/70">
+          <p className="text-card-accent-foreground/70">
             Essai gratuit 14 jours, sans carte bancaire. 30 missions complètes pour vous faire votre
             propre opinion.
           </p>

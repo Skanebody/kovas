@@ -14,7 +14,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       className={cn(
         variant === 'glass' &&
           'rounded-xl border border-cta/[0.08] bg-card/85 backdrop-blur-xl text-foreground shadow-glass',
-        variant === 'accent' && 'rounded-lg bg-card-accent text-cta-foreground shadow-accent',
+        variant === 'accent' && 'rounded-lg bg-card-accent text-card-accent-foreground shadow-accent',
         className,
       )}
       {...props}
