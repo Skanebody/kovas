@@ -82,7 +82,7 @@ export function MissionFocusDrawer({
       role="dialog"
       aria-modal="true"
       aria-label={`Mode mission ${label}`}
-      className="fixed inset-0 z-50 flex flex-col bg-navy-deep text-paper"
+      className="fixed inset-0 z-50 flex flex-col bg-fluid-navy text-paper"
     >
       <header className="glass-dark px-4 py-3 flex items-center gap-3 shrink-0 border-b border-paper/10">
         <Button
