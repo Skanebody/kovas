@@ -45,17 +45,17 @@ export function MissionCard({
   className,
 }: MissionCardProps) {
   const cardClasses = cn(
-    'rounded-xl border border-border-soft bg-paper shadow-glass-sm transition-all',
+    'rounded-xl border border-rule/80 glass-opaque shadow-glass-sm transition-all',
     'grid grid-cols-[auto_1fr_auto] gap-5 items-center p-6',
-    href && 'hover:border-border hover:shadow-glass hover:-translate-y-px cursor-pointer',
+    href && 'hover:border-rule hover:shadow-glass hover:-translate-y-px cursor-pointer',
     className,
   )
 
   const content = (
     <>
       {/* Colonne 1 — Heure typographique */}
-      <div className="flex flex-col gap-1 pr-5 border-r border-border-soft">
-        <span className="font-mono text-2xl font-semibold tracking-tight text-foreground">
+      <div className="flex flex-col gap-1 pr-5 border-r border-rule">
+        <span className="font-mono text-2xl font-semibold tracking-tight text-ink">
           {time}
         </span>
         {day && (
@@ -80,7 +80,7 @@ export function MissionCard({
             </span>
           ))}
         </div>
-        <h3 className="text-lg font-bold tracking-tight text-foreground mb-1 truncate">
+        <h3 className="text-lg font-bold tracking-tight text-ink mb-1 truncate">
           {name}
         </h3>
         <p className="text-sm text-ink-mute flex items-center gap-1.5">

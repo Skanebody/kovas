@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { ArrowLeft, Building2 } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -32,32 +33,29 @@ export default async function NewDossierPage({
   ])
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/app/dossiers">
           <ArrowLeft className="size-4" /> Retour
         </Link>
       </Button>
 
-      <div className="space-y-1">
-        <h1 className="text-display text-2xl md:text-3xl tracking-tight">Nouveau dossier</h1>
-        <p className="text-sm text-ink-mute">
-          Un dossier = une visite. Cochez tous les diagnostics à faire lors de cette visite — KOVAS
-          créera une fiche par diagnostic et partagera les pièces, photos et notes.
-        </p>
-      </div>
+      <AppPageHeader
+        title="Nouveau dossier"
+        description="Un dossier = une visite. Cochez tous les diagnostics à faire — KOVAS créera une fiche par diagnostic et partagera pièces, photos et notes."
+      />
 
       {!properties || properties.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6 pb-8 text-center space-y-4">
+        <Card variant="opaque" padding="default" className="text-center">
+          <CardContent className="space-y-4 pt-2">
             <Building2 className="size-10 mx-auto text-ink-mute" />
             <div className="space-y-1">
-              <h2 className="font-semibold">Aucun bien disponible</h2>
-              <p className="text-sm text-ink-mute">
-                Ajoutez d'abord un bien — le dossier s'y rattachera.
+              <h2 className="font-semibold text-ink">Aucun bien disponible</h2>
+              <p className="text-[13px] text-ink-mute">
+                Ajoutez d&apos;abord un bien — le dossier s&apos;y rattachera.
               </p>
             </div>
-            <Button asChild>
+            <Button asChild variant="warm">
               <Link href="/app/properties/new">Créer un bien</Link>
             </Button>
           </CardContent>

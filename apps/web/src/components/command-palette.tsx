@@ -212,11 +212,11 @@ export function CommandPalette() {
     >
       <Command
         label="Command palette"
-        className="w-full max-w-xl rounded-xl border border-border-soft bg-paper/95 backdrop-blur-xl shadow-glass-hover overflow-hidden"
+        className="w-full max-w-xl rounded-xl border border-rule bg-paper/95 backdrop-blur-xl shadow-glass-hover overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         loop
       >
-        <div className="flex items-center gap-2 border-b border-border-soft px-4">
+        <div className="flex items-center gap-2 border-b border-rule px-4">
           <Search className="size-4 text-ink-mute shrink-0" />
           <Command.Input
             value={search}
@@ -224,7 +224,7 @@ export function CommandPalette() {
             placeholder="Chercher dossiers, clients, biens, actions…"
             className="flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-ink-mute"
           />
-          <kbd className="text-[10px] text-ink-mute bg-muted/50 rounded px-1.5 py-0.5">
+          <kbd className="text-[10px] text-ink-mute bg-cream-deep/50 rounded px-1.5 py-0.5">
             ESC
           </kbd>
         </div>
@@ -335,14 +335,14 @@ export function CommandPalette() {
           </CommandGroup>
         </Command.List>
 
-        <div className="flex items-center justify-between gap-3 border-t border-border-soft px-4 py-2 text-[10px] text-ink-mute">
+        <div className="flex items-center justify-between gap-3 border-t border-rule px-4 py-2 text-[10px] text-ink-mute">
           <span>
-            <kbd className="bg-muted/50 rounded px-1.5 py-0.5">↑↓</kbd> naviguer ·{' '}
-            <kbd className="bg-muted/50 rounded px-1.5 py-0.5">↵</kbd> ouvrir
+            <kbd className="bg-cream-deep/50 rounded px-1.5 py-0.5">↑↓</kbd> naviguer ·{' '}
+            <kbd className="bg-cream-deep/50 rounded px-1.5 py-0.5">↵</kbd> ouvrir
           </span>
           <span>
-            <kbd className="bg-muted/50 rounded px-1.5 py-0.5">⌘K</kbd> /{' '}
-            <kbd className="bg-muted/50 rounded px-1.5 py-0.5">Ctrl K</kbd>
+            <kbd className="bg-cream-deep/50 rounded px-1.5 py-0.5">⌘K</kbd> /{' '}
+            <kbd className="bg-cream-deep/50 rounded px-1.5 py-0.5">Ctrl K</kbd>
           </span>
         </div>
       </Command>
@@ -382,7 +382,7 @@ function CommandRow({
       disabled={disabled}
       className={cn(
         'flex items-center gap-3 rounded-md px-3 py-2 text-sm cursor-pointer',
-        'data-[selected=true]:bg-cta/[0.08] data-[selected=true]:text-foreground',
+        'data-[selected=true]:bg-navy/[0.08] data-[selected=true]:text-ink',
         'aria-disabled:opacity-50 aria-disabled:cursor-not-allowed',
       )}
     >
@@ -396,7 +396,7 @@ function CommandRow({
       {shortcut && (
         <span className="flex gap-0.5 shrink-0">
           {shortcut.split(' ').map((k, i) => (
-            <kbd key={`${shortcut}-${i}`} className="text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
+            <kbd key={`${shortcut}-${i}`} className="text-[10px] bg-cream-deep/50 rounded px-1.5 py-0.5">
               {k}
             </kbd>
           ))}

@@ -1,7 +1,8 @@
-import { ArrowLeft, MapPin, Pencil, Plus } from 'lucide-react'
+import { ArrowLeft, Pencil, Plus } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { AppPageHeader } from '@/components/app-page-header'
 import { DangerZone } from '@/components/danger-zone'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -34,58 +35,61 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
   if (!property) notFound()
 
+  const aptParts: string[] = []
+  if (property.building_letter) aptParts.push(`Bât. ${property.building_letter}`)
+  if (property.apartment_detail) aptParts.push(property.apartment_detail)
+  if (typeof property.floor_number === 'number') {
+    aptParts.push(
+      property.floor_number === 0
+        ? 'RDC'
+        : property.floor_number > 0
+          ? `${property.floor_number}e étage`
+          : `sous-sol ${Math.abs(property.floor_number)}`,
+    )
+  }
+  if (property.lot_number) aptParts.push(`Lot ${property.lot_number}`)
+
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/app/properties">
           <ArrowLeft className="size-4" /> Retour aux biens
         </Link>
       </Button>
 
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <h1 className="text-display text-2xl md:text-3xl tracking-tight">{property.address}</h1>
-          {(() => {
-            const aptParts: string[] = []
-            if (property.building_letter) aptParts.push(`Bât. ${property.building_letter}`)
-            if (property.apartment_detail) aptParts.push(property.apartment_detail)
-            if (typeof property.floor_number === 'number') {
-              aptParts.push(
-                property.floor_number === 0
-                  ? 'RDC'
-                  : property.floor_number > 0
-                    ? `${property.floor_number}e étage`
-                    : `sous-sol ${Math.abs(property.floor_number)}`,
-              )
-            }
-            if (property.lot_number) aptParts.push(`Lot ${property.lot_number}`)
-            return aptParts.length > 0 ? (
-              <p className="text-sm font-medium">{aptParts.join(' · ')}</p>
-            ) : null
-          })()}
-          <p className="text-sm text-ink-mute flex items-center gap-1.5">
-            <MapPin className="size-4" />
-            {[property.postal_code, property.city].filter(Boolean).join(' ') || 'Localisation non précisée'}
-          </p>
-          {property.property_type && (
-            <Badge variant="muted">{TYPE_LABELS[property.property_type] ?? property.property_type}</Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" asChild>
-            <Link href={`/app/properties/${property.id}/edit`}>
-              <Pencil className="size-4" /> Modifier
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href={`/app/dossiers/new?propertyId=${property.id}`}>
-              <Plus className="size-4" /> Nouveau dossier
-            </Link>
-          </Button>
-        </div>
-      </div>
+      <AppPageHeader
+        title={property.address}
+        description={[property.postal_code, property.city].filter(Boolean).join(' ') || undefined}
+        action={
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="glass" asChild>
+              <Link href={`/app/properties/${property.id}/edit`}>
+                <Pencil className="size-4" /> Modifier
+              </Link>
+            </Button>
+            <Button variant="warm" asChild>
+              <Link href={`/app/dossiers/new?propertyId=${property.id}`}>
+                <Plus className="size-4" /> Nouveau dossier
+              </Link>
+            </Button>
+          </div>
+        }
+      />
 
-      <Card>
+      {(aptParts.length > 0 || property.property_type) && (
+        <Card variant="opaque" padding="default" className="flex flex-wrap items-center gap-3 text-[13px]">
+          {aptParts.length > 0 ? (
+            <span className="font-medium text-ink">{aptParts.join(' · ')}</span>
+          ) : null}
+          {property.property_type ? (
+            <Badge variant="muted">
+              {TYPE_LABELS[property.property_type] ?? property.property_type}
+            </Badge>
+          ) : null}
+        </Card>
+      )}
+
+      <Card variant="opaque" padding="default">
         <CardHeader>
           <CardTitle className="text-base">Caractéristiques</CardTitle>
         </CardHeader>
@@ -99,14 +103,14 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         </CardContent>
       </Card>
 
-      {property.notes && (
-        <Card>
+      {property.notes ? (
+        <Card variant="opaque" padding="default">
           <CardHeader>
             <CardTitle className="text-base">Notes</CardTitle>
           </CardHeader>
           <CardContent className="text-sm whitespace-pre-wrap">{property.notes}</CardContent>
         </Card>
-      )}
+      ) : null}
 
       <DangerZone
         entityLabel="bien"
@@ -119,8 +123,8 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <div className="text-xs text-ink-mute">{label}</div>
-      <div className="font-medium">{value ?? '—'}</div>
+      <div className="text-[11px] text-ink-mute">{label}</div>
+      <div className="font-medium text-ink">{value ?? '—'}</div>
     </div>
   )
 }

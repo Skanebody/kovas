@@ -138,7 +138,7 @@ export async function RecentActivityBlock() {
     .slice(0, 10)
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card variant="opaque" padding="default" className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute flex items-center gap-2">
           <History className="size-3.5" /> Activité récente
@@ -152,7 +152,7 @@ export async function RecentActivityBlock() {
         ) : (
           <ul className="divide-y divide-border">
             {top.slice(0, 6).map((e) => (
-              <li key={e.key} className="px-4 py-2 hover:bg-muted/30 transition-colors">
+              <li key={e.key} className="px-4 py-2 hover:bg-ink/5 transition-colors">
                 <Link href={e.href} className="flex items-center gap-3 text-xs">
                   <EventIcon kind={e.icon} />
                   <span className="flex-1 min-w-0 truncate">{e.label}</span>

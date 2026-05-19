@@ -1,0 +1,892 @@
+---
+description: KOVAS Design System — Source unique de vérité pour les règles UI/UX. Tokens exacts, règles d'usage par composant, anti-patterns. À appliquer sur tous les fichiers UI du SaaS KOVAS (Next.js 15 + Tailwind 4 + Supabase).
+globs:
+  - "**/*.tsx"
+  - "**/*.ts"
+  - "**/*.css"
+  - "tailwind.config.ts"
+  - "tailwind.config.js"
+  - "app/globals.css"
+alwaysApply: true
+---
+
+# KOVAS Design System — Règles exécutoires
+
+> Source unique de vérité pour l'UI/UX KOVAS SaaS. Quand tu hésites, cette page tranche.
+
+## Contexte produit
+
+KOVAS est un SaaS B2B pour diagnostiqueurs immobiliers français (DPE, amiante, plomb, gaz, électricité, etc.). Utilisateurs cibles : solopreneurs comme Benjamin, qui passent 6-8h/jour dans l'app, alternent bureau (PC) et terrain (mobile). Esthétique : moderne, épurée, glassmorphism raffiné inspiré de Ron Design Lab (Payrix, Drippi, Synthex). Pas de bling : sobre, institutionnel, pro.
+
+**Stack** : Next.js 15 (App Router) · Tailwind CSS 4 · TypeScript · Supabase · `next/font` pour les polices · React Server Components par défaut.
+
+---
+
+## 1. TOKENS
+
+### 1.1 Couleurs (28 tokens — palette fermée)
+
+**Règle absolue** : aucune couleur hors de ces 28 tokens. Si tu as besoin d'une autre teinte, c'est que tu utilises mal le système.
+
+#### Brand · Navy KOVAS
+```
+--color-navy:         #163144  /* Primary — texte principal + CTA */
+--color-navy-deep:    #0B1D2E  /* Backgrounds dramatiques (GainTracker, mode mission) */
+--color-navy-soft:    #2C4A63  /* Texte secondaire */
+--color-navy-mute:    #475F77  /* Texte tertiaire */
+```
+
+#### Cyan liquide (signature Payrix-inspired)
+```
+--color-cyan-deep:    #4E8FA8  /* Backgrounds saturés écrans hero */
+--color-cyan-mid:     #7FB5C7  /* Gradients fluides */
+--color-cyan-light:   #DFF3EB  /* Backgrounds très légers */
+--color-amber:        #D97706  /* UN accent chaud par écran maximum */
+```
+
+#### Neutres
+```
+--color-paper:        #FFFFFF
+--color-cream:        #F8F6F0  /* Background page défaut */
+--color-cream-deep:   #EFEBDF  /* Background secondaire */
+--color-rule:         #E7E2D2  /* Borders subtiles */
+```
+
+#### Texte (5 niveaux)
+```
+--color-ink:          #163144  /* Texte primary */
+--color-ink-soft:     #2C4A63  /* Body text */
+--color-ink-mute:     #5B7088  /* Captions, labels */
+--color-ink-faint:    #8A99AE  /* Placeholders */
+--color-ink-ghost:    #B8C2D2  /* Dividers, désactivé */
+```
+
+#### Pastels (cards KPI uniquement)
+```
+--color-blue-mist:    #DBEAFE
+--color-orange-mist:  #FFE5C9
+--color-lime-mist:    #F0FBD5
+--color-coral-mist:   #FCE3E1
+```
+
+#### Sémantiques (états système uniquement, jamais décoratif)
+```
+--color-success:      #10B981
+--color-warning:      #F59E0B
+--color-danger:       #EF4444
+--color-info:         #3B82F6
+```
+
+### 1.2 Typographie
+
+**Trois polices, jamais plus.** Charger via `next/font` pour éviter le CLS et la dépendance réseau.
+
+```typescript
+// app/fonts.ts
+import { Urbanist, Instrument_Serif, JetBrains_Mono } from 'next/font/google'
+
+export const urbanist = Urbanist({
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700'],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+export const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: ['400'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
+})
+
+export const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+  display: 'swap',
+})
+```
+
+**Échelle typographique :**
+
+| Token         | Weight | Size  | Line  | Tracking | Usage                                          |
+|---------------|--------|-------|-------|----------|------------------------------------------------|
+| display-xl    | 200    | 154px | 0.90  | -0.045em | Hero couvertures, titres oversized             |
+| display-l     | 300    | 84px  | 0.94  | -0.035em | Titres de page principaux                      |
+| display-m     | 300    | 54px  | 1.00  | -0.028em | Titres de section                              |
+| display-s     | 400    | 34px  | 1.05  | -0.020em | Sous-titres importants                         |
+| h1            | 500    | 30px  | 1.10  | -0.018em | Titres de cards                                |
+| h2            | 600    | 22px  | 1.20  | -0.012em | Titres de sous-sections                        |
+| h3            | 600    | 17px  | 1.25  | normal   | Labels de zones                                |
+| body          | 400    | 14px  | 1.55  | normal   | Texte courant — couleur ink-soft               |
+| small         | 400    | 12px  | 1.50  | normal   | Captions — couleur ink-mute                    |
+| tiny          | 400    | 11px  | 1.40  | normal   | Légendes minimales — couleur ink-faint         |
+| mono          | 500    | 11px  | normal| 0.10em   | Labels MAJ, codes, IDs — uppercase             |
+| kpi-xl        | serif italic 400 | 168px | 0.85 | -0.04em  | KPI hero (le « 4 », « 23h 47 »)            |
+| kpi-l         | serif italic 400 | 110px | 0.90 | -0.035em | KPI dashboards                              |
+| kpi-m         | serif italic 400 | 64px  | 0.95 | -0.03em  | KPI cards subordonnées                      |
+| kpi-s         | serif italic 400 | 40px  | 1.00 | -0.025em | KPI inline                                  |
+
+### 1.3 Spacing (système 4x)
+
+```
+s-1: 4px    s-2: 8px    s-3: 12px   s-4: 16px
+s-5: 20px   s-6: 24px   s-8: 32px   s-10: 40px
+s-12: 48px  s-16: 64px  s-20: 80px  s-24: 96px
+```
+
+**Aucune valeur arbitraire.** `gap-[15px]` est interdit. Si 16 ne marche pas, c'est ton layout qui est mauvais.
+
+### 1.4 Radius
+
+```
+r-sm: 8px       /* Inputs, petits chips */
+r-md: 14px      /* Inputs principaux, badges */
+r-lg: 22px      /* Cards de contenu */
+r-xl: 32px      /* Cards hero, modals */
+r-pill: 9999px  /* Boutons, pills, tabs */
+```
+
+### 1.5 Shadows (diffuses uniquement, jamais dures)
+
+```css
+--shadow-xs: 0 1px 3px rgba(22, 49, 68, 0.04);
+--shadow-sm: 0 3px 10px rgba(22, 49, 68, 0.06);
+--shadow-md: 0 8px 22px rgba(22, 49, 68, 0.08);
+--shadow-lg: 0 20px 50px rgba(22, 49, 68, 0.10);
+
+/* Glass cards : combiner inset highlight + diffuse */
+--shadow-glass:
+  inset 0 1px 0 rgba(255, 255, 255, 0.9),
+  0 12px 36px rgba(22, 49, 68, 0.10),
+  0 4px 12px rgba(22, 49, 68, 0.06);
+```
+
+**Couleur des shadows : navy à faible opacité, jamais noir pur.** Le shadow noir tue l'esthétique aérienne.
+
+### 1.6 Motion
+
+```css
+--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+--duration-fast: 150ms;   /* hover, tap, focus */
+--duration-base: 250ms;   /* transitions de page, modals */
+--duration-slow: 400ms;   /* apparitions hero, stagger cascades */
+--stagger: 60ms;          /* delay entre enfants successifs */
+```
+
+**Jamais d'easing linéaire.** Spring partout sauf cas exceptionnel (progress bars linéaires).
+
+---
+
+## 2. RÈGLES PAR COMPOSANT
+
+### 2.1 Boutons (5 variants)
+
+#### `Button` — variant primary (navy)
+- **UTILISE QUAND** : CTA principal de la mission utilisateur sur cet écran. Le bouton qui fait avancer le flow.
+- **UN SEUL** primary par écran. Deux primary côte à côte = bug de design.
+- **EXEMPLES** : « Démarrer la mission », « Créer le dossier », « Suivant », « Sauvegarder ».
+- **JAMAIS** : action destructive (utilise `danger`), action secondaire (utilise `glass`), action énergisante (utilise `warm`).
+
+#### `Button` — variant warm (amber)
+- **UTILISE QUAND** : action de création, démarrage, milestone positive. Énergie positive.
+- **EXEMPLES** : « + Nouveau dossier », « Lancer la tournée », « ⚡ Saisie vocale ».
+- **MAX 1** warm par écran (sinon le ton ambre perd son sens).
+- **JAMAIS** : action neutre, confirmation simple, navigation.
+
+#### `Button` — variant glass (paper translucide)
+- **UTILISE QUAND** : action neutre à côté du primary. « Annuler », « Voir détail », « Modifier ».
+- Tout est OK pour cette variante — c'est la valeur par défaut.
+- **JAMAIS** : sur fond paper plein (utiliser variant `outline` à la place).
+
+#### `Button` — variant ghost (transparent)
+- **UTILISE QUAND** : action discrète, tertiaire. « Passer », « Plus tard », « Ignorer ».
+- **JAMAIS** : pour l'action principale d'un écran.
+
+#### `Button` — variant danger (rouge)
+- **UTILISE QUAND** : suppression, action destructive irréversible.
+- **TOUJOURS** : précédé d'un dialog de confirmation.
+- **JAMAIS** : pour signaler une erreur (utiliser un toast ou alert, pas un bouton).
+
+#### Tailles
+- `sm` : padding 6px 14px · font-size 11px · pour actions inline, mini-CTA.
+- `default` : padding 11px 22px · font-size 13px · pour 90% des cas.
+- `lg` : padding 14px 28px · font-size 15px · pour CTA mobile pleine largeur.
+
+#### Anti-patterns boutons
+- ❌ Deux primary côte à côte
+- ❌ Bouton avec ombre dure noire
+- ❌ Bouton sans hover state ni focus ring
+- ❌ Border-radius autre que pill (sauf cas mobile bottom-CTA pleine largeur où r-lg accepté)
+- ❌ Icône en emoji sur primary (utiliser lucide-react)
+
+### 2.2 Typographie — règles d'usage
+
+#### Quand utiliser Instrument Serif italic
+- ✅ KPI hero dramatisés (« 4 », « 23h 47 », « 87 348 € »)
+- ✅ Mots-clés éditoriaux dans un titre Urbanist (« épuré, intuitif », « aujourd'hui »)
+- ✅ Dates dramatisées (« 11h *00* », « *Mardi* 19 mai »)
+- ❌ Body text (illisible en long)
+- ❌ Labels UI (boutons, status pills, navigation)
+- ❌ Code, monospace, ou data tabulaire
+
+#### Quand utiliser Urbanist weight 100-200
+- ✅ Display-XL uniquement (titres > 80px)
+- ✅ Effet "luxe aéré" sur les hero
+- ❌ Body text (illisible)
+- ❌ Tailles sous 40px (les strokes deviennent trop fines)
+
+#### Quand utiliser Urbanist weight 500-600
+- ✅ H1, H2 (titres importants)
+- ✅ Labels de boutons primary, status pills
+- ✅ Texte qui doit ressortir
+
+#### Quand utiliser Urbanist weight 400 (régulier)
+- ✅ Body — toujours en `ink-soft`, jamais `ink` (pas assez aéré)
+- ✅ Captions, descriptions
+- Line-height 1.55 minimum pour le body
+
+#### Quand utiliser JetBrains Mono
+- ✅ IDs techniques (DOS-2026-00123, DPE-001)
+- ✅ Labels MAJ uppercase letter-spaced (« BONJOUR BENJAMIN », « PROCHAINE MISSION »)
+- ✅ Code, valeurs CSS, références techniques
+- ❌ Pour décorer du texte courant
+
+#### Anti-patterns typo
+- ❌ Urbanist weight 800/900 (trop bold, casse la signature light)
+- ❌ Texte sous 11px (illisibilité)
+- ❌ Italic serif pour body
+- ❌ Mélanger plus de 3 polices dans un même écran
+
+### 2.3 Couleurs — règles d'usage
+
+#### Navy #163144
+- ✅ Texte primary, CTA primary
+- ✅ Background de cards "moment dramatique" (GainTracker hero, mode mission)
+- ❌ Background de page entière (sauf mode mission)
+- ❌ Pour de petits éléments (utiliser ink pour le texte)
+
+#### Amber #D97706
+- ✅ Bouton warm, status "en cours", glow GainTracker
+- **MAX 1 accent ambre par écran**
+- ❌ Pour décorer (l'ambre doit toujours porter une intention)
+- ❌ Pour les warnings (utiliser warning #F59E0B avec teinte différente)
+
+#### Cyan #4E8FA8 / #7FB5C7
+- ✅ Backgrounds des écrans hero (dashboard, identité)
+- ✅ **TOUJOURS en gradient**, jamais en aplat dur
+- ❌ En text color
+- ❌ Pour les boutons (sauf cas exceptionnel)
+
+#### Sémantiques (vert/rouge/jaune)
+- ✅ Status pills, alertes, validation, dots d'état
+- ❌ Pour décorer
+- ❌ Le rouge pour autre chose que erreur/danger
+
+#### Anti-patterns couleurs
+- ❌ Toute couleur hors des 28 tokens
+- ❌ Background avec couleur saturée pleine sur grandes surfaces
+- ❌ Plus de 3 couleurs saturées différentes sur un même écran
+- ❌ Texte coloré pour le body (toujours ink-soft)
+
+### 2.4 Cards (4 variants)
+
+#### `Card` — variant glass (translucide)
+- **UTILISE QUAND** : sur fonds cyan saturés, le background doit transparaître à travers.
+- **CSS** : `background: linear-gradient(135deg, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0.25) 100%)`, `backdrop-filter: blur(20px) saturate(1.4)`, border 1px rgba(255,255,255,0.65), shadow-glass.
+- **EXEMPLE** : card "Sophie Martin · 11h00" sur le dashboard matin.
+
+#### `Card` — variant opaque (paper translucide 85%)
+- **UTILISE QUAND** : contenu dense qui doit rester lisible (tableaux, listes, formulaires).
+- **CSS** : `background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.70) 100%)`, backdrop-filter blur 24px saturate 1.2.
+- 90% des cards utilisent cette variante.
+
+#### `Card` — variant navy (moment dramatique)
+- **UTILISE QUAND** : un moment "wow" à mettre en valeur. GainTracker hero, milestone, célébration mensuelle.
+- **UNE SEULE** par écran maximum.
+- Toujours avec un glow ambre subtil en arrière-plan via `::before` ou `::after` absolute.
+
+#### `Card` — variant warm-tinted (alertes)
+- **UTILISE QUAND** : alertes de cohérence, warnings utiles, suggestions.
+- **CSS** : `background: linear-gradient(135deg, rgba(255,213,168,0.80), rgba(255,200,150,0.65))`, border `1px solid rgba(217,119,6,0.20)`.
+- **JAMAIS** : pour information neutre (utiliser opaque).
+
+#### Anti-patterns cards
+- ❌ Card sans border-radius minimum r-lg (22px)
+- ❌ Card avec ombre dure ou ombre noire pure
+- ❌ Plus de 2 niveaux d'élévation visibles côte à côte
+- ❌ Cards avec borders solides épaisses (utiliser glass borders)
+
+### 2.5 Status pills
+
+```
+Structure : dot (8px, color sémantique) + halo (3px à 20% opacité) + label
+Variants : amber (en cours) · blue (programmée) · green (terminée) · coral (problème) · muted (à démarrer)
+```
+
+- ✅ Statut d'un dossier, d'une mission, d'un document
+- ✅ Toujours scannable d'un coup d'œil (dot + 2-3 mots max)
+- ❌ Phrase entière dans un status pill
+- ❌ Plus de 5 status pills différents dans une même liste (réduire la complexité)
+
+### 2.6 Label chips (catégories diagnostics)
+
+Pastels exclusifs par type :
+- DPE : `chip-dpe` — fond blue-mist, texte #1E3A8A
+- AMIANTE : `chip-amiante` — fond orange-mist, texte #7C3F0A
+- PLOMB / CREP : `chip-plomb` — fond coral-mist, texte #8B1414
+- GAZ : `chip-gaz` — fond lime-mist, texte #2D4015
+- ÉLECTRICITÉ : `chip-elec` — fond #E8E0F5, texte #2F1F5A
+- TERMITES : `chip-termites` — fond cream-deep, texte ink-mute
+
+**Format** : uppercase, 10px, letter-spacing 0.06em, r-sm (6px), padding 4px 9px.
+
+### 2.7 Inputs
+
+- **Border** : 1px var(--rule), r-md (14px), padding 13px 16px, font-size 13px.
+- **Focus** : border 1.5px navy + ring 5px navy à 10% opacité.
+- **Error** : border 1.5px danger + message tiny dessous en danger.
+- **Label** : 11px, font-weight 600, color ink, margin-bottom 6px.
+- **Placeholder** : color ink-faint.
+
+#### Anti-patterns inputs
+- ❌ Input sans label visible
+- ❌ Border épaisse ou colorée par défaut
+- ❌ Placeholder en italic (illisibilité)
+- ❌ Input height < 40px (tap target min sur mobile)
+
+### 2.8 Spacing — règles d'usage
+
+- **Padding intérieur cards** : s-6 à s-8 (24-32px). Jamais moins de s-4 (16px).
+- **Gap entre éléments d'une liste** : s-3 (12px).
+- **Gap entre cards principales** : s-4 à s-5 (16-20px).
+- **Marges de page** : Mobile s-4 (16px) · Tablet s-6 (24px) · Desktop s-8 à s-10 (32-40px).
+- **Bottom sheet mobile** : drag handle 36×4px en haut, padding s-4 latéral, s-6 bas.
+
+---
+
+## 3. ÉCRANS PRINCIPAUX
+
+### 3.1 Dashboard cockpit (matin)
+
+**Background** : cyan saturé (`bg-fluid-cyan`) avec gradient flou et touche warm orange bas-droite.
+
+**Structure** :
+1. Top bar pill glass (logo + tabs + status DPE + avatar)
+2. Hero KPI sur 2 colonnes (1.5fr / 1fr) :
+   - Gauche : « 👋 Bonjour Benjamin · [date] » + KPI hero serif italic blanc (« 4 ») + sous-titre Urbanist + 2 CTA (warm primary + glass)
+   - Droite : Card glass translucide "Prochaine mission" avec nom client, adresse, chips diagnostics
+3. Row de 4 pastels KPI cards (cyan-mist / orange-mist / lime-mist / coral-mist)
+
+**Règles** :
+- Le KPI hero (« 4 ») doit être en `text-paper` (blanc) avec text-shadow subtil
+- Les pastels en bas portent chacun un KPI mais ne sont JAMAIS interactifs (juste informatifs)
+- 1 seul bouton warm par cet écran (« Démarrer la tournée »)
+
+### 3.2 Dashboard cockpit (soir / GainTracker)
+
+**Background** : navy deep (`bg-fluid-navy`) avec glow ambre subtil.
+
+**Structure** :
+1. Top bar pill dark glass
+2. Hero GainTracker : KPI XL serif italic blanc (« 23h 47 ») + texte explicatif à droite + 2 CTA
+3. 3 cards subordonnées (glass-dark) : productivité, missions complétées, CA généré
+
+**Règles** :
+- C'est LE moment dramatique de la semaine — ne pas en abuser
+- Seul écran avec background navy plein
+- Le glow ambre doit être subtil (rgba 0.30 max, filter blur 40px)
+
+### 3.3 Liste dossiers
+
+**Background** : cyan light (`bg-fluid-light`) — moins saturé que dashboard.
+
+**Structure** :
+1. Title row : « Dossiers » display-l + counter pill + boutons (Importer glass + Nouveau warm)
+2. Filter row : status pills cliquables + boutons recherche/filtres à droite
+3. Glass-opaque table avec grille `140px 1fr 160px 160px 130px 60px`
+
+**Règles** :
+- Status pill du filtre actif = navy plein avec dot blanc
+- Hover row = légère élévation, pas de changement de fond brutal
+- Action principale par row = chevron → en icon-btn-sm
+
+### 3.4 Détail dossier (vue admin)
+
+**Background** : cyan light.
+
+**Structure** :
+1. Breadcrumb mono
+2. Header card opaque XL : nom client display-s + adresse + chips + actions icon-btn + bouton primary "Mode mission"
+3. Workflow stepper horizontal (étapes complétées vert / en cours ambre / à faire muted)
+4. Grid 2/1 : Documents reçus + alertes cohérence à gauche · Client + Programmé à droite
+
+### 3.5 Mode mission (terrain)
+
+**Background** : navy deep — l'écran "focus" qui élimine toute distraction.
+
+**Structure** :
+1. Header minimal : back + nom client mono + % + close
+2. Progress bar ambre 4px
+3. Grid 1/1 : Checklist à gauche · Saisie vocale + photos à droite
+4. Floating action bar bottom pill (glass-dark) : photo/note/pièces/cohérence + "Terminer la mission" (success)
+
+**Règles** :
+- Aucun élément qui n'est pas strictement nécessaire à la mission en cours
+- L'item "en cours" de la checklist = full amber background, weight 600 paper
+- Items complétés = check vert sur glass-dark
+- Items à faire = bordure dashed muted, transparent
+
+### 3.6 Mobile patterns (terrain)
+
+- Tap targets minimum **44pt** (jamais moins)
+- **Bottom sheets uniquement**, jamais de modal centré
+- **Une seule action principale par écran**
+- Drag handle 36×4px sur tous les bottom sheets
+- Pas de small text (<13px sur mobile)
+- Le navy plein du mode mission est la seule exception au fond clair par défaut
+
+---
+
+## 4. CODE PATTERNS · TAILWIND 4
+
+### 4.1 Configuration Tailwind
+
+```typescript
+// tailwind.config.ts
+import type { Config } from 'tailwindcss'
+
+export default {
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        // Brand
+        navy: { DEFAULT: '#163144', deep: '#0B1D2E', soft: '#2C4A63', mute: '#475F77' },
+        cyan: { deep: '#4E8FA8', mid: '#7FB5C7', light: '#DFF3EB' },
+        amber: { DEFAULT: '#D97706' },
+        // Neutres
+        paper: '#FFFFFF',
+        cream: { DEFAULT: '#F8F6F0', deep: '#EFEBDF' },
+        rule: '#E7E2D2',
+        // Texte
+        ink: { DEFAULT: '#163144', soft: '#2C4A63', mute: '#5B7088', faint: '#8A99AE', ghost: '#B8C2D2' },
+        // Pastels
+        'blue-mist': '#DBEAFE',
+        'orange-mist': '#FFE5C9',
+        'lime-mist': '#F0FBD5',
+        'coral-mist': '#FCE3E1',
+        // Sémantiques
+        success: '#10B981',
+        warning: '#F59E0B',
+        danger: '#EF4444',
+        info: '#3B82F6',
+      },
+      fontFamily: {
+        display: ['var(--font-display)', 'sans-serif'],
+        serif: ['var(--font-serif)', 'serif'],
+        mono: ['var(--font-mono)', 'monospace'],
+      },
+      fontSize: {
+        'display-xl': ['154px', { lineHeight: '0.90', letterSpacing: '-0.045em', fontWeight: '200' }],
+        'display-l':  ['84px',  { lineHeight: '0.94', letterSpacing: '-0.035em', fontWeight: '300' }],
+        'display-m':  ['54px',  { lineHeight: '1.00', letterSpacing: '-0.028em', fontWeight: '300' }],
+        'display-s':  ['34px',  { lineHeight: '1.05', letterSpacing: '-0.020em', fontWeight: '400' }],
+        'kpi-xl':     ['168px', { lineHeight: '0.85', letterSpacing: '-0.04em' }],
+        'kpi-l':      ['110px', { lineHeight: '0.90', letterSpacing: '-0.035em' }],
+        'kpi-m':      ['64px',  { lineHeight: '0.95', letterSpacing: '-0.03em' }],
+        'kpi-s':      ['40px',  { lineHeight: '1.00', letterSpacing: '-0.025em' }],
+      },
+      borderRadius: {
+        sm: '8px',
+        md: '14px',
+        lg: '22px',
+        xl: '32px',
+      },
+      boxShadow: {
+        xs: '0 1px 3px rgba(22, 49, 68, 0.04)',
+        sm: '0 3px 10px rgba(22, 49, 68, 0.06)',
+        md: '0 8px 22px rgba(22, 49, 68, 0.08)',
+        lg: '0 20px 50px rgba(22, 49, 68, 0.10)',
+        glass: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 36px rgba(22,49,68,0.10), 0 4px 12px rgba(22,49,68,0.06)',
+      },
+      transitionTimingFunction: {
+        spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
+      transitionDuration: {
+        fast: '150ms',
+        base: '250ms',
+        slow: '400ms',
+      },
+    },
+  },
+} satisfies Config
+```
+
+### 4.2 CSS variables globales
+
+```css
+/* app/globals.css */
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Backgrounds fluides cyan saturé */
+    --bg-fluid-cyan:
+      radial-gradient(ellipse 1200px 900px at 25% 35%, rgba(127,181,199,0.95) 0%, rgba(127,181,199,0) 55%),
+      radial-gradient(ellipse 900px 700px at 75% 65%, rgba(78,143,168,0.85) 0%, rgba(78,143,168,0) 50%),
+      radial-gradient(ellipse 700px 500px at 50% 90%, rgba(168,208,220,0.75) 0%, rgba(168,208,220,0) 60%),
+      radial-gradient(ellipse 600px 400px at 90% 20%, rgba(200,226,232,0.95) 0%, rgba(200,226,232,0) 50%),
+      linear-gradient(135deg, #B8D4DC 0%, #8FB8C8 40%, #6FA0B5 100%);
+
+    --bg-fluid-light:
+      radial-gradient(ellipse 1000px 700px at 30% 40%, rgba(200,226,232,0.6) 0%, transparent 60%),
+      radial-gradient(ellipse 800px 600px at 70% 60%, rgba(168,208,220,0.45) 0%, transparent 60%),
+      linear-gradient(180deg, #EFF5F6 0%, #DCE9EB 100%);
+
+    --bg-fluid-navy:
+      radial-gradient(ellipse 1100px 800px at 30% 40%, rgba(40,75,100,1) 0%, transparent 55%),
+      radial-gradient(ellipse 900px 700px at 75% 65%, rgba(20,45,65,1) 0%, transparent 50%),
+      radial-gradient(ellipse 500px 400px at 85% 20%, rgba(217,119,6,0.35) 0%, transparent 55%),
+      linear-gradient(135deg, #112739 0%, #0B1D2E 60%, #050F1A 100%);
+  }
+
+  body {
+    @apply font-display text-ink antialiased;
+    font-weight: 400;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: linear-gradient(135deg, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0.25) 100%);
+    border: 1px solid rgba(255,255,255,0.65);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    box-shadow: var(--shadow-glass, inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 36px rgba(22,49,68,0.10));
+  }
+
+  .glass-opaque {
+    background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.70) 100%);
+    border: 1px solid rgba(255,255,255,0.9);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  }
+
+  .glass-dark {
+    background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  }
+}
+```
+
+### 4.3 Composant Button (référence canonique)
+
+```tsx
+// components/ui/Button.tsx
+import { forwardRef, type ButtonHTMLAttributes } from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
+
+const buttonVariants = cva(
+  'inline-flex items-center justify-center gap-2 rounded-full font-display font-medium ' +
+  'transition-all duration-fast ease-spring focus-visible:outline-none ' +
+  'focus-visible:ring-4 focus-visible:ring-navy/20 disabled:opacity-50 disabled:pointer-events-none ' +
+  'whitespace-nowrap leading-none',
+  {
+    variants: {
+      variant: {
+        primary: 'bg-navy text-paper shadow-[0_6px_20px_rgba(22,49,68,0.18)] hover:bg-navy-deep',
+        warm: 'bg-amber text-paper shadow-[0_6px_18px_rgba(217,119,6,0.25)] hover:opacity-95',
+        glass: 'bg-paper/85 text-ink border border-paper/70 shadow-sm backdrop-blur-md hover:bg-paper',
+        ghost: 'text-ink-mute hover:text-ink hover:bg-ink/5',
+        danger: 'bg-danger text-paper shadow-[0_6px_18px_rgba(239,68,68,0.25)] hover:opacity-95',
+      },
+      size: {
+        sm: 'px-3.5 py-1.5 text-[11px]',
+        default: 'px-[22px] py-[11px] text-[13px]',
+        lg: 'px-7 py-3.5 text-[15px]',
+      },
+    },
+    defaultVariants: {
+      variant: 'primary',
+      size: 'default',
+    },
+  }
+)
+
+export interface ButtonProps
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {}
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, ...props }, ref) => (
+    <button ref={ref} className={cn(buttonVariants({ variant, size }), className)} {...props} />
+  )
+)
+Button.displayName = 'Button'
+```
+
+### 4.4 Composant Card
+
+```tsx
+// components/ui/Card.tsx
+import { forwardRef, type HTMLAttributes } from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
+
+const cardVariants = cva(
+  'rounded-lg transition-all duration-base ease-spring',
+  {
+    variants: {
+      variant: {
+        glass: 'glass',
+        opaque: 'glass-opaque',
+        dark: 'glass-dark text-paper',
+        navy: 'bg-navy text-paper shadow-[0_16px_40px_rgba(22,49,68,0.25)] relative overflow-hidden',
+        warm: 'border border-amber/20 shadow-md',
+      },
+      padding: {
+        sm: 'p-5',     // 20px
+        default: 'p-7', // 28px
+        lg: 'p-9',     // 36px
+      },
+    },
+    defaultVariants: {
+      variant: 'opaque',
+      padding: 'default',
+    },
+  }
+)
+
+export interface CardProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof cardVariants> {}
+
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant, padding, style, ...props }, ref) => {
+    const warmStyle = variant === 'warm'
+      ? { background: 'linear-gradient(135deg, rgba(255,213,168,0.80), rgba(255,200,150,0.65))' }
+      : undefined
+    return (
+      <div
+        ref={ref}
+        className={cn(cardVariants({ variant, padding }), className)}
+        style={{ ...warmStyle, ...style }}
+        {...props}
+      />
+    )
+  }
+)
+Card.displayName = 'Card'
+```
+
+### 4.5 Composant StatusPill
+
+```tsx
+// components/ui/StatusPill.tsx
+import { type HTMLAttributes } from 'react'
+import { cn } from '@/lib/utils'
+
+type Status = 'amber' | 'blue' | 'green' | 'coral' | 'muted'
+
+interface StatusPillProps extends HTMLAttributes<HTMLDivElement> {
+  status: Status
+  label: string
+  size?: 'sm' | 'default'
+}
+
+const dotColors: Record<Status, string> = {
+  amber: 'bg-warning shadow-[0_0_0_3px_rgba(245,158,11,0.20)]',
+  blue: 'bg-info shadow-[0_0_0_3px_rgba(59,130,246,0.20)]',
+  green: 'bg-success shadow-[0_0_0_3px_rgba(16,185,129,0.20)]',
+  coral: 'bg-danger shadow-[0_0_0_3px_rgba(253,102,102,0.20)]',
+  muted: 'bg-ink-ghost',
+}
+
+export const StatusPill = ({ status, label, size = 'default', className, ...props }: StatusPillProps) => (
+  <div
+    className={cn(
+      'inline-flex items-center gap-2.5 rounded-full glass-opaque',
+      size === 'sm' ? 'px-2.5 py-1 text-[10px] gap-1.5' : 'px-4 py-2 text-[12px]',
+      'font-medium text-ink-soft',
+      className
+    )}
+    {...props}
+  >
+    <span className={cn('rounded-full', size === 'sm' ? 'w-1.5 h-1.5' : 'w-2 h-2', dotColors[status])} />
+    {label}
+  </div>
+)
+```
+
+### 4.6 Composant LabelChip (diagnostics)
+
+```tsx
+// components/ui/LabelChip.tsx
+import { cn } from '@/lib/utils'
+
+type DiagType = 'dpe' | 'amiante' | 'plomb' | 'gaz' | 'elec' | 'termites' | 'mesurage' | 'erp'
+
+const chipStyles: Record<DiagType, string> = {
+  dpe: 'bg-blue-mist text-[#1E3A8A]',
+  amiante: 'bg-orange-mist text-[#7C3F0A]',
+  plomb: 'bg-coral-mist text-[#8B1414]',
+  gaz: 'bg-lime-mist text-[#2D4015]',
+  elec: 'bg-[#E8E0F5] text-[#2F1F5A]',
+  termites: 'bg-cream-deep text-ink-mute',
+  mesurage: 'bg-blue-mist text-[#1E3A8A]',
+  erp: 'bg-orange-mist text-[#7C3F0A]',
+}
+
+const labels: Record<DiagType, string> = {
+  dpe: 'DPE',
+  amiante: 'AMIANTE',
+  plomb: 'PLOMB',
+  gaz: 'GAZ',
+  elec: 'ÉLEC',
+  termites: 'TERMITES',
+  mesurage: 'MESURAGE',
+  erp: 'ERP',
+}
+
+export const LabelChip = ({ type }: { type: DiagType }) => (
+  <span
+    className={cn(
+      'inline-flex items-center px-2 py-1 rounded-md text-[10px] font-semibold uppercase',
+      'tracking-[0.06em] font-display',
+      chipStyles[type]
+    )}
+  >
+    {labels[type]}
+  </span>
+)
+```
+
+### 4.7 Layout type — Page hero (dashboard matin)
+
+```tsx
+// app/(app)/dashboard/page.tsx
+export default function DashboardPage() {
+  return (
+    <main className="relative min-h-screen overflow-hidden" style={{ background: 'var(--bg-fluid-cyan)' }}>
+      <div className="relative z-10 px-10 py-14 max-w-[1400px] mx-auto">
+
+        {/* Top bar pill glass */}
+        <header className="glass-opaque rounded-full px-3.5 py-2 flex items-center gap-4 mb-9">
+          {/* logo + tabs + status + avatar */}
+        </header>
+
+        {/* Hero */}
+        <section className="grid grid-cols-[1.5fr_1fr] gap-7 mt-9">
+          <div>
+            <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-paper/85 mb-3">
+              👋 Bonjour Benjamin · Mardi 19 mai
+            </p>
+            <h1 className="font-serif italic text-[220px] leading-[0.85] text-paper drop-shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
+              4
+            </h1>
+            <p className="font-display font-light text-[38px] text-paper -mt-4">
+              visites vous attendent <span className="font-serif italic">aujourd'hui</span>.
+            </p>
+            <p className="text-paper/92 max-w-md mt-3 text-[14px] leading-[1.55]">
+              Première mission à <span className="font-serif italic">11h chez Sophie Martin</span>.
+              La tournée fait <strong>47 km</strong>.
+            </p>
+            <div className="flex gap-3 mt-5">
+              <Button variant="warm">Démarrer la tournée →</Button>
+              <Button variant="glass">Voir le planning</Button>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <Card variant="glass" className="w-full">
+              {/* Prochaine mission */}
+            </Card>
+          </div>
+        </section>
+
+        {/* KPI pastels row */}
+        <section className="grid grid-cols-4 gap-3 mt-9">
+          <KpiCard variant="cyan" label="TOURNÉE DU JOUR" value="47" unit="km" />
+          <KpiCard variant="orange" label="COMPTEUR DPE" value="237" unit="/1000" />
+          <KpiCard variant="lime" label="DOCUMENTS REÇUS" value="3" unit="/4" />
+          <KpiCard variant="coral" label="À FACTURER" value="5" />
+        </section>
+
+      </div>
+    </main>
+  )
+}
+```
+
+---
+
+## 5. ANTI-PATTERNS critiques (jamais)
+
+1. ❌ **Couleur hors palette** — si tu écris un hex qui n'est pas dans les 28 tokens, tu te trompes
+2. ❌ **Box-shadow noire** — toutes les shadows portent une teinte navy à faible opacité
+3. ❌ **Border-radius arbitraire** — utilise les 5 tokens (sm/md/lg/xl/pill), point
+4. ❌ **Espacement hors système 4x** — pas de `gap-[15px]`, `mt-[7px]`, etc.
+5. ❌ **Plus d'un bouton primary par écran**
+6. ❌ **Plus d'un accent ambre par écran**
+7. ❌ **Instrument Serif pour body text** — réservé aux KPI et accents
+8. ❌ **Modal centré sur mobile** — toujours bottom sheet
+9. ❌ **Tap target < 44pt sur mobile**
+10. ❌ **Background cyan en aplat dur** — toujours en gradient fluide
+11. ❌ **Texte coloré pour le body** — toujours `ink-soft`
+12. ❌ **Animation linéaire** — toujours spring cubic-bezier
+13. ❌ **Emoji dans un bouton primary** — utilise lucide-react
+14. ❌ **Plus de 3 polices dans un écran** — Urbanist + Serif + Mono, c'est tout
+15. ❌ **Texte sous 11px** — accessibilité minimum
+16. ❌ **Card sans border-radius minimum r-lg (22px)**
+17. ❌ **Border colorée épaisse sur input par défaut** — focus seulement
+18. ❌ **CTA secondaire en navy plein** — réservé au primary
+19. ❌ **Hover sans transition spring** — toujours `transition-all duration-fast ease-spring`
+20. ❌ **Loader sur action <250ms** — pas la peine, ça fait laggy
+
+---
+
+## 6. RÈGLE D'OR TRANSVERSALE
+
+**Quand tu hésites, choisis l'option la plus discrète.**
+
+Le système gagne en cohérence quand chaque élément reste à sa place. Si tu te dis « ce serait peut-être plus visible si... », c'est probablement que tu cassais l'équilibre. Ajoute, plutôt, un peu de hiérarchie typographique ou d'espacement. Jamais une couleur ou une ombre supplémentaire.
+
+---
+
+## 7. CHECKLIST QUALITÉ AVANT PR
+
+Avant de commit/PR, vérifie systématiquement :
+
+- [ ] Toutes les couleurs sont dans les 28 tokens
+- [ ] Pas de valeur arbitraire dans Tailwind (`[...]` interdit hors cas justifié)
+- [ ] Un seul bouton primary par écran
+- [ ] Un accent ambre maximum par écran
+- [ ] Toutes les shadows sont des `shadow-xs/sm/md/lg/glass`
+- [ ] Tous les radius sont des `rounded-sm/md/lg/xl/full`
+- [ ] Body text en `text-ink-soft`, jamais `text-ink`
+- [ ] Polices : `font-display` partout sauf KPI (`font-serif italic`) et codes (`font-mono`)
+- [ ] Transitions : toujours `transition-* duration-fast/base/slow ease-spring`
+- [ ] Tap targets ≥ 44pt en mobile
+- [ ] Inputs avec label visible + focus ring navy
+- [ ] Modal mobile = bottom sheet avec drag handle
+- [ ] Pas plus de 5 status pills différents dans une même liste
+
+---
+
+## 8. RÉFÉRENCES VISUELLES
+
+- **Couverture & écrans hero** : Payrix Overview Panel (cyan saturé + glass cards translucides)
+- **Cards composition** : Drippi (layering avec cards qui se chevauchent)
+- **Dashboard analytics** : Synthex Experience Platform (sidebar + main + floating cards)
+- **Typography ratio** : Ron Design Lab cases (display oversized + accent italic serif)
+- **Mode mission focus** : inspiration calendar app dark mode Apple
+
+---
+
+*Dernière mise à jour : mai 2026 · v3 du design system*
+*Source visuelle : `KOVAS_UIUX_Design_v3.pdf` (20 pages)*

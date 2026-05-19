@@ -153,7 +153,7 @@ export function DossierForm({
             <Button
               key={p.id}
               type="button"
-              variant="outline"
+              variant="glass"
               size="sm"
               onClick={() => applyPack(p.types)}
             >
@@ -201,8 +201,8 @@ export function DossierForm({
                     className={cn(
                       'flex items-start gap-3 rounded-md border p-3 cursor-pointer transition-colors',
                       isChecked
-                        ? 'border-border-soft bg-muted/50'
-                        : 'border-border hover:bg-muted/30',
+                        ? 'border-rule bg-cream-deep/50'
+                        : 'border-rule hover:bg-ink/5',
                     )}
                   >
                     <input

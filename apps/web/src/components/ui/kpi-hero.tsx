@@ -19,20 +19,20 @@ export function KpiHero({ value, label, hint, trend, className, featured }: KpiH
   return (
     <div
       className={cn(
-        'rounded-2xl border border-border-soft bg-paper p-5 shadow-glass-sm',
+        'rounded-2xl border border-rule/80 glass-opaque p-5 shadow-glass-sm',
         featured && 'md:col-span-2 md:row-span-2 md:p-8',
         className,
       )}
     >
       <p
         className={cn(
-          'font-serif italic tracking-tight text-foreground leading-none',
+          'font-serif italic tracking-tight text-ink leading-none',
           featured ? 'text-6xl md:text-7xl' : 'text-4xl md:text-5xl',
         )}
       >
         {value}
       </p>
-      <p className={cn('mt-3 font-semibold text-foreground', featured ? 'text-lg' : 'text-sm')}>
+      <p className={cn('mt-3 font-semibold text-ink', featured ? 'text-lg' : 'text-sm')}>
         {label}
       </p>
       {hint ? <p className="mt-1 text-sm text-ink-mute">{hint}</p> : null}

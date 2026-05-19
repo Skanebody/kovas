@@ -3,27 +3,12 @@ import { getCurrentUser } from '@/lib/auth/current-user'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import { MISSION_PASTEL_CLASS } from '@/lib/mission-pastels'
 import type { MissionType } from '@kovas/shared'
+import { parisMonthBounds } from '@/lib/paris-dates'
 import { cn } from '@/lib/utils'
-
-function monthBoundsParis(): { startIso: string; nextIso: string } {
-  const now = new Date()
-  const fmt = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Paris',
-    year: 'numeric',
-    month: '2-digit',
-  })
-  const parts = fmt.formatToParts(now)
-  const year = parts.find((p) => p.type === 'year')?.value
-  const month = parts.find((p) => p.type === 'month')?.value
-  const start = new Date(`${year}-${month}-01T00:00:00+02:00`)
-  const next = new Date(start)
-  next.setMonth(next.getMonth() + 1)
-  return { startIso: start.toISOString(), nextIso: next.toISOString() }
-}
 
 export async function DiagnosticsBreakdown() {
   const { supabase, orgId } = await getCurrentUser()
-  const { startIso, nextIso } = monthBoundsParis()
+  const { startIso, nextIso } = parisMonthBounds()
 
   const { data: missions } = await supabase
     .from('missions')
@@ -44,14 +29,14 @@ export async function DiagnosticsBreakdown() {
       label: MISSION_TYPE_LABELS[type] ?? type,
       count,
       pct: total > 0 ? Math.round((count / total) * 100) : 0,
-      barClass: MISSION_PASTEL_CLASS[type as MissionType] ?? 'bg-muted',
+      barClass: MISSION_PASTEL_CLASS[type as MissionType] ?? 'bg-cream-deep',
     }))
     .sort((a, b) => b.count - a.count)
 
-  const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long' })
+  const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', timeZone: 'Europe/Paris' })
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card variant="opaque" padding="none" className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute capitalize">
           Répartition diagnostics · {monthLabel}

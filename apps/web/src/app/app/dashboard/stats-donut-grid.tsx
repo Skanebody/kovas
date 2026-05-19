@@ -135,7 +135,7 @@ export async function StatsDonutGrid() {
   ]
 
   return (
-    <Card>
+    <Card variant="opaque" padding="default">
       <CardContent className="pt-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {tiles.map((t) => (

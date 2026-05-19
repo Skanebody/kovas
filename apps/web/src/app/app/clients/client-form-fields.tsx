@@ -160,8 +160,8 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
         </FormField>
       </div>
 
-      <fieldset className="space-y-4 rounded-lg border border-border p-4">
-        <legend className="px-1 text-sm font-medium">Adresse du cabinet (facturation)</legend>
+      <fieldset className="space-y-4 rounded-xl border border-rule/80 glass-opaque p-4">
+        <legend className="px-1 text-sm font-medium text-ink">Adresse du cabinet (facturation)</legend>
         <p className="text-xs text-ink-mute -mt-2">
           Voie, numéro, appartement, bâtiment — l&apos;adresse du bien diagnostiqué est sur chaque dossier.
         </p>
@@ -204,8 +204,8 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
           </FormField>
         </div>
 
-        <div className="rounded-xl border border-border bg-paper/50 p-4 space-y-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <div className="rounded-xl border border-rule/80 glass-opaque p-4 space-y-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-ink">
             <Building2 className="size-4" /> Complément d&apos;adresse
           </div>
 

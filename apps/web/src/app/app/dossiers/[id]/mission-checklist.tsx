@@ -66,8 +66,8 @@ export function MissionChecklist({
   const percent = Math.round(completion * 100)
 
   return (
-    <Card>
-      <CardHeader>
+    <Card variant="opaque" padding="none">
+      <CardHeader className="p-5 pb-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <CardTitle className="text-base flex items-center gap-2">
             <ClipboardList className="size-4" />
@@ -81,11 +81,11 @@ export function MissionChecklist({
             <Badge variant="orange">Items obligatoires manquants</Badge>
           )}
         </div>
-        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-          <div className="h-full bg-cta transition-all" style={{ width: `${percent}%` }} />
+        <div className="h-1.5 rounded-full bg-cream-deep overflow-hidden">
+          <div className="h-full bg-navy transition-all" style={{ width: `${percent}%` }} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="p-5 pt-0 space-y-5">
         {Object.entries(grouped).map(([cat, catItems]) => (
           <div key={cat} className="space-y-2">
             <h3 className="text-xs uppercase tracking-wider text-ink-mute font-semibold">
@@ -104,7 +104,7 @@ export function MissionChecklist({
                       disabled={!isManual}
                       className={cn(
                         'w-full flex items-start gap-3 text-left text-sm rounded-md px-2 py-1.5 transition-colors',
-                        isManual ? 'hover:bg-muted cursor-pointer' : 'cursor-default',
+                        isManual ? 'hover:bg-ink/5 cursor-pointer' : 'cursor-default',
                       )}
                     >
                       {isOk ? (

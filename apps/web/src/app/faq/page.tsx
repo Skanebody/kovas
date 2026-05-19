@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import { FAQ_CATEGORIES, FAQ_LANDING } from '@/lib/faq-data'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
+import { SiteFooter } from '@/components/site-footer'
 import Link from 'next/link'
 import Script from 'next/script'
 
@@ -48,7 +49,7 @@ export default function FaqPage() {
       <header className="glass-header sticky top-0 z-40">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-md bg-cta shadow-cta" aria-hidden />
+            <div className="size-8 rounded-md bg-navy shadow-accent" aria-hidden />
             <span className="text-base font-bold tracking-tight">KOVAS</span>
           </Link>
           <Button variant="ghost" size="sm" asChild>
@@ -61,13 +62,13 @@ export default function FaqPage() {
 
       <main className="mx-auto max-w-6xl px-6 py-12">
         <div className="max-w-2xl mb-12 space-y-3">
-          <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+          <p className="text-xs uppercase tracking-wider font-semibold text-ink-mute">
             Questions fréquentes
           </p>
-          <h1 className="text-4xl font-extrabold tracking-tight">
+          <h1 className="font-display font-light text-display-m tracking-tight text-ink">
             Tout ce que vous voulez savoir sur KOVAS et le diagnostic immobilier
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-ink-mute">
             53 réponses détaillées classées en 8 catégories. Pour les diagnostiqueurs, les
             propriétaires, les vendeurs et les locataires.
           </p>
@@ -77,12 +78,12 @@ export default function FaqPage() {
           {/* TOC sticky desktop */}
           <aside className="hidden lg:block">
             <nav className="sticky top-24 space-y-1" aria-label="Catégories">
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute px-3 py-2">
                 Catégories
               </p>
               <a
                 href="#essentiel"
-                className="block rounded-md px-3 py-2 text-sm hover:bg-muted/50 transition-colors"
+                className="block rounded-md px-3 py-2 text-sm hover:bg-ink/5 transition-colors"
               >
                 L&apos;essentiel
               </a>
@@ -90,7 +91,7 @@ export default function FaqPage() {
                 <a
                   key={cat.id}
                   href={`#${cat.id}`}
-                  className="block rounded-md px-3 py-2 text-sm hover:bg-muted/50 transition-colors"
+                  className="block rounded-md px-3 py-2 text-sm hover:bg-ink/5 transition-colors"
                 >
                   {cat.title}
                 </a>
@@ -103,7 +104,7 @@ export default function FaqPage() {
             <section id="essentiel" className="scroll-mt-24 space-y-4">
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold tracking-tight">L&apos;essentiel</h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-ink-mute">
                   Les 5 questions les plus posées sur KOVAS, avant de plonger dans les détails.
                 </p>
               </div>
@@ -118,8 +119,8 @@ export default function FaqPage() {
             {FAQ_CATEGORIES.map((cat) => (
               <section key={cat.id} id={cat.id} className="scroll-mt-24 space-y-4">
                 <div className="space-y-1">
-                  <h2 className="text-2xl font-bold tracking-tight">{cat.title}</h2>
-                  <p className="text-sm text-muted-foreground">{cat.description}</p>
+                  <h2 className="font-display font-light text-2xl tracking-tight text-ink">{cat.title}</h2>
+                  <p className="text-sm text-ink-mute">{cat.description}</p>
                 </div>
                 <div className="space-y-3">
                   {cat.questions.map((q) => (
@@ -131,42 +132,43 @@ export default function FaqPage() {
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-border text-center space-y-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-16 pt-8 border-t border-rule text-center space-y-4">
+          <p className="text-sm text-ink-mute">
             Votre question n&apos;est pas dans la liste ? Écrivez-nous à{' '}
             <a
               href="mailto:contact@kovas.fr"
-              className="text-cta underline-offset-4 hover:underline"
+              className="text-navy underline-offset-4 hover:underline"
             >
               contact@kovas.fr
             </a>
           </p>
-          <Button asChild>
+          <Button asChild variant="warm">
             <Link href="/signup">Commencer mon essai 14 jours</Link>
           </Button>
         </div>
       </main>
+      <SiteFooter />
     </div>
   )
 }
 
 function FaqItem({ id, question, answer }: { id: string; question: string; answer: string }) {
   return (
-    <Card className="p-0 overflow-hidden">
+    <Card variant="opaque" padding="none" className="overflow-hidden">
       <details className="group">
         <summary
           id={id}
-          className="cursor-pointer list-none px-5 py-4 flex items-start justify-between gap-3 hover:bg-muted/30 transition-colors scroll-mt-24"
+          className="cursor-pointer list-none px-5 py-4 flex items-start justify-between gap-3 hover:bg-ink/5 transition-colors scroll-mt-24"
         >
           <h3 className="text-base font-semibold flex-1 min-w-0">{question}</h3>
           <span
             aria-hidden
-            className="text-muted-foreground shrink-0 transition-transform group-open:rotate-180"
+            className="text-ink-mute shrink-0 transition-transform group-open:rotate-180"
           >
             ▾
           </span>
         </summary>
-        <div className="px-5 pb-5 pt-1 border-t border-border/50">
+        <div className="px-5 pb-5 pt-1 border-t border-rule/50">
           <FaqAnswer markdown={answer} />
         </div>
       </details>

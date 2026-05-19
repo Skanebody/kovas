@@ -106,7 +106,7 @@ export function ShareMissionButton({
             description="XML LIV_administratif + LIV_donnees + LIV_DPE + photos taggées. Le .mdb sera ajouté courant 2026."
             action={
               <Button
-                variant="outline"
+                variant="glass"
                 onClick={() => handleDownload('liciel')}
                 disabled={downloading !== null}
               >
@@ -120,13 +120,13 @@ export function ShareMissionButton({
             }
           />
 
-          <div className="border-t border-border pt-3">
+          <div className="border-t border-rule pt-3">
             <p className="text-xs text-ink-mute mb-3">Autres modes d'envoi</p>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" onClick={handleEmail}>
+              <Button variant="glass" onClick={handleEmail}>
                 <Mail className="size-4" /> Email{clientEmail ? ' au client' : ''}
               </Button>
-              <Button variant="outline" disabled>
+              <Button variant="glass" disabled>
                 <Cloud className="size-4" /> GDrive (bientôt)
               </Button>
             </div>
@@ -151,10 +151,10 @@ function ShareCard({
   action: React.ReactNode
 }) {
   return (
-    <div className="rounded-lg border border-border p-4 space-y-3">
+    <div className="rounded-lg border border-rule p-4 space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <div className="size-9 rounded-md bg-muted flex items-center justify-center shrink-0">
+          <div className="size-9 rounded-md bg-cream-deep flex items-center justify-center shrink-0">
             <Icon className="size-4" />
           </div>
           <h3 className="text-sm font-semibold">{title}</h3>

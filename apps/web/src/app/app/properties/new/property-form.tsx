@@ -79,8 +79,8 @@ export function PropertyForm({ clients }: PropertyFormProps) {
       </FormField>
 
       {showCollectiveFields && (
-        <div className="rounded-xl border border-border bg-paper/50 p-4 space-y-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <div className="rounded-xl border border-rule/80 glass-opaque p-4 space-y-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-ink">
             <Building2 className="size-4" /> Détails appartement / lot
           </div>
 

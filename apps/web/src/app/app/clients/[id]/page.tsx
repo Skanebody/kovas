@@ -2,8 +2,8 @@ import { ArrowLeft, Building2, Mail, MapPin, Pencil, Phone } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { AppPageHeader } from '@/components/app-page-header'
 import { DangerZone } from '@/components/danger-zone'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -41,27 +41,27 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const business = isBusinessClientType(client.type)
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/app/clients">
           <ArrowLeft className="size-4" /> Retour aux clients
         </Link>
       </Button>
 
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-display text-2xl md:text-3xl tracking-tight">{client.display_name}</h1>
-          <Badge variant="muted">{TYPE_LABELS[client.type] ?? client.type}</Badge>
-        </div>
-        <Button variant="outline" asChild>
-          <Link href={`/app/clients/${client.id}/edit`}>
-            <Pencil className="size-4" /> Modifier
-          </Link>
-        </Button>
-      </div>
+      <AppPageHeader
+        title={client.display_name}
+        description={TYPE_LABELS[client.type] ?? client.type}
+        action={
+          <Button variant="glass" asChild>
+            <Link href={`/app/clients/${client.id}/edit`}>
+              <Pencil className="size-4" /> Modifier
+            </Link>
+          </Button>
+        }
+      />
 
       {(personName || client.company_name) && (
-        <Card>
+        <Card variant="opaque" padding="default">
           <CardHeader>
             <CardTitle className="text-base">Identité</CardTitle>
           </CardHeader>
@@ -88,7 +88,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         </Card>
       )}
 
-      <Card>
+      <Card variant="opaque" padding="default">
         <CardHeader>
           <CardTitle className="text-base">Coordonnées</CardTitle>
         </CardHeader>
@@ -116,7 +116,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       </Card>
 
       {addressLines.length > 0 ? (
-        <Card>
+        <Card variant="opaque" padding="default">
           <CardHeader>
             <CardTitle className="text-base">Adresse cabinet (facturation)</CardTitle>
           </CardHeader>
@@ -134,7 +134,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       ) : null}
 
       {client.notes ? (
-        <Card>
+        <Card variant="opaque" padding="default">
           <CardHeader>
             <CardTitle className="text-base">Notes internes</CardTitle>
           </CardHeader>

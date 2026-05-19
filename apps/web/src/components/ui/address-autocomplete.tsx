@@ -148,7 +148,7 @@ export function AddressAutocomplete({
         <ul
           id={listId}
           className={cn(
-            'absolute z-50 mt-1 w-full rounded-md border border-border bg-paper shadow-glass-sm',
+            'absolute z-50 mt-1 w-full rounded-md border border-rule bg-paper shadow-glass-sm',
             'max-h-72 overflow-auto p-1',
           )}
           role="listbox"
@@ -158,7 +158,7 @@ export function AddressAutocomplete({
               <button
                 type="button"
                 onClick={() => handleSelect(f)}
-                className="w-full text-left rounded-sm px-3 py-2 text-sm hover:bg-muted flex items-start gap-2"
+                className="w-full text-left rounded-sm px-3 py-2 text-sm hover:bg-cream-deep flex items-start gap-2"
               >
                 <MapPin className="size-4 mt-0.5 text-ink-mute shrink-0" />
                 <span>{f.label}</span>

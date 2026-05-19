@@ -2,6 +2,7 @@ import { CheckCircle2, FileX, Lock } from 'lucide-react'
 import type { Metadata } from 'next'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Database } from '@kovas/database/types'
+import { Card } from '@/components/ui/card'
 import { UploadForm } from './upload-form'
 
 export const metadata: Metadata = {
@@ -33,12 +34,10 @@ export default async function PublicUploadPage({ params }: PageProps) {
     .is('deleted_at', null)
     .maybeSingle()
 
-  // Token inconnu → 404 stylé
   if (!dossier) {
     return <InvalidTokenPage />
   }
 
-  // Token expiré
   if (
     dossier.client_upload_expires_at &&
     new Date(dossier.client_upload_expires_at) < new Date()
@@ -48,7 +47,6 @@ export default async function PublicUploadPage({ params }: PageProps) {
 
   const prop = Array.isArray(dossier.properties) ? dossier.properties[0] : dossier.properties
 
-  // Liste des documents déjà uploadés (visible côté client pour feedback)
   const { data: existing } = await admin
     .from('owner_documents')
     .select('id, original_name, doc_kind, uploaded_at')
@@ -56,62 +54,65 @@ export default async function PublicUploadPage({ params }: PageProps) {
     .order('uploaded_at', { ascending: false })
 
   return (
-    <div className="min-h-dvh flex flex-col bg-background">
-      <header className="px-6 py-4 border-b border-border">
+    <div className="min-h-dvh flex flex-col bg-fluid-light">
+      <header className="px-6 py-4 border-b border-rule/80 glass-header">
         <div className="mx-auto max-w-2xl flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="size-7 rounded-md bg-cta" aria-hidden />
-            <span className="font-semibold tracking-tight">KOVAS</span>
+            <div className="size-7 rounded-md bg-navy shadow-accent" aria-hidden />
+            <span className="font-display font-semibold tracking-tight text-ink">KOVAS</span>
           </div>
-          <span className="text-xs text-muted-foreground">Sécurisé · RGPD</span>
+          <span className="text-[11px] text-ink-mute font-mono uppercase tracking-wider">
+            Sécurisé · RGPD
+          </span>
         </div>
       </header>
 
       <main className="flex-1 px-6 py-12">
         <div className="mx-auto max-w-2xl space-y-8">
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1 className="font-display font-light text-display-s tracking-tight text-ink">
               Documents pour votre diagnostic
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-[14px] text-ink-mute">
               Votre diagnostiqueur a besoin de quelques documents avant son intervention.
-              Téléchargez-les ici — c'est sécurisé et privé.
+              Téléchargez-les ici — c&apos;est sécurisé et privé.
             </p>
             {prop && (
-              <p className="text-sm text-subtle-foreground">
+              <p className="text-[12px] text-ink-faint font-mono">
                 Dossier {dossier.reference} · {prop.address}, {prop.postal_code} {prop.city}
               </p>
             )}
           </div>
 
-          <UploadForm token={token} />
+          <Card variant="opaque" padding="default">
+            <UploadForm token={token} />
+          </Card>
 
           {existing && existing.length > 0 && (
-            <div className="rounded-xl border border-border bg-card p-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <CheckCircle2 className="size-4 text-accent-green" />
+            <Card variant="opaque" padding="default" className="space-y-2">
+              <div className="flex items-center gap-2 text-[14px] font-semibold text-ink">
+                <CheckCircle2 className="size-4 text-success" />
                 {existing.length} document{existing.length > 1 ? 's' : ''} déjà envoyé
                 {existing.length > 1 ? 's' : ''}
               </div>
-              <ul className="text-sm text-muted-foreground space-y-1">
+              <ul className="text-[13px] text-ink-mute space-y-1">
                 {existing.map((d) => (
                   <li key={d.id}>· {d.original_name ?? 'Document sans nom'}</li>
                 ))}
               </ul>
-            </div>
+            </Card>
           )}
 
-          <div className="text-xs text-subtle-foreground space-y-1">
-            <p className="flex items-start gap-1">
-              <Lock className="size-3 mt-0.5 shrink-0" /> Hébergement EU (Paris), conformité RGPD. Vos
-              documents ne sont visibles que par votre diagnostiqueur.
-            </p>
-          </div>
+          <p className="text-[11px] text-ink-faint flex items-start gap-1">
+            <Lock className="size-3 mt-0.5 shrink-0" />
+            Hébergement EU (Paris), conformité RGPD. Vos documents ne sont visibles que par votre
+            diagnostiqueur.
+          </p>
         </div>
       </main>
 
-      <footer className="px-6 py-6 border-t border-border">
-        <p className="text-xs text-subtle-foreground text-center">
+      <footer className="px-6 py-6 border-t border-rule/80">
+        <p className="text-[11px] text-ink-faint text-center">
           © 2026 SASU Nexus 1993 · SIREN 982 786 154
         </p>
       </footer>
@@ -121,29 +122,30 @@ export default async function PublicUploadPage({ params }: PageProps) {
 
 function InvalidTokenPage() {
   return (
-    <div className="min-h-dvh flex items-center justify-center px-6">
-      <div className="max-w-md text-center space-y-4">
-        <FileX className="size-10 mx-auto text-muted-foreground" />
-        <h1 className="text-xl font-semibold">Lien invalide ou révoqué</h1>
-        <p className="text-sm text-muted-foreground">
-          Ce lien d'envoi de documents n'est plus actif. Contactez votre diagnostiqueur pour en
-          obtenir un nouveau.
+    <div className="min-h-dvh flex items-center justify-center px-6 bg-fluid-light">
+      <Card variant="opaque" padding="lg" className="max-w-md text-center space-y-4">
+        <FileX className="size-10 mx-auto text-ink-mute" />
+        <h1 className="font-display text-xl font-semibold text-ink">Lien invalide ou révoqué</h1>
+        <p className="text-[13px] text-ink-mute">
+          Ce lien d&apos;envoi de documents n&apos;est plus actif. Contactez votre diagnostiqueur pour
+          en obtenir un nouveau.
         </p>
-      </div>
+      </Card>
     </div>
   )
 }
 
 function ExpiredTokenPage() {
   return (
-    <div className="min-h-dvh flex items-center justify-center px-6">
-      <div className="max-w-md text-center space-y-4">
-        <FileX className="size-10 mx-auto text-muted-foreground" />
-        <h1 className="text-xl font-semibold">Lien expiré</h1>
-        <p className="text-sm text-muted-foreground">
-          Ce lien a expiré (validité : 30 jours). Contactez votre diagnostiqueur pour un nouveau lien.
+    <div className="min-h-dvh flex items-center justify-center px-6 bg-fluid-light">
+      <Card variant="opaque" padding="lg" className="max-w-md text-center space-y-4">
+        <FileX className="size-10 mx-auto text-ink-mute" />
+        <h1 className="font-display text-xl font-semibold text-ink">Lien expiré</h1>
+        <p className="text-[13px] text-ink-mute">
+          Ce lien a expiré (validité : 30 jours). Contactez votre diagnostiqueur pour un nouveau
+          lien.
         </p>
-      </div>
+      </Card>
     </div>
   )
 }

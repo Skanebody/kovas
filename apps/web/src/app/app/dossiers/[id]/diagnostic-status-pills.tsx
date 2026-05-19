@@ -22,27 +22,27 @@ function statusColor(pct: number): {
   if (pct >= 100)
     return {
       dot: 'bg-accent-blue',
-      text: 'text-foreground',
+      text: 'text-ink',
       border: 'border-accent-blue/30',
       bg: 'bg-accent-blue/5',
     }
   if (pct >= 75)
     return {
       dot: 'bg-accent-green',
-      text: 'text-foreground',
+      text: 'text-ink',
       border: 'border-accent-green/30',
       bg: 'bg-accent-green/5',
     }
   if (pct >= 25)
     return {
       dot: 'bg-accent-orange',
-      text: 'text-foreground',
+      text: 'text-ink',
       border: 'border-accent-orange/30',
       bg: 'bg-accent-orange/5',
     }
   return {
     dot: 'bg-accent-red',
-    text: 'text-foreground',
+    text: 'text-ink',
     border: 'border-accent-red/30',
     bg: 'bg-accent-red/5',
   }

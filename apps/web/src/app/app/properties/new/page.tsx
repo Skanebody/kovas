@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -18,19 +19,17 @@ export default async function NewPropertyPage() {
     .order('display_name')
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/app/properties">
           <ArrowLeft className="size-4" /> Retour
         </Link>
       </Button>
 
-      <div className="space-y-1">
-        <h1 className="text-display text-2xl md:text-3xl tracking-tight">Nouveau bien</h1>
-        <p className="text-sm text-ink-mute">
-          L'adresse se complète automatiquement (Base Adresse Nationale).
-        </p>
-      </div>
+      <AppPageHeader
+        title="Nouveau bien"
+        description="L'adresse se complète automatiquement (Base Adresse Nationale)."
+      />
 
       <PropertyForm clients={clients ?? []} />
     </div>

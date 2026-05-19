@@ -18,7 +18,7 @@ interface FaqAnswerProps {
 export function FaqAnswer({ markdown }: FaqAnswerProps) {
   const paragraphs = markdown.trim().split(/\n\n+/)
   return (
-    <div className="space-y-3 text-sm text-foreground leading-relaxed">
+    <div className="space-y-3 text-sm text-ink leading-relaxed">
       {paragraphs.map((para, i) => renderParagraph(para, i))}
     </div>
   )

@@ -1,4 +1,10 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import {
+  AppListTable,
+  AppListTableCell,
+  AppListTableHead,
+  AppListTableRow,
+} from '@/components/ui/app-list-table'
 import { Building2, Plus } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -28,13 +34,15 @@ export default async function PropertiesPage() {
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
+  const count = properties?.length ?? 0
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <AppPageHeader
         title="Biens"
-        description={`${properties?.length ?? 0} bien${(properties?.length ?? 0) > 1 ? 's' : ''}`}
+        description={`${count} bien${count > 1 ? 's' : ''}`}
         action={
-          <Button asChild>
+          <Button asChild variant="warm">
             <Link href="/app/properties/new">
               <Plus className="size-4" />
               Nouveau bien
@@ -44,54 +52,57 @@ export default async function PropertiesPage() {
       />
 
       {properties && properties.length > 0 ? (
-        <div className="rounded-xl border border-border-soft bg-paper overflow-hidden shadow-glass-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-cream-deep/80 text-ink-mute">
-              <tr>
-                <th className="text-left font-medium px-4 py-3">Adresse</th>
-                <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Type</th>
-                <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Surface</th>
-              </tr>
-            </thead>
-            <tbody>
-              {properties.map((p) => (
-                <tr key={p.id} className="border-t border-border hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3">
-                    <Link href={`/app/properties/${p.id}`} className="font-medium hover:underline">
-                      {p.address}
-                    </Link>
-                    {(p.postal_code || p.city) && (
-                      <div className="text-xs text-ink-mute mt-0.5">
-                        {[p.postal_code, p.city].filter(Boolean).join(' ')}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 hidden sm:table-cell">
-                    {p.property_type ? (
-                      <Badge variant="muted">{TYPE_LABELS[p.property_type] ?? p.property_type}</Badge>
-                    ) : (
-                      <span className="text-ink-mute">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-ink-mute hidden md:table-cell">
-                    {p.surface_total ? `${p.surface_total} m²` : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AppListTable>
+          <AppListTableHead>
+            <tr>
+              <th className="text-left font-medium px-4 py-3">Adresse</th>
+              <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Type</th>
+              <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Surface</th>
+            </tr>
+          </AppListTableHead>
+          <tbody>
+            {properties.map((p) => (
+              <AppListTableRow key={p.id}>
+                <AppListTableCell>
+                  <Link
+                    href={`/app/properties/${p.id}`}
+                    className="font-medium text-ink hover:underline text-[14px]"
+                  >
+                    {p.address}
+                  </Link>
+                  {(p.postal_code || p.city) && (
+                    <div className="text-[11px] text-ink-mute mt-0.5">
+                      {[p.postal_code, p.city].filter(Boolean).join(' ')}
+                    </div>
+                  )}
+                </AppListTableCell>
+                <AppListTableCell className="hidden sm:table-cell">
+                  {p.property_type ? (
+                    <Badge variant="muted">
+                      {TYPE_LABELS[p.property_type] ?? p.property_type}
+                    </Badge>
+                  ) : (
+                    <span className="text-ink-mute">—</span>
+                  )}
+                </AppListTableCell>
+                <AppListTableCell className="hidden md:table-cell text-ink-mute">
+                  {p.surface_total ? `${p.surface_total} m²` : '—'}
+                </AppListTableCell>
+              </AppListTableRow>
+            ))}
+          </tbody>
+        </AppListTable>
       ) : (
-        <Card>
-          <CardContent className="pt-6 pb-8 text-center space-y-4">
+        <Card variant="opaque" padding="default" className="text-center">
+          <CardContent className="space-y-4 pt-2">
             <Building2 className="size-10 mx-auto text-ink-mute" />
             <div className="space-y-1">
-              <h2 className="font-semibold">Aucun bien pour le moment</h2>
-              <p className="text-sm text-ink-mute">
+              <h2 className="font-semibold text-ink">Aucun bien pour le moment</h2>
+              <p className="text-[13px] text-ink-mute">
                 Ajoutez un bien pour pouvoir y associer des missions de diagnostic.
               </p>
             </div>
-            <Button asChild>
+            <Button asChild variant="warm">
               <Link href="/app/properties/new">
                 <Plus className="size-4" />
                 Ajouter un bien

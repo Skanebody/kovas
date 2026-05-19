@@ -12,7 +12,7 @@ import { Search } from 'lucide-react'
 export function CommandPaletteTrigger() {
   return (
     <Button
-      variant="outline"
+      variant="glass"
       size="sm"
       aria-label="Recherche rapide (⌘K)"
       onClick={() => {
@@ -32,7 +32,7 @@ export function CommandPaletteTrigger() {
     >
       <Search className="size-4" />
       <span className="hidden sm:inline">Recherche…</span>
-      <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] bg-muted/50 rounded px-1.5 py-0.5 ml-1">
+      <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] bg-cream-deep/50 rounded px-1.5 py-0.5 ml-1">
         ⌘K
       </kbd>
     </Button>

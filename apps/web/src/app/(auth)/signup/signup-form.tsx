@@ -88,7 +88,7 @@ export function SignupForm() {
         Commencer l'essai 14 jours
       </Button>
 
-      <p className="text-xs text-subtle-foreground text-center">
+      <p className="text-xs text-ink-faint text-center">
         En créant un compte, vous acceptez nos{' '}
         <a href="/cgu" className="underline">
           CGU

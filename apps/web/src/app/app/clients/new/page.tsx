@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -8,19 +9,17 @@ export const metadata: Metadata = { title: 'Nouveau client' }
 
 export default function NewClientPage() {
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/app/clients">
           <ArrowLeft className="size-4" /> Retour
         </Link>
       </Button>
 
-      <div className="space-y-1">
-        <h1 className="text-display text-2xl md:text-3xl tracking-tight">Nouveau client</h1>
-        <p className="text-sm text-ink-mute">
-          Renseignez le nom du donneur d'ordre — un particulier, une agence, un notaire…
-        </p>
-      </div>
+      <AppPageHeader
+        title="Nouveau client"
+        description="Renseignez le donneur d'ordre — particulier, agence, notaire…"
+      />
 
       <ClientForm />
     </div>

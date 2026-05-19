@@ -2,28 +2,14 @@ import { cn } from '@/lib/utils'
 import { type VariantProps, cva } from 'class-variance-authority'
 import type { HTMLAttributes } from 'react'
 
-/**
- * StatusPill — pastille avec dot coloré pour les états vivants.
- * KOVAS Design System v2 (2026-05-19) — pattern Ron Design Lab.
- *
- * Différence vs Badge :
- * - Badge = état textuel statique (catégorie, type, label fixe)
- * - StatusPill = état vivant (mission en cours, planifiée, en attente)
- *   avec dot 8px coloré, halo ring soft, et pulse animation sur amber.
- *
- * Variants (signification métier) :
- * - blue   : programmé, planifié, à venir
- * - amber  : en cours (pulse 2s) — le seul variant animé
- * - green  : terminé, validé, exporté
- * - muted  : à démarrer, en attente, état neutre passif
- */
-const dotVariants = cva('size-2 rounded-full shrink-0', {
+const dotVariants = cva('rounded-full shrink-0', {
   variants: {
     variant: {
-      blue: 'bg-accent-blue ring-4 ring-accent-blue-soft',
-      amber: 'bg-accent-warm ring-4 ring-accent-warm-soft animate-pulse-soft',
-      green: 'bg-accent-green ring-4 ring-accent-green-soft',
-      muted: 'bg-ink-ghost',
+      blue: 'size-2 bg-info shadow-[0_0_0_3px_rgba(59,130,246,0.20)]',
+      amber: 'size-2 bg-warning shadow-[0_0_0_3px_rgba(245,158,11,0.20)] animate-pulse-soft',
+      green: 'size-2 bg-success shadow-[0_0_0_3px_rgba(16,185,129,0.20)]',
+      coral: 'size-2 bg-danger shadow-[0_0_0_3px_rgba(253,102,102,0.20)]',
+      muted: 'size-2 bg-ink-ghost',
     },
   },
   defaultVariants: { variant: 'muted' },
@@ -32,20 +18,21 @@ const dotVariants = cva('size-2 rounded-full shrink-0', {
 export interface StatusPillProps
   extends HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof dotVariants> {
-  /** Texte affiché à droite du dot */
   label: string
+  size?: 'sm' | 'default'
 }
 
-export function StatusPill({ className, variant, label, ...props }: StatusPillProps) {
+export function StatusPill({ className, variant, label, size = 'default', ...props }: StatusPillProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-2 rounded-pill border border-border-soft bg-paper px-3 py-1.5 text-sm font-medium text-foreground',
+        'inline-flex items-center gap-2.5 rounded-pill glass-opaque font-medium text-ink-soft',
+        size === 'sm' ? 'px-2.5 py-1 text-[10px] gap-1.5' : 'px-4 py-2 text-[12px]',
         className,
       )}
       {...props}
     >
-      <span className={cn(dotVariants({ variant }))} />
+      <span className={cn(dotVariants({ variant }))} aria-hidden />
       {label}
     </span>
   )

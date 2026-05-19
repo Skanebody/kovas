@@ -59,7 +59,7 @@ export function AddMissionButton({ dossierId, existingTypes }: AddMissionButtonP
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" disabled={pending}>
+          <Button variant="glass" size="sm" disabled={pending}>
             {triggerLabel}
           </Button>
         </DropdownMenuTrigger>
@@ -93,7 +93,7 @@ export function AddMissionButton({ dossierId, existingTypes }: AddMissionButtonP
   // Mobile : bottom sheet
   return (
     <>
-      <Button variant="outline" size="sm" disabled={pending} onClick={() => setSheetOpen(true)}>
+      <Button variant="glass" size="sm" disabled={pending} onClick={() => setSheetOpen(true)}>
         {triggerLabel}
       </Button>
       <BottomSheet
@@ -116,7 +116,7 @@ export function AddMissionButton({ dossierId, existingTypes }: AddMissionButtonP
                     type="button"
                     disabled={already || adding === type}
                     onClick={() => handleAdd(type)}
-                    className="w-full text-left rounded-md px-3 py-3 text-sm hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-between"
+                    className="w-full text-left rounded-md px-3 py-3 text-sm hover:bg-ink/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-between"
                   >
                     <span>{MISSION_TYPE_LABELS[type] ?? type}</span>
                     {already && <span className="text-xs text-ink-mute">déjà ajouté</span>}

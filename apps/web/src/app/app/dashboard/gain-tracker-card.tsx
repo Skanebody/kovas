@@ -1,26 +1,8 @@
 import { Card } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowRight } from 'lucide-react'
+import { parisMonthBounds } from '@/lib/paris-dates'
 import Link from 'next/link'
-
-/**
- * Bornes du mois courant en timezone Paris.
- */
-function monthBoundsParis(): { startIso: string; nextIso: string } {
-  const now = new Date()
-  const fmt = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Paris',
-    year: 'numeric',
-    month: '2-digit',
-  })
-  const parts = fmt.formatToParts(now)
-  const year = parts.find((p) => p.type === 'year')?.value
-  const month = parts.find((p) => p.type === 'month')?.value
-  const start = new Date(`${year}-${month}-01T00:00:00+02:00`)
-  const next = new Date(start)
-  next.setMonth(next.getMonth() + 1)
-  return { startIso: start.toISOString(), nextIso: next.toISOString() }
-}
 
 const MINUTES_SAVED_PER_MISSION = 90 // CLAUDE.md §2 : 1h30 par DPE typique
 const EUROS_PER_HOUR_PRODUCTIVITY = 50 // hypothèse productivité libérée
@@ -36,7 +18,7 @@ const EUROS_PER_HOUR_PRODUCTIVITY = 50 // hypothèse productivité libérée
  */
 export async function GainTrackerCard() {
   const { supabase, orgId } = await getCurrentUser()
-  const { startIso, nextIso } = monthBoundsParis()
+  const { startIso, nextIso } = parisMonthBounds()
 
   const { count: missionsThisMonth } = await supabase
     .from('missions')
@@ -56,7 +38,7 @@ export async function GainTrackerCard() {
 
   return (
     <Card
-      variant="accent"
+      variant="navy"
       className="relative overflow-hidden p-8 md:p-10 h-full flex flex-col justify-between"
     >
       {/* Glow ambre radial en background (signature v2) */}

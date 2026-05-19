@@ -115,12 +115,12 @@ export async function AlertsAndActions() {
   }
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card variant="opaque" padding="default" className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute flex items-center justify-between">
           <span>Alertes & actions</span>
           {alerts.length > 0 && (
-            <span className="text-foreground tabular-nums">{alerts.length}</span>
+            <span className="text-ink tabular-nums">{alerts.length}</span>
           )}
         </CardTitle>
       </CardHeader>

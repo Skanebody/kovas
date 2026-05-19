@@ -1,34 +1,22 @@
 import type { MissionType } from '@kovas/shared'
 
 /**
- * Mapping pastels catégoriels par type de diagnostic.
- * KOVAS Design System v2 (2026-05-19) — pattern Ron Design Lab.
- *
- * 5 pastels disponibles, 8 diagnostics → certains partagent (par affinité métier).
- *
- * - butter   (#FFF0C5) → DPE (énergie, classement A-G) + ERP (info naturelle)
- * - lime     (#E5F0D5) → Électricité (vert tech)
- * - peach    (#FFE0D5) → Amiante + Termites (alerte sanitaire, bois)
- * - lavender (#E8E0F5) → Plomb (toxique, sérieux)
- * - sky      (#DAE8F5) → Carrez/Boutin + Gaz (mesure / atmosphère)
+ * Label chips diagnostics — KOVAS Design System v3 (kovas-design-system.mdc §2.6).
  */
 export const MISSION_PASTEL_CLASS: Record<MissionType, string> = {
-  dpe_vente: 'bg-pastel-butter text-foreground',
-  dpe_location: 'bg-pastel-butter text-foreground',
-  amiante_vente: 'bg-pastel-peach text-foreground',
-  amiante_avant_travaux: 'bg-pastel-peach text-foreground',
-  plomb_crep: 'bg-pastel-lavender text-foreground',
-  gaz: 'bg-pastel-sky text-foreground',
-  electricite: 'bg-pastel-lime text-foreground',
-  termites: 'bg-pastel-peach text-foreground',
-  carrez_boutin: 'bg-pastel-sky text-foreground',
-  erp: 'bg-pastel-butter text-foreground',
-  copropriete: 'bg-pastel-lavender text-foreground',
+  dpe_vente: 'bg-blue-mist text-[#1E3A8A]',
+  dpe_location: 'bg-blue-mist text-[#1E3A8A]',
+  amiante_vente: 'bg-orange-mist text-[#7C3F0A]',
+  amiante_avant_travaux: 'bg-orange-mist text-[#7C3F0A]',
+  plomb_crep: 'bg-coral-mist text-[#8B1414]',
+  gaz: 'bg-lime-mist text-[#2D4015]',
+  electricite: 'bg-[#E8E0F5] text-[#2F1F5A]',
+  termites: 'bg-cream-deep text-ink-mute',
+  carrez_boutin: 'bg-blue-mist text-[#1E3A8A]',
+  erp: 'bg-orange-mist text-[#7C3F0A]',
+  copropriete: 'bg-[#E8E0F5] text-[#2F1F5A]',
 }
 
-/**
- * Label court pour un type de mission (uppercase, format tag).
- */
 export const MISSION_TYPE_LABEL: Record<MissionType, string> = {
   dpe_vente: 'DPE',
   dpe_location: 'DPE LOC',

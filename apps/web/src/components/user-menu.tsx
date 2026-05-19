@@ -43,7 +43,7 @@ export function UserMenu({ displayName, email, onLogout }: UserMenuProps) {
           aria-label="Menu utilisateur"
           className={cn(
             'flex items-center gap-1.5 rounded-full p-0.5 pr-1.5 transition-colors',
-            'hover:bg-cta/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta/30',
+            'hover:bg-navy/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/30',
           )}
         >
           <Avatar name={displayName} size="sm" />

@@ -96,7 +96,7 @@ export async function DashboardPipeline() {
   byColumn.set('done', done.slice(0, 5))
 
   return (
-    <Card>
+    <Card variant="opaque" padding="default">
       <CardHeader className="pb-3">
         <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute">
           Pipeline de la semaine
@@ -109,7 +109,7 @@ export async function DashboardPipeline() {
             return (
               <div
                 key={col.id}
-                className="rounded-lg border border-border-soft bg-paper/40 p-2 min-h-[180px] flex flex-col"
+                className="rounded-xl border border-rule/80 bg-cream/60 p-2 min-h-[180px] flex flex-col"
               >
                 <div className="flex items-center justify-between px-1 pb-2">
                   <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ export async function DashboardPipeline() {
                       <li key={r.id}>
                         <Link
                           href={`/app/dossiers/${r.dossier_id}#mission-${r.id}`}
-                          className="flex items-stretch gap-2 rounded-md bg-paper hover:bg-muted/40 transition-colors overflow-hidden border border-border/50"
+                          className="flex items-stretch gap-2 rounded-lg bg-paper/90 hover:bg-ink/5 transition-colors duration-fast overflow-hidden border border-rule/60"
                         >
                           <span className={cn('w-1 shrink-0', col.accent)} aria-hidden />
                           <div className="flex-1 min-w-0 py-2 pr-2 space-y-0.5">

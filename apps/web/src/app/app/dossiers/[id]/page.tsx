@@ -236,19 +236,58 @@ export default async function DossierDetailPage({
         </Link>
       </Button>
 
-      {/* Header compact */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1 min-w-0 flex-1">
-          <p className="text-xs font-mono text-ink-mute">{dossier.reference}</p>
-          <h1 className="text-display text-2xl md:text-3xl tracking-tight">Dossier de visite</h1>
+      <Card variant="opaque" padding="lg" className="space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-1 space-y-2">
+            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
+              {dossier.reference}
+            </p>
+            <h1 className="font-display font-light text-display-s tracking-tight text-ink">
+              {client?.display_name ?? 'Dossier de visite'}
+            </h1>
+            {fullAddress ? (
+              <p className="text-[14px] text-ink-soft flex items-center gap-2">
+                <MapPin className="size-4 shrink-0 text-ink-mute" />
+                {fullAddress}
+              </p>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Badge variant={DOSSIER_STATUS_VARIANT[dossier.status] ?? 'muted'}>
+              {DOSSIER_STATUS_LABELS[dossier.status] ?? dossier.status}
+            </Badge>
+            <DossierMoreMenu dossierId={dossier.id} />
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant={DOSSIER_STATUS_VARIANT[dossier.status] ?? 'muted'}>
-            {DOSSIER_STATUS_LABELS[dossier.status] ?? dossier.status}
-          </Badge>
-          <DossierMoreMenu dossierId={dossier.id} />
-        </div>
-      </div>
+        {(client || dossier.scheduled_at) && (
+          <div className="flex flex-wrap items-center gap-4 text-[12px] text-ink-mute pt-2 border-t border-rule/80">
+            {client && dossier.client_id && (
+              <Link
+                href={`/app/clients/${dossier.client_id}`}
+                className="flex items-center gap-1 hover:text-ink transition-colors duration-fast"
+              >
+                <User className="size-3.5" /> {client.display_name}
+              </Link>
+            )}
+            {dossier.scheduled_at && (
+              <span className="flex items-center gap-1">
+                <Calendar className="size-3.5" />
+                {new Date(dossier.scheduled_at).toLocaleString('fr-FR', {
+                  dateStyle: 'long',
+                  timeStyle: 'short',
+                })}
+                <a
+                  href={`/api/dossiers/${dossier.id}/calendar.ics`}
+                  download
+                  className="ml-2 underline-offset-4 hover:underline hover:text-ink"
+                >
+                  .ics
+                </a>
+              </span>
+            )}
+          </div>
+        )}
+      </Card>
 
       {/* Pills statut diagnostics — scan visuel rapide */}
       {missionsWithChecklist.length > 0 && (
@@ -262,64 +301,31 @@ export default async function DossierDetailPage({
         />
       )}
 
-      {/* Détails compactés — 1 à 2 lignes */}
-      <Card className="p-4">
-        <div className="flex items-center gap-3 flex-wrap">
-          <MapPin className="size-4 text-ink-mute shrink-0" />
-          {prop ? (
-            <Link
-              href={`/app/properties/${dossier.property_id}`}
-              className="text-sm font-medium hover:underline truncate flex-1 min-w-0"
-            >
-              {fullAddress || 'Bien sans adresse'}
-            </Link>
-          ) : (
-            <span className="text-sm text-ink-mute flex-1">Aucun bien rattaché</span>
-          )}
-          {prop?.year_built && (
-            <span className="text-xs text-ink-mute">{prop.year_built}</span>
-          )}
-          {prop?.surface_total && (
-            <span className="text-xs text-ink-mute">· {prop.surface_total} m²</span>
-          )}
-          <DossierInfoEdit
-            dossierId={dossier.id}
-            scheduledAt={dossier.scheduled_at ?? null}
-            notes={dossier.notes ?? null}
-            clientId={dossier.client_id ?? null}
-            clients={clientsList ?? []}
-          />
-        </div>
-        {(client || dossier.scheduled_at) && (
-          <div className="flex items-center gap-4 mt-2 text-xs text-ink-mute flex-wrap">
-            {client && dossier.client_id && (
-              <Link
-                href={`/app/clients/${dossier.client_id}`}
-                className="flex items-center gap-1 hover:text-foreground transition-colors"
-              >
-                <User className="size-3" /> {client.display_name}
-              </Link>
-            )}
-            {dossier.scheduled_at && (
-              <span className="flex items-center gap-1">
-                <Calendar className="size-3" />
-                {new Date(dossier.scheduled_at).toLocaleString('fr-FR', {
-                  dateStyle: 'long',
-                  timeStyle: 'short',
-                })}
-                <a
-                  href={`/api/dossiers/${dossier.id}/calendar.ics`}
-                  download
-                  className="ml-2 underline-offset-4 hover:underline hover:text-foreground transition-colors"
-                  aria-label="Télécharger le RDV au format .ics (Google/Apple/Outlook)"
-                  title="Télécharger pour Google / Apple / Outlook"
-                >
-                  .ics ↓
-                </a>
-              </span>
-            )}
-          </div>
+      <Card variant="opaque" padding="default" className="flex flex-wrap items-center gap-3">
+        <MapPin className="size-4 text-ink-mute shrink-0" />
+        {prop ? (
+          <Link
+            href={`/app/properties/${dossier.property_id}`}
+            className="text-[14px] font-medium text-ink hover:underline truncate flex-1 min-w-0"
+          >
+            {fullAddress || 'Bien sans adresse'}
+          </Link>
+        ) : (
+          <span className="text-[13px] text-ink-mute flex-1">Aucun bien rattaché</span>
         )}
+        {prop?.year_built && (
+          <span className="text-[11px] text-ink-mute">{prop.year_built}</span>
+        )}
+        {prop?.surface_total && (
+          <span className="text-[11px] text-ink-mute">· {prop.surface_total} m²</span>
+        )}
+        <DossierInfoEdit
+          dossierId={dossier.id}
+          scheduledAt={dossier.scheduled_at ?? null}
+          notes={dossier.notes ?? null}
+          clientId={dossier.client_id ?? null}
+          clients={clientsList ?? []}
+        />
       </Card>
 
       {/* WORKFLOW STEPPER — la pièce maîtresse */}
@@ -604,11 +610,11 @@ export default async function DossierDetailPage({
       )}
 
       {dossier.notes && (
-        <Card>
+        <Card variant="opaque" padding="default">
           <CardHeader>
             <CardTitle className="text-base">Notes internes</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm whitespace-pre-wrap">{dossier.notes}</CardContent>
+          <CardContent className="text-sm whitespace-pre-wrap text-ink-soft">{dossier.notes}</CardContent>
         </Card>
       )}
     </div>

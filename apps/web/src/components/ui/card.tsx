@@ -1,49 +1,62 @@
 import { cn } from '@/lib/utils'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { forwardRef } from 'react'
-import type { HTMLAttributes } from 'react'
+import type { HTMLAttributes, CSSProperties } from 'react'
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  /**
-   * Variant visuel (KOVAS Design System v3 — 2026-05-19, cf. PDF p.11).
-   * - `opaque` (défaut, ex-flat v2) : paper translucide 85% sur fond cream,
-   *   contenus denses, lisibilité prioritaire. Cards de travail dashboard,
-   *   dossier, listes, account.
-   * - `glass` : translucide cyan, micro-actions, hero visuels sur fond
-   *   coloré. Pour surfaces flottantes (header sticky, sidebar, command
-   *   palette, bottom sheets).
-   * - `accent` : navy plein + glow ambre subtle, KPI hero dramatisé
-   *   (GainTracker mode soir, CTA premium).
-   * - `warm` : fond ambre-soft, alerte douce / mise en avant / cohérence
-   *   à vérifier.
-   */
-  variant?: 'opaque' | 'glass' | 'accent' | 'warm' | 'flat'
-}
+const cardVariants = cva('rounded-lg transition-all duration-base ease-spring', {
+  variants: {
+    variant: {
+      opaque: 'glass-opaque text-ink',
+      flat: 'glass-opaque text-ink',
+      glass: 'glass text-ink',
+      accent: 'bg-navy text-paper shadow-accent relative overflow-hidden',
+      navy: 'bg-navy text-paper shadow-accent relative overflow-hidden',
+      warm: 'border border-amber/20 shadow-md text-ink',
+      dark: 'glass-dark text-paper',
+    },
+    padding: {
+      none: '',
+      sm: 'p-5',
+      default: 'p-7',
+      lg: 'p-9',
+    },
+  },
+  defaultVariants: {
+    variant: 'opaque',
+    padding: 'default',
+  },
+})
+
+export interface CardProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof cardVariants> {}
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'opaque', ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        // 'flat' = alias rétrocompat v2 vers 'opaque'
-        (variant === 'opaque' || variant === 'flat') &&
-          'rounded-xl border border-border-soft bg-paper text-foreground shadow-glass-sm',
-        variant === 'glass' &&
-          'rounded-xl border border-border-soft bg-paper/85 backdrop-blur-xl text-foreground shadow-glass',
-        variant === 'accent' &&
-          'rounded-2xl bg-card-accent text-card-accent-foreground shadow-accent',
-        variant === 'warm' &&
-          'rounded-xl border border-accent-warm/15 bg-accent-warm-soft text-foreground',
-        className,
-      )}
-      {...props}
-    />
-  ),
+  ({ className, variant = 'opaque', padding, style, ...props }, ref) => {
+    const resolved = variant === 'accent' ? 'navy' : variant
+    const warmStyle: CSSProperties | undefined =
+      resolved === 'warm'
+        ? {
+            background:
+              'linear-gradient(135deg, rgba(255,213,168,0.80), rgba(255,200,150,0.65))',
+          }
+        : undefined
+
+    return (
+      <div
+        ref={ref}
+        className={cn(cardVariants({ variant: resolved, padding }), className)}
+        style={{ ...warmStyle, ...style }}
+        {...props}
+      />
+    )
+  },
 )
 Card.displayName = 'Card'
 
 export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('flex flex-col space-y-1.5 p-6', className)} {...props} />
+    <div ref={ref} className={cn('flex flex-col space-y-1.5', className)} {...props} />
   ),
 )
 CardHeader.displayName = 'CardHeader'
@@ -52,7 +65,7 @@ export const CardTitle = forwardRef<HTMLDivElement, HTMLAttributes<HTMLHeadingEl
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-lg font-bold leading-none tracking-tight', className)}
+      className={cn('text-[17px] font-semibold leading-tight tracking-tight text-ink', className)}
       {...props}
     />
   ),
@@ -61,21 +74,21 @@ CardTitle.displayName = 'CardTitle'
 
 export const CardDescription = forwardRef<HTMLDivElement, HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn('text-sm text-ink-mute', className)} {...props} />
+    <p ref={ref} className={cn('text-[12px] text-ink-mute leading-normal', className)} {...props} />
   ),
 )
 CardDescription.displayName = 'CardDescription'
 
 export const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+    <div ref={ref} className={cn('pt-0', className)} {...props} />
   ),
 )
 CardContent.displayName = 'CardContent'
 
 export const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('flex items-center p-6 pt-0', className)} {...props} />
+    <div ref={ref} className={cn('flex items-center pt-0', className)} {...props} />
   ),
 )
 CardFooter.displayName = 'CardFooter'

@@ -3,11 +3,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 
 function SkelLine({ className }: { className?: string }) {
-  return <div className={`h-3 rounded-md bg-muted/60 animate-pulse ${className ?? ''}`} />
+  return <div className={`h-3 rounded-md bg-cream-deep/80 animate-pulse ${className ?? ''}`} />
 }
 
 function SkelBlock({ className }: { className?: string }) {
-  return <div className={`rounded-lg bg-muted/60 animate-pulse ${className ?? ''}`} />
+  return <div className={`rounded-lg bg-cream-deep/80 animate-pulse ${className ?? ''}`} />
 }
 
 /**
@@ -39,14 +39,14 @@ export default function DossierDetailLoading() {
       </div>
 
       {/* Details card */}
-      <Card className="p-4 space-y-2">
+      <Card variant="opaque" padding="default" className="space-y-2">
         <SkelLine className="w-3/4" />
         <SkelLine className="w-1/2 h-2.5" />
       </Card>
 
       {/* Workflow */}
-      <Card>
-        <CardContent className="pt-6 space-y-3">
+      <Card variant="opaque" padding="default">
+        <CardContent className="pt-2 space-y-3">
           <SkelLine className="w-1/3 h-4" />
           <SkelBlock className="h-1.5 rounded-full" />
           <div className="space-y-2 pt-2">
@@ -58,15 +58,15 @@ export default function DossierDetailLoading() {
       </Card>
 
       {/* Owner docs */}
-      <Card>
-        <CardContent className="pt-4">
+      <Card variant="opaque" padding="default">
+        <CardContent className="pt-2">
           <SkelLine className="w-1/4 h-4" />
         </CardContent>
       </Card>
 
       {/* Pieces */}
-      <Card>
-        <CardContent className="pt-6 space-y-2">
+      <Card variant="opaque" padding="default">
+        <CardContent className="pt-2 space-y-2">
           <SkelLine className="w-1/4 h-4" />
           {[0, 1, 2].map((i) => (
             <SkelBlock key={i} className="h-9 rounded-md" />

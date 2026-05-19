@@ -1,3 +1,10 @@
+import { AppPageHeader } from '@/components/app-page-header'
+import {
+  AppListTable,
+  AppListTableCell,
+  AppListTableHead,
+  AppListTableRow,
+} from '@/components/ui/app-list-table'
 import { FolderOpen, Plus } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -43,97 +50,91 @@ export default async function DossiersPage() {
     .order('created_at', { ascending: false })
     .limit(100)
 
+  const count = dossiers?.length ?? 0
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-display text-3xl md:text-4xl tracking-tight">Dossiers</h1>
-          <p className="text-sm text-ink-mute">
-            {dossiers?.length ?? 0} dossier{(dossiers?.length ?? 0) > 1 ? 's' : ''}
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/app/dossiers/new">
-            <Plus className="size-4" />
-            Nouveau dossier
-          </Link>
-        </Button>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <AppPageHeader
+        title="Dossiers"
+        description={`${count} dossier${count > 1 ? 's' : ''}`}
+        action={
+          <Button asChild variant="warm">
+            <Link href="/app/dossiers/new">
+              <Plus className="size-4" />
+              Nouveau dossier
+            </Link>
+          </Button>
+        }
+      />
 
       {dossiers && dossiers.length > 0 ? (
-        <div className="rounded-xl border border-border-soft bg-paper overflow-hidden shadow-glass-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-cream-deep/80 text-ink-mute">
-              <tr>
-                <th className="text-left font-medium px-4 py-3">Référence</th>
-                <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Bien</th>
-                <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Diagnostics</th>
-                <th className="text-left font-medium px-4 py-3">Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dossiers.map((d) => {
-                const prop = Array.isArray(d.properties) ? d.properties[0] : d.properties
-                const missions = (d.missions ?? []) as { type: string }[]
-                return (
-                  <tr
-                    key={d.id}
-                    className="border-t border-border hover:bg-muted/30 transition-colors"
-                  >
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/app/dossiers/${d.id}`}
-                        className="font-medium hover:underline font-mono text-xs"
-                      >
-                        {d.reference}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <div className="text-sm">{prop?.address ?? '—'}</div>
-                      {prop?.city && (
-                        <div className="text-xs text-ink-mute">
-                          {prop.postal_code} {prop.city}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <div className="flex flex-wrap gap-1">
-                        {missions.slice(0, 3).map((m, i) => (
-                          <MissionTypeTag
-                            key={`${d.id}-${m.type}-${i}`}
-                            type={m.type as MissionType}
-                          />
-                        ))}
-                        {missions.length > 3 && (
-                          <Badge variant="outline" className="text-[10px]">
-                            +{missions.length - 3}
-                          </Badge>
-                        )}
+        <AppListTable>
+          <AppListTableHead>
+            <tr>
+              <th className="text-left font-medium px-4 py-3">Référence</th>
+              <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Bien</th>
+              <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Diagnostics</th>
+              <th className="text-left font-medium px-4 py-3">Statut</th>
+            </tr>
+          </AppListTableHead>
+          <tbody>
+            {dossiers.map((d) => {
+              const prop = Array.isArray(d.properties) ? d.properties[0] : d.properties
+              const missions = (d.missions ?? []) as { type: string }[]
+              return (
+                <AppListTableRow key={d.id}>
+                  <AppListTableCell>
+                    <Link
+                      href={`/app/dossiers/${d.id}`}
+                      className="font-mono text-[11px] font-semibold text-ink hover:underline"
+                    >
+                      {d.reference}
+                    </Link>
+                  </AppListTableCell>
+                  <AppListTableCell className="hidden md:table-cell">
+                    <div className="text-[13px]">{prop?.address ?? '—'}</div>
+                    {prop?.city && (
+                      <div className="text-[11px] text-ink-mute">
+                        {prop.postal_code} {prop.city}
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant={DOSSIER_STATUS_VARIANT[d.status] ?? 'muted'}>
-                        {DOSSIER_STATUS_LABELS[d.status] ?? d.status}
-                      </Badge>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                    )}
+                  </AppListTableCell>
+                  <AppListTableCell className="hidden sm:table-cell">
+                    <div className="flex flex-wrap gap-1">
+                      {missions.slice(0, 3).map((m, i) => (
+                        <MissionTypeTag
+                          key={`${d.id}-${m.type}-${i}`}
+                          type={m.type as MissionType}
+                        />
+                      ))}
+                      {missions.length > 3 && (
+                        <Badge variant="outline" className="text-[10px]">
+                          +{missions.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  </AppListTableCell>
+                  <AppListTableCell>
+                    <Badge variant={DOSSIER_STATUS_VARIANT[d.status] ?? 'muted'}>
+                      {DOSSIER_STATUS_LABELS[d.status] ?? d.status}
+                    </Badge>
+                  </AppListTableCell>
+                </AppListTableRow>
+              )
+            })}
+          </tbody>
+        </AppListTable>
       ) : (
-        <Card>
-          <CardContent className="pt-6 pb-8 text-center space-y-4">
+        <Card variant="opaque" padding="default" className="text-center">
+          <CardContent className="space-y-4 pt-2">
             <FolderOpen className="size-10 mx-auto text-ink-mute" />
             <div className="space-y-1">
-              <h2 className="font-semibold">Aucun dossier pour le moment</h2>
-              <p className="text-sm text-ink-mute">
-                Un dossier regroupe les diagnostics d'une même visite (DPE + Amiante + Plomb…) sur
-                un bien.
+              <h2 className="font-semibold text-ink">Aucun dossier</h2>
+              <p className="text-[13px] text-ink-mute">
+                Un dossier regroupe les diagnostics d&apos;une même visite sur un bien.
               </p>
             </div>
-            <Button asChild>
+            <Button asChild variant="warm">
               <Link href="/app/dossiers/new">
                 <Plus className="size-4" />
                 Créer un dossier

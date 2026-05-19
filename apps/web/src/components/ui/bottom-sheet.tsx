@@ -31,11 +31,11 @@ export function BottomSheet({
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" />
         <Drawer.Content
-          className="fixed bottom-0 inset-x-0 z-50 mt-24 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border-soft bg-paper outline-none focus:outline-none"
+          className="fixed bottom-0 inset-x-0 z-50 mt-24 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-rule/80 glass-opaque outline-none focus:outline-none"
           aria-describedby={description ? 'bottom-sheet-description' : undefined}
         >
           {/* Drag handle */}
-          <div aria-hidden className="mx-auto my-3 h-1.5 w-12 rounded-full bg-muted shrink-0" />
+          <div aria-hidden className="mx-auto my-3 h-1.5 w-12 rounded-full bg-cream-deep shrink-0" />
           {title && (
             <Drawer.Title className="text-base font-semibold text-center px-6 pb-1">
               {title}

@@ -1,76 +1,71 @@
 import type { Config } from 'tailwindcss'
 import tailwindcssAnimate from 'tailwindcss-animate'
 
-/**
- * Tailwind — KOVAS Design System v3 (2026-05-19)
- * Cream dominant · Navy KOVAS · Cyan liquide signature · Ambre accent · Pastels mist
- * Typo : Urbanist (UI) + Instrument Serif italic + JetBrains Mono
- * Réf. : docs/design/KOVAS_UIUX_Design_v3.pdf + CLAUDE.md §9
- */
+/** KOVAS Design System v3 — kovas-design-system.mdc */
 const config: Config = {
   darkMode: ['class'],
   content: ['./src/**/*.{ts,tsx}', '../../packages/*/src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-urbanist)', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-instrument-serif)', 'Georgia', 'serif'],
-        mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'monospace'],
+        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-display)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Georgia', 'serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       colors: {
-        background: 'hsl(var(--background) / <alpha-value>)',
-        paper: 'hsl(var(--paper) / <alpha-value>)',
-        card: {
-          DEFAULT: 'hsl(var(--card) / <alpha-value>)',
-          accent: 'hsl(var(--card-accent) / <alpha-value>)',
-          'accent-foreground': 'hsl(var(--card-accent-foreground) / <alpha-value>)',
+        navy: {
+          DEFAULT: '#163144',
+          deep: '#0B1D2E',
+          soft: '#2C4A63',
+          mute: '#475F77',
         },
-        cream: {
-          DEFAULT: 'hsl(var(--background) / <alpha-value>)',
-          deep: 'hsl(var(--cream-deep) / <alpha-value>)',
+        cyan: {
+          deep: '#4E8FA8',
+          mid: '#7FB5C7',
+          light: '#DFF3EB',
         },
-        foreground: 'hsl(var(--foreground) / <alpha-value>)',
+        amber: { DEFAULT: '#D97706' },
+        paper: '#FFFFFF',
+        cream: { DEFAULT: '#F8F6F0', deep: '#EFEBDF' },
+        rule: '#E7E2D2',
         ink: {
-          DEFAULT: 'hsl(var(--foreground) / <alpha-value>)',
-          soft: 'hsl(var(--ink-soft) / <alpha-value>)',
-          mute: 'hsl(var(--muted-foreground) / <alpha-value>)',
-          faint: 'hsl(var(--subtle-foreground) / <alpha-value>)',
-          ghost: 'hsl(var(--ink-ghost) / <alpha-value>)',
+          DEFAULT: '#163144',
+          soft: '#2C4A63',
+          mute: '#5B7088',
+          faint: '#8A99AE',
+          ghost: '#B8C2D2',
+        },
+        'blue-mist': '#DBEAFE',
+        'orange-mist': '#FFE5C9',
+        'lime-mist': '#F0FBD5',
+        'coral-mist': '#FCE3E1',
+        success: '#10B981',
+        warning: '#F59E0B',
+        danger: '#EF4444',
+        info: '#3B82F6',
+        // HSL aliases (composants existants)
+        background: 'hsl(var(--background) / <alpha-value>)',
+        foreground: 'hsl(var(--foreground) / <alpha-value>)',
+        border: {
+          DEFAULT: 'hsl(var(--border) / <alpha-value>)',
+          soft: 'hsl(var(--border-soft) / <alpha-value>)',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted) / <alpha-value>)',
           foreground: 'hsl(var(--muted-foreground) / <alpha-value>)',
-        },
-        subtle: {
-          DEFAULT: 'hsl(var(--subtle) / <alpha-value>)',
-          foreground: 'hsl(var(--subtle-foreground) / <alpha-value>)',
-        },
-        border: {
-          DEFAULT: 'hsl(var(--border) / <alpha-value>)',
-          soft: 'hsl(var(--border-soft) / <alpha-value>)',
         },
         cta: {
           DEFAULT: 'hsl(var(--cta) / <alpha-value>)',
           hover: 'hsl(var(--cta-hover) / <alpha-value>)',
           foreground: 'hsl(var(--cta-foreground) / <alpha-value>)',
         },
-        navy: {
-          DEFAULT: 'hsl(var(--navy-primary) / <alpha-value>)',
-          primary: 'hsl(var(--navy-primary) / <alpha-value>)',
-          deep: 'hsl(var(--navy-deep) / <alpha-value>)',
-          soft: 'hsl(var(--navy-soft) / <alpha-value>)',
-          mute: 'hsl(var(--navy-mute) / <alpha-value>)',
-        },
-        cyan: {
-          deep: 'hsl(var(--cyan-deep) / <alpha-value>)',
-          mid: 'hsl(var(--cyan-mid) / <alpha-value>)',
-          light: 'hsl(var(--cyan-light) / <alpha-value>)',
+        card: {
+          DEFAULT: 'hsl(var(--card) / <alpha-value>)',
+          accent: 'hsl(var(--card-accent) / <alpha-value>)',
+          'accent-foreground': 'hsl(var(--card-accent-foreground) / <alpha-value>)',
         },
         accent: {
-          warm: 'hsl(var(--accent-warm) / <alpha-value>)',
-          'warm-soft': 'hsl(var(--accent-warm-soft) / <alpha-value>)',
-          'warm-glow': 'hsl(var(--accent-warm-glow) / <alpha-value>)',
-          'warm-foreground': 'hsl(var(--accent-warm-foreground) / <alpha-value>)',
           blue: 'hsl(var(--accent-blue) / <alpha-value>)',
           'blue-soft': 'hsl(var(--accent-blue-soft) / <alpha-value>)',
           green: 'hsl(var(--accent-green) / <alpha-value>)',
@@ -79,46 +74,58 @@ const config: Config = {
           'red-soft': 'hsl(var(--accent-red-soft) / <alpha-value>)',
           orange: 'hsl(var(--accent-orange) / <alpha-value>)',
           'orange-soft': 'hsl(var(--accent-orange-soft) / <alpha-value>)',
-          yellow: 'hsl(var(--accent-yellow) / <alpha-value>)',
+          warm: 'hsl(var(--accent-warm) / <alpha-value>)',
+          'warm-soft': 'hsl(var(--accent-warm-soft) / <alpha-value>)',
+          'warm-foreground': 'hsl(var(--accent-warm-foreground) / <alpha-value>)',
         },
         pastel: {
-          /* v3 mist (signature) */
-          'blue-mist': 'hsl(var(--pastel-blue-mist) / <alpha-value>)',
-          'orange-mist': 'hsl(var(--pastel-orange-mist) / <alpha-value>)',
-          'lime-mist': 'hsl(var(--pastel-lime-mist) / <alpha-value>)',
-          'coral-mist': 'hsl(var(--pastel-coral-mist) / <alpha-value>)',
-          /* v2 conservés (alias MissionTypeTag) */
           butter: 'hsl(var(--pastel-butter) / <alpha-value>)',
           lime: 'hsl(var(--pastel-lime) / <alpha-value>)',
           peach: 'hsl(var(--pastel-peach) / <alpha-value>)',
           lavender: 'hsl(var(--pastel-lavender) / <alpha-value>)',
           sky: 'hsl(var(--pastel-sky) / <alpha-value>)',
+          'blue-mist': '#DBEAFE',
+          'orange-mist': '#FFE5C9',
+          'lime-mist': '#F0FBD5',
+          'coral-mist': '#FCE3E1',
         },
       },
-      borderRadius: {
-        /* v3 scale page 7 PDF */
-        sm: '8px',    // R-SM 8 — inputs petits, tags
-        md: '14px',   // R-MD 14 — inputs standards
-        lg: '22px',   // R-LG 22 — cards intérieures
-        xl: '32px',   // R-XL 32 — cards principales
-        '2xl': '40px',
-        pill: '999px',
+      fontSize: {
+        'display-xl': ['154px', { lineHeight: '0.9', letterSpacing: '-0.045em', fontWeight: '200' }],
+        'display-l': ['84px', { lineHeight: '0.94', letterSpacing: '-0.035em', fontWeight: '300' }],
+        'display-m': ['54px', { lineHeight: '1', letterSpacing: '-0.028em', fontWeight: '300' }],
+        'display-s': ['34px', { lineHeight: '1.05', letterSpacing: '-0.02em', fontWeight: '400' }],
+        'kpi-xl': ['168px', { lineHeight: '0.85', letterSpacing: '-0.04em' }],
+        'kpi-l': ['110px', { lineHeight: '0.9', letterSpacing: '-0.035em' }],
+        'kpi-m': ['64px', { lineHeight: '0.95', letterSpacing: '-0.03em' }],
+        'kpi-s': ['40px', { lineHeight: '1', letterSpacing: '-0.025em' }],
       },
-      backdropBlur: {
-        md: '12px',
-        xl: '20px',
+      borderRadius: {
+        sm: '8px',
+        md: '14px',
+        lg: '22px',
+        xl: '32px',
+        pill: '9999px',
       },
       boxShadow: {
-        /* v3 shadows diffuses 4 niveaux */
-        'glass-xs': '0 1px 2px hsl(207 47% 17% / 0.04)',
-        'glass-sm': '0 2px 6px hsl(207 47% 17% / 0.06)',
-        glass: '0 6px 18px hsl(207 47% 17% / 0.06), 0 2px 6px hsl(207 47% 17% / 0.04)',
-        'glass-hover': '0 12px 28px hsl(207 47% 17% / 0.10), 0 2px 6px hsl(207 47% 17% / 0.04)',
-        'glass-lg': '0 18px 40px hsl(207 47% 17% / 0.08), 0 4px 12px hsl(207 47% 17% / 0.04)',
-        cta: '0 4px 16px hsl(207 47% 17% / 0.2)',
-        'cta-hover': '0 6px 24px hsl(207 47% 17% / 0.28)',
-        accent: '0 8px 24px hsl(207 47% 17% / 0.12)',
-        warm: '0 4px 16px hsl(34 99% 47% / 0.22)',
+        xs: '0 1px 3px rgba(22, 49, 68, 0.04)',
+        sm: '0 3px 10px rgba(22, 49, 68, 0.06)',
+        md: '0 8px 22px rgba(22, 49, 68, 0.08)',
+        lg: '0 20px 50px rgba(22, 49, 68, 0.1)',
+        glass: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 36px rgba(22,49,68,0.10), 0 4px 12px rgba(22,49,68,0.06)',
+        'glass-sm': '0 3px 10px rgba(22, 49, 68, 0.06)',
+        'glass-hover': '0 12px 28px rgba(22, 49, 68, 0.10), 0 2px 6px rgba(22, 49, 68, 0.04)',
+        cta: '0 6px 20px rgba(22, 49, 68, 0.18)',
+        warm: '0 6px 18px rgba(217, 119, 6, 0.25)',
+        accent: '0 16px 40px rgba(22, 49, 68, 0.25)',
+      },
+      transitionTimingFunction: {
+        spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
+      transitionDuration: {
+        fast: '150ms',
+        base: '250ms',
+        slow: '400ms',
       },
       keyframes: {
         'fade-in': {
@@ -131,16 +138,8 @@ const config: Config = {
         },
       },
       animation: {
-        'fade-in': 'fade-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'fade-in': 'fade-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
         'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
-      },
-      transitionTimingFunction: {
-        spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-      },
-      transitionDuration: {
-        fast: '150ms',
-        base: '250ms',
-        slow: '400ms',
       },
     },
   },

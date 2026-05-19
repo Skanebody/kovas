@@ -1,7 +1,9 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CollapsibleSection } from '@/components/ui/collapsible-section'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { parisMonthBounds } from '@/lib/paris-dates'
 import { KOVAS_TIERS } from '@/lib/stripe-config'
 import { cn } from '@/lib/utils'
 import {
@@ -27,6 +29,7 @@ function eurosCents(cents: number) {
 
 export default async function AccountPage() {
   const { supabase, orgId, profile } = await getCurrentUser()
+  const { startIso: monthStartIso } = parisMonthBounds()
 
   const [{ data: subscription }, { count: monthMissions }, { data: organization }] =
     await Promise.all([
@@ -42,10 +45,7 @@ export default async function AccountPage() {
         .select('*', { count: 'exact', head: true })
         .eq('organization_id', orgId)
         .is('deleted_at', null)
-        .gte(
-          'created_at',
-          new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
-        ),
+        .gte('created_at', monthStartIso),
       supabase
         .from('organizations')
         .select('name, siret, vat_number, address, postal_code, city, certification_n')
@@ -73,12 +73,10 @@ export default async function AccountPage() {
         </Link>
       </Button>
 
-      <div className="space-y-1">
-        <h1 className="text-display text-3xl md:text-4xl tracking-tight">Mon compte</h1>
-        <p className="text-sm text-ink-mute">
-          Profil, apparence, abonnement, facturation et informations légales.
-        </p>
-      </div>
+      <AppPageHeader
+        title="Mon compte"
+        description="Profil, apparence, abonnement, facturation et informations légales."
+      />
 
       {/* PROFIL — ouvert par défaut (frequent) */}
       <CollapsibleSection
@@ -143,7 +141,7 @@ export default async function AccountPage() {
                   <div className="text-xs text-ink-mute uppercase tracking-wider font-semibold">
                     Formule actuelle
                   </div>
-                  <div className="text-display text-2xl md:text-3xl tracking-tight">
+                  <div className="text-2xl font-bold tracking-tight">
                     {tier?.label ?? currentTier}
                   </div>
                   <div className="text-xs text-ink-mute">
@@ -170,11 +168,11 @@ export default async function AccountPage() {
                     {Math.round(usagePct)}%
                   </span>
                 </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <div className="h-2 rounded-full bg-cream-deep overflow-hidden">
                   <div
                     className={cn(
                       'h-full transition-all',
-                      usagePct >= 100 ? 'bg-accent-orange' : 'bg-cta',
+                      usagePct >= 100 ? 'bg-accent-orange' : 'bg-navy',
                     )}
                     style={{ width: `${usagePct}%` }}
                   />
@@ -223,8 +221,8 @@ export default async function AccountPage() {
                   key={t.id}
                   className={cn(
                     'rounded-lg border p-4 space-y-3',
-                    isCurrent ? 'border-cta/40 bg-cta/[0.04]' : 'border-border-soft bg-paper/60',
-                    t.recommended && !isCurrent && 'border-cta/20',
+                    isCurrent ? 'border-navy/40 bg-navy/[0.04]' : 'border-rule/80 glass-opaque',
+                    t.recommended && !isCurrent && 'border-navy/20',
                   )}
                 >
                   <div className="space-y-1">
@@ -302,7 +300,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
       <span className="text-xs text-ink-mute uppercase tracking-wider font-semibold">
         {label}
       </span>
-      <span className="text-foreground">{children}</span>
+      <span className="text-ink">{children}</span>
     </div>
   )
 }
@@ -310,7 +308,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 function PortalButton() {
   return (
     <form action="/api/billing/portal" method="POST">
-      <Button type="submit" variant="outline" size="sm">
+      <Button type="submit" variant="glass" size="sm">
         <ExternalLink className="size-4" /> Gérer factures et paiement (Stripe)
       </Button>
     </form>
