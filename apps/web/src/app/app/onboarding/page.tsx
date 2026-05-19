@@ -18,14 +18,18 @@ export default async function OnboardingPage() {
   const firstName = profile.full_name?.split(' ')[0] ?? ''
 
   return (
-    <div className="max-w-3xl space-y-8">
-      <div className="space-y-2">
-        <h1 className="font-display font-light text-display-m md:text-display-l tracking-tight text-ink">
-          Bienvenue {firstName}
-          <span className="font-serif italic text-ink-mute">.</span>
+    <div className="max-w-3xl space-y-8 animate-fade-in">
+      {/* Hero onboarding — Drama cyan atténué */}
+      <div className="-mx-4 md:-mx-8 -mt-4 bg-fluid-light px-4 md:px-8 py-10 md:py-14 mb-2 rounded-b-xl">
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute mb-3">
+          Bienvenue · 90 secondes pour démarrer
+        </p>
+        <h1 className="font-sans font-light text-display-m md:text-display-l tracking-tight text-ink">
+          Bienvenue <span className="font-serif italic">{firstName}</span>.
         </h1>
-        <p className="text-ink-mute">
-          Vous êtes prêt. Voici les 3 actions à faire dans cet ordre pour démarrer.
+        <p className="text-base md:text-lg text-ink-mute mt-3 max-w-xl">
+          Vous êtes prêt. Voici les 3 actions à faire dans cet ordre — votre première mission est
+          opérationnelle dès aujourd'hui.
         </p>
       </div>
 
