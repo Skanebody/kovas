@@ -221,9 +221,11 @@ export default async function AccountPage() {
         </div>
       </CollapsibleSection>
 
-      {/* PLANS COMPARISON — fermé par défaut (action peu fréquente) */}
+      {/* PLANS COMPARISON — ouvert si pas d'abonnement actif (subscribe flow),
+          fermé sinon (action peu fréquente quand abonnement déjà actif) */}
       <CollapsibleSection
         storageKey="kovas_account_plans"
+        defaultExpanded={!isActive}
         title={
           <>
             <CreditCard className="size-4" /> Changer de formule

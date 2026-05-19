@@ -1,8 +1,8 @@
-import { CreditCard } from 'lucide-react'
-import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { cn } from '@/lib/utils'
+import { CreditCard } from 'lucide-react'
+import Link from 'next/link'
 
 /**
  * Widget mini "consommation mensuelle" dans le header app.
@@ -22,7 +22,10 @@ export async function UsageWidget() {
       .select('*', { count: 'exact', head: true })
       .eq('organization_id', orgId)
       .is('deleted_at', null)
-      .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+      .gte(
+        'created_at',
+        new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
+      ),
   ])
 
   const count = monthMissions ?? 0
@@ -32,11 +35,13 @@ export async function UsageWidget() {
   if (!sub || sub.status !== 'active') {
     return (
       <Link
-        href="/app/billing"
+        href="/app/account"
         className="hidden md:inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
       >
         <CreditCard className="size-3.5" />
-        <span>Essai · {count} mission{count > 1 ? 's' : ''}</span>
+        <span>
+          Essai · {count} mission{count > 1 ? 's' : ''}
+        </span>
       </Link>
     )
   }
@@ -46,7 +51,7 @@ export async function UsageWidget() {
 
   return (
     <Link
-      href="/app/billing"
+      href="/app/account"
       className="hidden md:inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md hover:bg-muted transition-colors"
     >
       <CreditCard className="size-3.5 text-muted-foreground" />
