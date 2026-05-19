@@ -3,12 +3,14 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CollapsibleSection } from '@/components/ui/collapsible-section'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { buildCalendarSubscriptionUrl, buildCalendarWebcalUrl } from '@/lib/calendar-token'
 import { parisMonthBounds } from '@/lib/paris-dates'
 import { KOVAS_TIERS } from '@/lib/stripe-config'
 import { cn } from '@/lib/utils'
 import {
   ArrowLeft,
   Building2,
+  CalendarSync as CalendarSyncIcon,
   Check,
   CreditCard,
   ExternalLink,
@@ -17,6 +19,7 @@ import {
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { CalendarSync } from './calendar-sync'
 import { CheckoutButton } from './checkout-button'
 import { CompanyForm } from './company-form'
 import { ProfileForm } from './profile-form'
@@ -202,6 +205,21 @@ export default async function AccountPage() {
         </div>
       </CollapsibleSection>
 
+      {/* SYNCHRONISATION CALENDRIER — abonnement URL .ics vers Google/Apple/Outlook */}
+      <CollapsibleSection
+        storageKey="kovas_account_calendar"
+        title={
+          <>
+            <CalendarSyncIcon className="size-4" /> Synchronisation calendrier
+          </>
+        }
+      >
+        <CalendarSync
+          httpsUrl={buildCalendarSubscriptionUrl(orgId)}
+          webcalUrl={buildCalendarWebcalUrl(orgId)}
+        />
+      </CollapsibleSection>
+
       {/* PLANS COMPARISON — ouvert si pas d'abonnement actif (subscribe flow),
           fermé sinon (action peu fréquente quand abonnement déjà actif) */}
       <CollapsibleSection
@@ -297,9 +315,7 @@ export default async function AccountPage() {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-3 flex-wrap">
-      <span className="text-xs text-ink-mute uppercase tracking-wider font-semibold">
-        {label}
-      </span>
+      <span className="text-xs text-ink-mute uppercase tracking-wider font-semibold">{label}</span>
       <span className="text-ink">{children}</span>
     </div>
   )

@@ -25,16 +25,9 @@ interface IcsEvent {
  */
 function toIcsDate(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0')
-  return (
-    date.getUTCFullYear().toString() +
-    pad(date.getUTCMonth() + 1) +
-    pad(date.getUTCDate()) +
-    'T' +
-    pad(date.getUTCHours()) +
-    pad(date.getUTCMinutes()) +
-    pad(date.getUTCSeconds()) +
-    'Z'
-  )
+  return `${
+    date.getUTCFullYear().toString() + pad(date.getUTCMonth() + 1) + pad(date.getUTCDate())
+  }T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`
 }
 
 /**
@@ -60,26 +53,16 @@ function foldLine(line: string): string {
   chunks.push(remaining.slice(0, 75))
   remaining = remaining.slice(75)
   while (remaining.length > 0) {
-    chunks.push(' ' + remaining.slice(0, 74))
+    chunks.push(` ${remaining.slice(0, 74)}`)
     remaining = remaining.slice(74)
   }
   return chunks.join('\r\n')
 }
 
-/**
- * Construit le contenu .ics complet pour un event unique.
- * Newline = CRLF (RFC 5545 strict).
- */
-export function buildIcs(event: IcsEvent): string {
+function buildVevent(event: IcsEvent): string[] {
   const duration = event.durationMinutes ?? 60
   const end = new Date(event.start.getTime() + duration * 60_000)
-
-  const lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//KOVAS//Diagnostic Immobilier//FR',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
+  return [
     'BEGIN:VEVENT',
     `UID:${event.uid}`,
     `DTSTAMP:${toIcsDate(new Date())}`,
@@ -92,10 +75,63 @@ export function buildIcs(event: IcsEvent): string {
     'STATUS:CONFIRMED',
     'TRANSP:OPAQUE',
     'END:VEVENT',
+  ].filter((l): l is string => l !== null)
+}
+
+/**
+ * Construit le contenu .ics complet pour un event unique.
+ * Newline = CRLF (RFC 5545 strict).
+ */
+export function buildIcs(event: IcsEvent): string {
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//KOVAS//Diagnostic Immobilier//FR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    ...buildVevent(event),
+    'END:VCALENDAR',
+  ]
+
+  return `${lines.map(foldLine).join('\r\n')}\r\n`
+}
+
+/**
+ * Construit le contenu .ics pour un calendrier multi-events.
+ *
+ * Sert d'endpoint d'abonnement (subscription URL) — l'utilisateur l'ajoute
+ * dans Google Calendar / Apple Calendar / Outlook qui le rafraîchit
+ * périodiquement.
+ *
+ * @param events liste d'events
+ * @param meta   métadonnées du calendrier (nom, description) — affichées dans
+ *               les clients calendrier (couleur, nom dans la sidebar, etc.)
+ */
+export function buildIcsCalendar(
+  events: IcsEvent[],
+  meta: { name: string; description?: string; refreshIntervalHours?: number } = {
+    name: 'KOVAS',
+  },
+): string {
+  const refreshMin = (meta.refreshIntervalHours ?? 1) * 60
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//KOVAS//Diagnostic Immobilier//FR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    `NAME:${escapeText(meta.name)}`,
+    `X-WR-CALNAME:${escapeText(meta.name)}`,
+    meta.description ? `X-WR-CALDESC:${escapeText(meta.description)}` : null,
+    'X-WR-TIMEZONE:Europe/Paris',
+    // Indique aux clients calendrier de rafraîchir périodiquement
+    `REFRESH-INTERVAL;VALUE=DURATION:PT${refreshMin}M`,
+    `X-PUBLISHED-TTL:PT${refreshMin}M`,
+    ...events.flatMap((e) => buildVevent(e)),
     'END:VCALENDAR',
   ].filter((l): l is string => l !== null)
 
-  return lines.map(foldLine).join('\r\n') + '\r\n'
+  return `${lines.map(foldLine).join('\r\n')}\r\n`
 }
 
 /**
