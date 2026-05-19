@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { MissionTour } from '@/components/ui/mission-tour'
 import { toast } from '@/components/ui/toaster'
 import type { ChecklistRunItem } from '@/lib/checklists'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
@@ -84,6 +85,8 @@ export function MissionFocusDrawer({
       aria-label={`Mode mission ${label}`}
       className="fixed inset-0 z-50 flex flex-col bg-fluid-navy text-paper"
     >
+      {/* Tour guidé 1ère visite — Sprint 3 */}
+      <MissionTour />
       <header className="glass-dark px-4 py-3 flex items-center gap-3 shrink-0 border-b border-paper/10">
         <Button
           variant="glass"
