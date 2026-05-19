@@ -33,9 +33,12 @@ const config: Config = {
           deep: '#A3C920',
         },
         paper: '#FFFFFF',
-        /* v5 sage pâle remplace cream Ron sur l'app prod */
+        /* v5 sage pâle remplace cream Ron sur l'app prod.
+         * Alias rétrocompat : 'cream' pointe désormais vers les mêmes hex
+         * que 'sage' pour migration douce des 30+ fichiers legacy (bg-cream
+         * → rendu sage v5 sans toucher chaque fichier). */
         sage: { DEFAULT: '#F5F7F4', alt: '#EEF2F0' },
-        cream: { DEFAULT: '#F8F6F0', deep: '#EFEBDF' },
+        cream: { DEFAULT: '#F5F7F4', deep: '#EEF2F0' },
         /* v5 sidebar Synthex #0F1419 noir bleuté */
         'sidebar-bg': '#0F1419',
         rule: '#E7E2D2',

@@ -91,8 +91,8 @@ export default function PricingPage() {
       <main className="flex-1 mx-auto max-w-6xl w-full px-6 py-16 space-y-16">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <Badge variant="muted">Sans engagement</Badge>
-          <h1 className="font-display font-light text-display-m sm:text-display-l tracking-tight text-ink">
-            Tarification simple, sans surprise.
+          <h1 className="font-sans font-light text-display-m sm:text-display-l tracking-tight text-ink leading-[1.05]">
+            Tarification <span className="font-serif italic font-normal">simple</span>, sans surprise.
           </h1>
           <p className="text-ink-mute">
             Toutes les fonctionnalités dans tous les tiers. La différence : votre volume mensuel.

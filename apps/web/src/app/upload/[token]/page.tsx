@@ -70,8 +70,9 @@ export default async function PublicUploadPage({ params }: PageProps) {
       <main className="flex-1 px-6 py-12">
         <div className="mx-auto max-w-2xl space-y-8">
           <div className="space-y-2">
-            <h1 className="font-display font-light text-display-s tracking-tight text-ink">
-              Documents pour votre diagnostic
+            <h1 className="font-sans font-light text-display-s tracking-tight text-ink leading-[1.1]">
+              Documents pour votre{' '}
+              <span className="font-serif italic font-normal">diagnostic</span>.
             </h1>
             <p className="text-[14px] text-ink-mute">
               Votre diagnostiqueur a besoin de quelques documents avant son intervention.

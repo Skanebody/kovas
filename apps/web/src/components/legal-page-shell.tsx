@@ -10,11 +10,16 @@ type LegalPageShellProps = {
 
 export function LegalPageShell({ title, children }: LegalPageShellProps) {
   return (
-    <div className="min-h-dvh flex flex-col bg-cream">
+    <div className="min-h-dvh flex flex-col bg-sage">
       <header className="glass-header sticky top-0 z-50">
         <div className="mx-auto max-w-3xl px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="size-7 rounded-md bg-navy shadow-accent" aria-hidden />
+            <div
+              aria-hidden
+              className="size-7 rounded-md bg-[#0F1419] shadow-accent flex items-center justify-center text-white font-bold text-xs"
+            >
+              K
+            </div>
             <span className="font-display font-semibold tracking-tight text-ink">KOVAS</span>
           </Link>
           <Button variant="ghost" size="sm" asChild>
@@ -25,7 +30,9 @@ export function LegalPageShell({ title, children }: LegalPageShellProps) {
         </div>
       </header>
       <main className="flex-1 mx-auto max-w-3xl w-full px-6 py-12 space-y-8">
-        <h1 className="font-display font-light text-display-s tracking-tight text-ink">{title}</h1>
+        <h1 className="font-serif italic font-normal text-4xl md:text-5xl tracking-tight text-ink leading-[1.1]">
+          {title}.
+        </h1>
         <div className="prose-legal space-y-4 text-[14px] text-ink-soft leading-relaxed">{children}</div>
       </main>
       <footer className="px-6 py-8 border-t border-rule text-[11px] text-ink-faint">

@@ -65,8 +65,9 @@ export default function FaqPage() {
           <p className="text-xs uppercase tracking-wider font-semibold text-ink-mute">
             Questions fréquentes
           </p>
-          <h1 className="font-display font-light text-display-m tracking-tight text-ink">
-            Tout ce que vous voulez savoir sur KOVAS et le diagnostic immobilier
+          <h1 className="font-sans font-light text-display-m tracking-tight text-ink leading-[1.1]">
+            Tout ce que vous voulez savoir sur KOVAS et le{' '}
+            <span className="font-serif italic font-normal">diagnostic immobilier</span>.
           </h1>
           <p className="text-ink-mute">
             53 réponses détaillées classées en 8 catégories. Pour les diagnostiqueurs, les
