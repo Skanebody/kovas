@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowLeft } from 'lucide-react'
@@ -10,8 +11,6 @@ export const metadata: Metadata = { title: 'Planning' }
 export default async function CalendarPage() {
   const { supabase, orgId } = await getCurrentUser()
 
-  // Chargement large : 3 mois passés + 6 mois futurs (le navigateur week-by-week
-  // reste fluide sans aller re-fetch)
   const now = new Date()
   const since = new Date(now)
   since.setMonth(since.getMonth() - 3)
@@ -47,25 +46,24 @@ export default async function CalendarPage() {
   })
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="max-w-6xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/app/dashboard">
           <ArrowLeft className="size-4" /> Tableau de bord
         </Link>
       </Button>
 
-      <div className="space-y-1">
-        <h1 className="text-display text-3xl md:text-4xl tracking-tight">Planning</h1>
-        <p className="text-sm text-ink-mute">
-          Vue calendrier de vos visites diagnostic. Click sur un RDV pour ouvrir le dossier.
-        </p>
-      </div>
+      <AppPageHeader
+        title="Votre"
+        accent="planning"
+        description="Vue calendrier de vos visites diagnostic. Cliquez sur un RDV pour ouvrir le dossier."
+      />
 
       <CalendarWeekView events={events} />
 
-      <p className="text-xs text-ink-mute text-center">
-        Les RDV se créent en planifiant un dossier (Détails de la visite → Modifier). Téléchargez un
-        .ics depuis le détail du dossier pour l'importer dans Google / Apple / Outlook.
+      <p className="text-[11px] text-ink-mute text-center">
+        Les RDV se créent en planifiant un dossier. Téléchargez un .ics depuis le détail du dossier
+        pour l&apos;importer dans Google / Apple / Outlook.
       </p>
     </div>
   )

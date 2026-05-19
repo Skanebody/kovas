@@ -32,7 +32,7 @@ export function DangerZone({ onDelete, entityLabel, confirmWord = 'supprimer' }:
   }
 
   return (
-    <Card className="border-accent-red/40">
+    <Card variant="opaque" padding="default" className="border-danger/30">
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2 text-accent-red">
           <AlertTriangle className="size-4" /> Zone sensible
@@ -45,7 +45,7 @@ export function DangerZone({ onDelete, entityLabel, confirmWord = 'supprimer' }:
               La suppression de ce {entityLabel} le rend invisible (soft-delete). Les données
               restent en base 30 jours puis sont purgées.
             </p>
-            <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+            <Button variant="glass" size="sm" onClick={() => setOpen(true)}>
               <Trash2 className="size-4 text-accent-red" />
               Supprimer ce {entityLabel}
             </Button>
@@ -54,7 +54,7 @@ export function DangerZone({ onDelete, entityLabel, confirmWord = 'supprimer' }:
           <div className="space-y-3">
             <p className="text-sm">
               Pour confirmer, tapez{' '}
-              <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
+              <code className="rounded bg-cream-deep px-1 py-0.5 font-mono text-xs">
                 {confirmWord}
               </code>{' '}
               dans le champ ci-dessous :
@@ -63,7 +63,7 @@ export function DangerZone({ onDelete, entityLabel, confirmWord = 'supprimer' }:
               type="text"
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-border bg-paper px-3 text-sm"
+              className="flex h-9 w-full rounded-md border border-rule bg-paper px-3 text-sm"
               placeholder={confirmWord}
             />
             {error && <p className="text-sm text-accent-red">{error}</p>}

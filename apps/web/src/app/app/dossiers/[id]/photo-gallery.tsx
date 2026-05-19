@@ -104,7 +104,7 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
             {section.photos.map((p) => (
               <div
                 key={p.id}
-                className="group relative rounded-lg overflow-hidden border border-border bg-muted aspect-square"
+                className="group relative rounded-lg overflow-hidden border border-rule bg-cream-deep aspect-square"
               >
                 {signedUrls[p.id] ? (
                   <Image
@@ -116,7 +116,7 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
                     unoptimized
                   />
                 ) : (
-                  <div className="size-full bg-muted animate-pulse" />
+                  <div className="size-full bg-cream-deep animate-pulse" />
                 )}
                 {p.view_type && (
                   <div className="absolute top-1 left-1">

@@ -84,8 +84,8 @@ export function WorkflowStepper({
   const overallPercent = Math.round(overallProgress * 100)
 
   return (
-    <Card>
-      <CardContent className="pt-6 space-y-4">
+    <Card variant="opaque" padding="default">
+      <CardContent className="pt-2 space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-base font-semibold flex items-center gap-2">
             <ListChecks className="size-4" />
@@ -102,8 +102,8 @@ export function WorkflowStepper({
           )}
         </div>
 
-        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-          <div className="h-full bg-cta transition-all" style={{ width: `${overallPercent}%` }} />
+        <div className="h-1.5 rounded-full bg-cream-deep overflow-hidden">
+          <div className="h-full bg-navy transition-all" style={{ width: `${overallPercent}%` }} />
         </div>
 
         <ol className="space-y-2">
@@ -115,9 +115,9 @@ export function WorkflowStepper({
                 key={step.id}
                 className={cn(
                   'rounded-lg border transition-colors',
-                  isOpen && 'border-cta/30 bg-paper/60',
+                  isOpen && 'border-navy/30 bg-paper/60',
                   !isOpen && step.completed && 'border-accent-green/20 bg-accent-green/5',
-                  !isOpen && !step.completed && 'border-border',
+                  !isOpen && !step.completed && 'border-rule',
                 )}
               >
                 <button
@@ -132,7 +132,7 @@ export function WorkflowStepper({
                       'shrink-0 size-7 rounded-full flex items-center justify-center text-xs font-semibold',
                       step.completed
                         ? 'bg-accent-green text-white'
-                        : 'bg-muted text-ink-mute',
+                        : 'bg-cream-deep text-ink-mute',
                     )}
                   >
                     {step.completed ? <CheckCircle2 className="size-4" /> : idx + 1}
@@ -209,7 +209,7 @@ export function WorkflowStepper({
                       <button
                         type="button"
                         onClick={() => setOpenStep(optimisticSteps[idx + 1]!.id)}
-                        className="text-xs text-ink-mute hover:text-foreground mt-2 flex items-center gap-1"
+                        className="text-xs text-ink-mute hover:text-ink mt-2 flex items-center gap-1"
                       >
                         Étape suivante <ArrowRight className="size-3" />
                       </button>

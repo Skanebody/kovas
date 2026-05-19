@@ -90,11 +90,11 @@ export function UploadForm({ token }: UploadFormProps) {
         </Select>
       </FormField>
 
-      <div className="rounded-xl border-2 border-dashed border-border p-8 text-center space-y-3">
-        <Upload className="size-8 mx-auto text-muted-foreground" />
+      <div className="rounded-xl border-2 border-dashed border-rule p-8 text-center space-y-3">
+        <Upload className="size-8 mx-auto text-ink-mute" />
         <div className="space-y-1">
           <p className="font-semibold">Glissez vos fichiers ici</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-ink-mute">
             PDF, images (JPG/PNG), Word, Excel · max 20 Mo par fichier
           </p>
         </div>
@@ -107,7 +107,7 @@ export function UploadForm({ token }: UploadFormProps) {
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        <Button asChild disabled={uploading}>
+        <Button variant="accent" asChild disabled={uploading}>
           <label htmlFor="file-input" className="cursor-pointer">
             {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
             {uploading ? 'Envoi…' : 'Choisir des fichiers'}
@@ -120,13 +120,13 @@ export function UploadForm({ token }: UploadFormProps) {
           {uploads.map((u, i) => (
             <li
               key={`${u.name}-${i}`}
-              className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm bg-card"
+              className="flex items-center justify-between gap-3 rounded-lg border border-rule/80 px-3 py-2 text-sm bg-cream-deep/50"
             >
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <FileText className="size-4 text-muted-foreground shrink-0" />
+                <FileText className="size-4 text-ink-mute shrink-0" />
                 <span className="truncate">{u.name}</span>
               </div>
-              {u.status === 'pending' && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+              {u.status === 'pending' && <Loader2 className="size-4 animate-spin text-ink-mute" />}
               {u.status === 'success' && <CheckCircle2 className="size-4 text-accent-green" />}
               {u.status === 'error' && (
                 <span className="text-xs text-accent-red">{u.error}</span>

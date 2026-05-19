@@ -102,14 +102,16 @@ export function RoomsMatrixView({
           <Card
             key={room.id}
             id={`room-${room.id}`}
-            className={cn('scroll-mt-20', isOpen ? 'border-border-soft' : '')}
+            variant="opaque"
+            padding="none"
+            className={cn('scroll-mt-20', isOpen ? 'border-navy/25' : '')}
           >
             <button
               type="button"
               onClick={() => setOpenRoom(isOpen ? null : room.id)}
               className="w-full"
             >
-              <CardHeader className="cursor-pointer">
+              <CardHeader className="cursor-pointer p-5 pb-3">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <DoorOpen className="size-4 mt-1 text-ink-mute shrink-0" />
@@ -146,7 +148,7 @@ export function RoomsMatrixView({
             </button>
 
             {isOpen && (
-              <CardContent className="space-y-4">
+              <CardContent className="p-5 pt-0 space-y-4">
                 {diagStats.length === 0 ? (
                   <p className="text-sm text-ink-mute italic">
                     Aucun diagnostic du dossier ne concerne ce type de pièce.
@@ -175,7 +177,7 @@ export function RoomsMatrixView({
                                 disabled={!isManual}
                                 className={cn(
                                   'w-full flex items-start gap-2 text-left rounded-md px-2 py-1.5 text-sm transition-colors',
-                                  isManual ? 'hover:bg-muted/40 cursor-pointer' : 'cursor-default',
+                                  isManual ? 'hover:bg-ink/5 cursor-pointer' : 'cursor-default',
                                 )}
                               >
                                 {isDone ? (

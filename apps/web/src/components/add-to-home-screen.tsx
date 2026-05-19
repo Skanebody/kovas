@@ -39,16 +39,16 @@ export function AddToHomeScreen() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 p-4 md:p-6">
-      <div className="mx-auto max-w-md rounded-xl bg-paper p-6 shadow-glass-sm ring-1 ring-border">
+      <div className="mx-auto max-w-md glass-opaque rounded-xl p-6 shadow-glass-sm ring-1 ring-rule/80">
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="text-lg font-semibold text-ink">
             Installez KOVAS sur votre écran d'accueil
           </h2>
           <p className="text-sm text-ink-mute">
             Pour utiliser KOVAS comme une vraie app et garder vos données en sécurité, ajoutez-le à
             votre écran d'accueil en 3 étapes.
           </p>
-          <ol className="space-y-2 text-sm text-foreground">
+          <ol className="space-y-2 text-sm text-ink">
             <li>1. Touchez le bouton Partager ⎙ en bas</li>
             <li>2. Choisissez « Sur l'écran d'accueil »</li>
             <li>3. Touchez Ajouter</li>
@@ -62,7 +62,7 @@ export function AddToHomeScreen() {
                 localStorage.setItem('a2hs-dismissed-count', String(c))
                 setShow(false)
               }}
-              className="flex-1 rounded-md border border-border bg-paper px-4 py-2 text-sm font-medium hover:bg-muted transition"
+              className="flex-1 rounded-md border border-rule bg-paper px-4 py-2 text-sm font-medium hover:bg-cream-deep transition"
             >
               Plus tard
             </button>
@@ -72,7 +72,7 @@ export function AddToHomeScreen() {
                 localStorage.setItem('a2hs-dismissed-count', '999')
                 setShow(false)
               }}
-              className="flex-1 rounded-md bg-cta px-4 py-2 text-sm font-medium text-cta-foreground hover:bg-cta-hover transition"
+              className="flex-1 rounded-md bg-navy px-4 py-2 text-sm font-medium text-paper hover:bg-navy-hover transition"
             >
               Compris
             </button>

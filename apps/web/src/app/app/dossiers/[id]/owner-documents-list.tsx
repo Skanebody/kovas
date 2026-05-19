@@ -147,7 +147,7 @@ export function OwnerDocumentsList({ dossierId, documents }: OwnerDocumentsListP
         const status = d.extraction_status ?? 'pending'
 
         return (
-          <li key={d.id} className="rounded-md border border-border bg-paper p-3 space-y-3">
+          <li key={d.id} className="rounded-md border border-rule/80 glass-opaque p-3 space-y-3">
             <div className="flex items-center gap-3">
               <FileText className="size-5 text-ink-mute shrink-0" />
               <div className="flex-1 min-w-0">
@@ -279,7 +279,7 @@ function ExtractedPanel({
   )
 
   return (
-    <div className="rounded-md bg-muted/40 p-3 space-y-3 text-sm">
+    <div className="rounded-md bg-cream-deep/60 p-3 space-y-3 text-sm">
       <div className="space-y-1">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <span className="font-semibold flex items-center gap-1.5">
@@ -352,7 +352,7 @@ function ExtractedPanel({
 
       {Object.keys(extracted.raw_fields ?? {}).length > 0 && (
         <details className="text-xs text-ink-mute">
-          <summary className="cursor-pointer hover:text-foreground">
+          <summary className="cursor-pointer hover:text-ink">
             Voir les données brutes ({Object.keys(extracted.raw_fields).length} champs)
           </summary>
           <pre className="mt-2 p-2 rounded bg-paper overflow-auto text-[10px]">

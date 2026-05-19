@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Check } from 'lucide-react'
 import type { Metadata } from 'next'
+import { SiteFooter } from '@/components/site-footer'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -69,11 +70,11 @@ const INCLUDED_FEATURES = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-dvh flex flex-col bg-background">
-      <header className="border-b border-border bg-card/70 backdrop-blur-md sticky top-0 z-50">
+    <div className="min-h-dvh flex flex-col bg-cream">
+      <header className="glass-header sticky top-0 z-50">
         <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="size-7 rounded-md bg-cta" aria-hidden />
+            <div className="size-7 rounded-md bg-navy" aria-hidden />
             <span className="text-base font-semibold tracking-tight">KOVAS</span>
           </Link>
           <div className="flex items-center gap-2">
@@ -90,10 +91,10 @@ export default function PricingPage() {
       <main className="flex-1 mx-auto max-w-6xl w-full px-6 py-16 space-y-16">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <Badge variant="muted">Sans engagement</Badge>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+          <h1 className="font-display font-light text-display-m sm:text-display-l tracking-tight text-ink">
             Tarification simple, sans surprise.
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-ink-mute">
             Toutes les fonctionnalités dans tous les tiers. La différence : votre volume mensuel.
           </p>
         </div>
@@ -102,7 +103,9 @@ export default function PricingPage() {
           {PHASE_1_TIERS.map((tier) => (
             <Card
               key={tier.name}
-              className={tier.highlighted ? 'border-foreground/40 shadow-md relative' : ''}
+              variant="opaque"
+              padding="default"
+              className={tier.highlighted ? 'border-navy/30 shadow-accent relative' : ''}
             >
               {tier.highlighted && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Recommandé</Badge>
@@ -112,7 +115,7 @@ export default function PricingPage() {
                 <CardDescription>{tier.description}</CardDescription>
                 <div className="pt-4">
                   <div className="text-4xl font-bold tracking-tight">{tier.price}</div>
-                  <div className="text-sm text-muted-foreground">HT / mois</div>
+                  <div className="text-sm text-ink-mute">HT / mois</div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -138,7 +141,7 @@ export default function PricingPage() {
                 </ul>
                 <Button
                   className="w-full"
-                  variant={tier.highlighted ? 'default' : 'outline'}
+                  variant={tier.highlighted ? 'warm' : 'glass'}
                   asChild
                 >
                   <Link href="/signup">{tier.cta}</Link>
@@ -162,36 +165,32 @@ export default function PricingPage() {
           </ul>
         </div>
 
-        <div className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-6 space-y-3">
+        <Card variant="opaque" padding="default" className="mx-auto max-w-2xl space-y-3">
           <h3 className="font-semibold">Options ponctuelles (paiement à l'usage)</h3>
-          <ul className="space-y-2 text-sm text-muted-foreground">
+          <ul className="space-y-2 text-sm text-ink-mute">
             <li>
-              • Signature eIDAS Yousign — <strong className="text-foreground">2€/signature</strong>
+              • Signature eIDAS Yousign — <strong className="text-ink">2€/signature</strong>
             </li>
             <li>
-              • Rapport bilingue FR/EN — <strong className="text-foreground">5€/rapport</strong>
+              • Rapport bilingue FR/EN — <strong className="text-ink">5€/rapport</strong>
             </li>
             <li>
-              • SMS rappel client J-1 — <strong className="text-foreground">0,15€/SMS</strong>
+              • SMS rappel client J-1 — <strong className="text-ink">0,15€/SMS</strong>
             </li>
           </ul>
-          <p className="text-xs text-subtle-foreground pt-2">
+          <p className="text-xs text-ink-faint pt-2">
             Aucun pack mensuel obligatoire — vous ne payez que ce que vous utilisez.
           </p>
-        </div>
+        </Card>
 
         <div className="text-center space-y-3 max-w-xl mx-auto">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-ink-mute">
             <strong>Annuel : 2 mois offerts</strong> (10 mois payés sur 12) sur tous les tiers.
           </p>
         </div>
       </main>
 
-      <footer className="px-6 py-10 border-t border-border">
-        <div className="mx-auto max-w-6xl text-sm text-subtle-foreground text-center">
-          © 2026 SASU Nexus 1993 · SIREN 982 786 154
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

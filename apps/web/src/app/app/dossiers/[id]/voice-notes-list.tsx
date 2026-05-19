@@ -73,7 +73,7 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
         return (
           <li
             key={n.id}
-            className="rounded-xl border border-border bg-paper/50 p-4 space-y-3"
+            className="rounded-xl border border-rule/80 glass-opaque p-4 space-y-3"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2 text-sm">
@@ -102,8 +102,8 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
             )}
 
             {parsed && (parsed.surface_m2 || parsed.year_built || parsed.equipment.length > 0) && (
-              <div className="rounded-md bg-muted/40 p-3 space-y-2 text-xs">
-                <div className="font-semibold text-foreground">Données extraites</div>
+              <div className="rounded-md bg-cream-deep/60 p-3 space-y-2 text-xs">
+                <div className="font-semibold text-ink">Données extraites</div>
                 <div className="flex flex-wrap gap-2">
                   {parsed.surface_m2 && (
                     <Badge variant="blue">Surface : {parsed.surface_m2} m²</Badge>

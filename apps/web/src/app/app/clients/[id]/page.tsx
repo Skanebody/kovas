@@ -2,8 +2,8 @@ import { ArrowLeft, Building2, Mail, MapPin, Pencil, Phone } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { AppPageHeader } from '@/components/app-page-header'
 import { DangerZone } from '@/components/danger-zone'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -36,32 +36,53 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   if (!client) notFound()
 
+  // Count dossiers historiques pour badge "Fidèle" (wireframe v4 §6.1)
+  // Mission n'a pas de client_id direct — relation via dossier
+  const { count: dossiersCount } = await supabase
+    .from('dossiers')
+    .select('*', { count: 'exact', head: true })
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .eq('client_id', id)
+
+  const missionsCount = dossiersCount ?? 0
+  const fidele = missionsCount >= 5
+
   const addressLines = formatFullAddress(client)
   const personName = [client.first_name, client.last_name].filter(Boolean).join(' ')
   const business = isBusinessClientType(client.type)
+  const typeLabel = TYPE_LABELS[client.type] ?? client.type
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/app/clients">
           <ArrowLeft className="size-4" /> Retour aux clients
         </Link>
       </Button>
 
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-display text-2xl md:text-3xl tracking-tight">{client.display_name}</h1>
-          <Badge variant="muted">{TYPE_LABELS[client.type] ?? client.type}</Badge>
-        </div>
-        <Button variant="outline" asChild>
-          <Link href={`/app/clients/${client.id}/edit`}>
-            <Pencil className="size-4" /> Modifier
-          </Link>
-        </Button>
-      </div>
+      <AppPageHeader
+        title="Client"
+        accent={client.display_name}
+        eyebrow={`${typeLabel}${missionsCount ? ` · ${missionsCount} dossier${missionsCount > 1 ? 's' : ''}` : ''}`}
+        action={
+          <div className="flex items-center gap-2">
+            {fidele && (
+              <span className="inline-flex items-center gap-1 rounded-pill bg-accent-warm-soft text-accent-warm px-3 py-1 text-xs font-semibold uppercase tracking-wider">
+                Fidèle
+              </span>
+            )}
+            <Button variant="glass" asChild>
+              <Link href={`/app/clients/${client.id}/edit`}>
+                <Pencil className="size-4" /> Modifier
+              </Link>
+            </Button>
+          </div>
+        }
+      />
 
       {(personName || client.company_name) && (
-        <Card>
+        <Card variant="opaque" padding="default">
           <CardHeader>
             <CardTitle className="text-base">Identité</CardTitle>
           </CardHeader>
@@ -88,7 +109,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         </Card>
       )}
 
-      <Card>
+      <Card variant="opaque" padding="default">
         <CardHeader>
           <CardTitle className="text-base">Coordonnées</CardTitle>
         </CardHeader>
@@ -116,7 +137,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       </Card>
 
       {addressLines.length > 0 ? (
-        <Card>
+        <Card variant="opaque" padding="default">
           <CardHeader>
             <CardTitle className="text-base">Adresse cabinet (facturation)</CardTitle>
           </CardHeader>
@@ -134,7 +155,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       ) : null}
 
       {client.notes ? (
-        <Card>
+        <Card variant="opaque" padding="default">
           <CardHeader>
             <CardTitle className="text-base">Notes internes</CardTitle>
           </CardHeader>

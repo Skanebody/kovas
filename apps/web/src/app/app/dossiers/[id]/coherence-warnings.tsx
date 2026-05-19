@@ -19,7 +19,7 @@ export function CoherenceWarnings({ warnings }: CoherenceWarningsProps) {
   return (
     <Card variant="warm">
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2 text-foreground">
+        <CardTitle className="text-base flex items-center gap-2 text-ink">
           <AlertTriangle className="size-4 text-accent-warm" />
           Cohérence ({warnings.length} {warnings.length > 1 ? 'alertes' : 'alerte'})
         </CardTitle>

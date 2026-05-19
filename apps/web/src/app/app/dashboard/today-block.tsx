@@ -6,24 +6,8 @@ import { getCurrentUser } from '@/lib/auth/current-user'
 import type { MissionType } from '@kovas/shared'
 import { ArrowRight, CalendarClock, FileWarning } from 'lucide-react'
 import Link from 'next/link'
+import { parisDayBounds } from '@/lib/paris-dates'
 import { TodayMissionActions } from './today-mission-actions'
-
-/**
- * Bornes du jour en timezone Europe/Paris.
- */
-function todayBoundsParis(): { startIso: string; endIso: string } {
-  const now = new Date()
-  const fmt = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Paris',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-  const parisDate = fmt.format(now)
-  const start = new Date(`${parisDate}T00:00:00+02:00`)
-  const end = new Date(`${parisDate}T23:59:59+02:00`)
-  return { startIso: start.toISOString(), endIso: end.toISOString() }
-}
 
 /**
  * Mission types qui consomment au moins un document propriétaire utile.
@@ -45,7 +29,7 @@ const DOC_RELEVANT_TYPES = new Set([
  */
 export async function TodayBlock() {
   const { supabase, orgId } = await getCurrentUser()
-  const { startIso, endIso } = todayBoundsParis()
+  const { startIso, endIso } = parisDayBounds()
 
   const { data: dossiers } = await supabase
     .from('dossiers')
@@ -60,13 +44,14 @@ export async function TodayBlock() {
 
   const list = dossiers ?? []
   const todayLabel = new Date().toLocaleDateString('fr-FR', {
+    timeZone: 'Europe/Paris',
     weekday: 'long',
     day: 'numeric',
     month: 'long',
   })
 
   return (
-    <Card>
+    <Card variant="opaque" padding="default">
       <CardHeader>
         <CardTitle className="text-base flex items-center justify-between gap-2 flex-wrap">
           <span className="flex items-center gap-2">
@@ -77,7 +62,7 @@ export async function TodayBlock() {
             <span className="text-ink-mute capitalize">{todayLabel}</span>
             <Link
               href="/app/calendar"
-              className="text-cta hover:underline underline-offset-4 inline-flex items-center gap-1"
+              className="text-navy hover:underline underline-offset-4 inline-flex items-center gap-1"
             >
               Voir le planning <ArrowRight className="size-3" />
             </Link>
@@ -86,9 +71,15 @@ export async function TodayBlock() {
       </CardHeader>
       <CardContent className="p-0">
         {list.length === 0 ? (
-          <p className="px-6 pb-6 text-sm text-ink-mute">
-            Aucune visite aujourd&apos;hui. Profitez-en pour finaliser vos exports.
-          </p>
+          <div className="px-6 pb-8 pt-2 text-center">
+            <p className="font-serif italic text-xl text-ink leading-relaxed max-w-md mx-auto">
+              Journée libre. Profitez-en.
+            </p>
+            <p className="text-sm text-ink-mute mt-2 max-w-md mx-auto">
+              Aucune visite planifiée aujourd&apos;hui. Bon moment pour finaliser vos exports en
+              attente.
+            </p>
+          </div>
         ) : (
           <ul className="space-y-3 px-4 pb-4">
             {list.map((d) => {

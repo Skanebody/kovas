@@ -16,25 +16,31 @@ export default function LoginPage() {
       : { email: '', password: '' }
 
   return (
-    <div className="w-full max-w-sm space-y-6">
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-bold tracking-tight">Connexion</h1>
-        <p className="text-sm text-muted-foreground">
-          Accédez à votre compte KOVAS.
+    <div className="w-full space-y-7">
+      {/* Hero serif italic — pattern signature v4 wireframe §1.1 */}
+      <div className="space-y-3 text-center">
+        <h1 className="font-serif italic font-normal text-4xl md:text-5xl tracking-tight text-ink leading-[1.05]">
+          Bienvenue.
+        </h1>
+        <p className="text-sm md:text-base text-ink-mute">
+          Connectez-vous pour continuer.
         </p>
       </div>
 
       <LoginForm defaultEmail={devPrefill.email} defaultPassword={devPrefill.password} />
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-[13px] text-ink-mute pt-2 border-t border-rule/40">
         Pas encore de compte ?{' '}
-        <Link href="/signup" className="text-foreground font-medium underline-offset-4 hover:underline">
+        <Link
+          href="/signup"
+          className="text-navy-700 font-semibold underline-offset-4 hover:underline"
+        >
           Essai gratuit 14 jours
         </Link>
       </p>
 
       {process.env.NODE_ENV === 'development' && process.env.KOVAS_DEV_ENTER === '1' ? (
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-[11px] text-ink-faint">
           <Link
             href="/api/dev/enter"
             className="font-medium underline-offset-4 hover:underline"

@@ -30,7 +30,7 @@ export function ViewToggle({ dossierId, current }: ViewToggleProps) {
   }
 
   return (
-    <div className="inline-flex rounded-lg border border-border bg-paper p-0.5">
+    <div className="inline-flex rounded-pill glass-opaque border border-rule/80 p-0.5">
       <Button
         variant="ghost"
         size="sm"
@@ -38,7 +38,7 @@ export function ViewToggle({ dossierId, current }: ViewToggleProps) {
         disabled={isPending}
         className={cn(
           'h-7 px-3 text-xs',
-          current === 'rooms' ? 'bg-muted text-foreground' : 'text-ink-mute',
+          current === 'rooms' ? 'bg-cream-deep text-ink' : 'text-ink-mute',
         )}
       >
         <DoorOpen className="size-3.5" />
@@ -51,7 +51,7 @@ export function ViewToggle({ dossierId, current }: ViewToggleProps) {
         disabled={isPending}
         className={cn(
           'h-7 px-3 text-xs',
-          current === 'diags' ? 'bg-muted text-foreground' : 'text-ink-mute',
+          current === 'diags' ? 'bg-cream-deep text-ink' : 'text-ink-mute',
         )}
       >
         <ListChecks className="size-3.5" />

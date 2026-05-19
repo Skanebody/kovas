@@ -18,14 +18,18 @@ export default async function OnboardingPage() {
   const firstName = profile.full_name?.split(' ')[0] ?? ''
 
   return (
-    <div className="max-w-3xl space-y-8">
-      <div className="space-y-2">
-        <h1 className="text-display text-3xl md:text-4xl tracking-tight">
-          Bienvenue {firstName}
-          <span className="text-display-serif">.</span>
+    <div className="max-w-3xl space-y-8 animate-fade-in">
+      {/* Hero onboarding — Drama cyan atténué */}
+      <div className="-mx-4 md:-mx-8 -mt-4 bg-fluid-light px-4 md:px-8 py-10 md:py-14 mb-2 rounded-b-xl">
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute mb-3">
+          Bienvenue · 90 secondes pour démarrer
+        </p>
+        <h1 className="font-sans font-light text-display-m md:text-display-l tracking-tight text-ink">
+          Bienvenue <span className="font-serif italic">{firstName}</span>.
         </h1>
-        <p className="text-ink-mute">
-          Vous êtes prêt. Voici les 3 actions à faire dans cet ordre pour démarrer.
+        <p className="text-base md:text-lg text-ink-mute mt-3 max-w-xl">
+          Vous êtes prêt. Voici les 3 actions à faire dans cet ordre — votre première mission est
+          opérationnelle dès aujourd'hui.
         </p>
       </div>
 
@@ -48,12 +52,12 @@ export default async function OnboardingPage() {
           description="Le client est le donneur d'ordre (particulier, agence, notaire…). Le bien est l'adresse à diagnostiquer — l'autocomplétion gouv FR remplit tout."
           actions={
             <div className="flex flex-wrap gap-2">
-              <Button asChild>
+              <Button asChild variant="accent">
                 <Link href="/app/clients/new">
                   Créer un client <ArrowRight className="size-4" />
                 </Link>
               </Button>
-              <Button variant="outline" asChild>
+              <Button variant="glass" asChild>
                 <Link href="/app/properties/new">Ajouter un bien</Link>
               </Button>
             </div>
@@ -65,8 +69,8 @@ export default async function OnboardingPage() {
           title="Lancer une mission test"
           description="Créez une mission DPE, ajoutez 1 pièce, prenez 2-3 photos et faites une note vocale. Vous verrez en 5 minutes ce que KOVAS change réellement."
           actions={
-            <Button asChild>
-              <Link href="/app/missions/new">
+            <Button asChild variant="accent">
+              <Link href="/app/dossiers/new">
                 Créer une mission <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -74,7 +78,7 @@ export default async function OnboardingPage() {
         />
       </div>
 
-      <Card>
+      <Card variant="opaque" padding="default">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <CheckCircle2 className="size-4 text-accent-green" />
@@ -106,9 +110,9 @@ function Step({
   actions?: React.ReactNode
 }) {
   return (
-    <Card>
+    <Card variant="opaque" padding="default">
       <CardContent className="pt-6 flex gap-4">
-        <div className="shrink-0 size-9 rounded-full bg-cta text-cta-foreground flex items-center justify-center text-sm font-semibold">
+        <div className="shrink-0 size-9 rounded-full bg-navy text-paper flex items-center justify-center text-sm font-semibold shadow-accent">
           {n}
         </div>
         <div className="flex-1 space-y-3">

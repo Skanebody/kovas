@@ -1,41 +1,35 @@
-import type { HTMLAttributes, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { Label } from './label'
+import type { ReactNode } from 'react'
 
-interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
-  label?: string
-  htmlFor?: string
+type FormFieldProps = {
+  label: string
   hint?: string
   error?: string
-  required?: boolean
   children: ReactNode
+  className?: string
+  htmlFor?: string
+  required?: boolean
 }
 
+/** Champ formulaire v3 — label 11px semibold + hint tiny. */
 export function FormField({
   label,
-  htmlFor,
   hint,
   error,
-  required,
   children,
   className,
-  ...props
+  htmlFor,
+  required,
 }: FormFieldProps) {
   return (
-    <div className={cn('space-y-1.5', className)} {...props}>
-      {label && (
-        <Label htmlFor={htmlFor}>
-          {label}
-          {required && <span className="text-accent-red ml-0.5">*</span>}
-        </Label>
-      )}
+    <div className={cn('space-y-1.5', className)}>
+      <label htmlFor={htmlFor} className="block text-[11px] font-semibold text-ink">
+        {label}
+        {required ? <span className="text-danger ml-0.5">*</span> : null}
+      </label>
       {children}
-      {hint && !error && <p className="text-xs text-ink-faint">{hint}</p>}
-      {error && (
-        <p className="text-xs text-accent-red" role="alert">
-          {error}
-        </p>
-      )}
+      {hint && !error ? <p className="text-[11px] text-ink-faint">{hint}</p> : null}
+      {error ? <p className="text-[11px] text-danger">{error}</p> : null}
     </div>
   )
 }

@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react'
+import { SiteFooter } from '@/components/site-footer'
 import Link from 'next/link'
 
 /**
@@ -22,7 +23,7 @@ import Link from 'next/link'
  */
 export default function HomePage() {
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col bg-cream">
       <SiteHeader />
       <main className="flex-1">
         <Hero />
@@ -43,25 +44,25 @@ function SiteHeader() {
     <header className="sticky top-0 z-50 glass-header">
       <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="size-8 rounded-md bg-cta shadow-cta" aria-hidden />
+          <div className="size-8 rounded-md bg-navy shadow-accent" aria-hidden />
           <span className="text-base font-bold tracking-tight">KOVAS</span>
         </Link>
         <nav className="hidden sm:flex items-center gap-6 text-sm">
           <Link
             href="/#features"
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-ink-mute hover:text-ink transition-colors"
           >
             Fonctionnalités
           </Link>
           <Link
             href="/pricing"
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-ink-mute hover:text-ink transition-colors"
           >
             Tarifs
           </Link>
           <Link
             href="/faq"
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-ink-mute hover:text-ink transition-colors"
           >
             FAQ
           </Link>
@@ -81,22 +82,17 @@ function SiteHeader() {
 
 function Hero() {
   return (
-    <section className="relative px-6 py-20 sm:py-28 md:py-32 overflow-hidden">
-      {/* Halo navy subtil derrière le titre, sans surcharger */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 -z-10 h-[500px] bg-[radial-gradient(ellipse_at_center,hsl(var(--cta)/0.06),transparent_60%)]"
-      />
+    <section className="relative px-6 py-20 sm:py-28 md:py-32 overflow-hidden bg-fluid-cyan">
       <div className="mx-auto max-w-3xl text-center space-y-8">
-        <Badge variant="outline" className="mx-auto">
+        <Badge variant="outline" className="mx-auto border-rule/80">
           Pour les diagnostiqueurs immobiliers indépendants
         </Badge>
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
+        <h1 className="font-display font-light text-display-m sm:text-display-l tracking-tight text-ink">
           3 heures de DPE.
           <br />
-          <span className="text-muted-foreground">30 minutes avec KOVAS.</span>
+          <span className="text-ink-mute">30 minutes avec KOVAS.</span>
         </h1>
-        <p className="text-lg text-muted-foreground sm:text-xl max-w-2xl mx-auto">
+        <p className="text-lg text-ink-mute sm:text-xl max-w-2xl mx-auto">
           Saisie vocale terrain, photos géolocalisées, exports universels. Compagnon de votre
           logiciel actuel — Liciel, AnalysImmo ou autre.
         </p>
@@ -110,7 +106,7 @@ function Hero() {
             <Link href="/#how-it-works">Voir comment ça marche</Link>
           </Button>
         </div>
-        <p className="text-sm text-subtle-foreground">
+        <p className="text-sm text-ink-faint">
           Sans carte bancaire · 30 missions incluses · 8 diagnostics couverts
         </p>
       </div>
@@ -127,11 +123,11 @@ function Stats() {
   return (
     <section className="px-6 py-16">
       <div className="mx-auto max-w-5xl">
-        <Card className="grid grid-cols-1 sm:grid-cols-3 gap-8 p-10">
+        <Card variant="opaque" padding="lg" className="grid grid-cols-1 sm:grid-cols-3 gap-8">
           {stats.map((s) => (
             <div key={s.label} className="text-center space-y-1">
               <div className="text-3xl sm:text-4xl font-extrabold tracking-tight">{s.value}</div>
-              <div className="text-sm text-muted-foreground">{s.label}</div>
+              <div className="text-sm text-ink-mute">{s.label}</div>
             </div>
           ))}
         </Card>
@@ -188,16 +184,16 @@ function Features() {
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
             Le terrain plus rapide. Le retour bureau quasi inutile.
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-ink-mute">
             KOVAS ne remplace pas Liciel en Phase 1. Il le complète, élimine la friction terrain et
             vous fait gagner 1h30 par mission.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f) => (
-            <Card key={f.title}>
+            <Card key={f.title} variant="opaque" padding="sm">
               <CardHeader>
-                <div className="size-9 rounded-md bg-muted flex items-center justify-center mb-2">
+                <div className="size-9 rounded-md bg-cyan-light/80 flex items-center justify-center mb-2 text-navy">
                   <f.icon className="size-4" />
                 </div>
                 <CardTitle className="text-base">{f.title}</CardTitle>
@@ -243,12 +239,12 @@ function HowItWorks() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {steps.map((s) => (
-            <Card key={s.n} className="p-6 space-y-3">
-              <div className="size-10 rounded-full bg-cta text-cta-foreground flex items-center justify-center text-base font-bold shadow-cta">
+            <Card key={s.n} variant="opaque" padding="sm" className="space-y-3">
+              <div className="size-10 rounded-full bg-navy text-paper flex items-center justify-center text-base font-bold shadow-accent">
                 {s.n}
               </div>
               <h3 className="text-lg font-semibold">{s.title}</h3>
-              <p className="text-sm text-muted-foreground">{s.description}</p>
+              <p className="text-sm text-ink-mute">{s.description}</p>
             </Card>
           ))}
         </div>
@@ -266,7 +262,7 @@ function PricingTeaser() {
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
             À partir de 29€/mois. Sans engagement.
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-ink-mute">
             Découverte (20 missions), Standard (60 missions, recommandé), Volume (150 missions).
             Surplus à l'usage si vous dépassez, plafond mensuel auto-protecteur activable.
           </p>
@@ -295,9 +291,9 @@ function LandingFaq() {
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             Les questions les plus posées
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-ink-mute">
             5 réponses essentielles avant de démarrer. La FAQ complète est disponible sur{' '}
-            <Link href="/faq" className="text-foreground underline-offset-4 hover:underline">
+            <Link href="/faq" className="text-ink underline-offset-4 hover:underline">
               kovas.fr/faq
             </Link>
             .
@@ -307,16 +303,16 @@ function LandingFaq() {
           {FAQ_LANDING.map((q) => (
             <Card key={q.id} className="p-0 overflow-hidden">
               <details className="group">
-                <summary className="cursor-pointer list-none px-5 py-4 flex items-start justify-between gap-3 hover:bg-muted/30 transition-colors">
+                <summary className="cursor-pointer list-none px-5 py-4 flex items-start justify-between gap-3 hover:bg-ink/5 transition-colors">
                   <h3 className="text-base font-semibold flex-1 min-w-0">{q.question}</h3>
                   <span
                     aria-hidden
-                    className="text-muted-foreground shrink-0 transition-transform group-open:rotate-180"
+                    className="text-ink-mute shrink-0 transition-transform group-open:rotate-180"
                   >
                     ▾
                   </span>
                 </summary>
-                <div className="px-5 pb-5 pt-1 border-t border-border/50">
+                <div className="px-5 pb-5 pt-1 border-t border-rule/50">
                   <FaqAnswer markdown={q.answer} />
                 </div>
               </details>
@@ -337,16 +333,16 @@ function FinalCTA() {
   return (
     <section className="px-6 py-20 sm:py-28">
       <div className="mx-auto max-w-4xl">
-        <Card variant="accent" className="p-10 sm:p-14 text-center space-y-6">
-          <Zap className="size-10 mx-auto text-card-accent-foreground/80" />
+        <Card variant="navy" padding="lg" className="text-center space-y-6">
+          <Zap className="size-10 mx-auto text-paper/80" />
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             Prêt à gagner 1h30 par mission ?
           </h2>
-          <p className="text-card-accent-foreground/70">
+          <p className="text-paper/70">
             Essai gratuit 14 jours, sans carte bancaire. 30 missions complètes pour vous faire votre
             propre opinion.
           </p>
-          <Button size="lg" variant="outline" asChild className="bg-card text-foreground">
+          <Button size="lg" variant="accent" asChild>
             <Link href="/signup">
               Commencer mon essai <ArrowRight className="size-4" />
             </Link>
@@ -354,32 +350,5 @@ function FinalCTA() {
         </Card>
       </div>
     </section>
-  )
-}
-
-function SiteFooter() {
-  return (
-    <footer className="px-6 py-10 border-t border-border">
-      <div className="mx-auto max-w-6xl flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-sm text-subtle-foreground">
-        <p>© 2026 SASU Nexus 1993 · 66 Av Champs Elysées, 75008 Paris · SIREN 982 786 154</p>
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          <Link href="/faq" className="hover:text-foreground transition-colors">
-            FAQ
-          </Link>
-          <Link href="/mentions-legales" className="hover:text-foreground transition-colors">
-            Mentions légales
-          </Link>
-          <Link href="/cgu" className="hover:text-foreground transition-colors">
-            CGU
-          </Link>
-          <Link href="/confidentialite" className="hover:text-foreground transition-colors">
-            Confidentialité
-          </Link>
-          <Link href="/contact" className="hover:text-foreground transition-colors">
-            Contact
-          </Link>
-        </div>
-      </div>
-    </footer>
   )
 }

@@ -36,7 +36,7 @@ export function CollapsibleSection({
   const [expanded, setExpanded] = useExpandState(storageKey, defaultExpanded)
 
   return (
-    <Card>
+    <Card variant="opaque" padding="none">
       <CardHeader className="p-4">
         <div className="flex items-center gap-3 flex-wrap">
           <button

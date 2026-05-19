@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -29,17 +30,18 @@ export default async function EditClientPage({
   if (!client) notFound()
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href={`/app/clients/${id}`}>
           <ArrowLeft className="size-4" /> Retour au client
         </Link>
       </Button>
 
-      <div className="space-y-1">
-        <h1 className="text-display text-2xl md:text-3xl tracking-tight">Modifier le client</h1>
-        <p className="text-sm text-ink-mute">{client.display_name}</p>
-      </div>
+      <AppPageHeader
+        title="Modifier"
+        accent={client.display_name}
+        eyebrow="Client"
+      />
 
       <EditClientForm client={client} />
     </div>

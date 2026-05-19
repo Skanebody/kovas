@@ -180,7 +180,7 @@ export function VoiceRecorder({ dossierId, orgId, rooms }: VoiceRecorderProps) {
         ) : status === 'recording' ? (
           <>
             <span className="text-sm font-mono tabular-nums">{fmt(duration)}</span>
-            <Button type="button" variant="outline" onClick={stop}>
+            <Button type="button" variant="glass" onClick={stop}>
               <Square className="size-4 fill-current" /> Stop
             </Button>
             <Button type="button" variant="ghost" size="icon" onClick={cancel} aria-label="Annuler">

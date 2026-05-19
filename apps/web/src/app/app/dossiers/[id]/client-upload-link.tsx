@@ -44,7 +44,7 @@ export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLi
 
   if (!token) {
     return (
-      <div className="rounded-lg bg-muted/40 p-4 space-y-3">
+      <div className="rounded-lg bg-cream-deep/60 p-4 space-y-3">
         <p className="text-sm text-ink-mute">
           Aucun lien d'upload actif. Générez-en un pour permettre au client d'envoyer factures
           énergie, plans, anciens DPE…
@@ -58,7 +58,7 @@ export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLi
   }
 
   return (
-    <div className="rounded-lg bg-muted/40 p-4 space-y-3">
+    <div className="rounded-lg bg-cream-deep/60 p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Link2 className="size-4 text-ink-mute" />
         <span className="text-sm font-semibold">Lien d'upload client</span>
@@ -71,10 +71,10 @@ export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLi
         )}
       </div>
       <div className="flex items-center gap-2">
-        <code className="flex-1 truncate rounded-md bg-paper border border-border px-3 py-2 text-xs font-mono">
+        <code className="flex-1 truncate rounded-md bg-paper border border-rule px-3 py-2 text-xs font-mono">
           {fullUrl ?? `/upload/${token}`}
         </code>
-        <Button size="icon" variant="outline" onClick={copyUrl} aria-label="Copier le lien">
+        <Button size="icon" variant="glass" onClick={copyUrl} aria-label="Copier le lien">
           {copied ? <Check className="size-4 text-accent-green" /> : <Copy className="size-4" />}
         </Button>
       </div>

@@ -98,20 +98,20 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
       {/* Header navigation */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setAnchor(addDays(anchor, -7))}>
+          <Button variant="glass" size="sm" onClick={() => setAnchor(addDays(anchor, -7))}>
             <ChevronLeft className="size-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setAnchor(startOfWeek(new Date()))}>
+          <Button variant="glass" size="sm" onClick={() => setAnchor(startOfWeek(new Date()))}>
             <CalendarDays className="size-4" /> Aujourd'hui
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setAnchor(addDays(anchor, 7))}>
+          <Button variant="glass" size="sm" onClick={() => setAnchor(addDays(anchor, 7))}>
             <ChevronRight className="size-4" />
           </Button>
         </div>
         <div className="text-sm font-medium capitalize">
           {formatRangeLabel(weekStart, rangeEnd)}
         </div>
-        <Button size="sm" asChild>
+        <Button size="sm" variant="accent" asChild>
           <Link href="/app/dossiers/new">
             <Plus className="size-4" /> Nouveau RDV
           </Link>
@@ -128,14 +128,14 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
               <div
                 key={day.toISOString()}
                 className={cn(
-                  'rounded-lg border border-border-soft bg-paper/50 flex flex-col min-h-[400px]',
-                  isToday && 'ring-2 ring-cta/30 bg-cta/[0.03]',
+                  'rounded-lg border border-rule/80 glass-opaque flex flex-col min-h-[400px]',
+                  isToday && 'ring-2 ring-navy/30 bg-navy/[0.03]',
                 )}
               >
                 <div
                   className={cn(
-                    'px-3 py-2 border-b border-border-soft text-center sticky top-0 bg-paper/80 backdrop-blur-md',
-                    isToday && 'bg-cta/[0.06]',
+                    'px-3 py-2 border-b border-rule text-center sticky top-0 bg-paper/80 backdrop-blur-md',
+                    isToday && 'bg-navy/[0.06]',
                   )}
                 >
                   <div className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
@@ -144,7 +144,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
                   <div
                     className={cn(
                       'text-base font-bold tracking-tight tabular-nums',
-                      isToday && 'text-cta',
+                      isToday && 'text-navy',
                     )}
                   >
                     {day.getDate()}
@@ -173,10 +173,10 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
                           href={`/app/dossiers/${ev.dossierId}`}
                           className={cn(
                             'block rounded-md p-2 text-[11px] hover:shadow-glass transition-shadow',
-                            'bg-cta/[0.08] border-l-2 border-cta hover:bg-cta/[0.12]',
+                            'bg-navy/[0.08] border-l-2 border-navy hover:bg-navy/[0.12]',
                           )}
                         >
-                          <div className="font-semibold tabular-nums text-cta">{time}</div>
+                          <div className="font-semibold tabular-nums text-navy">{time}</div>
                           <div className="font-medium truncate mt-0.5">
                             {ev.clientName ?? 'Sans client'}
                           </div>
@@ -199,7 +199,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
       <div className="flex items-center justify-between text-xs text-ink-mute flex-wrap gap-2">
         <span>{events.length} RDV planifiés</span>
         <span className="flex items-center gap-2">
-          <span className="inline-block size-2 rounded-full bg-cta" /> RDV KOVAS
+          <span className="inline-block size-2 rounded-full bg-navy" /> RDV KOVAS
           <Badge variant="muted" className="text-[10px] py-0">
             HEURES 7H → 19H
           </Badge>

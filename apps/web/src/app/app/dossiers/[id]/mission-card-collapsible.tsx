@@ -44,7 +44,7 @@ export function MissionCardCollapsible({
   const color = pillColor(percentage, missingRequiredCount)
 
   return (
-    <Card id={`mission-${missionId}`} className="scroll-mt-20">
+    <Card id={`mission-${missionId}`} variant="opaque" padding="none" className="scroll-mt-20">
       <CardHeader className="p-4">
         <div className="flex items-center gap-3 flex-wrap">
           <button
