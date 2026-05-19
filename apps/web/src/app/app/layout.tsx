@@ -5,6 +5,7 @@ import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
 import { MobileQuickActionsFab } from '@/components/ui/mobile-quick-actions'
 import { OfflineBanner } from '@/components/ui/offline-banner'
+import { SyncIndicator } from '@/components/ui/sync-indicator'
 import { UsageWidget } from '@/components/usage-widget'
 import { UserMenu } from '@/components/user-menu'
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -13,7 +14,7 @@ import type { ReactNode } from 'react'
 import { logoutAction } from './actions'
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const { profile } = await getCurrentUser()
+  const { profile, orgId } = await getCurrentUser()
   const displayName = profile.full_name ?? profile.email
 
   return (
@@ -39,6 +40,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             </Link>
             <AppNavTabs />
             <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+              <SyncIndicator organizationId={orgId} />
               <CommandPaletteTrigger />
               <UsageWidget />
               <UserMenu displayName={displayName} email={profile.email} onLogout={logoutAction} />
