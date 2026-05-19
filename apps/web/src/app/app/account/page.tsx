@@ -1,5 +1,3 @@
-import { CheckoutButton } from '@/app/app/billing/checkout-button'
-import { ThemePicker } from '@/components/theme-picker'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CollapsibleSection } from '@/components/ui/collapsible-section'
@@ -12,12 +10,12 @@ import {
   Check,
   CreditCard,
   ExternalLink,
-  Palette,
   Sparkles,
   User,
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { CheckoutButton } from './checkout-button'
 import { CompanyForm } from './company-form'
 import { ProfileForm } from './profile-form'
 
@@ -125,22 +123,6 @@ export default async function AccountPage() {
             certification_n: organization?.certification_n ?? null,
           }}
         />
-      </CollapsibleSection>
-
-      {/* APPARENCE — fermé par défaut (réglage one-shot) */}
-      <CollapsibleSection
-        storageKey="kovas_account_appearance"
-        title={
-          <>
-            <Palette className="size-4" /> Apparence
-          </>
-        }
-      >
-        <p className="text-sm text-muted-foreground pb-4">
-          Choisissez le thème de l'application. Le mode « Système » suit automatiquement les
-          préférences de votre appareil (clair/sombre).
-        </p>
-        <ThemePicker />
       </CollapsibleSection>
 
       {/* ABONNEMENT — ouvert par défaut (usage du mois pertinent) */}

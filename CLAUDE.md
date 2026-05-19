@@ -8,7 +8,7 @@
 > **Modification 18 MVP V1 étendu + Focus 8 diagnostics** : [`docs/modification-18-mvp-v1-extended.md`](docs/modification-18-mvp-v1-extended.md) (10 features V1, croquis V2, audit/DTG/marketplace MAR-RGE supprimés)
 > **Avatar client (TOUT décision produit doit passer ce test)** : [`docs/avatar-client.md`](docs/avatar-client.md) — diagnostiqueur 43 ans, ex-cadre reconverti, ton SOBRE PROFESSIONNEL, **JAMAIS gaming/lifestyle/millennial**
 > **Système Gain Tracker (V1.5, sprints 15-17 post-launch, 8j dev)** : [`docs/gain-tracker-system.md`](docs/gain-tracker-system.md) — compteur permanent + page activité + rapport mensuel + image LinkedIn + statuts pros + stats anonymisées
-> **Dernière mise à jour** : 2026-05-19 (Modification 20 : §9 Identité visuelle réécrit — adoption registre produit Ron Design Lab × Tectra : crème + cobalt + butter, Outfit + Instrument Serif italic)
+> **Dernière mise à jour** : 2026-05-19 (Refonte P7 cleanup : suppression Radix Toast orphelin, consolidation `/app/billing` dans `/app/account`, theme toggle unique sidebar, Badge variant `yellow` ajouté)
 
 ---
 
@@ -388,7 +388,7 @@ Variables CSS : `--font-outfit` + `--font-instrument-serif` câblés dans [`apps
 - **Gradients** : autorisés UNIQUEMENT pour le fond page (`#F5F1EA → #EDE7DC`) ; JAMAIS multicolores ni glows
 - **Couleurs flashy/néon, violet cinematic** : **interdits**. Le violet `#7C6FFF` du marketing Ron est explicitement **exclu** de KOVAS
 - **Bordures** : 1px max, opacité 60-100% du token `--border` (qui est déjà discret)
-- **Dark + Light** : auto système + override manuel (next-themes), **V1 actif**, defaultTheme=`light` — toggle dans `/app/account` (Apparence) + sidebar bottom
+- **Dark + Light** : auto système + override manuel (next-themes), **V1 actif**, defaultTheme=`light` — toggle **uniquement dans la sidebar app** (icon dropdown). Décision P7 : suppression du `ThemePicker` redondant dans `/app/account` (sobriété > pédagogie)
 - **Animations** : `fade-in 0.3s ease` (keyframe utility `.animate-fade-in`) sur entrée de page ; PAS de bounces ni spring exubérants ; respect `prefers-reduced-motion`
 - **PDF générés** : toujours en clair (impression), couleurs sémantiques conservées pour DPE A-G
 
@@ -397,7 +397,7 @@ Variables CSS : `--font-outfit` + `--font-instrument-serif` câblés dans [`apps
 - **`Button`** : variants `default` (pillule cobalt CTA), `outline` (bordure border, hover bg-muted), `ghost`, `destructive` (rouge), `icon` (cercle 40px ghost)
 - **`Card`** : glass standard (`bg-card/85 backdrop-blur-xl border shadow-glass rounded-2xl`) ou variant `accent` (`bg-card-accent text-card-accent-foreground`, cobalt pleine)
 - **`KpiHero`** (signature Ron) : chiffre Instrument Serif italic 60-72px + label + trend pill — composant dédié au cockpit dashboard
-- **`Badge`** : variants `blue` `red` `orange` `green` `yellow` `muted` — pastilles pillule avec opacité 15% sur fond et 100% sur texte/border
+- **`Badge`** : 8 variants — `default` (cobalt CTA) + `outline` + `muted` + sémantiques `blue` (info) + `green` (DPE A-C) + `red` (DPE F-G) + `orange` (DPE D-E) + `yellow` (butter, alerte douce / compteur missions). Pastilles pillule, opacité 15% sur fond et 100% sur texte (sauf yellow : 45% bg + text-foreground)
 - **Utilities** : `.glass` / `.glass-hover` / `.glass-accent` / `.glass-header` / `.glass-sidebar` / `.bg-accent-yellow-soft` / `.text-display` / `.text-display-serif`
 - **`Donut`** (V1.5) : Recharts, segments arrondis cornerRadius 10, palette sémantique DPE
 - **`WorkflowStepper`** : timeline linéaire (Bézier rejeté V1)
