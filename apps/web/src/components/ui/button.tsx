@@ -28,7 +28,7 @@ const buttonVariants = cva(
           'bg-paper/80 backdrop-blur-xl text-foreground border border-cta/8 hover:bg-paper hover:shadow-glass',
         // Destructive (rouge alerte)
         destructive:
-          'bg-accent-red text-white shadow-badge-red hover:bg-accent-red/90 hover:-translate-y-px',
+          'bg-accent-red text-white shadow-glass-sm hover:bg-accent-red/90 hover:-translate-y-px',
       },
       size: {
         default: 'h-10 px-6 py-2', // pillule classique

@@ -1,10 +1,10 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { MissionTypeTag } from '@/components/ui/mission-type-tag'
+import { MissionCard } from '@/components/ui/mission-card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import type { MissionType } from '@kovas/shared'
-import { ArrowRight, CalendarClock, FileWarning, MapPin } from 'lucide-react'
+import { ArrowRight, CalendarClock, FileWarning } from 'lucide-react'
 import Link from 'next/link'
 import { TodayMissionActions } from './today-mission-actions'
 
@@ -27,7 +27,6 @@ function todayBoundsParis(): { startIso: string; endIso: string } {
 
 /**
  * Mission types qui consomment au moins un document propriétaire utile.
- * Si un dossier contient ≥1 de ces types, on attend au moins 1 doc reçu.
  */
 const DOC_RELEVANT_TYPES = new Set([
   'dpe_vente',
@@ -38,6 +37,12 @@ const DOC_RELEVANT_TYPES = new Set([
   'plomb_crep',
 ])
 
+/**
+ * Today block v2 (Design System v2 — 2026-05-19).
+ * Liste les visites du jour avec composant MissionCard signature Ron
+ * Design Lab : heure mono + tags pastels catégoriels + nom client +
+ * adresse + slot actions (TodayMissionActions + StatusPill docs manquants).
+ */
 export async function TodayBlock() {
   const { supabase, orgId } = await getCurrentUser()
   const { startIso, endIso } = todayBoundsParis()
@@ -66,7 +71,7 @@ export async function TodayBlock() {
         <CardTitle className="text-base flex items-center justify-between gap-2 flex-wrap">
           <span className="flex items-center gap-2">
             <CalendarClock className="size-4" />
-            Vos visites aujourd'hui ({list.length})
+            Vos visites aujourd&apos;hui ({list.length})
           </span>
           <span className="flex items-center gap-3 text-xs font-normal">
             <span className="text-muted-foreground capitalize">{todayLabel}</span>
@@ -81,11 +86,11 @@ export async function TodayBlock() {
       </CardHeader>
       <CardContent className="p-0">
         {list.length === 0 ? (
-          <p className="px-4 pb-5 text-sm text-muted-foreground">
-            Aucune visite aujourd'hui. Profitez-en pour finaliser vos exports.
+          <p className="px-6 pb-6 text-sm text-muted-foreground">
+            Aucune visite aujourd&apos;hui. Profitez-en pour finaliser vos exports.
           </p>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="space-y-3 px-4 pb-4">
             {list.map((d) => {
               const prop = Array.isArray(d.properties) ? d.properties[0] : d.properties
               const client = Array.isArray(d.clients) ? d.clients[0] : d.clients
@@ -103,7 +108,13 @@ export async function TodayBlock() {
                     minute: '2-digit',
                     timeZone: 'Europe/Paris',
                   })
-                : null
+                : '—'
+              const dayShort = d.scheduled_at
+                ? new Date(d.scheduled_at).toLocaleDateString('fr-FR', {
+                    weekday: 'short',
+                    timeZone: 'Europe/Paris',
+                  })
+                : undefined
               const fullAddress = prop
                 ? [prop.address, prop.postal_code, prop.city].filter(Boolean).join(', ')
                 : ''
@@ -113,62 +124,40 @@ export async function TodayBlock() {
               const startHref = firstActive
                 ? `/app/dossiers/${d.id}#mission-${firstActive.id}`
                 : `/app/dossiers/${d.id}`
+              const missionTypes = missions.slice(0, 3).map((m) => m.type as MissionType)
+              const clientName = client?.display_name ?? d.reference
 
               return (
-                <li key={d.id} className="px-4 py-3 hover:bg-muted/30 transition-colors space-y-2">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    {time && (
-                      <span className="text-base font-semibold tracking-tight shrink-0 w-14 tabular-nums">
-                        {time}
-                      </span>
-                    )}
-                    <div className="flex-1 min-w-0 space-y-0.5">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs text-muted-foreground">
-                          {d.reference}
-                        </span>
-                        {missions.slice(0, 3).map((m) => (
-                          <MissionTypeTag key={m.id} type={m.type as MissionType} />
-                        ))}
-                        {missions.length > 3 && (
-                          <span className="text-[10px] text-muted-foreground">
-                            +{missions.length - 3}
-                          </span>
-                        )}
-                        {docsMissing && (
-                          <Badge variant="orange" className="text-[10px] py-0 gap-1">
-                            <FileWarning className="size-3" />
-                            Docs manquants
-                          </Badge>
-                        )}
-                      </div>
-                      {fullAddress && (
-                        <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
-                          <MapPin className="size-3 shrink-0" />
-                          <span className="truncate">{fullAddress}</span>
-                        </div>
-                      )}
-                      {client?.display_name && (
-                        <div className="text-xs text-muted-foreground truncate">
-                          {client.display_name}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-end gap-1 flex-wrap pl-[3.75rem] sm:pl-0">
-                    <TodayMissionActions
-                      phone={client?.phone ?? null}
-                      address={fullAddress}
-                      dossierId={d.id}
-                      uploadToken={d.client_upload_token ?? null}
-                      docsMissing={docsMissing}
-                    />
-                    <Button size="sm" asChild>
-                      <Link href={startHref}>
-                        Démarrer <ArrowRight className="size-4" />
-                      </Link>
-                    </Button>
-                  </div>
+                <li key={d.id}>
+                  <MissionCard
+                    time={time}
+                    day={dayShort}
+                    types={missionTypes}
+                    name={clientName}
+                    address={fullAddress || '—'}
+                    actions={
+                      <>
+                        <TodayMissionActions
+                          phone={client?.phone ?? null}
+                          address={fullAddress}
+                          dossierId={d.id}
+                          uploadToken={d.client_upload_token ?? null}
+                          docsMissing={docsMissing}
+                        />
+                        <Button size="sm" asChild>
+                          <Link href={startHref}>
+                            Démarrer <ArrowRight className="size-4" />
+                          </Link>
+                        </Button>
+                      </>
+                    }
+                  />
+                  {docsMissing && (
+                    <Badge variant="orange" className="ml-6 mt-2 gap-1">
+                      <FileWarning className="size-3" />
+                      Documents manquants
+                    </Badge>
+                  )}
                 </li>
               )
             })}

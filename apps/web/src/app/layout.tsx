@@ -6,12 +6,6 @@ import type { Metadata, Viewport } from 'next'
 import { Instrument_Serif, JetBrains_Mono, Manrope } from 'next/font/google'
 import './globals.css'
 
-/**
- * Fonts KOVAS Design System v2 (2026-05-19) :
- * - Manrope (UI sans-serif géométrique moderne)
- * - Instrument Serif italic (display, KPIs hero, accents éditoriaux)
- * - JetBrains Mono (labels uppercase, codes, IDs techniques)
- */
 const manrope = Manrope({
   subsets: ['latin'],
   variable: '--font-manrope',
@@ -28,6 +22,7 @@ const instrumentSerif = Instrument_Serif({
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
+  weight: ['400', '500', '600'],
   variable: '--font-jetbrains-mono',
   display: 'swap',
 })
@@ -72,7 +67,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#F8F5EE' },
-    { media: '(prefers-color-scheme: dark)', color: '#0A1224' },
+    { media: '(prefers-color-scheme: dark)', color: '#0B0F1A' },
   ],
   width: 'device-width',
   initialScale: 1,

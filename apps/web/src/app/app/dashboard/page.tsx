@@ -1,10 +1,7 @@
-import { Button } from '@/components/ui/button'
-import { getCurrentUser } from '@/lib/auth/current-user'
-import { Plus } from 'lucide-react'
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { AlertsAndActions } from './alerts-and-actions'
-import { CockpitHero } from './cockpit-hero'
+import { DashboardMorningHero } from './dashboard-morning-hero'
 import { DashboardPipeline } from './dashboard-pipeline'
 import { DiagnosticsBreakdown } from './diagnostics-breakdown'
 import { GainTrackerCard } from './gain-tracker-card'
@@ -18,35 +15,9 @@ export default async function DashboardPage() {
   const { profile } = await getCurrentUser()
   const firstName = profile.full_name?.split(' ')[0] ?? 'à vous'
 
-  const today = new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
-
   return (
-    <div className="space-y-6 animate-fade-in">
-      <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-2 max-w-xl">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            Cockpit · <span className="capitalize">{today}</span>
-          </p>
-          <h1 className="text-display text-4xl md:text-5xl leading-[1.05]">
-            Bonjour {firstName},{' '}
-            <span className="text-display-serif">votre journée</span>
-          </h1>
-          <p className="text-muted-foreground text-base">
-            Visites du jour, exports en attente et stats de la semaine — tout en un coup d&apos;œil.
-          </p>
-        </div>
-        <Button asChild size="lg" className="shrink-0 self-start md:self-auto">
-          <Link href="/app/dossiers/new">
-            <Plus className="size-4" /> Nouveau dossier
-          </Link>
-        </Button>
-      </header>
-
-      <CockpitHero />
+    <div className="space-y-10 animate-fade-in">
+      <DashboardMorningHero firstName={firstName} />
 
       <TodayBlock />
 
