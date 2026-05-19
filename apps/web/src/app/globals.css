@@ -3,81 +3,137 @@
 @tailwind utilities;
 
 /* ============================================
-   KOVAS Design Tokens — Ron Design Lab (produit) × Tectra
-   Light crème par défaut · Cobalt + jaune énergique · Outfit + Instrument Serif
-   Réf. docs/design/ron-design-lab-kovas.md — 2026-05-19
+   KOVAS Design System v2 — Ron Design Lab adapté KOVAS (2026-05-19)
+   Cream dominant · Navy primaire · Ambre accent chaud · Pastels catégoriels
+   Typo : Manrope (UI) + Instrument Serif italic (KPIs/accents) + JetBrains Mono (labels)
+   Réf. canonique : docs/design/kovas-design-system-v2.html
    ============================================ */
 
 @layer base {
   :root {
-    /* Surface — crème Ron (#F5F1EA → #EDE7DC) */
-    --bg-gradient-from: 38 24% 94%;
-    --bg-gradient-to: 38 18% 91%;
-    --background: 38 24% 94%;
+    /* ─── Surfaces — cream chaud signature Ron ─── */
+    --bg-gradient-from: 40 30% 95%;        /* #F8F5EE cream */
+    --bg-gradient-to: 38 26% 91%;          /* #EFEAD9 cream-deep */
+    --background: 40 30% 95%;              /* #F8F5EE */
+    --paper: 42 50% 98%;                   /* #FDFBF6 — surfaces de travail */
+    --card: 42 50% 98%;                    /* alias paper pour shadcn */
+    --card-accent: 218 60% 15%;            /* #0F1E3D navy plein — moments premium */
+    --card-accent-foreground: 40 30% 95%;  /* cream sur navy */
+    --cream-deep: 38 26% 91%;              /* #EFEAD9 — fond inactif/disabled */
 
-    /* Cards & paper */
-    --card: 40 33% 98%; /* #FBF8F2 paper */
-    --card-accent: 227 57% 42%; /* #2C3FA8 cobalt — confiance métier */
-    --card-accent-foreground: 0 0% 100%;
+    /* ─── Brand navy KOVAS (primaire) ─── */
+    --cta: 218 60% 15%;                    /* #0F1E3D navy */
+    --cta-hover: 220 65% 10%;              /* #08122A navy-deep */
+    --cta-foreground: 40 30% 95%;          /* cream sur navy */
+    --navy-soft: 222 41% 28%;              /* #2A3A65 — backgrounds adoucis */
 
-    /* Primaire — bleu calmant (CTA) */
-    --cta: 227 57% 42%;
-    --cta-hover: 227 50% 36%;
-    --cta-foreground: 0 0% 100%;
+    /* ─── Accent chaud ambre (nouveau v2) ─── */
+    --accent-warm: 28 92% 44%;             /* #D97706 ambre saturé — CTA secondaire warm, dot pulse */
+    --accent-warm-soft: 38 100% 92%;       /* #FFEDD5 — fond badge amber */
+    --accent-warm-glow: 38 100% 96%;       /* #FFF7E8 — glow halo subtle */
+    --accent-warm-foreground: 40 30% 95%;  /* cream sur ambre saturé */
 
-    /* Texte — encre */
-    --foreground: 30 10% 9%; /* #1A1815 */
-    --muted: 38 20% 92%;
-    --muted-foreground: 30 8% 38%; /* #5A554B */
-    --subtle: 38 18% 88%;
-    --subtle-foreground: 30 6% 52%; /* #8A8478 */
+    /* ─── Texte — 4 niveaux d'encre navy ─── */
+    --foreground: 218 60% 15%;             /* #0F1E3D ink primary */
+    --ink-soft: 220 42% 22%;               /* #1F2E4D — sous-titres, intermédiaire */
+    --muted-foreground: 220 25% 38%;       /* #4A5878 ink-mute */
+    --subtle-foreground: 219 17% 57%;      /* #7E8AA4 ink-faint */
+    --ink-ghost: 220 17% 73%;              /* #B0B8C8 — placeholders, disabled text */
+    --muted: 38 26% 91%;                   /* #EFEAD9 — surfaces inactives */
+    --subtle: 40 25% 87%;                  /* #E5DECB — séparateurs doux */
 
-    /* Borders — rule */
-    --border: 38 20% 80%; /* #D8D1C0 */
+    /* ─── Borders ─── */
+    --border: 40 22% 78%;                  /* #D5CDB8 rule */
+    --border-soft: 40 25% 85%;             /* #E5DECB rule-soft */
 
-    /* Sémantiques + jaune énergique (alertes, compteur DPE) */
-    --accent-blue: 227 57% 50%;
-    --accent-yellow: 45 100% 80%; /* #FFE89C butter */
-    --accent-red: 0 84% 60%;
-    --accent-orange: 38 92% 50%;
-    --accent-green: 158 64% 42%;
+    /* ─── Sémantiques (états système) ─── */
+    --accent-blue: 217 91% 60%;            /* #3B82F6 info */
+    --accent-blue-soft: 214 95% 93%;       /* #DBE9FE */
+    --accent-green: 158 84% 30%;           /* #059669 success */
+    --accent-green-soft: 152 81% 90%;      /* #D1FAE5 */
+    --accent-red: 0 73% 50%;               /* #DC2626 danger */
+    --accent-red-soft: 4 78% 93%;          /* #FCE3E1 */
+    --accent-yellow: 38 92% 50%;           /* #F59E0B warning (DPE D/E) */
+    --accent-yellow-soft: 48 100% 88%;     /* butter-ish soft */
+    --accent-orange: 25 95% 50%;           /* #F97316 — réservé legacy */
+    --accent-orange-soft: 33 100% 92%;     /* #FFEDD5 (= warm-soft) */
+
+    /* ─── Pastels catégoriels (types de diagnostic) ─── */
+    --pastel-butter: 46 100% 89%;          /* #FFF0C5 — DPE (énergie) */
+    --pastel-lime: 80 47% 89%;             /* #E5F0D5 — Électricité (vert tech) */
+    --pastel-peach: 20 100% 92%;           /* #FFE0D5 — Amiante / Termites (alerte sanitaire) */
+    --pastel-lavender: 264 47% 92%;        /* #E8E0F5 — Plomb (toxique) */
+    --pastel-sky: 210 50% 91%;             /* #DAE8F5 — Carrez/Boutin / Gaz (mesure/air) */
+
+    /* ─── Ombres signature Ron (neutres navy 4-10%) ─── */
+    /* Utilisées via tokens Tailwind shadow-glass / shadow-glass-hover / shadow-cta */
   }
 
   .dark {
-    --bg-gradient-from: 222 47% 8%;
-    --bg-gradient-to: 220 33% 12%;
-    --background: 222 47% 8%;
+    /* ─── Dark mode v2 — refonte complète avec palette navy + ambre ─── */
+    --bg-gradient-from: 222 47% 7%;        /* #0A1224 navy ultra-deep */
+    --bg-gradient-to: 220 38% 11%;         /* #131C30 */
+    --background: 222 47% 7%;
+    --paper: 220 30% 14%;                  /* #1A2238 — surfaces de travail */
+    --card: 220 30% 14%;
+    --card-accent: 28 92% 44%;             /* ambre plein — moments premium en dark */
+    --card-accent-foreground: 222 47% 7%;  /* navy sur ambre */
+    --cream-deep: 220 25% 18%;             /* surfaces inactives sombre */
 
-    --card: 220 26% 14%;
-    --card-accent: 227 45% 55%;
-    --card-accent-foreground: 0 0% 100%;
+    /* Brand navy clarifié pour dark mode */
+    --cta: 218 55% 65%;                    /* #6A8AC4 navy-light — contraste sur dark */
+    --cta-hover: 218 60% 75%;
+    --cta-foreground: 222 47% 7%;          /* navy-deep sur cta clair */
+    --navy-soft: 220 22% 22%;
 
-    --cta: 227 70% 62%;
-    --cta-hover: 227 65% 55%;
-    --cta-foreground: 222 47% 8%;
+    /* Ambre adapté dark */
+    --accent-warm: 38 92% 56%;             /* ambre plus clair pour visibilité */
+    --accent-warm-soft: 30 40% 22%;        /* fond pastille discret */
+    --accent-warm-glow: 30 50% 18%;
+    --accent-warm-foreground: 222 47% 7%;
 
-    --foreground: 38 20% 96%;
-    --muted: 220 22% 18%;
-    --muted-foreground: 38 12% 68%;
-    --subtle: 220 22% 16%;
-    --subtle-foreground: 38 8% 55%;
+    /* Texte 4 niveaux inversés cream */
+    --foreground: 40 30% 95%;              /* cream */
+    --ink-soft: 40 25% 87%;
+    --muted-foreground: 220 15% 65%;       /* #98A1B8 */
+    --subtle-foreground: 220 12% 50%;
+    --ink-ghost: 220 15% 38%;
+    --muted: 220 25% 18%;
+    --subtle: 220 22% 22%;
 
+    /* Borders dark */
     --border: 220 18% 24%;
+    --border-soft: 220 16% 20%;
 
+    /* Sémantiques dark (légèrement plus clairs) */
     --accent-blue: 213 94% 68%;
-    --accent-yellow: 45 90% 65%;
-    --accent-red: 0 91% 71%;
-    --accent-orange: 43 96% 56%;
+    --accent-blue-soft: 217 50% 22%;
     --accent-green: 158 60% 56%;
+    --accent-green-soft: 158 40% 18%;
+    --accent-red: 0 91% 71%;
+    --accent-red-soft: 0 50% 22%;
+    --accent-yellow: 43 96% 56%;
+    --accent-yellow-soft: 43 50% 22%;
+    --accent-orange: 25 95% 60%;
+    --accent-orange-soft: 25 50% 22%;
+
+    /* Pastels catégoriels dark — désaturés et assombris */
+    --pastel-butter: 46 30% 25%;
+    --pastel-lime: 80 25% 22%;
+    --pastel-peach: 20 30% 25%;
+    --pastel-lavender: 264 25% 28%;
+    --pastel-sky: 210 25% 25%;
   }
 
   * {
     @apply border-border;
   }
+
   html,
   body {
     min-height: 100dvh;
   }
+
   body {
     @apply text-foreground antialiased;
     background: linear-gradient(
@@ -106,60 +162,87 @@
   outline-offset: 2px;
   border-radius: 4px;
 }
+
 :focus:not(:focus-visible) {
   outline: none;
 }
 
 @layer utilities {
-  /* Glass utilities (.glass, .glass-header, .glass-sidebar, .glass-accent)
-   * Décision P6 (2026-05-19) — Option B "Adapter" :
+  /* ─── Glass utilities — réservées surfaces flottantes (P6) ─── *
+   * Décision P6 (2026-05-19) + maintenue v2 :
    * Réservées AUX SURFACES FLOTTANTES uniquement (header sticky, sidebar,
    * command palette, bottom sheets, app-nav-tabs, calendar sticky header).
-   * Les cards de travail (dashboard, dossier, listes, account) utilisent
-   * le composant Card variant="flat" (défaut) — surface paper opaque,
-   * ombre douce neutre. Cf. components/ui/card.tsx + CLAUDE.md §9.
+   * Les cards de travail utilisent Card variant="flat" (défaut).
    */
   .glass {
-    @apply bg-card/85 backdrop-blur-xl border;
+    @apply bg-paper/85 backdrop-blur-xl border;
     border-color: hsl(var(--cta) / 0.08);
     box-shadow: 0 8px 24px hsl(var(--foreground) / 0.06), 0 1px 2px hsl(var(--foreground) / 0.04);
   }
+
   .glass-hover {
     transition: box-shadow 0.3s ease, transform 0.3s ease;
   }
+
   .glass-hover:hover {
     box-shadow: 0 12px 32px hsl(var(--foreground) / 0.08), 0 2px 4px hsl(var(--foreground) / 0.04);
     transform: translateY(-2px);
   }
+
   .glass-accent {
     background: hsl(var(--card-accent));
     color: hsl(var(--card-accent-foreground));
-    border-radius: 16px;
+    border-radius: 24px;
     box-shadow: 0 8px 24px hsl(var(--cta) / 0.15);
   }
+
   .glass-header {
-    @apply bg-card/70 backdrop-blur-xl;
+    @apply bg-paper/70 backdrop-blur-xl;
     border-bottom: 1px solid hsl(var(--border) / 0.6);
   }
+
   .glass-sidebar {
-    @apply bg-card/60 backdrop-blur-xl;
+    @apply bg-paper/60 backdrop-blur-xl;
     border-right: 1px solid hsl(var(--border) / 0.6);
   }
-  .shadow-badge-blue {
-    box-shadow: 0 2px 8px hsl(var(--accent-blue) / 0.3);
-  }
-  .shadow-badge-red {
-    box-shadow: 0 2px 8px hsl(var(--accent-red) / 0.3);
-  }
-  /** Accent jaune pastel (badges alerte / DPE) */
-  .bg-accent-yellow-soft {
-    background-color: hsl(var(--accent-yellow) / 0.45);
-  }
-  /** Titre éditorial Ron */
+
+  /* ─── Pastels catégoriels (types de diagnostic) ─── *
+   * Mapping V1 :
+   * - DPE         → butter (énergie)
+   * - Électricité → lime (vert tech)
+   * - Amiante     → peach (alerte sanitaire)
+   * - Termites    → peach (bois)
+   * - Plomb       → lavender (toxique)
+   * - Carrez      → sky (mesure)
+   * - Gaz         → sky (air/atmosphère)
+   * - ERP         → butter (info naturelle/technologique)
+   */
+  .bg-pastel-butter   { background-color: hsl(var(--pastel-butter)); }
+  .bg-pastel-lime     { background-color: hsl(var(--pastel-lime)); }
+  .bg-pastel-peach    { background-color: hsl(var(--pastel-peach)); }
+  .bg-pastel-lavender { background-color: hsl(var(--pastel-lavender)); }
+  .bg-pastel-sky      { background-color: hsl(var(--pastel-sky)); }
+
+  /* ─── Ombres badges semantic (legacy gardé) ─── */
+  .shadow-badge-blue { box-shadow: 0 2px 8px hsl(var(--accent-blue) / 0.3); }
+  .shadow-badge-red { box-shadow: 0 2px 8px hsl(var(--accent-red) / 0.3); }
+
+  /* ─── Titres éditoriaux Ron ─── */
   .text-display {
     @apply font-sans font-extrabold tracking-tight;
   }
+
   .text-display-serif {
     @apply font-serif italic font-normal;
+  }
+
+  /* ─── Animation pulse signature (StatusPill dot amber) ─── */
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }

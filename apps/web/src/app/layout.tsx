@@ -3,12 +3,18 @@ import { QueryProvider } from '@/components/query-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import type { Metadata, Viewport } from 'next'
-import { Instrument_Serif, Outfit } from 'next/font/google'
+import { Instrument_Serif, JetBrains_Mono, Manrope } from 'next/font/google'
 import './globals.css'
 
-const outfit = Outfit({
+/**
+ * Fonts KOVAS Design System v2 (2026-05-19) :
+ * - Manrope (UI sans-serif géométrique moderne)
+ * - Instrument Serif italic (display, KPIs hero, accents éditoriaux)
+ * - JetBrains Mono (labels uppercase, codes, IDs techniques)
+ */
+const manrope = Manrope({
   subsets: ['latin'],
-  variable: '--font-outfit',
+  variable: '--font-manrope',
   display: 'swap',
 })
 
@@ -17,6 +23,12 @@ const instrumentSerif = Instrument_Serif({
   weight: '400',
   style: ['normal', 'italic'],
   variable: '--font-instrument-serif',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
   display: 'swap',
 })
 
@@ -59,8 +71,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F5F1EA' },
-    { media: '(prefers-color-scheme: dark)', color: '#0B0F1A' },
+    { media: '(prefers-color-scheme: light)', color: '#F8F5EE' },
+    { media: '(prefers-color-scheme: dark)', color: '#0A1224' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -78,7 +90,7 @@ export default function RootLayout({
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`${outfit.variable} ${instrumentSerif.variable}`}
+      className={`${manrope.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
     >
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
