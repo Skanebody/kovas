@@ -36,10 +36,13 @@ export async function DiagnosticsBreakdown() {
   const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', timeZone: 'Europe/Paris' })
 
   return (
-    <Card variant="opaque" padding="none" className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute capitalize">
-          Répartition diagnostics · {monthLabel}
+    <Card variant="opaque" padding="default" className="h-full flex flex-col">
+      <CardHeader className="pb-3 space-y-1">
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute capitalize">
+          {monthLabel}
+        </p>
+        <CardTitle className="font-serif italic text-xl text-ink leading-tight">
+          Répartition diagnostics.
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 flex-1">

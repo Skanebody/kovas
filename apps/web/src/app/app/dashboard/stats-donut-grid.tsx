@@ -136,7 +136,15 @@ export async function StatsDonutGrid() {
 
   return (
     <Card variant="opaque" padding="default">
-      <CardContent className="pt-6">
+      <CardContent className="pt-6 space-y-5">
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute mb-1">
+            Vue d&apos;ensemble
+          </p>
+          <h2 className="font-serif italic text-2xl text-ink leading-tight">
+            Votre semaine en chiffres.
+          </h2>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {tiles.map((t) => (
             <DonutTile key={t.title} tile={t} />
@@ -150,7 +158,7 @@ export async function StatsDonutGrid() {
 function DonutTile({ tile }: { tile: StatTile }) {
   return (
     <div className="flex flex-col items-center text-center gap-2 py-2">
-      <div className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
+      <div className="font-mono text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
         {tile.title}
       </div>
       <Donut value={tile.value} total={tile.total} color={tile.color} size={96} thickness={10} />

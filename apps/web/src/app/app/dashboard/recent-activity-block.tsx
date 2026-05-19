@@ -139,9 +139,12 @@ export async function RecentActivityBlock() {
 
   return (
     <Card variant="opaque" padding="default" className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute flex items-center gap-2">
+      <CardHeader className="pb-3 space-y-1">
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute flex items-center gap-2">
           <History className="size-3.5" /> Activité récente
+        </p>
+        <CardTitle className="font-serif italic text-xl text-ink leading-tight">
+          14 derniers jours.
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 flex-1">

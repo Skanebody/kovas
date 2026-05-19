@@ -116,20 +116,22 @@ export async function AlertsAndActions() {
 
   return (
     <Card variant="opaque" padding="default" className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute flex items-center justify-between">
+      <CardHeader className="pb-3 space-y-1">
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute flex items-center justify-between">
           <span>Alertes & actions</span>
           {alerts.length > 0 && (
-            <span className="text-ink tabular-nums">{alerts.length}</span>
+            <span className="text-ink tabular-nums font-semibold">{alerts.length}</span>
           )}
+        </p>
+        <CardTitle className="font-serif italic text-xl text-ink leading-tight">
+          {alerts.length === 0 ? 'Tout est à jour.' : 'À traiter avant de partir.'}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 flex-1 flex flex-col">
         {alerts.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-2 py-6">
             <CheckCircle2 className="size-8 text-accent-green" />
-            <p className="text-sm font-medium">Tout est à jour</p>
-            <p className="text-xs text-ink-mute">
+            <p className="text-xs text-ink-mute max-w-[200px]">
               Aucune action en attente. Profitez-en pour préparer demain.
             </p>
           </div>
