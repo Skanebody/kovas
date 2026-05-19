@@ -3,18 +3,28 @@ import { forwardRef } from 'react'
 import type { HTMLAttributes } from 'react'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  /** 'glass' (défaut) = blanc semi-transparent + blur ; 'accent' = navy plein */
-  variant?: 'glass' | 'accent'
+  /**
+   * Variant visuel (cf. CLAUDE.md §9, décision P6 — 2026-05-19).
+   * - `flat` (défaut) : surface paper opaque, ombre douce neutre. Cards
+   *   de travail (dashboard, dossier, listes, account).
+   * - `glass` : opt-in pour surfaces flottantes au-dessus du flux
+   *   (rare dans le composant Card — la plupart des flottants utilisent
+   *   directement les utilities `.glass-header` / `.glass-sidebar`).
+   * - `accent` : cobalt pleine, hero visuels (CTA landing, gain tracker).
+   */
+  variant?: 'flat' | 'glass' | 'accent'
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'glass', ...props }, ref) => (
+  ({ className, variant = 'flat', ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
+        variant === 'flat' && 'rounded-2xl border border-border bg-card text-foreground shadow-glass',
         variant === 'glass' &&
-          'rounded-xl border border-cta/[0.08] bg-card/85 backdrop-blur-xl text-foreground shadow-glass',
-        variant === 'accent' && 'rounded-lg bg-card-accent text-card-accent-foreground shadow-accent',
+          'rounded-2xl border border-cta/[0.08] bg-card/85 backdrop-blur-xl text-foreground shadow-glass',
+        variant === 'accent' &&
+          'rounded-2xl bg-card-accent text-card-accent-foreground shadow-accent',
         className,
       )}
       {...props}
