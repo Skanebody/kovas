@@ -55,5 +55,6 @@
 - Polices **Outfit** + **Instrument Serif** : `apps/web/src/app/layout.tsx` (`defaultTheme="light"`)
 - Cockpit KPI hero : `apps/web/src/app/app/dashboard/cockpit-hero.tsx` + `components/ui/kpi-hero.tsx`
 - Dashboard hero : `apps/web/src/app/app/dashboard/page.tsx`
+- **Card `flat` par défaut** (P6, 2026-05-19) : `components/ui/card.tsx` — surface paper opaque + border + ombre douce neutre. Glass `bg-card/85 backdrop-blur-xl` désormais **opt-in** via `variant="glass"` et réservé aux surfaces flottantes (header, sidebar, command palette, bottom sheets).
 
 **Reste** : landing marketing `page.tsx` (noir → crème éditorial), compteur DPE jaune (F7).

@@ -111,6 +111,14 @@
 }
 
 @layer utilities {
+  /* Glass utilities (.glass, .glass-header, .glass-sidebar, .glass-accent)
+   * Décision P6 (2026-05-19) — Option B "Adapter" :
+   * Réservées AUX SURFACES FLOTTANTES uniquement (header sticky, sidebar,
+   * command palette, bottom sheets, app-nav-tabs, calendar sticky header).
+   * Les cards de travail (dashboard, dossier, listes, account) utilisent
+   * le composant Card variant="flat" (défaut) — surface paper opaque,
+   * ombre douce neutre. Cf. components/ui/card.tsx + CLAUDE.md §9.
+   */
   .glass {
     @apply bg-card/85 backdrop-blur-xl border;
     border-color: hsl(var(--cta) / 0.08);
