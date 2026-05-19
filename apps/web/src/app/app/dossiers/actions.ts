@@ -41,7 +41,11 @@ const quickDossierSchema = z.object({
   yearBuilt: z.coerce.number().int().min(1000).max(2100).optional(),
   // Client : soit clientId existant, soit nom/tel/email inline (tous optionnels)
   clientId: z.string().uuid().optional().or(z.literal('')),
+  clientType: z
+    .enum(['particulier', 'agence', 'notaire', 'syndic', 'entreprise', 'collectivite'])
+    .optional(),
   clientName: z.string().max(120).optional().or(z.literal('')),
+  clientCompanyName: z.string().max(160).optional().or(z.literal('')),
   clientPhone: z.string().max(30).optional().or(z.literal('')),
   clientEmail: z.string().max(120).optional().or(z.literal('')),
   // Diagnostics + RDV
@@ -184,7 +188,9 @@ export async function createQuickDossierAction(
     addressLat: formData.get('address_lat') || undefined,
     yearBuilt: formData.get('yearBuilt') || undefined,
     clientId: formData.get('clientId'),
+    clientType: formData.get('clientType') || undefined,
     clientName: formData.get('clientName'),
+    clientCompanyName: formData.get('clientCompanyName'),
     clientPhone: formData.get('clientPhone'),
     clientEmail: formData.get('clientEmail'),
     types,
@@ -246,16 +252,33 @@ export async function createQuickDossierAction(
 
   // 2. Créer client si nécessaire (au moins un champ inline rempli)
   const hasClientInline =
-    !clientId && (data.clientName?.trim() || data.clientPhone?.trim() || data.clientEmail?.trim())
+    !clientId &&
+    (data.clientName?.trim() ||
+      data.clientCompanyName?.trim() ||
+      data.clientPhone?.trim() ||
+      data.clientEmail?.trim())
 
   if (hasClientInline) {
-    const displayName = (data.clientName || data.clientPhone || data.clientEmail || 'Client').trim()
+    const clientType = data.clientType ?? 'particulier'
+    const isBusiness = clientType !== 'particulier'
+    // display_name : raison sociale en priorité pour B2B (SCI/syndic/agence), sinon nom contact
+    const displayName = (
+      (isBusiness ? data.clientCompanyName : data.clientName) ||
+      data.clientName ||
+      data.clientCompanyName ||
+      data.clientPhone ||
+      data.clientEmail ||
+      'Client'
+    ).trim()
     const { data: cliRow, error: cliErr } = await supabase
       .from('clients')
       .insert({
         organization_id: orgId,
-        type: 'particulier',
+        type: clientType,
         display_name: displayName,
+        company_name: isBusiness ? data.clientCompanyName || null : null,
+        // Pour B2B, clientName = nom du contact (ex: gestionnaire syndic)
+        last_name: isBusiness && data.clientName ? data.clientName : null,
         phone: data.clientPhone || null,
         email: data.clientEmail || null,
       })

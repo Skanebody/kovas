@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import { Info, Loader2, MapPin, Phone, User } from 'lucide-react'
-import { useActionState, useState } from 'react'
+import { Briefcase, Building2, Home, Info, Loader2, MapPin, Phone, User } from 'lucide-react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { type DossierFormState, createQuickDossierAction } from '../actions'
 
 interface DossierFormProps {
@@ -66,6 +66,16 @@ const GROUP_LABELS = {
   amiante: 'Amiante',
   autres: 'Autres diagnostics',
 }
+
+// Types client UI — mapping vers enum DB client_type (SCI → entreprise)
+const CLIENT_TYPE_PILLS = [
+  { value: 'particulier', label: 'Particulier', dbType: 'particulier', icon: User },
+  { value: 'sci', label: 'SCI', dbType: 'entreprise', icon: Briefcase, isBusiness: true },
+  { value: 'syndic', label: 'Syndic', dbType: 'syndic', icon: Building2, isBusiness: true },
+  { value: 'agence', label: 'Agence', dbType: 'agence', icon: Home, isBusiness: true },
+] as const
+
+type ClientPillValue = (typeof CLIENT_TYPE_PILLS)[number]['value']
 
 // Packs rapides — choix en 1 clic pendant l'appel téléphonique
 const QUICK_PACKS = [
@@ -127,6 +137,10 @@ export function DossierForm({
   const [clientMode, setClientMode] = useState<'inline' | 'existing'>(
     defaultClientId ? 'existing' : 'inline',
   )
+  const [clientPill, setClientPill] = useState<ClientPillValue>('particulier')
+  const activeClientPill =
+    CLIENT_TYPE_PILLS.find((p) => p.value === clientPill) ?? CLIENT_TYPE_PILLS[0]
+  const clientIsBusiness = 'isBusiness' in activeClientPill && activeClientPill.isBusiness === true
 
   function toggleDiag(value: string) {
     setSelected((prev) => {
@@ -141,12 +155,34 @@ export function DossierForm({
     setSelected(new Set(types))
   }
 
-  // Suggestions auto selon l'année de construction
-  const suggestions: string[] = []
+  // Diagnostics obligatoires déduits de l'année de construction (vente).
+  // Légal FR (art. L271-4 CCH) :
+  //  - amiante : permis de construire avant le 01/07/1997
+  //  - plomb CREP : permis de construire avant le 01/01/1949
+  //  - DPE : toujours
+  //  - ERP : toujours (gratuit Géorisques)
+  // Gaz/élec : seulement si installation > 15 ans → impossible à déterminer
+  //  juste avec l'année du bien, on laisse en suggestion non auto-cochée.
+  const requiredByYear: string[] = ['dpe_vente', 'erp']
   if (effectiveYear) {
-    if (effectiveYear < 1949) suggestions.push('plomb_crep')
-    if (effectiveYear < 1997) suggestions.push('amiante_vente')
+    if (effectiveYear < 1997) requiredByYear.push('amiante_vente')
+    if (effectiveYear < 1949) requiredByYear.push('plomb_crep')
   }
+
+  // Auto-cochage à chaque changement d'année — cumule avec sélection user
+  // (on coche les obligatoires, on ne décoche jamais ce que l'utilisateur a ajouté)
+  const lastYearRef = useRef<number | null>(null)
+  useEffect(() => {
+    // Skip si l'année n'a pas changé
+    if (lastYearRef.current === effectiveYear) return
+    lastYearRef.current = effectiveYear
+    setSelected((prev) => {
+      const next = new Set(prev)
+      for (const t of requiredByYear) next.add(t)
+      return next
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveYear])
 
   const fieldErrors = state?.fieldErrors ?? {}
 
@@ -261,30 +297,126 @@ export function DossierForm({
         </div>
 
         {clientMode === 'inline' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <FormField label="Nom" htmlFor="clientName">
-              <Input id="clientName" name="clientName" placeholder="M. Martin" autoComplete="off" />
-            </FormField>
-            <FormField label="Téléphone" htmlFor="clientPhone" hint="Pour SMS J-1">
-              <Input
-                id="clientPhone"
-                name="clientPhone"
-                type="tel"
-                inputMode="tel"
-                placeholder="06 12 34 56 78"
-                autoComplete="off"
-              />
-            </FormField>
-            <FormField label="Email (optionnel)" htmlFor="clientEmail">
-              <Input
-                id="clientEmail"
-                name="clientEmail"
-                type="email"
-                inputMode="email"
-                placeholder="martin@example.fr"
-                autoComplete="off"
-              />
-            </FormField>
+          <div className="space-y-3">
+            {/* Pillules de type client */}
+            <div className="flex flex-wrap gap-2">
+              {CLIENT_TYPE_PILLS.map((p) => {
+                const isActive = clientPill === p.value
+                const Icon = p.icon
+                return (
+                  <button
+                    key={p.value}
+                    type="button"
+                    onClick={() => setClientPill(p.value)}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-xs font-medium transition-colors border',
+                      isActive
+                        ? 'bg-navy text-paper border-navy'
+                        : 'bg-paper text-ink border-rule hover:border-navy/40 hover:bg-cream-deep/40',
+                    )}
+                  >
+                    <Icon className="size-3.5" /> {p.label}
+                  </button>
+                )
+              })}
+            </div>
+            <input type="hidden" name="clientType" value={activeClientPill.dbType} />
+
+            {clientIsBusiness ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <FormField
+                    label={
+                      clientPill === 'sci'
+                        ? 'Raison sociale SCI'
+                        : clientPill === 'syndic'
+                          ? 'Nom du syndic / cabinet'
+                          : "Nom de l'agence"
+                    }
+                    htmlFor="clientCompanyName"
+                    hint="Pour facturation"
+                  >
+                    <Input
+                      id="clientCompanyName"
+                      name="clientCompanyName"
+                      placeholder={
+                        clientPill === 'sci'
+                          ? 'SCI Martin Immobilier'
+                          : clientPill === 'syndic'
+                            ? 'Cabinet Foncia'
+                            : 'Century 21 Paris 8e'
+                      }
+                      autoComplete="organization"
+                    />
+                  </FormField>
+                  <FormField
+                    label="Contact (optionnel)"
+                    htmlFor="clientName"
+                    hint="Gestionnaire / interlocuteur"
+                  >
+                    <Input
+                      id="clientName"
+                      name="clientName"
+                      placeholder="M. Durand (gestionnaire)"
+                      autoComplete="name"
+                    />
+                  </FormField>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <FormField label="Téléphone" htmlFor="clientPhone" hint="Pour SMS J-1">
+                    <Input
+                      id="clientPhone"
+                      name="clientPhone"
+                      type="tel"
+                      inputMode="tel"
+                      placeholder="01 23 45 67 89"
+                      autoComplete="tel"
+                    />
+                  </FormField>
+                  <FormField label="Email (optionnel)" htmlFor="clientEmail">
+                    <Input
+                      id="clientEmail"
+                      name="clientEmail"
+                      type="email"
+                      inputMode="email"
+                      placeholder="contact@cabinet.fr"
+                      autoComplete="email"
+                    />
+                  </FormField>
+                </div>
+              </>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <FormField label="Nom" htmlFor="clientName">
+                  <Input
+                    id="clientName"
+                    name="clientName"
+                    placeholder="M. Martin"
+                    autoComplete="name"
+                  />
+                </FormField>
+                <FormField label="Téléphone" htmlFor="clientPhone" hint="Pour SMS J-1">
+                  <Input
+                    id="clientPhone"
+                    name="clientPhone"
+                    type="tel"
+                    inputMode="tel"
+                    placeholder="06 12 34 56 78"
+                    autoComplete="tel"
+                  />
+                </FormField>
+                <FormField label="Email (optionnel)" htmlFor="clientEmail">
+                  <Input
+                    id="clientEmail"
+                    name="clientEmail"
+                    type="email"
+                    inputMode="email"
+                    placeholder="martin@example.fr"
+                    autoComplete="email"
+                  />
+                </FormField>
+              </div>
+            )}
           </div>
         ) : (
           <FormField label="Client donneur d'ordre" htmlFor="clientId">
@@ -342,17 +474,18 @@ export function DossierForm({
           </p>
         )}
 
-        {suggestions.length > 0 && (
-          <div className="rounded-md border border-accent-blue/40 bg-accent-blue/10 p-3 flex items-start gap-2 text-sm">
-            <Info className="size-4 mt-0.5 text-accent-blue shrink-0" />
+        {effectiveYear && requiredByYear.length > 2 && (
+          <div className="rounded-md border border-accent-green/40 bg-accent-green/10 p-3 flex items-start gap-2 text-sm">
+            <Info className="size-4 mt-0.5 text-accent-green shrink-0" />
             <span>
-              Vu l'année de construction ({effectiveYear}), pensez à cocher :{' '}
+              Bâti {effectiveYear} — diagnostics obligatoires cochés automatiquement :{' '}
               <strong>
-                {suggestions
+                {requiredByYear
                   .map((s) => DIAG_OPTIONS.find((d) => d.value === s)?.label)
                   .filter(Boolean)
                   .join(', ')}
               </strong>
+              .
             </span>
           </div>
         )}
@@ -365,13 +498,14 @@ export function DossierForm({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {DIAG_OPTIONS.filter((d) => d.group === group).map((d) => {
                 const isChecked = selected.has(d.value)
-                const isSuggested = suggestions.includes(d.value)
+                const isRequired = requiredByYear.includes(d.value)
                 return (
                   <label
                     key={d.value}
                     className={cn(
                       'flex items-start gap-3 rounded-md border p-2.5 cursor-pointer transition-colors',
                       isChecked ? 'border-navy/40 bg-navy/5' : 'border-rule hover:bg-ink/5',
+                      isRequired && !isChecked && 'border-accent-red/40',
                     )}
                   >
                     <input
@@ -383,11 +517,11 @@ export function DossierForm({
                       className="mt-0.5 accent-foreground"
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium">{d.label}</span>
-                        {isSuggested && (
-                          <Badge variant="blue" className="text-[10px]">
-                            Suggéré
+                        {isRequired && (
+                          <Badge variant="green" className="text-[10px]">
+                            Obligatoire
                           </Badge>
                         )}
                       </div>
