@@ -2,7 +2,7 @@ import { CheckoutButton } from '@/app/app/billing/checkout-button'
 import { ThemePicker } from '@/components/theme-picker'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CollapsibleSection } from '@/components/ui/collapsible-section'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { KOVAS_TIERS } from '@/lib/stripe-config'
 import { cn } from '@/lib/utils'
@@ -82,73 +82,78 @@ export default async function AccountPage() {
         </p>
       </div>
 
-      {/* PROFIL */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+      {/* PROFIL — ouvert par défaut (frequent) */}
+      <CollapsibleSection
+        storageKey="kovas_account_profile"
+        defaultExpanded
+        title={
+          <>
             <User className="size-4" /> Profil
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProfileForm
-            initial={{
-              full_name: profile.full_name,
-              email: profile.email,
-              phone: profile.phone ?? null,
-            }}
-          />
-        </CardContent>
-      </Card>
+          </>
+        }
+      >
+        <ProfileForm
+          initial={{
+            full_name: profile.full_name,
+            email: profile.email,
+            phone: profile.phone ?? null,
+          }}
+        />
+      </CollapsibleSection>
 
-      {/* ENTREPRISE */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+      {/* ENTREPRISE — ouvert par défaut (V1 setup) */}
+      <CollapsibleSection
+        storageKey="kovas_account_company"
+        defaultExpanded
+        title={
+          <>
             <Building2 className="size-4" /> Mon entreprise
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          <p className="text-xs text-muted-foreground pb-3">
-            Ces informations apparaissent sur vos exports et en-têtes de rapports.
-          </p>
-          <CompanyForm
-            initial={{
-              name: organization?.name ?? null,
-              siret: organization?.siret ?? null,
-              vat_number: organization?.vat_number ?? null,
-              address: organization?.address ?? null,
-              postal_code: organization?.postal_code ?? null,
-              city: organization?.city ?? null,
-              certification_n: organization?.certification_n ?? null,
-            }}
-          />
-        </CardContent>
-      </Card>
+          </>
+        }
+      >
+        <p className="text-xs text-muted-foreground pb-3">
+          Ces informations apparaissent sur vos exports et en-têtes de rapports.
+        </p>
+        <CompanyForm
+          initial={{
+            name: organization?.name ?? null,
+            siret: organization?.siret ?? null,
+            vat_number: organization?.vat_number ?? null,
+            address: organization?.address ?? null,
+            postal_code: organization?.postal_code ?? null,
+            city: organization?.city ?? null,
+            certification_n: organization?.certification_n ?? null,
+          }}
+        />
+      </CollapsibleSection>
 
-      {/* APPARENCE */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+      {/* APPARENCE — fermé par défaut (réglage one-shot) */}
+      <CollapsibleSection
+        storageKey="kovas_account_appearance"
+        title={
+          <>
             <Palette className="size-4" /> Apparence
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Choisissez le thème de l'application. Le mode « Système » suit automatiquement les
-            préférences de votre appareil (clair/sombre).
-          </p>
-          <ThemePicker />
-        </CardContent>
-      </Card>
+          </>
+        }
+      >
+        <p className="text-sm text-muted-foreground pb-4">
+          Choisissez le thème de l'application. Le mode « Système » suit automatiquement les
+          préférences de votre appareil (clair/sombre).
+        </p>
+        <ThemePicker />
+      </CollapsibleSection>
 
-      {/* ABONNEMENT */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+      {/* ABONNEMENT — ouvert par défaut (usage du mois pertinent) */}
+      <CollapsibleSection
+        storageKey="kovas_account_subscription"
+        defaultExpanded
+        title={
+          <>
             <Sparkles className="size-4" /> Abonnement
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </>
+        }
+      >
+        <div className="space-y-4">
           {isActive && subscription ? (
             <>
               <div className="flex items-end justify-between gap-3 flex-wrap">
@@ -213,17 +218,19 @@ export default async function AccountPage() {
               Aucun abonnement actif. Choisissez une offre ci-dessous pour activer votre compte.
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
-      {/* PLANS COMPARISON */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
+      {/* PLANS COMPARISON — fermé par défaut (action peu fréquente) */}
+      <CollapsibleSection
+        storageKey="kovas_account_plans"
+        title={
+          <>
             <CreditCard className="size-4" /> Changer de formule
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </>
+        }
+      >
+        <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {KOVAS_TIERS.map((t) => {
               const isCurrent = isActive && currentTier === t.id
@@ -285,15 +292,12 @@ export default async function AccountPage() {
             Annuel : 2 mois offerts (10 mois payés sur 12). Sans engagement. Plafond mensuel
             auto-protecteur activable depuis le portail Stripe.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
-      {/* INFORMATIONS LÉGALES KOVAS */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Informations légales KOVAS</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
+      {/* INFORMATIONS LÉGALES KOVAS — fermé par défaut (référence statique) */}
+      <CollapsibleSection storageKey="kovas_account_legal" title={<>Informations légales KOVAS</>}>
+        <div className="space-y-2 text-sm">
           <Row label="Éditeur">SASU Nexus 1993</Row>
           <Row label="Siège social">66 Av Champs Élysées, 75008 Paris</Row>
           <Row label="SIREN">982 786 154</Row>
@@ -302,8 +306,8 @@ export default async function AccountPage() {
             Vos factures KOVAS sont émises HT avec TVA 20% en sus, déductible si vous êtes
             assujetti.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
     </div>
   )
 }
