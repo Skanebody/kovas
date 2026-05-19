@@ -1,6 +1,6 @@
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
-import { createClient } from '@/lib/supabase/server'
 
 /**
  * Récupère l'utilisateur courant + son organisation par défaut.
@@ -19,7 +19,7 @@ export const getCurrentUser = cache(async () => {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, email, full_name, default_org_id, locale')
+    .select('id, email, full_name, phone, default_org_id, locale')
     .eq('id', user.id)
     .single()
 

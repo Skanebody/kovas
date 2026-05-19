@@ -6,9 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { KOVAS_TIERS } from '@/lib/stripe-config'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, Check, CreditCard, ExternalLink, Palette, Sparkles, User } from 'lucide-react'
+import {
+  ArrowLeft,
+  Building2,
+  Check,
+  CreditCard,
+  ExternalLink,
+  Palette,
+  Sparkles,
+  User,
+} from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { CompanyForm } from './company-form'
+import { ProfileForm } from './profile-form'
 
 export const metadata: Metadata = { title: 'Mon compte' }
 
@@ -19,24 +30,30 @@ function eurosCents(cents: number) {
 export default async function AccountPage() {
   const { supabase, orgId, profile } = await getCurrentUser()
 
-  const [{ data: subscription }, { count: monthMissions }] = await Promise.all([
-    supabase
-      .from('subscriptions')
-      .select(
-        'tier, status, missions_included, overage_price_cents, current_period_end, cancel_at_period_end',
-      )
-      .eq('organization_id', orgId)
-      .maybeSingle(),
-    supabase
-      .from('missions')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .is('deleted_at', null)
-      .gte(
-        'created_at',
-        new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
-      ),
-  ])
+  const [{ data: subscription }, { count: monthMissions }, { data: organization }] =
+    await Promise.all([
+      supabase
+        .from('subscriptions')
+        .select(
+          'tier, status, missions_included, overage_price_cents, current_period_end, cancel_at_period_end',
+        )
+        .eq('organization_id', orgId)
+        .maybeSingle(),
+      supabase
+        .from('missions')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', orgId)
+        .is('deleted_at', null)
+        .gte(
+          'created_at',
+          new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
+        ),
+      supabase
+        .from('organizations')
+        .select('name, siret, vat_number, address, postal_code, city, certification_n')
+        .eq('id', orgId)
+        .maybeSingle(),
+    ])
 
   const isActive = subscription?.status === 'active'
   const currentTier = subscription?.tier
@@ -72,9 +89,39 @@ export default async function AccountPage() {
             <User className="size-4" /> Profil
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <Row label="Nom">{profile.full_name ?? '—'}</Row>
-          <Row label="Email">{profile.email}</Row>
+        <CardContent>
+          <ProfileForm
+            initial={{
+              full_name: profile.full_name,
+              email: profile.email,
+              phone: profile.phone ?? null,
+            }}
+          />
+        </CardContent>
+      </Card>
+
+      {/* ENTREPRISE */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Building2 className="size-4" /> Mon entreprise
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1">
+          <p className="text-xs text-muted-foreground pb-3">
+            Ces informations apparaissent sur vos exports et en-têtes de rapports.
+          </p>
+          <CompanyForm
+            initial={{
+              name: organization?.name ?? null,
+              siret: organization?.siret ?? null,
+              vat_number: organization?.vat_number ?? null,
+              address: organization?.address ?? null,
+              postal_code: organization?.postal_code ?? null,
+              city: organization?.city ?? null,
+              certification_n: organization?.certification_n ?? null,
+            }}
+          />
         </CardContent>
       </Card>
 
