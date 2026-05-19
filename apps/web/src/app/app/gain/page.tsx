@@ -2,8 +2,10 @@ import { GainTrackerCard } from '@/app/app/dashboard/gain-tracker-card'
 import { BarChartPills, buildLast12MonthsData } from '@/components/ui/bar-chart-pills'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { DpeCounterCard } from '@/components/ui/dpe-counter-card'
 import { GlassCard } from '@/components/ui/glass-card'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { getDpeCountThisYear } from '@/lib/dpe-counter'
 import { parisMonthBounds } from '@/lib/paris-dates'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -56,6 +58,9 @@ export default async function GainPage() {
   }
   const chartData = buildLast12MonthsData(monthlyMissions)
   const yearTotal = chartData.reduce((sum, p) => sum + p.value, 0)
+
+  // Compteur DPE annuel (limite légale 1000)
+  const dpeCounter = await getDpeCountThisYear(supabase, orgId)
 
   const { count: missionsDoneMonth } = await supabase
     .from('missions')
@@ -152,10 +157,11 @@ export default async function GainPage() {
         </div>
       </section>
 
-      {/* Strate 2 — Clear : GainTracker hero card + détail V1.5 */}
+      {/* Strate 2 — Clear : GainTracker + Compteur DPE + Évolution */}
       <section className="px-4 md:px-8 py-10 space-y-8">
-        <div className="max-w-3xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl">
           <GainTrackerCard />
+          <DpeCounterCard data={dpeCounter} size="compact" />
         </div>
 
         {/* Bar chart pilules verticales — signature v5 Synthex */}
