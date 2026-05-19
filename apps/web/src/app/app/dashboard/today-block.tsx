@@ -67,7 +67,15 @@ export async function TodayBlock() {
             <CalendarClock className="size-4" />
             Vos visites aujourd'hui ({list.length})
           </span>
-          <span className="text-xs font-normal text-muted-foreground capitalize">{todayLabel}</span>
+          <span className="flex items-center gap-3 text-xs font-normal">
+            <span className="text-muted-foreground capitalize">{todayLabel}</span>
+            <Link
+              href="/app/calendar"
+              className="text-cta hover:underline underline-offset-4 inline-flex items-center gap-1"
+            >
+              Voir le planning <ArrowRight className="size-3" />
+            </Link>
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">

@@ -1,17 +1,29 @@
 'use server'
 
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { getCurrentUser } from '@/lib/auth/current-user'
 
 // ============================================
 // Dossier rooms (anciennement mission_rooms)
 // ============================================
 
 const ROOM_TYPES = [
-  'salon', 'sejour', 'cuisine', 'chambre', 'salle_de_bain', 'wc',
-  'entree', 'couloir', 'buanderie', 'cave', 'grenier', 'garage', 'balcon',
-  'terrasse', 'autre',
+  'salon',
+  'sejour',
+  'cuisine',
+  'chambre',
+  'salle_de_bain',
+  'wc',
+  'entree',
+  'couloir',
+  'buanderie',
+  'cave',
+  'grenier',
+  'garage',
+  'balcon',
+  'terrasse',
+  'autre',
 ] as const
 
 const roomSchema = z.object({
@@ -239,7 +251,11 @@ export async function createVoiceNoteAction(input: z.infer<typeof voiceNoteSchem
   return { id: data.id }
 }
 
-export async function deleteVoiceNoteAction(dossierId: string, voiceNoteId: string, storagePath: string) {
+export async function deleteVoiceNoteAction(
+  dossierId: string,
+  voiceNoteId: string,
+  storagePath: string,
+) {
   const { supabase, orgId } = await getCurrentUser()
   await supabase.storage.from('voice-notes').remove([storagePath])
   const { error } = await supabase
@@ -328,11 +344,10 @@ export async function importExtractedDataAction(
 
   if (!doc?.extracted_data) throw new Error('Aucune donnée extraite pour ce document')
 
-  const suggestions = (
-    (doc.extracted_data as Record<string, unknown>).suggested_imports as
+  const suggestions =
+    ((doc.extracted_data as Record<string, unknown>).suggested_imports as
       | { target: string; value: string | number | null }[]
-      | undefined
-  ) ?? []
+      | undefined) ?? []
 
   // Récupère le property_id depuis le dossier
   const { data: dossier } = await supabase
@@ -387,8 +402,8 @@ export async function importExtractedDataAction(
 
   // Apply mission updates : on cible les missions DPE du dossier
   if (Object.keys(missionUpdates).length > 0) {
-    const dpeMissions = ((dossier.missions ?? []) as { id: string; type: string }[]).filter((m) =>
-      m.type.startsWith('dpe_') || m.type === 'copropriete',
+    const dpeMissions = ((dossier.missions ?? []) as { id: string; type: string }[]).filter(
+      (m) => m.type.startsWith('dpe_') || m.type === 'copropriete',
     )
 
     for (const m of dpeMissions) {
@@ -424,7 +439,14 @@ export async function deleteOwnerDocumentAction(
 // ============================================
 
 const MISSION_STATUSES = [
-  'draft', 'scheduled', 'in_progress', 'to_review', 'done', 'exported', 'archived', 'cancelled',
+  'draft',
+  'scheduled',
+  'in_progress',
+  'to_review',
+  'done',
+  'exported',
+  'archived',
+  'cancelled',
 ] as const
 type MissionStatus = (typeof MISSION_STATUSES)[number]
 
@@ -501,7 +523,13 @@ export async function updateMissionStatusAction(missionId: string, newStatus: Mi
 // ============================================
 
 const DOSSIER_STATUSES = [
-  'draft', 'scheduled', 'on_site', 'back_office', 'done', 'archived', 'cancelled',
+  'draft',
+  'scheduled',
+  'on_site',
+  'back_office',
+  'done',
+  'archived',
+  'cancelled',
 ] as const
 type DossierStatus = (typeof DOSSIER_STATUSES)[number]
 
@@ -570,11 +598,7 @@ export async function toggleChecklistItemAction(
  * Toggle un item manuel de la matrice room×diag (vue "par pièce").
  * Persisté dans dossier.metadata.roomTasksState
  */
-export async function toggleRoomTaskAction(
-  dossierId: string,
-  itemId: string,
-  checked: boolean,
-) {
+export async function toggleRoomTaskAction(dossierId: string, itemId: string, checked: boolean) {
   const { supabase, orgId } = await getCurrentUser()
 
   const { data: current } = await supabase
@@ -625,11 +649,51 @@ export async function setDossierViewPreferenceAction(dossierId: string, view: 'r
 /**
  * Édite les meta-infos du dossier (date prévue, notes, client).
  */
+export interface ScheduleConflict {
+  dossierId: string
+  reference: string
+  scheduledAt: string
+  clientName: string | null
+}
+
+/**
+ * Édite les meta-infos du dossier. Retourne les conflits de planning
+ * éventuels (autres dossiers actifs planifiés dans une fenêtre de ±90 min).
+ */
 export async function updateDossierInfoAction(
   dossierId: string,
   updates: { scheduled_at?: string | null; notes?: string | null; client_id?: string | null },
-) {
+): Promise<{ conflicts: ScheduleConflict[] }> {
   const { supabase, orgId } = await getCurrentUser()
+
+  // Détection conflits AVANT save : autres dossiers actifs dans ±90 min
+  let conflicts: ScheduleConflict[] = []
+  if (updates.scheduled_at) {
+    const newAt = new Date(updates.scheduled_at)
+    const windowStart = new Date(newAt.getTime() - 90 * 60_000)
+    const windowEnd = new Date(newAt.getTime() + 90 * 60_000)
+    const { data: others } = await supabase
+      .from('dossiers')
+      .select('id, reference, scheduled_at, clients(display_name)')
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .neq('id', dossierId)
+      .in('status', ['draft', 'scheduled', 'on_site'])
+      .gte('scheduled_at', windowStart.toISOString())
+      .lte('scheduled_at', windowEnd.toISOString())
+      .limit(5)
+
+    conflicts = (others ?? []).map((d) => {
+      const client = Array.isArray(d.clients) ? d.clients[0] : d.clients
+      return {
+        dossierId: d.id,
+        reference: d.reference,
+        scheduledAt: d.scheduled_at as string,
+        clientName: client?.display_name ?? null,
+      }
+    })
+  }
+
   const patch: Record<string, unknown> = {}
   if (updates.scheduled_at !== undefined) {
     patch.scheduled_at = updates.scheduled_at ? new Date(updates.scheduled_at).toISOString() : null
@@ -645,15 +709,26 @@ export async function updateDossierInfoAction(
 
   if (error) throw new Error(error.message)
   revalidatePath(`/app/dossiers/${dossierId}`)
+  revalidatePath('/app/calendar')
+
+  return { conflicts }
 }
 
 /**
  * Ajoute un diagnostic (mission) à un dossier existant.
  */
 const ALL_MISSION_TYPES = [
-  'dpe_vente', 'dpe_location', 'copropriete',
-  'amiante_vente', 'amiante_avant_travaux',
-  'plomb_crep', 'gaz', 'electricite', 'termites', 'carrez_boutin', 'erp',
+  'dpe_vente',
+  'dpe_location',
+  'copropriete',
+  'amiante_vente',
+  'amiante_avant_travaux',
+  'plomb_crep',
+  'gaz',
+  'electricite',
+  'termites',
+  'carrez_boutin',
+  'erp',
 ] as const
 type AnyMissionType = (typeof ALL_MISSION_TYPES)[number]
 

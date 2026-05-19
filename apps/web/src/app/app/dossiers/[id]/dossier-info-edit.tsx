@@ -5,6 +5,7 @@ import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { toast } from '@/components/ui/toaster'
 import { Loader2, Pencil, X } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { updateDossierInfoAction } from './actions'
@@ -42,11 +43,28 @@ export function DossierInfoEdit({
 
   function save() {
     startSave(async () => {
-      await updateDossierInfoAction(dossierId, {
+      const result = await updateDossierInfoAction(dossierId, {
         scheduled_at: scheduled || null,
         notes: notesVal || null,
         client_id: clientVal || null,
       })
+      if (result.conflicts.length > 0) {
+        const list = result.conflicts
+          .map((c) => {
+            const t = new Date(c.scheduledAt).toLocaleTimeString('fr-FR', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+            return `${t} · ${c.clientName ?? c.reference}`
+          })
+          .join(', ')
+        toast.warning(
+          `Conflit planning : ${result.conflicts.length} autre${result.conflicts.length > 1 ? 's' : ''} RDV dans ±90 min (${list})`,
+          { duration: 8000 },
+        )
+      } else {
+        toast.success('Dossier mis à jour')
+      }
       setOpen(false)
     })
   }

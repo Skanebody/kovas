@@ -307,6 +307,15 @@ export default async function DossierDetailPage({
                   dateStyle: 'long',
                   timeStyle: 'short',
                 })}
+                <a
+                  href={`/api/dossiers/${dossier.id}/calendar.ics`}
+                  download
+                  className="ml-2 underline-offset-4 hover:underline hover:text-foreground transition-colors"
+                  aria-label="Télécharger le RDV au format .ics (Google/Apple/Outlook)"
+                  title="Télécharger pour Google / Apple / Outlook"
+                >
+                  .ics ↓
+                </a>
               </span>
             )}
           </div>
