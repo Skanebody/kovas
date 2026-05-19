@@ -54,8 +54,7 @@ Layout commun `app/layout.tsx` :
 | `/app/properties/new` | `apps/web/src/app/app/properties/new/page.tsx` | Création bien (BAN + appartement détails) |
 | `/app/properties/[id]` | `apps/web/src/app/app/properties/[id]/page.tsx` | Détail bien + DangerZone |
 | `/app/properties/[id]/edit` | `apps/web/src/app/app/properties/[id]/edit/page.tsx` | Édition bien |
-| `/app/account` | `apps/web/src/app/app/account/page.tsx` | **Hub Mon compte** — Profil · Entreprise · Apparence · Abonnement · Plans · Légales (6 sections collapsibles, defaults adaptatifs) |
-| `/app/billing` | `apps/web/src/app/app/billing/page.tsx` | `redirect('/app/account')` — consolidation |
+| `/app/account` | `apps/web/src/app/app/account/page.tsx` | **Hub Mon compte** — Profil · Entreprise · Abonnement · Plans · Légales (5 sections collapsibles, defaults adaptatifs ; Apparence supprimée P7, theme toggle sidebar uniquement). `checkout-button.tsx` colocalisé. |
 
 ---
 
@@ -319,7 +318,7 @@ Buckets Storage :
 
 ## 12. Système design (CLAUDE.md §9 + docs/design-system.md)
 
-- Light + Dark mode actif via next-themes (toggle dans /app/account + sidebar), defaultTheme `light`
+- Light + Dark mode actif via next-themes (toggle **sidebar uniquement** depuis P7, ThemePicker /app/account supprimé), defaultTheme `light`
 - Glassmorphism léger (Ron Design Lab × Tectra) + ombres neutres
 - Palette : crème `#F5F1EA` + paper `#FBF8F2` + cobalt `#2C3FA8` CTA + butter `#FFE89C` accent énergique + sémantiques (bleu/rouge/orange/vert)
 - Typo : Outfit (UI) + Instrument Serif italic (KPIs, mots-clés éditoriaux)
