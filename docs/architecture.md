@@ -320,9 +320,10 @@ Buckets Storage :
 
 - Light + Dark mode actif via next-themes (toggle **sidebar uniquement** depuis P7, ThemePicker /app/account supprimé), defaultTheme `light`
 - Glassmorphism léger **réservé aux surfaces flottantes** depuis P6 (header sticky, sidebar, command palette, bottom sheets, app-nav-tabs, calendar sticky header). Cards de travail = `variant="flat"` (paper opaque + ombre neutre)
-- Palette : crème `#F5F1EA` + paper `#FBF8F2` + cobalt `#2C3FA8` CTA + butter `#FFE89C` accent énergique + sémantiques (bleu/rouge/orange/vert)
-- Typo : Outfit (UI) + Instrument Serif italic (KPIs, mots-clés éditoriaux)
-- Radius : `1.25rem`/`1.5rem` cards, `100px` (pill) CTA et badges, `0.75rem` inputs
+- **Design System v2 (2026-05-19)** : Palette cream `#F8F5EE` + paper `#FDFBF6` + **navy `#0F1E3D` CTA** + **ambre `#D97706` accent chaud** + sémantiques (bleu/rouge/orange/jaune/vert) + 5 pastels catégoriels (butter/lime/peach/lavender/sky pour types de diagnostic)
+- Typo v2 : **Manrope** (UI) + **Instrument Serif italic** (KPIs, mots-clés éditoriaux H1) + **JetBrains Mono** (labels uppercase, codes, IDs)
+- Radius : `1.125rem` (lg) / `1.5rem` (xl) / `2rem` (2xl) cards, `100px` (pill) CTA et badges, `0.75rem` (md) inputs
+- Composants v2 ajoutés : `StatusPill` (dot animé pulse 2s) · `MissionCard` (heure mono + tags pastels) · Card variant `warm` · Button variant `warm` · Badge variant `amber`
 - Animations : transitions CSS ~200ms, prefers-reduced-motion respecté
 - Toasts : Sonner (`@/components/ui/toaster`)
 - Bottom sheets mobile : Vaul (`@/components/ui/bottom-sheet`)

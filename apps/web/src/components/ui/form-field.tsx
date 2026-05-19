@@ -30,7 +30,7 @@ export function FormField({
         </Label>
       )}
       {children}
-      {hint && !error && <p className="text-xs text-subtle-foreground">{hint}</p>}
+      {hint && !error && <p className="text-xs text-ink-faint">{hint}</p>}
       {error && (
         <p className="text-xs text-accent-red" role="alert">
           {error}

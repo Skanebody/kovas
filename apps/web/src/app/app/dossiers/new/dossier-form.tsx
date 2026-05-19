@@ -188,7 +188,7 @@ export function DossierForm({
 
         {(['dpe', 'amiante', 'autres'] as const).map((group) => (
           <div key={group} className="space-y-1.5">
-            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+            <h3 className="text-xs uppercase tracking-wider text-ink-mute font-semibold">
               {GROUP_LABELS[group]}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -201,7 +201,7 @@ export function DossierForm({
                     className={cn(
                       'flex items-start gap-3 rounded-md border p-3 cursor-pointer transition-colors',
                       isChecked
-                        ? 'border-foreground/40 bg-muted/50'
+                        ? 'border-border-soft bg-muted/50'
                         : 'border-border hover:bg-muted/30',
                     )}
                   >
@@ -218,7 +218,7 @@ export function DossierForm({
                         <span className="text-sm font-medium">{d.label}</span>
                         {isSuggested && <Badge variant="blue" className="text-[10px]">Suggéré</Badge>}
                       </div>
-                      {d.hint && <p className="text-xs text-muted-foreground">{d.hint}</p>}
+                      {d.hint && <p className="text-xs text-ink-mute">{d.hint}</p>}
                     </div>
                   </label>
                 )
@@ -227,7 +227,7 @@ export function DossierForm({
           </div>
         ))}
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-ink-mute">
           {selected.size} diagnostic{selected.size > 1 ? 's' : ''} sélectionné
           {selected.size > 1 ? 's' : ''}.
         </p>

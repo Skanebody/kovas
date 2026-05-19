@@ -121,7 +121,7 @@ export function ShareMissionButton({
           />
 
           <div className="border-t border-border pt-3">
-            <p className="text-xs text-muted-foreground mb-3">Autres modes d'envoi</p>
+            <p className="text-xs text-ink-mute mb-3">Autres modes d'envoi</p>
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" onClick={handleEmail}>
                 <Mail className="size-4" /> Email{clientEmail ? ' au client' : ''}
@@ -161,7 +161,7 @@ function ShareCard({
         </div>
         {badge}
       </div>
-      <p className="text-xs text-muted-foreground">{description}</p>
+      <p className="text-xs text-ink-mute">{description}</p>
       <div className="flex justify-end">{action}</div>
     </div>
   )

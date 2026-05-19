@@ -20,10 +20,11 @@ export default async function OnboardingPage() {
   return (
     <div className="max-w-3xl space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Bienvenue {firstName}.
+        <h1 className="text-display text-3xl md:text-4xl tracking-tight">
+          Bienvenue {firstName}
+          <span className="text-display-serif">.</span>
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-ink-mute">
           Vous êtes prêt. Voici les 3 actions à faire dans cet ordre pour démarrer.
         </p>
       </div>
@@ -112,15 +113,15 @@ function Step({
         </div>
         <div className="flex-1 space-y-3">
           <div className="flex items-center gap-2">
-            <Icon className="size-4 text-muted-foreground" />
+            <Icon className="size-4 text-ink-mute" />
             <h2 className="font-semibold">{title}</h2>
           </div>
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-sm text-ink-mute">{description}</p>
           {bullets && (
             <ul className="text-sm space-y-1">
               {bullets.map((b) => (
                 <li key={b} className="flex gap-2">
-                  <span className="text-muted-foreground">·</span>
+                  <span className="text-ink-mute">·</span>
                   <span>{b}</span>
                 </li>
               ))}

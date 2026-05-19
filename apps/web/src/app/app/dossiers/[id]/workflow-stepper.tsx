@@ -115,7 +115,7 @@ export function WorkflowStepper({
                 key={step.id}
                 className={cn(
                   'rounded-lg border transition-colors',
-                  isOpen && 'border-cta/30 bg-card/60',
+                  isOpen && 'border-cta/30 bg-paper/60',
                   !isOpen && step.completed && 'border-accent-green/20 bg-accent-green/5',
                   !isOpen && !step.completed && 'border-border',
                 )}
@@ -132,7 +132,7 @@ export function WorkflowStepper({
                       'shrink-0 size-7 rounded-full flex items-center justify-center text-xs font-semibold',
                       step.completed
                         ? 'bg-accent-green text-white'
-                        : 'bg-muted text-muted-foreground',
+                        : 'bg-muted text-ink-mute',
                     )}
                   >
                     {step.completed ? <CheckCircle2 className="size-4" /> : idx + 1}
@@ -145,20 +145,20 @@ export function WorkflowStepper({
                       </Badge>
                     </div>
                     {isOpen && (
-                      <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
+                      <p className="text-xs text-ink-mute mt-0.5">{step.description}</p>
                     )}
                   </div>
                   {isOpen ? (
-                    <ChevronDown className="size-4 text-muted-foreground" />
+                    <ChevronDown className="size-4 text-ink-mute" />
                   ) : (
-                    <ChevronRight className="size-4 text-muted-foreground" />
+                    <ChevronRight className="size-4 text-ink-mute" />
                   )}
                 </button>
 
                 {isOpen && (
                   <div id={`step-${step.id}-body`} className="px-4 pb-4 space-y-1.5">
                     {step.items.length === 0 ? (
-                      <p className="text-xs text-muted-foreground italic">
+                      <p className="text-xs text-ink-mute italic">
                         Aucun item applicable pour les diagnostics inclus.
                       </p>
                     ) : (
@@ -175,18 +175,18 @@ export function WorkflowStepper({
                             disabled={!isManual}
                             className={cn(
                               'w-full flex items-start gap-2 text-left rounded-md px-2 py-1.5 text-sm transition-colors',
-                              isManual ? 'hover:bg-card cursor-pointer' : 'cursor-default',
+                              isManual ? 'hover:bg-paper cursor-pointer' : 'cursor-default',
                             )}
                           >
                             {isDone ? (
                               <CheckCircle2 className="size-4 mt-0.5 shrink-0 text-accent-green" />
                             ) : (
-                              <Circle className="size-4 mt-0.5 shrink-0 text-muted-foreground" />
+                              <Circle className="size-4 mt-0.5 shrink-0 text-ink-mute" />
                             )}
                             <span
                               className={cn(
                                 'flex-1',
-                                isDone ? 'text-muted-foreground line-through' : '',
+                                isDone ? 'text-ink-mute line-through' : '',
                                 item.required && !isDone ? 'font-medium' : '',
                               )}
                             >
@@ -209,7 +209,7 @@ export function WorkflowStepper({
                       <button
                         type="button"
                         onClick={() => setOpenStep(optimisticSteps[idx + 1]!.id)}
-                        className="text-xs text-muted-foreground hover:text-foreground mt-2 flex items-center gap-1"
+                        className="text-xs text-ink-mute hover:text-foreground mt-2 flex items-center gap-1"
                       >
                         Étape suivante <ArrowRight className="size-3" />
                       </button>

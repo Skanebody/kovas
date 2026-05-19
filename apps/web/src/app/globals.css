@@ -3,90 +3,129 @@
 @tailwind utilities;
 
 /* ============================================
-   KOVAS Design Tokens — Ron Design Lab (produit) × Tectra
-   Light crème par défaut · Cobalt + jaune énergique · Outfit + Instrument Serif
-   Réf. docs/design/ron-design-lab-kovas.md — 2026-05-19
+   KOVAS Design System v1.0 — Ron Design Lab (produit)
+   Manrope + Instrument Serif · Navy + Amber · Crème
+   Réf. docs/design/kovas-design-system.html
    ============================================ */
 
 @layer base {
   :root {
-    /* Surface — crème Ron (#F5F1EA → #EDE7DC) */
-    --bg-gradient-from: 38 24% 94%;
-    --bg-gradient-to: 38 18% 91%;
-    --background: 38 24% 94%;
+    /* Surfaces */
+    --background: 38 33% 95%; /* #F8F5EE cream */
+    --bg-gradient-from: 38 33% 95%;
+    --bg-gradient-to: 38 26% 91%; /* #EFEAD9 cream-deep */
+    --paper: 42 50% 98%; /* #FDFBF6 */
+    --card: 0 0% 100%; /* white-pure surfaces */
 
-    /* Cards & paper */
-    --card: 40 33% 98%; /* #FBF8F2 paper */
-    --card-accent: 227 57% 42%; /* #2C3FA8 cobalt — confiance métier */
-    --card-accent-foreground: 0 0% 100%;
-
-    /* Primaire — bleu calmant (CTA) */
-    --cta: 227 57% 42%;
-    --cta-hover: 227 50% 36%;
+    /* Brand navy */
+    --cta: 218 60% 15%; /* #0F1E3D */
+    --cta-hover: 218 50% 21%; /* #1A2F52 */
     --cta-foreground: 0 0% 100%;
+    --card-accent: 218 60% 15%;
+    --card-accent-foreground: 38 33% 95%;
 
-    /* Texte — encre */
-    --foreground: 30 10% 9%; /* #1A1815 */
-    --muted: 38 20% 92%;
-    --muted-foreground: 30 8% 38%; /* #5A554B */
-    --subtle: 38 18% 88%;
-    --subtle-foreground: 30 6% 52%; /* #8A8478 */
+    /* Texte — 4 niveaux ink */
+    --foreground: 218 60% 15%; /* ink */
+    --ink-soft: 218 45% 21%; /* #1F2E4D */
+    --muted-foreground: 218 25% 38%; /* ink-mute #4A5878 */
+    --subtle-foreground: 218 18% 55%; /* ink-faint */
+    --ink-ghost: 218 15% 72%; /* #B0B8C8 */
+    --muted: 38 26% 91%;
+    --subtle: 38 22% 88%;
 
-    /* Borders — rule */
-    --border: 38 20% 80%; /* #D8D1C0 */
+    /* Borders */
+    --border: 38 22% 78%; /* rule #D8D1C0 */
+    --border-soft: 38 24% 85%; /* rule-soft #E5DECB */
 
-    /* Sémantiques + jaune énergique (alertes, compteur DPE) */
-    --accent-blue: 227 57% 50%;
-    --accent-yellow: 45 100% 80%; /* #FFE89C butter */
-    --accent-red: 0 84% 60%;
-    --accent-orange: 38 92% 50%;
-    --accent-green: 158 64% 42%;
+    /* Accent chaud KOVAS */
+    --accent-warm: 32 95% 44%; /* #D97706 amber */
+    --accent-warm-soft: 34 100% 92%; /* #FFEDD5 */
+    --accent-warm-glow: 42 100% 96%; /* #FFF7E8 */
+    --accent-warm-foreground: 0 0% 100%;
+
+    /* Sémantiques */
+    --accent-blue: 217 91% 60%; /* #3B82F6 */
+    --accent-blue-soft: 214 96% 93%;
+    --accent-green: 160 84% 39%; /* #059669 */
+    --accent-green-soft: 152 76% 90%;
+    --accent-red: 0 72% 51%; /* #DC2626 */
+    --accent-red-soft: 0 86% 94%;
+    --accent-orange: 38 92% 50%; /* #F59E0B warning */
+    --accent-orange-soft: 38 100% 92%;
+    --accent-yellow: 45 100% 80%; /* butter semantic */
+
+    /* Pastels catégories (Ron) */
+    --pastel-butter: 45 100% 89%; /* #FFF0C5 */
+    --pastel-lime: 88 38% 89%; /* #E5F0D5 */
+    --pastel-peach: 18 100% 91%; /* #FFE0D5 */
+    --pastel-lavender: 258 52% 92%; /* #E8E0F5 */
+    --pastel-sky: 208 58% 91%; /* #DAE8F5 */
   }
 
   .dark {
+    --background: 222 47% 8%;
     --bg-gradient-from: 222 47% 8%;
     --bg-gradient-to: 220 33% 12%;
-    --background: 222 47% 8%;
+    --paper: 220 26% 14%;
+    --card: 220 26% 16%;
 
-    --card: 220 26% 14%;
-    --card-accent: 227 45% 55%;
+    --cta: 0 0% 100%;
+    --cta-hover: 0 0% 88%;
+    --cta-foreground: 218 60% 15%;
+    --card-accent: 218 45% 24%;
     --card-accent-foreground: 0 0% 100%;
 
-    --cta: 227 70% 62%;
-    --cta-hover: 227 65% 55%;
-    --cta-foreground: 222 47% 8%;
-
     --foreground: 38 20% 96%;
-    --muted: 220 22% 18%;
+    --ink-soft: 38 15% 88%;
     --muted-foreground: 38 12% 68%;
-    --subtle: 220 22% 16%;
     --subtle-foreground: 38 8% 55%;
+    --ink-ghost: 218 12% 42%;
+    --muted: 220 22% 18%;
+    --subtle: 220 22% 16%;
 
     --border: 220 18% 24%;
+    --border-soft: 220 16% 28%;
+
+    --accent-warm: 38 92% 55%;
+    --accent-warm-soft: 32 40% 22%;
+    --accent-warm-glow: 32 30% 18%;
+    --accent-warm-foreground: 218 60% 15%;
 
     --accent-blue: 213 94% 68%;
-    --accent-yellow: 45 90% 65%;
-    --accent-red: 0 91% 71%;
-    --accent-orange: 43 96% 56%;
+    --accent-blue-soft: 217 40% 22%;
     --accent-green: 158 60% 56%;
+    --accent-green-soft: 158 30% 20%;
+    --accent-red: 0 91% 71%;
+    --accent-red-soft: 0 40% 22%;
+    --accent-orange: 43 96% 56%;
+    --accent-orange-soft: 38 40% 22%;
+    --accent-yellow: 45 90% 65%;
+
+    --pastel-butter: 45 30% 22%;
+    --pastel-lime: 88 25% 20%;
+    --pastel-peach: 18 30% 22%;
+    --pastel-lavender: 258 25% 22%;
+    --pastel-sky: 208 30% 22%;
   }
 
   * {
     @apply border-border;
   }
+
   html,
   body {
     min-height: 100dvh;
   }
+
   body {
-    @apply text-foreground antialiased;
+    @apply bg-background text-foreground antialiased;
     background: linear-gradient(
       135deg,
       hsl(var(--bg-gradient-from)) 0%,
       hsl(var(--bg-gradient-to)) 100%
     );
     background-attachment: fixed;
-    font-feature-settings: 'ss01', 'ss02', 'rlig' 1, 'calt' 1;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 }
 
@@ -102,64 +141,31 @@
 }
 
 :focus-visible {
-  outline: 2px solid hsl(var(--cta) / 0.6);
+  outline: 2px solid hsl(var(--cta) / 0.45);
   outline-offset: 2px;
   border-radius: 4px;
 }
+
 :focus:not(:focus-visible) {
   outline: none;
 }
 
 @layer utilities {
-  /* Glass utilities (.glass, .glass-header, .glass-sidebar, .glass-accent)
-   * Décision P6 (2026-05-19) — Option B "Adapter" :
-   * Réservées AUX SURFACES FLOTTANTES uniquement (header sticky, sidebar,
-   * command palette, bottom sheets, app-nav-tabs, calendar sticky header).
-   * Les cards de travail (dashboard, dossier, listes, account) utilisent
-   * le composant Card variant="flat" (défaut) — surface paper opaque,
-   * ombre douce neutre. Cf. components/ui/card.tsx + CLAUDE.md §9.
-   */
-  .glass {
-    @apply bg-card/85 backdrop-blur-xl border;
-    border-color: hsl(var(--cta) / 0.08);
-    box-shadow: 0 8px 24px hsl(var(--foreground) / 0.06), 0 1px 2px hsl(var(--foreground) / 0.04);
-  }
-  .glass-hover {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-  }
-  .glass-hover:hover {
-    box-shadow: 0 12px 32px hsl(var(--foreground) / 0.08), 0 2px 4px hsl(var(--foreground) / 0.04);
-    transform: translateY(-2px);
-  }
-  .glass-accent {
-    background: hsl(var(--card-accent));
-    color: hsl(var(--card-accent-foreground));
-    border-radius: 16px;
-    box-shadow: 0 8px 24px hsl(var(--cta) / 0.15);
-  }
-  .glass-header {
-    @apply bg-card/70 backdrop-blur-xl;
-    border-bottom: 1px solid hsl(var(--border) / 0.6);
-  }
-  .glass-sidebar {
-    @apply bg-card/60 backdrop-blur-xl;
-    border-right: 1px solid hsl(var(--border) / 0.6);
-  }
-  .shadow-badge-blue {
-    box-shadow: 0 2px 8px hsl(var(--accent-blue) / 0.3);
-  }
-  .shadow-badge-red {
-    box-shadow: 0 2px 8px hsl(var(--accent-red) / 0.3);
-  }
-  /** Accent jaune pastel (badges alerte / DPE) */
-  .bg-accent-yellow-soft {
-    background-color: hsl(var(--accent-yellow) / 0.45);
-  }
-  /** Titre éditorial Ron */
   .text-display {
     @apply font-sans font-extrabold tracking-tight;
   }
   .text-display-serif {
     @apply font-serif italic font-normal;
+  }
+
+  /* Surfaces flottantes uniquement (header, sidebar, palettes, toasts) */
+  .glass {
+    @apply bg-paper/85 backdrop-blur-xl border border-border-soft shadow-glass;
+  }
+  .glass-header {
+    @apply bg-paper/85 backdrop-blur-xl border-b border-border-soft;
+  }
+  .glass-sidebar {
+    @apply bg-paper/80 backdrop-blur-xl border-r border-border-soft;
   }
 }

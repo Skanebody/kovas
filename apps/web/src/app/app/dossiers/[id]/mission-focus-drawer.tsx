@@ -112,7 +112,7 @@ export function MissionFocusDrawer({
               {percentage}%
             </Badge>
           </div>
-          <p className="text-[10px] font-mono text-muted-foreground truncate">
+          <p className="text-[10px] font-mono text-ink-mute truncate">
             {mission.reference}
           </p>
         </div>
@@ -129,7 +129,7 @@ export function MissionFocusDrawer({
       {/* Body scrollable */}
       <main className="flex-1 overflow-y-auto px-4 py-4 pb-24 space-y-5">
         {propertyAddress && (
-          <p className="text-xs text-muted-foreground text-center">{propertyAddress}</p>
+          <p className="text-xs text-ink-mute text-center">{propertyAddress}</p>
         )}
 
         <section id="mission-focus-checklist">
@@ -142,21 +142,21 @@ export function MissionFocusDrawer({
         </section>
 
         <section id="mission-focus-rooms" className="space-y-2">
-          <h3 className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+          <h3 className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
             Pièces concernées par cette mission
           </h3>
           {roomsSection}
         </section>
 
         <section id="mission-focus-photos" className="space-y-2">
-          <h3 className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+          <h3 className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
             Photos terrain
           </h3>
           {photoSection}
         </section>
 
         <section id="mission-focus-voice" className="space-y-2">
-          <h3 className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+          <h3 className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
             Notes vocales
           </h3>
           {voiceSection}
@@ -194,7 +194,7 @@ export function MissionFocusDrawer({
         <Button
           onClick={handleFinish}
           disabled={alreadyDone}
-          className={cn(!canFinish && 'bg-muted text-muted-foreground hover:bg-muted')}
+          className={cn(!canFinish && 'bg-muted text-ink-mute hover:bg-muted')}
         >
           <CheckCircle2 className="size-4" />
           {alreadyDone

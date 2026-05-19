@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { MissionTypeTag } from '@/components/ui/mission-type-tag'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
+import type { MissionType } from '@kovas/shared'
 
 export const metadata: Metadata = { title: 'Dossiers' }
 
@@ -46,8 +47,8 @@ export default async function DossiersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Dossiers</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-display text-3xl md:text-4xl tracking-tight">Dossiers</h1>
+          <p className="text-sm text-ink-mute">
             {dossiers?.length ?? 0} dossier{(dossiers?.length ?? 0) > 1 ? 's' : ''}
           </p>
         </div>
@@ -60,9 +61,9 @@ export default async function DossiersPage() {
       </div>
 
       {dossiers && dossiers.length > 0 ? (
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="rounded-xl border border-border-soft bg-paper overflow-hidden shadow-glass-sm">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-muted-foreground">
+            <thead className="bg-cream-deep/80 text-ink-mute">
               <tr>
                 <th className="text-left font-medium px-4 py-3">Référence</th>
                 <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Bien</th>
@@ -90,7 +91,7 @@ export default async function DossiersPage() {
                     <td className="px-4 py-3 hidden md:table-cell">
                       <div className="text-sm">{prop?.address ?? '—'}</div>
                       {prop?.city && (
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-ink-mute">
                           {prop.postal_code} {prop.city}
                         </div>
                       )}
@@ -98,13 +99,10 @@ export default async function DossiersPage() {
                     <td className="px-4 py-3 hidden sm:table-cell">
                       <div className="flex flex-wrap gap-1">
                         {missions.slice(0, 3).map((m, i) => (
-                          <Badge
+                          <MissionTypeTag
                             key={`${d.id}-${m.type}-${i}`}
-                            variant="muted"
-                            className="text-[10px]"
-                          >
-                            {MISSION_TYPE_LABELS[m.type]?.split(' ')[0] ?? m.type}
-                          </Badge>
+                            type={m.type as MissionType}
+                          />
                         ))}
                         {missions.length > 3 && (
                           <Badge variant="outline" className="text-[10px]">
@@ -127,10 +125,10 @@ export default async function DossiersPage() {
       ) : (
         <Card>
           <CardContent className="pt-6 pb-8 text-center space-y-4">
-            <FolderOpen className="size-10 mx-auto text-muted-foreground" />
+            <FolderOpen className="size-10 mx-auto text-ink-mute" />
             <div className="space-y-1">
               <h2 className="font-semibold">Aucun dossier pour le moment</h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ink-mute">
                 Un dossier regroupe les diagnostics d'une même visite (DPE + Amiante + Plomb…) sur
                 un bien.
               </p>

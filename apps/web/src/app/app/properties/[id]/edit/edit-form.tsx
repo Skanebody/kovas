@@ -96,7 +96,7 @@ export function EditPropertyForm({ property, clients }: EditPropertyFormProps) {
       </FormField>
 
       {showCollectiveFields && (
-        <div className="rounded-xl border border-border bg-card/50 p-4 space-y-4">
+        <div className="rounded-xl border border-border bg-paper/50 p-4 space-y-4">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Building2 className="size-4" /> Détails appartement / lot
           </div>

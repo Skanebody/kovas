@@ -47,14 +47,14 @@ export function UserMenu({ displayName, email, onLogout }: UserMenuProps) {
           )}
         >
           <Avatar name={displayName} size="sm" />
-          <ChevronDown className="size-3 text-muted-foreground" aria-hidden />
+          <ChevronDown className="size-3 text-ink-mute" aria-hidden />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-56">
         <DropdownMenuLabel className="flex flex-col gap-0.5">
           <span className="text-sm font-semibold truncate">{displayName}</span>
           {email && email !== displayName && (
-            <span className="text-xs text-muted-foreground truncate font-normal">{email}</span>
+            <span className="text-xs text-ink-mute truncate font-normal">{email}</span>
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

@@ -76,7 +76,7 @@ export function Donut({
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-bold tracking-tight tabular-nums">{value}</span>
         {label && (
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">
+          <span className="text-[10px] uppercase tracking-wider text-ink-mute mt-0.5">
             {label}
           </span>
         )}

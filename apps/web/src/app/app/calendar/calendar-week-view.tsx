@@ -128,17 +128,17 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
               <div
                 key={day.toISOString()}
                 className={cn(
-                  'rounded-lg border border-cta/[0.08] bg-card/50 flex flex-col min-h-[400px]',
+                  'rounded-lg border border-border-soft bg-paper/50 flex flex-col min-h-[400px]',
                   isToday && 'ring-2 ring-cta/30 bg-cta/[0.03]',
                 )}
               >
                 <div
                   className={cn(
-                    'px-3 py-2 border-b border-cta/[0.06] text-center sticky top-0 bg-card/80 backdrop-blur-md',
+                    'px-3 py-2 border-b border-border-soft text-center sticky top-0 bg-paper/80 backdrop-blur-md',
                     isToday && 'bg-cta/[0.06]',
                   )}
                 >
-                  <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
                     {DAY_NAMES[idx]}
                   </div>
                   <div
@@ -152,7 +152,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
                 </div>
                 <div className="flex-1 p-1.5 space-y-1.5">
                   {dayEvents.length === 0 ? (
-                    <p className="text-[11px] text-muted-foreground/60 text-center pt-3 italic">
+                    <p className="text-[11px] text-ink-mute/60 text-center pt-3 italic">
                       —
                     </p>
                   ) : (
@@ -172,7 +172,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
                           key={ev.dossierId}
                           href={`/app/dossiers/${ev.dossierId}`}
                           className={cn(
-                            'block rounded-md p-2 text-[11px] hover:shadow-md transition-shadow',
+                            'block rounded-md p-2 text-[11px] hover:shadow-glass transition-shadow',
                             'bg-cta/[0.08] border-l-2 border-cta hover:bg-cta/[0.12]',
                           )}
                         >
@@ -180,7 +180,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
                           <div className="font-medium truncate mt-0.5">
                             {ev.clientName ?? 'Sans client'}
                           </div>
-                          <div className="text-muted-foreground truncate mt-0.5">
+                          <div className="text-ink-mute truncate mt-0.5">
                             {typeShort}
                             {ev.city && ` · ${ev.city}`}
                           </div>
@@ -196,7 +196,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground flex-wrap gap-2">
+      <div className="flex items-center justify-between text-xs text-ink-mute flex-wrap gap-2">
         <span>{events.length} RDV planifiés</span>
         <span className="flex items-center gap-2">
           <span className="inline-block size-2 rounded-full bg-cta" /> RDV KOVAS

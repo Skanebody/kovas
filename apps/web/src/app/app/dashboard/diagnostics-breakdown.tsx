@@ -1,25 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
-
-/**
- * Couleurs par type diagnostic (cf. spec dashboard cockpit).
- * Stockées en HSL custom : on les pose en inline style pour éviter
- * d'ajouter des tokens supplémentaires juste pour ce bloc.
- */
-const TYPE_COLORS: Record<string, string> = {
-  dpe_vente: '#3B82F6',
-  dpe_location: '#3B82F6',
-  copropriete: '#3B82F6',
-  amiante_vente: '#EF4444',
-  amiante_avant_travaux: '#EF4444',
-  plomb_crep: '#F59E0B',
-  gaz: '#10B981',
-  electricite: '#8B5CF6',
-  termites: '#EC4899',
-  carrez_boutin: '#14B8A6',
-  erp: '#6366F1',
-}
+import { MISSION_PASTEL_CLASS } from '@/lib/mission-pastels'
+import type { MissionType } from '@kovas/shared'
+import { cn } from '@/lib/utils'
 
 function monthBoundsParis(): { startIso: string; nextIso: string } {
   const now = new Date()
@@ -60,7 +44,7 @@ export async function DiagnosticsBreakdown() {
       label: MISSION_TYPE_LABELS[type] ?? type,
       count,
       pct: total > 0 ? Math.round((count / total) * 100) : 0,
-      color: TYPE_COLORS[type] ?? '#6B7280',
+      barClass: MISSION_PASTEL_CLASS[type as MissionType] ?? 'bg-muted',
     }))
     .sort((a, b) => b.count - a.count)
 
@@ -69,13 +53,13 @@ export async function DiagnosticsBreakdown() {
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
-        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground capitalize">
+        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute capitalize">
           Répartition diagnostics · {monthLabel}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 flex-1">
         {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-6 text-center">
+          <p className="text-sm text-ink-mute py-6 text-center">
             Pas encore de mission ce mois.
           </p>
         ) : (
@@ -84,14 +68,14 @@ export async function DiagnosticsBreakdown() {
               <li key={r.type} className="space-y-1">
                 <div className="flex items-center justify-between gap-2 text-xs">
                   <span className="font-medium truncate">{r.label}</span>
-                  <span className="tabular-nums text-muted-foreground shrink-0">
+                  <span className="tabular-nums text-ink-mute shrink-0">
                     {r.count} · {r.pct}%
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                <div className="h-1.5 rounded-full bg-cream-deep overflow-hidden">
                   <div
-                    className="h-full transition-all"
-                    style={{ width: `${r.pct}%`, background: r.color }}
+                    className={cn('h-full transition-all', r.barClass)}
+                    style={{ width: `${r.pct}%` }}
                   />
                 </div>
               </li>

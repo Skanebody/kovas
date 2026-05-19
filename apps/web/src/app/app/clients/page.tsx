@@ -31,8 +31,8 @@ export default async function ClientsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Clients</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-display text-3xl md:text-4xl tracking-tight">Clients</h1>
+          <p className="text-sm text-ink-mute">
             {clients?.length ?? 0} client{(clients?.length ?? 0) > 1 ? 's' : ''}
           </p>
         </div>
@@ -45,9 +45,9 @@ export default async function ClientsPage() {
       </div>
 
       {clients && clients.length > 0 ? (
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="rounded-xl border border-border-soft bg-paper overflow-hidden shadow-glass-sm">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-muted-foreground">
+            <thead className="bg-cream-deep/80 text-ink-mute">
               <tr>
                 <th className="text-left font-medium px-4 py-3">Nom</th>
                 <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Type</th>
@@ -65,7 +65,7 @@ export default async function ClientsPage() {
                   <td className="px-4 py-3 hidden sm:table-cell">
                     <Badge variant="muted">{TYPE_LABELS[c.type] ?? c.type}</Badge>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                  <td className="px-4 py-3 text-ink-mute hidden md:table-cell">
                     {c.email ?? c.phone ?? '—'}
                   </td>
                 </tr>
@@ -76,10 +76,10 @@ export default async function ClientsPage() {
       ) : (
         <Card>
           <CardContent className="pt-6 pb-8 text-center space-y-4">
-            <Users className="size-10 mx-auto text-muted-foreground" />
+            <Users className="size-10 mx-auto text-ink-mute" />
             <div className="space-y-1">
               <h2 className="font-semibold">Aucun client pour le moment</h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ink-mute">
                 Créez votre premier client pour pouvoir lancer une mission.
               </p>
             </div>

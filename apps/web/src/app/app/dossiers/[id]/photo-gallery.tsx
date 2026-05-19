@@ -81,7 +81,7 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
 
   if (photos.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-ink-mute">
         Aucune photo. Utilisez le bouton "Prendre photo(s)" ci-dessus.
       </p>
     )

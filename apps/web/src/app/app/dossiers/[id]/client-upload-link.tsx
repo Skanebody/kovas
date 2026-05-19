@@ -45,7 +45,7 @@ export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLi
   if (!token) {
     return (
       <div className="rounded-lg bg-muted/40 p-4 space-y-3">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-ink-mute">
           Aucun lien d'upload actif. Générez-en un pour permettre au client d'envoyer factures
           énergie, plans, anciens DPE…
         </p>
@@ -60,7 +60,7 @@ export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLi
   return (
     <div className="rounded-lg bg-muted/40 p-4 space-y-3">
       <div className="flex items-center gap-2">
-        <Link2 className="size-4 text-muted-foreground" />
+        <Link2 className="size-4 text-ink-mute" />
         <span className="text-sm font-semibold">Lien d'upload client</span>
         {expired ? (
           <Badge variant="red">Expiré</Badge>
@@ -71,7 +71,7 @@ export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLi
         )}
       </div>
       <div className="flex items-center gap-2">
-        <code className="flex-1 truncate rounded-md bg-card border border-border px-3 py-2 text-xs font-mono">
+        <code className="flex-1 truncate rounded-md bg-paper border border-border px-3 py-2 text-xs font-mono">
           {fullUrl ?? `/upload/${token}`}
         </code>
         <Button size="icon" variant="outline" onClick={copyUrl} aria-label="Copier le lien">
@@ -82,7 +82,7 @@ export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLi
         <Button size="sm" variant="ghost" onClick={revoke} disabled={isPending}>
           <X className="size-4" /> Révoquer
         </Button>
-        <p className="text-xs text-subtle-foreground">
+        <p className="text-xs text-ink-faint">
           Envoyez ce lien par email ou SMS à votre client.
         </p>
       </div>

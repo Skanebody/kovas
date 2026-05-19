@@ -129,7 +129,7 @@ export function AddressAutocomplete({
         autoComplete="off"
       />
       {loading && (
-        <Loader2 className="size-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Loader2 className="size-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-ink-mute" />
       )}
 
       {/* Hidden fields to submit structured meta alongside the label */}
@@ -148,7 +148,7 @@ export function AddressAutocomplete({
         <ul
           id={listId}
           className={cn(
-            'absolute z-50 mt-1 w-full rounded-md border border-border bg-card shadow-md',
+            'absolute z-50 mt-1 w-full rounded-md border border-border bg-paper shadow-glass-sm',
             'max-h-72 overflow-auto p-1',
           )}
           role="listbox"
@@ -160,7 +160,7 @@ export function AddressAutocomplete({
                 onClick={() => handleSelect(f)}
                 className="w-full text-left rounded-sm px-3 py-2 text-sm hover:bg-muted flex items-start gap-2"
               >
-                <MapPin className="size-4 mt-0.5 text-muted-foreground shrink-0" />
+                <MapPin className="size-4 mt-0.5 text-ink-mute shrink-0" />
                 <span>{f.label}</span>
               </button>
             </li>

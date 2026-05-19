@@ -16,8 +16,8 @@ export default function NewClientPage() {
       </Button>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Nouveau client</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-display text-2xl md:text-3xl tracking-tight">Nouveau client</h1>
+        <p className="text-sm text-ink-mute">
           Renseignez le nom du donneur d'ordre — un particulier, une agence, un notaire…
         </p>
       </div>

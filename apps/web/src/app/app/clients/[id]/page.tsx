@@ -50,7 +50,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">{client.display_name}</h1>
+          <h1 className="text-display text-2xl md:text-3xl tracking-tight">{client.display_name}</h1>
           <Badge variant="muted">{TYPE_LABELS[client.type] ?? client.type}</Badge>
         </div>
         <Button variant="outline" asChild>
@@ -68,19 +68,19 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           <CardContent className="space-y-2 text-sm">
             {personName ? (
               <p>
-                <span className="text-muted-foreground">Contact : </span>
+                <span className="text-ink-mute">Contact : </span>
                 {personName}
               </p>
             ) : null}
             {client.company_name ? (
               <p className="flex items-center gap-2">
-                <Building2 className="size-4 text-muted-foreground shrink-0" />
+                <Building2 className="size-4 text-ink-mute shrink-0" />
                 {client.company_name}
               </p>
             ) : null}
             {business && client.siret ? (
               <p>
-                <span className="text-muted-foreground">SIRET : </span>
+                <span className="text-ink-mute">SIRET : </span>
                 {client.siret}
               </p>
             ) : null}
@@ -95,7 +95,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         <CardContent className="space-y-3 text-sm">
           {client.email ? (
             <div className="flex items-center gap-2">
-              <Mail className="size-4 text-muted-foreground shrink-0" />
+              <Mail className="size-4 text-ink-mute shrink-0" />
               <a href={`mailto:${client.email}`} className="hover:underline">
                 {client.email}
               </a>
@@ -103,14 +103,14 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           ) : null}
           {client.phone ? (
             <div className="flex items-center gap-2">
-              <Phone className="size-4 text-muted-foreground shrink-0" />
+              <Phone className="size-4 text-ink-mute shrink-0" />
               <a href={`tel:${client.phone}`} className="hover:underline">
                 {client.phone}
               </a>
             </div>
           ) : null}
           {!client.email && !client.phone && (
-            <p className="text-muted-foreground">Aucun email ni téléphone renseigné</p>
+            <p className="text-ink-mute">Aucun email ni téléphone renseigné</p>
           )}
         </CardContent>
       </Card>
@@ -122,7 +122,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           </CardHeader>
           <CardContent className="text-sm">
             <div className="flex items-start gap-2">
-              <MapPin className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+              <MapPin className="size-4 text-ink-mute shrink-0 mt-0.5" />
               <div className="space-y-0.5">
                 {addressLines.map((line) => (
                   <p key={line}>{line}</p>

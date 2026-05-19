@@ -22,11 +22,11 @@ export default function AppError({
         <CardContent className="pt-6 space-y-4 text-center">
           <AlertTriangle className="size-10 mx-auto text-accent-red" />
           <h1 className="text-xl font-semibold">Une erreur est survenue</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-ink-mute">
             {error.message || 'Erreur inconnue. Réessayez ou contactez le support.'}
           </p>
           {error.digest && (
-            <p className="text-xs font-mono text-subtle-foreground">Réf. {error.digest}</p>
+            <p className="text-xs font-mono text-ink-faint">Réf. {error.digest}</p>
           )}
           <Button onClick={reset}>
             <RefreshCw className="size-4" /> Réessayer

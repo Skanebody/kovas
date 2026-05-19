@@ -41,7 +41,7 @@ export function DangerZone({ onDelete, entityLabel, confirmWord = 'supprimer' }:
       <CardContent className="space-y-3">
         {!open ? (
           <>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-mute">
               La suppression de ce {entityLabel} le rend invisible (soft-delete). Les données
               restent en base 30 jours puis sont purgées.
             </p>
@@ -63,7 +63,7 @@ export function DangerZone({ onDelete, entityLabel, confirmWord = 'supprimer' }:
               type="text"
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-border bg-card px-3 text-sm"
+              className="flex h-9 w-full rounded-md border border-border bg-paper px-3 text-sm"
               placeholder={confirmWord}
             />
             {error && <p className="text-sm text-accent-red">{error}</p>}

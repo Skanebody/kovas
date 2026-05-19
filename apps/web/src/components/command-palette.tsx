@@ -212,24 +212,24 @@ export function CommandPalette() {
     >
       <Command
         label="Command palette"
-        className="w-full max-w-xl rounded-xl border border-cta/10 bg-card/95 backdrop-blur-xl shadow-glass-hover overflow-hidden"
+        className="w-full max-w-xl rounded-xl border border-border-soft bg-paper/95 backdrop-blur-xl shadow-glass-hover overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         loop
       >
-        <div className="flex items-center gap-2 border-b border-cta/[0.08] px-4">
-          <Search className="size-4 text-muted-foreground shrink-0" />
+        <div className="flex items-center gap-2 border-b border-border-soft px-4">
+          <Search className="size-4 text-ink-mute shrink-0" />
           <Command.Input
             value={search}
             onValueChange={setSearch}
             placeholder="Chercher dossiers, clients, biens, actions…"
-            className="flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-ink-mute"
           />
-          <kbd className="text-[10px] text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
+          <kbd className="text-[10px] text-ink-mute bg-muted/50 rounded px-1.5 py-0.5">
             ESC
           </kbd>
         </div>
         <Command.List className="max-h-[60vh] overflow-y-auto p-2">
-          <Command.Empty className="py-8 text-center text-sm text-muted-foreground">
+          <Command.Empty className="py-8 text-center text-sm text-ink-mute">
             Aucun résultat
           </Command.Empty>
 
@@ -335,7 +335,7 @@ export function CommandPalette() {
           </CommandGroup>
         </Command.List>
 
-        <div className="flex items-center justify-between gap-3 border-t border-cta/[0.08] px-4 py-2 text-[10px] text-muted-foreground">
+        <div className="flex items-center justify-between gap-3 border-t border-border-soft px-4 py-2 text-[10px] text-ink-mute">
           <span>
             <kbd className="bg-muted/50 rounded px-1.5 py-0.5">↑↓</kbd> naviguer ·{' '}
             <kbd className="bg-muted/50 rounded px-1.5 py-0.5">↵</kbd> ouvrir
@@ -354,7 +354,7 @@ function CommandGroup({ heading, children }: { heading: string; children: React.
   return (
     <Command.Group
       heading={heading}
-      className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2"
+      className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2"
     >
       {children}
     </Command.Group>
@@ -386,11 +386,11 @@ function CommandRow({
         'aria-disabled:opacity-50 aria-disabled:cursor-not-allowed',
       )}
     >
-      <span className="text-muted-foreground shrink-0">{icon}</span>
+      <span className="text-ink-mute shrink-0">{icon}</span>
       <span className="flex-1 min-w-0">
         <span className="truncate block">{label}</span>
         {subtitle && (
-          <span className="text-[11px] text-muted-foreground truncate block">{subtitle}</span>
+          <span className="text-[11px] text-ink-mute truncate block">{subtitle}</span>
         )}
       </span>
       {shortcut && (

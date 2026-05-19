@@ -239,8 +239,8 @@ export default async function DossierDetailPage({
       {/* Header compact */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1 min-w-0 flex-1">
-          <p className="text-xs font-mono text-muted-foreground">{dossier.reference}</p>
-          <h1 className="text-2xl font-bold tracking-tight">Dossier de visite</h1>
+          <p className="text-xs font-mono text-ink-mute">{dossier.reference}</p>
+          <h1 className="text-display text-2xl md:text-3xl tracking-tight">Dossier de visite</h1>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant={DOSSIER_STATUS_VARIANT[dossier.status] ?? 'muted'}>
@@ -265,7 +265,7 @@ export default async function DossierDetailPage({
       {/* Détails compactés — 1 à 2 lignes */}
       <Card className="p-4">
         <div className="flex items-center gap-3 flex-wrap">
-          <MapPin className="size-4 text-muted-foreground shrink-0" />
+          <MapPin className="size-4 text-ink-mute shrink-0" />
           {prop ? (
             <Link
               href={`/app/properties/${dossier.property_id}`}
@@ -274,13 +274,13 @@ export default async function DossierDetailPage({
               {fullAddress || 'Bien sans adresse'}
             </Link>
           ) : (
-            <span className="text-sm text-muted-foreground flex-1">Aucun bien rattaché</span>
+            <span className="text-sm text-ink-mute flex-1">Aucun bien rattaché</span>
           )}
           {prop?.year_built && (
-            <span className="text-xs text-muted-foreground">{prop.year_built}</span>
+            <span className="text-xs text-ink-mute">{prop.year_built}</span>
           )}
           {prop?.surface_total && (
-            <span className="text-xs text-muted-foreground">· {prop.surface_total} m²</span>
+            <span className="text-xs text-ink-mute">· {prop.surface_total} m²</span>
           )}
           <DossierInfoEdit
             dossierId={dossier.id}
@@ -291,7 +291,7 @@ export default async function DossierDetailPage({
           />
         </div>
         {(client || dossier.scheduled_at) && (
-          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
+          <div className="flex items-center gap-4 mt-2 text-xs text-ink-mute flex-wrap">
             {client && dossier.client_id && (
               <Link
                 href={`/app/clients/${dossier.client_id}`}
@@ -459,7 +459,7 @@ export default async function DossierDetailPage({
               ? `Pièces (${rooms?.length ?? 0})`
               : `Diagnostics (${missionsList.length})`}
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-ink-mute">
             {viewPreference === 'rooms'
               ? 'Vue terrain : pour chaque pièce, les tâches de tous les diagnostics applicables.'
               : 'Vue bureau : pour chaque diagnostic, sa check-list de complétude et son export.'}

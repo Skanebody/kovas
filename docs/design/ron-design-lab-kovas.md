@@ -1,12 +1,12 @@
 # Ron Design Lab → KOVAS — Synthèse design (19.05.2026)
 
-> Analyse complète (HTML interactif) : voir `ron-design-lab-analyse-kovas.html` dans ce dossier.  
+> Design system interactif (tokens + composants + écrans) : `kovas-design-system-v2.html` dans ce dossier.  
 > Sources : rondesignlab.com, cases Tectra · Lumos · Tenancy.
 
 ## TL;DR
 
 - **Ne pas** appliquer le registre *marketing* Ron (typo 120px, avatars inline, multi-pastels, emojis partout) dans l’**app métier** (8 h/jour, terrain + bureau).
-- **Reprendre** le registre *produit* Ron : **light mode** dominant, **Outfit** + **Instrument Serif** en italique sur les mots-clés, **pills** full-rounded, **KPIs hero** en gros chiffres, ombres **douces** (pas de glow violet).
+- **Reprendre** le registre *produit* Ron : **light mode** dominant, **Manrope** + **Instrument Serif** en italique sur les mots-clés, **pills** full-rounded, **KPIs hero** en gros chiffres, ombres **douces** (pas de glow violet).
 - **Écarter** : dark cinematic, `#7C6FFF`, glows colorés systématiques.
 
 ## Deux registres Ron
@@ -26,7 +26,7 @@
 | Pattern | Verdict |
 |---------|---------|
 | Light + 1 accent chaud | **Keep** |
-| Outfit + Instrument Serif italic (KPIs, titres) | **Keep** |
+| Manrope + Instrument Serif italic (KPIs, titres) | **Keep** |
 | Pill buttons (CTA, badges, statuts) | **Keep** |
 | KPIs hero dramatisés (cockpit) | **Keep** |
 | Ombres douces (y 8–24, blur 30–60, ~6–12% opacité) | **Keep** |
@@ -55,6 +55,5 @@
 - Polices **Outfit** + **Instrument Serif** : `apps/web/src/app/layout.tsx` (`defaultTheme="light"`)
 - Cockpit KPI hero : `apps/web/src/app/app/dashboard/cockpit-hero.tsx` + `components/ui/kpi-hero.tsx`
 - Dashboard hero : `apps/web/src/app/app/dashboard/page.tsx`
-- **Card `flat` par défaut** (P6, 2026-05-19) : `components/ui/card.tsx` — surface paper opaque + border + ombre douce neutre. Glass `bg-card/85 backdrop-blur-xl` désormais **opt-in** via `variant="glass"` et réservé aux surfaces flottantes (header, sidebar, command palette, bottom sheets).
 
 **Reste** : landing marketing `page.tsx` (noir → crème éditorial), compteur DPE jaune (F7).

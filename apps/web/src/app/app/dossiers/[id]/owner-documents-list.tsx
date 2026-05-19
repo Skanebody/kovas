@@ -132,7 +132,7 @@ export function OwnerDocumentsList({ dossierId, documents }: OwnerDocumentsListP
 
   if (documents.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-ink-mute">
         Aucun document envoyé par le client pour le moment.
       </p>
     )
@@ -147,9 +147,9 @@ export function OwnerDocumentsList({ dossierId, documents }: OwnerDocumentsListP
         const status = d.extraction_status ?? 'pending'
 
         return (
-          <li key={d.id} className="rounded-md border border-border bg-card p-3 space-y-3">
+          <li key={d.id} className="rounded-md border border-border bg-paper p-3 space-y-3">
             <div className="flex items-center gap-3">
-              <FileText className="size-5 text-muted-foreground shrink-0" />
+              <FileText className="size-5 text-ink-mute shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium truncate">
@@ -165,7 +165,7 @@ export function OwnerDocumentsList({ dossierId, documents }: OwnerDocumentsListP
                   )}
                   {status === 'failed' && <Badge variant="red">Échec analyse</Badge>}
                 </div>
-                <div className="text-xs text-muted-foreground mt-0.5">
+                <div className="text-xs text-ink-mute mt-0.5">
                   {sizeKB ? `${sizeKB} Ko · ` : ''}
                   {d.uploaded_at ? new Date(d.uploaded_at).toLocaleString('fr-FR') : ''}
                 </div>
@@ -193,7 +193,7 @@ export function OwnerDocumentsList({ dossierId, documents }: OwnerDocumentsListP
                 {d.reviewed_by_diag ? (
                   <CheckCircle className="size-4 text-accent-green" />
                 ) : (
-                  <Circle className="size-4 text-muted-foreground" />
+                  <Circle className="size-4 text-ink-mute" />
                 )}
               </Button>
               {url && (
@@ -209,7 +209,7 @@ export function OwnerDocumentsList({ dossierId, documents }: OwnerDocumentsListP
                 onClick={() => handleDelete(d.id, d.storage_path)}
                 aria-label="Supprimer"
               >
-                <Trash2 className="size-4 text-muted-foreground" />
+                <Trash2 className="size-4 text-ink-mute" />
               </Button>
             </div>
 
@@ -295,13 +295,13 @@ function ExtractedPanel({
           )}
         </div>
         {extracted.summary && (
-          <p className="text-muted-foreground italic">"{extracted.summary}"</p>
+          <p className="text-ink-mute italic">"{extracted.summary}"</p>
         )}
       </div>
 
       {usableSuggestions.length > 0 ? (
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-ink-mute">
             Cochez les valeurs à importer dans le dossier (n'écrase pas les champs déjà remplis) :
           </p>
           <ul className="space-y-1">
@@ -309,7 +309,7 @@ function ExtractedPanel({
               <li key={sug.target}>
                 <label
                   className={cn(
-                    'flex items-center gap-2 rounded px-2 py-1.5 hover:bg-card cursor-pointer text-xs',
+                    'flex items-center gap-2 rounded px-2 py-1.5 hover:bg-paper cursor-pointer text-xs',
                     !selected.has(sug.target) && 'opacity-60',
                   )}
                 >
@@ -321,7 +321,7 @@ function ExtractedPanel({
                   />
                   <span className="font-medium">{sug.label} :</span>
                   <span className="font-mono">{String(sug.value)}</span>
-                  <span className="ml-auto text-muted-foreground font-mono text-[10px]">
+                  <span className="ml-auto text-ink-mute font-mono text-[10px]">
                     → {sug.target}
                   </span>
                 </label>
@@ -345,17 +345,17 @@ function ExtractedPanel({
           {error && <p className="text-xs text-accent-red">{error}</p>}
         </div>
       ) : (
-        <p className="text-xs text-muted-foreground italic">
+        <p className="text-xs text-ink-mute italic">
           Aucune valeur importable directement — voir le résumé ci-dessus.
         </p>
       )}
 
       {Object.keys(extracted.raw_fields ?? {}).length > 0 && (
-        <details className="text-xs text-muted-foreground">
+        <details className="text-xs text-ink-mute">
           <summary className="cursor-pointer hover:text-foreground">
             Voir les données brutes ({Object.keys(extracted.raw_fields).length} champs)
           </summary>
-          <pre className="mt-2 p-2 rounded bg-card overflow-auto text-[10px]">
+          <pre className="mt-2 p-2 rounded bg-paper overflow-auto text-[10px]">
             {JSON.stringify(extracted.raw_fields, null, 2)}
           </pre>
         </details>

@@ -45,8 +45,8 @@ export default async function EditPropertyPage({
       </Button>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Modifier le bien</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-display text-2xl md:text-3xl tracking-tight">Modifier le bien</h1>
+        <p className="text-sm text-ink-mute">
           {property.address}
           {property.city ? `, ${property.city}` : ''}
         </p>

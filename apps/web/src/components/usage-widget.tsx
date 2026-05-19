@@ -36,7 +36,7 @@ export async function UsageWidget() {
     return (
       <Link
         href="/app/account"
-        className="hidden md:inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
+        className="hidden md:inline-flex items-center gap-1.5 text-xs text-ink-mute hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
       >
         <CreditCard className="size-3.5" />
         <span>
@@ -54,8 +54,8 @@ export async function UsageWidget() {
       href="/app/account"
       className="hidden md:inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md hover:bg-muted transition-colors"
     >
-      <CreditCard className="size-3.5 text-muted-foreground" />
-      <span className={cn(ratio > 1 ? 'text-accent-orange font-medium' : 'text-muted-foreground')}>
+      <CreditCard className="size-3.5 text-ink-mute" />
+      <span className={cn(ratio > 1 ? 'text-accent-orange font-medium' : 'text-ink-mute')}>
         {count}/{included} missions
       </span>
       {overage > 0 && (

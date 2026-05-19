@@ -203,7 +203,7 @@ export function VoiceRecorder({ dossierId, orgId, rooms }: VoiceRecorderProps) {
         </p>
       )}
 
-      <p className="text-xs text-subtle-foreground">
+      <p className="text-xs text-ink-faint">
         Décrivez la pièce à voix haute. KOVAS transcrit + structure automatiquement.
       </p>
     </div>

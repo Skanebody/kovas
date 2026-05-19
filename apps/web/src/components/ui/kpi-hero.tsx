@@ -19,7 +19,7 @@ export function KpiHero({ value, label, hint, trend, className, featured }: KpiH
   return (
     <div
       className={cn(
-        'rounded-2xl border border-border bg-card/90 p-5 shadow-glass',
+        'rounded-2xl border border-border-soft bg-paper p-5 shadow-glass-sm',
         featured && 'md:col-span-2 md:row-span-2 md:p-8',
         className,
       )}
@@ -35,7 +35,7 @@ export function KpiHero({ value, label, hint, trend, className, featured }: KpiH
       <p className={cn('mt-3 font-semibold text-foreground', featured ? 'text-lg' : 'text-sm')}>
         {label}
       </p>
-      {hint ? <p className="mt-1 text-sm text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-sm text-ink-mute">{hint}</p> : null}
       {trend !== null && trend !== undefined ? (
         <p
           className={cn(

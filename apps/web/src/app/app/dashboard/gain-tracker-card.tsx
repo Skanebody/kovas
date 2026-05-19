@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { cn } from '@/lib/utils'
-import { ArrowRight, Clock, Target, TrendingUp } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 /**
  * Bornes du mois courant en timezone Paris.
@@ -22,13 +22,17 @@ function monthBoundsParis(): { startIso: string; nextIso: string } {
   return { startIso: start.toISOString(), nextIso: next.toISOString() }
 }
 
-const MONTHLY_TARGET = 30
 const MINUTES_SAVED_PER_MISSION = 90 // CLAUDE.md §2 : 1h30 par DPE typique
+const EUROS_PER_HOUR_PRODUCTIVITY = 50 // hypothèse productivité libérée
 
 /**
- * Gain Tracker — SHELL V1 (CLAUDE.md §21bis prévoit V1.5 sprints 15-17).
- * Estimation basée sur le nombre de missions terminées × 1h30 par mission
- * (promesse mesurable CLAUDE.md §2). Pas de tracking détaillé jusqu'à V1.5.
+ * Gain Tracker — Design System v2 (2026-05-19).
+ * Card pleine navy avec glow ambre subtle en background, chiffre hero
+ * Instrument Serif italic 120px, microcopy productivité euros.
+ * CTA glass discret bottom-right vers /app/gain (drill-down V1.5).
+ *
+ * Estimation basée sur missions terminées × 1h30 (CLAUDE.md §2).
+ * Tracking détaillé V1.5.
  */
 export async function GainTrackerCard() {
   const { supabase, orgId } = await getCurrentUser()
@@ -47,85 +51,66 @@ export async function GainTrackerCard() {
   const totalMinutesSaved = count * MINUTES_SAVED_PER_MISSION
   const hoursSaved = Math.floor(totalMinutesSaved / 60)
   const remainderMinutes = totalMinutesSaved % 60
-  const targetPct = Math.min(Math.round((count / MONTHLY_TARGET) * 100), 100)
-
-  const monthLabel = new Date().toLocaleDateString('fr-FR', {
-    month: 'long',
-    year: 'numeric',
-  })
+  const eurosProductivity = Math.round((totalMinutesSaved / 60) * EUROS_PER_HOUR_PRODUCTIVITY)
+  const yearlyProjection = Math.round((hoursSaved + remainderMinutes / 60) * 12)
 
   return (
-    <Card variant="accent" className="p-6 space-y-4 h-full flex flex-col">
-      <div>
-        <p className="text-[10px] uppercase tracking-wider font-semibold opacity-70">
-          Votre gain ce mois
+    <Card
+      variant="accent"
+      className="relative overflow-hidden p-8 md:p-10 h-full flex flex-col justify-between"
+    >
+      {/* Glow ambre radial en background (signature v2) */}
+      <div
+        aria-hidden
+        className="absolute -top-20 -right-20 size-72 rounded-full pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(circle, hsl(var(--accent-warm) / 0.18) 0%, transparent 70%)',
+        }}
+      />
+
+      <div className="relative">
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-card-accent-foreground/65 mb-4">
+          Vous avez gagné ce mois
         </p>
-        <p className="text-xs opacity-50 capitalize">{monthLabel}</p>
-      </div>
 
-      <div className="space-y-3 flex-1">
-        <Metric
-          icon={Clock}
-          value={count > 0 ? `${hoursSaved}h ${String(remainderMinutes).padStart(2, '0')}min` : '—'}
-          label="Temps économisé estimé"
-        />
-        <div className="h-px bg-card-accent-foreground/15" />
-        <Metric
-          icon={TrendingUp}
-          value={`${count}`}
-          label={`mission${count > 1 ? 's' : ''} terminée${count > 1 ? 's' : ''}`}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <span className="flex items-center gap-1.5">
-            <Target className="size-3.5" /> Objectif {MONTHLY_TARGET}
-          </span>
-          <span className="tabular-nums">{targetPct}%</span>
-        </div>
-        <div className="h-1.5 rounded-full bg-card-accent-foreground/15 overflow-hidden">
-          <div
-            className="h-full bg-card-accent-foreground transition-all"
-            style={{ width: `${targetPct}%` }}
-          />
-        </div>
-      </div>
-
-      <p className="text-[10px] opacity-60 leading-tight">
-        Estimation 1h30/mission (CLAUDE.md §2). Tracking détaillé V1.5.
-      </p>
-
-      <button
-        type="button"
-        className={cn(
-          'flex items-center justify-between text-xs font-medium',
-          'border-t border-card-accent-foreground/15 pt-3',
-          'hover:opacity-80 transition-opacity',
+        {count > 0 ? (
+          <p className="font-serif italic font-normal text-card-accent-foreground leading-[0.9] tracking-tight text-7xl md:text-8xl mb-4">
+            {hoursSaved}h {String(remainderMinutes).padStart(2, '0')}
+          </p>
+        ) : (
+          <p className="font-serif italic font-normal text-card-accent-foreground/40 leading-[0.9] tracking-tight text-6xl md:text-7xl mb-4">
+            —
+          </p>
         )}
-      >
-        Voir mon activité <ArrowRight className="size-3.5" />
-      </button>
-    </Card>
-  )
-}
 
-function Metric({
-  icon: Icon,
-  value,
-  label,
-}: {
-  icon: React.ComponentType<{ className?: string }>
-  value: string
-  label: string
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <Icon className="size-5 opacity-70" />
-      <div>
-        <div className="text-xl font-bold tracking-tight tabular-nums">{value}</div>
-        <div className="text-[11px] opacity-70">{label}</div>
+        {count > 0 ? (
+          <p className="text-base text-card-accent-foreground/80 max-w-sm">
+            Soit{' '}
+            <span className="font-semibold text-card-accent-foreground">
+              {eurosProductivity.toLocaleString('fr-FR')}€
+            </span>{' '}
+            de productivité libérée sur{' '}
+            <span className="font-semibold text-card-accent-foreground">{count}</span> mission
+            {count > 1 ? 's' : ''}. À ce rythme,{' '}
+            <span className="font-semibold text-card-accent-foreground">
+              {yearlyProjection}h
+            </span>{' '}
+            sur l&apos;année.
+          </p>
+        ) : (
+          <p className="text-base text-card-accent-foreground/70 max-w-sm">
+            Terminez votre première mission ce mois pour voir votre gain de temps cumulé.
+          </p>
+        )}
       </div>
-    </div>
+
+      <Link
+        href="/app/gain"
+        className="relative inline-flex items-center gap-2 self-start rounded-pill border border-card-accent-foreground/20 bg-card-accent-foreground/10 backdrop-blur-md px-4 py-2 text-sm font-semibold text-card-accent-foreground transition-all hover:bg-card-accent-foreground/18 hover:-translate-y-px mt-6"
+      >
+        Voir le détail <ArrowRight className="size-4" />
+      </Link>
+    </Card>
   )
 }

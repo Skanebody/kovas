@@ -74,8 +74,8 @@ export default async function AccountPage() {
       </Button>
 
       <div className="space-y-1">
-        <h1 className="text-3xl font-extrabold tracking-tight">Mon compte</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-display text-3xl md:text-4xl tracking-tight">Mon compte</h1>
+        <p className="text-sm text-ink-mute">
           Profil, apparence, abonnement, facturation et informations légales.
         </p>
       </div>
@@ -109,7 +109,7 @@ export default async function AccountPage() {
           </>
         }
       >
-        <p className="text-xs text-muted-foreground pb-3">
+        <p className="text-xs text-ink-mute pb-3">
           Ces informations apparaissent sur vos exports et en-têtes de rapports.
         </p>
         <CompanyForm
@@ -140,13 +140,13 @@ export default async function AccountPage() {
             <>
               <div className="flex items-end justify-between gap-3 flex-wrap">
                 <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                  <div className="text-xs text-ink-mute uppercase tracking-wider font-semibold">
                     Formule actuelle
                   </div>
-                  <div className="text-2xl font-bold tracking-tight">
+                  <div className="text-display text-2xl md:text-3xl tracking-tight">
                     {tier?.label ?? currentTier}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs text-ink-mute">
                     {tier
                       ? `${eurosCents(tier.priceMonthlyCents)}€ HT/mois · ${tier.missionsIncluded} missions incluses`
                       : ''}
@@ -161,12 +161,12 @@ export default async function AccountPage() {
                 <div className="flex items-baseline justify-between">
                   <span className="text-sm font-medium">
                     {missionsCount}
-                    <span className="text-muted-foreground">
+                    <span className="text-ink-mute">
                       {' '}
                       / {subscription.missions_included} missions ce mois
                     </span>
                   </span>
-                  <span className="text-xs tabular-nums text-muted-foreground">
+                  <span className="text-xs tabular-nums text-ink-mute">
                     {Math.round(usagePct)}%
                   </span>
                 </div>
@@ -186,7 +186,7 @@ export default async function AccountPage() {
                   <p className="text-sm font-medium text-accent-orange">
                     {overage} mission{overage > 1 ? 's' : ''} au-delà du forfait
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-ink-mute">
                     Surplus estimé : {overageTotal.toFixed(2)}€ HT · facturé en fin de cycle. Aucune
                     rupture de service.
                   </p>
@@ -196,7 +196,7 @@ export default async function AccountPage() {
               <PortalButton />
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-mute">
               Aucun abonnement actif. Choisissez une offre ci-dessous pour activer votre compte.
             </p>
           )}
@@ -223,7 +223,7 @@ export default async function AccountPage() {
                   key={t.id}
                   className={cn(
                     'rounded-lg border p-4 space-y-3',
-                    isCurrent ? 'border-cta/40 bg-cta/[0.04]' : 'border-cta/10 bg-card/60',
+                    isCurrent ? 'border-cta/40 bg-cta/[0.04]' : 'border-border-soft bg-paper/60',
                     t.recommended && !isCurrent && 'border-cta/20',
                   )}
                 >
@@ -245,9 +245,9 @@ export default async function AccountPage() {
                     </div>
                     <div className="text-2xl font-extrabold tracking-tight">
                       {eurosCents(t.priceMonthlyCents)}€
-                      <span className="text-xs font-normal text-muted-foreground"> HT/mois</span>
+                      <span className="text-xs font-normal text-ink-mute"> HT/mois</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">{t.description}</p>
+                    <p className="text-xs text-ink-mute">{t.description}</p>
                   </div>
                   <ul className="space-y-1.5 text-xs">
                     <li className="flex items-start gap-2">
@@ -272,7 +272,7 @@ export default async function AccountPage() {
               )
             })}
           </div>
-          <p className="text-xs text-muted-foreground mt-4 text-center">
+          <p className="text-xs text-ink-mute mt-4 text-center">
             Annuel : 2 mois offerts (10 mois payés sur 12). Sans engagement. Plafond mensuel
             auto-protecteur activable depuis le portail Stripe.
           </p>
@@ -286,7 +286,7 @@ export default async function AccountPage() {
           <Row label="Siège social">66 Av Champs Élysées, 75008 Paris</Row>
           <Row label="SIREN">982 786 154</Row>
           <Row label="Domaine">kovas.fr</Row>
-          <p className="text-xs text-muted-foreground pt-2">
+          <p className="text-xs text-ink-mute pt-2">
             Vos factures KOVAS sont émises HT avec TVA 20% en sus, déductible si vous êtes
             assujetti.
           </p>
@@ -299,7 +299,7 @@ export default async function AccountPage() {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-3 flex-wrap">
-      <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+      <span className="text-xs text-ink-mute uppercase tracking-wider font-semibold">
         {label}
       </span>
       <span className="text-foreground">{children}</span>

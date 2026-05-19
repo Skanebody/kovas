@@ -83,7 +83,7 @@ export function DiagnosticStatusPills({ pills }: DiagnosticStatusPillsProps) {
           >
             <span className={cn('size-2 rounded-full', colors.dot)} aria-hidden />
             <span className="font-medium">{p.label}</span>
-            <span className="text-muted-foreground tabular-nums">{p.percentage}%</span>
+            <span className="text-ink-mute tabular-nums">{p.percentage}%</span>
           </button>
         )
       })}

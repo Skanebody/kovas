@@ -70,11 +70,11 @@ export function MissionCardCollapsible({
                   </Badge>
                 )}
               </div>
-              <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{reference}</p>
+              <p className="text-[11px] font-mono text-ink-mute mt-0.5">{reference}</p>
             </div>
             <ChevronDown
               className={cn(
-                'size-4 text-muted-foreground transition-transform shrink-0',
+                'size-4 text-ink-mute transition-transform shrink-0',
                 expanded && 'rotate-180',
               )}
             />
