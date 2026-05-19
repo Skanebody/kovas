@@ -1,5 +1,6 @@
 'use client'
 
+import { logoutAction } from '@/app/app/actions'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -8,6 +9,7 @@ import {
   Building2,
   CalendarClock,
   FileText,
+  HelpCircle,
   Home,
   LogOut,
   Mic,
@@ -16,7 +18,7 @@ import {
   Users,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useTransition } from 'react'
 
 interface RecentItem {
   kind: 'dossier' | 'client' | 'property'
@@ -67,6 +69,7 @@ export function CommandPalette() {
   const [search, setSearch] = useState('')
   const [recent, setRecent] = useState<RecentItem[]>([])
   const [today, setToday] = useState<TodayMission[]>([])
+  const [, startTransition] = useTransition()
   const router = useRouter()
 
   // Cmd+K / Ctrl+K global shortcut + G+X navigation
@@ -306,16 +309,18 @@ export function CommandPalette() {
             </CommandGroup>
           )}
 
-          <CommandGroup heading="Compte">
+          <CommandGroup heading="Aide & compte">
+            <CommandRow
+              onSelect={() => go('/faq')}
+              icon={<HelpCircle className="size-4" />}
+              label="Questions fréquentes"
+            />
             <CommandRow
               onSelect={() => {
                 close()
-                // Logout passe par form action — on simule un click sur le bouton logout du header
-                document
-                  .querySelector<HTMLButtonElement>(
-                    'form[action] button[type="submit"][aria-label="Se déconnecter"]',
-                  )
-                  ?.click()
+                startTransition(async () => {
+                  await logoutAction()
+                })
               }}
               icon={<LogOut className="size-4" />}
               label="Se déconnecter"

@@ -2,11 +2,9 @@ import { AppNavTabs } from '@/components/app-nav-tabs'
 import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
-import { Avatar } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { UsageWidget } from '@/components/usage-widget'
+import { UserMenu } from '@/components/user-menu'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { LogOut } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { logoutAction } from './actions'
@@ -27,15 +25,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2 shrink-0">
             <CommandPaletteTrigger />
             <UsageWidget />
-            <span className="text-sm text-muted-foreground hidden lg:inline ml-1">
-              {displayName}
-            </span>
-            <Avatar name={displayName} size="sm" />
-            <form action={logoutAction}>
-              <Button variant="ghost" size="icon" type="submit" aria-label="Se déconnecter">
-                <LogOut className="size-4" />
-              </Button>
-            </form>
+            <UserMenu displayName={displayName} email={profile.email} onLogout={logoutAction} />
           </div>
         </div>
       </header>
