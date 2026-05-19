@@ -17,8 +17,10 @@ import {
   Shield,
   Users,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { LICIEL_EXPORT_STEPS, TUTO_HELP_LINKS } from './tuto-content'
+import { UploadDropZone } from './upload-dropzone'
 
 interface ImportLicielWizardProps {
   /** Job id si on reprend un import en cours (étapes 4-5). Undefined = nouveau wizard. */
@@ -50,7 +52,7 @@ export function ImportLicielWizard({ initialJobId }: ImportLicielWizardProps) {
 
       {step === 1 && <Step1Prepare onNext={() => goToStep(2)} />}
       {step === 2 && <Step2Export onBack={() => goToStep(1)} onNext={() => goToStep(3)} />}
-      {step === 3 && <Step3UploadPlaceholder onBack={() => goToStep(2)} />}
+      {step === 3 && <Step3Upload onBack={() => goToStep(2)} />}
       {step === 4 && <Step4AnalyzePlaceholder jobId={initialJobId} />}
       {step === 5 && <Step5ValidatePlaceholder />}
     </div>
@@ -419,15 +421,41 @@ function PlaceholderStep({
   )
 }
 
-function Step3UploadPlaceholder({ onBack }: { onBack: () => void }) {
+// ============================================================================
+// STEP 3 — TÉLÉVERSER
+// ============================================================================
+
+function Step3Upload({ onBack }: { onBack: () => void }) {
+  const router = useRouter()
   return (
-    <PlaceholderStep
-      stepNum={3}
-      stepLabel="Téléverser"
-      title="Glissez votre fichier ici."
-      description="La drop-zone arrive dans le prochain commit (POST /api/import/liciel/upload + Supabase Storage bucket import-liciel-staging)."
-      onBack={onBack}
-    />
+    <Card variant="opaque" padding="default">
+      <CardContent className="pt-2 space-y-6">
+        <header className="space-y-1.5">
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute flex items-center gap-2">
+            <FileSpreadsheet className="size-3.5" /> Étape 3 / 5 — Téléverser
+          </p>
+          <h2 className="font-serif italic font-normal text-2xl md:text-3xl text-ink leading-tight">
+            Glissez votre fichier ici.
+          </h2>
+          <p className="text-sm text-ink-soft max-w-2xl">
+            Le fichier est chiffré en transit et stocké temporairement (7 jours max) dans un bucket
+            privé en région Paris. Vous pourrez le supprimer à tout moment depuis votre journal
+            d&apos;imports.
+          </p>
+        </header>
+
+        <UploadDropZone onJobCreated={(id) => router.push(`/app/dossiers/import-liciel/${id}`)} />
+
+        <div className="flex justify-between items-center pt-2 flex-wrap gap-2">
+          <Button variant="ghost" onClick={onBack}>
+            ← Retour
+          </Button>
+          <p className="text-[11px] text-ink-mute font-mono">
+            Auto-passage à l&apos;étape suivante après téléversement
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
