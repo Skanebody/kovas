@@ -5,23 +5,27 @@ import { forwardRef } from 'react'
 import type { ButtonHTMLAttributes } from 'react'
 
 const buttonVariants = cva(
-  // base — cf. CLAUDE.md §9 + docs/design-system.md (pillule CTA navy, hover lift)
+  // base — cf. CLAUDE.md §9 (KOVAS Design System v2)
+  // Pillule complète (rounded-pill = 999px), Manrope 600, hover lift -1px
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-pill text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cta/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        // CTA principal navy pillule + ombre + lift hover
+        // CTA primaire navy pillule + ombre + lift hover
         default:
           'bg-cta text-cta-foreground shadow-cta hover:bg-cta-hover hover:shadow-cta-hover hover:-translate-y-px',
-        // Bordure navy 10% + bg blanc 80%
+        // Secondaire : paper + bordure rule, hover lift
         outline:
-          'border border-cta/10 bg-card/80 backdrop-blur-md text-foreground hover:bg-card hover:border-cta/20',
-        // Sans fond, hover navy 5%
-        ghost: 'text-foreground hover:bg-cta/5',
+          'border border-border bg-paper text-foreground hover:bg-paper hover:border-ink-ghost',
+        // Warm : ambre saturé pour énergie positive (célébration, action positive)
+        warm:
+          'bg-accent-warm text-accent-warm-foreground shadow-warm hover:bg-accent-warm/90 hover:-translate-y-px',
+        // Ghost : transparent, hover cream-deep
+        ghost: 'text-foreground hover:bg-cream-deep',
         link: 'text-foreground underline-offset-4 hover:underline rounded-none',
-        // Card glass utility
+        // Glass : opt-in surface flottante
         glass:
-          'bg-card/80 backdrop-blur-xl text-foreground border border-cta/8 hover:bg-card hover:shadow-glass',
+          'bg-paper/80 backdrop-blur-xl text-foreground border border-cta/8 hover:bg-paper hover:shadow-glass',
         // Destructive (rouge alerte)
         destructive:
           'bg-accent-red text-white shadow-badge-red hover:bg-accent-red/90 hover:-translate-y-px',

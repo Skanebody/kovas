@@ -4,15 +4,17 @@ import type { HTMLAttributes } from 'react'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   /**
-   * Variant visuel (cf. CLAUDE.md §9, décision P6 — 2026-05-19).
-   * - `flat` (défaut) : surface paper opaque, ombre douce neutre. Cards
-   *   de travail (dashboard, dossier, listes, account).
+   * Variant visuel (KOVAS Design System v2 — 2026-05-19).
+   * - `flat` (défaut) : surface paper opaque + border + ombre douce neutre.
+   *   Cards de travail (dashboard, dossier, listes, account).
    * - `glass` : opt-in pour surfaces flottantes au-dessus du flux
-   *   (rare dans le composant Card — la plupart des flottants utilisent
-   *   directement les utilities `.glass-header` / `.glass-sidebar`).
-   * - `accent` : cobalt pleine, hero visuels (CTA landing, gain tracker).
+   *   (header sticky, sidebar, command palette, bottom sheets).
+   * - `accent` : navy plein, hero visuels (GainTracker, milestones,
+   *   CTA premium landing).
+   * - `warm` : fond ambre-soft + bordure subtile. Sections d'alerte
+   *   douce, mise en avant, cohérence à vérifier.
    */
-  variant?: 'flat' | 'glass' | 'accent'
+  variant?: 'flat' | 'glass' | 'accent' | 'warm'
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
@@ -20,11 +22,14 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       className={cn(
-        variant === 'flat' && 'rounded-2xl border border-border bg-card text-foreground shadow-glass',
+        variant === 'flat' &&
+          'rounded-xl border border-border-soft bg-paper text-foreground shadow-glass-sm',
         variant === 'glass' &&
-          'rounded-2xl border border-cta/[0.08] bg-card/85 backdrop-blur-xl text-foreground shadow-glass',
+          'rounded-xl border border-cta/[0.08] bg-paper/85 backdrop-blur-xl text-foreground shadow-glass',
         variant === 'accent' &&
           'rounded-2xl bg-card-accent text-card-accent-foreground shadow-accent',
+        variant === 'warm' &&
+          'rounded-xl border border-accent-warm/15 bg-accent-warm-soft text-foreground',
         className,
       )}
       {...props}
@@ -44,7 +49,7 @@ export const CardTitle = forwardRef<HTMLDivElement, HTMLAttributes<HTMLHeadingEl
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+      className={cn('text-lg font-bold leading-none tracking-tight', className)}
       {...props}
     />
   ),
