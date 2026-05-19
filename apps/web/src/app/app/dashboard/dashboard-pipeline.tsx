@@ -1,9 +1,9 @@
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MissionTypeTag } from '@/components/ui/mission-type-tag'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import { cn } from '@/lib/utils'
+import type { MissionType } from '@kovas/shared'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
@@ -134,9 +134,7 @@ export async function DashboardPipeline() {
                           <span className={cn('w-1 shrink-0', col.accent)} aria-hidden />
                           <div className="flex-1 min-w-0 py-2 pr-2 space-y-0.5">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <Badge variant="muted" className="text-[10px] py-0">
-                                {MISSION_TYPE_LABELS[r.type]?.split(' ')[0] ?? r.type}
-                              </Badge>
+                              <MissionTypeTag type={r.type as MissionType} />
                               <span className="text-[10px] font-mono text-muted-foreground">
                                 {r.reference}
                               </span>

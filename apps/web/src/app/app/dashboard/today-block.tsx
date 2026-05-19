@@ -1,8 +1,9 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MissionTypeTag } from '@/components/ui/mission-type-tag'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
+import type { MissionType } from '@kovas/shared'
 import { ArrowRight, CalendarClock, FileWarning, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { TodayMissionActions } from './today-mission-actions'
@@ -127,9 +128,7 @@ export async function TodayBlock() {
                           {d.reference}
                         </span>
                         {missions.slice(0, 3).map((m) => (
-                          <Badge key={m.id} variant="muted" className="text-[10px] py-0">
-                            {MISSION_TYPE_LABELS[m.type]?.split(' ')[0] ?? m.type}
-                          </Badge>
+                          <MissionTypeTag key={m.id} type={m.type as MissionType} />
                         ))}
                         {missions.length > 3 && (
                           <span className="text-[10px] text-muted-foreground">

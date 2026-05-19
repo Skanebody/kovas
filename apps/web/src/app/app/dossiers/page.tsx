@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { MissionTypeTag } from '@/components/ui/mission-type-tag'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
+import type { MissionType } from '@kovas/shared'
 
 export const metadata: Metadata = { title: 'Dossiers' }
 
@@ -98,13 +99,10 @@ export default async function DossiersPage() {
                     <td className="px-4 py-3 hidden sm:table-cell">
                       <div className="flex flex-wrap gap-1">
                         {missions.slice(0, 3).map((m, i) => (
-                          <Badge
+                          <MissionTypeTag
                             key={`${d.id}-${m.type}-${i}`}
-                            variant="muted"
-                            className="text-[10px]"
-                          >
-                            {MISSION_TYPE_LABELS[m.type]?.split(' ')[0] ?? m.type}
-                          </Badge>
+                            type={m.type as MissionType}
+                          />
                         ))}
                         {missions.length > 3 && (
                           <Badge variant="outline" className="text-[10px]">

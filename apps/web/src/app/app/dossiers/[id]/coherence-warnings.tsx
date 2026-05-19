@@ -17,10 +17,10 @@ export function CoherenceWarnings({ warnings }: CoherenceWarningsProps) {
   if (warnings.length === 0) return null
 
   return (
-    <Card>
+    <Card variant="warm">
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <AlertTriangle className="size-4 text-accent-orange" />
+        <CardTitle className="text-base flex items-center gap-2 text-foreground">
+          <AlertTriangle className="size-4 text-accent-warm" />
           Cohérence ({warnings.length} {warnings.length > 1 ? 'alertes' : 'alerte'})
         </CardTitle>
       </CardHeader>
