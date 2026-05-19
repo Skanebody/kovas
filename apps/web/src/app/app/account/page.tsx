@@ -74,7 +74,8 @@ export default async function AccountPage() {
       </Button>
 
       <AppPageHeader
-        title="Mon compte"
+        title="Mon"
+        accent="compte"
         description="Profil, apparence, abonnement, facturation et informations légales."
       />
 

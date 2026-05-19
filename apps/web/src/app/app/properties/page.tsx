@@ -39,8 +39,9 @@ export default async function PropertiesPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <AppPageHeader
-        title="Biens"
-        description={`${count} bien${count > 1 ? 's' : ''}`}
+        title="Vos"
+        accent="biens"
+        description={`${count} bien${count > 1 ? 's' : ''} · adresses mutualisées entre missions et clients`}
         action={
           <Button asChild variant="warm">
             <Link href="/app/properties/new">

@@ -54,7 +54,8 @@ export default async function CalendarPage() {
       </Button>
 
       <AppPageHeader
-        title="Planning"
+        title="Votre"
+        accent="planning"
         description="Vue calendrier de vos visites diagnostic. Cliquez sur un RDV pour ouvrir le dossier."
       />
 

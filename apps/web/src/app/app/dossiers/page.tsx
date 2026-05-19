@@ -55,8 +55,9 @@ export default async function DossiersPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <AppPageHeader
-        title="Dossiers"
-        description={`${count} dossier${count > 1 ? 's' : ''}`}
+        title="Vos"
+        accent="dossiers"
+        description={`${count} dossier${count > 1 ? 's' : ''} · regroupant les diagnostics par visite et par bien`}
         action={
           <Button asChild variant="warm">
             <Link href="/app/dossiers/new">

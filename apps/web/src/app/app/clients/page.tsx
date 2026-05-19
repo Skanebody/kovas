@@ -39,8 +39,9 @@ export default async function ClientsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <AppPageHeader
-        title="Clients"
-        description={`${count} client${count > 1 ? 's' : ''}`}
+        title="Vos"
+        accent="clients"
+        description={`${count} client${count > 1 ? 's' : ''} · propriétaires, agences, syndics`}
         action={
           <Button asChild variant="warm">
             <Link href="/app/clients/new">
