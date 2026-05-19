@@ -23,7 +23,7 @@ import Link from 'next/link'
  */
 export default function HomePage() {
   return (
-    <div className="min-h-dvh flex flex-col bg-cream">
+    <div className="min-h-dvh flex flex-col bg-sage">
       <SiteHeader />
       <main className="flex-1">
         <Hero />
@@ -44,7 +44,12 @@ function SiteHeader() {
     <header className="sticky top-0 z-50 glass-header">
       <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="size-8 rounded-md bg-navy shadow-accent" aria-hidden />
+          <div
+            aria-hidden
+            className="size-8 rounded-md bg-[#0F1419] shadow-accent flex items-center justify-center text-white font-bold text-sm"
+          >
+            K
+          </div>
           <span className="text-base font-bold tracking-tight">KOVAS</span>
         </Link>
         <nav className="hidden sm:flex items-center gap-6 text-sm">
@@ -87,17 +92,18 @@ function Hero() {
         <Badge variant="outline" className="mx-auto border-rule/80">
           Pour les diagnostiqueurs immobiliers indépendants
         </Badge>
-        <h1 className="font-display font-light text-display-m sm:text-display-l tracking-tight text-ink">
+        <h1 className="font-sans font-light text-display-m sm:text-display-l tracking-tight text-ink leading-[1.05]">
           3 heures de DPE.
           <br />
-          <span className="text-ink-mute">30 minutes avec KOVAS.</span>
+          <span className="font-serif italic text-ink">30 minutes</span>
+          <span className="text-ink-mute"> avec KOVAS.</span>
         </h1>
         <p className="text-lg text-ink-mute sm:text-xl max-w-2xl mx-auto">
           Saisie vocale terrain, photos géolocalisées, exports universels. Compagnon de votre
           logiciel actuel — Liciel, AnalysImmo ou autre.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Button size="lg" asChild>
+          <Button size="lg" variant="accent" asChild>
             <Link href="/signup">
               Commencer mon essai 14 jours <ArrowRight className="size-4" />
             </Link>
@@ -181,8 +187,9 @@ function Features() {
       <div className="mx-auto max-w-6xl space-y-12">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <Badge variant="muted">10 fonctionnalités cœur</Badge>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Le terrain plus rapide. Le retour bureau quasi inutile.
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
+            Le terrain plus <span className="font-serif italic font-normal">rapide</span>. Le retour
+            bureau <span className="font-serif italic font-normal">quasi inutile</span>.
           </h2>
           <p className="text-ink-mute">
             KOVAS ne remplace pas Liciel en Phase 1. Il le complète, élimine la friction terrain et
@@ -233,8 +240,9 @@ function HowItWorks() {
       <div className="mx-auto max-w-5xl space-y-12">
         <div className="text-center space-y-3 max-w-xl mx-auto">
           <Badge variant="muted">Workflow</Badge>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            De la visite au logiciel principal. Sans re-saisie.
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
+            De la visite au logiciel principal.{' '}
+            <span className="font-serif italic font-normal">Sans re-saisie</span>.
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -259,8 +267,9 @@ function PricingTeaser() {
       <div className="mx-auto max-w-3xl text-center space-y-8">
         <div className="space-y-3">
           <Badge variant="muted">Tarification</Badge>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            À partir de 29€/mois. Sans engagement.
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
+            À partir de <span className="font-serif italic font-normal">29€/mois</span>. Sans
+            engagement.
           </h2>
           <p className="text-ink-mute">
             Découverte (20 missions), Standard (60 missions, recommandé), Volume (150 missions).
@@ -288,8 +297,8 @@ function LandingFaq() {
       <div className="mx-auto max-w-3xl space-y-10">
         <div className="text-center space-y-3">
           <Badge variant="muted">FAQ</Badge>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Les questions les plus posées
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
+            Les questions les <span className="font-serif italic font-normal">plus posées</span>.
           </h2>
           <p className="text-ink-mute">
             5 réponses essentielles avant de démarrer. La FAQ complète est disponible sur{' '}
@@ -335,8 +344,8 @@ function FinalCTA() {
       <div className="mx-auto max-w-4xl">
         <Card variant="navy" padding="lg" className="text-center space-y-6">
           <Zap className="size-10 mx-auto text-paper/80" />
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Prêt à gagner 1h30 par mission ?
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
+            Prêt à gagner <span className="font-serif italic font-normal">1h30</span> par mission ?
           </h2>
           <p className="text-paper/70">
             Essai gratuit 14 jours, sans carte bancaire. 30 missions complètes pour vous faire votre
