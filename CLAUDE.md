@@ -8,7 +8,7 @@
 > **Modification 18 MVP V1 étendu + Focus 8 diagnostics** : [`docs/modification-18-mvp-v1-extended.md`](docs/modification-18-mvp-v1-extended.md) (10 features V1, croquis V2, audit/DTG/marketplace MAR-RGE supprimés)
 > **Avatar client (TOUT décision produit doit passer ce test)** : [`docs/avatar-client.md`](docs/avatar-client.md) — diagnostiqueur 43 ans, ex-cadre reconverti, ton SOBRE PROFESSIONNEL, **JAMAIS gaming/lifestyle/millennial**
 > **Système Gain Tracker (V1.5, sprints 15-17 post-launch, 8j dev)** : [`docs/gain-tracker-system.md`](docs/gain-tracker-system.md) — compteur permanent + page activité + rapport mensuel + image LinkedIn + statuts pros + stats anonymisées
-> **Dernière mise à jour** : 2026-05-19 (Design System v2 — refonte complète : retour navy `#0F1E3D` + Manrope, ajout ambre `#D97706` accent chaud, 5 pastels catégoriels, JetBrains Mono labels, dark mode reconstruit, 9 variants Badge, nouveaux composants StatusPill + MissionCard + GainTracker hero navy/glow ambre)
+> **Dernière mise à jour** : 2026-05-19 (Design System v3 — bascule complète vers spec PDF [`docs/design/KOVAS_UIUX_Design_v3.pdf`](docs/design/KOVAS_UIUX_Design_v3.pdf) : navy 4 niveaux `#163144/#0B1D2E/#2C4A63/#475F77`, cyan liquide signature `#4E8FA8/#7FB5C7/#DFF3EB`, ambre `#D97706`, pastels mist `blue/orange/lime/coral`, **typo Urbanist** (au lieu Manrope) + Instrument Serif italic + JetBrains Mono, bascule **matin/soir/auto** dashboard via `DashboardModeToggle` localStorage, Card variant `opaque` (alias rétrocompat `flat`))
 
 ---
 

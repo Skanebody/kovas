@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { AlertsAndActions } from './alerts-and-actions'
-import { DashboardMorningHero } from './dashboard-morning-hero'
+import { CockpitHero } from './cockpit-hero'
 import { DashboardPipeline } from './dashboard-pipeline'
 import { DiagnosticsBreakdown } from './diagnostics-breakdown'
 import { GainTrackerCard } from './gain-tracker-card'
@@ -12,12 +11,9 @@ import { TodayBlock } from './today-block'
 export const metadata: Metadata = { title: 'Tableau de bord' }
 
 export default async function DashboardPage() {
-  const { profile } = await getCurrentUser()
-  const firstName = profile.full_name?.split(' ')[0] ?? 'à vous'
-
   return (
     <div className="space-y-10 animate-fade-in">
-      <DashboardMorningHero firstName={firstName} />
+      <CockpitHero />
 
       <TodayBlock />
 
