@@ -15,6 +15,7 @@ import {
   Mic,
   Plus,
   Search,
+  Settings,
   Users,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -310,6 +311,12 @@ export function CommandPalette() {
           )}
 
           <CommandGroup heading="Aide & compte">
+            <CommandRow
+              onSelect={() => go('/app/account')}
+              icon={<Settings className="size-4" />}
+              label="Mon compte"
+              shortcut="⌘ ,"
+            />
             <CommandRow
               onSelect={() => go('/faq')}
               icon={<HelpCircle className="size-4" />}

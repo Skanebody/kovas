@@ -68,8 +68,10 @@ export function UserMenu({ displayName, email, onLogout }: UserMenuProps) {
             <Mail className="size-4" /> Contacter le support
           </a>
         </DropdownMenuItem>
-        <DropdownMenuItem disabled className="text-muted-foreground">
-          <Settings className="size-4" /> Paramètres (bientôt)
+        <DropdownMenuItem asChild>
+          <Link href="/app/account" className="cursor-pointer">
+            <Settings className="size-4" /> Mon compte
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

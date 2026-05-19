@@ -333,7 +333,7 @@ D-U-N-S 281 515 446 **gardé** (gratuit, lifetime, débloquera Apple Dev enrollm
 | Texte tertiaire / icônes | `#9CA3AF` |
 | Borders | `rgba(229, 231, 235, 0.5)` / `rgba(15, 30, 61, 0.08)` |
 
-### Palette dark (V1.5)
+### Palette dark (V1 — actif via next-themes)
 
 | Rôle | Valeur |
 |---|---|
@@ -381,7 +381,7 @@ Line-height : 1.2 titres, 1.5 body, 1.3 compact.
 - **Gradients** : autorisés UNIQUEMENT pour le fond page (`#F5F7FA → #EDF0F5`) et hero landing (navy → dark) ; JAMAIS multicolores
 - **Couleurs flashy/néon** : interdits sur surface large ; accents OK uniquement en pastille
 - **Bordures** : 1px max, opacité 8-50%
-- **Dark + Light** : auto système + override manuel (next-themes), V1.5
+- **Dark + Light** : auto système + override manuel (next-themes), **V1 actif** — toggle dans `/app/account` (Apparence) + sidebar bottom
 - **PDF** : toujours en clair (impression)
 
 ### Composants canoniques (cf. `docs/design-system.md` pour le détail)
