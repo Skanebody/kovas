@@ -118,7 +118,7 @@ export function MissionFocusDrawer({
 
       <div className="h-1 bg-paper/10 shrink-0" aria-hidden>
         <div
-          className="h-full bg-amber transition-all duration-base ease-spring"
+          className="h-full bg-chartreuse transition-all duration-base ease-spring"
           style={{ width: `${percentage}%` }}
         />
       </div>

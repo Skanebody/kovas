@@ -30,7 +30,7 @@ const pillVariants = cva(
         primary:
           'bg-navy-800 text-white shadow-cta hover:bg-navy-700 hover:-translate-y-px hover:shadow-cta-hover active:translate-y-0',
         amber:
-          'bg-amber text-white shadow-warm hover:bg-amber/90 hover:-translate-y-px active:translate-y-0',
+          'bg-chartreuse text-ink shadow-[0_6px_18px_rgba(212,245,66,0.35)] hover:bg-chartreuse-deep hover:-translate-y-px active:translate-y-0',
         glass:
           'bg-white/55 backdrop-blur-xl border border-white/40 text-navy-900 hover:bg-white/75 hover:border-white/60',
         ghost:
