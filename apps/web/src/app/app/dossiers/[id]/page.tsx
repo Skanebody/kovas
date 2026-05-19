@@ -16,7 +16,6 @@ import { notFound } from 'next/navigation'
 import { AddMissionButton } from './add-mission'
 import { ClientUploadLink } from './client-upload-link'
 import { CoherenceWarnings } from './coherence-warnings'
-import { DiagnosticStatusPills } from './diagnostic-status-pills'
 import { DossierInfoEdit } from './dossier-info-edit'
 import { DossierMoreMenu } from './dossier-more-menu'
 import { MissionChecklist } from './mission-checklist'
@@ -24,12 +23,10 @@ import { type MissionDrawerItem, MissionsWithDrawer } from './missions-with-draw
 import { OwnerDocumentsList } from './owner-documents-list'
 import { PhotoCapture } from './photo-capture'
 import { PhotoGallery } from './photo-gallery'
-import { RemoveMissionButton } from './remove-mission-button'
+import { MissionActionsMenu } from './mission-actions-menu'
 import { ResumeButton } from './resume-button'
 import { RoomsList } from './rooms-list'
 import { RoomsMatrixView } from './rooms-matrix-view'
-import { ShareMissionButton } from './share-button'
-import { MissionStatusButton } from './status-button'
 import { ViewToggle } from './view-toggle'
 import { VoiceNotesList } from './voice-notes-list'
 import { VoiceRecorder } from './voice-recorder'
@@ -289,17 +286,7 @@ export default async function DossierDetailPage({
         )}
       </Card>
 
-      {/* Pills statut diagnostics — scan visuel rapide */}
-      {missionsWithChecklist.length > 0 && (
-        <DiagnosticStatusPills
-          pills={missionsWithChecklist.map(({ mission, percentage }) => ({
-            missionId: mission.id,
-            type: mission.type,
-            label: MISSION_TYPE_LABELS[mission.type]?.split(' ')[0] ?? mission.type,
-            percentage,
-          }))}
-        />
-      )}
+      {/* DiagnosticStatusPills supprimé v5 — redondant avec section "8 diagnostics" plus bas */}
 
       <Card variant="opaque" padding="default" className="flex flex-wrap items-center gap-3">
         <MapPin className="size-4 text-ink-mute shrink-0" />
@@ -582,15 +569,12 @@ export default async function DossierDetailPage({
               headerActions: (
                 <>
                   <ResumeButton missionId={m.id} status={m.status} />
-                  <MissionStatusButton missionId={m.id} currentStatus={m.status as never} />
-                  <ShareMissionButton
-                    missionId={m.id}
-                    missionReference={m.reference}
-                    clientEmail={client?.email ?? null}
-                  />
-                  <RemoveMissionButton
+                  <MissionActionsMenu
                     missionId={m.id}
                     missionLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
+                    missionReference={m.reference}
+                    currentStatus={m.status as never}
+                    clientEmail={client?.email ?? null}
                   />
                 </>
               ),
