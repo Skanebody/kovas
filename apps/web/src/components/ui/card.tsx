@@ -4,25 +4,28 @@ import type { HTMLAttributes } from 'react'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   /**
-   * Variant visuel (KOVAS Design System v2 — 2026-05-19).
-   * - `flat` (défaut) : surface paper opaque + border + ombre douce neutre.
-   *   Cards de travail (dashboard, dossier, listes, account).
-   * - `glass` : opt-in pour surfaces flottantes au-dessus du flux
-   *   (header sticky, sidebar, command palette, bottom sheets).
-   * - `accent` : navy plein, hero visuels (GainTracker, milestones,
-   *   CTA premium landing).
-   * - `warm` : fond ambre-soft + bordure subtile. Sections d'alerte
-   *   douce, mise en avant, cohérence à vérifier.
+   * Variant visuel (KOVAS Design System v3 — 2026-05-19, cf. PDF p.11).
+   * - `opaque` (défaut, ex-flat v2) : paper translucide 85% sur fond cream,
+   *   contenus denses, lisibilité prioritaire. Cards de travail dashboard,
+   *   dossier, listes, account.
+   * - `glass` : translucide cyan, micro-actions, hero visuels sur fond
+   *   coloré. Pour surfaces flottantes (header sticky, sidebar, command
+   *   palette, bottom sheets).
+   * - `accent` : navy plein + glow ambre subtle, KPI hero dramatisé
+   *   (GainTracker mode soir, CTA premium).
+   * - `warm` : fond ambre-soft, alerte douce / mise en avant / cohérence
+   *   à vérifier.
    */
-  variant?: 'flat' | 'glass' | 'accent' | 'warm'
+  variant?: 'opaque' | 'glass' | 'accent' | 'warm' | 'flat'
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'flat', ...props }, ref) => (
+  ({ className, variant = 'opaque', ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        variant === 'flat' &&
+        // 'flat' = alias rétrocompat v2 vers 'opaque'
+        (variant === 'opaque' || variant === 'flat') &&
           'rounded-xl border border-border-soft bg-paper text-foreground shadow-glass-sm',
         variant === 'glass' &&
           'rounded-xl border border-border-soft bg-paper/85 backdrop-blur-xl text-foreground shadow-glass',
