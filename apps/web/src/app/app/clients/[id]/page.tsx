@@ -5,7 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { formatFullAddress } from '@/lib/format-address'
 import { isBusinessClientType } from '@/lib/validation/client'
-import { ArrowLeft, Building2, Home, Mail, MapPin, Pencil, Phone, Plus } from 'lucide-react'
+import {
+  ArrowLeft,
+  Building2,
+  Download,
+  Home,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  Plus,
+} from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -83,6 +93,17 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 Fidèle
               </span>
             )}
+            {missionsCount > 0 ? (
+              <Button variant="glass" asChild>
+                <a
+                  href={`/api/clients/${client.id}/export.zip`}
+                  download
+                  aria-label="Exporter tout le fichier client en ZIP"
+                >
+                  <Download className="size-4" /> Exporter tout (.zip)
+                </a>
+              </Button>
+            ) : null}
             <Button variant="glass" asChild>
               <Link href={`/app/clients/${client.id}/edit`}>
                 <Pencil className="size-4" /> Modifier

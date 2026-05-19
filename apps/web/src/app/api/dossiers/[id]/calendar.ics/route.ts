@@ -1,5 +1,5 @@
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { buildIcs, icsFilename } from '@/lib/ics'
+import { buildIcs, buildIcsFileName } from '@/lib/ics'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import { NextResponse } from 'next/server'
 
@@ -61,11 +61,25 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     url: dossierUrl,
   })
 
+  const filename = buildIcsFileName({
+    date: new Date(dossier.scheduled_at),
+    reference: dossier.reference,
+    client: client ? { display_name: client.display_name } : null,
+    property: prop
+      ? {
+          address: prop.address,
+          city: prop.city ?? null,
+          apartment_detail: null,
+          building_letter: null,
+        }
+      : null,
+  })
+
   return new NextResponse(ics, {
     status: 200,
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${icsFilename(dossier.reference)}"`,
+      'Content-Disposition': `attachment; filename="${filename}"`,
       'Cache-Control': 'no-store',
     },
   })

@@ -6,6 +6,7 @@
  * Pas de dépendance — RFC 5545 est assez simple pour être généré à la main
  * pour notre cas d'usage (event unique, pas de recurrence complexe).
  */
+import { isoDate, slugifyAddress, slugifyClientName } from '@/lib/file-naming'
 
 interface IcsEvent {
   uid: string
@@ -135,9 +136,53 @@ export function buildIcsCalendar(
 }
 
 /**
- * Nom de fichier sain pour le téléchargement.
+ * Nom de fichier sain pour le téléchargement (fallback minimal sans contexte).
+ * Préférer {@link buildIcsFileName} dès que le contexte (date, client,
+ * adresse) est disponible — c'est l'alignement strict sur la convention
+ * de nommage KOVAS (cf. {@link ../lib/file-naming.ts}).
  */
 export function icsFilename(reference: string): string {
   const safe = reference.replace(/[^a-zA-Z0-9-_]/g, '_')
   return `kovas-${safe}.ics`
+}
+
+/**
+ * Nom canonique d'un fichier .ics (RDV agenda).
+ * Format : [DATE]_RDV_[CLIENT]_[ADRESSE]_[REF].ics
+ *
+ * Ex : 2026-05-20_RDV_DUPONT-Pierre_12-rue-Republique-Paris_DOS-2026-00042.ics
+ *
+ * Aligné sur la convention de nommage canonique KOVAS définie dans
+ * `lib/file-naming.ts`. Reuse les helpers `isoDate`, `slugifyClientName`,
+ * `slugifyAddress` pour rester cohérent avec les exports PDF/DOCX/ZIP.
+ */
+export function buildIcsFileName(ctx: {
+  date: Date | string
+  reference: string
+  client?: { display_name: string | null } | null
+  property?: {
+    address: string | null
+    city?: string | null
+    apartment_detail?: string | null
+    building_letter?: string | null
+  } | null
+}): string {
+  const date = isoDate(ctx.date)
+  const client = ctx.client?.display_name
+    ? slugifyClientName(ctx.client.display_name, 40)
+    : 'CLIENT'
+  const address = ctx.property
+    ? slugifyAddress(
+        [
+          ctx.property.address,
+          ctx.property.building_letter,
+          ctx.property.apartment_detail,
+          ctx.property.city,
+        ]
+          .filter(Boolean)
+          .join(' '),
+        60,
+      )
+    : 'ADRESSE'
+  return `${date}_RDV_${client}_${address}_${ctx.reference}.ics`
 }

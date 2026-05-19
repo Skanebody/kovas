@@ -198,6 +198,27 @@ export function buildPhotoFileName(opts: {
 }
 
 /**
+ * Nom d'un export archive consolidée client (tous dossiers d'un client
+ * regroupés dans un seul ZIP).
+ * Format : [DATE]_FICHIER-CLIENT_[CLIENT].zip
+ *
+ * Ex : 2026-05-20_FICHIER-CLIENT_DUPONT-Pierre.zip
+ *
+ * Pas de référence de dossier (l'archive contient TOUS les dossiers du client) —
+ * c'est volontaire et différent de `buildZipFileName` qui cible un dossier précis.
+ */
+export function buildClientArchiveFileName(opts: {
+  date: Date | string
+  client: { display_name: string | null }
+}): string {
+  const date = isoDate(opts.date)
+  const client = opts.client.display_name
+    ? slugifyClientName(opts.client.display_name, 40)
+    : 'CLIENT'
+  return `${date}_FICHIER-CLIENT_${client}.zip`
+}
+
+/**
  * Nom de dossier pour stockage hiérarchique.
  * Format : [REF]_[CLIENT]_[VILLE]
  *
@@ -208,9 +229,7 @@ export function buildDirectoryName(opts: {
   client: { display_name: string | null } | null
   property: { city: string | null } | null
 }): string {
-  const client = opts.client?.display_name
-    ? slugifyClientName(opts.client.display_name, 30)
-    : null
+  const client = opts.client?.display_name ? slugifyClientName(opts.client.display_name, 30) : null
   const city = opts.property?.city ? slugify(opts.property.city, 20) : null
   const parts = [opts.reference]
   if (client) parts.push(client)
