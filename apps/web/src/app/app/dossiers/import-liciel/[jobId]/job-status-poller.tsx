@@ -146,12 +146,13 @@ export function JobStatusPoller({ jobId, initialStatus }: JobStatusPollerProps) 
     }
   }, [jobId])
 
-  // Redirection sur completed (placeholder vers /app/dossiers)
+  // Transitions : 'deduped' → on rafraîchit pour que la page parent affiche
+  // la DuplicateReviewView. 'completed' → idem pour basculer sur ImportSummary.
   useEffect(() => {
-    if (status === 'completed') {
-      router.push(`/app/dossiers?imported=${jobId}`)
+    if (status === 'deduped' || status === 'completed') {
+      router.refresh()
     }
-  }, [status, jobId, router])
+  }, [status, router])
 
   async function onCancel() {
     if (cancelling) return
