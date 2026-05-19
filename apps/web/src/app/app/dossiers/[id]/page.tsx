@@ -348,21 +348,28 @@ export default async function DossierDetailPage({
         </div>
       </CollapsibleSection>
 
-      {/* Pièces */}
-      <Card>
-        <CardContent className="pt-6">
-          <RoomsList dossierId={dossier.id} rooms={rooms ?? []} />
-        </CardContent>
-      </Card>
+      {/* Pièces — ouvert si vide (setup needed), fermé sinon */}
+      <CollapsibleSection
+        storageKey={`kovas_dossier_${dossier.id}_rooms`}
+        defaultExpanded={(rooms?.length ?? 0) === 0}
+        title={<>Pièces du bien</>}
+        meta={`(${rooms?.length ?? 0})`}
+      >
+        <RoomsList dossierId={dossier.id} rooms={rooms ?? []} />
+      </CollapsibleSection>
 
-      {/* Photos */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Camera className="size-4" /> Photos terrain ({photos?.length ?? 0})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      {/* Photos — ouvert si aucune photo (setup terrain), fermé sinon (review) */}
+      <CollapsibleSection
+        storageKey={`kovas_dossier_${dossier.id}_photos`}
+        defaultExpanded={(photos?.length ?? 0) === 0}
+        title={
+          <>
+            <Camera className="size-4" /> Photos terrain
+          </>
+        }
+        meta={`(${photos?.length ?? 0})`}
+      >
+        <div className="space-y-6">
           {(() => {
             const photoCountsByRoom: Record<string, number> = {}
             for (const p of photos ?? []) {
@@ -398,17 +405,20 @@ export default async function DossierDetailPage({
               location_text: null,
             }))}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
-      {/* Notes vocales */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Mic className="size-4" /> Notes vocales ({voiceNotes?.length ?? 0})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      {/* Notes vocales — fermé par défaut (action terrain via Drawer mode mission) */}
+      <CollapsibleSection
+        storageKey={`kovas_dossier_${dossier.id}_voice`}
+        title={
+          <>
+            <Mic className="size-4" /> Notes vocales
+          </>
+        }
+        meta={`(${voiceNotes?.length ?? 0})`}
+      >
+        <div className="space-y-6">
           <VoiceRecorder
             dossierId={dossier.id}
             orgId={orgId}
@@ -429,8 +439,8 @@ export default async function DossierDetailPage({
               created_at: n.created_at,
             }))}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
       {/* Toggle Vue par pièce / Vue par diag */}
       <div className="flex items-center justify-between gap-3 flex-wrap pt-2">

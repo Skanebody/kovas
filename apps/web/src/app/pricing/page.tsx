@@ -1,14 +1,14 @@
-import { Check } from 'lucide-react'
-import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Check } from 'lucide-react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Tarifs',
   description:
-    'Découverte 29€, Standard 59€, Volume 99€ par mois. Sans engagement, sans carte bancaire pour l\'essai.',
+    "Découverte 29€, Standard 59€, Volume 99€ par mois. Sans engagement, sans carte bancaire pour l'essai.",
 }
 
 interface Tier {
@@ -89,7 +89,7 @@ export default function PricingPage() {
 
       <main className="flex-1 mx-auto max-w-6xl w-full px-6 py-16 space-y-16">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <Badge variant="muted">Phase 1 — Compagnon</Badge>
+          <Badge variant="muted">Sans engagement</Badge>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
             Tarification simple, sans surprise.
           </h1>
@@ -105,9 +105,7 @@ export default function PricingPage() {
               className={tier.highlighted ? 'border-foreground/40 shadow-md relative' : ''}
             >
               {tier.highlighted && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  Recommandé
-                </Badge>
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Recommandé</Badge>
               )}
               <CardHeader>
                 <CardTitle className="text-xl">{tier.name}</CardTitle>
@@ -167,9 +165,15 @@ export default function PricingPage() {
         <div className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-6 space-y-3">
           <h3 className="font-semibold">Options ponctuelles (paiement à l'usage)</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>• Signature eIDAS Yousign — <strong className="text-foreground">2€/signature</strong></li>
-            <li>• Rapport bilingue FR/EN — <strong className="text-foreground">5€/rapport</strong></li>
-            <li>• SMS rappel client J-1 — <strong className="text-foreground">0,15€/SMS</strong></li>
+            <li>
+              • Signature eIDAS Yousign — <strong className="text-foreground">2€/signature</strong>
+            </li>
+            <li>
+              • Rapport bilingue FR/EN — <strong className="text-foreground">5€/rapport</strong>
+            </li>
+            <li>
+              • SMS rappel client J-1 — <strong className="text-foreground">0,15€/SMS</strong>
+            </li>
           </ul>
           <p className="text-xs text-subtle-foreground pt-2">
             Aucun pack mensuel obligatoire — vous ne payez que ce que vous utilisez.
@@ -179,9 +183,6 @@ export default function PricingPage() {
         <div className="text-center space-y-3 max-w-xl mx-auto">
           <p className="text-sm text-muted-foreground">
             <strong>Annuel : 2 mois offerts</strong> (10 mois payés sur 12) sur tous les tiers.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Phase 2 (M10) : calcul DPE certifié ADEME + Vision IA + tier Cabinet 199€/mo.
           </p>
         </div>
       </main>
