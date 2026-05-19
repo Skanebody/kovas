@@ -47,7 +47,11 @@ export default async function EditPropertyPage({
         </Link>
       </Button>
 
-      <AppPageHeader title="Modifier le bien" description={subtitle || undefined} />
+      <AppPageHeader
+        title="Modifier"
+        accent={property.address}
+        eyebrow={subtitle || 'Bien'}
+      />
 
       <EditPropertyForm property={property} clients={clients ?? []} />
     </div>

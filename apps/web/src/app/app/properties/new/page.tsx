@@ -27,8 +27,9 @@ export default async function NewPropertyPage() {
       </Button>
 
       <AppPageHeader
-        title="Nouveau bien"
-        description="L'adresse se complète automatiquement (Base Adresse Nationale)."
+        title="Nouveau"
+        accent="bien"
+        description="L'adresse se complète automatiquement via la Base Adresse Nationale (BAN)."
       />
 
       <PropertyForm clients={clients ?? []} />

@@ -37,7 +37,11 @@ export default async function EditClientPage({
         </Link>
       </Button>
 
-      <AppPageHeader title="Modifier le client" description={client.display_name} />
+      <AppPageHeader
+        title="Modifier"
+        accent={client.display_name}
+        eyebrow="Client"
+      />
 
       <EditClientForm client={client} />
     </div>
