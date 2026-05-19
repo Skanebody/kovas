@@ -3,6 +3,8 @@ import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { AppShell } from '@/components/app-shell'
 import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
+import { MobileQuickActionsFab } from '@/components/ui/mobile-quick-actions'
+import { OfflineBanner } from '@/components/ui/offline-banner'
 import { UsageWidget } from '@/components/usage-widget'
 import { UserMenu } from '@/components/user-menu'
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -19,6 +21,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <AppSidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
+        <OfflineBanner />
         {/* Header app v4 — sans logo (déjà dans sidebar 240px), juste search + usage + user */}
         <header className="md:sticky top-0 z-30 px-4 md:px-6 pt-4 pb-2 bg-transparent">
           <div className="glass-opaque rounded-pill px-3 py-2 flex items-center justify-between gap-3">
@@ -47,6 +50,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </div>
 
       <AppMobileNav />
+      <MobileQuickActionsFab />
       <CommandPalette />
     </AppShell>
   )
