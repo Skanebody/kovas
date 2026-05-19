@@ -319,11 +319,11 @@ Buckets Storage :
 
 ## 12. Système design (CLAUDE.md §9 + docs/design-system.md)
 
-- Light + Dark mode actif via next-themes (toggle dans /app/account + sidebar)
-- Glassmorphism Premium Soft UI
-- Palette : navy KOVAS #0F1E3D + accents vifs (#3B82F6 / #EF4444 / #F59E0B / #10B981)
-- Typo : Manrope
-- Radius : 20px cards, 100px pills CTA, 12px inputs
+- Light + Dark mode actif via next-themes (toggle dans /app/account + sidebar), defaultTheme `light`
+- Glassmorphism léger (Ron Design Lab × Tectra) + ombres neutres
+- Palette : crème `#F5F1EA` + paper `#FBF8F2` + cobalt `#2C3FA8` CTA + butter `#FFE89C` accent énergique + sémantiques (bleu/rouge/orange/vert)
+- Typo : Outfit (UI) + Instrument Serif italic (KPIs, mots-clés éditoriaux)
+- Radius : `1.25rem`/`1.5rem` cards, `100px` (pill) CTA et badges, `0.75rem` inputs
 - Animations : transitions CSS ~200ms, prefers-reduced-motion respecté
 - Toasts : Sonner (`@/components/ui/toaster`)
 - Bottom sheets mobile : Vaul (`@/components/ui/bottom-sheet`)
@@ -386,7 +386,7 @@ Hors-V1 documentés (V1.5+) :
 
 ### Anti-patterns à éviter (déjà tentés et rejetés)
 - ❌ Dark-first + violet brand (override CLAUDE.md §9)
-- ❌ Inter font (mandate Manrope)
+- ❌ Manrope, Inter, ou autre sans-serif neutre (mandate Outfit + Instrument Serif italic depuis 2026-05-19)
 - ❌ Sidebar 240px avec labels (on a 64px icons)
 - ❌ Workflow Bézier 4 colonnes connectées (linéaire suffit)
 - ❌ Drag-and-drop blocs dashboard (V2)

@@ -139,7 +139,7 @@ Dashboard admin :
 
 ### Service Worker (serwist or next-pwa)
 
-- Cache-first pour assets statiques (CSS, JS, images, fonts Manrope)
+- Cache-first pour assets statiques (CSS, JS, images, fonts Outfit + Instrument Serif)
 - Network-first pour API calls (avec fallback cache stale-while-revalidate)
 - Background sync pour queue mutations offline
 - Periodic background sync (si supporté) pour sync 5 jours
@@ -178,7 +178,7 @@ Gains de simplification (~3-5 jours sur les 14, à réallouer en buffer ou polis
 | Jour | Plan initial | Plan PWA-only |
 |---|---|---|
 | J1 | Setup monorepo + Supabase + auth + design system base | **Identique** |
-| J2 | Design system complet (Glassmorphism, Manrope) | **Identique** |
+| J2 | Design system complet (Ron Design Lab × Tectra : crème + cobalt + butter, Outfit + Instrument Serif italic) | **Identique** |
 | J3 | CRUD missions/clients/biens + APIs gouv FR | **Identique** |
 | J4 | EAS dev client + Vision Camera + Skia setup | **PWA setup** : Service Worker + IndexedDB Dexie + manifest + onboarding "Add to Home Screen" |
 | J5 | Photos géolocalisées RN Vision Camera | **Photos PWA** : `<input capture>` + `getUserMedia` + EXIF GPS + Konva annotations |

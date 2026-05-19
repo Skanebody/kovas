@@ -165,11 +165,11 @@
 
 ### Style visuel
 
-- **Palette navy KOVAS** + blanc + accents subtils (cf. CLAUDE.md §9)
-- **Pas de gradients colorés vifs** (cf. règles strictes CLAUDE.md §9.5)
+- **Palette Ron Design Lab × Tectra** : crème `#F5F1EA` + cobalt `#2C3FA8` + butter `#FFE89C` sur accents (cf. CLAUDE.md §9)
+- **Pas de gradients colorés vifs** (cf. règles strictes CLAUDE.md §9)
 - **Pas de confettis, pas de festoyage visuel**
 - **Format "rapport business"** sobre, ressemble à un relevé bancaire pro
-- **Typographie** : Manrope, hiérarchie claire, tailles standardisées
+- **Typographie** : Outfit (UI) + Instrument Serif italic sur KPIs et mots-clés éditoriaux, hiérarchie claire
 - **Espaces blancs** larges (white space premium)
 - **Animations** : seulement transitions discrètes (200-300ms), pas d'effets festifs
 

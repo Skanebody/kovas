@@ -227,7 +227,7 @@ L'argument IA viendra en **V2-V3** (Vision IA, recos auto, assistant conversatio
 | Jour | Plan révisé |
 |---|---|
 | J1 | Setup monorepo Next.js + Supabase + auth + design system base |
-| J2 | Design system complet (Glassmorphism, Manrope) |
+| J2 | Design system complet (Ron Design Lab × Tectra : crème + cobalt + butter, Outfit + Instrument Serif italic) |
 | J3 | CRUD missions/clients/biens + auto-complétion adresse BAN/cadastre |
 | J4 | Saisie terrain photos + géolocalisation (Web APIs) |
 | J5 | Saisie vocale Whisper + parser custom JS |

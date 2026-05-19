@@ -1,8 +1,13 @@
 # KOVAS Design System — Glassmorphism Premium Soft UI
 
-> Référence canonique des tokens, composants et patterns visuels KOVAS.
-> Override en faveur de [CLAUDE.md §9](../CLAUDE.md) en cas de conflit.
-> Dernière révision : 2026-05-18 (passage palette monochrome → navy KOVAS).
+> ⚠️ **DEPRECATED depuis 2026-05-19** — Ce document décrit la palette navy KOVAS + Manrope abandonnée.
+> **Référence canonique actuelle** :
+> - [CLAUDE.md §9](../CLAUDE.md) — tokens + règles strictes Ron Design Lab × Tectra (crème + cobalt + butter, Outfit + Instrument Serif italic)
+> - [docs/design/ron-design-lab-kovas.md](design/ron-design-lab-kovas.md) — analyse + grille de décision pattern-par-pattern
+> - [apps/web/src/app/globals.css](../apps/web/src/app/globals.css) — implémentation tokens HSL
+> - [apps/web/tailwind.config.ts](../apps/web/tailwind.config.ts) — utilities Tailwind
+>
+> Le contenu ci-dessous est conservé en référence historique (palette navy `#0F1E3D` + Manrope) mais **ne reflète plus** le système actif.
 
 ## 1. Tokens CSS
 

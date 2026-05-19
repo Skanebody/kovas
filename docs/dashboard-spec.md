@@ -56,7 +56,7 @@ Timeline des 10 derniers events (cross-entité), tri par `created_at desc` :
 Format sobre : `Il y a 5 min · Mission DPE Dupont terminée`.
 
 ### 6. CTA principal "+ Nouveau dossier"
-Déjà présent. Conserver, juste s'assurer qu'il est très visible (CTA navy KOVAS).
+Déjà présent. Conserver, juste s'assurer qu'il est très visible (CTA pillule cobalt, cf. CLAUDE.md §9).
 
 ## Hors-V1 (V1.5+, à NE PAS faire maintenant)
 
@@ -153,4 +153,4 @@ certification ADEME 3CL-2021 + recrutement advisor diagnostiqueur certifié + au
 
 ## Design tokens
 
-Hérite intégralement de CLAUDE.md §9 — palette, Manrope, glassmorphism, accents délavés. **Aucune redéfinition** ici.
+Hérite intégralement de CLAUDE.md §9 — palette crème + cobalt + butter (Ron Design Lab × Tectra), typo Outfit + Instrument Serif italic, glassmorphism léger, ombres neutres. **Aucune redéfinition** ici.

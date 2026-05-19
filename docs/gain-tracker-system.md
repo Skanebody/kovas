@@ -62,7 +62,7 @@ Investissement KOVAS : 640€
 ROI : ×36
 ```
 
-**Graphique évolution mensuelle** : histogramme 12 mois glissants, gains mensuels (Recharts, palette navy KOVAS sobre).
+**Graphique évolution mensuelle** : histogramme 12 mois glissants, gains mensuels (Recharts, palette cobalt + butter sobre, cf. CLAUDE.md §9).
 
 **Répartition par type de diagnostic** :
 - DPE : 60%
@@ -113,7 +113,7 @@ Cumul du mois : 47 heures économisées
 
 ✅ **À FAIRE** :
 - Présentation type "diplôme professionnel"
-- Couleur navy KOVAS + accents discrets
+- Palette crème + cobalt + butter (Ron Design Lab × Tectra), accents discrets
 - Format certificat chambre professionnelle
 - Vocabulaire sobre ("statut", "diplôme", "certificat de compétence")
 
@@ -177,7 +177,7 @@ Fondateur KOVAS
 
 - Pas de fioritures graphiques
 - Chiffres en gras, le reste en texte standard
-- Couleurs : navy KOVAS (#0A0A0A foncé) + blanc UNIQUEMENT (pas d'accents délavés)
+- Couleurs : encre `#1A1815` + crème `#F5F1EA` + cobalt `#2C3FA8` UNIQUEMENT (pas d'accents délavés ni multi-pastels marketing)
 - Ressemble à un **rapport comptable mensuel**
 - 1 page maximum
 - Signature personnelle de Benjamin (humain, pas marketing automatisé)
@@ -502,7 +502,7 @@ SELECT cron.schedule(
 - [ ] Visible top-right dashboard mobile + web
 - [ ] Update temps réel après mission terminée (≤ 2s)
 - [ ] Animation 300ms incrément (CSS transition, pas Framer Motion lourde)
-- [ ] Affichage cohérent light/dark mode (palette navy KOVAS)
+- [ ] Affichage cohérent light/dark mode (palette crème + cobalt + butter, cf. CLAUDE.md §9)
 - [ ] **Pas de confettis, pas de son** post-incrément
 
 ### Élément 2 — Page "Mon activité"
@@ -539,7 +539,7 @@ SELECT cron.schedule(
 ### Élément 6 — Image LinkedIn
 
 - [ ] Image 1080×1080 PNG générée
-- [ ] Design sobre cohérent palette navy KOVAS
+- [ ] Design sobre cohérent palette crème + cobalt + butter (Ron Design Lab × Tectra)
 - [ ] Texte pré-rédigé professionnel
 - [ ] Intent partage navigateur (LinkedIn share dialog)
 - [ ] **Pas d'options Instagram/TikTok/Twitter**
