@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { MISSION_PASTEL_CLASS, MISSION_TYPE_LABEL } from '@/lib/mission-pastels'
+import { DiagChip } from '@/components/ui/diag-chip'
 import type { MissionType } from '@kovas/shared'
 import { MapPin } from 'lucide-react'
 import Link from 'next/link'
@@ -69,15 +69,7 @@ export function MissionCard({
       <div className="min-w-0">
         <div className="flex gap-1.5 mb-2 flex-wrap">
           {types.map((type) => (
-            <span
-              key={type}
-              className={cn(
-                'inline-flex items-center px-2 py-0.5 rounded-sm font-mono text-[10.5px] font-semibold uppercase tracking-wider',
-                MISSION_PASTEL_CLASS[type],
-              )}
-            >
-              {MISSION_TYPE_LABEL[type]}
-            </span>
+            <DiagChip key={type} type={type} />
           ))}
         </div>
         <h3 className="text-lg font-bold tracking-tight text-ink mb-1 truncate">

@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { MissionTypeTag } from '@/components/ui/mission-type-tag'
+import { DiagChip } from '@/components/ui/diag-chip'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { cn } from '@/lib/utils'
 import type { MissionType } from '@kovas/shared'
@@ -135,7 +135,7 @@ export async function DashboardPipeline() {
                           <span className={cn('w-1 shrink-0', col.accent)} aria-hidden />
                           <div className="flex-1 min-w-0 py-2 pr-2 space-y-0.5">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <MissionTypeTag type={r.type as MissionType} />
+                              <DiagChip type={r.type as MissionType} />
                               <span className="text-[10px] font-mono text-ink-mute">
                                 {r.reference}
                               </span>

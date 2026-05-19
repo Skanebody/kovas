@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { MissionTypeTag } from '@/components/ui/mission-type-tag'
+import { DiagChip } from '@/components/ui/diag-chip'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import type { MissionType } from '@kovas/shared'
 
@@ -102,7 +102,7 @@ export default async function DossiersPage() {
                   <AppListTableCell className="hidden sm:table-cell">
                     <div className="flex flex-wrap gap-1">
                       {missions.slice(0, 3).map((m, i) => (
-                        <MissionTypeTag
+                        <DiagChip
                           key={`${d.id}-${m.type}-${i}`}
                           type={m.type as MissionType}
                         />
