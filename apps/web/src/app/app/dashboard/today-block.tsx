@@ -71,9 +71,15 @@ export async function TodayBlock() {
       </CardHeader>
       <CardContent className="p-0">
         {list.length === 0 ? (
-          <p className="px-6 pb-6 text-sm text-ink-mute">
-            Aucune visite aujourd&apos;hui. Profitez-en pour finaliser vos exports.
-          </p>
+          <div className="px-6 pb-8 pt-2 text-center">
+            <p className="font-serif italic text-xl text-ink leading-relaxed max-w-md mx-auto">
+              Journée libre. Profitez-en.
+            </p>
+            <p className="text-sm text-ink-mute mt-2 max-w-md mx-auto">
+              Aucune visite planifiée aujourd&apos;hui. Bon moment pour finaliser vos exports en
+              attente.
+            </p>
+          </div>
         ) : (
           <ul className="space-y-3 px-4 pb-4">
             {list.map((d) => {
