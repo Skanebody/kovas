@@ -3,93 +3,121 @@
 @tailwind utilities;
 
 /* ============================================
-   KOVAS Design System v1.0 — Ron Design Lab (produit)
-   Manrope + Instrument Serif · Navy + Amber · Crème
-   Réf. docs/design/kovas-design-system.html
+   KOVAS Design System v3 — 2026-05-19
+   Cream dominant · Navy KOVAS · Cyan liquide signature · Amber accent · Pastels mist
+   Typo : Urbanist (UI) + Instrument Serif italic (KPIs hero/accents) + JetBrains Mono (labels mono)
+   Réf. canonique : docs/design/KOVAS_UIUX_Design_v3.pdf + CLAUDE.md §9
    ============================================ */
 
 @layer base {
   :root {
-    /* Surfaces */
-    --background: 38 33% 95%; /* #F8F5EE cream */
-    --bg-gradient-from: 38 33% 95%;
-    --bg-gradient-to: 38 26% 91%; /* #EFEAD9 cream-deep */
-    --paper: 42 50% 98%; /* #FDFBF6 */
-    --card: 0 0% 100%; /* white-pure surfaces */
+    /* ─── Surfaces — cream chaud signature ─── */
+    --bg-gradient-from: 40 30% 95%;         /* #F8F5EE cream */
+    --bg-gradient-to: 38 26% 91%;           /* #EFEAD9 cream-deep */
+    --background: 40 30% 95%;
+    --paper: 42 50% 98%;                    /* #FDFBF6 surfaces de travail */
+    --card: 0 0% 100%;                      /* white pure défaut shadcn */
+    --cream-deep: 38 26% 91%;               /* surfaces inactives */
 
-    /* Brand navy */
-    --cta: 218 60% 15%; /* #0F1E3D */
-    --cta-hover: 218 50% 21%; /* #1A2F52 */
-    --cta-foreground: 0 0% 100%;
-    --card-accent: 218 60% 15%;
-    --card-accent-foreground: 38 33% 95%;
+    /* ─── Brand Navy KOVAS — 4 niveaux ─── */
+    --navy-primary: 207 47% 17%;            /* #163144 navy primary */
+    --navy-deep: 213 60% 11%;               /* #0B1D2E navy deep, fond mode soir */
+    --navy-soft: 207 39% 28%;               /* #2C4A63 navy soft */
+    --navy-mute: 213 25% 38%;               /* #475F77 navy mute */
 
-    /* Texte — 4 niveaux ink */
-    --foreground: 218 60% 15%; /* ink */
-    --ink-soft: 218 45% 21%; /* #1F2E4D */
-    --muted-foreground: 218 25% 38%; /* ink-mute #4A5878 */
-    --subtle-foreground: 218 18% 55%; /* ink-faint */
-    --ink-ghost: 218 15% 72%; /* #B0B8C8 */
+    /* ─── Cyan liquide (signature v3) ─── */
+    --cyan-deep: 197 39% 49%;               /* #4E8FA8 */
+    --cyan-mid: 196 38% 64%;                /* #7FB5C7 */
+    --cyan-light: 156 51% 90%;              /* #DFF3EB */
+
+    /* ─── CTA primaire alias navy ─── */
+    --cta: 207 47% 17%;
+    --cta-hover: 213 60% 11%;
+    --cta-foreground: 40 30% 95%;
+    --card-accent: 213 60% 11%;
+    --card-accent-foreground: 40 30% 95%;
+
+    /* ─── Accent chaud ambre (énergie positive) ─── */
+    --accent-warm: 34 99% 47%;              /* #D97706 */
+    --accent-warm-soft: 34 100% 92%;        /* #FFEDD5 */
+    --accent-warm-glow: 42 100% 96%;        /* #FFF7E8 */
+    --accent-warm-foreground: 0 0% 100%;
+
+    /* ─── Texte — 4 niveaux d'encre navy ─── */
+    --foreground: 207 47% 17%;
+    --ink-soft: 207 45% 21%;
+    --muted-foreground: 213 25% 38%;
+    --subtle-foreground: 213 18% 55%;
+    --ink-ghost: 218 15% 72%;
     --muted: 38 26% 91%;
     --subtle: 38 22% 88%;
 
-    /* Borders */
-    --border: 38 22% 78%; /* rule #D8D1C0 */
-    --border-soft: 38 24% 85%; /* rule-soft #E5DECB */
+    /* ─── Borders ─── */
+    --border: 38 22% 78%;
+    --border-soft: 38 24% 85%;
 
-    /* Accent chaud KOVAS */
-    --accent-warm: 32 95% 44%; /* #D97706 amber */
-    --accent-warm-soft: 34 100% 92%; /* #FFEDD5 */
-    --accent-warm-glow: 42 100% 96%; /* #FFF7E8 */
-    --accent-warm-foreground: 0 0% 100%;
-
-    /* Sémantiques */
-    --accent-blue: 217 91% 60%; /* #3B82F6 */
+    /* ─── Sémantiques (états système) ─── */
+    --accent-blue: 217 91% 60%;
     --accent-blue-soft: 214 96% 93%;
-    --accent-green: 160 84% 39%; /* #059669 */
+    --accent-green: 160 84% 39%;
     --accent-green-soft: 152 76% 90%;
-    --accent-red: 0 72% 51%; /* #DC2626 */
+    --accent-red: 0 72% 51%;
     --accent-red-soft: 0 86% 94%;
-    --accent-orange: 38 92% 50%; /* #F59E0B warning */
+    --accent-orange: 38 92% 50%;
     --accent-orange-soft: 38 100% 92%;
-    --accent-yellow: 45 100% 80%; /* butter semantic */
+    --accent-yellow: 45 100% 80%;
 
-    /* Pastels catégories (Ron) */
-    --pastel-butter: 45 100% 89%; /* #FFF0C5 */
-    --pastel-lime: 88 38% 89%; /* #E5F0D5 */
-    --pastel-peach: 18 100% 91%; /* #FFE0D5 */
-    --pastel-lavender: 258 52% 92%; /* #E8E0F5 */
-    --pastel-sky: 208 58% 91%; /* #DAE8F5 */
+    /* ─── Pastels mist (signature v3 — cards KPI + label chips) ─── */
+    --pastel-blue-mist: 217 91% 92%;        /* #D8EAFE */
+    --pastel-orange-mist: 28 100% 89%;      /* #FFE5C9 */
+    --pastel-lime-mist: 80 47% 89%;         /* #F0FBD5 */
+    --pastel-coral-mist: 4 86% 94%;         /* #FCE3E1 */
+    /* Pastels v2 conservés (alias MissionTypeTag) */
+    --pastel-butter: 45 100% 89%;
+    --pastel-lime: 88 38% 89%;
+    --pastel-peach: 18 100% 91%;
+    --pastel-lavender: 258 52% 92%;
+    --pastel-sky: 208 58% 91%;
   }
 
   .dark {
-    --background: 222 47% 8%;
-    --bg-gradient-from: 222 47% 8%;
-    --bg-gradient-to: 220 33% 12%;
-    --paper: 220 26% 14%;
-    --card: 220 26% 16%;
+    --bg-gradient-from: 213 60% 8%;
+    --bg-gradient-to: 213 60% 11%;
+    --background: 213 60% 8%;
+    --paper: 213 35% 14%;
+    --card: 213 35% 16%;
+    --cream-deep: 213 28% 18%;
+
+    --navy-primary: 207 47% 17%;
+    --navy-deep: 213 60% 11%;
+    --navy-soft: 207 39% 28%;
+    --navy-mute: 213 25% 50%;
+
+    --cyan-deep: 197 50% 60%;
+    --cyan-mid: 196 50% 72%;
+    --cyan-light: 196 30% 22%;
 
     --cta: 0 0% 100%;
     --cta-hover: 0 0% 88%;
-    --cta-foreground: 218 60% 15%;
-    --card-accent: 218 45% 24%;
+    --cta-foreground: 207 47% 17%;
+    --card-accent: 207 39% 28%;
     --card-accent-foreground: 0 0% 100%;
+
+    --accent-warm: 32 95% 55%;
+    --accent-warm-soft: 32 40% 22%;
+    --accent-warm-glow: 32 30% 18%;
+    --accent-warm-foreground: 213 60% 8%;
 
     --foreground: 38 20% 96%;
     --ink-soft: 38 15% 88%;
     --muted-foreground: 38 12% 68%;
     --subtle-foreground: 38 8% 55%;
-    --ink-ghost: 218 12% 42%;
-    --muted: 220 22% 18%;
-    --subtle: 220 22% 16%;
+    --ink-ghost: 213 12% 42%;
+    --muted: 213 22% 18%;
+    --subtle: 213 22% 16%;
 
-    --border: 220 18% 24%;
-    --border-soft: 220 16% 28%;
-
-    --accent-warm: 38 92% 55%;
-    --accent-warm-soft: 32 40% 22%;
-    --accent-warm-glow: 32 30% 18%;
-    --accent-warm-foreground: 218 60% 15%;
+    --border: 213 18% 24%;
+    --border-soft: 213 16% 28%;
 
     --accent-blue: 213 94% 68%;
     --accent-blue-soft: 217 40% 22%;
@@ -101,6 +129,10 @@
     --accent-orange-soft: 38 40% 22%;
     --accent-yellow: 45 90% 65%;
 
+    --pastel-blue-mist: 217 30% 22%;
+    --pastel-orange-mist: 28 30% 22%;
+    --pastel-lime-mist: 80 25% 22%;
+    --pastel-coral-mist: 4 30% 22%;
     --pastel-butter: 45 30% 22%;
     --pastel-lime: 88 25% 20%;
     --pastel-peach: 18 30% 22%;
@@ -156,16 +188,5 @@
   }
   .text-display-serif {
     @apply font-serif italic font-normal;
-  }
-
-  /* Surfaces flottantes uniquement (header, sidebar, palettes, toasts) */
-  .glass {
-    @apply bg-paper/85 backdrop-blur-xl border border-border-soft shadow-glass;
-  }
-  .glass-header {
-    @apply bg-paper/85 backdrop-blur-xl border-b border-border-soft;
-  }
-  .glass-sidebar {
-    @apply bg-paper/80 backdrop-blur-xl border-r border-border-soft;
   }
 }
