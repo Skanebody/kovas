@@ -11,7 +11,7 @@ export default function NotFound() {
         <p className="text-[13px] text-ink-mute">
           La page que vous cherchez n&apos;existe pas ou a été déplacée.
         </p>
-        <Button asChild variant="warm">
+        <Button asChild variant="accent">
           <Link href="/">
             <ArrowLeft className="size-4" /> Retour à l&apos;accueil
           </Link>

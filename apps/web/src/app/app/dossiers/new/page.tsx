@@ -57,7 +57,7 @@ export default async function NewDossierPage({
                 Ajoutez d&apos;abord un bien — le dossier s&apos;y rattachera.
               </p>
             </div>
-            <Button asChild variant="warm">
+            <Button asChild variant="accent">
               <Link href="/app/properties/new">Créer un bien</Link>
             </Button>
           </CardContent>

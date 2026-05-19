@@ -111,7 +111,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
         <div className="text-sm font-medium capitalize">
           {formatRangeLabel(weekStart, rangeEnd)}
         </div>
-        <Button size="sm" variant="warm" asChild>
+        <Button size="sm" variant="accent" asChild>
           <Link href="/app/dossiers/new">
             <Plus className="size-4" /> Nouveau RDV
           </Link>

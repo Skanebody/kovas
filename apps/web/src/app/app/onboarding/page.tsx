@@ -52,7 +52,7 @@ export default async function OnboardingPage() {
           description="Le client est le donneur d'ordre (particulier, agence, notaire…). Le bien est l'adresse à diagnostiquer — l'autocomplétion gouv FR remplit tout."
           actions={
             <div className="flex flex-wrap gap-2">
-              <Button asChild variant="warm">
+              <Button asChild variant="accent">
                 <Link href="/app/clients/new">
                   Créer un client <ArrowRight className="size-4" />
                 </Link>
@@ -69,7 +69,7 @@ export default async function OnboardingPage() {
           title="Lancer une mission test"
           description="Créez une mission DPE, ajoutez 1 pièce, prenez 2-3 photos et faites une note vocale. Vous verrez en 5 minutes ce que KOVAS change réellement."
           actions={
-            <Button asChild variant="warm">
+            <Button asChild variant="accent">
               <Link href="/app/dossiers/new">
                 Créer une mission <ArrowRight className="size-4" />
               </Link>

@@ -72,7 +72,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                 <Pencil className="size-4" /> Modifier
               </Link>
             </Button>
-            <Button variant="warm" asChild>
+            <Button variant="accent" asChild>
               <Link href={`/app/dossiers/new?propertyId=${property.id}`}>
                 <Plus className="size-4" /> Nouveau dossier
               </Link>

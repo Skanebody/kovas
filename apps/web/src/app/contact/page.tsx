@@ -19,7 +19,7 @@ export default function ContactPage() {
       <p>
         <strong>Adresse :</strong> SASU Nexus 1993, 66 Avenue des Champs-Élysées, 75008 Paris
       </p>
-      <Button asChild variant="warm">
+      <Button asChild variant="accent">
         <a href="mailto:benjamin@kovas.fr">Envoyer un email</a>
       </Button>
     </LegalPageShell>

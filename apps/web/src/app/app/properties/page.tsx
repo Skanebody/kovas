@@ -43,7 +43,7 @@ export default async function PropertiesPage() {
         accent="biens"
         description={`${count} bien${count > 1 ? 's' : ''} · adresses mutualisées entre missions et clients`}
         action={
-          <Button asChild variant="warm">
+          <Button asChild variant="accent">
             <Link href="/app/properties/new">
               <Plus className="size-4" />
               Nouveau bien
@@ -99,7 +99,7 @@ export default async function PropertiesPage() {
           title="Aucun bien enregistré."
           description="Ajoutez un bien pour mutualiser son historique de diagnostics entre plusieurs clients ou interventions."
           action={
-            <Button asChild variant="warm">
+            <Button asChild variant="accent">
               <Link href="/app/properties/new">
                 <Plus className="size-4" />
                 Ajouter un bien

@@ -59,7 +59,7 @@ export default async function DossiersPage() {
         accent="dossiers"
         description={`${count} dossier${count > 1 ? 's' : ''} · regroupant les diagnostics par visite et par bien`}
         action={
-          <Button asChild variant="warm">
+          <Button asChild variant="accent">
             <Link href="/app/dossiers/new">
               <Plus className="size-4" />
               Nouveau dossier
@@ -131,7 +131,7 @@ export default async function DossiersPage() {
           title="Premier dossier en 90 secondes."
           description="Un dossier regroupe les diagnostics d'une même visite sur un bien (DPE + Amiante + Plomb, etc.)."
           action={
-            <Button asChild variant="warm">
+            <Button asChild variant="accent">
               <Link href="/app/dossiers/new">
                 <Plus className="size-4" />
                 Créer mon premier dossier

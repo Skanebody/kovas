@@ -76,7 +76,7 @@ export default function OnboardingFirstDossierPage() {
           <Button asChild variant="ghost" className="text-paper hover:bg-paper/10">
             <Link href="/app/dashboard">Plus tard</Link>
           </Button>
-          <Button asChild size="lg" variant="warm">
+          <Button asChild size="lg" variant="accent">
             <Link href="/app/dossiers/new">
               Créer mon premier dossier <ArrowRight className="size-4" />
             </Link>

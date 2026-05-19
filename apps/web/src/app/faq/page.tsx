@@ -142,7 +142,7 @@ export default function FaqPage() {
               contact@kovas.fr
             </a>
           </p>
-          <Button asChild variant="warm">
+          <Button asChild variant="accent">
             <Link href="/signup">Commencer mon essai 14 jours</Link>
           </Button>
         </div>

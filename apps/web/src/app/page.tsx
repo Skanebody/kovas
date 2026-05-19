@@ -342,7 +342,7 @@ function FinalCTA() {
             Essai gratuit 14 jours, sans carte bancaire. 30 missions complètes pour vous faire votre
             propre opinion.
           </p>
-          <Button size="lg" variant="warm" asChild>
+          <Button size="lg" variant="accent" asChild>
             <Link href="/signup">
               Commencer mon essai <ArrowRight className="size-4" />
             </Link>

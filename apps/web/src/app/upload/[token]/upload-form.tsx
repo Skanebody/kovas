@@ -107,7 +107,7 @@ export function UploadForm({ token }: UploadFormProps) {
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        <Button variant="warm" asChild disabled={uploading}>
+        <Button variant="accent" asChild disabled={uploading}>
           <label htmlFor="file-input" className="cursor-pointer">
             {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
             {uploading ? 'Envoi…' : 'Choisir des fichiers'}

@@ -43,7 +43,7 @@ export default async function ClientsPage() {
         accent="clients"
         description={`${count} client${count > 1 ? 's' : ''} · propriétaires, agences, syndics`}
         action={
-          <Button asChild variant="warm">
+          <Button asChild variant="accent">
             <Link href="/app/clients/new">
               <Plus className="size-4" />
               Nouveau client
@@ -88,7 +88,7 @@ export default async function ClientsPage() {
           title="Aucun client encore."
           description="Créez votre premier client (propriétaire, agence ou syndic) pour pouvoir lui lancer des missions."
           action={
-            <Button asChild variant="warm">
+            <Button asChild variant="accent">
               <Link href="/app/clients/new">
                 <Plus className="size-4" />
                 Créer un client

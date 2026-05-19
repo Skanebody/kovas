@@ -13,6 +13,10 @@ const buttonVariants = cva(
       variant: {
         default:
           'bg-navy text-paper shadow-accent hover:bg-navy-deep hover:-translate-y-px',
+        // v5 accent UNIQUE chartreuse — CTA fort signature (max 1/écran)
+        accent:
+          'bg-chartreuse text-ink shadow-[0_6px_18px_rgba(212,245,66,0.35)] hover:bg-chartreuse-deep hover:-translate-y-px',
+        // Legacy v4 warm ambre — réservé alertes douces (coherence warnings)
         warm:
           'bg-amber text-paper shadow-warm hover:opacity-95 hover:-translate-y-px',
         glass:

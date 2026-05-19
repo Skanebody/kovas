@@ -85,7 +85,7 @@ function MorningHero({
               )}
             </p>
             <div className="flex flex-wrap gap-3 mt-5">
-              <Button asChild variant="warm" size="lg">
+              <Button asChild variant="accent" size="lg">
                 <Link href={tourHref}>
                   Démarrer la tournée
                   <ArrowRight className="size-4" />
