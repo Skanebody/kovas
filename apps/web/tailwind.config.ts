@@ -26,8 +26,18 @@ const config: Config = {
           light: '#DFF3EB',
         },
         amber: { DEFAULT: '#D97706' },
+        /* v5 accent unique chartreuse Synthex (signature) */
+        chartreuse: {
+          DEFAULT: '#D4F542',
+          soft: '#F4FAD9',
+          deep: '#A3C920',
+        },
         paper: '#FFFFFF',
+        /* v5 sage pâle remplace cream Ron sur l'app prod */
+        sage: { DEFAULT: '#F5F7F4', alt: '#EEF2F0' },
         cream: { DEFAULT: '#F8F6F0', deep: '#EFEBDF' },
+        /* v5 sidebar Synthex #0F1419 noir bleuté */
+        'sidebar-bg': '#0F1419',
         rule: '#E7E2D2',
         ink: {
           DEFAULT: '#163144',

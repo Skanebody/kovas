@@ -18,6 +18,17 @@
     --navy-soft: 207 47% 31%;
     --navy-mute: 207 42% 41%;
 
+    /* === v5 final tokens — productivité B2B sobre Synthex === */
+    /* Background sage pâle (au lieu de cream Ron) */
+    --bg-surface: 110 18% 96%;   /* #F5F7F4 sage pâle */
+    --bg-surface-alt: 138 11% 94%;
+    /* Sidebar 80px icon-only Synthex */
+    --sidebar-bg: 210 26% 8%;    /* #0F1419 noir bleuté */
+    /* ACCENT UNIQUE chartreuse signature v5 */
+    --accent-chartreuse: 73 89% 60%;       /* #D4F542 */
+    --accent-chartreuse-soft: 73 76% 92%;  /* #F4FAD9 */
+    --accent-chartreuse-deep: 73 73% 46%;  /* #A3C920 */
+
     /* Cyan */
     --cyan-deep: 198 36% 48%;
     --cyan-mid: 198 38% 64%;
@@ -159,7 +170,8 @@
     font-weight: 400;
     font-size: 14px;
     line-height: 1.55;
-    background: hsl(var(--cream));
+    /* v5 final : sage pâle Synthex remplace cream Ron */
+    background: hsl(var(--bg-surface));
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 }
