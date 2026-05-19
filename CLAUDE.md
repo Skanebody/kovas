@@ -8,7 +8,7 @@
 > **Modification 18 MVP V1 étendu + Focus 8 diagnostics** : [`docs/modification-18-mvp-v1-extended.md`](docs/modification-18-mvp-v1-extended.md) (10 features V1, croquis V2, audit/DTG/marketplace MAR-RGE supprimés)
 > **Avatar client (TOUT décision produit doit passer ce test)** : [`docs/avatar-client.md`](docs/avatar-client.md) — diagnostiqueur 43 ans, ex-cadre reconverti, ton SOBRE PROFESSIONNEL, **JAMAIS gaming/lifestyle/millennial**
 > **Système Gain Tracker (V1.5, sprints 15-17 post-launch, 8j dev)** : [`docs/gain-tracker-system.md`](docs/gain-tracker-system.md) — compteur permanent + page activité + rapport mensuel + image LinkedIn + statuts pros + stats anonymisées
-> **Dernière mise à jour** : 2026-05-19 (Refonte P7 cleanup : suppression Radix Toast orphelin, consolidation `/app/billing` dans `/app/account`, theme toggle unique sidebar, Badge variant `yellow` ajouté)
+> **Dernière mise à jour** : 2026-05-19 (Refonte P6 glassmorphism : Card `flat` par défaut, glass réservé aux surfaces flottantes via utilities `.glass-*`. P7 cleanup avant : Radix Toast supprimé, `/app/billing` consolidé, theme toggle unique sidebar, Badge `yellow`)
 
 ---
 
@@ -381,7 +381,7 @@ Variables CSS : `--font-outfit` + `--font-instrument-serif` câblés dans [`apps
 ### Règles strictes (non négociables)
 
 - **Border-radius** : `1.25rem` (xl) / `1.5rem` (2xl) cards, `0.75rem` (md) inputs et inner cards, `1rem` (lg) sections, `100px` (pill) CTA et badges
-- **Glassmorphism léger** : `backdrop-blur(20px)` + `bg-card/85` (utility `.glass`) — **moins agressif** que SugarCRM (était 60%). La crème de fond impose plus d'opacité sinon illisible
+- **Glassmorphism léger** : décision P6 (2026-05-19) — Option B "Adapter". Glass **réservé aux surfaces flottantes** au-dessus du flux (header sticky, sidebar, command palette, bottom sheets, app-nav-tabs, calendar sticky header) via les utilities `.glass-header` / `.glass-sidebar` / `.glass`. Les cards de travail (dashboard, dossier, listes, account, landing) utilisent désormais `Card variant="flat"` par défaut : surface paper opaque, ombre douce neutre `shadow-glass`, border `border-border`. Plus de blur partout — pattern vieillissant en 2026
 - **Ombres douces signature Ron** : `box-shadow: 0 8px 24px hsl(var(--foreground) / 0.06), 0 1px 2px hsl(var(--foreground) / 0.04)` — neutres (basées sur foreground encre, pas couleur). Tokens `shadow-glass` / `shadow-glass-hover` / `shadow-cta`. **JAMAIS** `shadow-lg` / `shadow-2xl` / glows colorés
 - **CTA primaire** : pillule cobalt (`bg-cta text-cta-foreground rounded-pill`), padding `12px 32px`, font-weight 600, ombre `shadow-cta`, hover lift `-1px` + `shadow-cta-hover`
 - **Hero KPI dramatisé** : Instrument Serif italic, taille 60-72px, leading-none, sur card paper — registre éditorial signé (cf. composant [`KpiHero`](apps/web/src/components/ui/kpi-hero.tsx))
@@ -395,7 +395,7 @@ Variables CSS : `--font-outfit` + `--font-instrument-serif` câblés dans [`apps
 ### Composants canoniques
 
 - **`Button`** : variants `default` (pillule cobalt CTA), `outline` (bordure border, hover bg-muted), `ghost`, `destructive` (rouge), `icon` (cercle 40px ghost)
-- **`Card`** : glass standard (`bg-card/85 backdrop-blur-xl border shadow-glass rounded-2xl`) ou variant `accent` (`bg-card-accent text-card-accent-foreground`, cobalt pleine)
+- **`Card`** : 3 variants — `flat` (défaut depuis P6, paper opaque + border + shadow-glass) · `glass` (opt-in surfaces flottantes) · `accent` (cobalt pleine, hero visuels CTA landing + gain tracker). Tous en `rounded-2xl`
 - **`KpiHero`** (signature Ron) : chiffre Instrument Serif italic 60-72px + label + trend pill — composant dédié au cockpit dashboard
 - **`Badge`** : 8 variants — `default` (cobalt CTA) + `outline` + `muted` + sémantiques `blue` (info) + `green` (DPE A-C) + `red` (DPE F-G) + `orange` (DPE D-E) + `yellow` (butter, alerte douce / compteur missions). Pastilles pillule, opacité 15% sur fond et 100% sur texte (sauf yellow : 45% bg + text-foreground)
 - **Utilities** : `.glass` / `.glass-hover` / `.glass-accent` / `.glass-header` / `.glass-sidebar` / `.bg-accent-yellow-soft` / `.text-display` / `.text-display-serif`

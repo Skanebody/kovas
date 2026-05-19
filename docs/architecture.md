@@ -319,7 +319,7 @@ Buckets Storage :
 ## 12. Système design (CLAUDE.md §9 + docs/design-system.md)
 
 - Light + Dark mode actif via next-themes (toggle **sidebar uniquement** depuis P7, ThemePicker /app/account supprimé), defaultTheme `light`
-- Glassmorphism léger (Ron Design Lab × Tectra) + ombres neutres
+- Glassmorphism léger **réservé aux surfaces flottantes** depuis P6 (header sticky, sidebar, command palette, bottom sheets, app-nav-tabs, calendar sticky header). Cards de travail = `variant="flat"` (paper opaque + ombre neutre)
 - Palette : crème `#F5F1EA` + paper `#FBF8F2` + cobalt `#2C3FA8` CTA + butter `#FFE89C` accent énergique + sémantiques (bleu/rouge/orange/vert)
 - Typo : Outfit (UI) + Instrument Serif italic (KPIs, mots-clés éditoriaux)
 - Radius : `1.25rem`/`1.5rem` cards, `100px` (pill) CTA et badges, `0.75rem` inputs
