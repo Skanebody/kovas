@@ -41,7 +41,9 @@ export default async function NewDossierPage({
       </Button>
 
       <AppPageHeader
-        title="Nouveau dossier"
+        title="Nouveau"
+        accent="dossier"
+        eyebrow="90 secondes chrono"
         description="Un dossier = une visite. Cochez tous les diagnostics à faire — KOVAS créera une fiche par diagnostic et partagera pièces, photos et notes."
       />
 

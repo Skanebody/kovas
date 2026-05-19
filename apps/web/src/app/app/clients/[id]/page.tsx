@@ -36,9 +36,22 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   if (!client) notFound()
 
+  // Count dossiers historiques pour badge "Fidèle" (wireframe v4 §6.1)
+  // Mission n'a pas de client_id direct — relation via dossier
+  const { count: dossiersCount } = await supabase
+    .from('dossiers')
+    .select('*', { count: 'exact', head: true })
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .eq('client_id', id)
+
+  const missionsCount = dossiersCount ?? 0
+  const fidele = missionsCount >= 5
+
   const addressLines = formatFullAddress(client)
   const personName = [client.first_name, client.last_name].filter(Boolean).join(' ')
   const business = isBusinessClientType(client.type)
+  const typeLabel = TYPE_LABELS[client.type] ?? client.type
 
   return (
     <div className="max-w-3xl space-y-6 animate-fade-in">
@@ -49,14 +62,22 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       </Button>
 
       <AppPageHeader
-        title={client.display_name}
-        description={TYPE_LABELS[client.type] ?? client.type}
+        title="Client"
+        accent={client.display_name}
+        eyebrow={`${typeLabel}${missionsCount ? ` · ${missionsCount} dossier${missionsCount > 1 ? 's' : ''}` : ''}`}
         action={
-          <Button variant="glass" asChild>
-            <Link href={`/app/clients/${client.id}/edit`}>
-              <Pencil className="size-4" /> Modifier
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {fidele && (
+              <span className="inline-flex items-center gap-1 rounded-pill bg-accent-warm-soft text-accent-warm px-3 py-1 text-xs font-semibold uppercase tracking-wider">
+                Fidèle
+              </span>
+            )}
+            <Button variant="glass" asChild>
+              <Link href={`/app/clients/${client.id}/edit`}>
+                <Pencil className="size-4" /> Modifier
+              </Link>
+            </Button>
+          </div>
         }
       />
 

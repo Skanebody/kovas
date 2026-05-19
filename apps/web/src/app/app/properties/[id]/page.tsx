@@ -58,8 +58,13 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
       </Button>
 
       <AppPageHeader
-        title={property.address}
-        description={[property.postal_code, property.city].filter(Boolean).join(' ') || undefined}
+        title="Bien"
+        accent={property.address}
+        eyebrow={[
+          [property.postal_code, property.city].filter(Boolean).join(' '),
+          property.surface_total ? `${property.surface_total} m²` : null,
+          property.year_built ? `${property.year_built}` : null,
+        ].filter(Boolean).join(' · ') || undefined}
         action={
           <div className="flex items-center gap-2 flex-wrap">
             <Button variant="glass" asChild>
