@@ -1,6 +1,8 @@
+import { FaqAnswer } from '@/components/faq-answer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { FAQ_LANDING } from '@/lib/faq-data'
 import {
   ArrowRight,
   Camera,
@@ -28,6 +30,7 @@ export default function HomePage() {
         <Features />
         <HowItWorks />
         <PricingTeaser />
+        <LandingFaq />
         <FinalCTA />
       </main>
       <SiteFooter />
@@ -57,7 +60,7 @@ function SiteHeader() {
             Tarifs
           </Link>
           <Link
-            href="/#faq"
+            href="/faq"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             FAQ
@@ -283,6 +286,53 @@ function PricingTeaser() {
   )
 }
 
+function LandingFaq() {
+  return (
+    <section id="faq" className="px-6 py-20 sm:py-28">
+      <div className="mx-auto max-w-3xl space-y-10">
+        <div className="text-center space-y-3">
+          <Badge variant="muted">FAQ</Badge>
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+            Les questions les plus posées
+          </h2>
+          <p className="text-muted-foreground">
+            5 réponses essentielles avant de démarrer. La FAQ complète est disponible sur{' '}
+            <Link href="/faq" className="text-foreground underline-offset-4 hover:underline">
+              kovas.fr/faq
+            </Link>
+            .
+          </p>
+        </div>
+        <div className="space-y-3">
+          {FAQ_LANDING.map((q) => (
+            <Card key={q.id} className="p-0 overflow-hidden">
+              <details className="group">
+                <summary className="cursor-pointer list-none px-5 py-4 flex items-start justify-between gap-3 hover:bg-muted/30 transition-colors">
+                  <h3 className="text-base font-semibold flex-1 min-w-0">{q.question}</h3>
+                  <span
+                    aria-hidden
+                    className="text-muted-foreground shrink-0 transition-transform group-open:rotate-180"
+                  >
+                    ▾
+                  </span>
+                </summary>
+                <div className="px-5 pb-5 pt-1 border-t border-border/50">
+                  <FaqAnswer markdown={q.answer} />
+                </div>
+              </details>
+            </Card>
+          ))}
+        </div>
+        <div className="text-center">
+          <Button variant="outline" asChild>
+            <Link href="/faq">Voir toutes les questions</Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function FinalCTA() {
   return (
     <section className="px-6 py-20 sm:py-28">
@@ -313,6 +363,9 @@ function SiteFooter() {
       <div className="mx-auto max-w-6xl flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-sm text-subtle-foreground">
         <p>© 2026 SASU Nexus 1993 · 66 Av Champs Elysées, 75008 Paris · SIREN 982 786 154</p>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <Link href="/faq" className="hover:text-foreground transition-colors">
+            FAQ
+          </Link>
           <Link href="/mentions-legales" className="hover:text-foreground transition-colors">
             Mentions légales
           </Link>
