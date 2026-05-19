@@ -1,5 +1,7 @@
 import { AppNavTabs } from '@/components/app-nav-tabs'
 import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
+import { CommandPalette } from '@/components/command-palette'
+import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { UsageWidget } from '@/components/usage-widget'
@@ -23,6 +25,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </Link>
           <AppNavTabs />
           <div className="flex items-center gap-2 shrink-0">
+            <CommandPaletteTrigger />
             <UsageWidget />
             <span className="text-sm text-muted-foreground hidden lg:inline ml-1">
               {displayName}
@@ -43,6 +46,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </main>
       </div>
       <AppMobileNav />
+      <CommandPalette />
     </div>
   )
 }
