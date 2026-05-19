@@ -242,7 +242,7 @@ export default async function DossierDetailPage({
             <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
               {dossier.reference}
             </p>
-            <h1 className="font-display font-light text-display-s tracking-tight text-ink">
+            <h1 className="font-serif italic font-normal text-3xl md:text-4xl tracking-tight text-ink leading-[1.1]">
               {client?.display_name ?? 'Dossier de visite'}
             </h1>
             {fullAddress ? (
