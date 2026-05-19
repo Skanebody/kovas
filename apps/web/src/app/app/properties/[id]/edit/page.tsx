@@ -1,10 +1,10 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { Button } from '@/components/ui/button'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { EditPropertyForm } from './edit-form'
 
 export const metadata: Metadata = { title: 'Modifier le bien' }
@@ -47,11 +47,7 @@ export default async function EditPropertyPage({
         </Link>
       </Button>
 
-      <AppPageHeader
-        title="Modifier"
-        accent={property.address}
-        eyebrow={subtitle || 'Bien'}
-      />
+      <AppPageHeader title="Modifier" accent={property.address} eyebrow={subtitle || 'Bien'} />
 
       <EditPropertyForm property={property} clients={clients ?? []} />
     </div>

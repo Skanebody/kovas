@@ -1,13 +1,13 @@
 'use client'
 
-import { Building2, Loader2 } from 'lucide-react'
-import { useActionState, useState } from 'react'
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete'
 import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { Building2, Loader2 } from 'lucide-react'
+import { useActionState, useState } from 'react'
 import { type PropertyFormState, updatePropertyAction } from '../../actions'
 
 interface EditPropertyFormProps {
@@ -104,7 +104,7 @@ export function EditPropertyForm({ property, clients }: EditPropertyFormProps) {
           <FormField
             label="Identification appartement"
             htmlFor="apartmentDetail"
-            hint='Ex : « Apt 12B », « 3ème étage gauche »'
+            hint="Ex : « Apt 12B », « 3ème étage gauche »"
           >
             <Input
               id="apartmentDetail"

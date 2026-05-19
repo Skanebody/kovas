@@ -1,11 +1,18 @@
 'use server'
 
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { getCurrentUser } from '@/lib/auth/current-user'
 
-const PROPERTY_TYPES = ['maison', 'appartement', 'immeuble', 'local_commercial', 'bureau', 'autre'] as const
+const PROPERTY_TYPES = [
+  'maison',
+  'appartement',
+  'immeuble',
+  'local_commercial',
+  'bureau',
+  'autre',
+] as const
 
 const propertySchema = z.object({
   address: z.string().min(3, 'Adresse requise').max(255),
@@ -162,6 +169,48 @@ export async function updatePropertyAction(
   revalidatePath('/app/properties')
   revalidatePath(`/app/properties/${propertyId}`)
   redirect(`/app/properties/${propertyId}`)
+}
+
+/**
+ * Transfère un bien à un autre propriétaire (ou le dissocie si newClientId
+ * est null/vide).
+ *
+ * Sémantique : `properties.client_id` représente le propriétaire ACTUEL.
+ * Pour l'historique d'audit (qui a possédé ce bien à quelle période),
+ * voir V1.5 — table `property_transfers` ou colonne `metadata.transfers[]`.
+ */
+export async function transferPropertyOwnerAction(
+  propertyId: string,
+  newClientId: string | null,
+): Promise<{ error?: string } | undefined> {
+  const { supabase, orgId } = await getCurrentUser()
+
+  // Si newClientId fourni, vérifier qu'il appartient à la même organisation
+  if (newClientId) {
+    const { data: client, error: clientErr } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('id', newClientId)
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .maybeSingle()
+    if (clientErr) return { error: clientErr.message }
+    if (!client) return { error: 'Client introuvable.' }
+  }
+
+  const { error } = await supabase
+    .from('properties')
+    .update({ client_id: newClientId || null })
+    .eq('id', propertyId)
+    .eq('organization_id', orgId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/app/properties/${propertyId}`)
+  revalidatePath('/app/properties')
+  revalidatePath('/app/clients')
+  if (newClientId) revalidatePath(`/app/clients/${newClientId}`)
+  return undefined
 }
 
 export async function softDeletePropertyAction(propertyId: string) {

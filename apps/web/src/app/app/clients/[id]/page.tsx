@@ -1,7 +1,3 @@
-import { ArrowLeft, Building2, Mail, MapPin, Pencil, Phone } from 'lucide-react'
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { AppPageHeader } from '@/components/app-page-header'
 import { DangerZone } from '@/components/danger-zone'
 import { Button } from '@/components/ui/button'
@@ -9,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { formatFullAddress } from '@/lib/format-address'
 import { isBusinessClientType } from '@/lib/validation/client'
+import { ArrowLeft, Building2, Home, Mail, MapPin, Pencil, Phone, Plus } from 'lucide-react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { deleteClientAction } from '../actions'
 
 export const metadata: Metadata = { title: 'Détail client' }
@@ -38,12 +38,23 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   // Count dossiers historiques pour badge "Fidèle" (wireframe v4 §6.1)
   // Mission n'a pas de client_id direct — relation via dossier
-  const { count: dossiersCount } = await supabase
-    .from('dossiers')
-    .select('*', { count: 'exact', head: true })
-    .eq('organization_id', orgId)
-    .is('deleted_at', null)
-    .eq('client_id', id)
+  const [{ count: dossiersCount }, { data: ownedProperties }] = await Promise.all([
+    supabase
+      .from('dossiers')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .eq('client_id', id),
+    // Logements actuellement détenus par ce client (propriétaire)
+    // CLAUDE.md §3 — un propriétaire peut avoir plusieurs logements
+    supabase
+      .from('properties')
+      .select('id, address, postal_code, city, year_built, surface_total, property_type')
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .eq('client_id', id)
+      .order('created_at', { ascending: false }),
+  ])
 
   const missionsCount = dossiersCount ?? 0
   const fidele = missionsCount >= 5
@@ -154,6 +165,60 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         </Card>
       ) : null}
 
+      {/* LOGEMENTS DU PROPRIÉTAIRE — un propriétaire peut avoir plusieurs biens.
+          Le client_id sur properties.client_id reflète le propriétaire actuel ;
+          un transfert (changement de propriétaire) se fait depuis la fiche bien. */}
+      <Card variant="opaque" padding="default">
+        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Home className="size-4 text-ink-mute" /> Logements détenus
+            <span className="text-xs font-normal text-ink-mute">
+              ({ownedProperties?.length ?? 0})
+            </span>
+          </CardTitle>
+          <Button variant="glass" size="sm" asChild>
+            <Link href={`/app/properties/new?clientId=${id}`}>
+              <Plus className="size-4" /> Ajouter un logement
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {!ownedProperties || ownedProperties.length === 0 ? (
+            <p className="text-sm text-ink-mute italic">
+              Aucun logement rattaché. Cliquez « Ajouter un logement » pour en créer un — ou
+              transférez un bien existant depuis la fiche du logement.
+            </p>
+          ) : (
+            <ul className="divide-y divide-rule/60">
+              {ownedProperties.map((p) => {
+                const address = [p.address, p.postal_code, p.city].filter(Boolean).join(', ')
+                return (
+                  <li key={p.id} className="py-2.5 first:pt-0 last:pb-0">
+                    <Link href={`/app/properties/${p.id}`} className="flex items-start gap-3 group">
+                      <MapPin className="size-4 mt-0.5 text-ink-mute shrink-0" />
+                      <div className="flex-1 min-w-0 space-y-0.5">
+                        <p className="text-sm font-medium text-ink group-hover:underline truncate">
+                          {address || 'Adresse non renseignée'}
+                        </p>
+                        <p className="text-[11px] text-ink-mute">
+                          {[
+                            p.property_type,
+                            p.year_built ? `${p.year_built}` : null,
+                            p.surface_total ? `${p.surface_total} m²` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
       {client.notes ? (
         <Card variant="opaque" padding="default">
           <CardHeader>
@@ -163,10 +228,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         </Card>
       ) : null}
 
-      <DangerZone
-        entityLabel="client"
-        onDelete={deleteClientAction.bind(null, client.id)}
-      />
+      <DangerZone entityLabel="client" onDelete={deleteClientAction.bind(null, client.id)} />
     </div>
   )
 }
