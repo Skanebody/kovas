@@ -3,7 +3,13 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { WIZARD_STEPS, type WizardStep } from '@/lib/import/types'
+import {
+  SOURCE_LOGICIELS,
+  SOURCE_LOGICIEL_LABELS,
+  type SourceLogiciel,
+  WIZARD_STEPS,
+  type WizardStep,
+} from '@/lib/import/types'
 import { cn } from '@/lib/utils'
 import {
   ArrowRight,
@@ -19,28 +25,28 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { LICIEL_EXPORT_STEPS, TUTO_HELP_LINKS } from './tuto-content'
+import { EXPORT_TUTORIALS, TUTO_HELP_LINKS, type TutoStepContent } from './tuto-content'
 import { UploadDropZone } from './upload-dropzone'
 
-interface ImportLicielWizardProps {
+interface ImportWizardProps {
   /** Job id si on reprend un import en cours (étapes 4-5). Undefined = nouveau wizard. */
   initialJobId?: string
 }
 
 /**
- * Wizard 5 étapes pour l'import Liciel.
+ * Wizard 5 étapes pour l'import depuis un logiciel diag (multi-source).
  *
  * Étape 1 — Préparer (statique, RGPD-friendly)
- * Étape 2 — Exporter depuis Liciel (tuto, contenu dans tuto-content.ts)
- * Étape 3 — Téléverser (drag-drop, TODO backend)
- * Étape 4 — Analyser (polling status, TODO backend)
- * Étape 5 — Valider (review doublons + commit, TODO backend)
- *
- * Pour V1 actuelle : seules les étapes 1 et 2 sont fonctionnelles (statiques).
- * Les étapes 3-5 affichent un placeholder annonçant la suite.
+ * Étape 2 — Choisir + Exporter (pillules Liciel/AnalysImmo/OBBC/ORIS/Autre + tuto)
+ * Étape 3 — Téléverser (drag-drop, passe source_logiciel à l'API)
+ * Étape 4 — Analyser (polling status)
+ * Étape 5 — Valider (review doublons + commit)
  */
-export function ImportLicielWizard({ initialJobId }: ImportLicielWizardProps) {
+export function ImportWizard({ initialJobId }: ImportWizardProps) {
   const [step, setStep] = useState<WizardStep>(initialJobId ? 4 : 1)
+  // Source logiciel sélectionnée à l'étape 2, transmise à l'upload (étape 3).
+  // Défaut Liciel = case la plus fréquente (40-52 % PdM, cf. CLAUDE.md §1).
+  const [sourceLogiciel, setSourceLogiciel] = useState<SourceLogiciel>('liciel')
 
   function goToStep(s: WizardStep) {
     setStep(s)
@@ -51,8 +57,15 @@ export function ImportLicielWizard({ initialJobId }: ImportLicielWizardProps) {
       <StepperHeader currentStep={step} onJump={goToStep} />
 
       {step === 1 && <Step1Prepare onNext={() => goToStep(2)} />}
-      {step === 2 && <Step2Export onBack={() => goToStep(1)} onNext={() => goToStep(3)} />}
-      {step === 3 && <Step3Upload onBack={() => goToStep(2)} />}
+      {step === 2 && (
+        <Step2Export
+          sourceLogiciel={sourceLogiciel}
+          onChangeSource={setSourceLogiciel}
+          onBack={() => goToStep(1)}
+          onNext={() => goToStep(3)}
+        />
+      )}
+      {step === 3 && <Step3Upload sourceLogiciel={sourceLogiciel} onBack={() => goToStep(2)} />}
       {step === 4 && <Step4AnalyzePlaceholder jobId={initialJobId} />}
       {step === 5 && <Step5ValidatePlaceholder />}
     </div>
@@ -143,10 +156,10 @@ function Step1Prepare({ onNext }: { onNext: () => void }) {
         <div className="rounded-lg border border-accent-green/30 bg-accent-green/5 p-4 text-sm leading-relaxed">
           <p className="font-medium text-ink mb-1">Import légal et sécurisé.</p>
           <p className="text-ink-soft">
-            C&apos;est <strong>vous</strong> qui exportez vos données depuis votre propre compte
-            Liciel, dans le cadre de votre <strong>droit à la portabilité</strong> (article 20 du
-            RGPD). KOVAS n&apos;accède jamais directement à Liciel et ne stocke pas vos identifiants
-            Liciel.
+            C&apos;est <strong>vous</strong> qui exportez vos données depuis votre propre logiciel
+            de diagnostic, dans le cadre de votre <strong>droit à la portabilité</strong> (article
+            20 du RGPD). KOVAS n&apos;accède jamais directement à votre logiciel et ne stocke pas
+            vos identifiants.
           </p>
         </div>
 
@@ -183,14 +196,15 @@ function Step1Prepare({ onNext }: { onNext: () => void }) {
               <span className="text-ink-mute">·</span>
               <span>
                 <strong className="text-ink">Les rapports PDF eux-mêmes</strong> — à conserver dans
-                Liciel selon la réglementation (10 ans, 50 ans pour l&apos;amiante).
+                votre logiciel d&apos;origine selon la réglementation (10 ans, 50 ans pour
+                l&apos;amiante).
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-ink-mute">·</span>
               <span>
                 <strong className="text-ink">Les paramètres techniques de calcul DPE</strong> —
-                propres à Liciel.
+                propres à votre logiciel d&apos;origine.
               </span>
             </li>
             <li className="flex gap-2">
@@ -209,7 +223,7 @@ function Step1Prepare({ onNext }: { onNext: () => void }) {
           </p>
           <ul className="space-y-0.5">
             <li>
-              · Export depuis Liciel : <span className="tabular-nums">2 à 5 minutes</span>
+              · Export depuis votre logiciel : <span className="tabular-nums">2 à 5 minutes</span>
             </li>
             <li>
               · Import et vérification : <span className="tabular-nums">5 à 15 minutes</span> selon
@@ -251,10 +265,22 @@ function ImportItem({
 }
 
 // ============================================================================
-// STEP 2 — EXPORTER DEPUIS LICIEL
+// STEP 2 — EXPORTER (sélecteur logiciel + tuto correspondant)
 // ============================================================================
 
-function Step2Export({ onBack, onNext }: { onBack: () => void; onNext: () => void }) {
+function Step2Export({
+  sourceLogiciel,
+  onChangeSource,
+  onBack,
+  onNext,
+}: {
+  sourceLogiciel: SourceLogiciel
+  onChangeSource: (s: SourceLogiciel) => void
+  onBack: () => void
+  onNext: () => void
+}) {
+  const tutoSteps = EXPORT_TUTORIALS[sourceLogiciel]
+  const logicielLabel = SOURCE_LOGICIEL_LABELS[sourceLogiciel]
   return (
     <Card variant="opaque" padding="default">
       <CardContent className="pt-2 space-y-6">
@@ -263,22 +289,70 @@ function Step2Export({ onBack, onNext }: { onBack: () => void; onNext: () => voi
             <FileSpreadsheet className="size-3.5" /> Étape 2 / 5 — Exporter
           </p>
           <h2 className="font-serif italic font-normal text-2xl md:text-3xl text-ink leading-tight">
-            Comment exporter votre base depuis Liciel.
+            Quel logiciel utilisez-vous actuellement ?
           </h2>
           <p className="text-sm text-ink-soft max-w-2xl">
-            Suivez ces étapes dans votre logiciel Liciel. Le tutoriel sera affiné une fois
-            l&apos;interface réelle Liciel validée.
+            Sélectionnez votre logiciel de diagnostic. KOVAS adapte automatiquement le tutoriel et
+            la lecture du fichier exporté.
           </p>
         </header>
 
-        {/* TODO LICIEL — placeholders à remplacer par captures + libellés exacts */}
-        <Badge variant="orange" className="text-[10px]">
-          <Shield className="size-3 mr-1" />
-          Tuto à finaliser après démo Liciel
-        </Badge>
+        {/* Pillules de sélection logiciel source — pattern toggle group :
+            <button aria-pressed> est plus simple et plus accessible que
+            <button role=radio>, et passe le linter biome a11y. */}
+        <fieldset className="space-y-2.5">
+          <legend className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            Logiciel source
+          </legend>
+          <div className="flex flex-wrap gap-2" aria-label="Logiciel de diagnostic source">
+            {SOURCE_LOGICIELS.map((s) => {
+              const active = s === sourceLogiciel
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => onChangeSource(s)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-pill border px-3 py-1.5 text-xs font-medium transition-colors',
+                    active
+                      ? 'bg-navy text-paper border-navy'
+                      : 'bg-paper text-ink border-rule hover:border-navy/40 hover:bg-cream-deep/40',
+                  )}
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'inline-block size-2 rounded-full',
+                      active ? 'bg-chartreuse' : 'bg-ink-mute/40',
+                    )}
+                  />
+                  {SOURCE_LOGICIEL_LABELS[s]}
+                </button>
+              )
+            })}
+          </div>
+        </fieldset>
+
+        <header className="space-y-1.5 pt-2 border-t border-rule/40">
+          <h3 className="font-serif italic font-normal text-xl text-ink leading-tight">
+            Comment exporter depuis {logicielLabel}.
+          </h3>
+          <p className="text-sm text-ink-soft max-w-2xl">
+            Suivez ces étapes dans votre logiciel. Le tutoriel sera affiné une fois l&apos;interface
+            réelle validée sur les retours bêta.
+          </p>
+        </header>
+
+        {sourceLogiciel !== 'autre' && (
+          <Badge variant="orange" className="text-[10px]">
+            <Shield className="size-3 mr-1" />
+            Tuto à finaliser après démo {logicielLabel}
+          </Badge>
+        )}
 
         <ol className="space-y-4">
-          {LICIEL_EXPORT_STEPS.map((s) => (
+          {tutoSteps.map((s) => (
             <TutoStepCard key={s.num} step={s} />
           ))}
         </ol>
@@ -325,7 +399,7 @@ const HELP_ICONS = {
   ExternalLink,
 } as const
 
-function TutoStepCard({ step }: { step: (typeof LICIEL_EXPORT_STEPS)[number] }) {
+function TutoStepCard({ step }: { step: TutoStepContent }) {
   return (
     <li className="rounded-xl border border-rule bg-paper p-4 space-y-2">
       <div className="flex items-start gap-3">
@@ -345,7 +419,7 @@ function TutoStepCard({ step }: { step: (typeof LICIEL_EXPORT_STEPS)[number] }) 
         </div>
         {step.screenshot && (
           <div className="hidden md:flex shrink-0 items-center justify-center size-24 rounded-lg border border-dashed border-rule bg-cream-deep/40 text-[10px] text-ink-mute font-mono">
-            {/* TODO LICIEL — capture {step.screenshot}.png à ajouter dans /public/tutos/ */}
+            {/* TODO — capture {step.screenshot}.png à ajouter dans /public/tutos/ */}
             capture
             <br />à venir
           </div>
@@ -425,7 +499,13 @@ function PlaceholderStep({
 // STEP 3 — TÉLÉVERSER
 // ============================================================================
 
-function Step3Upload({ onBack }: { onBack: () => void }) {
+function Step3Upload({
+  sourceLogiciel,
+  onBack,
+}: {
+  sourceLogiciel: SourceLogiciel
+  onBack: () => void
+}) {
   const router = useRouter()
   return (
     <Card variant="opaque" padding="default">
@@ -444,7 +524,10 @@ function Step3Upload({ onBack }: { onBack: () => void }) {
           </p>
         </header>
 
-        <UploadDropZone onJobCreated={(id) => router.push(`/app/dossiers/import-liciel/${id}`)} />
+        <UploadDropZone
+          sourceLogiciel={sourceLogiciel}
+          onJobCreated={(id) => router.push(`/app/dossiers/import/${id}`)}
+        />
 
         <div className="flex justify-between items-center pt-2 flex-wrap gap-2">
           <Button variant="ghost" onClick={onBack}>
@@ -464,11 +547,11 @@ function Step4AnalyzePlaceholder({ jobId }: { jobId?: string }) {
     <PlaceholderStep
       stepNum={4}
       stepLabel="Analyser"
-      title="Analyse de votre fichier Liciel."
+      title="Analyse de votre fichier."
       description={
         jobId
           ? `Suivi temps réel du job ${jobId.slice(0, 8)}… — parsing + normalisation + dédoublonnage en cours.`
-          : 'Polling /api/import/liciel/status/[jobId] toutes les 2s avec étapes progressives. À implémenter.'
+          : 'Polling /api/import/status/[jobId] toutes les 2s avec étapes progressives. À implémenter.'
       }
     />
   )

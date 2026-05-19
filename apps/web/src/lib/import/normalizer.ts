@@ -1,5 +1,7 @@
 /**
- * Normalisation des entités Liciel parsées :
+ * Normalisation des entités parsées (multi-source : Liciel / AnalysImmo / OBBC /
+ * ORIS / Autre — le normalizer est agnostique de la source car le schéma
+ * Parsed* est unifié) :
  *  - Téléphones → E.164 (libphonenumber-js)
  *  - Emails → validation + détection typos communs
  *  - SIRET → validation Luhn (INSEE Sirene différé V1.5)
@@ -11,12 +13,7 @@
  */
 
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
-import type {
-  LicielParsedClient,
-  LicielParsedCopropriete,
-  LicielParsedProperty,
-  NormalizationWarning,
-} from './types'
+import type { NormalizationWarning, ParsedClient, ParsedCopropriete, ParsedProperty } from './types'
 
 // ============================================================================
 // SORTIES TYPÉES
@@ -417,7 +414,7 @@ function inferPropertyType(raw: string | undefined): NormalizedProperty['propert
 // ============================================================================
 
 export async function normalizeClient(
-  c: LicielParsedClient,
+  c: ParsedClient,
   banCache: BanCache = new BanCache(),
 ): Promise<NormalizeResult<NormalizedClient>> {
   const warnings: NormalizationWarning[] = []
@@ -516,7 +513,7 @@ export async function normalizeClient(
 // ============================================================================
 
 export async function normalizeProperty(
-  p: LicielParsedProperty,
+  p: ParsedProperty,
   banCache: BanCache = new BanCache(),
 ): Promise<NormalizeResult<NormalizedProperty>> {
   const warnings: NormalizationWarning[] = []
@@ -599,7 +596,7 @@ function intOrNull(v: number | undefined): number | null {
 // ============================================================================
 
 export async function normalizeCopropriete(
-  c: LicielParsedCopropriete,
+  c: ParsedCopropriete,
   banCache: BanCache = new BanCache(),
 ): Promise<NormalizeResult<NormalizedCopropriete>> {
   const warnings: NormalizationWarning[] = []

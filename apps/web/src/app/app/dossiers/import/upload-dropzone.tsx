@@ -1,7 +1,13 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { ACCEPTED_EXTENSIONS, IMPORT_LIMITS, type UploadResponse } from '@/lib/import/types'
+import {
+  ACCEPTED_EXTENSIONS,
+  IMPORT_LIMITS,
+  SOURCE_LOGICIEL_LABELS,
+  type SourceLogiciel,
+  type UploadResponse,
+} from '@/lib/import/types'
 import { cn } from '@/lib/utils'
 import { FileSpreadsheet, Loader2, Upload, X } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
@@ -9,6 +15,8 @@ import { useCallback, useRef, useState } from 'react'
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'error'
 
 interface UploadDropZoneProps {
+  /** Logiciel diag source sélectionné dans le wizard (étape 2). */
+  sourceLogiciel: SourceLogiciel
   /** Callback appelé quand l'API retourne 201 avec le job_id. */
   onJobCreated: (jobId: string) => void
 }
@@ -20,7 +28,12 @@ function formatBytes(bytes: number): string {
 }
 
 /**
- * Drop-zone d'upload pour l'étape 3 du wizard Import Liciel.
+ * Drop-zone d'upload pour l'étape 3 du wizard d'import multi-source.
+ *
+ * Le wizard force la sélection d'un logiciel à l'étape 2 (défaut Liciel),
+ * donc `sourceLogiciel` est toujours défini. On l'envoie en form-data
+ * à `/api/import/upload` pour que le pipeline parse choisisse le bon
+ * mapping headers.
  *
  * Design v5 KOVAS :
  *   idle      → dashed border-rule, hover navy/40 + cream-deep/40
@@ -31,7 +44,7 @@ function formatBytes(bytes: number): string {
  * Validation taille client-side (100 Mo) avant POST, pour éviter l'envoi
  * réseau d'un fichier qui sera rejeté côté serveur.
  */
-export function UploadDropZone({ onJobCreated }: UploadDropZoneProps) {
+export function UploadDropZone({ sourceLogiciel, onJobCreated }: UploadDropZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [status, setStatus] = useState<UploadStatus>('idle')
@@ -42,6 +55,7 @@ export function UploadDropZone({ onJobCreated }: UploadDropZoneProps) {
   const [progress, setProgress] = useState(0)
 
   const accept = ACCEPTED_EXTENSIONS.join(',')
+  const logicielLabel = SOURCE_LOGICIEL_LABELS[sourceLogiciel]
 
   const handleFiles = useCallback(
     async (files: FileList | null) => {
@@ -82,12 +96,13 @@ export function UploadDropZone({ onJobCreated }: UploadDropZoneProps) {
       try {
         const fd = new FormData()
         fd.append('file', f)
+        fd.append('source_logiciel', sourceLogiciel)
 
         // Pseudo-progress visuel pendant l'attente serveur (le fetch n'expose
         // pas progressEvent, on simule un step à 60% après 600ms)
         const fakeTimer = setTimeout(() => setProgress(60), 600)
 
-        const res = await fetch('/api/import/liciel/upload', {
+        const res = await fetch('/api/import/upload', {
           method: 'POST',
           body: fd,
         })
@@ -107,7 +122,7 @@ export function UploadDropZone({ onJobCreated }: UploadDropZoneProps) {
         setErrorMsg(err instanceof Error ? err.message : 'Échec de l’upload')
       }
     },
-    [onJobCreated],
+    [onJobCreated, sourceLogiciel],
   )
 
   function onDragOver(e: React.DragEvent<HTMLButtonElement>) {
@@ -193,7 +208,7 @@ export function UploadDropZone({ onJobCreated }: UploadDropZoneProps) {
             </span>
             <div className="space-y-1">
               <p className="text-sm font-medium text-ink">
-                Glissez votre fichier Liciel ici, ou{' '}
+                Glissez votre fichier {logicielLabel} ici, ou{' '}
                 <span className="underline underline-offset-2">cliquez pour le choisir</span>.
               </p>
               <p className="text-xs text-ink-mute">

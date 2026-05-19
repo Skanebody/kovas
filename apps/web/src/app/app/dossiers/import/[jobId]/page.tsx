@@ -17,7 +17,7 @@ import { ImportSummary } from './import-summary'
 import { JobStatusPoller } from './job-status-poller'
 
 export const metadata: Metadata = {
-  title: 'Analyse de l’import Liciel',
+  title: 'Analyse de l’import',
 }
 
 interface JobRow {
@@ -110,14 +110,15 @@ interface CoproRow {
 }
 
 /**
- * Page de suivi + validation d'un job d'import Liciel.
+ * Page de suivi + validation d'un job d'import (multi-source : Liciel /
+ * AnalysImmo / OBBC / ORIS / Autre).
  *
  * Logique d'affichage selon `job.status` :
  *   - completed → ImportSummary (récap final + CTA)
  *   - deduped   → DuplicateReviewView (validation des doublons)
  *   - failed/cancelled/autre → JobStatusPoller (polling pipeline en cours)
  */
-export default async function ImportLicielJobPage({
+export default async function ImportJobPage({
   params,
   searchParams,
 }: {
@@ -156,13 +157,13 @@ export default async function ImportLicielJobPage({
     return (
       <div className="max-w-3xl space-y-6">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/app/dossiers/import-liciel">
+          <Link href="/app/dossiers/import">
             <ArrowLeft className="size-4" /> Nouveau import
           </Link>
         </Button>
         <AppPageHeader
           title="Récapitulatif de"
-          accent="votre import Liciel"
+          accent="votre import"
           eyebrow="📥 IMPORT · ÉTAPE 5 / 5"
           description={`Fichier : ${job.source_filename}.`}
         />
@@ -400,7 +401,7 @@ export default async function ImportLicielJobPage({
     return (
       <div className="max-w-5xl space-y-6">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/app/dossiers/import-liciel">
+          <Link href="/app/dossiers/import">
             <ArrowLeft className="size-4" /> Nouveau import
           </Link>
         </Button>
@@ -433,14 +434,14 @@ export default async function ImportLicielJobPage({
   return (
     <div className="max-w-3xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
-        <Link href="/app/dossiers/import-liciel">
+        <Link href="/app/dossiers/import">
           <ArrowLeft className="size-4" /> Nouveau import
         </Link>
       </Button>
 
       <AppPageHeader
         title="Analyse de"
-        accent="votre fichier Liciel"
+        accent="votre fichier"
         eyebrow="📥 IMPORT · ÉTAPE 4 / 5"
         description={`Fichier : ${job.source_filename}. Suivi temps réel de l'extraction, normalisation et détection des doublons.`}
       />

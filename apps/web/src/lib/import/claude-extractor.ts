@@ -1,11 +1,12 @@
 /**
- * Fallback Claude Haiku pour les exports Liciel dont les en-têtes ne sont
- * pas reconnus par le parser CSV maison.
+ * Fallback Claude Haiku pour les exports logiciel diag dont les en-têtes ne
+ * sont pas reconnus par le parser CSV maison (cas Autre / AnalysImmo /
+ * OBBC / ORIS V1 sans mapping, ou Liciel avec headers exotiques).
  *
  * Stratégie :
- *  - Parser CSV maison gère 90% des cas (0€)
+ *  - Parser CSV maison gère 90 % des cas (0 €)
  *  - Cas ambigus → Claude Haiku 4.5 avec tool use (input < 4k tokens)
- *  - Coût : ~$0.001/import
+ *  - Coût : ~0,001 €/import
  *
  * Cf. CLAUDE.md §7bis — stratégie d'autonomisation IA progressive.
  */
@@ -13,19 +14,19 @@
 import Anthropic from '@anthropic-ai/sdk'
 import {
   ImportError,
-  type LicielParsedClient,
-  type LicielParsedCopropriete,
-  type LicielParsedDiagnostic,
-  type LicielParsedExport,
-  type LicielParsedLot,
-  type LicielParsedProperty,
+  type ParsedClient,
+  type ParsedCopropriete,
+  type ParsedDiagnostic,
+  type ParsedExport,
+  type ParsedLot,
+  type ParsedProperty,
 } from './types'
 
 const HAIKU_MODEL = process.env.ANTHROPIC_MODEL_VOICE ?? 'claude-haiku-4-5'
 const MAX_INPUT_LINES = 50
 const MAX_RETRIES = 3
 
-const SYSTEM_PROMPT = `Tu extrais les entités d'un export de logiciel de diagnostic immobilier français (Liciel ou équivalent).
+const SYSTEM_PROMPT = `Tu extrais les entités d'un export de logiciel de diagnostic immobilier français (Liciel, AnalysImmo, OBBC, ORIS ou équivalent).
 
 Règles ABSOLUES :
 - Tu n'inventes JAMAIS de données manquantes. Si un champ n'est pas dans le texte, omets-le.
@@ -33,12 +34,12 @@ Règles ABSOLUES :
 - Téléphone : garde le format brut trouvé (la normalisation E.164 se fait après).
 - Surface en m² (number).
 - Année 4 chiffres.
-- Tu réponds UNIQUEMENT via l'outil "extract_liciel_data".`
+- Tu réponds UNIQUEMENT via l'outil "extract_source_data".`
 
 const EXTRACT_TOOL = {
-  name: 'extract_liciel_data',
+  name: 'extract_source_data',
   description:
-    "Retourne les entités structurées extraites d'un export Liciel : clients, biens, copropriétés, lots, diagnostics.",
+    "Retourne les entités structurées extraites d'un export de logiciel diag : clients, biens, copropriétés, lots, diagnostics.",
   input_schema: {
     type: 'object',
     properties: {
@@ -47,7 +48,7 @@ const EXTRACT_TOOL = {
         items: {
           type: 'object',
           properties: {
-            liciel_id: { type: 'string' },
+            source_id: { type: 'string' },
             type: { type: 'string' },
             nom: { type: 'string' },
             prenom: { type: 'string' },
@@ -69,7 +70,7 @@ const EXTRACT_TOOL = {
         items: {
           type: 'object',
           properties: {
-            liciel_id: { type: 'string' },
+            source_id: { type: 'string' },
             type_bien: { type: 'string' },
             adresse_ligne1: { type: 'string' },
             adresse_ligne2: { type: 'string' },
@@ -81,9 +82,9 @@ const EXTRACT_TOOL = {
             nombre_pieces: { type: 'number' },
             nombre_niveaux: { type: 'number' },
             annee_construction: { type: 'number' },
-            liciel_client_proprietaire_id: { type: 'string' },
-            liciel_copropriete_id: { type: 'string' },
-            liciel_lot_id: { type: 'string' },
+            source_client_proprietaire_id: { type: 'string' },
+            source_copropriete_id: { type: 'string' },
+            source_lot_id: { type: 'string' },
           },
         },
       },
@@ -92,7 +93,7 @@ const EXTRACT_TOOL = {
         items: {
           type: 'object',
           properties: {
-            liciel_id: { type: 'string' },
+            source_id: { type: 'string' },
             nom_copro: { type: 'string' },
             numero_immatriculation: { type: 'string' },
             adresse_ligne1: { type: 'string' },
@@ -100,7 +101,7 @@ const EXTRACT_TOOL = {
             ville: { type: 'string' },
             nombre_lots: { type: 'number' },
             annee_construction: { type: 'number' },
-            liciel_syndic_id: { type: 'string' },
+            source_syndic_id: { type: 'string' },
           },
         },
       },
@@ -109,13 +110,13 @@ const EXTRACT_TOOL = {
         items: {
           type: 'object',
           properties: {
-            liciel_id: { type: 'string' },
+            source_id: { type: 'string' },
             numero_lot: { type: 'string' },
             etage: { type: 'string' },
             numero_porte: { type: 'string' },
             description: { type: 'string' },
-            liciel_copropriete_id: { type: 'string' },
-            liciel_property_id: { type: 'string' },
+            source_copropriete_id: { type: 'string' },
+            source_property_id: { type: 'string' },
           },
         },
       },
@@ -124,10 +125,10 @@ const EXTRACT_TOOL = {
         items: {
           type: 'object',
           properties: {
-            liciel_id: { type: 'string' },
+            source_id: { type: 'string' },
             type_diagnostic: { type: 'string' },
             date_diagnostic: { type: 'string' },
-            liciel_property_id: { type: 'string' },
+            source_property_id: { type: 'string' },
           },
         },
       },
@@ -137,11 +138,11 @@ const EXTRACT_TOOL = {
 } as const
 
 interface ExtractToolInput {
-  clients: LicielParsedClient[]
-  properties: LicielParsedProperty[]
-  coproprietes: LicielParsedCopropriete[]
-  lots: LicielParsedLot[]
-  diagnostics: LicielParsedDiagnostic[]
+  clients: ParsedClient[]
+  properties: ParsedProperty[]
+  coproprietes: ParsedCopropriete[]
+  lots: ParsedLot[]
+  diagnostics: ParsedDiagnostic[]
 }
 
 /**
@@ -150,7 +151,7 @@ interface ExtractToolInput {
  *
  * @throws ImportError('CLAUDE_EXTRACTION_FAILED') après MAX_RETRIES
  */
-export async function extractStructuredData(rawContent: string): Promise<LicielParsedExport> {
+export async function extractStructuredData(rawContent: string): Promise<ParsedExport> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new ImportError('CLAUDE_EXTRACTION_FAILED', 'ANTHROPIC_API_KEY non configurée.')
   }
@@ -184,11 +185,11 @@ export async function extractStructuredData(rawContent: string): Promise<LicielP
         ],
         // biome-ignore lint/suspicious/noExplicitAny: typage strict du SDK Anthropic
         tools: [EXTRACT_TOOL as any],
-        tool_choice: { type: 'tool', name: 'extract_liciel_data' },
+        tool_choice: { type: 'tool', name: 'extract_source_data' },
         messages: [
           {
             role: 'user',
-            content: `Voici un extrait d'export Liciel à structurer :\n\n${truncated}`,
+            content: `Voici un extrait d'export de logiciel diag à structurer :\n\n${truncated}`,
           },
         ],
       })

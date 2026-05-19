@@ -3,7 +3,7 @@ import type { DedupeResolution, FieldChoiceMap } from '@/lib/import/types'
 import { NextResponse } from 'next/server'
 
 /**
- * POST /api/import/liciel/dedupe/[jobId]/resolution
+ * POST /api/import/dedupe/[jobId]/resolution
  *
  * Enregistre la résolution utilisateur sur un match de doublon donné.
  * Body JSON :

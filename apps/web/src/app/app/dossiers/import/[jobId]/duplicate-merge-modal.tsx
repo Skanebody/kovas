@@ -67,7 +67,7 @@ function initialState(field: MergeFieldDefinition, prior?: FieldChoice): PerFiel
  * Modal de fusion par champ. Affiche EXISTANT ↔ NOUVEAU côte à côte, avec
  * pour chaque champ un sélecteur « ● Existant / ○ Nouveau / ○ Éditer (input) ».
  *
- * Lorsque l'utilisateur valide, on POST `/api/import/liciel/dedupe/[jobId]/resolution`
+ * Lorsque l'utilisateur valide, on POST `/api/import/dedupe/[jobId]/resolution`
  * avec `resolution=merge` et `field_choices=...`.
  */
 export function DuplicateMergeModal({

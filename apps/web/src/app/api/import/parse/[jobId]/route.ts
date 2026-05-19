@@ -9,7 +9,6 @@ import {
   findCopropriereDuplicates,
   findPropertyDuplicates,
 } from '@/lib/import/deduper'
-import { parseLicielExport } from '@/lib/import/liciel-parser'
 import {
   BanCache,
   type NormalizedClient,
@@ -20,19 +19,27 @@ import {
   normalizeCopropriete,
   normalizeProperty,
 } from '@/lib/import/normalizer'
-import { ImportError, type LicielParsedExport, type ProcessingLogEntry } from '@/lib/import/types'
+import { parseSourceExport } from '@/lib/import/source-parser'
+import {
+  ImportError,
+  type ParsedExport,
+  type ProcessingLogEntry,
+  SOURCE_LOGICIELS,
+  type SourceLogiciel,
+} from '@/lib/import/types'
 import { createKovasAdminClient } from '@kovas/database'
 import type { Database } from '@kovas/database/types'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 /**
- * POST /api/import/liciel/parse/[jobId]
+ * POST /api/import/parse/[jobId]
  *
  * Pipeline complet :
  *  1. Lit job (status='uploaded'), passe en parsing
  *  2. Download fichier Storage
- *  3. parseLicielExport (dispatch CSV pour V1, fallback Claude si nécessaire)
+ *  3. parseSourceExport (dispatch CSV pour V1, mapping selon job.source_logiciel,
+ *     fallback Claude si nécessaire)
  *  4. normalize (BAN cache + libphonenumber + Luhn SIRET)
  *  5. insert staging (batch 100)
  *  6. dedupe vs prod (clients + properties + coproprietes)
@@ -40,7 +47,8 @@ import { NextResponse } from 'next/server'
  *
  * En cas d'échec : status='failed' + error_message + error_details.
  *
- * Cf. CLAUDE.md §13 (stratégie défensive Liciel) + spec « Import Liciel ».
+ * Cf. CLAUDE.md §13 (stratégie défensive logiciels concurrents) + spec
+ * « Import logiciel diag ».
  */
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -52,8 +60,11 @@ interface JobRow {
   source_storage_path: string
   source_filename: string
   source_mime_type: string
+  source_logiciel: SourceLogiciel
   processing_log: ProcessingLogEntry[] | null
 }
+
+const VALID_SOURCES = new Set<string>(SOURCE_LOGICIELS)
 
 interface StagingClientInsert {
   job_id: string
@@ -158,7 +169,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ jo
   const { data: job, error: fetchErr } = await supabase
     .from('import_jobs')
     .select(
-      'id, status, organization_id, source_storage_path, source_filename, source_mime_type, processing_log',
+      'id, status, organization_id, source_storage_path, source_filename, source_mime_type, source_logiciel, processing_log',
     )
     .eq('id', jobId)
     .maybeSingle<JobRow>()
@@ -206,6 +217,8 @@ export async function POST(_request: Request, { params }: { params: Promise<{ jo
     })
 
     // ─── Étape 2 : download fichier Storage ─────────────────────────
+    // NOTE : nom du bucket conservé pour éviter une migration storage destructrice
+    // (cf. migration 20260520150000_import_multi_source.sql). Invisible côté UI.
     const { data: blob, error: dlError } = await admin.storage
       .from('import-liciel-staging')
       .download(job.source_storage_path)
@@ -218,18 +231,31 @@ export async function POST(_request: Request, { params }: { params: Promise<{ jo
     const buffer = Buffer.from(await blob.arrayBuffer())
 
     // ─── Étape 3 : parse (avec fallback Claude si nécessaire) ───────
-    let parsed: LicielParsedExport
+    // Garde-fou : si la colonne arrive avec une valeur inconnue, on bascule
+    // sur 'autre' (= fallback Claude direct, jamais d'erreur ici).
+    const sourceLogiciel: SourceLogiciel = VALID_SOURCES.has(job.source_logiciel)
+      ? job.source_logiciel
+      : 'autre'
+
+    let parsed: ParsedExport
     try {
-      parsed = await parseLicielExport(buffer, job.source_filename, job.source_mime_type)
+      parsed = await parseSourceExport(
+        buffer,
+        job.source_filename,
+        job.source_mime_type,
+        sourceLogiciel,
+      )
     } catch (err) {
-      // Fallback Claude UNIQUEMENT si format CSV ambigu (FORMAT_DETECTION_FAILED)
+      // Fallback Claude si :
+      //  - détection de format CSV ambiguë (FORMAT_DETECTION_FAILED), OU
+      //  - mapping headers vide pour ce logiciel (cas Autre/AnalysImmo/OBBC/ORIS V1)
       if (err instanceof ImportError && err.code === 'FORMAT_DETECTION_FAILED') {
         const text = buffer.toString('utf8').replace(/^﻿/, '').slice(0, 8000)
         await logStep({
           ts: new Date().toISOString(),
           step: 'parse',
           level: 'warn',
-          message: 'Détection format CSV échouée — fallback Claude',
+          message: `Détection format CSV échouée (source=${sourceLogiciel}) — fallback Claude`,
         })
         parsed = await extractStructuredData(text)
       } else {

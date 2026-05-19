@@ -5,6 +5,8 @@ import {
   ACCEPTED_MIME_TYPES,
   IMPORT_LIMITS,
   type ImportSourceFormat,
+  SOURCE_LOGICIELS,
+  type SourceLogiciel,
   type UploadResponse,
 } from '@/lib/import/types'
 import type { Database } from '@kovas/database/types'
@@ -12,17 +14,23 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 /**
- * POST /api/import/liciel/upload
+ * POST /api/import/upload
  *
  * Reçoit un fichier multipart/form-data (champ `file`) exporté par
- * l'utilisateur depuis son compte Liciel (art. 20 RGPD), le stocke dans
- * le bucket privé `import-liciel-staging` et crée un row `import_jobs`
+ * l'utilisateur depuis son logiciel diag (art. 20 RGPD), le stocke dans
+ * le bucket privé `import-liciel-staging` (nom technique historique
+ * conservé — voir migration 20260520150000) et crée un row `import_jobs`
  * avec status='uploaded' prêt à être parsé.
+ *
+ * Champs form-data attendus :
+ *   - file : binaire (csv/xlsx/xml/zip)
+ *   - source_logiciel : 'liciel' | 'analysimmo' | 'obbc' | 'oris' | 'autre'
+ *                       (défaut 'autre' si absent)
  *
  * Conventions storage : `<orgId>/<uuid>.<ext>`.
  *
- * Cf. CLAUDE.md §13 (stratégie défensive Liciel) — pas de scraping, c'est
- * l'utilisateur qui exporte lui-même.
+ * Cf. CLAUDE.md §13 (stratégie défensive logiciels concurrents) — pas de
+ * scraping, c'est l'utilisateur qui exporte lui-même.
  */
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -37,6 +45,7 @@ const EXT_TO_FORMAT: Record<string, ImportSourceFormat> = {
 
 const ACCEPTED_MIME_SET = new Set<string>(ACCEPTED_MIME_TYPES)
 const ACCEPTED_EXT_SET = new Set<string>(ACCEPTED_EXTENSIONS.map((e) => e.replace(/^\./, '')))
+const VALID_SOURCES = new Set<string>(SOURCE_LOGICIELS)
 
 function getExtension(filename: string): string {
   const parts = filename.toLowerCase().split('.')
@@ -67,6 +76,13 @@ export async function POST(request: Request) {
   if (!(file instanceof File)) {
     return NextResponse.json({ error: 'missing file' }, { status: 400 })
   }
+
+  // ── Source logiciel (défaut 'autre' si absent ou invalide) ────────
+  const rawSource = formData.get('source_logiciel')
+  const sourceLogiciel: SourceLogiciel =
+    typeof rawSource === 'string' && VALID_SOURCES.has(rawSource)
+      ? (rawSource as SourceLogiciel)
+      : 'autre'
 
   // ── Validation taille ─────────────────────────────────────────────
   if (file.size === 0) {
@@ -122,6 +138,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'lecture fichier échouée' }, { status: 500 })
   }
 
+  // NOTE : nom du bucket conservé pour éviter une migration storage destructrice
+  // (cf. migration 20260520150000_import_multi_source.sql). Invisible côté UI.
   const { error: uploadError } = await admin.storage
     .from('import-liciel-staging')
     .upload(storagePath, buffer, {
@@ -142,6 +160,7 @@ export async function POST(request: Request) {
     organization_id: orgId,
     created_by: userId,
     status: 'uploaded',
+    source_logiciel: sourceLogiciel,
     source_filename: file.name.slice(0, 255),
     source_filesize_bytes: file.size,
     source_storage_path: storagePath,
@@ -169,6 +188,7 @@ export async function POST(request: Request) {
     filename: file.name,
     filesize: file.size,
     format: sourceFormat,
+    source_logiciel: sourceLogiciel,
   }
   return NextResponse.json(response, { status: 201 })
 }

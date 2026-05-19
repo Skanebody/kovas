@@ -1,9 +1,9 @@
 import { getCurrentUser } from '@/lib/auth/current-user'
-import type { ImportJobStatus, JobStatusResponse } from '@/lib/import/types'
+import type { ImportJobStatus, JobStatusResponse, SourceLogiciel } from '@/lib/import/types'
 import { NextResponse } from 'next/server'
 
 /**
- * GET /api/import/liciel/status/[jobId]
+ * GET /api/import/status/[jobId]
  *
  * Renvoie l'état courant d'un job d'import + une sous-étape normalisée
  * pour l'UI de progression. Polling toutes les 2s côté client.
@@ -35,6 +35,7 @@ const JOB_COLUMNS = [
   'status',
   'source_filename',
   'source_format',
+  'source_logiciel',
   'detected_clients_count',
   'detected_properties_count',
   'detected_lots_count',
@@ -52,6 +53,7 @@ interface JobRow {
   status: ImportJobStatus
   source_filename: string
   source_format: JobStatusResponse['job']['source_format']
+  source_logiciel: SourceLogiciel
   detected_clients_count: number
   detected_properties_count: number
   detected_lots_count: number
@@ -96,6 +98,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ job
       status: data.status,
       source_filename: data.source_filename,
       source_format: data.source_format,
+      source_logiciel: data.source_logiciel,
       detected_clients_count: data.detected_clients_count,
       detected_properties_count: data.detected_properties_count,
       detected_lots_count: data.detected_lots_count,

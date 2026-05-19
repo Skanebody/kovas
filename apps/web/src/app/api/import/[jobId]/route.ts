@@ -4,10 +4,11 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 /**
- * DELETE /api/import/liciel/[jobId]
+ * DELETE /api/import/[jobId]
  *
  * Annule un job (status → 'cancelled') et supprime le fichier source
- * dans le bucket `import-liciel-staging`. Les rows staging sont
+ * dans le bucket `import-liciel-staging` (nom technique historique
+ * conservé — cf. migration 20260520150000). Les rows staging sont
  * supprimées en cascade via ON DELETE CASCADE FK.
  *
  * On garde la row `import_jobs` (avec status='cancelled') pour audit.

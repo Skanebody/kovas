@@ -1,22 +1,27 @@
 /**
- * Référence de mapping des en-têtes de colonnes Liciel → schéma KOVAS.
+ * Référence de mapping des en-têtes de colonnes des logiciels diag → schéma KOVAS.
  *
- * Source : observations terrain sur exports réels Liciel + tickets bêta-testeurs.
- * Sera étoffé à mesure qu'on récupère plus de fixtures.
+ * Sources : observations terrain sur exports réels Liciel + tickets bêta-testeurs.
+ * Étoffé à mesure qu'on récupère plus de fixtures par logiciel.
  *
  * Cf. CLAUDE.md §13 — pas de désassemblage, on se base UNIQUEMENT sur les
  * exports utilisateur (art. 20 RGPD + jurisprudence CJUE SAS Institute c/ WPL).
  *
  * Format : la clé est une version *normalisée* (lowercase + sans accent + sans
  * espaces ni ponctuation) de l'en-tête source, la valeur est le nom de champ
- * KOVAS (cf. `LicielParsedClient`, `LicielParsedProperty`, etc.).
+ * KOVAS (cf. `ParsedClient`, `ParsedProperty`, etc.).
+ *
+ * V1 : seuls les mappings Liciel sont implémentés. Pour AnalysImmo / OBBC /
+ * ORIS / Autre, le pipeline tombe sur le fallback Claude Haiku — efficace
+ * en attendant les fixtures terrain (Sprint 15+).
  */
 
 import type {
-  LicielParsedClient,
-  LicielParsedCopropriete,
-  LicielParsedLot,
-  LicielParsedProperty,
+  ParsedClient,
+  ParsedCopropriete,
+  ParsedLot,
+  ParsedProperty,
+  SourceLogiciel,
 } from './types'
 
 /**
@@ -35,7 +40,7 @@ export function normalizeHeader(header: string): string {
 }
 
 // ============================================================================
-// Mapping headers Liciel → champs LicielParsedClient
+// Mapping headers Liciel → champs Parsed*
 // ============================================================================
 // TODO LICIEL : valider sur exports réels et compléter (champs telephone mobile,
 // type de client, notes, etc.). Les variantes courantes sont déjà couvertes.
@@ -43,9 +48,9 @@ export function normalizeHeader(header: string): string {
 export const LICIEL_CSV_HEADERS = {
   client: {
     // Identifiants & nom
-    licielid: 'liciel_id',
-    id: 'liciel_id',
-    idclient: 'liciel_id',
+    licielid: 'source_id',
+    id: 'source_id',
+    idclient: 'source_id',
     type: 'type',
     typeclient: 'type',
     categorie: 'type',
@@ -94,12 +99,12 @@ export const LICIEL_CSV_HEADERS = {
     note: 'notes',
     commentaires: 'notes',
     remarques: 'notes',
-  } satisfies Record<string, keyof LicielParsedClient>,
+  } satisfies Record<string, keyof ParsedClient>,
 
   property: {
-    licielid: 'liciel_id',
-    id: 'liciel_id',
-    idbien: 'liciel_id',
+    licielid: 'source_id',
+    id: 'source_id',
+    idbien: 'source_id',
     typebien: 'type_bien',
     typedebien: 'type_bien',
     type: 'type_bien',
@@ -133,20 +138,20 @@ export const LICIEL_CSV_HEADERS = {
     anneeconstruction: 'annee_construction',
     annee: 'annee_construction',
     yearbuilt: 'annee_construction',
-    proprietaireid: 'liciel_client_proprietaire_id',
-    idproprietaire: 'liciel_client_proprietaire_id',
-    proprietaire: 'liciel_client_proprietaire_id',
-    coproprieteid: 'liciel_copropriete_id',
-    idcopro: 'liciel_copropriete_id',
-    copropriete: 'liciel_copropriete_id',
-    lotid: 'liciel_lot_id',
-    idlot: 'liciel_lot_id',
-  } satisfies Record<string, keyof LicielParsedProperty>,
+    proprietaireid: 'source_client_proprietaire_id',
+    idproprietaire: 'source_client_proprietaire_id',
+    proprietaire: 'source_client_proprietaire_id',
+    coproprieteid: 'source_copropriete_id',
+    idcopro: 'source_copropriete_id',
+    copropriete: 'source_copropriete_id',
+    lotid: 'source_lot_id',
+    idlot: 'source_lot_id',
+  } satisfies Record<string, keyof ParsedProperty>,
 
   copropriete: {
-    licielid: 'liciel_id',
-    id: 'liciel_id',
-    idcopro: 'liciel_id',
+    licielid: 'source_id',
+    id: 'source_id',
+    idcopro: 'source_id',
     nom: 'nom_copro',
     nomcopro: 'nom_copro',
     nomcopropriete: 'nom_copro',
@@ -165,15 +170,15 @@ export const LICIEL_CSV_HEADERS = {
     lots: 'nombre_lots',
     anneeconstruction: 'annee_construction',
     annee: 'annee_construction',
-    syndicid: 'liciel_syndic_id',
-    idsyndic: 'liciel_syndic_id',
-    syndic: 'liciel_syndic_id',
-  } satisfies Record<string, keyof LicielParsedCopropriete>,
+    syndicid: 'source_syndic_id',
+    idsyndic: 'source_syndic_id',
+    syndic: 'source_syndic_id',
+  } satisfies Record<string, keyof ParsedCopropriete>,
 
   lot: {
-    licielid: 'liciel_id',
-    id: 'liciel_id',
-    idlot: 'liciel_id',
+    licielid: 'source_id',
+    id: 'source_id',
+    idlot: 'source_id',
     numerolot: 'numero_lot',
     numero: 'numero_lot',
     lotnumber: 'numero_lot',
@@ -183,23 +188,59 @@ export const LICIEL_CSV_HEADERS = {
     porte: 'numero_porte',
     description: 'description',
     descriptif: 'description',
-    coproprieteid: 'liciel_copropriete_id',
-    idcopro: 'liciel_copropriete_id',
-    propertyid: 'liciel_property_id',
-    idbien: 'liciel_property_id',
-    bienid: 'liciel_property_id',
-  } satisfies Record<string, keyof LicielParsedLot>,
+    coproprieteid: 'source_copropriete_id',
+    idcopro: 'source_copropriete_id',
+    propertyid: 'source_property_id',
+    idbien: 'source_property_id',
+    bienid: 'source_property_id',
+  } satisfies Record<string, keyof ParsedLot>,
 } as const
 
 export type EntityKind = 'client' | 'property' | 'copropriete' | 'lot'
+
+/**
+ * Maps de headers par logiciel source. V1 : seul Liciel est rempli.
+ * AnalysImmo / OBBC / ORIS / Autre sont des maps vides → fallback Claude Haiku.
+ */
+export type HeadersMap = {
+  client: Record<string, keyof ParsedClient>
+  property: Record<string, keyof ParsedProperty>
+  copropriete: Record<string, keyof ParsedCopropriete>
+  lot: Record<string, keyof ParsedLot>
+}
+
+const EMPTY_HEADERS: HeadersMap = {
+  client: {},
+  property: {},
+  copropriete: {},
+  lot: {},
+}
+
+export const SOURCE_CSV_HEADERS: Record<SourceLogiciel, HeadersMap> = {
+  liciel: LICIEL_CSV_HEADERS,
+  // TODO ANALYSIMMO : compléter avec fixtures terrain (Sprint 15+)
+  analysimmo: EMPTY_HEADERS,
+  // TODO OBBC : compléter avec fixtures terrain (Sprint 15+)
+  obbc: EMPTY_HEADERS,
+  // TODO ORIS : compléter avec fixtures terrain (Sprint 15+)
+  oris: EMPTY_HEADERS,
+  // Toujours vide — fallback Claude Haiku 100 %
+  autre: EMPTY_HEADERS,
+}
 
 /**
  * Tente d'identifier le type d'entité que contient un CSV à partir de
  * ses headers normalisés. Score par catégorie = nombre de headers qui
  * mappent vers cette entité. Renvoie le meilleur score (≥ 2 minimum
  * pour éviter les faux positifs sur "id" seul).
+ *
+ * Si `headersMap` est vide pour toutes les entités (cas Autre/AnalysImmo/
+ * OBBC/ORIS V1), renvoie `kind: null` → le caller bascule sur Claude Haiku.
  */
-export function detectEntityKind(normalizedHeaders: string[]): {
+export function detectEntityKind(
+  normalizedHeaders: string[],
+  headersMap: HeadersMap = LICIEL_CSV_HEADERS,
+): {
   kind: EntityKind | null
   score: number
   allScores: Record<EntityKind, number>
@@ -212,10 +253,10 @@ export function detectEntityKind(normalizedHeaders: string[]): {
   }
 
   for (const header of normalizedHeaders) {
-    if (header in LICIEL_CSV_HEADERS.client) allScores.client += 1
-    if (header in LICIEL_CSV_HEADERS.property) allScores.property += 1
-    if (header in LICIEL_CSV_HEADERS.copropriete) allScores.copropriete += 1
-    if (header in LICIEL_CSV_HEADERS.lot) allScores.lot += 1
+    if (header in headersMap.client) allScores.client += 1
+    if (header in headersMap.property) allScores.property += 1
+    if (header in headersMap.copropriete) allScores.copropriete += 1
+    if (header in headersMap.lot) allScores.lot += 1
   }
 
   // Discriminants forts (présence quasi exclusive à un type)

@@ -1,5 +1,5 @@
 /**
- * Parser Liciel — dispatch CSV / XLSX / XML / ZIP de PDFs.
+ * Parser logiciel diag — dispatch CSV / XLSX / XML / ZIP de PDFs.
  *
  * V1 : seul le CSV est réellement implémenté. Les autres formats throw
  * `ImportError('FORMAT_UNSUPPORTED')` — ils seront ajoutés au fil des
@@ -10,24 +10,31 @@
  *  - gérer finement BOM UTF-8 + CRLF + delimiter auto-détecté,
  *  - éviter une dépendance lourde sur un format qu'on contrôle.
  *
- * Cf. CLAUDE.md §13 (stratégie défensive Liciel) — toujours basé sur les
- * exports utilisateur, jamais sur scraping/désassemblage.
+ * Multi-source : selon `sourceLogiciel`, on sélectionne le bon mapping
+ * de headers dans `SOURCE_CSV_HEADERS`. V1 : seul Liciel a un mapping
+ * non-vide. Pour AnalysImmo/OBBC/ORIS/Autre, la détection d'entité échoue
+ * et le caller bascule sur le fallback Claude Haiku (cf. claude-extractor.ts).
+ *
+ * Cf. CLAUDE.md §13 (stratégie défensive logiciels concurrents) — toujours basé
+ * sur les exports utilisateur, jamais sur scraping/désassemblage.
  */
 
 import {
   type EntityKind,
-  LICIEL_CSV_HEADERS,
+  type HeadersMap,
+  SOURCE_CSV_HEADERS,
   detectEntityKind,
   normalizeHeader,
-} from './liciel-schema-reference'
+} from './source-schema-reference'
 import {
   ImportError,
   type ImportSourceFormat,
-  type LicielParsedClient,
-  type LicielParsedCopropriete,
-  type LicielParsedExport,
-  type LicielParsedLot,
-  type LicielParsedProperty,
+  type ParsedClient,
+  type ParsedCopropriete,
+  type ParsedExport,
+  type ParsedLot,
+  type ParsedProperty,
+  type SourceLogiciel,
 } from './types'
 
 // ============================================================================
@@ -99,20 +106,31 @@ function looksLikeText(buffer: Buffer): boolean {
 // Entrée principale
 // ============================================================================
 
-export async function parseLicielExport(
+/**
+ * Parse un export depuis un logiciel diag (Liciel / AnalysImmo / OBBC / ORIS /
+ * Autre).
+ *
+ * Le parser CSV sélectionne le bon mapping selon `sourceLogiciel`. Si le
+ * mapping est vide (AnalysImmo/OBBC/ORIS/Autre V1) ou si la détection
+ * d'entité échoue, le caller (route /api/import/parse) bascule sur le
+ * fallback Claude Haiku.
+ */
+export async function parseSourceExport(
   fileBuffer: Buffer,
   filename: string,
   mimeType: string,
-): Promise<LicielParsedExport> {
+  sourceLogiciel: SourceLogiciel,
+): Promise<ParsedExport> {
   if (fileBuffer.length === 0) {
     throw new ImportError('FILE_EMPTY', 'Fichier vide.')
   }
 
   const format = detectFormat(fileBuffer, filename, mimeType)
+  const headersMap = SOURCE_CSV_HEADERS[sourceLogiciel]
 
   switch (format) {
     case 'csv':
-      return parseCsvBuffer(fileBuffer)
+      return parseCsvBuffer(fileBuffer, headersMap)
     case 'xlsx':
       throw new ImportError(
         'FORMAT_UNSUPPORTED',
@@ -148,12 +166,12 @@ const BOM = '﻿'
  *  - Pas de fallback Claude automatique ici (la route appelle Claude
  *    en cas d'échec total seulement)
  */
-export function parseCsvBuffer(buffer: Buffer): LicielParsedExport {
+export function parseCsvBuffer(buffer: Buffer, headersMap: HeadersMap): ParsedExport {
   const text = buffer.toString('utf8').replace(/^﻿/, '').replace(/^﻿/, '')
-  return parseCsvText(text)
+  return parseCsvText(text, headersMap)
 }
 
-export function parseCsvText(rawText: string): LicielParsedExport {
+export function parseCsvText(rawText: string, headersMap: HeadersMap): ParsedExport {
   let text = rawText
   if (text.startsWith(BOM)) {
     text = text.slice(1)
@@ -179,7 +197,7 @@ export function parseCsvText(rawText: string): LicielParsedExport {
   }
 
   const normalized = headers.map((h) => normalizeHeader(h))
-  const detection = detectEntityKind(normalized)
+  const detection = detectEntityKind(normalized, headersMap)
   if (!detection.kind) {
     throw new ImportError(
       'FORMAT_DETECTION_FAILED',
@@ -190,7 +208,7 @@ export function parseCsvText(rawText: string): LicielParsedExport {
     )
   }
 
-  return dispatchRows(detection.kind, normalized, dataRows)
+  return dispatchRows(detection.kind, normalized, dataRows, headersMap)
 }
 
 // ----------------------------------------------------------------------------
@@ -205,7 +223,7 @@ function detectDelimiter(text: string): string {
   let bestCount = 0
   for (const c of candidates) {
     // On compte hors quotes — heuristique simple : approximation suffisante
-    // pour des CSV Liciel raisonnables. La vraie validation a lieu au parse.
+    // pour des CSV raisonnables. La vraie validation a lieu au parse.
     let count = 0
     let inQuote = false
     for (const ch of firstLine) {
@@ -294,8 +312,9 @@ function dispatchRows(
   kind: EntityKind,
   normalizedHeaders: string[],
   dataRows: string[][],
-): LicielParsedExport {
-  const empty: LicielParsedExport = {
+  headersMap: HeadersMap,
+): ParsedExport {
+  const empty: ParsedExport = {
     clients: [],
     properties: [],
     coproprietes: [],
@@ -305,20 +324,24 @@ function dispatchRows(
 
   switch (kind) {
     case 'client':
-      empty.clients = dataRows.map((row) => buildClient(normalizedHeaders, row)).filter(notEmpty)
+      empty.clients = dataRows
+        .map((row) => buildClient(normalizedHeaders, row, headersMap))
+        .filter(notEmpty)
       break
     case 'property':
       empty.properties = dataRows
-        .map((row) => buildProperty(normalizedHeaders, row))
+        .map((row) => buildProperty(normalizedHeaders, row, headersMap))
         .filter(notEmpty)
       break
     case 'copropriete':
       empty.coproprietes = dataRows
-        .map((row) => buildCopropriete(normalizedHeaders, row))
+        .map((row) => buildCopropriete(normalizedHeaders, row, headersMap))
         .filter(notEmpty)
       break
     case 'lot':
-      empty.lots = dataRows.map((row) => buildLot(normalizedHeaders, row)).filter(notEmpty)
+      empty.lots = dataRows
+        .map((row) => buildLot(normalizedHeaders, row, headersMap))
+        .filter(notEmpty)
       break
   }
 
@@ -339,12 +362,16 @@ function getCell(row: string[], index: number): string | undefined {
   return value === '' || value === undefined ? undefined : value
 }
 
-function buildClient(normalizedHeaders: string[], row: string[]): LicielParsedClient {
-  const out: LicielParsedClient = {}
-  const map = LICIEL_CSV_HEADERS.client
+function buildClient(
+  normalizedHeaders: string[],
+  row: string[],
+  headersMap: HeadersMap,
+): ParsedClient {
+  const out: ParsedClient = {}
+  const map = headersMap.client
   for (let i = 0; i < normalizedHeaders.length; i++) {
     const h = normalizedHeaders[i] ?? ''
-    const target = (map as Record<string, keyof LicielParsedClient>)[h]
+    const target = (map as Record<string, keyof ParsedClient>)[h]
     if (!target) continue
     const value = getCell(row, i)
     if (value === undefined) continue
@@ -353,12 +380,16 @@ function buildClient(normalizedHeaders: string[], row: string[]): LicielParsedCl
   return out
 }
 
-function buildProperty(normalizedHeaders: string[], row: string[]): LicielParsedProperty {
-  const out: LicielParsedProperty = {}
-  const map = LICIEL_CSV_HEADERS.property
+function buildProperty(
+  normalizedHeaders: string[],
+  row: string[],
+  headersMap: HeadersMap,
+): ParsedProperty {
+  const out: ParsedProperty = {}
+  const map = headersMap.property
   for (let i = 0; i < normalizedHeaders.length; i++) {
     const h = normalizedHeaders[i] ?? ''
-    const target = (map as Record<string, keyof LicielParsedProperty>)[h]
+    const target = (map as Record<string, keyof ParsedProperty>)[h]
     if (!target) continue
     const raw = getCell(row, i)
     if (raw === undefined) continue
@@ -385,12 +416,16 @@ function buildProperty(normalizedHeaders: string[], row: string[]): LicielParsed
   return out
 }
 
-function buildCopropriete(normalizedHeaders: string[], row: string[]): LicielParsedCopropriete {
-  const out: LicielParsedCopropriete = {}
-  const map = LICIEL_CSV_HEADERS.copropriete
+function buildCopropriete(
+  normalizedHeaders: string[],
+  row: string[],
+  headersMap: HeadersMap,
+): ParsedCopropriete {
+  const out: ParsedCopropriete = {}
+  const map = headersMap.copropriete
   for (let i = 0; i < normalizedHeaders.length; i++) {
     const h = normalizedHeaders[i] ?? ''
-    const target = (map as Record<string, keyof LicielParsedCopropriete>)[h]
+    const target = (map as Record<string, keyof ParsedCopropriete>)[h]
     if (!target) continue
     const raw = getCell(row, i)
     if (raw === undefined) continue
@@ -404,12 +439,12 @@ function buildCopropriete(normalizedHeaders: string[], row: string[]): LicielPar
   return out
 }
 
-function buildLot(normalizedHeaders: string[], row: string[]): LicielParsedLot {
-  const out: LicielParsedLot = {}
-  const map = LICIEL_CSV_HEADERS.lot
+function buildLot(normalizedHeaders: string[], row: string[], headersMap: HeadersMap): ParsedLot {
+  const out: ParsedLot = {}
+  const map = headersMap.lot
   for (let i = 0; i < normalizedHeaders.length; i++) {
     const h = normalizedHeaders[i] ?? ''
-    const target = (map as Record<string, keyof LicielParsedLot>)[h]
+    const target = (map as Record<string, keyof ParsedLot>)[h]
     if (!target) continue
     const raw = getCell(row, i)
     if (raw === undefined) continue

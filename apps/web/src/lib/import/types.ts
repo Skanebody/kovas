@@ -1,15 +1,31 @@
 /**
- * Types de la feature « Import Liciel ».
+ * Types de la feature « Import logiciel diag » (multi-source).
  *
  * Cadre légal : art. 20 RGPD (droit à la portabilité) — l'utilisateur
- * exporte lui-même depuis son compte Liciel et upload dans KOVAS.
- * Aucun scraping de l'interface Liciel (CLAUDE.md §13).
+ * exporte lui-même depuis son logiciel diag (Liciel, AnalysImmo, OBBC,
+ * ORIS ou autre) et upload dans KOVAS. Aucun scraping de l'interface
+ * du logiciel source (CLAUDE.md §13).
  *
  * State machine d'un job :
  *   uploaded → parsing → parsed → normalizing → normalized →
  *   deduping → deduped → committing → completed
  *   (failed / cancelled à tout moment)
  */
+
+// ============================================================================
+// SOURCE LOGICIEL
+// ============================================================================
+
+export const SOURCE_LOGICIELS = ['liciel', 'analysimmo', 'obbc', 'oris', 'autre'] as const
+export type SourceLogiciel = (typeof SOURCE_LOGICIELS)[number]
+
+export const SOURCE_LOGICIEL_LABELS: Record<SourceLogiciel, string> = {
+  liciel: 'Liciel',
+  analysimmo: 'AnalysImmo',
+  obbc: 'OBBC',
+  oris: 'ORIS',
+  autre: 'Autre logiciel',
+}
 
 // ============================================================================
 // JOB
@@ -36,7 +52,10 @@ export interface ImportJob {
   created_by: string
   status: ImportJobStatus
 
-  // Source
+  // Source logiciel choisi par l'utilisateur (mapping + tuto)
+  source_logiciel: SourceLogiciel
+
+  // Source fichier
   source_filename: string
   source_filesize_bytes: number
   source_storage_path: string
@@ -103,7 +122,7 @@ export type WizardStep = 1 | 2 | 3 | 4 | 5
 
 export const WIZARD_STEPS = [
   { id: 1, label: 'Préparer', short: 'Préparer' },
-  { id: 2, label: 'Exporter depuis Liciel', short: 'Exporter' },
+  { id: 2, label: 'Exporter depuis votre logiciel', short: 'Exporter' },
   { id: 3, label: 'Téléverser', short: 'Téléverser' },
   { id: 4, label: 'Analyser', short: 'Analyser' },
   { id: 5, label: 'Valider', short: 'Valider' },
@@ -337,6 +356,7 @@ export interface UploadResponse {
   filename: string
   filesize: number
   format: ImportSourceFormat | null
+  source_logiciel: SourceLogiciel
 }
 
 export interface JobStatusResponse {
@@ -346,6 +366,7 @@ export interface JobStatusResponse {
     | 'status'
     | 'source_filename'
     | 'source_format'
+    | 'source_logiciel'
     | 'detected_clients_count'
     | 'detected_properties_count'
     | 'detected_lots_count'
@@ -408,20 +429,24 @@ export interface CommitResponse {
 }
 
 // ============================================================================
-// SCHÉMA LICIEL (sera complété au fur et à mesure des observations terrain)
+// SCHÉMA PARSED — agnostique de la source (mêmes clés pour tous les logiciels)
 // ============================================================================
 
 /**
- * Schéma intermédiaire — sortie du parser Liciel, entrée du normalizer.
+ * Schéma intermédiaire — sortie du parser, entrée du normalizer.
  * Représente l'état brut juste après extraction (encore non normalisé,
  * pas encore en BDD).
  *
- * Note : les champs `liciel_*` correspondent aux noms Liciel d'origine
- * (à compléter quand on aura les vrais exports). Les autres champs sont
- * pré-mappés sur le schéma KOVAS.
+ * Note : le champ `source_id` correspond à l'identifiant interne du logiciel
+ * source (à compléter quand on aura les vrais exports). Les autres champs
+ * sont pré-mappés sur le schéma KOVAS.
+ *
+ * V1 : seuls les mappings Liciel sont implémentés dans
+ * `SOURCE_CSV_HEADERS.liciel`. Pour AnalysImmo/OBBC/ORIS/Autre, le pipeline
+ * tombe sur le fallback Claude Haiku qui renvoie le même schéma.
  */
-export interface LicielParsedClient {
-  liciel_id?: string
+export interface ParsedClient {
+  source_id?: string
   type?: string
   nom?: string
   prenom?: string
@@ -437,8 +462,8 @@ export interface LicielParsedClient {
   notes?: string
 }
 
-export interface LicielParsedProperty {
-  liciel_id?: string
+export interface ParsedProperty {
+  source_id?: string
   type_bien?: string
   adresse_ligne1?: string
   adresse_ligne2?: string
@@ -450,13 +475,13 @@ export interface LicielParsedProperty {
   nombre_pieces?: number
   nombre_niveaux?: number
   annee_construction?: number
-  liciel_client_proprietaire_id?: string
-  liciel_copropriete_id?: string
-  liciel_lot_id?: string
+  source_client_proprietaire_id?: string
+  source_copropriete_id?: string
+  source_lot_id?: string
 }
 
-export interface LicielParsedCopropriete {
-  liciel_id?: string
+export interface ParsedCopropriete {
+  source_id?: string
   nom_copro?: string
   numero_immatriculation?: string
   adresse_ligne1?: string
@@ -464,32 +489,32 @@ export interface LicielParsedCopropriete {
   ville?: string
   nombre_lots?: number
   annee_construction?: number
-  liciel_syndic_id?: string
+  source_syndic_id?: string
 }
 
-export interface LicielParsedLot {
-  liciel_id?: string
+export interface ParsedLot {
+  source_id?: string
   numero_lot?: string
   etage?: string
   numero_porte?: string
   description?: string
-  liciel_copropriete_id?: string
-  liciel_property_id?: string
+  source_copropriete_id?: string
+  source_property_id?: string
 }
 
-export interface LicielParsedDiagnostic {
-  liciel_id?: string
+export interface ParsedDiagnostic {
+  source_id?: string
   type_diagnostic?: string
   date_diagnostic?: string
-  liciel_property_id?: string
+  source_property_id?: string
 }
 
-export interface LicielParsedExport {
-  clients: LicielParsedClient[]
-  properties: LicielParsedProperty[]
-  coproprietes: LicielParsedCopropriete[]
-  lots: LicielParsedLot[]
-  diagnostics: LicielParsedDiagnostic[]
+export interface ParsedExport {
+  clients: ParsedClient[]
+  properties: ParsedProperty[]
+  coproprietes: ParsedCopropriete[]
+  lots: ParsedLot[]
+  diagnostics: ParsedDiagnostic[]
 }
 
 // ============================================================================

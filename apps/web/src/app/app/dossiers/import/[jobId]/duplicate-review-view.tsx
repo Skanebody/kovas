@@ -184,7 +184,7 @@ export function DuplicateReviewView({ job, matches, newEntitiesCount }: Duplicat
   ): Promise<boolean> {
     setState((prev) => updateOne(prev, match, { pending: true, error: null }))
     try {
-      const res = await fetch(`/api/import/liciel/dedupe/${job.id}/resolution`, {
+      const res = await fetch(`/api/import/dedupe/${job.id}/resolution`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
@@ -235,7 +235,7 @@ export function DuplicateReviewView({ job, matches, newEntitiesCount }: Duplicat
     setCommitting(true)
     setCommitError(null)
     try {
-      const res = await fetch(`/api/import/liciel/commit/${job.id}`, { method: 'POST' })
+      const res = await fetch(`/api/import/commit/${job.id}`, { method: 'POST' })
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string }
         throw new Error(body.error ?? `HTTP ${res.status}`)
@@ -251,7 +251,7 @@ export function DuplicateReviewView({ job, matches, newEntitiesCount }: Duplicat
         mp: String(result.merged.properties),
         mco: String(result.merged.coproprietes),
       })
-      router.push(`/app/dossiers/import-liciel/${job.id}?${params.toString()}`)
+      router.push(`/app/dossiers/import/${job.id}?${params.toString()}`)
       router.refresh()
     } catch (err) {
       setCommitError(err instanceof Error ? err.message : 'Erreur inconnue')
@@ -419,7 +419,7 @@ export function DuplicateReviewView({ job, matches, newEntitiesCount }: Duplicat
 
       {/* ── Footer commit ─────────────────────────────────────────── */}
       <div className="flex justify-between items-center gap-3 flex-wrap">
-        <Button variant="ghost" onClick={() => router.push('/app/dossiers/import-liciel')}>
+        <Button variant="ghost" onClick={() => router.push('/app/dossiers/import')}>
           Annuler
         </Button>
         <div className="flex items-center gap-3 flex-wrap">

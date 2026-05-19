@@ -3,12 +3,12 @@ import type { CommitResponse, ImportJobStatus } from '@/lib/import/types'
 import { NextResponse } from 'next/server'
 
 /**
- * POST /api/import/liciel/commit/[jobId]
+ * POST /api/import/commit/[jobId]
  *
- * Finalise un import Liciel en appelant la RPC `commit_import_job(uuid)`
+ * Finalise un import (multi-source) en appelant la RPC `commit_import_job(uuid)`
  * qui insère les staging vers la prod (clients / properties / coproprietes
  * / lots) selon les résolutions de doublons enregistrées via
- * `/api/import/liciel/dedupe/[jobId]/resolution`.
+ * `/api/import/dedupe/[jobId]/resolution`.
  *
  * Préconditions :
  *   - job.status ∈ {'deduped', 'normalized', 'parsed'}

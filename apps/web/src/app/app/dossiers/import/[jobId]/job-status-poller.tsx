@@ -74,7 +74,7 @@ function lineStateFor(
 }
 
 /**
- * Composant client polling /api/import/liciel/status/[jobId] toutes les 2s.
+ * Composant client polling /api/import/status/[jobId] toutes les 2s.
  *
  * Affiche les 7 sous-étapes avec coches/spinners/labels selon l'avancement.
  * Stop le polling sur statut terminal (completed/failed/cancelled).
@@ -100,7 +100,7 @@ export function JobStatusPoller({ jobId, initialStatus }: JobStatusPollerProps) 
     if (triggeredParseRef.current) return
     if (initialStatus !== 'uploaded') return
     triggeredParseRef.current = true
-    void fetch(`/api/import/liciel/parse/${jobId}`, { method: 'POST' }).catch(() => {
+    void fetch(`/api/import/parse/${jobId}`, { method: 'POST' }).catch(() => {
       /* on laisse le polling remonter l'erreur */
     })
   }, [jobId, initialStatus])
@@ -111,7 +111,7 @@ export function JobStatusPoller({ jobId, initialStatus }: JobStatusPollerProps) 
 
     async function tick() {
       try {
-        const res = await fetch(`/api/import/liciel/status/${jobId}`, {
+        const res = await fetch(`/api/import/status/${jobId}`, {
           cache: 'no-store',
         })
         if (!res.ok) {
@@ -158,8 +158,8 @@ export function JobStatusPoller({ jobId, initialStatus }: JobStatusPollerProps) 
     if (cancelling) return
     setCancelling(true)
     try {
-      await fetch(`/api/import/liciel/${jobId}`, { method: 'DELETE' })
-      router.push('/app/dossiers/import-liciel')
+      await fetch(`/api/import/${jobId}`, { method: 'DELETE' })
+      router.push('/app/dossiers/import')
     } catch {
       setCancelling(false)
     }
