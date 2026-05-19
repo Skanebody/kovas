@@ -69,7 +69,8 @@ export function MobileQuickActionsFab() {
         className={cn(
           'md:hidden fixed bottom-[72px] left-1/2 -translate-x-1/2 z-40',
           'flex size-14 items-center justify-center rounded-full',
-          'bg-amber text-white shadow-warm hover:bg-amber/90',
+          /* v5 : accent UNIQUE chartreuse Synthex (était bg-amber v4) */
+          'bg-chartreuse text-ink shadow-[0_6px_18px_rgba(212,245,66,0.45)] hover:bg-chartreuse-deep',
           'transition-transform duration-fast ease-spring active:scale-95',
           'ring-4 ring-white/20',
         )}
