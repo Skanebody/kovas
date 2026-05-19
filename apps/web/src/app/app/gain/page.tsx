@@ -1,10 +1,11 @@
 import { GainTrackerCard } from '@/app/app/dashboard/gain-tracker-card'
+import { BarChartPills, buildLast12MonthsData } from '@/components/ui/bar-chart-pills'
 import { Button } from '@/components/ui/button'
-import { EmptyState } from '@/components/ui/empty-state'
+import { Card } from '@/components/ui/card'
 import { GlassCard } from '@/components/ui/glass-card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { parisMonthBounds } from '@/lib/paris-dates'
-import { ArrowLeft, ChartLine } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -30,6 +31,31 @@ const EUROS_PER_HOUR = 50
 export default async function GainPage() {
   const { supabase, orgId } = await getCurrentUser()
   const { startIso: monthStart, nextIso: monthNext } = parisMonthBounds()
+
+  // Évolution missions 12 derniers mois (pour BarChartPills)
+  const twelveMonthsAgo = new Date()
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
+  twelveMonthsAgo.setDate(1)
+  twelveMonthsAgo.setHours(0, 0, 0, 0)
+
+  const { data: missionsYear } = await supabase
+    .from('missions')
+    .select('completed_at')
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .in('status', ['done', 'exported'])
+    .gte('completed_at', twelveMonthsAgo.toISOString())
+
+  // Agrégation par mois YYYY-MM
+  const monthlyMissions: Record<string, number> = {}
+  for (const m of missionsYear ?? []) {
+    if (!m.completed_at) continue
+    const d = new Date(m.completed_at)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    monthlyMissions[key] = (monthlyMissions[key] ?? 0) + 1
+  }
+  const chartData = buildLast12MonthsData(monthlyMissions)
+  const yearTotal = chartData.reduce((sum, p) => sum + p.value, 0)
 
   const { count: missionsDoneMonth } = await supabase
     .from('missions')
@@ -132,11 +158,30 @@ export default async function GainPage() {
           <GainTrackerCard />
         </div>
 
-        <EmptyState
-          icon={ChartLine}
-          title="Évolution mensuelle bientôt."
-          description="Graphique 12 mois, missions par diagnostic, top clients, CA mensuel. Disponible en V1.5."
-        />
+        {/* Bar chart pilules verticales — signature v5 Synthex */}
+        <Card className="p-8 max-w-4xl">
+          <div className="mb-6 flex items-baseline justify-between flex-wrap gap-2">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-wider text-ink-mute mb-1">
+                Évolution sur 12 mois
+              </p>
+              <h2 className="font-serif italic text-3xl text-ink leading-tight">
+                {yearTotal} mission{yearTotal > 1 ? 's' : ''} terminée{yearTotal > 1 ? 's' : ''}
+              </h2>
+            </div>
+            <span className="font-mono text-[11px] text-ink-mute">
+              de {chartData[0]?.label} à {chartData[chartData.length - 1]?.label}
+            </span>
+          </div>
+          <BarChartPills
+            data={chartData}
+            height={180}
+            barWidth={16}
+            gap={14}
+            barColor="#0F2436"
+            dotColor="#D4F542"
+          />
+        </Card>
       </section>
     </div>
   )
