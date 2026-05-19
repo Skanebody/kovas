@@ -2,9 +2,8 @@ import type { Config } from 'tailwindcss'
 import tailwindcssAnimate from 'tailwindcss-animate'
 
 /**
- * Tailwind config — KOVAS Glassmorphism Premium Soft UI
- * Référence canonique : CLAUDE.md §9 + docs/design-system.md
- * Révision 2026-05-18 : navy KOVAS + accents vifs
+ * Tailwind — KOVAS Ron Design Lab (produit) × Tectra
+ * Outfit UI · Instrument Serif KPIs · crème + cobalt + jaune
  */
 const config: Config = {
   darkMode: ['class'],
@@ -12,7 +11,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-manrope)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-outfit)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-instrument-serif)', 'Georgia', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background) / <alpha-value>)',
@@ -38,30 +38,31 @@ const config: Config = {
         },
         accent: {
           blue: 'hsl(var(--accent-blue) / <alpha-value>)',
+          yellow: 'hsl(var(--accent-yellow) / <alpha-value>)',
           red: 'hsl(var(--accent-red) / <alpha-value>)',
           green: 'hsl(var(--accent-green) / <alpha-value>)',
           orange: 'hsl(var(--accent-orange) / <alpha-value>)',
         },
       },
       borderRadius: {
-        sm: '0.375rem', // 6px
-        md: '0.75rem', // 12px (inputs, icon-buttons)
-        lg: '1rem', // 16px (cards intérieures)
-        xl: '1.25rem', // 20px (cards principales)
-        '2xl': '1.5rem', // 24px (cards XL)
-        pill: '100px', // pills/CTA/tabs/badges ronds
+        sm: '0.375rem',
+        md: '0.75rem',
+        lg: '1rem',
+        xl: '1.25rem',
+        '2xl': '1.5rem',
+        pill: '100px',
       },
       backdropBlur: {
         md: '12px',
-        xl: '20px', // standard glassmorphism KOVAS
+        xl: '20px',
       },
       boxShadow: {
-        // Doubles couches subtiles (cf. design-system.md)
-        glass: '0 4px 24px hsl(var(--cta) / 0.04), 0 1px 2px hsl(var(--cta) / 0.02)',
-        'glass-hover': '0 8px 32px hsl(var(--cta) / 0.08), 0 2px 4px hsl(var(--cta) / 0.04)',
-        cta: '0 4px 16px hsl(var(--cta) / 0.2)',
-        'cta-hover': '0 6px 24px hsl(var(--cta) / 0.3)',
-        accent: '0 8px 24px hsl(var(--cta) / 0.15)',
+        glass: '0 8px 24px hsl(var(--foreground) / 0.06), 0 1px 2px hsl(var(--foreground) / 0.04)',
+        'glass-hover':
+          '0 12px 32px hsl(var(--foreground) / 0.08), 0 2px 4px hsl(var(--foreground) / 0.04)',
+        cta: '0 4px 16px hsl(var(--cta) / 0.22)',
+        'cta-hover': '0 6px 24px hsl(var(--cta) / 0.28)',
+        accent: '0 8px 24px hsl(var(--cta) / 0.12)',
       },
       keyframes: {
         'fade-in': {

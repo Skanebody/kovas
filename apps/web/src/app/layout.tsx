@@ -3,12 +3,20 @@ import { QueryProvider } from '@/components/query-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import type { Metadata, Viewport } from 'next'
-import { Manrope } from 'next/font/google'
+import { Instrument_Serif, Outfit } from 'next/font/google'
 import './globals.css'
 
-const manrope = Manrope({
+const outfit = Outfit({
   subsets: ['latin'],
-  variable: '--font-manrope',
+  variable: '--font-outfit',
+  display: 'swap',
+})
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-instrument-serif',
   display: 'swap',
 })
 
@@ -51,8 +59,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F4F4F5' },
-    { media: '(prefers-color-scheme: dark)', color: '#0A0A0A' },
+    { media: '(prefers-color-scheme: light)', color: '#F5F1EA' },
+    { media: '(prefers-color-scheme: dark)', color: '#0B0F1A' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -67,9 +75,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" suppressHydrationWarning className={manrope.variable}>
+    <html
+      lang="fr"
+      suppressHydrationWarning
+      className={`${outfit.variable} ${instrumentSerif.variable}`}
+    >
       <body className="font-sans antialiased">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <QueryProvider>
             {children}
             <AddToHomeScreen />
