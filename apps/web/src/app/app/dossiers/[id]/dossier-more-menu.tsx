@@ -50,10 +50,10 @@ export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem disabled className="text-muted-foreground">
+          <DropdownMenuItem disabled className="text-ink-mute">
             Dupliquer le dossier (bientôt)
           </DropdownMenuItem>
-          <DropdownMenuItem disabled className="text-muted-foreground">
+          <DropdownMenuItem disabled className="text-ink-mute">
             Archiver (bientôt)
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -80,7 +80,7 @@ export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
           >
             <div className="space-y-2">
               <h3 className="text-base font-semibold">Supprimer ce dossier ?</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ink-mute">
                 Le dossier sera invisible (soft-delete). Les données restent en base 30 jours puis
                 sont purgées. Tapez{' '}
                 <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">supprimer</code>{' '}
@@ -91,7 +91,7 @@ export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
               type="text"
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-cta/10 bg-card/80 px-3 text-sm"
+              className="flex h-9 w-full rounded-md border border-border-soft bg-paper/80 px-3 text-sm"
               placeholder="supprimer"
               autoFocus
             />

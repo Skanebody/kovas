@@ -56,7 +56,7 @@ export function RoomsMatrixView({
 
   if (rooms.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground italic">
+      <p className="text-sm text-ink-mute italic">
         Ajoutez d'abord des pièces (section dédiée plus bas) pour voir la matrice par pièce.
       </p>
     )
@@ -102,7 +102,7 @@ export function RoomsMatrixView({
           <Card
             key={room.id}
             id={`room-${room.id}`}
-            className={cn('scroll-mt-20', isOpen ? 'border-foreground/30' : '')}
+            className={cn('scroll-mt-20', isOpen ? 'border-border-soft' : '')}
           >
             <button
               type="button"
@@ -112,10 +112,10 @@ export function RoomsMatrixView({
               <CardHeader className="cursor-pointer">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <DoorOpen className="size-4 mt-1 text-muted-foreground shrink-0" />
+                    <DoorOpen className="size-4 mt-1 text-ink-mute shrink-0" />
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-base text-left">{room.name}</CardTitle>
-                      <div className="flex items-center gap-3 flex-wrap mt-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3 flex-wrap mt-1 text-xs text-ink-mute">
                         <span className="flex items-center gap-1">
                           <Camera className="size-3" /> {photosInRoom} photo{photosInRoom > 1 ? 's' : ''}
                         </span>
@@ -136,9 +136,9 @@ export function RoomsMatrixView({
                       <Badge variant="muted">{roomProgress}%</Badge>
                     )}
                     {isOpen ? (
-                      <ChevronDown className="size-4 text-muted-foreground" />
+                      <ChevronDown className="size-4 text-ink-mute" />
                     ) : (
-                      <ChevronRight className="size-4 text-muted-foreground" />
+                      <ChevronRight className="size-4 text-ink-mute" />
                     )}
                   </div>
                 </div>
@@ -148,7 +148,7 @@ export function RoomsMatrixView({
             {isOpen && (
               <CardContent className="space-y-4">
                 {diagStats.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">
+                  <p className="text-sm text-ink-mute italic">
                     Aucun diagnostic du dossier ne concerne ce type de pièce.
                   </p>
                 ) : (
@@ -181,12 +181,12 @@ export function RoomsMatrixView({
                                 {isDone ? (
                                   <CheckCircle2 className="size-4 mt-0.5 shrink-0 text-accent-green" />
                                 ) : (
-                                  <Circle className="size-4 mt-0.5 shrink-0 text-muted-foreground" />
+                                  <Circle className="size-4 mt-0.5 shrink-0 text-ink-mute" />
                                 )}
                                 <span
                                   className={cn(
                                     'flex-1',
-                                    isDone ? 'text-muted-foreground line-through' : '',
+                                    isDone ? 'text-ink-mute line-through' : '',
                                     t.required && !isDone ? 'font-medium' : '',
                                   )}
                                 >

@@ -74,7 +74,7 @@ export async function TodayBlock() {
             Vos visites aujourd&apos;hui ({list.length})
           </span>
           <span className="flex items-center gap-3 text-xs font-normal">
-            <span className="text-muted-foreground capitalize">{todayLabel}</span>
+            <span className="text-ink-mute capitalize">{todayLabel}</span>
             <Link
               href="/app/calendar"
               className="text-cta hover:underline underline-offset-4 inline-flex items-center gap-1"
@@ -86,7 +86,7 @@ export async function TodayBlock() {
       </CardHeader>
       <CardContent className="p-0">
         {list.length === 0 ? (
-          <p className="px-6 pb-6 text-sm text-muted-foreground">
+          <p className="px-6 pb-6 text-sm text-ink-mute">
             Aucune visite aujourd&apos;hui. Profitez-en pour finaliser vos exports.
           </p>
         ) : (

@@ -49,7 +49,7 @@ export function AppSidebar() {
                 'flex size-10 items-center justify-center rounded-md transition-colors',
                 active
                   ? 'bg-cta/[0.08] text-cta'
-                  : 'text-muted-foreground hover:bg-cta/[0.04] hover:text-foreground',
+                  : 'text-ink-mute hover:bg-cta/[0.04] hover:text-foreground',
               )}
             >
               <item.icon className="size-5" strokeWidth={1.75} />
@@ -80,7 +80,7 @@ export function AppMobileNav() {
               href={item.href}
               className={cn(
                 'flex-1 flex flex-col items-center gap-1 py-2.5 text-xs transition-colors',
-                active ? 'text-cta font-semibold' : 'text-muted-foreground',
+                active ? 'text-cta font-semibold' : 'text-ink-mute',
               )}
             >
               <item.icon className="size-5" strokeWidth={1.75} />

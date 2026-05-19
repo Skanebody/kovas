@@ -28,7 +28,7 @@ export function CommandPaletteTrigger() {
           }),
         )
       }}
-      className="gap-2 text-muted-foreground"
+      className="gap-2 text-ink-mute"
     >
       <Search className="size-4" />
       <span className="hidden sm:inline">Recherche…</span>

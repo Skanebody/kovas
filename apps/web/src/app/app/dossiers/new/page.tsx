@@ -40,8 +40,8 @@ export default async function NewDossierPage({
       </Button>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Nouveau dossier</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-display text-2xl md:text-3xl tracking-tight">Nouveau dossier</h1>
+        <p className="text-sm text-ink-mute">
           Un dossier = une visite. Cochez tous les diagnostics à faire lors de cette visite — KOVAS
           créera une fiche par diagnostic et partagera les pièces, photos et notes.
         </p>
@@ -50,10 +50,10 @@ export default async function NewDossierPage({
       {!properties || properties.length === 0 ? (
         <Card>
           <CardContent className="pt-6 pb-8 text-center space-y-4">
-            <Building2 className="size-10 mx-auto text-muted-foreground" />
+            <Building2 className="size-10 mx-auto text-ink-mute" />
             <div className="space-y-1">
               <h2 className="font-semibold">Aucun bien disponible</h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ink-mute">
                 Ajoutez d'abord un bien — le dossier s'y rattachera.
               </p>
             </div>

@@ -88,7 +88,7 @@ export function MissionChecklist({
       <CardContent className="space-y-5">
         {Object.entries(grouped).map(([cat, catItems]) => (
           <div key={cat} className="space-y-2">
-            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+            <h3 className="text-xs uppercase tracking-wider text-ink-mute font-semibold">
               {CATEGORY_LABELS[cat] ?? cat}
             </h3>
             <ul className="space-y-1">
@@ -110,12 +110,12 @@ export function MissionChecklist({
                       {isOk ? (
                         <CheckCircle2 className="size-4 mt-0.5 shrink-0 text-accent-green" />
                       ) : (
-                        <Circle className="size-4 mt-0.5 shrink-0 text-muted-foreground" />
+                        <Circle className="size-4 mt-0.5 shrink-0 text-ink-mute" />
                       )}
                       <span
                         className={cn(
                           'flex-1',
-                          isOk ? 'text-muted-foreground line-through' : '',
+                          isOk ? 'text-ink-mute line-through' : '',
                           it.required && !isOk ? 'font-medium' : '',
                         )}
                       >

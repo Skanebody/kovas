@@ -157,4 +157,15 @@
   .text-display-serif {
     @apply font-serif italic font-normal;
   }
+
+  /* Surfaces flottantes uniquement (header, sidebar, palettes, toasts) */
+  .glass {
+    @apply bg-paper/85 backdrop-blur-xl border border-border-soft shadow-glass;
+  }
+  .glass-header {
+    @apply bg-paper/85 backdrop-blur-xl border-b border-border-soft;
+  }
+  .glass-sidebar {
+    @apply bg-paper/80 backdrop-blur-xl border-r border-border-soft;
+  }
 }

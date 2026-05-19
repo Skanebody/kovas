@@ -33,7 +33,7 @@ export function AppNavTabs() {
   const pathname = usePathname()
 
   return (
-    <nav className="hidden md:flex items-center gap-1 rounded-pill bg-card/60 backdrop-blur-md p-1">
+    <nav className="hidden md:flex items-center gap-1 rounded-pill bg-paper/85 backdrop-blur-xl border border-border-soft/60 p-1 shadow-glass-sm">
       {NAV.map((item) => {
         const active = isActive(pathname, item.href)
         return (
@@ -44,7 +44,7 @@ export function AppNavTabs() {
               'rounded-pill px-4 py-1.5 text-sm transition-colors',
               active
                 ? 'bg-cta text-cta-foreground font-semibold shadow-cta'
-                : 'text-muted-foreground hover:text-foreground font-medium',
+                : 'text-ink-mute hover:text-foreground font-medium',
             )}
           >
             {item.label}

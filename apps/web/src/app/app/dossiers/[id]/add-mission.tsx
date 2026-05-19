@@ -76,7 +76,7 @@ export function AddMissionButton({ dossierId, existingTypes }: AddMissionButtonP
                     disabled={already || adding === type}
                     onClick={() => handleAdd(type)}
                   >
-                    <span className={already ? 'text-muted-foreground' : ''}>
+                    <span className={already ? 'text-ink-mute' : ''}>
                       {MISSION_TYPE_LABELS[type] ?? type}
                       {already && ' (déjà ajouté)'}
                     </span>
@@ -105,7 +105,7 @@ export function AddMissionButton({ dossierId, existingTypes }: AddMissionButtonP
         <div className="space-y-4">
           {GROUPS.map((g) => (
             <div key={g.label} className="space-y-1">
-              <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground px-2">
+              <p className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute px-2">
                 {g.label}
               </p>
               {g.types.map((type) => {
@@ -119,7 +119,7 @@ export function AddMissionButton({ dossierId, existingTypes }: AddMissionButtonP
                     className="w-full text-left rounded-md px-3 py-3 text-sm hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-between"
                   >
                     <span>{MISSION_TYPE_LABELS[type] ?? type}</span>
-                    {already && <span className="text-xs text-muted-foreground">déjà ajouté</span>}
+                    {already && <span className="text-xs text-ink-mute">déjà ajouté</span>}
                     {adding === type && <Loader2 className="size-4 animate-spin" />}
                   </button>
                 )

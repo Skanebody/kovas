@@ -43,7 +43,7 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
 
   if (notes.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-ink-mute">
         Aucune note vocale. Utilisez le bouton ci-dessus pour enregistrer.
       </p>
     )
@@ -73,11 +73,11 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
         return (
           <li
             key={n.id}
-            className="rounded-xl border border-border bg-card/50 p-4 space-y-3"
+            className="rounded-xl border border-border bg-paper/50 p-4 space-y-3"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2 text-sm">
-                <Mic className="size-4 text-muted-foreground" />
+                <Mic className="size-4 text-ink-mute" />
                 <span className="font-medium">{roomName(n.room_id)}</span>
                 <Badge variant="muted">{fmt(n.duration_seconds)}</Badge>
                 {confidence > 0 && (
@@ -93,7 +93,7 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
                 onClick={() => handleDelete(n.id, n.storage_path)}
                 aria-label="Supprimer"
               >
-                <Trash2 className="size-4 text-muted-foreground" />
+                <Trash2 className="size-4 text-ink-mute" />
               </Button>
             </div>
 

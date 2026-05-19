@@ -25,7 +25,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         variant === 'flat' &&
           'rounded-xl border border-border-soft bg-paper text-foreground shadow-glass-sm',
         variant === 'glass' &&
-          'rounded-xl border border-cta/[0.08] bg-paper/85 backdrop-blur-xl text-foreground shadow-glass',
+          'rounded-xl border border-border-soft bg-paper/85 backdrop-blur-xl text-foreground shadow-glass',
         variant === 'accent' &&
           'rounded-2xl bg-card-accent text-card-accent-foreground shadow-accent',
         variant === 'warm' &&
@@ -58,7 +58,7 @@ CardTitle.displayName = 'CardTitle'
 
 export const CardDescription = forwardRef<HTMLDivElement, HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />
+    <p ref={ref} className={cn('text-sm text-ink-mute', className)} {...props} />
   ),
 )
 CardDescription.displayName = 'CardDescription'

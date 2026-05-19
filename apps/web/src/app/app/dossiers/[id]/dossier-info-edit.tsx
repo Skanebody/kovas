@@ -78,7 +78,7 @@ export function DossierInfoEdit({
   }
 
   return (
-    <div className="space-y-3 rounded-md border border-foreground/30 bg-card p-4 mt-3">
+    <div className="space-y-3 rounded-md border border-border-soft bg-paper p-4 mt-3">
       <FormField label="Date prévue" htmlFor="scheduledAt">
         <Input
           id="scheduledAt"

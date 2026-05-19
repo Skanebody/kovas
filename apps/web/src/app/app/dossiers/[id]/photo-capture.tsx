@@ -185,7 +185,7 @@ export function PhotoCapture({
 
       {/* Pills : types de vue les plus utilisés */}
       <div className="space-y-2">
-        <div className="text-xs text-muted-foreground">Type de vue :</div>
+        <div className="text-xs text-ink-mute">Type de vue :</div>
         <div className="flex flex-wrap gap-1.5">
           {pinned.map((v) => (
             <ViewPill
@@ -236,7 +236,7 @@ export function PhotoCapture({
         </p>
       )}
 
-      <p className="text-xs text-subtle-foreground">
+      <p className="text-xs text-ink-faint">
         WebP qualité 0.75 · max 1920×1080 · géolocalisation auto si autorisée · fichier nommé
         automatiquement
       </p>
@@ -261,7 +261,7 @@ function ViewPill({
         'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
         active
           ? 'border-foreground bg-foreground text-background'
-          : 'border-border bg-card text-foreground hover:bg-muted',
+          : 'border-border bg-paper text-foreground hover:bg-muted',
       )}
     >
       {view.label}

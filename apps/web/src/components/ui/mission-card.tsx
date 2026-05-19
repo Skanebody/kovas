@@ -59,7 +59,7 @@ export function MissionCard({
           {time}
         </span>
         {day && (
-          <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+          <span className="font-mono text-[11px] uppercase tracking-wider text-ink-mute">
             {day}
           </span>
         )}
@@ -83,7 +83,7 @@ export function MissionCard({
         <h3 className="text-lg font-bold tracking-tight text-foreground mb-1 truncate">
           {name}
         </h3>
-        <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+        <p className="text-sm text-ink-mute flex items-center gap-1.5">
           <MapPin className="size-3.5 shrink-0" />
           <span className="truncate">
             {address}

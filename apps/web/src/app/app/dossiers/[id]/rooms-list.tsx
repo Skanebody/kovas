@@ -97,7 +97,7 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
                 >
                   <div className="flex flex-col items-start">
                     <span>{t.label}</span>
-                    <span className="text-xs text-muted-foreground">{t.rooms.length} pièces · {t.description}</span>
+                    <span className="text-xs text-ink-mute">{t.rooms.length} pièces · {t.description}</span>
                   </div>
                 </DropdownMenuItem>
               ))}
@@ -114,7 +114,7 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
                 >
                   <div className="flex flex-col items-start">
                     <span>{t.label}</span>
-                    <span className="text-xs text-muted-foreground">{t.rooms.length} pièces · {t.description}</span>
+                    <span className="text-xs text-ink-mute">{t.rooms.length} pièces · {t.description}</span>
                   </div>
                 </DropdownMenuItem>
               ))}
@@ -138,7 +138,7 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
             // Hide form after submit — useActionState will reset
             requestAnimationFrame(() => setShowForm(rooms.length === 0))
           }}
-          className="rounded-xl border border-border p-4 space-y-3 bg-card/50"
+          className="rounded-xl border border-border p-4 space-y-3 bg-paper/50"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <FormField label="Nom" htmlFor="name" required>
@@ -172,7 +172,7 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
         </ul>
       ) : (
         !showForm && (
-          <p className="text-sm text-muted-foreground">Aucune pièce — ajoutez-en pour organiser vos photos.</p>
+          <p className="text-sm text-ink-mute">Aucune pièce — ajoutez-en pour organiser vos photos.</p>
         )
       )}
     </div>
@@ -199,7 +199,7 @@ function RoomItem({ room, onDelete }: { room: Room; onDelete: () => void }) {
 
   if (editing) {
     return (
-      <li className="rounded-md border border-foreground/40 bg-card px-3 py-3 text-sm space-y-3">
+      <li className="rounded-md border border-border-soft bg-paper px-3 py-3 text-sm space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <Input
             value={name}
@@ -252,15 +252,15 @@ function RoomItem({ room, onDelete }: { room: Room; onDelete: () => void }) {
   return (
     <li className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm hover:bg-muted/30 transition-colors">
       <div className="flex items-center gap-2 flex-1 min-w-0">
-        <DoorOpen className="size-4 text-muted-foreground shrink-0" />
+        <DoorOpen className="size-4 text-ink-mute shrink-0" />
         <span className="font-medium truncate">{room.name}</span>
         {room.room_type && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-ink-mute">
             · {ROOM_TYPE_LABELS[room.room_type] ?? room.room_type}
           </span>
         )}
         {room.surface_m2 && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-ink-mute">
             · {room.surface_m2} m²
           </span>
         )}
@@ -272,7 +272,7 @@ function RoomItem({ room, onDelete }: { room: Room; onDelete: () => void }) {
           onClick={() => setEditing(true)}
           aria-label={`Modifier ${room.name}`}
         >
-          <Pencil className="size-4 text-muted-foreground" />
+          <Pencil className="size-4 text-ink-mute" />
         </Button>
         <Button
           variant="ghost"
@@ -280,7 +280,7 @@ function RoomItem({ room, onDelete }: { room: Room; onDelete: () => void }) {
           onClick={onDelete}
           aria-label={`Supprimer ${room.name}`}
         >
-          <Trash2 className="size-4 text-muted-foreground" />
+          <Trash2 className="size-4 text-ink-mute" />
         </Button>
       </div>
     </li>

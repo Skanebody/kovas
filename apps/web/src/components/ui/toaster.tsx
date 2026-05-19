@@ -19,9 +19,9 @@ export function Toaster() {
       toastOptions={{
         classNames: {
           toast:
-            'rounded-xl border border-cta/[0.08] bg-card/95 backdrop-blur-xl shadow-glass text-foreground',
+            'rounded-xl border border-border-soft bg-paper/95 backdrop-blur-xl shadow-glass text-foreground',
           title: 'text-sm font-semibold',
-          description: 'text-xs text-muted-foreground',
+          description: 'text-xs text-ink-mute',
         },
       }}
     />

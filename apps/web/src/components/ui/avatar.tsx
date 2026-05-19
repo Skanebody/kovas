@@ -24,7 +24,7 @@ export function Avatar({ name, size = 'md', className, ...props }: AvatarProps) 
     <div
       aria-label={name ?? 'Avatar'}
       className={cn(
-        'inline-flex items-center justify-center rounded-full bg-muted text-muted-foreground font-medium select-none',
+        'inline-flex items-center justify-center rounded-full bg-muted text-ink-mute font-medium select-none',
         sizeClasses[size],
         className,
       )}

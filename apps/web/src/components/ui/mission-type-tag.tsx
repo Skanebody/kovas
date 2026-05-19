@@ -31,7 +31,7 @@ export function MissionTypeTag({ type, size = 'short', className, ...props }: Mi
     return (
       <span
         className={cn(
-          'inline-flex items-center px-2 py-0.5 rounded-sm font-mono text-[10.5px] font-semibold uppercase tracking-wider bg-muted text-muted-foreground',
+          'inline-flex items-center px-2 py-0.5 rounded-sm font-mono text-[10.5px] font-semibold uppercase tracking-wider bg-muted text-ink-mute',
           className,
         )}
         {...props}

@@ -55,15 +55,15 @@ export default async function CalendarPage() {
       </Button>
 
       <div className="space-y-1">
-        <h1 className="text-3xl font-extrabold tracking-tight">Planning</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-display text-3xl md:text-4xl tracking-tight">Planning</h1>
+        <p className="text-sm text-ink-mute">
           Vue calendrier de vos visites diagnostic. Click sur un RDV pour ouvrir le dossier.
         </p>
       </div>
 
       <CalendarWeekView events={events} />
 
-      <p className="text-xs text-muted-foreground text-center">
+      <p className="text-xs text-ink-mute text-center">
         Les RDV se créent en planifiant un dossier (Détails de la visite → Modifier). Téléchargez un
         .ics depuis le détail du dossier pour l'importer dans Google / Apple / Outlook.
       </p>

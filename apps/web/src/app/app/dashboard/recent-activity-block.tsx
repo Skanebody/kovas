@@ -140,13 +140,13 @@ export async function RecentActivityBlock() {
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
-        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-2">
+        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute flex items-center gap-2">
           <History className="size-3.5" /> Activité récente
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 flex-1">
         {top.length === 0 ? (
-          <p className="px-4 pb-5 text-sm text-muted-foreground">
+          <p className="px-4 pb-5 text-sm text-ink-mute">
             Pas d'activité sur les 14 derniers jours.
           </p>
         ) : (
@@ -156,7 +156,7 @@ export async function RecentActivityBlock() {
                 <Link href={e.href} className="flex items-center gap-3 text-xs">
                   <EventIcon kind={e.icon} />
                   <span className="flex-1 min-w-0 truncate">{e.label}</span>
-                  <span className="text-[10px] text-muted-foreground shrink-0">
+                  <span className="text-[10px] text-ink-mute shrink-0">
                     {timeAgoFr(e.at)}
                   </span>
                 </Link>
@@ -170,7 +170,7 @@ export async function RecentActivityBlock() {
 }
 
 function EventIcon({ kind }: { kind: Event['icon'] }) {
-  const className = 'size-4 text-muted-foreground shrink-0'
+  const className = 'size-4 text-ink-mute shrink-0'
   switch (kind) {
     case 'folder':
       return <FolderPlus className={className} />

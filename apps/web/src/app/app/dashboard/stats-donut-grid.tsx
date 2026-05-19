@@ -150,11 +150,11 @@ export async function StatsDonutGrid() {
 function DonutTile({ tile }: { tile: StatTile }) {
   return (
     <div className="flex flex-col items-center text-center gap-2 py-2">
-      <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+      <div className="text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
         {tile.title}
       </div>
       <Donut value={tile.value} total={tile.total} color={tile.color} size={96} thickness={10} />
-      <div className="text-[11px] text-muted-foreground">{tile.subtitle}</div>
+      <div className="text-[11px] text-ink-mute">{tile.subtitle}</div>
       {tile.trend !== null ? (
         <div
           className={cn(
@@ -170,7 +170,7 @@ function DonutTile({ tile }: { tile: StatTile }) {
           {Math.abs(tile.trend)}% vs S-1
         </div>
       ) : (
-        <div className="text-[11px] text-muted-foreground">—</div>
+        <div className="text-[11px] text-ink-mute">—</div>
       )}
     </div>
   )

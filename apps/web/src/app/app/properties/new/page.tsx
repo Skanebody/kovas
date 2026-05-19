@@ -26,8 +26,8 @@ export default async function NewPropertyPage() {
       </Button>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Nouveau bien</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-display text-2xl md:text-3xl tracking-tight">Nouveau bien</h1>
+        <p className="text-sm text-ink-mute">
           L'adresse se complète automatiquement (Base Adresse Nationale).
         </p>
       </div>

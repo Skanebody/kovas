@@ -31,7 +31,7 @@ export function BottomSheet({
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" />
         <Drawer.Content
-          className="fixed bottom-0 inset-x-0 z-50 mt-24 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-cta/[0.08] bg-card outline-none focus:outline-none"
+          className="fixed bottom-0 inset-x-0 z-50 mt-24 flex max-h-[85vh] flex-col rounded-t-2xl border-t border-border-soft bg-paper outline-none focus:outline-none"
           aria-describedby={description ? 'bottom-sheet-description' : undefined}
         >
           {/* Drag handle */}
@@ -44,7 +44,7 @@ export function BottomSheet({
           {description ? (
             <Drawer.Description
               id="bottom-sheet-description"
-              className="text-sm text-muted-foreground text-center px-6 pb-3"
+              className="text-sm text-ink-mute text-center px-6 pb-3"
             >
               {description}
             </Drawer.Description>

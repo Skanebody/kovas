@@ -25,7 +25,7 @@ const buttonVariants = cva(
         link: 'text-foreground underline-offset-4 hover:underline rounded-none',
         // Glass : opt-in surface flottante
         glass:
-          'bg-paper/80 backdrop-blur-xl text-foreground border border-cta/8 hover:bg-paper hover:shadow-glass',
+          'bg-paper/80 backdrop-blur-xl text-foreground border border-border-soft hover:bg-paper hover:shadow-glass',
         // Destructive (rouge alerte)
         destructive:
           'bg-accent-red text-white shadow-glass-sm hover:bg-accent-red/90 hover:-translate-y-px',

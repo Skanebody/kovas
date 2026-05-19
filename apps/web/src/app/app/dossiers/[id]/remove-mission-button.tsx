@@ -33,7 +33,7 @@ export function RemoveMissionButton({
       {pending ? (
         <Loader2 className="size-4 animate-spin" />
       ) : (
-        <Trash2 className="size-4 text-muted-foreground" />
+        <Trash2 className="size-4 text-ink-mute" />
       )}
     </Button>
   )

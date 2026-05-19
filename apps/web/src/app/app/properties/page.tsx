@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { Building2, Plus } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -29,25 +30,23 @@ export default async function PropertiesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Biens</h1>
-          <p className="text-sm text-muted-foreground">
-            {properties?.length ?? 0} bien{(properties?.length ?? 0) > 1 ? 's' : ''}
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/app/properties/new">
-            <Plus className="size-4" />
-            Nouveau bien
-          </Link>
-        </Button>
-      </div>
+      <AppPageHeader
+        title="Biens"
+        description={`${properties?.length ?? 0} bien${(properties?.length ?? 0) > 1 ? 's' : ''}`}
+        action={
+          <Button asChild>
+            <Link href="/app/properties/new">
+              <Plus className="size-4" />
+              Nouveau bien
+            </Link>
+          </Button>
+        }
+      />
 
       {properties && properties.length > 0 ? (
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="rounded-xl border border-border-soft bg-paper overflow-hidden shadow-glass-sm">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-muted-foreground">
+            <thead className="bg-cream-deep/80 text-ink-mute">
               <tr>
                 <th className="text-left font-medium px-4 py-3">Adresse</th>
                 <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Type</th>
@@ -62,7 +61,7 @@ export default async function PropertiesPage() {
                       {p.address}
                     </Link>
                     {(p.postal_code || p.city) && (
-                      <div className="text-xs text-muted-foreground mt-0.5">
+                      <div className="text-xs text-ink-mute mt-0.5">
                         {[p.postal_code, p.city].filter(Boolean).join(' ')}
                       </div>
                     )}
@@ -71,10 +70,10 @@ export default async function PropertiesPage() {
                     {p.property_type ? (
                       <Badge variant="muted">{TYPE_LABELS[p.property_type] ?? p.property_type}</Badge>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-ink-mute">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                  <td className="px-4 py-3 text-ink-mute hidden md:table-cell">
                     {p.surface_total ? `${p.surface_total} m²` : '—'}
                   </td>
                 </tr>
@@ -85,10 +84,10 @@ export default async function PropertiesPage() {
       ) : (
         <Card>
           <CardContent className="pt-6 pb-8 text-center space-y-4">
-            <Building2 className="size-10 mx-auto text-muted-foreground" />
+            <Building2 className="size-10 mx-auto text-ink-mute" />
             <div className="space-y-1">
               <h2 className="font-semibold">Aucun bien pour le moment</h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ink-mute">
                 Ajoutez un bien pour pouvoir y associer des missions de diagnostic.
               </p>
             </div>

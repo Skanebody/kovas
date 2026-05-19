@@ -98,7 +98,7 @@ export async function DashboardPipeline() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute">
           Pipeline de la semaine
         </CardTitle>
       </CardHeader>
@@ -109,7 +109,7 @@ export async function DashboardPipeline() {
             return (
               <div
                 key={col.id}
-                className="rounded-lg border border-cta/[0.06] bg-card/40 p-2 min-h-[180px] flex flex-col"
+                className="rounded-lg border border-border-soft bg-paper/40 p-2 min-h-[180px] flex flex-col"
               >
                 <div className="flex items-center justify-between px-1 pb-2">
                   <div className="flex items-center gap-2">
@@ -123,27 +123,27 @@ export async function DashboardPipeline() {
                   </Badge>
                 </div>
                 {cards.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic px-1 py-3">—</p>
+                  <p className="text-xs text-ink-mute italic px-1 py-3">—</p>
                 ) : (
                   <ul className="space-y-1.5">
                     {cards.map((r) => (
                       <li key={r.id}>
                         <Link
                           href={`/app/dossiers/${r.dossier_id}#mission-${r.id}`}
-                          className="flex items-stretch gap-2 rounded-md bg-card hover:bg-muted/40 transition-colors overflow-hidden border border-border/50"
+                          className="flex items-stretch gap-2 rounded-md bg-paper hover:bg-muted/40 transition-colors overflow-hidden border border-border/50"
                         >
                           <span className={cn('w-1 shrink-0', col.accent)} aria-hidden />
                           <div className="flex-1 min-w-0 py-2 pr-2 space-y-0.5">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <MissionTypeTag type={r.type as MissionType} />
-                              <span className="text-[10px] font-mono text-muted-foreground">
+                              <span className="text-[10px] font-mono text-ink-mute">
                                 {r.reference}
                               </span>
                             </div>
                             <div className="text-xs font-medium truncate">
                               {r.client_name ?? 'Sans client'}
                             </div>
-                            <div className="text-[10px] text-muted-foreground truncate">
+                            <div className="text-[10px] text-ink-mute truncate">
                               {r.property_city ?? ''}
                               {r.scheduled_at && (
                                 <>

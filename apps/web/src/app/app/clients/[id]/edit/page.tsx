@@ -37,8 +37,8 @@ export default async function EditClientPage({
       </Button>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Modifier le client</h1>
-        <p className="text-sm text-muted-foreground">{client.display_name}</p>
+        <h1 className="text-display text-2xl md:text-3xl tracking-tight">Modifier le client</h1>
+        <p className="text-sm text-ink-mute">{client.display_name}</p>
       </div>
 
       <EditClientForm client={client} />
