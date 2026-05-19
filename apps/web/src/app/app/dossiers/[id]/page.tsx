@@ -459,16 +459,19 @@ export default async function DossierDetailPage({
 
       {/* Toggle Vue par pièce / Vue par diag */}
       <div className="flex items-center justify-between gap-3 flex-wrap pt-2">
-        <div>
-          <h2 className="text-lg font-semibold">
+        <div className="space-y-1">
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            {viewPreference === 'rooms' ? 'Vue terrain' : 'Vue bureau'}
+          </p>
+          <h2 className="font-serif italic font-normal text-2xl text-ink leading-tight">
             {viewPreference === 'rooms'
-              ? `Pièces (${rooms?.length ?? 0})`
-              : `Diagnostics (${missionsList.length})`}
+              ? `${rooms?.length ?? 0} ${(rooms?.length ?? 0) === 1 ? 'pièce' : 'pièces'}.`
+              : `${missionsList.length} ${missionsList.length === 1 ? 'diagnostic' : 'diagnostics'}.`}
           </h2>
-          <p className="text-sm text-ink-mute">
+          <p className="text-sm text-ink-mute max-w-xl">
             {viewPreference === 'rooms'
-              ? 'Vue terrain : pour chaque pièce, les tâches de tous les diagnostics applicables.'
-              : 'Vue bureau : pour chaque diagnostic, sa check-list de complétude et son export.'}
+              ? 'Pour chaque pièce, les tâches de tous les diagnostics applicables.'
+              : 'Pour chaque diagnostic, sa check-list de complétude et son export.'}
           </p>
         </div>
         <div className="flex items-center gap-2">

@@ -87,10 +87,14 @@ export function WorkflowStepper({
     <Card variant="opaque" padding="default">
       <CardContent className="pt-2 space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="text-base font-semibold flex items-center gap-2">
-            <ListChecks className="size-4" />
-            Workflow — {overallPercent}% complet
-          </h2>
+          <div className="space-y-1">
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute flex items-center gap-2">
+              <ListChecks className="size-3.5" /> Workflow
+            </p>
+            <h2 className="font-serif italic font-normal text-2xl text-ink leading-tight">
+              {overallPercent}% complet.
+            </h2>
+          </div>
           {overallPercent === 100 ? (
             <Badge variant="green">
               <CheckCircle2 className="size-3 mr-1" /> Prêt à exporter
