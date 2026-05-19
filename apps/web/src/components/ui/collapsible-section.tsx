@@ -46,7 +46,9 @@ export function CollapsibleSection({
             aria-controls={`${storageKey}-body`}
             className="flex items-center gap-2 flex-1 min-w-0 text-left"
           >
-            <CardTitle className="text-base flex items-center gap-2">{title}</CardTitle>
+            <CardTitle className="font-serif italic font-normal text-xl text-ink flex items-center gap-2">
+              {title}
+            </CardTitle>
             {meta && <span className="text-xs text-ink-mute shrink-0">{meta}</span>}
             <ChevronDown
               className={cn(

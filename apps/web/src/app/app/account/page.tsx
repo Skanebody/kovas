@@ -226,9 +226,9 @@ export default async function AccountPage() {
                     t.recommended && !isCurrent && 'border-navy/20',
                   )}
                 >
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs uppercase tracking-wider font-semibold">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.1em] font-semibold text-ink-mute">
                         {t.label}
                       </span>
                       {t.recommended && (
@@ -242,11 +242,10 @@ export default async function AccountPage() {
                         </Badge>
                       )}
                     </div>
-                    <div className="text-2xl font-extrabold tracking-tight">
+                    <div className="font-serif italic text-4xl text-ink leading-none tracking-tight">
                       {eurosCents(t.priceMonthlyCents)}€
-                      <span className="text-xs font-normal text-ink-mute"> HT/mois</span>
                     </div>
-                    <p className="text-xs text-ink-mute">{t.description}</p>
+                    <p className="text-xs text-ink-mute">HT/mois · {t.description}</p>
                   </div>
                   <ul className="space-y-1.5 text-xs">
                     <li className="flex items-start gap-2">
