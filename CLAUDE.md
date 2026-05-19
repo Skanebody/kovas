@@ -8,7 +8,7 @@
 > **Modification 18 MVP V1 étendu + Focus 8 diagnostics** : [`docs/modification-18-mvp-v1-extended.md`](docs/modification-18-mvp-v1-extended.md) (10 features V1, croquis V2, audit/DTG/marketplace MAR-RGE supprimés)
 > **Avatar client (TOUT décision produit doit passer ce test)** : [`docs/avatar-client.md`](docs/avatar-client.md) — diagnostiqueur 43 ans, ex-cadre reconverti, ton SOBRE PROFESSIONNEL, **JAMAIS gaming/lifestyle/millennial**
 > **Système Gain Tracker (V1.5, sprints 15-17 post-launch, 8j dev)** : [`docs/gain-tracker-system.md`](docs/gain-tracker-system.md) — compteur permanent + page activité + rapport mensuel + image LinkedIn + statuts pros + stats anonymisées
-> **Dernière mise à jour** : 2026-05-19 (Refonte P6 glassmorphism : Card `flat` par défaut, glass réservé aux surfaces flottantes via utilities `.glass-*`. P7 cleanup avant : Radix Toast supprimé, `/app/billing` consolidé, theme toggle unique sidebar, Badge `yellow`)
+> **Dernière mise à jour** : 2026-05-19 (Design System v2 — refonte complète : retour navy `#0F1E3D` + Manrope, ajout ambre `#D97706` accent chaud, 5 pastels catégoriels, JetBrains Mono labels, dark mode reconstruit, 9 variants Badge, nouveaux composants StatusPill + MissionCard + GainTracker hero navy/glow ambre)
 
 ---
 
@@ -314,99 +314,137 @@ D-U-N-S 281 515 446 **gardé** (gratuit, lifetime, débloquera Apple Dev enrollm
 
 ---
 
-## 9. Identité visuelle — Ron Design Lab × Tectra (révision 2026-05-19)
+## 9. Identité visuelle — KOVAS Design System v2 (Ron Design Lab adapté, révision 2026-05-19)
 
-> **Authority** : ce document est la référence canonique du design system. Tokens CSS implémentés dans [`apps/web/src/app/globals.css`](apps/web/src/app/globals.css) + [`apps/web/tailwind.config.ts`](apps/web/tailwind.config.ts). Analyse complète + verdict pattern-par-pattern dans [`docs/design/ron-design-lab-kovas.md`](docs/design/ron-design-lab-kovas.md).
-> Décision 2026-05-19 : adoption du **registre produit Ron Design Lab × Tectra** — crème dominant, cobalt confiance, jaune énergique, typo expressive Outfit + Instrument Serif italique sur les accents. Anciennes valeurs (navy KOVAS + Manrope, 2026-05-18) **abandonnées** : trop corporate, pas assez éditorial pour un produit utilisé 8h/jour terrain + bureau. Le registre marketing Ron (typo 120px, multi-pastels, emojis partout, avatars inline) reste **exclu de l'app** et **réservé à kovas.fr**.
+> **Authority** : ce document est la référence canonique du design system. Tokens CSS implémentés dans [`apps/web/src/app/globals.css`](apps/web/src/app/globals.css) + [`apps/web/tailwind.config.ts`](apps/web/tailwind.config.ts). Référence visuelle exhaustive dans [`docs/design/kovas-design-system-v2.html`](docs/design/kovas-design-system-v2.html). Verdict pattern-par-pattern dans [`docs/design/ron-design-lab-kovas.md`](docs/design/ron-design-lab-kovas.md).
+> Décision 2026-05-19 (3e itération design system) : adoption du système v2 — **cream + navy KOVAS conservé + ambre accent chaud + 5 pastels catégoriels + Manrope + Instrument Serif italic + JetBrains Mono**. Itérations précédentes abandonnées : (1) navy + Manrope monochrome 2026-05-18 ; (2) cobalt + Outfit + butter Ron pur 2026-05-19 J39 ; (3) cette v2 = synthèse des deux + ajouts Ron Design Lab. Le registre marketing Ron (typo 120px, emojis profusion, avatars inline) reste **exclu de l'app** et **réservé à kovas.fr**.
 
 ### Palette light (mode par défaut — `:root`)
 
 | Rôle | HSL token | Valeur indicative |
 |---|---|---|
-| Background page | `--background: 38 24% 94%` | `#F5F1EA` crème Ron |
-| Background gradient | `--bg-gradient-from/to: 38 24% 94% → 38 18% 91%` | dégradé 135° subtil |
-| Card (paper) | `--card: 40 33% 98%` | `#FBF8F2` paper |
-| Card pleine accent | `--card-accent: 227 57% 42%` | `#2C3FA8` cobalt |
-| Card accent foreground | `--card-accent-foreground: 0 0% 100%` | blanc (contraste sur cobalt) |
-| CTA primaire | `--cta: 227 57% 42%` | cobalt — confiance métier |
-| CTA hover | `--cta-hover: 227 50% 36%` | cobalt -10% |
-| CTA foreground | `--cta-foreground: 0 0% 100%` | blanc |
-| Texte body | `--foreground: 30 10% 9%` | `#1A1815` encre |
-| Texte muted | `--muted-foreground: 30 8% 38%` | `#5A554B` |
-| Texte subtle | `--subtle-foreground: 30 6% 52%` | `#8A8478` |
-| Borders rule | `--border: 38 20% 80%` | `#D8D1C0` |
+| Background page | `--background: 40 30% 95%` | `#F8F5EE` cream |
+| Background gradient | `--bg-gradient-from/to: 40 30% 95% → 38 26% 91%` | cream → cream-deep 135° |
+| Paper (surfaces de travail) | `--paper / --card: 42 50% 98%` | `#FDFBF6` |
+| Card pleine accent | `--card-accent: 218 60% 15%` | `#0F1E3D` navy plein |
+| Card accent foreground | `--card-accent-foreground: 40 30% 95%` | cream sur navy |
+| CTA primaire | `--cta: 218 60% 15%` | `#0F1E3D` navy |
+| CTA hover | `--cta-hover: 220 65% 10%` | `#08122A` navy-deep |
+| Navy soft | `--navy-soft: 222 41% 28%` | `#2A3A65` backgrounds adoucis |
+| **Accent chaud (nouveau v2)** | `--accent-warm: 28 92% 44%` | `#D97706` ambre saturé |
+| Accent warm soft | `--accent-warm-soft: 38 100% 92%` | `#FFEDD5` fond pastille |
+| Accent warm glow | `--accent-warm-glow: 38 100% 96%` | `#FFF7E8` halo radial |
+| Texte primary | `--foreground: 218 60% 15%` | `#0F1E3D` ink |
+| Texte soft | `--ink-soft: 220 42% 22%` | `#1F2E4D` sous-titres |
+| Texte mute | `--muted-foreground: 220 25% 38%` | `#4A5878` ink-mute |
+| Texte faint | `--subtle-foreground: 219 17% 57%` | `#7E8AA4` ink-faint |
+| Texte ghost | `--ink-ghost: 220 17% 73%` | `#B0B8C8` placeholders |
+| Borders rule | `--border: 40 22% 78%` | `#D5CDB8` |
+| Borders soft | `--border-soft: 40 25% 85%` | `#E5DECB` séparateurs |
 
-### Palette dark (V1 actif, `.dark`)
+### Palette dark (V1 actif, `.dark`) — refonte complète v2
 
 | Rôle | HSL token | Valeur indicative |
 |---|---|---|
-| Background | `--background: 222 47% 8%` | encre profonde (non-cinematic) |
-| Card | `--card: 220 26% 14%` | gris-bleu sourd |
-| Card accent | `--card-accent: 227 45% 55%` | cobalt clarifié |
-| CTA | `--cta: 227 70% 62%` | cobalt vif sur fond sombre |
-| Foreground | `--foreground: 38 20% 96%` | crème inversée |
-| Border | `--border: 220 18% 24%` | très discret |
+| Background | `--background: 222 47% 7%` | `#0A1224` navy ultra-deep |
+| Paper / Card | `--paper / --card: 220 30% 14%` | `#1A2238` surfaces travail |
+| Card accent | `--card-accent: 28 92% 44%` | ambre plein (inversion light) |
+| CTA | `--cta: 218 55% 65%` | `#6A8AC4` navy-light contraste |
+| CTA foreground | `--cta-foreground: 222 47% 7%` | navy-deep sur cta clair |
+| Accent warm | `--accent-warm: 38 92% 56%` | ambre clarifié |
+| Foreground | `--foreground: 40 30% 95%` | cream inversé |
+| Borders | `--border: 220 18% 24%` | très discret |
+| Pastels | désaturés et assombris | fonds catégories adapté |
 
-### Accents sémantiques (badges, indicateurs)
+### Sémantiques système (badges, indicateurs)
 
 | Token | Light | Dark | Usage |
 |---|---|---|---|
-| `--accent-blue` | `227 57% 50%` | `213 94% 68%` | Mission planifiée, info, lien |
-| `--accent-yellow` | `45 100% 80%` (`#FFE89C` butter) | `45 90% 65%` | **Énergique** — alerte douce, compteur DPE, statut "à relire". Utility `.bg-accent-yellow-soft` (45% opacity) pour fond pastille |
-| `--accent-red` | `0 84% 60%` | `0 91% 71%` | DPE F/G, danger |
-| `--accent-orange` | `38 92% 50%` | `43 96% 56%` | DPE D/E |
-| `--accent-green` | `158 64% 42%` | `158 60% 56%` | DPE A-C, validé, payé |
+| `--accent-blue` | `217 91% 60%` (#3B82F6) | `213 94% 68%` | Info, mission planifiée |
+| `--accent-green` | `158 84% 30%` (#059669) | `158 60% 56%` | Success, DPE A-C, exporté |
+| `--accent-red` | `0 73% 50%` (#DC2626) | `0 91% 71%` | Danger, DPE F-G, impayé |
+| `--accent-yellow` | `38 92% 50%` (#F59E0B) | `43 96% 56%` | Warning, DPE D-E |
+| `--accent-orange` | `25 95% 50%` (#F97316) | `25 95% 60%` | Warning saturé (legacy) |
 
-> **Jaune butter** = signature Ron Design Lab. À utiliser SANS modération sur les KPI dramatisés et les pastilles d'alerte douce ; **proscrit** sur les CTA ou les surfaces larges.
+### Pastels catégoriels (signature v2 — types de diagnostic)
 
-### Typo : **Outfit** (UI) + **Instrument Serif italic** (accents éditoriaux)
+| Token | Light | Dark | Mapping diagnostic |
+|---|---|---|---|
+| `--pastel-butter` | `46 100% 89%` (#FFF0C5) | `46 30% 25%` | **DPE** (énergie A-G), **ERP** (info) |
+| `--pastel-lime` | `80 47% 89%` (#E5F0D5) | `80 25% 22%` | **Électricité** (vert tech) |
+| `--pastel-peach` | `20 100% 92%` (#FFE0D5) | `20 30% 25%` | **Amiante**, **Termites** (alerte sanitaire) |
+| `--pastel-lavender` | `264 47% 92%` (#E8E0F5) | `264 25% 28%` | **Plomb** (toxique) |
+| `--pastel-sky` | `210 50% 91%` (#DAE8F5) | `210 25% 25%` | **Carrez/Boutin**, **Gaz** (mesure/air) |
 
-Variables CSS : `--font-outfit` + `--font-instrument-serif` câblés dans [`apps/web/src/app/layout.tsx`](apps/web/src/app/layout.tsx) via `next/font/google`.
+Mapping codé dans [`lib/mission-pastels.ts`](apps/web/src/lib/mission-pastels.ts) (helper `MISSION_PASTEL_CLASS` + `MISSION_TYPE_LABEL`).
 
-| Élément | Famille | Taille | Graisse | Letter-spacing |
-|---|---|---|---|---|
-| **KPI hero (cockpit, dramatisé)** | `font-serif italic` (Instrument Serif) | 60-72px | 400 | -0.02em |
-| **Mot-clé accent dans H1** | `font-serif italic` (utility `.text-display-serif`) | hérite | 400 | hérite |
-| H1 page (utility `.text-display`) | `font-sans` (Outfit) | 36-48px | Extrabold 800 | -0.02em |
-| H2 section | `font-sans` | 24-28px | Semibold 600 | -0.01em |
-| H3 card title | `font-sans` | 18px | Semibold 600 | 0 |
-| Body | `font-sans` | 14-16px | Regular 400 | 0 |
-| Eyebrow / uppercase | `font-sans` | 11-12px | Medium 500 | 0.15em uppercase |
-| Micro / badge | `font-sans` | 11px | Semibold 600 | 0.05em |
+### Typo : Manrope + Instrument Serif italic + JetBrains Mono
+
+Variables CSS : `--font-manrope` + `--font-instrument-serif` + `--font-jetbrains-mono` câblées dans [`layout.tsx`](apps/web/src/app/layout.tsx).
+
+| Élément | Famille | Taille | Graisse |
+|---|---|---|---|
+| **KPI hero (GainTracker, cockpit)** | `font-serif italic` (Instrument Serif) | 80-120px | 400 |
+| **Mot-clé accent dans H1** | `font-serif italic` (utility `.text-display-serif`) | hérite | 400 |
+| H1 hero | `font-sans` (Manrope) | 48-96px | Extrabold 800 |
+| H2 section | `font-sans` | 32-56px | Bold 700 |
+| H3 card title | `font-sans` | 18-22px | Bold 700 |
+| Body | `font-sans` | 14-16px | Regular 400 |
+| Eyebrow / mono label | `font-mono` (JetBrains) | 11-12px | Medium 500 uppercase 0.06em |
+| Time display (MissionCard) | `font-mono` | 22-24px | Semibold 600 |
+| Reference dossier (DOS-XXXX) | `font-mono` | 12-14px | Medium 500 |
 
 **Pattern signature** : `<h1>Bonjour Benjamin, <span className="text-display-serif">votre journée</span></h1>` — le serif italique met en relief le mot-clé éditorial.
 
-**Font-feature-settings** activés sur `body` : `'ss01', 'ss02', 'rlig' 1, 'calt' 1` (variants stylistiques Outfit + ligatures contextuelles).
+### Spacing — système 4x rigoureux
+
+Aligné Tailwind par défaut (`p-1`=4px, `p-2`=8px, `p-3`=12px, `p-4`=16px, `p-5`=20px, `p-6`=24px, `p-8`=32px, `p-10`=40px, `p-12`=48px, `p-16`=64px). **Aucune valeur arbitraire** — la cohérence visuelle vient de la rigueur d'espacement, pas de la décoration.
+
+### Radius scale v2
+
+| Token | Valeur | Usage |
+|---|---|---|
+| `rounded-sm` | 8px | Inputs petits, tags catégorie |
+| `rounded-md` | 12px | Inputs standards |
+| `rounded-lg` | 18px | Cards intérieures |
+| `rounded-xl` | 24px | Cards principales (Card variant flat) |
+| `rounded-2xl` | 32px | Hero, cards premium (Card variant accent) |
+| `rounded-pill` | 999px | CTA pillule, badges, status pills |
+
+### Ombres signature Ron — 5 niveaux gradués
+
+`shadow-glass-xs` / `-sm` / `-` / `-lg` / `-hover` — neutres basées sur `--foreground` 4-10% opacity. **JAMAIS** `shadow-lg` / `shadow-2xl` / glows colorés (sauf glow ambre radial GainTracker).
 
 ### Règles strictes (non négociables)
 
-- **Border-radius** : `1.25rem` (xl) / `1.5rem` (2xl) cards, `0.75rem` (md) inputs et inner cards, `1rem` (lg) sections, `100px` (pill) CTA et badges
-- **Glassmorphism léger** : décision P6 (2026-05-19) — Option B "Adapter". Glass **réservé aux surfaces flottantes** au-dessus du flux (header sticky, sidebar, command palette, bottom sheets, app-nav-tabs, calendar sticky header) via les utilities `.glass-header` / `.glass-sidebar` / `.glass`. Les cards de travail (dashboard, dossier, listes, account, landing) utilisent désormais `Card variant="flat"` par défaut : surface paper opaque, ombre douce neutre `shadow-glass`, border `border-border`. Plus de blur partout — pattern vieillissant en 2026
-- **Ombres douces signature Ron** : `box-shadow: 0 8px 24px hsl(var(--foreground) / 0.06), 0 1px 2px hsl(var(--foreground) / 0.04)` — neutres (basées sur foreground encre, pas couleur). Tokens `shadow-glass` / `shadow-glass-hover` / `shadow-cta`. **JAMAIS** `shadow-lg` / `shadow-2xl` / glows colorés
-- **CTA primaire** : pillule cobalt (`bg-cta text-cta-foreground rounded-pill`), padding `12px 32px`, font-weight 600, ombre `shadow-cta`, hover lift `-1px` + `shadow-cta-hover`
-- **Hero KPI dramatisé** : Instrument Serif italic, taille 60-72px, leading-none, sur card paper — registre éditorial signé (cf. composant [`KpiHero`](apps/web/src/components/ui/kpi-hero.tsx))
-- **Gradients** : autorisés UNIQUEMENT pour le fond page (`#F5F1EA → #EDE7DC`) ; JAMAIS multicolores ni glows
-- **Couleurs flashy/néon, violet cinematic** : **interdits**. Le violet `#7C6FFF` du marketing Ron est explicitement **exclu** de KOVAS
-- **Bordures** : 1px max, opacité 60-100% du token `--border` (qui est déjà discret)
-- **Dark + Light** : auto système + override manuel (next-themes), **V1 actif**, defaultTheme=`light` — toggle **uniquement dans la sidebar app** (icon dropdown). Décision P7 : suppression du `ThemePicker` redondant dans `/app/account` (sobriété > pédagogie)
-- **Animations** : `fade-in 0.3s ease` (keyframe utility `.animate-fade-in`) sur entrée de page ; PAS de bounces ni spring exubérants ; respect `prefers-reduced-motion`
-- **PDF générés** : toujours en clair (impression), couleurs sémantiques conservées pour DPE A-G
+- **Border-radius** : voir scale ci-dessus
+- **Glassmorphism léger** : décision P6 — Option B "Adapter". Glass **réservé aux surfaces flottantes** (header sticky, sidebar, command palette, bottom sheets, app-nav-tabs, calendar sticky header) via `.glass-*` utilities. Cards de travail = `Card variant="flat"` (défaut)
+- **CTA primaire** : pillule navy `#0F1E3D` (`bg-cta text-cta-foreground rounded-pill`), padding `12px 32px`, font-weight 600, ombre `shadow-cta`, hover lift `-1px` + `shadow-cta-hover`
+- **CTA warm (nouveau v2)** : pillule ambre `#D97706` (`bg-accent-warm`), pour célébration / énergie positive (gain tracker action, conversion essai→payant). À utiliser **parcimonieusement**
+- **Hero KPI dramatisé** : Instrument Serif italic 80-120px sur card paper ou card accent navy avec glow ambre (cf. `GainTrackerCard`)
+- **Pastels catégoriels** : usage UNIQUEMENT en fond de tags type de diagnostic ou de mini-cards catégorielles. **JAMAIS** sur CTA / surfaces larges / texte
+- **Gradients** : autorisés UNIQUEMENT pour le fond page (`#F8F5EE → #EFEAD9`) + glow radial ambre subtle sur card accent. **JAMAIS** multicolores
+- **Couleurs flashy/néon, violet cinematic** : **interdits**
+- **Bordures** : 1px max, tokens `--border` ou `--border-soft` uniquement
+- **Dark + Light** : auto système + override (next-themes), V1 actif, defaultTheme=`light` — toggle uniquement sidebar
+- **Animations** : `fade-in 0.3s ease` sur entrée page + `pulse-soft 2s` sur dot StatusPill amber (en cours). PAS de bounces. Respect `prefers-reduced-motion`
+- **PDF générés** : toujours en clair (impression), couleurs sémantiques DPE A-G conservées
 
-### Composants canoniques
+### Composants canoniques v2
 
-- **`Button`** : variants `default` (pillule cobalt CTA), `outline` (bordure border, hover bg-muted), `ghost`, `destructive` (rouge), `icon` (cercle 40px ghost)
-- **`Card`** : 3 variants — `flat` (défaut depuis P6, paper opaque + border + shadow-glass) · `glass` (opt-in surfaces flottantes) · `accent` (cobalt pleine, hero visuels CTA landing + gain tracker). Tous en `rounded-2xl`
+- **`Button`** : variants `default` (pillule navy CTA), `outline` (paper + bordure rule), **`warm` (NEW v2 — pillule ambre)**, `ghost` (transparent hover cream-deep), `link`, `glass` (opt-in surface flottante), `destructive` (rouge). Sizes : `default` (h-10), `sm` (h-8), `lg` (h-12), `icon` (size-10 rounded-full)
+- **`Card`** : 4 variants — `flat` (défaut, paper opaque + border + shadow-glass-sm, rounded-xl) · `glass` (opt-in surfaces flottantes, rounded-xl) · `accent` (navy plein, rounded-2xl, hero visuels GainTracker / CTA landing) · **`warm` (NEW v2 — fond ambre-soft, alerte douce / mise en avant)**
+- **`Badge`** : **9 variants** — `default` (cobalt CTA) + `outline` + `muted` + sémantiques `blue` (info) + `green` (DPE A-C) + `red` (DPE F-G) + `orange` (warning saturé) + `yellow` (DPE D-E warning) + **`amber` (NEW v2 — célébration, action positive saturée)**. Pastilles pillule, opacité variable selon variant
+- **`StatusPill` (NEW v2)** : dot 8px coloré + halo ring 4px + label texte. Variants : `blue` (planifié) · `amber` (en cours, **pulse 2s animé**) · `green` (terminé) · `muted` (à démarrer). Pour les états vivants, complément du `Badge`
 - **`KpiHero`** (signature Ron) : chiffre Instrument Serif italic 60-72px + label + trend pill — composant dédié au cockpit dashboard
-- **`Badge`** : 8 variants — `default` (cobalt CTA) + `outline` + `muted` + sémantiques `blue` (info) + `green` (DPE A-C) + `red` (DPE F-G) + `orange` (DPE D-E) + `yellow` (butter, alerte douce / compteur missions). Pastilles pillule, opacité 15% sur fond et 100% sur texte (sauf yellow : 45% bg + text-foreground)
-- **Utilities** : `.glass` / `.glass-hover` / `.glass-accent` / `.glass-header` / `.glass-sidebar` / `.bg-accent-yellow-soft` / `.text-display` / `.text-display-serif`
-- **`Donut`** (V1.5) : Recharts, segments arrondis cornerRadius 10, palette sémantique DPE
-- **`WorkflowStepper`** : timeline linéaire (Bézier rejeté V1)
+- **`MissionCard` (NEW v2)** : grid 3 colonnes (heure mono / info + tags pastels / actions), heure JetBrains Mono 24px, tags pastels catégoriels (via `MISSION_PASTEL_CLASS`), nom h3 bold, adresse meta avec icône MapPin, slot actions ouvert. Cliquable via prop `href`
+- **Utilities** : `.glass*` (surfaces flottantes), `.bg-pastel-*` (5 pastels catégoriels), `.text-display` / `.text-display-serif`, `.animate-pulse-soft` (dot StatusPill)
 
 ### Deux registres Ron — usage KOVAS
 
 | | Marketing `kovas.fr` (landing, blog, OG images) | App `/app/*` (PWA terrain + bureau) |
 |---|---|---|
-| Typo | Outfit 60-120px expressif + Instrument Serif italic à profusion | Outfit 14-48px + Instrument Serif italic **sur accents éditoriaux + KPIs** |
+| Typo | Manrope 60-120px expressif + Instrument Serif italic à profusion + emojis micro-copy hero | Manrope 14-48px + Instrument Serif italic **sur KPIs hero + accents éditoriaux H1** + JetBrains Mono pour labels mono |
 | Densité | Très aérée | Dense (data, listes, tables) avec respiration KPI |
 | Couleurs | Multi-pastels Ron OK (crème, butter, cobalt, vert, terracotta léger) | **Cobalt + butter** signature + sémantiques. Pas de terracotta |
 | Emojis | OK micro-copy hero | Réservés onboarding / empty states ; jamais facturation ni alertes graves |

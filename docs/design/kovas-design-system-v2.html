@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOVAS Design System v2 — Ron Design Lab adapté</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:           #F8F5EE;
+  --cream-deep:      #EFEAD9;
+  --paper:           #FDFBF6;
+  --white-pure:      #FFFFFF;
+  --ink:             #0F1E3D;
+  --ink-soft:        #1F2E4D;
+  --ink-mute:        #4A5878;
+  --ink-faint:       #7E8AA4;
+  --ink-ghost:       #B0B8C8;
+  --rule:            #D5CDB8;
+  --rule-soft:       #E5DECB;
+  --navy:            #0F1E3D;
+  --navy-deep:       #08122A;
+  --navy-soft:       #2A3A65;
+  --amber:           #D97706;
+  --amber-soft:      #FFEDD5;
+  --amber-glow:      #FFF7E8;
+  --blue:            #3B82F6;
+  --blue-soft:       #DBE9FE;
+  --red:             #DC2626;
+  --red-soft:        #FCE3E1;
+  --green:           #059669;
+  --green-soft:      #D1FAE5;
+  --pastel-butter:   #FFF0C5;
+  --pastel-lime:     #E5F0D5;
+  --pastel-peach:    #FFE0D5;
+  --pastel-lavender: #E8E0F5;
+  --pastel-sky:      #DAE8F5;
+  --font-sans:       'Manrope', sans-serif;
+  --font-serif:      'Instrument Serif', serif;
+  --font-mono:       'JetBrains Mono', monospace;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 24px; --r-2xl: 32px; --r-pill: 999px;
+  --shadow-xs: 0 1px 2px rgba(15,30,61,0.04);
+  --shadow-sm: 0 2px 6px rgba(15,30,61,0.06);
+  --shadow-md: 0 6px 18px rgba(15,30,61,0.06), 0 2px 6px rgba(15,30,61,0.04);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+.hero { padding: 100px 0 80px; border-bottom: 1px solid var(--rule); }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 8px 16px; border-radius: var(--r-pill);
+  background: var(--navy); color: var(--paper);
+  font-family: var(--font-mono); font-size: 11.5px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 40px;
+}
+.eyebrow .dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--amber);
+  box-shadow: 0 0 0 4px rgba(217,119,6,0.20);
+}
+h1.hero-title {
+  font-weight: 800; font-size: clamp(48px, 7.5vw, 96px);
+  line-height: 0.95; letter-spacing: -0.04em;
+  color: var(--ink); margin-bottom: 28px;
+}
+h1.hero-title .italic {
+  font-family: var(--font-serif); font-style: italic;
+  font-weight: 400; font-size: 1.05em; letter-spacing: -0.02em;
+}
+.hero-sub { font-size: 20px; line-height: 1.5; color: var(--ink-soft); max-width: 760px; }
+section { padding: 80px 0; border-bottom: 1px solid var(--rule); }
+section:last-of-type { border-bottom: none; }
+.section-num {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+  color: var(--amber); letter-spacing: 0.08em;
+  margin-bottom: 16px; display: block; text-transform: uppercase;
+}
+h2 {
+  font-weight: 700; font-size: clamp(34px, 5vw, 56px);
+  line-height: 1; letter-spacing: -0.03em;
+  color: var(--ink); margin-bottom: 32px;
+}
+h2 .italic { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 1.06em; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.swatch { border-radius: var(--r-md); overflow: hidden; background: var(--white-pure); border: 1px solid var(--rule-soft); }
+.swatch .color { height: 80px; width: 100%; display: block; }
+.swatch .meta { padding: 12px 14px; }
+.swatch .name { font-weight: 600; font-size: 13.5px; color: var(--ink); margin-bottom: 2px; }
+.swatch .hex { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-mute); }
+.t-kpi { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 80px; line-height: 1; letter-spacing: -0.03em; color: var(--navy); }
+footer { padding: 80px 0; background: var(--navy); color: var(--paper); }
+footer h3 { color: var(--paper); font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 44px; letter-spacing: -0.025em; margin-bottom: 24px; }
+footer .signature { margin-top: 48px; padding-top: 28px; border-top: 1px solid rgba(248,245,238,0.15); display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11.5px; color: rgba(248,245,238,0.50); letter-spacing: 0.06em; }
+p { margin-bottom: 16px; color: var(--ink-soft); max-width: 820px; font-size: 16px; }
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--paper); padding: 2px 8px; border-radius: var(--r-sm); border: 1px solid var(--rule); color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="hero">
+    <span class="eyebrow"><span class="dot"></span>Design system v2 · KOVAS × Ron Design Lab</span>
+    <h1 class="hero-title">Une interface <span class="italic">moderne, épurée,</span> intuitive.</h1>
+    <p class="hero-sub">Document de référence canonique du design system KOVAS v2. Tokens, composants, écrans exemples — implémentation : <code>globals.css</code> + <code>tailwind.config.ts</code> + composants UI.</p>
+  </header>
+
+  <section>
+    <span class="section-num">→ Palette — neutres + brand + accent chaud</span>
+    <h2>Couleurs <span class="italic">canoniques</span>.</h2>
+    <p>Cream dominant (#F8F5EE), navy KOVAS conservé (#0F1E3D), ambre saturé comme accent chaud nouveau (#D97706), 4 niveaux d'encre, 5 pastels catégoriels pour les types de diagnostic.</p>
+
+    <h3 style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-faint); margin: 32px 0 12px;">Neutres · cream/paper/cream-deep</h3>
+    <div class="swatches">
+      <div class="swatch"><div class="color" style="background:#F8F5EE"></div><div class="meta"><div class="name">cream (bg)</div><div class="hex">#F8F5EE</div></div></div>
+      <div class="swatch"><div class="color" style="background:#FDFBF6"></div><div class="meta"><div class="name">paper</div><div class="hex">#FDFBF6</div></div></div>
+      <div class="swatch"><div class="color" style="background:#EFEAD9"></div><div class="meta"><div class="name">cream-deep</div><div class="hex">#EFEAD9</div></div></div>
+    </div>
+
+    <h3 style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-faint); margin: 32px 0 12px;">Brand · navy + ambre</h3>
+    <div class="swatches">
+      <div class="swatch"><div class="color" style="background:#0F1E3D"></div><div class="meta"><div class="name">navy CTA</div><div class="hex">#0F1E3D</div></div></div>
+      <div class="swatch"><div class="color" style="background:#08122A"></div><div class="meta"><div class="name">navy-deep hover</div><div class="hex">#08122A</div></div></div>
+      <div class="swatch"><div class="color" style="background:#D97706"></div><div class="meta"><div class="name">amber accent</div><div class="hex">#D97706</div></div></div>
+      <div class="swatch"><div class="color" style="background:#FFEDD5"></div><div class="meta"><div class="name">amber-soft</div><div class="hex">#FFEDD5</div></div></div>
+    </div>
+
+    <h3 style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-faint); margin: 32px 0 12px;">Pastels catégoriels (types de diagnostic)</h3>
+    <div class="swatches">
+      <div class="swatch"><div class="color" style="background:#FFF0C5"></div><div class="meta"><div class="name">butter — DPE/ERP</div><div class="hex">#FFF0C5</div></div></div>
+      <div class="swatch"><div class="color" style="background:#E5F0D5"></div><div class="meta"><div class="name">lime — Élec</div><div class="hex">#E5F0D5</div></div></div>
+      <div class="swatch"><div class="color" style="background:#FFE0D5"></div><div class="meta"><div class="name">peach — Amiante/Termites</div><div class="hex">#FFE0D5</div></div></div>
+      <div class="swatch"><div class="color" style="background:#E8E0F5"></div><div class="meta"><div class="name">lavender — Plomb</div><div class="hex">#E8E0F5</div></div></div>
+      <div class="swatch"><div class="color" style="background:#DAE8F5"></div><div class="meta"><div class="name">sky — Carrez/Gaz</div><div class="hex">#DAE8F5</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="section-num">→ Typographie</span>
+    <h2>Manrope + Instrument Serif italic <span class="italic">en accent</span>.</h2>
+    <p>Manrope (UI sans-serif géométrique), Instrument Serif italic (display, KPIs hero, accents éditoriaux dans les H1), JetBrains Mono (labels uppercase, codes techniques, IDs dossiers).</p>
+    <p style="margin-top: 32px;"><strong>Pattern signature</strong> KPI hero (GainTracker, cockpit) :</p>
+    <div class="t-kpi">23h 47</div>
+  </section>
+
+  <section>
+    <span class="section-num">→ Implémentation repo</span>
+    <h2>Code <span class="italic">canonique</span>.</h2>
+    <p>Tokens CSS : <code>apps/web/src/app/globals.css</code> (variables HSL light + dark)</p>
+    <p>Tokens Tailwind : <code>apps/web/tailwind.config.ts</code> (colors / fontFamily / radius / shadow)</p>
+    <p>Fonts : <code>apps/web/src/app/layout.tsx</code> (Manrope + Instrument Serif + JetBrains Mono via next/font/google)</p>
+    <p>Composants UI : <code>apps/web/src/components/ui/</code> — card.tsx (4 variants flat/glass/accent/warm), button.tsx (8 variants incl. warm), badge.tsx (9 variants), status-pill.tsx (NEW), mission-card.tsx (NEW)</p>
+    <p>Helper pastels : <code>apps/web/src/lib/mission-pastels.ts</code> — mapping MissionType → pastel class</p>
+    <p>Référence canonique CLAUDE.md §9.</p>
+  </section>
+</div>
+
+<footer>
+  <div class="container">
+    <h3>Un système qui sert le diagnostiqueur, pas la démo Dribbble.</h3>
+    <p style="color: rgba(248,245,238,0.75); max-width: 740px;">Les patterns Ron Design Lab sont une boussole, pas un dogme. Chaque token, chaque composant, chaque écran de ce document doit gagner sa place dans le contexte KOVAS — un outil utilisé 8h par jour par un pro de 43 ans en conditions de terrain variables.</p>
+    <div class="signature">
+      <span>KOVAS · DESIGN SYSTEM v2 · 19.05.2026</span>
+      <span>Source canonique : CLAUDE.md §9</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
