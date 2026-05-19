@@ -39,6 +39,16 @@ const quickDossierSchema = z.object({
   addressLng: z.coerce.number().optional(),
   addressLat: z.coerce.number().optional(),
   yearBuilt: z.coerce.number().int().min(1000).max(2100).optional(),
+  // Compléments adresse (gain de temps au tél — saisie inline pendant l'appel,
+  // évite que le diagnostiqueur ait à les redemander sur place)
+  propertyType: z
+    .enum(['maison', 'appartement', 'immeuble', 'local_commercial', 'bureau', 'autre'])
+    .optional(),
+  apartmentDetail: z.string().max(120).optional().or(z.literal('')),
+  buildingLetter: z.string().max(10).optional().or(z.literal('')),
+  floorNumber: z.coerce.number().int().min(-5).max(60).optional(),
+  lotNumber: z.string().max(20).optional().or(z.literal('')),
+  surfaceTotal: z.coerce.number().min(0).max(100000).optional(),
   // Client : soit clientId existant, soit nom/tel/email inline (tous optionnels)
   clientId: z.string().uuid().optional().or(z.literal('')),
   clientType: z
@@ -187,6 +197,12 @@ export async function createQuickDossierAction(
     addressLng: formData.get('address_lng') || undefined,
     addressLat: formData.get('address_lat') || undefined,
     yearBuilt: formData.get('yearBuilt') || undefined,
+    propertyType: formData.get('propertyType') || undefined,
+    apartmentDetail: formData.get('apartmentDetail'),
+    buildingLetter: formData.get('buildingLetter'),
+    floorNumber: formData.get('floorNumber') || undefined,
+    lotNumber: formData.get('lotNumber'),
+    surfaceTotal: formData.get('surfaceTotal') || undefined,
     clientId: formData.get('clientId'),
     clientType: formData.get('clientType') || undefined,
     clientName: formData.get('clientName'),
@@ -239,6 +255,13 @@ export async function createQuickDossierAction(
         insee_code: data.addressInsee || null,
         location,
         year_built: data.yearBuilt ?? null,
+        // Compléments adresse — pré-remplissent le dossier dès le tél
+        property_type: data.propertyType ?? null,
+        apartment_detail: data.apartmentDetail || null,
+        building_letter: data.buildingLetter || null,
+        floor_number: data.floorNumber ?? null,
+        lot_number: data.lotNumber || null,
+        surface_total: data.surfaceTotal ?? null,
       })
       .select('id')
       .single()

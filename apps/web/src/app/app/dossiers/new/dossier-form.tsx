@@ -8,7 +8,18 @@ import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import { Briefcase, Building2, Home, Info, Loader2, MapPin, Phone, User } from 'lucide-react'
+import {
+  Briefcase,
+  Building2,
+  ChevronDown,
+  ChevronUp,
+  Home,
+  Info,
+  Loader2,
+  MapPin,
+  Phone,
+  User,
+} from 'lucide-react'
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { type DossierFormState, createQuickDossierAction } from '../actions'
 
@@ -66,6 +77,17 @@ const GROUP_LABELS = {
   amiante: 'Amiante',
   autres: 'Autres diagnostics',
 }
+
+// Types de bien — DB enum property_type_enum
+// Si appartement/immeuble → on déplie auto le bloc « étage / bâtiment »
+const PROPERTY_TYPE_PILLS = [
+  { value: 'maison', label: 'Maison', icon: Home, needsApt: false },
+  { value: 'appartement', label: 'Appartement', icon: Building2, needsApt: true },
+  { value: 'immeuble', label: 'Immeuble', icon: Building2, needsApt: true },
+  { value: 'autre', label: 'Autre', icon: Briefcase, needsApt: false },
+] as const
+
+type PropertyTypePill = (typeof PROPERTY_TYPE_PILLS)[number]['value']
 
 // Types client UI — mapping vers enum DB client_type (SCI → entreprise)
 const CLIENT_TYPE_PILLS = [
@@ -125,6 +147,12 @@ export function DossierForm({
 
   // Année construction pour suggestions automatiques de diagnostics
   const [yearBuilt, setYearBuilt] = useState<string>('')
+  // Type de bien — détermine si on déplie auto le bloc étage/bâtiment
+  const [propertyType, setPropertyType] = useState<PropertyTypePill | ''>('')
+  const needsAptDetails =
+    PROPERTY_TYPE_PILLS.find((p) => p.value === propertyType)?.needsApt ?? false
+  // Compléments adresse — repliés par défaut (uniquement si pertinent)
+  const [aptDetailsOpen, setAptDetailsOpen] = useState(false)
   const selectedProperty = properties.find((p) => p.id === propertyId)
   const effectiveYear =
     mode === 'existing'
@@ -168,6 +196,12 @@ export function DossierForm({
     if (effectiveYear < 1997) requiredByYear.push('amiante_vente')
     if (effectiveYear < 1949) requiredByYear.push('plomb_crep')
   }
+
+  // Quand le type devient appartement/immeuble, on déplie automatiquement le
+  // bloc compléments adresse pour gagner du temps au téléphone
+  useEffect(() => {
+    if (needsAptDetails) setAptDetailsOpen(true)
+  }, [needsAptDetails])
 
   // Auto-cochage à chaque changement d'année — cumule avec sélection user
   // (on coche les obligatoires, on ne décoche jamais ce que l'utilisateur a ajouté)
@@ -233,11 +267,36 @@ export function DossierForm({
                 {fieldErrors.address}
               </p>
             )}
+
+            {/* Type de bien — pillules. Auto-déplie compléments si appart/immeuble */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {PROPERTY_TYPE_PILLS.map((p) => {
+                const isActive = propertyType === p.value
+                const Icon = p.icon
+                return (
+                  <button
+                    key={p.value}
+                    type="button"
+                    onClick={() => setPropertyType(isActive ? '' : p.value)}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-xs font-medium transition-colors border',
+                      isActive
+                        ? 'bg-navy text-paper border-navy'
+                        : 'bg-paper text-ink border-rule hover:border-navy/40 hover:bg-cream-deep/40',
+                    )}
+                  >
+                    <Icon className="size-3.5" /> {p.label}
+                  </button>
+                )
+              })}
+            </div>
+            {propertyType && <input type="hidden" name="propertyType" value={propertyType} />}
+
             <div className="grid grid-cols-2 gap-3 mt-2">
               <FormField
                 label="Année de construction"
                 htmlFor="yearBuilt"
-                hint="Permet de suggérer plomb / amiante"
+                hint="Pré-coche plomb / amiante automatiquement"
               >
                 <Input
                   id="yearBuilt"
@@ -251,6 +310,78 @@ export function DossierForm({
                   onChange={(e) => setYearBuilt(e.target.value)}
                 />
               </FormField>
+              <FormField label="Surface (m²)" htmlFor="surfaceTotal" hint="Optionnel">
+                <Input
+                  id="surfaceTotal"
+                  name="surfaceTotal"
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  max={100000}
+                  step={0.01}
+                  placeholder="72"
+                />
+              </FormField>
+            </div>
+
+            {/* COMPLÉMENTS ADRESSE — collapsible, auto-déplié si appart/immeuble */}
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setAptDetailsOpen((v) => !v)}
+                className="inline-flex items-center gap-1.5 text-[11px] text-ink-mute hover:text-ink underline-offset-4 hover:underline transition-colors"
+              >
+                {aptDetailsOpen ? (
+                  <ChevronUp className="size-3.5" />
+                ) : (
+                  <ChevronDown className="size-3.5" />
+                )}
+                {aptDetailsOpen ? 'Masquer' : 'Préciser'} étage · bâtiment · n° appartement
+              </button>
+              {aptDetailsOpen && (
+                <div className="rounded-lg border border-rule bg-paper/40 p-3 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <FormField label="Bâtiment / entrée" htmlFor="buildingLetter">
+                      <Input
+                        id="buildingLetter"
+                        name="buildingLetter"
+                        maxLength={10}
+                        placeholder="Bât. A"
+                      />
+                    </FormField>
+                    <FormField label="Étage" htmlFor="floorNumber" hint="0 = RDC, -1 = sous-sol">
+                      <Input
+                        id="floorNumber"
+                        name="floorNumber"
+                        type="number"
+                        inputMode="numeric"
+                        min={-5}
+                        max={60}
+                        placeholder="3"
+                      />
+                    </FormField>
+                    <FormField label="Lot (optionnel)" htmlFor="lotNumber">
+                      <Input id="lotNumber" name="lotNumber" maxLength={20} placeholder="Lot 24" />
+                    </FormField>
+                  </div>
+                  <FormField
+                    label="N° appartement / porte"
+                    htmlFor="apartmentDetail"
+                    hint="« Apt 12B », « porte gauche », « local 204 »"
+                  >
+                    <Input
+                      id="apartmentDetail"
+                      name="apartmentDetail"
+                      maxLength={120}
+                      placeholder="Apt 12B"
+                    />
+                  </FormField>
+                  <p className="text-[11px] text-ink-mute italic">
+                    Ces infos pré-remplissent automatiquement le dossier et l&apos;adresse affichée
+                    le jour de la visite — pas besoin de les redemander au client.
+                  </p>
+                </div>
+              )}
             </div>
           </>
         ) : (

@@ -65,21 +65,46 @@ const DOSSIER_STATUS_VARIANT: Record<string, 'muted' | 'blue' | 'green' | 'orang
 }
 
 /**
- * Compose l'adresse en évitant la duplication ville si BAN l'a déjà mise dans `address`.
+ * Compose l'adresse en évitant la duplication ville si BAN l'a déjà mise dans
+ * `address`. Inclut bâtiment / étage / appartement / lot saisis lors du RDV
+ * pour que le diagnostiqueur n'ait pas à les redemander sur place.
  */
 function compactAddress(
   prop: {
     address: string | null
     postal_code: string | null
     city: string | null
+    building_letter?: string | null
+    apartment_detail?: string | null
+    floor_number?: number | null
+    lot_number?: string | null
   } | null,
 ): string {
   if (!prop) return ''
   const a = prop.address ?? ''
   const c = prop.city ?? ''
   const cp = prop.postal_code ?? ''
-  if (c && a.toLowerCase().includes(c.toLowerCase())) return a
-  return [a, [cp, c].filter(Boolean).join(' ')].filter(Boolean).join(', ')
+  // Compléments (bât / étage / apt / lot)
+  const detailParts: string[] = []
+  if (prop.building_letter) detailParts.push(`Bât. ${prop.building_letter}`)
+  if (prop.apartment_detail) detailParts.push(prop.apartment_detail)
+  if (typeof prop.floor_number === 'number') {
+    detailParts.push(
+      prop.floor_number === 0
+        ? 'RDC'
+        : prop.floor_number > 0
+          ? `${prop.floor_number}e étage`
+          : `sous-sol ${Math.abs(prop.floor_number)}`,
+    )
+  }
+  if (prop.lot_number) detailParts.push(`Lot ${prop.lot_number}`)
+
+  const streetPart =
+    c && a.toLowerCase().includes(c.toLowerCase())
+      ? a
+      : [a, [cp, c].filter(Boolean).join(' ')].filter(Boolean).join(', ')
+
+  return detailParts.length > 0 ? `${streetPart} — ${detailParts.join(' · ')}` : streetPart
 }
 
 export default async function DossierDetailPage({
@@ -102,7 +127,7 @@ export default async function DossierDetailPage({
     supabase
       .from('dossiers')
       .select(
-        'id, reference, status, scheduled_at, started_at, completed_at, notes, metadata, client_upload_token, client_upload_expires_at, property_id, client_id, properties(address, postal_code, city, surface_total, year_built, property_type), clients(display_name, email)',
+        'id, reference, status, scheduled_at, started_at, completed_at, notes, metadata, client_upload_token, client_upload_expires_at, property_id, client_id, properties(address, postal_code, city, surface_total, year_built, property_type, building_letter, apartment_detail, floor_number, lot_number), clients(display_name, email, phone)',
       )
       .eq('id', id)
       .eq('organization_id', orgId)
