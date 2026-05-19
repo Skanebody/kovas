@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { EmptyState } from '@/components/ui/empty-state'
 import { getCurrentUser } from '@/lib/auth/current-user'
 
 export const metadata: Metadata = { title: 'Biens' }
@@ -93,23 +93,19 @@ export default async function PropertiesPage() {
           </tbody>
         </AppListTable>
       ) : (
-        <Card variant="opaque" padding="default" className="text-center">
-          <CardContent className="space-y-4 pt-2">
-            <Building2 className="size-10 mx-auto text-ink-mute" />
-            <div className="space-y-1">
-              <h2 className="font-semibold text-ink">Aucun bien pour le moment</h2>
-              <p className="text-[13px] text-ink-mute">
-                Ajoutez un bien pour pouvoir y associer des missions de diagnostic.
-              </p>
-            </div>
+        <EmptyState
+          icon={Building2}
+          title="Aucun bien enregistré."
+          description="Ajoutez un bien pour mutualiser son historique de diagnostics entre plusieurs clients ou interventions."
+          action={
             <Button asChild variant="warm">
               <Link href="/app/properties/new">
                 <Plus className="size-4" />
                 Ajouter un bien
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       )}
     </div>
   )

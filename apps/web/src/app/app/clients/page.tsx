@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { EmptyState } from '@/components/ui/empty-state'
 import { getCurrentUser } from '@/lib/auth/current-user'
 
 export const metadata: Metadata = { title: 'Clients' }
@@ -82,23 +82,19 @@ export default async function ClientsPage() {
           </tbody>
         </AppListTable>
       ) : (
-        <Card variant="opaque" padding="default" className="text-center">
-          <CardContent className="pt-2 pb-4 space-y-4">
-            <Users className="size-10 mx-auto text-ink-mute" />
-            <div className="space-y-1">
-              <h2 className="font-semibold text-ink">Aucun client pour le moment</h2>
-              <p className="text-[13px] text-ink-mute">
-                Créez votre premier client pour pouvoir lancer une mission.
-              </p>
-            </div>
+        <EmptyState
+          icon={Users}
+          title="Aucun client encore."
+          description="Créez votre premier client (propriétaire, agence ou syndic) pour pouvoir lui lancer des missions."
+          action={
             <Button asChild variant="warm">
               <Link href="/app/clients/new">
                 <Plus className="size-4" />
                 Créer un client
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       )}
     </div>
   )

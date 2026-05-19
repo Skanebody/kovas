@@ -10,8 +10,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { DiagChip } from '@/components/ui/diag-chip'
+import { EmptyState } from '@/components/ui/empty-state'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import type { MissionType } from '@kovas/shared'
 
@@ -125,23 +125,19 @@ export default async function DossiersPage() {
           </tbody>
         </AppListTable>
       ) : (
-        <Card variant="opaque" padding="default" className="text-center">
-          <CardContent className="space-y-4 pt-2">
-            <FolderOpen className="size-10 mx-auto text-ink-mute" />
-            <div className="space-y-1">
-              <h2 className="font-semibold text-ink">Aucun dossier</h2>
-              <p className="text-[13px] text-ink-mute">
-                Un dossier regroupe les diagnostics d&apos;une même visite sur un bien.
-              </p>
-            </div>
+        <EmptyState
+          icon={FolderOpen}
+          title="Premier dossier en 90 secondes."
+          description="Un dossier regroupe les diagnostics d'une même visite sur un bien (DPE + Amiante + Plomb, etc.)."
+          action={
             <Button asChild variant="warm">
               <Link href="/app/dossiers/new">
                 <Plus className="size-4" />
-                Créer un dossier
+                Créer mon premier dossier
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       )}
     </div>
   )
