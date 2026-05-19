@@ -82,7 +82,7 @@
 }
 
 /* ============================================
-   Accessibilité — reduced motion
+   Accessibilité — reduced motion + focus-visible
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -93,6 +93,19 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Focus visible global — outline navy visible uniquement au clavier.
+   Les composants Button/Input/Select redéfinissent déjà focus-visible:ring
+   en interne ; cette règle catch-all couvre les éléments natifs et
+   custom non-Tailwind (links, buttons CSS-only, etc.). */
+:focus-visible {
+  outline: 2px solid hsl(var(--cta) / 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* ============================================

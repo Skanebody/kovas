@@ -1,11 +1,11 @@
 'use client'
 
-import { CheckCircle2, Circle, ClipboardList } from 'lucide-react'
-import { useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 import type { ChecklistRunItem } from '@/lib/checklists'
+import { cn } from '@/lib/utils'
+import { CheckCircle2, Circle, ClipboardList } from 'lucide-react'
+import { useOptimistic, useTransition } from 'react'
 import { toggleChecklistItemAction } from './actions'
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -25,19 +25,39 @@ interface MissionChecklistProps {
 export function MissionChecklist({
   missionId,
   items,
-  completion,
-  requiredOk,
+  completion: _completion,
+  requiredOk: _requiredOk,
 }: MissionChecklistProps) {
   const [, startTransition] = useTransition()
 
+  // Optimistic state : toggles instantanément manualChecked, le serveur
+  // revalide via revalidatePath et écrase si différent.
+  const [optimisticItems, applyOptimistic] = useOptimistic(
+    items,
+    (state: ChecklistRunItem[], patch: { id: string; checked: boolean }): ChecklistRunItem[] =>
+      state.map((it) => (it.id === patch.id ? { ...it, manualChecked: patch.checked } : it)),
+  )
+
   function handleToggle(itemId: string, currentChecked: boolean) {
+    const newChecked = !currentChecked
     startTransition(async () => {
-      await toggleChecklistItemAction(missionId, itemId, !currentChecked)
+      applyOptimistic({ id: itemId, checked: newChecked })
+      await toggleChecklistItemAction(missionId, itemId, newChecked)
     })
   }
 
+  // Re-calcule completion + requiredOk depuis l'état optimiste (cohérent avec
+  // la logique server-side dans lib/checklists.ts).
+  const doneCount = optimisticItems.filter(
+    (it) => it.status === 'auto_ok' || it.manualChecked === true,
+  ).length
+  const completion = optimisticItems.length > 0 ? doneCount / optimisticItems.length : 0
+  const requiredOk = optimisticItems.every(
+    (it) => !it.required || it.status === 'auto_ok' || it.manualChecked === true,
+  )
+
   // Group by category
-  const grouped = items.reduce<Record<string, ChecklistRunItem[]>>((acc, it) => {
+  const grouped = optimisticItems.reduce<Record<string, ChecklistRunItem[]>>((acc, it) => {
     if (!acc[it.category]) acc[it.category] = []
     acc[it.category]!.push(it)
     return acc
@@ -62,10 +82,7 @@ export function MissionChecklist({
           )}
         </div>
         <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full bg-cta transition-all"
-            style={{ width: `${percent}%` }}
-          />
+          <div className="h-full bg-cta transition-all" style={{ width: `${percent}%` }} />
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -103,9 +120,7 @@ export function MissionChecklist({
                         )}
                       >
                         {it.label}
-                        {it.required && !isOk && (
-                          <span className="text-accent-red ml-1">*</span>
-                        )}
+                        {it.required && !isOk && <span className="text-accent-red ml-1">*</span>}
                       </span>
                       {it.status === 'auto_ok' && (
                         <Badge variant="muted" className="text-[10px]">

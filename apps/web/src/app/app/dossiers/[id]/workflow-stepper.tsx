@@ -12,7 +12,7 @@ import {
   Circle,
   ListChecks,
 } from 'lucide-react'
-import { useState, useTransition } from 'react'
+import { useOptimistic, useState, useTransition } from 'react'
 import { toggleDossierStepItemAction } from './actions'
 
 interface WorkflowStepperProps {
@@ -21,7 +21,29 @@ interface WorkflowStepperProps {
   overallProgress: number
 }
 
-export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowStepperProps) {
+/**
+ * Recalcule progress + completed d'une step depuis ses items.
+ * Aligné sur la logique server-side dans lib/dossier-workflow.ts.
+ */
+function deriveStep(step: WorkflowStepRun): WorkflowStepRun {
+  const total = step.items.length
+  if (total === 0) {
+    return { ...step, progress: 1, completed: true }
+  }
+  const done = step.items.filter((it) => it.status === 'auto_ok' || it.checked === true).length
+  const progress = done / total
+  const requiredItems = step.items.filter((it) => it.required)
+  const allRequiredDone = requiredItems.every(
+    (it) => it.status === 'auto_ok' || it.checked === true,
+  )
+  return { ...step, progress, completed: allRequiredDone && done === total }
+}
+
+export function WorkflowStepper({
+  dossierId,
+  steps,
+  overallProgress: _overallProgress,
+}: WorkflowStepperProps) {
   // Default-open the first non-completed step
   const firstIncomplete = steps.findIndex((s) => !s.completed)
   const [openStep, setOpenStep] = useState<string>(
@@ -29,12 +51,36 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
   )
   const [, startTransition] = useTransition()
 
+  // Optimistic : on patch items[X].checked dans la bonne step et on recalcule
+  // progress + completed côté client. Le serveur revalide et écrasera.
+  const [optimisticSteps, applyOptimistic] = useOptimistic(
+    steps,
+    (state: WorkflowStepRun[], patch: { itemId: string; checked: boolean }): WorkflowStepRun[] =>
+      state.map((s) => {
+        if (!s.items.some((it) => it.id === patch.itemId)) return s
+        const patched = {
+          ...s,
+          items: s.items.map((it) =>
+            it.id === patch.itemId ? { ...it, checked: patch.checked } : it,
+          ),
+        }
+        return deriveStep(patched)
+      }),
+  )
+
   function handleToggle(itemId: string, current: boolean) {
+    const newChecked = !current
     startTransition(async () => {
-      await toggleDossierStepItemAction(dossierId, itemId, !current)
+      applyOptimistic({ itemId, checked: newChecked })
+      await toggleDossierStepItemAction(dossierId, itemId, newChecked)
     })
   }
 
+  // Overall progress recalculé depuis les steps optimistes
+  const flatItems = optimisticSteps.flatMap((s) => s.items)
+  const totalFlat = flatItems.length
+  const doneFlat = flatItems.filter((it) => it.status === 'auto_ok' || it.checked === true).length
+  const overallProgress = totalFlat > 0 ? doneFlat / totalFlat : 0
   const overallPercent = Math.round(overallProgress * 100)
 
   return (
@@ -51,7 +97,7 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
             </Badge>
           ) : (
             <Badge variant="muted">
-              {steps.filter((s) => s.completed).length}/{steps.length} étapes
+              {optimisticSteps.filter((s) => s.completed).length}/{optimisticSteps.length} étapes
             </Badge>
           )}
         </div>
@@ -61,7 +107,7 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
         </div>
 
         <ol className="space-y-2">
-          {steps.map((step, idx) => {
+          {optimisticSteps.map((step, idx) => {
             const isOpen = openStep === step.id
             const percent = Math.round(step.progress * 100)
             return (
@@ -159,10 +205,10 @@ export function WorkflowStepper({ dossierId, steps, overallProgress }: WorkflowS
                       })
                     )}
 
-                    {!step.completed && idx < steps.length - 1 && (
+                    {!step.completed && idx < optimisticSteps.length - 1 && (
                       <button
                         type="button"
-                        onClick={() => setOpenStep(steps[idx + 1]!.id)}
+                        onClick={() => setOpenStep(optimisticSteps[idx + 1]!.id)}
                         className="text-xs text-muted-foreground hover:text-foreground mt-2 flex items-center gap-1"
                       >
                         Étape suivante <ArrowRight className="size-3" />
