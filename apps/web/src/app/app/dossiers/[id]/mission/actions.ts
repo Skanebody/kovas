@@ -239,3 +239,137 @@ export async function uploadCapturePhotoAction(
   // l'invalidation côté client.
   return { photoId: photo.id as string }
 }
+
+// ============================================
+// createTextNoteAction — INSERT mission_text_notes (iteration 4)
+// ============================================
+
+const createTextNoteSchema = z.object({
+  dossierId: z.string().uuid(),
+  attachedPhotoId: z.string().uuid().nullable(),
+  text: z.string().trim().min(1).max(500),
+  roomId: z.string().uuid().nullable(),
+})
+
+export async function createTextNoteAction(
+  dossierId: string,
+  attachedPhotoId: string | null,
+  text: string,
+  roomId: string | null,
+): Promise<{ textNoteId: string } | { error: string }> {
+  const parsed = createTextNoteSchema.safeParse({ dossierId, attachedPhotoId, text, roomId })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+  }
+  const { supabase, orgId, user } = await getCurrentUser()
+
+  // Vérifier que le dossier appartient à l'org
+  const { data: dossier, error: dossierErr } = await supabase
+    .from('dossiers')
+    .select('id')
+    .eq('id', parsed.data.dossierId)
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .single()
+
+  if (dossierErr || !dossier) {
+    return { error: 'Dossier introuvable ou accès refusé' }
+  }
+
+  // La table mission_text_notes n'est pas encore reflétée dans le type généré
+  // Supabase (migration capture_first récente). On cast `as never` localement.
+  const insertPayload = {
+    organization_id: orgId,
+    dossier_id: parsed.data.dossierId,
+    attached_photo_id: parsed.data.attachedPhotoId,
+    room_id: parsed.data.roomId,
+    text: parsed.data.text,
+    created_by: user.id,
+  }
+
+  const { data: row, error } = await supabase
+    .from('mission_text_notes' as never)
+    .insert(insertPayload as never)
+    .select('id')
+    .single()
+
+  if (error || !row) {
+    return { error: error?.message ?? 'Insert text note failed' }
+  }
+
+  const textRow = row as { id: string }
+  return { textNoteId: textRow.id }
+}
+
+// ============================================
+// createCaptureVoiceNoteAction — INSERT voice_notes après upload Storage (iteration 4)
+// ============================================
+
+const createCaptureVoiceNoteSchema = z.object({
+  dossierId: z.string().uuid(),
+  attachedPhotoId: z.string().uuid().nullable(),
+  storagePath: z.string().min(5),
+  durationSeconds: z.coerce.number().int().min(0).max(60),
+  roomId: z.string().uuid().nullable(),
+})
+
+export async function createCaptureVoiceNoteAction(
+  dossierId: string,
+  attachedPhotoId: string | null,
+  storagePath: string,
+  durationSeconds: number,
+  roomId: string | null,
+): Promise<{ voiceNoteId: string } | { error: string }> {
+  const parsed = createCaptureVoiceNoteSchema.safeParse({
+    dossierId,
+    attachedPhotoId,
+    storagePath,
+    durationSeconds,
+    roomId,
+  })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+  }
+  const { supabase, orgId, user } = await getCurrentUser()
+
+  // Vérifier accès dossier
+  const { data: dossier, error: dossierErr } = await supabase
+    .from('dossiers')
+    .select('id')
+    .eq('id', parsed.data.dossierId)
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .single()
+
+  if (dossierErr || !dossier) {
+    return { error: 'Dossier introuvable ou accès refusé' }
+  }
+
+  // attached_photo_id et transcription_status sont ajoutés par la migration
+  // capture_first (pas dans le type généré) → cast `as never`.
+  const insertPayload = {
+    dossier_id: parsed.data.dossierId,
+    organization_id: orgId,
+    room_id: parsed.data.roomId,
+    storage_path: parsed.data.storagePath,
+    duration_seconds: parsed.data.durationSeconds,
+    language: 'fr',
+    provider: 'openai_whisper',
+    status: 'pending', // legacy field — pipeline classique
+    transcription_status: 'pending', // mode capture-first
+    attached_photo_id: parsed.data.attachedPhotoId,
+    recorded_by: user.id,
+  }
+
+  const { data: row, error } = await supabase
+    .from('voice_notes')
+    .insert(insertPayload as never)
+    .select('id')
+    .single()
+
+  if (error || !row) {
+    return { error: error?.message ?? 'Insert voice note failed' }
+  }
+
+  return { voiceNoteId: row.id as string }
+}

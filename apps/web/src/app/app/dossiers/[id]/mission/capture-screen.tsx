@@ -19,6 +19,7 @@ import { enqueuePhoto } from '@/lib/mission/local-storage-queue'
 import { preprocessPhoto } from '@/lib/mission/photo-processor'
 import { captureSyncManager } from '@/lib/mission/sync-manager'
 import { type DisplayPhoto, useCapturePhotos } from '@/lib/mission/use-capture-photos'
+import { usePhotoAnnotations } from '@/lib/mission/use-photo-annotations'
 import { useVisionStatus } from '@/lib/mission/use-vision-status'
 import { cn } from '@/lib/utils'
 import {
@@ -26,6 +27,8 @@ import {
   CheckCircle2,
   ImageOff,
   Loader2,
+  Mic,
+  Pencil,
   Plus,
   RefreshCw,
   Sparkles,
@@ -34,7 +37,16 @@ import {
 import { useEffect, useState, useTransition } from 'react'
 import { MissionToolbar } from './mission-toolbar'
 import { PhotoButton } from './photo-button'
+import { PostPhotoActionBar } from './post-photo-action-bar'
 import { type RoomOption, RoomPicker } from './room-picker'
+import { TextNoteModal } from './text-note-modal'
+import { VoiceRecorderModal } from './voice-recorder-modal'
+
+type PostPhotoState =
+  | { phase: 'idle' }
+  | { phase: 'action_bar'; localPhotoId: string; thumbnailUrl: string; roomId: string | null }
+  | { phase: 'voice_recording'; localPhotoId: string; thumbnailUrl: string; roomId: string | null }
+  | { phase: 'text_input'; localPhotoId: string; thumbnailUrl: string; roomId: string | null }
 
 interface CaptureScreenProps {
   dossier: {
@@ -52,6 +64,7 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
   const [captureError, setCaptureError] = useState<string | null>(null)
   const [isProcessing, startProcessing] = useTransition()
   const [previewPhoto, setPreviewPhoto] = useState<DisplayPhoto | null>(null)
+  const [postPhoto, setPostPhoto] = useState<PostPhotoState>({ phase: 'idle' })
 
   const currentRoom = rooms.find((r) => r.id === currentRoomId) ?? null
 
@@ -88,13 +101,15 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
       return
     }
     setCaptureError(null)
+    const roomIdAtCapture = currentRoomId
+    const roomNameAtCapture = currentRoom.name
     startProcessing(async () => {
       try {
         const processed = await preprocessPhoto(file)
-        await enqueuePhoto({
+        const localId = await enqueuePhoto({
           dossierId: dossier.id,
-          roomId: currentRoomId,
-          roomName: currentRoom.name,
+          roomId: roomIdAtCapture,
+          roomName: roomNameAtCapture,
           blob: processed.compressedBlob,
           thumbnailBlob: processed.thumbnailBlob,
           capturedAt: processed.capturedAt,
@@ -105,12 +120,31 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
           isBlurry: processed.isBlurry,
           deviceInfo: collectDeviceInfo(processed.capturedAt),
         })
+        // Crée une URL temporaire pour la thumb (l'objet URL sera nettoyé par
+        // le hook useCapturePhotos quand la photo apparaîtra dans la liste).
+        const thumbBlob = processed.thumbnailBlob ?? processed.compressedBlob
+        const thumbnailUrl = URL.createObjectURL(thumbBlob)
+        setPostPhoto({
+          phase: 'action_bar',
+          localPhotoId: localId,
+          thumbnailUrl,
+          roomId: roomIdAtCapture,
+        })
         // Le sync manager pollera ; on déclenche un sync immédiat pour réactivité.
         void captureSyncManager.syncAll()
       } catch (e) {
         setCaptureError(e instanceof Error ? e.message : 'Erreur préparation photo')
       }
     })
+  }
+
+  function dismissPostPhoto() {
+    if (postPhoto.phase !== 'idle') {
+      // Révoque l'URL temporaire de la thumb action-bar (le hook useCapturePhotos
+      // en a une autre dédiée au carrousel).
+      URL.revokeObjectURL(postPhoto.thumbnailUrl)
+    }
+    setPostPhoto({ phase: 'idle' })
   }
 
   function handleNextRoom() {
@@ -269,6 +303,52 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
         </div>
       </main>
 
+      {/* Barre d'action post-photo (3.5s) */}
+      {postPhoto.phase === 'action_bar' ? (
+        <PostPhotoActionBar
+          key={postPhoto.localPhotoId}
+          localPhotoId={postPhoto.localPhotoId}
+          thumbnailUrl={postPhoto.thumbnailUrl}
+          onVoiceStart={() =>
+            setPostPhoto((prev) =>
+              prev.phase === 'action_bar' ? { ...prev, phase: 'voice_recording' } : prev,
+            )
+          }
+          onTextStart={() =>
+            setPostPhoto((prev) =>
+              prev.phase === 'action_bar' ? { ...prev, phase: 'text_input' } : prev,
+            )
+          }
+          onDismiss={dismissPostPhoto}
+        />
+      ) : null}
+
+      {/* Modal enregistrement vocal */}
+      {postPhoto.phase === 'voice_recording' ? (
+        <VoiceRecorderModal
+          open
+          localPhotoId={postPhoto.localPhotoId}
+          dossierId={dossier.id}
+          roomId={postPhoto.roomId}
+          thumbnailUrl={postPhoto.thumbnailUrl}
+          onCancel={dismissPostPhoto}
+          onComplete={() => dismissPostPhoto()}
+        />
+      ) : null}
+
+      {/* Modal saisie texte */}
+      {postPhoto.phase === 'text_input' ? (
+        <TextNoteModal
+          open
+          localPhotoId={postPhoto.localPhotoId}
+          dossierId={dossier.id}
+          roomId={postPhoto.roomId}
+          thumbnailUrl={postPhoto.thumbnailUrl}
+          onCancel={dismissPostPhoto}
+          onComplete={() => dismissPostPhoto()}
+        />
+      ) : null}
+
       {/* Modal preview simple */}
       {previewPhoto ? (
         <button
@@ -310,6 +390,7 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
   // Polling Vision IA — uniquement si la photo est uploadée + non floue.
   const vision = useVisionStatus(photo.serverPhotoId, photo.isBlurry)
   const visionLabel = visionStatusLabel(vision.status, vision.fieldsCount, vision.confidence)
+  const annotations = usePhotoAnnotations(photo.id)
 
   return (
     <button
@@ -356,6 +437,22 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
       {/* Badge Vision IA — seulement si la photo est uploadée et non floue */}
       {photo.syncStatus === 'uploaded' && !photo.isBlurry ? (
         <VisionBadge status={vision.status} fieldsCount={vision.fieldsCount} />
+      ) : null}
+
+      {/* Badges annotation (🎤 voice + ✏️ text) — coin bas-gauche */}
+      {annotations.hasVoice || annotations.hasText ? (
+        <span
+          className={cn(
+            'absolute bottom-1 left-1 inline-flex items-center gap-0.5',
+            'rounded-full bg-navy/90 px-1.5 py-0.5 text-paper shadow-sm backdrop-blur-sm',
+            'text-[10px]',
+          )}
+          aria-label={annotationBadgeLabel(annotations.voiceCount, annotations.textCount)}
+          title={annotationBadgeLabel(annotations.voiceCount, annotations.textCount)}
+        >
+          {annotations.hasVoice ? <Mic className="h-2.5 w-2.5" aria-hidden /> : null}
+          {annotations.hasText ? <Pencil className="h-2.5 w-2.5" aria-hidden /> : null}
+        </span>
       ) : null}
 
       {/* Badge floue */}
@@ -456,6 +553,17 @@ function visionStatusLabel(
     case 'skipped_irrelevant':
       return 'Photo sans intérêt diagnostic'
   }
+}
+
+function annotationBadgeLabel(voiceCount: number, textCount: number): string {
+  const parts: string[] = []
+  if (voiceCount > 0) {
+    parts.push(`${voiceCount} note${voiceCount > 1 ? 's' : ''} vocale${voiceCount > 1 ? 's' : ''}`)
+  }
+  if (textCount > 0) {
+    parts.push(`${textCount} note${textCount > 1 ? 's' : ''} texte`)
+  }
+  return parts.join(' · ')
 }
 
 function syncStatusLabel(s: DisplayPhoto['syncStatus']): string {

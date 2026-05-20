@@ -352,9 +352,14 @@ export interface QueuedVoiceNoteOperation extends QueuedOperationBase {
   roomId: string | null
   blob: Blob
   durationSeconds: number
+  mimeType: string
   /** Si la note est attachée à une photo locale (window 3-4s). */
   attachedLocalPhotoId: string | null
+  /** Résolu post-sync photo, utile pour INSERT voice_notes(attached_photo_id). */
+  attachedPhotoServerId: string | null
   serverVoiceId?: string
+  /** Marqueur transcription async (déclenchée fire-and-forget après INSERT). */
+  transcriptionStatus?: 'pending' | 'transcribed' | 'failed'
 }
 
 export interface QueuedTextNoteOperation extends QueuedOperationBase {
@@ -362,6 +367,8 @@ export interface QueuedTextNoteOperation extends QueuedOperationBase {
   roomId: string | null
   text: string
   attachedLocalPhotoId: string | null
+  /** Résolu post-sync photo, utile pour INSERT mission_text_notes(attached_photo_id). */
+  attachedPhotoServerId: string | null
   serverTextId?: string
 }
 

@@ -178,7 +178,10 @@ export interface EnqueueVoiceNoteInput {
   roomId: string | null
   blob: Blob
   durationSeconds: number
+  mimeType: string
   attachedLocalPhotoId: string | null
+  /** Si la photo source est déjà uploadée serveur, on peut shortcut le INSERT. */
+  attachedPhotoServerId?: string | null
 }
 
 export async function enqueueVoiceNote(input: EnqueueVoiceNoteInput): Promise<string> {
@@ -191,11 +194,14 @@ export async function enqueueVoiceNote(input: EnqueueVoiceNoteInput): Promise<st
     roomId: input.roomId,
     blob: input.blob,
     durationSeconds: input.durationSeconds,
+    mimeType: input.mimeType,
     attachedLocalPhotoId: input.attachedLocalPhotoId,
+    attachedPhotoServerId: input.attachedPhotoServerId ?? null,
     syncStatus: 'pending_upload',
     attempts: 0,
     lastError: null,
     createdAt: Date.now(),
+    transcriptionStatus: 'pending',
   }
   await db.voiceNotes.add(op)
   return id
@@ -218,6 +224,21 @@ export async function markVoiceNoteUploaded(localId: string, serverVoiceId: stri
   })
 }
 
+export async function markVoiceNoteTranscribed(
+  localId: string,
+  transcription: string,
+): Promise<void> {
+  const db = getMissionDb()
+  await db.voiceNotes.update(localId, {
+    transcriptionStatus: 'transcribed',
+    // on garde lastError = null si on avait précédemment échoué
+    lastError: null,
+  })
+  // transcription n'est pas stockée localement (server side), mais on log via console
+  // pour debug (utile dans Service Worker).
+  console.info('[voice-notes] transcribed', localId, transcription.slice(0, 60))
+}
+
 export async function markVoiceNoteFailed(localId: string, error: string): Promise<void> {
   const db = getMissionDb()
   const v = await db.voiceNotes.get(localId)
@@ -229,6 +250,30 @@ export async function markVoiceNoteFailed(localId: string, error: string): Promi
   })
 }
 
+/**
+ * Résout l'attachedPhotoServerId d'une voice note locale après upload de la photo.
+ * Appelé par le sync manager dès qu'une photo passe en 'uploaded'.
+ */
+export async function resolveVoiceNotePhotoServerId(
+  localPhotoId: string,
+  serverPhotoId: string,
+): Promise<void> {
+  const db = getMissionDb()
+  await db.voiceNotes
+    .where('attachedLocalPhotoId')
+    .equals(localPhotoId)
+    .modify({ attachedPhotoServerId: serverPhotoId })
+}
+
+/**
+ * Compte les voice notes (pending ou uploaded) attachées à une photo locale.
+ * Utilisé pour les badges 🎤 sur les vignettes du carrousel.
+ */
+export async function countVoiceNotesForPhoto(localPhotoId: string): Promise<number> {
+  const db = getMissionDb()
+  return db.voiceNotes.where('attachedLocalPhotoId').equals(localPhotoId).count()
+}
+
 // ============================================
 // Text notes
 // ============================================
@@ -238,6 +283,7 @@ export interface EnqueueTextNoteInput {
   roomId: string | null
   text: string
   attachedLocalPhotoId: string | null
+  attachedPhotoServerId?: string | null
 }
 
 export async function enqueueTextNote(input: EnqueueTextNoteInput): Promise<string> {
@@ -250,6 +296,7 @@ export async function enqueueTextNote(input: EnqueueTextNoteInput): Promise<stri
     roomId: input.roomId,
     text: input.text,
     attachedLocalPhotoId: input.attachedLocalPhotoId,
+    attachedPhotoServerId: input.attachedPhotoServerId ?? null,
     syncStatus: 'pending_upload',
     attempts: 0,
     lastError: null,
@@ -274,6 +321,39 @@ export async function markTextNoteUploaded(localId: string, serverTextId: string
     syncStatus: 'uploaded',
     serverTextId,
   })
+}
+
+export async function markTextNoteFailed(localId: string, error: string): Promise<void> {
+  const db = getMissionDb()
+  const t = await db.textNotes.get(localId)
+  if (!t) return
+  await db.textNotes.update(localId, {
+    syncStatus: 'failed',
+    attempts: t.attempts + 1,
+    lastError: error,
+  })
+}
+
+/**
+ * Résout l'attachedPhotoServerId d'une text note locale après upload de la photo.
+ */
+export async function resolveTextNotePhotoServerId(
+  localPhotoId: string,
+  serverPhotoId: string,
+): Promise<void> {
+  const db = getMissionDb()
+  await db.textNotes
+    .where('attachedLocalPhotoId')
+    .equals(localPhotoId)
+    .modify({ attachedPhotoServerId: serverPhotoId })
+}
+
+/**
+ * Compte les text notes attachées à une photo locale (pour badge ✏️).
+ */
+export async function countTextNotesForPhoto(localPhotoId: string): Promise<number> {
+  const db = getMissionDb()
+  return db.textNotes.where('attachedLocalPhotoId').equals(localPhotoId).count()
 }
 
 // ============================================
