@@ -297,14 +297,12 @@ function buildSystemPrompt(
   annotation: { kind: 'voice' | 'text'; content: string } | null,
 ): string {
   // Sérialise les schémas des diagnostics actifs pour que Claude voie la structure
-  // attendue (paths + kind + enum options). Tronqué aux diagnostics implémentés
-  // (DPE + AMIANTE en iteration 1) ; les autres seront ajoutés au fur et à mesure.
+  // attendue (paths + kind + enum options + extraction_hints).
+  // Itération 6 : les 8 diagnostics MVP V1.5 sont couverts → SCHEMAS_BY_DIAGNOSTIC
+  // garantit un schéma non-null pour tout DiagnosticType valide.
   const schemasSerialized = activeDiagnostics
     .map((diag) => {
       const schema = SCHEMAS_BY_DIAGNOSTIC[diag]
-      if (!schema) {
-        return `### ${diag}\n(Schéma non encore implémenté côté KOVAS — Claude ne doit pas produire de field_hint pour ce type.)`
-      }
       return `### ${diag} (version ${schema.version})\n${schema.description}\n\n\`\`\`json\n${JSON.stringify(
         schema.sections,
         null,

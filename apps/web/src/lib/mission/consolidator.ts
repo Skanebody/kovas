@@ -441,12 +441,11 @@ function buildSystemPrompt(input: ConsolidationInput): string {
   // Sérialise les schémas complets des diagnostics actifs. Les schémas étant
   // mis en cache 1h via cache_control:ephemeral, c'est le bloc qu'on veut
   // gros et stable. Le user message porte les données du dossier (volatiles).
+  // Itération 6 : les 8 diagnostics MVP V1.5 sont couverts → SCHEMAS_BY_DIAGNOSTIC
+  // garantit un schéma non-null pour tout DiagnosticType valide.
   const schemasSerialized = input.activeDiagnostics
     .map((diag) => {
       const schema = SCHEMAS_BY_DIAGNOSTIC[diag]
-      if (!schema) {
-        return `### ${diag}\n(Schéma non encore implémenté côté KOVAS — pas de field_hint à produire pour ce type.)`
-      }
       return `### ${diag} (version ${schema.version})\n${schema.description}\n\n\`\`\`json\n${JSON.stringify(
         schema.sections,
         null,

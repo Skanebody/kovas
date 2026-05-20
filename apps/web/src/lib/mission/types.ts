@@ -422,6 +422,12 @@ export interface DiagnosticField {
   description?: string
   /** Cf. CLAUDE.md — marqueur pour validation expert avant prod. */
   needsRegulatoryValidation?: boolean
+  /**
+   * Mots-clés FR à reconnaître dans transcriptions vocales / OCR documents.
+   * Injectés dans le system prompt Vision/Consolidator pour amorcer la
+   * détection (ex: ['flexible', 'tuyauterie cuivre', 'DGI']).
+   */
+  extractionHints?: string[]
 }
 
 export interface DiagnosticSection {
