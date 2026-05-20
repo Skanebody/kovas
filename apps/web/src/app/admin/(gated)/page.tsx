@@ -1,8 +1,9 @@
+import { HealthChecksGrid } from '@/components/admin/home/HealthChecksGrid'
+import { RecentActivityFeed } from '@/components/admin/home/RecentActivityFeed'
 import { AdminMetricCard } from '@/components/admin/shared/AdminMetricCard'
-import { Card } from '@/components/ui/card'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { KOVAS_TIERS, type KovasTier } from '@/lib/stripe-config'
-import { Activity, BarChart3, Bot, Building2, PieChart, TrendingUp, UserPlus } from 'lucide-react'
+import { BarChart3, Bot, Building2, PieChart, TrendingUp, UserPlus } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -199,34 +200,10 @@ export default async function AdminHomePage() {
         />
       </section>
 
-      {/* Placeholders itération 2 */}
+      {/* Activité récente (polling 10s) + Health checks (polling 30s) */}
       <section className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-        <Card variant="opaque" padding="default">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-semibold tracking-tight text-ink">Activité récente</h2>
-            <Activity className="size-4 text-ink-faint" aria-hidden />
-          </div>
-          <p className="mt-2 text-sm text-ink-mute">
-            Flux temps réel (Supabase Realtime sur{' '}
-            <code className="font-mono">admin_audit_log</code>).
-          </p>
-          <p className="mt-4 inline-flex items-center gap-2 rounded-pill bg-ink/5 px-3 py-1 text-[11px] font-mono uppercase tracking-wider text-ink-mute">
-            À venir · itération 2
-          </p>
-        </Card>
-
-        <Card variant="opaque" padding="default">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-semibold tracking-tight text-ink">Health checks</h2>
-            <PieChart className="size-4 text-ink-faint" aria-hidden />
-          </div>
-          <p className="mt-2 text-sm text-ink-mute">
-            Statut Supabase, Stripe, Anthropic, Resend, MDB writer · checks périodiques.
-          </p>
-          <p className="mt-4 inline-flex items-center gap-2 rounded-pill bg-ink/5 px-3 py-1 text-[11px] font-mono uppercase tracking-wider text-ink-mute">
-            À venir · itération 2
-          </p>
-        </Card>
+        <RecentActivityFeed />
+        <HealthChecksGrid />
       </section>
     </div>
   )

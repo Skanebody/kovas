@@ -21,6 +21,12 @@ export type AdminRole = 'super_admin' | 'admin' | 'support'
 export interface AdminAccessResult {
   isAdmin: boolean
   needs2FA: boolean
+  /**
+   * true si l'admin n'a pas encore configuré son secret TOTP
+   * (table `admin_2fa_secrets` vide ou row avec enabled=false).
+   * Le caller doit alors rediriger vers /admin/setup-2fa au lieu de /admin/verify-2fa.
+   */
+  hasNoSecret: boolean
   user: { id: string; email: string } | null
   role: AdminRole | null
 }
@@ -28,6 +34,10 @@ export interface AdminAccessResult {
 interface AdminUserRow {
   role: AdminRole
   is_active: boolean
+}
+
+interface TwoFaSecretCheckRow {
+  enabled: boolean
 }
 
 /**
@@ -41,7 +51,7 @@ export const verifyAdminAccess = cache(async (): Promise<AdminAccessResult> => {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { isAdmin: false, needs2FA: false, user: null, role: null }
+    return { isAdmin: false, needs2FA: false, hasNoSecret: false, user: null, role: null }
   }
 
   // RLS sur admin_users : SELECT autorisé via is_admin(auth.uid()). Pour la
@@ -57,8 +67,18 @@ export const verifyAdminAccess = cache(async (): Promise<AdminAccessResult> => {
     .maybeSingle<AdminUserRow>()
 
   if (error || !data) {
-    return { isAdmin: false, needs2FA: false, user: null, role: null }
+    return { isAdmin: false, needs2FA: false, hasNoSecret: false, user: null, role: null }
   }
+
+  // Check si le secret TOTP est déjà configuré (enabled=true).
+  // RLS 2fa_secrets_self : un admin lit son propre secret.
+  const { data: secretRow } = await supabase
+    .from('admin_2fa_secrets')
+    .select('enabled')
+    .eq('user_id', user.id)
+    .maybeSingle<TwoFaSecretCheckRow>()
+
+  const hasNoSecret = !secretRow || !secretRow.enabled
 
   const cookieStore = await cookies()
   const cookieValue = cookieStore.get(TWO_FA_COOKIE_NAME)?.value
@@ -67,6 +87,7 @@ export const verifyAdminAccess = cache(async (): Promise<AdminAccessResult> => {
   return {
     isAdmin: true,
     needs2FA: !cookieValid,
+    hasNoSecret,
     user: { id: user.id, email: user.email ?? '' },
     role: data.role,
   }

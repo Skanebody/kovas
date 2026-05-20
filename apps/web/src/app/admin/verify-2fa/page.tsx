@@ -15,6 +15,10 @@ export default async function VerifyTwoFaPage() {
   if (!access.isAdmin) {
     redirect('/')
   }
+  // Pas de secret configuré → page de setup.
+  if (access.hasNoSecret) {
+    redirect('/admin/setup-2fa')
+  }
   // Déjà 2FA validé → /admin direct.
   if (!access.needs2FA) {
     redirect('/admin')
