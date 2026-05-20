@@ -37,11 +37,11 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Finance', icon: DollarSign, href: '/admin/finance', enabled: true },
   { label: 'Utilisateurs', icon: Users, href: '/admin/users', enabled: true },
   { label: 'Coûts IA', icon: Bot, href: '/admin/cout-ia', enabled: true },
-  { label: 'Produit', icon: BarChart3, href: '/admin/produit', enabled: false },
-  { label: 'Alertes', icon: AlertTriangle, href: '/admin/alertes', enabled: false },
-  { label: 'Paliers', icon: Target, href: '/admin/paliers', enabled: false },
-  { label: 'Actions', icon: Settings, href: '/admin/actions', enabled: false },
-  { label: 'Audit', icon: ScrollText, href: '/admin/audit', enabled: false },
+  { label: 'Produit', icon: BarChart3, href: '/admin/produit', enabled: true },
+  { label: 'Alertes', icon: AlertTriangle, href: '/admin/alertes', enabled: true },
+  { label: 'Paliers', icon: Target, href: '/admin/paliers', enabled: true },
+  { label: 'Actions', icon: Settings, href: '/admin/actions', enabled: true },
+  { label: 'Audit', icon: ScrollText, href: '/admin/audit', enabled: true },
 ]
 
 export function AdminSidebar({ role }: AdminSidebarProps) {
