@@ -87,6 +87,16 @@ export interface EnqueuePhotoInput {
   blob: Blob
   thumbnailBlob: Blob | null
   capturedAt: number
+  /** Largeur du blob compressé. */
+  width: number
+  /** Hauteur du blob compressé. */
+  height: number
+  /** Taille bytes du blob compressé. */
+  sizeBytes: number
+  /** dHash 16 hex. */
+  perceptualHash: string
+  /** Floue ? (variance Laplacian) */
+  isBlurry: boolean
   gpsLat?: number
   gpsLng?: number
   deviceInfo?: PhotoDeviceInfo
@@ -104,6 +114,11 @@ export async function enqueuePhoto(input: EnqueuePhotoInput): Promise<string> {
     blob: input.blob,
     thumbnailBlob: input.thumbnailBlob,
     capturedAt: input.capturedAt,
+    width: input.width,
+    height: input.height,
+    sizeBytes: input.sizeBytes,
+    perceptualHash: input.perceptualHash,
+    isBlurry: input.isBlurry,
     gpsLat: input.gpsLat,
     gpsLng: input.gpsLng,
     deviceInfo: input.deviceInfo,

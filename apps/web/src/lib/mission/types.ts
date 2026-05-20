@@ -330,6 +330,16 @@ export interface QueuedPhotoOperation extends QueuedOperationBase {
   blob: Blob
   thumbnailBlob: Blob | null
   capturedAt: number
+  /** Largeur du blob compressé (px) — issu de preprocessPhoto. */
+  width: number
+  /** Hauteur du blob compressé (px) — issu de preprocessPhoto. */
+  height: number
+  /** Taille en bytes du blob compressé. */
+  sizeBytes: number
+  /** dHash 16 hex (issu de preprocessPhoto). */
+  perceptualHash: string
+  /** Détecté flou par variance Laplacian (issu de preprocessPhoto). */
+  isBlurry: boolean
   gpsLat?: number
   gpsLng?: number
   deviceInfo?: PhotoDeviceInfo

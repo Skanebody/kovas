@@ -1,19 +1,19 @@
 'use client'
 
 /**
- * KOVAS — Sélecteur de pièce du mode terrain Capture-First (V1.5 iteration 1).
+ * KOVAS — Sélecteur de pièce du mode terrain Capture-First (V1.5 iteration 2).
  *
- * Dropdown des pièces existantes du dossier + option "+ Nouvelle pièce" qui
- * affiche un input inline. Etat purement local (parent gère la sélection).
- *
- * Cette itération ne crée PAS encore la pièce côté serveur — elle remonte juste
- * le nom au parent qui décidera (next iteration : insert dossier_rooms + sync queue).
+ * Dropdown des pièces existantes du dossier + option "+ Nouvelle pièce".
+ * Itération 2 : création **réelle** côté serveur via createRoomAction
+ * (pas de stockage temp local). Le picker informe le parent du nouveau
+ * roomId persisté via `onRoomCreated`.
  */
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Check, ChevronDown, Plus } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Check, ChevronDown, Loader2, Plus } from 'lucide-react'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import { createRoomAction } from './actions'
 
 export interface RoomOption {
   id: string
@@ -21,28 +21,30 @@ export interface RoomOption {
 }
 
 interface RoomPickerProps {
+  dossierId: string
   rooms: RoomOption[]
   currentRoomId: string | null
   /** Sélection d'une pièce existante. */
   onSelectRoom: (room: RoomOption) => void
   /**
-   * Création d'une nouvelle pièce — `tempId` est un UUID local généré côté composant
-   * pour permettre au parent de l'utiliser tout de suite (sync ultérieure).
+   * Pièce créée côté serveur — `id` est l'UUID persisté.
+   * Le parent doit l'ajouter à sa liste locale + la sélectionner si voulu.
    */
-  onCreateRoom: (input: { tempId: string; name: string }) => void
+  onRoomCreated: (room: RoomOption) => void
 }
 
-function genTempId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `local-${crypto.randomUUID()}`
-  }
-  return `local-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
-}
-
-export function RoomPicker({ rooms, currentRoomId, onSelectRoom, onCreateRoom }: RoomPickerProps) {
+export function RoomPicker({
+  dossierId,
+  rooms,
+  currentRoomId,
+  onSelectRoom,
+  onRoomCreated,
+}: RoomPickerProps) {
   const [open, setOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -55,6 +57,7 @@ export function RoomPicker({ rooms, currentRoomId, onSelectRoom, onCreateRoom }:
         setOpen(false)
         setCreating(false)
         setNewName('')
+        setError(null)
       }
     }
     document.addEventListener('mousedown', onClickOutside)
@@ -72,13 +75,21 @@ export function RoomPicker({ rooms, currentRoomId, onSelectRoom, onCreateRoom }:
 
   function handleCreateSubmit() {
     const trimmed = newName.trim()
-    if (trimmed.length === 0) {
+    if (trimmed.length === 0 || isPending) {
       return
     }
-    onCreateRoom({ tempId: genTempId(), name: trimmed })
-    setCreating(false)
-    setNewName('')
-    setOpen(false)
+    setError(null)
+    startTransition(async () => {
+      const result = await createRoomAction(dossierId, trimmed)
+      if ('error' in result) {
+        setError(result.error)
+        return
+      }
+      onRoomCreated({ id: result.roomId, name: trimmed })
+      setCreating(false)
+      setNewName('')
+      setOpen(false)
+    })
   }
 
   return (
@@ -145,29 +156,41 @@ export function RoomPicker({ rooms, currentRoomId, onSelectRoom, onCreateRoom }:
                   e.preventDefault()
                   handleCreateSubmit()
                 }}
-                className="flex items-center gap-2 px-2 py-2"
+                className="flex flex-col gap-2 px-2 py-2"
               >
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Salon, Chambre 1, Cuisine…"
-                  className={cn(
-                    'flex-1 rounded-md border border-rule bg-paper px-3 py-1.5',
-                    'text-sm text-ink placeholder:text-ink-ghost',
-                    'focus:outline-none focus:ring-2 focus:ring-navy/20',
-                  )}
-                  maxLength={60}
-                />
-                <Button type="submit" size="sm" disabled={newName.trim().length === 0}>
-                  Créer
-                </Button>
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="Salon, Chambre 1, Cuisine…"
+                    disabled={isPending}
+                    className={cn(
+                      'flex-1 rounded-md border border-rule bg-paper px-3 py-1.5',
+                      'text-sm text-ink placeholder:text-ink-ghost',
+                      'focus:outline-none focus:ring-2 focus:ring-navy/20',
+                      'disabled:opacity-50',
+                    )}
+                    maxLength={60}
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={newName.trim().length === 0 || isPending}
+                  >
+                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : 'Créer'}
+                  </Button>
+                </div>
+                {error ? <p className="text-xs text-accent-red">{error}</p> : null}
               </form>
             ) : (
               <button
                 type="button"
-                onClick={() => setCreating(true)}
+                onClick={() => {
+                  setCreating(true)
+                  setError(null)
+                }}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-lg px-3 py-2',
                   'text-sm font-medium text-ink',

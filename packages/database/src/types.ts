@@ -3,13 +3,7 @@
 // Source: db.jlizdkffwjdiokvmhcwg.supabase.co:5432 (public schema)
 // Do NOT edit manually. Regenerate via: pnpm db:gen-types
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
   __InternalSupabase: {
@@ -201,7 +195,7 @@ export type Database = {
           address_complement: string | null
           siret: string | null
           notes: string | null
-          tags: (unknown)[] | null
+          tags: unknown[] | null
           created_by: string | null
           created_at: string
           updated_at: string
@@ -227,7 +221,7 @@ export type Database = {
           address_complement?: string | null
           siret?: string | null
           notes?: string | null
-          tags?: (unknown)[] | null
+          tags?: unknown[] | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -253,7 +247,7 @@ export type Database = {
           address_complement?: string | null
           siret?: string | null
           notes?: string | null
-          tags?: (unknown)[] | null
+          tags?: unknown[] | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -421,7 +415,17 @@ export type Database = {
           organization_id: string
           room_id: string | null
           photo_id: string | null
-          kind: 'chaudiere' | 'chauffe_eau' | 'radiateur' | 'pac' | 'climatisation' | 'fenetre' | 'isolation' | 'ventilation' | 'tableau_elec' | 'autre'
+          kind:
+            | 'chaudiere'
+            | 'chauffe_eau'
+            | 'radiateur'
+            | 'pac'
+            | 'climatisation'
+            | 'fenetre'
+            | 'isolation'
+            | 'ventilation'
+            | 'tableau_elec'
+            | 'autre'
           brand: string | null
           model: string | null
           energy_class: string | null
@@ -442,7 +446,17 @@ export type Database = {
           organization_id: string
           room_id?: string | null
           photo_id?: string | null
-          kind: 'chaudiere' | 'chauffe_eau' | 'radiateur' | 'pac' | 'climatisation' | 'fenetre' | 'isolation' | 'ventilation' | 'tableau_elec' | 'autre'
+          kind:
+            | 'chaudiere'
+            | 'chauffe_eau'
+            | 'radiateur'
+            | 'pac'
+            | 'climatisation'
+            | 'fenetre'
+            | 'isolation'
+            | 'ventilation'
+            | 'tableau_elec'
+            | 'autre'
           brand?: string | null
           model?: string | null
           energy_class?: string | null
@@ -463,7 +477,17 @@ export type Database = {
           organization_id?: string
           room_id?: string | null
           photo_id?: string | null
-          kind?: 'chaudiere' | 'chauffe_eau' | 'radiateur' | 'pac' | 'climatisation' | 'fenetre' | 'isolation' | 'ventilation' | 'tableau_elec' | 'autre'
+          kind?:
+            | 'chaudiere'
+            | 'chauffe_eau'
+            | 'radiateur'
+            | 'pac'
+            | 'climatisation'
+            | 'fenetre'
+            | 'isolation'
+            | 'ventilation'
+            | 'tableau_elec'
+            | 'autre'
           brand?: string | null
           model?: string | null
           energy_class?: string | null
@@ -837,8 +861,27 @@ export type Database = {
           assigned_to: string | null
           created_by: string | null
           reference: string
-          type: 'dpe_vente' | 'dpe_location' | 'copropriete' | 'amiante_vente' | 'amiante_avant_travaux' | 'plomb_crep' | 'gaz' | 'electricite' | 'termites' | 'carrez_boutin' | 'erp'
-          status: 'draft' | 'scheduled' | 'in_progress' | 'to_review' | 'done' | 'exported' | 'archived' | 'cancelled'
+          type:
+            | 'dpe_vente'
+            | 'dpe_location'
+            | 'copropriete'
+            | 'amiante_vente'
+            | 'amiante_avant_travaux'
+            | 'plomb_crep'
+            | 'gaz'
+            | 'electricite'
+            | 'termites'
+            | 'carrez_boutin'
+            | 'erp'
+          status:
+            | 'draft'
+            | 'scheduled'
+            | 'in_progress'
+            | 'to_review'
+            | 'done'
+            | 'exported'
+            | 'archived'
+            | 'cancelled'
           priority: number | null
           completed_at: string | null
           exported_at: string | null
@@ -865,8 +908,27 @@ export type Database = {
           assigned_to?: string | null
           created_by?: string | null
           reference: string
-          type: 'dpe_vente' | 'dpe_location' | 'copropriete' | 'amiante_vente' | 'amiante_avant_travaux' | 'plomb_crep' | 'gaz' | 'electricite' | 'termites' | 'carrez_boutin' | 'erp'
-          status?: 'draft' | 'scheduled' | 'in_progress' | 'to_review' | 'done' | 'exported' | 'archived' | 'cancelled'
+          type:
+            | 'dpe_vente'
+            | 'dpe_location'
+            | 'copropriete'
+            | 'amiante_vente'
+            | 'amiante_avant_travaux'
+            | 'plomb_crep'
+            | 'gaz'
+            | 'electricite'
+            | 'termites'
+            | 'carrez_boutin'
+            | 'erp'
+          status?:
+            | 'draft'
+            | 'scheduled'
+            | 'in_progress'
+            | 'to_review'
+            | 'done'
+            | 'exported'
+            | 'archived'
+            | 'cancelled'
           priority?: number | null
           completed_at?: string | null
           exported_at?: string | null
@@ -893,8 +955,27 @@ export type Database = {
           assigned_to?: string | null
           created_by?: string | null
           reference?: string
-          type?: 'dpe_vente' | 'dpe_location' | 'copropriete' | 'amiante_vente' | 'amiante_avant_travaux' | 'plomb_crep' | 'gaz' | 'electricite' | 'termites' | 'carrez_boutin' | 'erp'
-          status?: 'draft' | 'scheduled' | 'in_progress' | 'to_review' | 'done' | 'exported' | 'archived' | 'cancelled'
+          type?:
+            | 'dpe_vente'
+            | 'dpe_location'
+            | 'copropriete'
+            | 'amiante_vente'
+            | 'amiante_avant_travaux'
+            | 'plomb_crep'
+            | 'gaz'
+            | 'electricite'
+            | 'termites'
+            | 'carrez_boutin'
+            | 'erp'
+          status?:
+            | 'draft'
+            | 'scheduled'
+            | 'in_progress'
+            | 'to_review'
+            | 'done'
+            | 'exported'
+            | 'archived'
+            | 'cancelled'
           priority?: number | null
           completed_at?: string | null
           exported_at?: string | null
@@ -1075,12 +1156,25 @@ export type Database = {
           taken_at: string | null
           location: unknown | null
           caption: string | null
-          ai_tags: (unknown)[] | null
+          ai_tags: unknown[] | null
           ai_cost_eur: number | null
           uploaded_by: string | null
           sync_status: string | null
           created_at: string
           view_type: string | null
+          // Capture-First (migration 20260520180000)
+          perceptual_hash: string | null
+          is_blurry: boolean | null
+          is_duplicate_of: string | null
+          device_info: Json | null
+          gps_lat: number | null
+          gps_lng: number | null
+          vision_status: string | null
+          vision_analysis: Json | null
+          vision_confidence: number | null
+          vision_model: string | null
+          vision_cost_usd: number | null
+          analyzed_at: string | null
         }
         Insert: {
           id?: string
@@ -1096,12 +1190,25 @@ export type Database = {
           taken_at?: string | null
           location?: unknown | null
           caption?: string | null
-          ai_tags?: (unknown)[] | null
+          ai_tags?: unknown[] | null
           ai_cost_eur?: number | null
           uploaded_by?: string | null
           sync_status?: string | null
           created_at?: string
           view_type?: string | null
+          // Capture-First
+          perceptual_hash?: string | null
+          is_blurry?: boolean | null
+          is_duplicate_of?: string | null
+          device_info?: Json | null
+          gps_lat?: number | null
+          gps_lng?: number | null
+          vision_status?: string | null
+          vision_analysis?: Json | null
+          vision_confidence?: number | null
+          vision_model?: string | null
+          vision_cost_usd?: number | null
+          analyzed_at?: string | null
         }
         Update: {
           id?: string
@@ -1117,12 +1224,25 @@ export type Database = {
           taken_at?: string | null
           location?: unknown | null
           caption?: string | null
-          ai_tags?: (unknown)[] | null
+          ai_tags?: unknown[] | null
           ai_cost_eur?: number | null
           uploaded_by?: string | null
           sync_status?: string | null
           created_at?: string
           view_type?: string | null
+          // Capture-First
+          perceptual_hash?: string | null
+          is_blurry?: boolean | null
+          is_duplicate_of?: string | null
+          device_info?: Json | null
+          gps_lat?: number | null
+          gps_lng?: number | null
+          vision_status?: string | null
+          vision_analysis?: Json | null
+          vision_confidence?: number | null
+          vision_model?: string | null
+          vision_cost_usd?: number | null
+          analyzed_at?: string | null
         }
         Relationships: [
           {
@@ -1449,7 +1569,14 @@ export type Database = {
           cadastre_section: string | null
           cadastre_number: string | null
           cadastre_prefix: string | null
-          property_type: 'maison' | 'appartement' | 'immeuble' | 'local_commercial' | 'bureau' | 'autre' | null
+          property_type:
+            | 'maison'
+            | 'appartement'
+            | 'immeuble'
+            | 'local_commercial'
+            | 'bureau'
+            | 'autre'
+            | null
           year_built: number | null
           surface_carrez: number | null
           surface_boutin: number | null
@@ -1481,7 +1608,14 @@ export type Database = {
           cadastre_section?: string | null
           cadastre_number?: string | null
           cadastre_prefix?: string | null
-          property_type?: 'maison' | 'appartement' | 'immeuble' | 'local_commercial' | 'bureau' | 'autre' | null
+          property_type?:
+            | 'maison'
+            | 'appartement'
+            | 'immeuble'
+            | 'local_commercial'
+            | 'bureau'
+            | 'autre'
+            | null
           year_built?: number | null
           surface_carrez?: number | null
           surface_boutin?: number | null
@@ -1513,7 +1647,14 @@ export type Database = {
           cadastre_section?: string | null
           cadastre_number?: string | null
           cadastre_prefix?: string | null
-          property_type?: 'maison' | 'appartement' | 'immeuble' | 'local_commercial' | 'bureau' | 'autre' | null
+          property_type?:
+            | 'maison'
+            | 'appartement'
+            | 'immeuble'
+            | 'local_commercial'
+            | 'bureau'
+            | 'autre'
+            | null
           year_built?: number | null
           surface_carrez?: number | null
           surface_boutin?: number | null
@@ -2043,10 +2184,45 @@ export type Database = {
     }
     Enums: {
       client_type: 'particulier' | 'agence' | 'notaire' | 'syndic' | 'entreprise' | 'collectivite'
-      equipment_kind: 'chaudiere' | 'chauffe_eau' | 'radiateur' | 'pac' | 'climatisation' | 'fenetre' | 'isolation' | 'ventilation' | 'tableau_elec' | 'autre'
-      mission_status: 'draft' | 'scheduled' | 'in_progress' | 'to_review' | 'done' | 'exported' | 'archived' | 'cancelled'
-      mission_type: 'dpe_vente' | 'dpe_location' | 'copropriete' | 'amiante_vente' | 'amiante_avant_travaux' | 'plomb_crep' | 'gaz' | 'electricite' | 'termites' | 'carrez_boutin' | 'erp'
-      property_type_enum: 'maison' | 'appartement' | 'immeuble' | 'local_commercial' | 'bureau' | 'autre'
+      equipment_kind:
+        | 'chaudiere'
+        | 'chauffe_eau'
+        | 'radiateur'
+        | 'pac'
+        | 'climatisation'
+        | 'fenetre'
+        | 'isolation'
+        | 'ventilation'
+        | 'tableau_elec'
+        | 'autre'
+      mission_status:
+        | 'draft'
+        | 'scheduled'
+        | 'in_progress'
+        | 'to_review'
+        | 'done'
+        | 'exported'
+        | 'archived'
+        | 'cancelled'
+      mission_type:
+        | 'dpe_vente'
+        | 'dpe_location'
+        | 'copropriete'
+        | 'amiante_vente'
+        | 'amiante_avant_travaux'
+        | 'plomb_crep'
+        | 'gaz'
+        | 'electricite'
+        | 'termites'
+        | 'carrez_boutin'
+        | 'erp'
+      property_type_enum:
+        | 'maison'
+        | 'appartement'
+        | 'immeuble'
+        | 'local_commercial'
+        | 'bureau'
+        | 'autre'
     }
     CompositeTypes: Record<string, never>
   }

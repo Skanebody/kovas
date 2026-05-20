@@ -51,6 +51,7 @@ export default async function MissionCapturePage({
   return (
     <CaptureScreen
       dossier={{ id: dossier.id as string, reference: dossier.reference as string }}
+      orgId={orgId}
       rooms={roomOptions}
     />
   )
