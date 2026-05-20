@@ -13,6 +13,7 @@
  */
 
 import { AppShell } from '@/components/app-shell'
+import { DocumentScanButton } from '@/components/documents'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { enqueuePhoto } from '@/lib/mission/local-storage-queue'
@@ -462,6 +463,18 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
           warnings={consolidate.summary.warnings}
         />
       ) : null}
+
+      {/* FAB scan document — bottom-right (mode terrain) */}
+      <div
+        className={cn(
+          'fixed z-30',
+          'right-4 sm:right-6',
+          // Au-dessus du safe-area iOS PWA + au-dessus de la barre d'action photo
+          'bottom-[max(env(safe-area-inset-bottom),16px)]',
+        )}
+      >
+        <DocumentScanButton placement="mode_terrain" variant="icon_only" dossierId={dossier.id} />
+      </div>
 
       {/* Modal preview simple */}
       {previewPhoto ? (

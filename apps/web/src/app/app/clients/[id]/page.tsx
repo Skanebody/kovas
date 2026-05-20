@@ -1,5 +1,6 @@
 import { AppPageHeader } from '@/components/app-page-header'
 import { DangerZone } from '@/components/danger-zone'
+import { DocumentScanButton } from '@/components/documents'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -109,6 +110,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 <Pencil className="size-4" /> Modifier
               </Link>
             </Button>
+            <DocumentScanButton placement="client_page" variant="secondary" />
           </div>
         }
       />

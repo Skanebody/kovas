@@ -11,6 +11,7 @@ import {
   Search,
   Settings,
   Users,
+  Wrench,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -42,6 +43,7 @@ const NAV_MAIN: readonly NavItem[] = [
   { href: '/app/clients', label: 'Clients', icon: Users },
   { href: '/app/properties', label: 'Biens', icon: Building2 },
   { href: '/app/gain', label: 'Performance', icon: ChartLine },
+  { href: '/app/outils', label: 'Outils', icon: Wrench },
 ] as const
 
 const NAV_BOTTOM: readonly NavItem[] = [
@@ -144,7 +146,7 @@ function SidebarIconButton({ item, active }: { item: NavItem; active: boolean })
 export function AppMobileNav() {
   const pathname = usePathname()
   const tabs = [
-    { href: '/app/dashboard', label: "Auj.", icon: Home },
+    { href: '/app/dashboard', label: 'Auj.', icon: Home },
     { href: '/app/dossiers', label: 'Dossiers', icon: FileText },
     { href: '/app/calendar', label: 'Plan.', icon: CalendarDays },
     { href: '/app/account', label: 'Compte', icon: Settings },

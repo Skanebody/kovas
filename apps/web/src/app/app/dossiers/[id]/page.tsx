@@ -17,6 +17,7 @@
  *   - components/dossier/* (hero, attention, sticky, progression, export)
  */
 
+import { DocumentScanButton } from '@/components/documents'
 import {
   DossierAttentionSection,
   DossierHeader,
@@ -178,6 +179,15 @@ export default async function DossierPage({
         {/* Header : adresse serif italic + méta + ref mono */}
         <DossierHeader info={headerInfo} />
 
+        {/* Toolbar actions rapides — scan document toujours accessible */}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <DocumentScanButton
+            placement="dossier_toolbar"
+            variant="secondary"
+            dossierId={dossier.id}
+          />
+        </div>
+
         {/* Hero compact (3 variants selon état) */}
         <DossierHeroCard state={state} summary={heroSummary} />
 
@@ -194,7 +204,26 @@ export default async function DossierPage({
 
         {/* Accordions conditionnels selon état */}
         <div className="space-y-4">
-          {state === 'to-start' && <PreparationChecklist items={preparationItems} />}
+          {state === 'to-start' && (
+            <>
+              <PreparationChecklist items={preparationItems} />
+              {/* Scan documents propriétaire (état préparation) */}
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rule/60 bg-paper px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-ink">Documents propriétaire</p>
+                  <p className="text-xs text-ink-mute">
+                    Scannez DPE antérieur, factures énergie, plans ou plaque chaudière pour
+                    pré-remplir le dossier.
+                  </p>
+                </div>
+                <DocumentScanButton
+                  placement="preparation"
+                  variant="primary"
+                  dossierId={dossier.id}
+                />
+              </div>
+            </>
+          )}
 
           {(state === 'in-progress' || state === 'completed') && (
             <>

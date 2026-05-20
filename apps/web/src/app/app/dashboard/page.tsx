@@ -1,5 +1,6 @@
-import type { Metadata } from 'next'
+import { DocumentScanButton } from '@/components/documents'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import type { Metadata } from 'next'
 import { AlertsAndActions } from './alerts-and-actions'
 import { CockpitHero } from './cockpit-hero'
 import { DashboardPipeline } from './dashboard-pipeline'
@@ -17,6 +18,10 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <CockpitHero firstName={firstName} />
+
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        <DocumentScanButton placement="dashboard" variant="primary" />
+      </div>
 
       <div className="space-y-8 animate-fade-in">
         <TodayBlock />

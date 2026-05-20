@@ -16,6 +16,7 @@ import {
   Target,
   TrendingUp,
   Users,
+  Wrench,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -31,7 +32,7 @@ interface NavItem {
   enabled: boolean
 }
 
-// 11 sections — activées progressivement (Aujourd'hui, Croissance, Finance, Utilisateurs, Scheduling).
+// 12 sections — activées progressivement (Aujourd'hui, Croissance, Finance, Utilisateurs, Scheduling, Utilities).
 const NAV_ITEMS: NavItem[] = [
   { label: "Aujourd'hui", icon: Home, href: '/admin', enabled: true },
   { label: 'Croissance', icon: TrendingUp, href: '/admin/croissance', enabled: true },
@@ -43,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Alertes', icon: AlertTriangle, href: '/admin/alertes', enabled: true },
   { label: 'Paliers', icon: Target, href: '/admin/paliers', enabled: true },
   { label: 'Actions', icon: Settings, href: '/admin/actions', enabled: true },
+  { label: 'Utilities', icon: Wrench, href: '/admin/utilities', enabled: true },
   { label: 'Audit', icon: ScrollText, href: '/admin/audit', enabled: true },
 ]
 
