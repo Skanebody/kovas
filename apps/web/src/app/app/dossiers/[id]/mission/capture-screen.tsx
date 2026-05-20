@@ -35,12 +35,38 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
+import {
+  ConsolidationSummaryModal,
+  type ConsolidationSummaryModalProps,
+} from './consolidation-summary-modal'
 import { MissionToolbar } from './mission-toolbar'
 import { PhotoButton } from './photo-button'
 import { PostPhotoActionBar } from './post-photo-action-bar'
 import { type RoomOption, RoomPicker } from './room-picker'
 import { TextNoteModal } from './text-note-modal'
 import { VoiceRecorderModal } from './voice-recorder-modal'
+
+type ConsolidateState =
+  | { phase: 'idle' }
+  | { phase: 'loading' }
+  | { phase: 'error'; message: string }
+  | {
+      phase: 'success'
+      summary: Omit<ConsolidationSummaryModalProps, 'open' | 'onClose'>
+    }
+
+type ConsolidateApiResponse =
+  | {
+      ok: true
+      fields_consolidated: number
+      conflicts: ConsolidationSummaryModalProps['conflicts']
+      missing_required: ConsolidationSummaryModalProps['missingRequired']
+      global_confidence: number
+      summary: string
+      cost_usd: number
+      warnings?: string[]
+    }
+  | { ok: false; error: string }
 
 type PostPhotoState =
   | { phase: 'idle' }
@@ -65,6 +91,7 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
   const [isProcessing, startProcessing] = useTransition()
   const [previewPhoto, setPreviewPhoto] = useState<DisplayPhoto | null>(null)
   const [postPhoto, setPostPhoto] = useState<PostPhotoState>({ phase: 'idle' })
+  const [consolidate, setConsolidate] = useState<ConsolidateState>({ phase: 'idle' })
 
   const currentRoom = rooms.find((r) => r.id === currentRoomId) ?? null
 
@@ -154,6 +181,45 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
 
   function handleRetryAll() {
     void retryAll()
+  }
+
+  async function handleConsolidate() {
+    if (consolidate.phase === 'loading') return
+    setConsolidate({ phase: 'loading' })
+    try {
+      const res = await fetch(`/api/missions/${dossier.id}/consolidate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const json = (await res.json()) as ConsolidateApiResponse
+      if (!res.ok || !json.ok) {
+        const message =
+          'error' in json && typeof json.error === 'string' ? json.error : 'Erreur consolidation'
+        setConsolidate({ phase: 'error', message })
+        return
+      }
+      setConsolidate({
+        phase: 'success',
+        summary: {
+          fieldsConsolidated: json.fields_consolidated,
+          conflicts: json.conflicts,
+          missingRequired: json.missing_required,
+          globalConfidence: json.global_confidence,
+          summary: json.summary,
+          costUsd: json.cost_usd,
+          warnings: json.warnings,
+        },
+      })
+    } catch (e) {
+      setConsolidate({
+        phase: 'error',
+        message: e instanceof Error ? e.message : 'Erreur réseau',
+      })
+    }
+  }
+
+  function dismissConsolidate() {
+    setConsolidate({ phase: 'idle' })
   }
 
   return (
@@ -272,8 +338,8 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
               ) : null}
             </div>
 
-            {/* CTA pièce suivante */}
-            <div className="flex justify-center">
+            {/* CTA pièce suivante + Consolider */}
+            <div className="flex flex-wrap justify-center gap-3">
               <Button
                 type="button"
                 variant="outline"
@@ -284,7 +350,40 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
                 <Plus className="h-4 w-4" aria-hidden />
                 Pièce suivante
               </Button>
+              <Button
+                type="button"
+                variant="accent"
+                size="lg"
+                onClick={() => {
+                  void handleConsolidate()
+                }}
+                disabled={consolidate.phase === 'loading' || pendingCount > 0}
+                title={
+                  pendingCount > 0
+                    ? `Patientez : ${pendingCount} photo${
+                        pendingCount > 1 ? 's' : ''
+                      } en cours de synchronisation`
+                    : undefined
+                }
+                className="gap-2"
+              >
+                {consolidate.phase === 'loading' ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : (
+                  <Sparkles className="size-4" aria-hidden />
+                )}
+                Consolider mes données
+              </Button>
             </div>
+
+            {consolidate.phase === 'loading' ? (
+              <p className="text-center text-xs text-ink-mute">Synthèse en cours, ~30s…</p>
+            ) : null}
+            {consolidate.phase === 'error' ? (
+              <p className="text-center text-xs text-accent-red" role="alert">
+                Échec de la consolidation : {consolidate.message}
+              </p>
+            ) : null}
           </section>
 
           {/* Colonne cockpit (xl+) */}
@@ -346,6 +445,21 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
           thumbnailUrl={postPhoto.thumbnailUrl}
           onCancel={dismissPostPhoto}
           onComplete={() => dismissPostPhoto()}
+        />
+      ) : null}
+
+      {/* Modal récap consolidation */}
+      {consolidate.phase === 'success' ? (
+        <ConsolidationSummaryModal
+          open
+          onClose={dismissConsolidate}
+          fieldsConsolidated={consolidate.summary.fieldsConsolidated}
+          conflicts={consolidate.summary.conflicts}
+          missingRequired={consolidate.summary.missingRequired}
+          globalConfidence={consolidate.summary.globalConfidence}
+          summary={consolidate.summary.summary}
+          costUsd={consolidate.summary.costUsd}
+          warnings={consolidate.summary.warnings}
         />
       ) : null}
 
