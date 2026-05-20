@@ -48,6 +48,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.1",
     "react-konva": "^18.2.10",
+    "recharts": "^3.8.1",
     "serwist": "^9.0.11",
     "sonner": "^2.0.7",
     "stripe": "^22.1.1",

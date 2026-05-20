@@ -30,13 +30,13 @@ interface NavItem {
   enabled: boolean
 }
 
-// 10 sections — V1 : seule "Aujourd'hui" est cliquable.
+// 10 sections — activées progressivement (Aujourd'hui, Croissance, Finance, Utilisateurs).
 const NAV_ITEMS: NavItem[] = [
   { label: "Aujourd'hui", icon: Home, href: '/admin', enabled: true },
-  { label: 'Croissance', icon: TrendingUp, href: '/admin/croissance', enabled: false },
-  { label: 'Finance', icon: DollarSign, href: '/admin/finance', enabled: false },
-  { label: 'Utilisateurs', icon: Users, href: '/admin/utilisateurs', enabled: false },
-  { label: 'Coûts IA', icon: Bot, href: '/admin/cout-ia', enabled: false },
+  { label: 'Croissance', icon: TrendingUp, href: '/admin/croissance', enabled: true },
+  { label: 'Finance', icon: DollarSign, href: '/admin/finance', enabled: true },
+  { label: 'Utilisateurs', icon: Users, href: '/admin/users', enabled: true },
+  { label: 'Coûts IA', icon: Bot, href: '/admin/cout-ia', enabled: true },
   { label: 'Produit', icon: BarChart3, href: '/admin/produit', enabled: false },
   { label: 'Alertes', icon: AlertTriangle, href: '/admin/alertes', enabled: false },
   { label: 'Paliers', icon: Target, href: '/admin/paliers', enabled: false },
@@ -68,7 +68,9 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
       {/* Items */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href
+          const isActive =
+            pathname === item.href ||
+            (item.href !== '/admin' && pathname.startsWith(`${item.href}/`))
           const Icon = item.icon
 
           if (!item.enabled) {
