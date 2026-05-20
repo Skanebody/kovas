@@ -27,6 +27,7 @@ import { ClientUploadLink } from './client-upload-link'
 import { CoherenceWarnings } from './coherence-warnings'
 import { DossierInfoEdit } from './dossier-info-edit'
 import { DossierMoreMenu } from './dossier-more-menu'
+import { LiveCapture } from './live-capture/live-capture'
 import { MissionActionsMenu } from './mission-actions-menu'
 import { MissionChecklist } from './mission-checklist'
 import { type MissionDrawerItem, MissionsWithDrawer } from './missions-with-drawer'
@@ -514,6 +515,34 @@ export default async function DossierDetailPage({
             dossierId={dossier.id}
             steps={workflow.steps}
             overallProgress={workflow.overallProgress}
+          />
+
+          {/* ───────────────────────────────────────────────────────────────
+              2bis. LIVE CAPTURE — saisie terrain intelligente (voix + texte).
+              Extrait surface / année / équipements à la volée et dispatche
+              dans property / room / mission en un click.
+              Feature CŒUR V1 — CLAUDE.md §3 #1.
+              ─────────────────────────────────────────────────────────────── */}
+          <LiveCapture
+            dossierId={dossier.id}
+            property={
+              prop
+                ? {
+                    surface_total: prop.surface_total ?? null,
+                    year_built: prop.year_built ?? null,
+                    floor_number: prop.floor_number ?? null,
+                    building_letter: prop.building_letter ?? null,
+                    apartment_detail: prop.apartment_detail ?? null,
+                    lot_number: prop.lot_number ?? null,
+                  }
+                : null
+            }
+            rooms={roomsArr}
+            missions={missionsList.map((m) => ({
+              id: m.id,
+              type: m.type,
+              reference: m.reference,
+            }))}
           />
 
           {/* ───────────────────────────────────────────────────────────────
