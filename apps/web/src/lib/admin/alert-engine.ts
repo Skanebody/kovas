@@ -597,29 +597,54 @@ async function isInCooldown(supabase: AdminSupabase, rule: AlertRule): Promise<b
 }
 
 // ============================================
-// Notification (stub V1)
+// Notification — dispatch vers Telegram bot (itération 13/N partie 2)
 // ============================================
 
+function rowToAlertEvent(row: AlertEventRow): AlertEvent {
+  return {
+    id: row.id,
+    rule_id: row.rule_id,
+    target_type: row.target_type,
+    target_id: row.target_id,
+    target_label: row.target_label,
+    actual_value: row.actual_value === null ? null : toNumber(row.actual_value),
+    threshold_value: row.threshold_value === null ? null : toNumber(row.threshold_value),
+    payload: (row.payload ?? {}) as Record<string, unknown>,
+    notified_email: row.notified_email ?? false,
+    notified_telegram: row.notified_telegram ?? false,
+    resolved: row.resolved,
+    resolved_at: row.resolved_at,
+    resolved_by: row.resolved_by,
+    resolution_note: row.resolution_note,
+    created_at: row.created_at,
+  }
+}
+
 async function dispatchNotification(
+  supabase: AdminSupabase,
   rule: AlertRule,
   event: AlertEventRow,
 ): Promise<{ notified_email: boolean; notified_telegram: boolean }> {
-  // V1 stub : juste console.log. V1.5/2 : appel Resend + Telegram bot
-  // (cf. itération 9+). On retourne quand même les flags pour tracking.
+  // V1.5 : Telegram opérationnel via notification-sender. Email reste stub
+  // (Resend templating à venir — pas de blocker).
   let notifiedEmail = false
   let notifiedTelegram = false
 
   if (rule.notify_email) {
-    console.warn(
-      `[alert-engine] (stub) email notification for rule ${rule.name} — event ${event.id}`,
-    )
+    // TODO V1.5 : Resend templating spécifique alerts.
+    console.warn(`[alert-engine] (email stub) for rule ${rule.name} — event ${event.id}`)
     notifiedEmail = true
   }
   if (rule.notify_telegram) {
-    console.warn(
-      `[alert-engine] (stub) telegram notification (channel=${rule.notify_telegram_channel}) for rule ${rule.name} — event ${event.id}`,
-    )
-    notifiedTelegram = true
+    try {
+      // Lazy import pour éviter de pull les deps Telegram dans tous les bundles
+      // (alert-engine est aussi importé par les routes admin).
+      const { sendAlertEventNotification } = await import('@/lib/telegram/notification-sender')
+      const ok = await sendAlertEventNotification(supabase, rule, rowToAlertEvent(event))
+      notifiedTelegram = ok
+    } catch (err) {
+      console.error('[alert-engine] telegram notification failed', rule.id, err)
+    }
   }
   return { notified_email: notifiedEmail, notified_telegram: notifiedTelegram }
 }
@@ -666,7 +691,7 @@ export async function runAlertChecks(supabase: AdminSupabase): Promise<RunChecks
       }
       result.triggered += 1
 
-      const sendFlags = await dispatchNotification(rule, inserted)
+      const sendFlags = await dispatchNotification(supabase, rule, inserted)
       if (sendFlags.notified_email || sendFlags.notified_telegram) result.notified += 1
     } catch (e) {
       result.errors += 1
