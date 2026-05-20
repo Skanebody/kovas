@@ -6,22 +6,23 @@ import { cn } from '@/lib/utils'
 import { Apple, Check, Copy, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 
-interface CalendarSyncProps {
+interface CalendarSyncExportProps {
   httpsUrl: string
   webcalUrl: string
 }
 
 /**
- * Section "Synchronisation calendrier" — page /app/account.
+ * Section "Exporter (Kovas → externe)" — URL d'abonnement .ics.
  *
- * Expose les URLs d'abonnement (subscription URL) pour Google / Apple / Outlook.
- * L'utilisateur copie l'URL et la colle dans son app calendrier — tous les
- * RDV diagnostic KOVAS apparaissent automatiquement et se mettent à jour.
+ * Mutualisé entre /app/account (CollapsibleSection) et /app/calendar
+ * (onglet "Exporter" du dialog Synchronisation).
  *
- * Direction Kovas → Externe en V1. Bidirectionnel via OAuth Google Calendar
+ * L'utilisateur copie l'URL et la colle dans Google Calendar / Apple Calendar /
+ * Outlook — tous les RDV KOVAS apparaissent automatiquement, refresh ~1h.
+ * Sens Kovas → Externe en V1. Bidirectionnel via OAuth Google Calendar
  * prévu V1.5 (CLAUDE.md §20).
  */
-export function CalendarSync({ httpsUrl, webcalUrl }: CalendarSyncProps) {
+export function CalendarSyncExport({ httpsUrl, webcalUrl }: CalendarSyncExportProps) {
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
   async function copy(value: string, key: string) {

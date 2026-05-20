@@ -1,6 +1,8 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { CalendarSyncDialog } from '@/components/calendar/calendar-sync-dialog'
 import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { buildCalendarSubscriptionUrl, buildCalendarWebcalUrl } from '@/lib/calendar-token'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -20,7 +22,7 @@ export default async function CalendarPage() {
   const { data: dossiers } = await supabase
     .from('dossiers')
     .select(
-      'id, reference, status, scheduled_at, properties(city), clients(display_name), missions(type)',
+      'id, reference, status, scheduled_at, properties(address, city), clients(display_name), missions(type)',
     )
     .eq('organization_id', orgId)
     .is('deleted_at', null)
@@ -37,13 +39,17 @@ export default async function CalendarPage() {
       dossierId: d.id,
       reference: d.reference,
       scheduledAt: d.scheduled_at as string,
-      durationMinutes: 90,
+      durationMinutes: 90, // V1 hard-codé, BDD `duration_minutes` à terme
       clientName: client?.display_name ?? null,
+      address: prop?.address ?? null,
       city: prop?.city ?? null,
       missionTypes: missions.map((m) => m.type),
       status: d.status,
     }
   })
+
+  const httpsUrl = buildCalendarSubscriptionUrl(orgId)
+  const webcalUrl = buildCalendarWebcalUrl(orgId)
 
   return (
     <div className="max-w-6xl space-y-6 animate-fade-in">
@@ -53,18 +59,16 @@ export default async function CalendarPage() {
         </Link>
       </Button>
 
-      <AppPageHeader
-        title="Votre"
-        accent="planning"
-        description="Vue calendrier de vos visites diagnostic. Cliquez sur un RDV pour ouvrir le dossier."
-      />
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <AppPageHeader
+          title="Votre"
+          accent="planning"
+          description="Vue calendrier de vos visites diagnostic. Cliquez un RDV pour voir les détails."
+        />
+        <CalendarSyncDialog httpsUrl={httpsUrl} webcalUrl={webcalUrl} />
+      </div>
 
       <CalendarWeekView events={events} />
-
-      <p className="text-[11px] text-ink-mute text-center">
-        Les RDV se créent en planifiant un dossier. Téléchargez un .ics depuis le détail du dossier
-        pour l&apos;importer dans Google / Apple / Outlook.
-      </p>
     </div>
   )
 }

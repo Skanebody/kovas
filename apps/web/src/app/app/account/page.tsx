@@ -1,4 +1,5 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { CalendarSyncExport } from '@/components/calendar/calendar-sync-export'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CollapsibleSection } from '@/components/ui/collapsible-section'
@@ -19,7 +20,6 @@ import {
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { CalendarSync } from './calendar-sync'
 import { CheckoutButton } from './checkout-button'
 import { CompanyForm } from './company-form'
 import { ProfileForm } from './profile-form'
@@ -214,7 +214,7 @@ export default async function AccountPage() {
           </>
         }
       >
-        <CalendarSync
+        <CalendarSyncExport
           httpsUrl={buildCalendarSubscriptionUrl(orgId)}
           webcalUrl={buildCalendarWebcalUrl(orgId)}
         />
