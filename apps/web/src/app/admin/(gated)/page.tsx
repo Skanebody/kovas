@@ -1,6 +1,13 @@
 import { HealthChecksGrid } from '@/components/admin/home/HealthChecksGrid'
 import { RecentActivityFeed } from '@/components/admin/home/RecentActivityFeed'
+import { SchedulingMetricsSection } from '@/components/admin/scheduling/SchedulingMetricsSection'
 import { AdminMetricCard } from '@/components/admin/shared/AdminMetricCard'
+import {
+  getClusteringAdoption,
+  getConflictDetectionStats,
+  getDpeQuotaTopUsers,
+  getDurationAccuracy,
+} from '@/lib/admin/scheduling-metrics'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { KOVAS_TIERS, type KovasTier } from '@/lib/stripe-config'
 import { BarChart3, Bot, Building2, PieChart, TrendingUp, UserPlus } from 'lucide-react'
@@ -139,8 +146,19 @@ async function fetchMetrics(): Promise<{
 // Page
 // ============================================
 
+async function fetchSchedulingOverview() {
+  const supabase = createAdminClient()
+  const [durationAccuracy, conflicts, dpeQuotaTop, clustering] = await Promise.all([
+    getDurationAccuracy(supabase, 30),
+    getConflictDetectionStats(supabase, 30),
+    getDpeQuotaTopUsers(supabase, 10),
+    getClusteringAdoption(supabase, 30),
+  ])
+  return { durationAccuracy, conflicts, dpeQuotaTop, clustering }
+}
+
 export default async function AdminHomePage() {
-  const metrics = await fetchMetrics()
+  const [metrics, scheduling] = await Promise.all([fetchMetrics(), fetchSchedulingOverview()])
 
   return (
     <div className="space-y-7 max-w-7xl">
@@ -205,6 +223,14 @@ export default async function AdminHomePage() {
         <RecentActivityFeed />
         <HealthChecksGrid />
       </section>
+
+      {/* Scheduling overview (30 derniers jours) */}
+      <SchedulingMetricsSection
+        durationAccuracy={scheduling.durationAccuracy}
+        conflicts={scheduling.conflicts}
+        dpeQuotaTop={scheduling.dpeQuotaTop}
+        clustering={scheduling.clustering}
+      />
     </div>
   )
 }

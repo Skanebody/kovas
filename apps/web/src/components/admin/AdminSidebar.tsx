@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   BarChart3,
   Bot,
+  CalendarRange,
   DollarSign,
   Home,
   LogOut,
@@ -30,11 +31,12 @@ interface NavItem {
   enabled: boolean
 }
 
-// 10 sections — activées progressivement (Aujourd'hui, Croissance, Finance, Utilisateurs).
+// 11 sections — activées progressivement (Aujourd'hui, Croissance, Finance, Utilisateurs, Scheduling).
 const NAV_ITEMS: NavItem[] = [
   { label: "Aujourd'hui", icon: Home, href: '/admin', enabled: true },
   { label: 'Croissance', icon: TrendingUp, href: '/admin/croissance', enabled: true },
   { label: 'Finance', icon: DollarSign, href: '/admin/finance', enabled: true },
+  { label: 'Scheduling', icon: CalendarRange, href: '/admin/scheduling', enabled: true },
   { label: 'Utilisateurs', icon: Users, href: '/admin/users', enabled: true },
   { label: 'Coûts IA', icon: Bot, href: '/admin/cout-ia', enabled: true },
   { label: 'Produit', icon: BarChart3, href: '/admin/produit', enabled: true },

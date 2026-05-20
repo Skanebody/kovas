@@ -1,8 +1,11 @@
 import { CostsBreakdown } from '@/components/admin/finance/CostsBreakdown'
 import { MRRChart } from '@/components/admin/finance/MRRChart'
 import { MarginsChart } from '@/components/admin/finance/MarginsChart'
+import { PackAdoptionChart } from '@/components/admin/finance/PackAdoptionChart'
+import { PricingComparisonTable } from '@/components/admin/finance/PricingComparisonTable'
 import { ProjectionsChart } from '@/components/admin/finance/ProjectionsChart'
 import { RevenueByPeriod } from '@/components/admin/finance/RevenueByPeriod'
+import { RevenueForecastSection } from '@/components/admin/finance/RevenueForecastSection'
 import { StripeSyncStatus } from '@/components/admin/finance/StripeSyncStatus'
 import { TopClientsTable } from '@/components/admin/finance/TopClientsTable'
 import { formatEur, formatPct } from '@/components/admin/finance/finance-format'
@@ -15,6 +18,12 @@ import {
   calculateProjections,
   calculateTopClients,
 } from '@/lib/admin/finance-calculator'
+import {
+  getPackAdoption,
+  getPricingComparison,
+  getRevenueForecast,
+  getRevenueRealized,
+} from '@/lib/admin/revenue-metrics'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { Coins, Percent, TrendingUp, Wallet } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -31,13 +40,28 @@ export default async function AdminFinancePage() {
   const supabase = createAdminClient()
   const now = new Date()
 
-  const [mrr, history, topClients, costs, margins, projections] = await Promise.all([
+  const [
+    mrr,
+    history,
+    topClients,
+    costs,
+    margins,
+    projections,
+    revenueForecast,
+    revenueRealized,
+    packAdoption,
+    pricingComparison,
+  ] = await Promise.all([
     calculateMRR(supabase),
     calculateMRRHistory(supabase, 12),
     calculateTopClients(supabase, 10),
     calculateMonthCosts(supabase, now),
     calculateMargins(supabase, 6),
     calculateProjections(supabase, 6),
+    getRevenueForecast(supabase, 30),
+    getRevenueRealized(supabase, 30),
+    getPackAdoption(supabase),
+    getPricingComparison(supabase),
   ])
 
   // CA ce mois = MRR du dernier point d'historique (mois courant).
@@ -130,6 +154,15 @@ export default async function AdminFinancePage() {
       {/* Top clients */}
       <section aria-label="Top clients">
         <TopClientsTable clients={topClients} />
+      </section>
+
+      {/* Revenue forecast & réalisé (mission_pricing_snapshots) */}
+      <RevenueForecastSection forecast={revenueForecast} realized={revenueRealized} />
+
+      {/* Pack adoption + Pricing comparison anonymisée */}
+      <section className="grid gap-4 grid-cols-1 lg:grid-cols-2" aria-label="Packs et pricing">
+        <PackAdoptionChart rows={packAdoption} />
+        <PricingComparisonTable comparison={pricingComparison} />
       </section>
     </div>
   )
