@@ -184,6 +184,30 @@ export class CaptureSyncManager {
 
     // 4. Marque uploaded
     await markPhotoUploaded(photo.id, result.photoId)
+
+    // 5. Trigger Vision IA en fire-and-forget côté serveur.
+    //    Pas d'await — l'analyse tourne en background. Si le déclenchement
+    //    échoue (offline, server down), la photo reste vision_status='pending'
+    //    et un autre passage du sync manager pourra réessayer plus tard.
+    //    Photos floues : le serveur a déjà mis vision_status='skipped_blurry'
+    //    via uploadCapturePhotoAction, donc l'appel sera idempotent (noop).
+    if (!photo.isBlurry) {
+      this.triggerVisionAnalyze(result.photoId)
+    }
+  }
+
+  private triggerVisionAnalyze(serverPhotoId: string): void {
+    // Best-effort fire-and-forget. On ne bloque pas le sync sur ce trigger.
+    void fetch(`/api/missions/photos/${serverPhotoId}/analyze`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      // Cache + keepalive : si l'utilisateur quitte la page, on laisse le navigateur
+      // finir l'envoi (le serveur prendra la suite côté Edge).
+      keepalive: true,
+    }).catch((e: unknown) => {
+      const msg = e instanceof Error ? e.message : 'unknown'
+      console.warn('[CaptureSyncManager] vision trigger failed', msg)
+    })
   }
 }
 

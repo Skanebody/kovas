@@ -19,8 +19,18 @@ import { enqueuePhoto } from '@/lib/mission/local-storage-queue'
 import { preprocessPhoto } from '@/lib/mission/photo-processor'
 import { captureSyncManager } from '@/lib/mission/sync-manager'
 import { type DisplayPhoto, useCapturePhotos } from '@/lib/mission/use-capture-photos'
+import { useVisionStatus } from '@/lib/mission/use-vision-status'
 import { cn } from '@/lib/utils'
-import { AlertTriangle, CheckCircle2, ImageOff, Loader2, Plus, RefreshCw, X } from 'lucide-react'
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ImageOff,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Sparkles,
+  X,
+} from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
 import { MissionToolbar } from './mission-toolbar'
 import { PhotoButton } from './photo-button'
@@ -297,6 +307,10 @@ interface PhotoThumbnailProps {
 }
 
 function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
+  // Polling Vision IA — uniquement si la photo est uploadée + non floue.
+  const vision = useVisionStatus(photo.serverPhotoId, photo.isBlurry)
+  const visionLabel = visionStatusLabel(vision.status, vision.fieldsCount, vision.confidence)
+
   return (
     <button
       type="button"
@@ -312,7 +326,7 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
       title={
         photo.isBlurry
           ? 'Photo floue — ne sera pas analysée par Vision IA'
-          : `Capturée à ${new Date(photo.capturedAt).toLocaleTimeString('fr-FR')}`
+          : `${new Date(photo.capturedAt).toLocaleTimeString('fr-FR')} · ${visionLabel}`
       }
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -339,6 +353,11 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
         )}
       </span>
 
+      {/* Badge Vision IA — seulement si la photo est uploadée et non floue */}
+      {photo.syncStatus === 'uploaded' && !photo.isBlurry ? (
+        <VisionBadge status={vision.status} fieldsCount={vision.fieldsCount} />
+      ) : null}
+
       {/* Badge floue */}
       {photo.isBlurry ? (
         <span
@@ -355,6 +374,88 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
       ) : null}
     </button>
   )
+}
+
+// ============================================
+// Vision IA badge
+// ============================================
+
+interface VisionBadgeProps {
+  status: import('@/lib/mission/types').VisionStatus
+  fieldsCount: number
+}
+
+function VisionBadge({ status, fieldsCount }: VisionBadgeProps) {
+  if (status === 'pending' || status === 'processing') {
+    return (
+      <span
+        className={cn(
+          'absolute top-1 right-1 inline-flex items-center justify-center',
+          'h-5 w-5 rounded-full bg-paper/90 text-ink shadow-sm backdrop-blur-sm',
+        )}
+        aria-label="Analyse Vision IA en cours"
+        title="Analyse Vision IA en cours…"
+      >
+        <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+      </span>
+    )
+  }
+  if (status === 'analyzed') {
+    return (
+      <span
+        className={cn(
+          'absolute top-1 right-1 inline-flex items-center justify-center',
+          'h-5 w-5 rounded-full bg-chartreuse text-ink shadow-sm',
+        )}
+        aria-label={`Analysée — ${fieldsCount} champ${fieldsCount > 1 ? 's' : ''} détecté${fieldsCount > 1 ? 's' : ''}`}
+        title={`Analysée — ${fieldsCount} champ${fieldsCount > 1 ? 's' : ''} détecté${fieldsCount > 1 ? 's' : ''}`}
+      >
+        <Sparkles className="h-3 w-3" aria-hidden />
+      </span>
+    )
+  }
+  if (status === 'failed') {
+    return (
+      <span
+        className={cn(
+          'absolute top-1 right-1 inline-flex items-center justify-center',
+          'h-5 w-5 rounded-full bg-accent-red text-paper shadow-sm',
+        )}
+        aria-label="Analyse Vision échouée"
+        title="Analyse Vision échouée — réessayera plus tard"
+      >
+        <AlertTriangle className="h-3 w-3" aria-hidden />
+      </span>
+    )
+  }
+  // skipped_* → pas de badge supplémentaire
+  return null
+}
+
+function visionStatusLabel(
+  status: import('@/lib/mission/types').VisionStatus,
+  fieldsCount: number,
+  confidence: number | null,
+): string {
+  switch (status) {
+    case 'pending':
+      return 'Vision IA en attente'
+    case 'processing':
+      return 'Vision IA en cours'
+    case 'analyzed': {
+      const confLabel =
+        typeof confidence === 'number' ? ` · confiance ${Math.round(confidence * 100)}%` : ''
+      return `Vision IA terminée — ${fieldsCount} champ${fieldsCount > 1 ? 's' : ''}${confLabel}`
+    }
+    case 'failed':
+      return 'Vision IA en échec'
+    case 'skipped_blurry':
+      return 'Photo floue — non analysée'
+    case 'skipped_duplicate':
+      return 'Doublon détecté — non analysée'
+    case 'skipped_irrelevant':
+      return 'Photo sans intérêt diagnostic'
+  }
 }
 
 function syncStatusLabel(s: DisplayPhoto['syncStatus']): string {
