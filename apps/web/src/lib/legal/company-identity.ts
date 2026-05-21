@@ -113,14 +113,23 @@ export const COMPANY_IDENTITY = {
     webFull: 'https://kovas.fr',
   },
 
-  /** Adresses email officielles */
+  /**
+   * Adresses email officielles.
+   *
+   * Décision opérationnelle (2026-05-21) : tant que les mailboxes role-based
+   * (support@, direction@, dpo@, signalement@, benjamin@) ne sont pas
+   * provisionnées chez le provider mail, **toutes** sont aliasées vers
+   * `contact@kovas.fr`. Les helpers (footers, templates Brevo, formulaires
+   * publics) référencent ces clés — le rebranding mailbox-par-mailbox se
+   * fera ici en un point unique quand les boîtes seront créées.
+   */
   emails: {
     contactGeneral: 'contact@kovas.fr',
-    direction: 'direction@kovas.fr',
-    dpo: 'dpo@kovas.fr',
-    support: 'support@kovas.fr',
-    benjaminPersonal: 'benjamin@kovas.fr',
-    signalement: 'signalement@kovas.fr',
+    direction: 'contact@kovas.fr',
+    dpo: 'contact@kovas.fr',
+    support: 'contact@kovas.fr',
+    benjaminPersonal: 'contact@kovas.fr',
+    signalement: 'contact@kovas.fr',
   },
 
   /** Téléphone (à compléter si besoin pour LCEN mentions légales) */
