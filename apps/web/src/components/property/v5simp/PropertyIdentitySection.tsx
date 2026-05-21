@@ -25,6 +25,10 @@ interface Props {
     property_type: string | null
     year_built: number | null
     apartmentLine: string | null
+    /** Latitude WGS84 (depuis `properties.location` PostGIS parsé côté server). */
+    lat: number | null
+    /** Longitude WGS84. */
+    lng: number | null
   }
 }
 
@@ -95,7 +99,10 @@ export function PropertyIdentitySection({ property }: Props) {
       <PropertyMapSheet
         open={mapOpen}
         onOpenChange={setMapOpen}
-        address={[property.address, cityLine].filter(Boolean).join(', ')}
+        address={property.address}
+        subtitle={cityLine || undefined}
+        lat={property.lat}
+        lng={property.lng}
       />
     </section>
   )

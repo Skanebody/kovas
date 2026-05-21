@@ -17,6 +17,7 @@ import {
   type PropertyPhoto,
 } from '@/components/property/v5simp/PropertyGallerieSection'
 import { PropertyIdentitySection } from '@/components/property/v5simp/PropertyIdentitySection'
+import { parsePropertyLocation } from '@/components/property/v5simp/PropertyInteractiveMap'
 import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { formatPropertyAddress } from '@/lib/property-display'
@@ -38,7 +39,7 @@ export default async function PropertyDetailPage({
   const { data: property } = await supabase
     .from('properties')
     .select(
-      'id, address, city, postal_code, insee_code, property_type, year_built, surface_total, surface_carrez, rooms_count, floors, heating_type, apartment_detail, floor_number, building_letter, lot_number, cadastre_prefix, cadastre_section, cadastre_number, client_id, notes',
+      'id, address, city, postal_code, insee_code, property_type, year_built, surface_total, surface_carrez, rooms_count, floors, heating_type, apartment_detail, floor_number, building_letter, lot_number, cadastre_prefix, cadastre_section, cadastre_number, client_id, notes, location',
     )
     .eq('id', id)
     .eq('organization_id', orgId)
@@ -181,7 +182,11 @@ export default async function PropertyDetailPage({
     city: property.city,
   }
 
-  // 10. Adresse mise en forme
+  // 10. Coords GPS (parse PostGIS location column — EWKT ou EWKB hex)
+  const propertyLocation = (property as { location?: string | null }).location ?? null
+  const coords = parsePropertyLocation(propertyLocation)
+
+  // 11. Adresse mise en forme
   const addressParts = formatPropertyAddress({
     address: property.address,
     postal_code: property.postal_code,
@@ -250,6 +255,8 @@ export default async function PropertyDetailPage({
             property_type: property.property_type,
             year_built: property.year_built,
             apartmentLine: addressParts.apartmentLine,
+            lat: coords?.lat ?? null,
+            lng: coords?.lng ?? null,
           }}
         />
 

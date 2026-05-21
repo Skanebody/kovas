@@ -2,8 +2,24 @@
 
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
-import { Compass, MapPin } from 'lucide-react'
+import { Compass } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
+
+// Leaflet est purement client-side (touche window) → dynamic import avec ssr:false.
+const PropertyInteractiveMap = dynamic(
+  () => import('./PropertyInteractiveMap').then((m) => m.PropertyInteractiveMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[280px] items-center justify-center rounded-lg border border-rule/40 bg-sage/50">
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+          Chargement de la carte…
+        </p>
+      </div>
+    ),
+  },
+)
 
 export interface PropertyContexteLocalData {
   /** Prix médian DVF €/m² sur la commune (V1 mock) */
@@ -101,23 +117,50 @@ function Row({ label, value, source }: { label: string; value: string; source: s
   )
 }
 
-/** Stub BottomSheet "Voir sur la carte" — placeholder V1 sans rendu OSM. */
+/**
+ * BottomSheet "Localisation" — carte interactive Leaflet + OpenStreetMap.
+ * Si les coordonnées GPS sont absentes (geocoding pas encore fait pour ce bien),
+ * affiche un fallback explicatif.
+ */
 export function PropertyMapSheet({
   open,
   onOpenChange,
   address,
+  subtitle,
+  lat,
+  lng,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   address: string
+  subtitle?: string
+  lat: number | null
+  lng: number | null
 }) {
+  const hasCoords = lat !== null && lng !== null
+
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Localisation" description={address}>
-      <div className="flex h-[280px] flex-col items-center justify-center gap-3 rounded-lg border border-rule/40 bg-sage/50 mx-2 mb-4">
-        <MapPin className="size-10 text-ink-mute" strokeWidth={1.5} />
-        <p className="text-[12px] text-ink-mute text-center px-6">
-          Carte interactive disponible dans une prochaine version.
-        </p>
+      <div className="mx-2 mb-4">
+        {hasCoords ? (
+          <PropertyInteractiveMap
+            lat={lat}
+            lng={lng}
+            address={address}
+            subtitle={subtitle}
+            zoom={17}
+            height={320}
+          />
+        ) : (
+          <div className="flex h-[280px] flex-col items-center justify-center gap-3 rounded-lg border border-rule/40 bg-sage/50 px-6 text-center">
+            <p className="text-[12px] text-ink-mute">
+              Coordonnées GPS non disponibles pour ce bien.
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-faint">
+              Géocodage BAN automatique au prochain enregistrement de l'adresse
+            </p>
+          </div>
+        )}
       </div>
     </BottomSheet>
   )
