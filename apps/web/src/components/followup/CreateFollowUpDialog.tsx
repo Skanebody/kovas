@@ -29,7 +29,7 @@ import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { createFollowUpSequenceAction } from '@/app/app/relances/actions'
+import { createFollowUpSequenceAction } from '@/app/dashboard/relances/actions'
 
 export type FollowUpDialogTargetType = 'quote' | 'invoice' | 'mission'
 export type FollowUpDialogPreset = 'standard' | 'soft' | 'insistant'

@@ -73,7 +73,7 @@ export function ReactivationModal({
           return
         }
         // Refresh page sans query param
-        router.replace('/app/account?reactivated=1')
+        router.replace('/dashboard/account?reactivated=1')
         router.refresh()
         setOpen(false)
       } catch (e) {

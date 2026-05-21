@@ -102,7 +102,7 @@ export function AdemeCockpitDashboard({
           </p>
         </div>
         <Button variant="accent" size="lg" asChild>
-          <Link href="/app/cockpit-ademe/prevalidation">Pré-valider un DPE</Link>
+          <Link href="/dashboard/cockpit-ademe/prevalidation">Pré-valider un DPE</Link>
         </Button>
       </div>
 

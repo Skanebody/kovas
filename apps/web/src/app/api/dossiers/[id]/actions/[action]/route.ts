@@ -155,9 +155,9 @@ export async function POST(
   }
 
   // Revalidation des pages impactées
-  revalidatePath(`/app/dossiers/${id}`)
-  revalidatePath('/app/dossiers')
-  revalidatePath('/app/dashboard')
+  revalidatePath(`/dashboard/dossiers/${id}`)
+  revalidatePath('/dashboard/dossiers')
+  revalidatePath('/dashboard/dashboard')
 
   return NextResponse.json(result)
 }

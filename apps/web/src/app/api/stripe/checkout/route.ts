@@ -244,7 +244,7 @@ async function handleCheckout(request: Request): Promise<Response> {
     customer: customerId,
     line_items: lineItems,
     mode: 'subscription',
-    success_url: `${origin}/app/account/billing?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${origin}/dashboard/account/billing?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/pricing`,
     automatic_tax: { enabled: true },
     metadata,

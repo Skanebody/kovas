@@ -78,7 +78,7 @@ export function ArchiveFilters({ clients }: ArchiveFiltersProps) {
       }
       next.delete('page') // reset pagination dès qu'un filtre change
       startTransition(() => {
-        router.replace(`/app/archive?${next.toString()}`)
+        router.replace(`/dashboard/archive?${next.toString()}`)
       })
     },
     [router, searchParams],

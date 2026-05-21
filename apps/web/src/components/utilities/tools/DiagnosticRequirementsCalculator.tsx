@@ -286,8 +286,8 @@ export function DiagnosticRequirementsCalculator() {
                 <Link
                   href={
                     suggestedMissions
-                      ? `/app/dossiers/new?diags=${encodeURIComponent(suggestedMissions)}`
-                      : '/app/dossiers/new'
+                      ? `/dashboard/dossiers/new?diags=${encodeURIComponent(suggestedMissions)}`
+                      : '/dashboard/dossiers/new'
                   }
                 >
                   Créer un dossier avec ces diags

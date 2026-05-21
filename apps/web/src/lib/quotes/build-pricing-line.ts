@@ -3,7 +3,7 @@
  * tarifaire (`user_pricing_config` + `user_pricing_packs`).
  *
  * Ces helpers sont utilisés par :
- *   - Le wizard `/app/devis/nouveau` (dropdown intelligent)
+ *   - Le wizard `/dashboard/devis/nouveau` (dropdown intelligent)
  *   - L'API de pré-remplissage (auto-quotes converti en quote final)
  *
  * Conventions :

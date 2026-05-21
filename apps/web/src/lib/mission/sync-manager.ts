@@ -25,7 +25,7 @@ import {
   createCaptureVoiceNoteAction,
   createTextNoteAction,
   uploadCapturePhotoAction,
-} from '@/app/app/dossiers/[id]/mission/actions'
+} from '@/app/dashboard/dossiers/[id]/mission/actions'
 import { createClient } from '@/lib/supabase/client'
 import {
   getPendingPhotos,

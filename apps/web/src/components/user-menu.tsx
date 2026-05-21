@@ -69,7 +69,7 @@ export function UserMenu({ displayName, email, onLogout }: UserMenuProps) {
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/app/account" className="cursor-pointer">
+          <Link href="/dashboard/account" className="cursor-pointer">
             <Settings className="size-4" /> Mon compte
           </Link>
         </DropdownMenuItem>

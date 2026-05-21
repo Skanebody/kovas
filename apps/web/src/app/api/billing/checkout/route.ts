@@ -63,8 +63,8 @@ export async function POST(request: Request) {
     customer: customerId,
     line_items: [{ price: priceId, quantity: 1 }],
     mode: 'subscription',
-    success_url: `${origin}/app/account?success=1`,
-    cancel_url: `${origin}/app/account?canceled=1`,
+    success_url: `${origin}/dashboard/account?success=1`,
+    cancel_url: `${origin}/dashboard/account?canceled=1`,
     automatic_tax: { enabled: true },
     metadata: { organization_id: orgId, tier: tier.id, cycle },
     subscription_data: {

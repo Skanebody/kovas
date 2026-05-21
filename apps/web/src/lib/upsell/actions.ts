@@ -142,8 +142,8 @@ export async function startTrialAction(target: string, trigger?: string): Promis
 
   await markAsConverted(supabase, user.id, target)
 
-  revalidatePath('/app/account')
-  revalidatePath('/app/dashboard')
+  revalidatePath('/dashboard/account')
+  revalidatePath('/dashboard/dashboard')
   return { success: true }
 }
 

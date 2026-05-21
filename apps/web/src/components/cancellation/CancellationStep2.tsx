@@ -76,7 +76,7 @@ export function CancellationStep2({
           setPendingKind(null)
           return
         }
-        router.push(data.redirect ?? '/app/account')
+        router.push(data.redirect ?? '/dashboard/account')
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Erreur réseau')
         setPendingKind(null)
@@ -230,7 +230,7 @@ export function CancellationStep2({
           Aucune de ces options ne vous convient ?
         </p>
         <Button asChild variant="ghost" size="sm" className="text-ink-mute">
-          <a href="/app/account/cancellation?step=3">
+          <a href="/dashboard/account/cancellation?step=3">
             Non merci, je résilie <ArrowRight className="size-4" />
           </a>
         </Button>

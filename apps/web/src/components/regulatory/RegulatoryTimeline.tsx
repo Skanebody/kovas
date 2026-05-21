@@ -66,7 +66,7 @@ export function RegulatoryTimeline({
         return (
           <li key={item.id}>
             <Link
-              href={`/app/veille/${item.id}`}
+              href={`/dashboard/veille/${item.id}`}
               className="block focus:outline-none focus-visible:ring-4 focus-visible:ring-navy/15 rounded-lg"
             >
               <Card

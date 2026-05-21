@@ -19,7 +19,7 @@ export function SurfaceCalculatorShortcut() {
       className="fixed bottom-24 right-4 z-20 shadow-lg md:bottom-8"
       aria-label="Ouvrir la calculatrice de surface"
     >
-      <Link href="/app/outils/calculatrice-surface" target="_blank" rel="noopener noreferrer">
+      <Link href="/dashboard/outils/calculatrice-surface" target="_blank" rel="noopener noreferrer">
         <Ruler className="size-5" />
       </Link>
     </Button>

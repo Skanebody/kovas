@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const redirectUrl = new URL('/app/dashboard', request.nextUrl.origin)
+  const redirectUrl = new URL('/dashboard/dashboard', request.nextUrl.origin)
   let response = NextResponse.redirect(redirectUrl)
 
   const supabase = createServerClient<Database>(

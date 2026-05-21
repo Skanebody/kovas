@@ -1,7 +1,7 @@
 /**
  * KOVAS — Preview compact du dossier de défense.
  *
- * À intégrer dans la page dossier principale (`/app/dossiers/[id]`) ou
+ * À intégrer dans la page dossier principale (`/dashboard/dossiers/[id]`) ou
  * partout où on veut un aperçu rapide de l'état du défense dossier
  * (existence, statut PDF, dernier horodatage).
  *
@@ -81,7 +81,7 @@ export function DefenseDossierPreview({ data }: { data: DefenseDossierPreviewDat
 
       <div className="flex items-center justify-end pt-2 border-t border-rule">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={`/app/dossiers/${data.dossierId}/defense`}>
+          <Link href={`/dashboard/dossiers/${data.dossierId}/defense`}>
             Ouvrir le dossier <ArrowRight className="size-4" />
           </Link>
         </Button>

@@ -4,7 +4,7 @@
  * Démarre formellement le workflow de résiliation (INSERT row cancellations).
  *
  * En pratique cette route est rarement appelée directement : la page server
- * `/app/account/cancellation` crée le draft à l'arrivée step=1 via
+ * `/dashboard/account/cancellation` crée le draft à l'arrivée step=1 via
  * `getOrCreateCancellation`. La route ici sert pour des intégrations futures
  * (mobile / API publique).
  *

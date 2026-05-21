@@ -97,7 +97,7 @@ export function CancellationStep3({ cancellationId }: Step3Props) {
           setError(data.error ?? `Erreur (${res.status})`)
           return
         }
-        router.push('/app/account/cancellation?step=4')
+        router.push('/dashboard/account/cancellation?step=4')
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Erreur réseau')
       }
@@ -189,7 +189,7 @@ export function CancellationStep3({ cancellationId }: Step3Props) {
 
       <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-rule">
         <Button asChild variant="ghost" size="lg" className="flex-1 text-ink-mute">
-          <a href="/app/account">Annuler et garder mon abonnement</a>
+          <a href="/dashboard/account">Annuler et garder mon abonnement</a>
         </Button>
         <Button
           type="button"

@@ -8,6 +8,8 @@ import {
   Briefcase,
   Building2,
   ChartLine,
+  IdCard,
+  Inbox,
   MessageSquare,
   Radar,
   Receipt,
@@ -23,6 +25,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { DiscoverSidebarButton } from '@/components/upsell/DiscoverSidebarButton'
+import type { TrackAccess } from '@/lib/access/track-access'
 import {
   hasFeatureAccess,
   type UserAccess,
@@ -49,25 +52,25 @@ type MoreSection = {
  * L1 (2026-06-05) : tagged avec requiredTier / requiredAddons. Filtré en
  * runtime selon UserAccess. Section "Découvrir" ajoutée en bas.
  */
-const SECTIONS: readonly MoreSection[] = [
+const LOGICIEL_SECTIONS: readonly MoreSection[] = [
   {
     title: 'Workflow',
     items: [
-      { href: '/app/clients', label: 'Clients', icon: Users },
-      { href: '/app/properties', label: 'Biens', icon: Building2 },
-      { href: '/app/gain', label: 'Performance', icon: ChartLine },
-      { href: '/app/archive', label: 'Mes fichiers', icon: Archive },
-      { href: '/app/outils', label: 'Outils', icon: Wrench },
+      { href: '/dashboard/clients', label: 'Clients', icon: Users },
+      { href: '/dashboard/properties', label: 'Biens', icon: Building2 },
+      { href: '/dashboard/gain', label: 'Performance', icon: ChartLine },
+      { href: '/dashboard/archive', label: 'Mes fichiers', icon: Archive },
+      { href: '/dashboard/outils', label: 'Outils', icon: Wrench },
     ],
   },
   {
     title: 'Intelligence',
     items: [
-      { href: '/app/cockpit-ademe', label: 'Cockpit ADEME', icon: Radar, requiredTier: 'pro' },
-      { href: '/app/analytics', label: 'Analytics', icon: TrendingUp, requiredTier: 'pro' },
-      { href: '/app/veille', label: 'Veille', icon: Bell, requiredAddons: ['regulatory_watch'] },
+      { href: '/dashboard/cockpit-ademe', label: 'Cockpit ADEME', icon: Radar, requiredTier: 'pro' },
+      { href: '/dashboard/analytics', label: 'Analytics', icon: TrendingUp, requiredTier: 'pro' },
+      { href: '/dashboard/veille', label: 'Veille', icon: Bell, requiredAddons: ['regulatory_watch'] },
       {
-        href: '/app/communaute',
+        href: '/dashboard/communaute',
         label: 'Communauté',
         icon: MessageSquare,
         requiredAddons: ['community_pro'],
@@ -77,24 +80,55 @@ const SECTIONS: readonly MoreSection[] = [
   {
     title: 'Facturation',
     items: [
-      { href: '/app/devis', label: 'Devis', icon: ScrollText },
-      { href: '/app/factures', label: 'Factures', icon: Receipt },
-      { href: '/app/relances', label: 'Relances', icon: Send },
+      { href: '/dashboard/devis', label: 'Devis', icon: ScrollText },
+      { href: '/dashboard/factures', label: 'Factures', icon: Receipt },
+      { href: '/dashboard/relances', label: 'Relances', icon: Send },
     ],
   },
   {
     title: 'Automatisation',
     items: [
-      { href: '/app/prescripteurs', label: 'Prescripteurs', icon: Briefcase, requiredTier: 'pro' },
+      { href: '/dashboard/prescripteurs', label: 'Prescripteurs', icon: Briefcase, requiredTier: 'pro' },
     ],
   },
 ] as const
+
+/**
+ * Sections KOVAS Annuaire (B2C lead-gen) — affichées si l'organisation a
+ * un track annuaire-only ou dual.
+ */
+const ANNUAIRE_SECTIONS: readonly MoreSection[] = [
+  {
+    title: 'KOVAS Annuaire',
+    items: [
+      { href: '/dashboard/annuaire/profile', label: 'Profil annuaire', icon: IdCard },
+      { href: '/dashboard/annuaire/leads', label: 'Leads reçus', icon: Inbox },
+      { href: '/dashboard/annuaire/stats', label: 'Stats fiche', icon: TrendingUp },
+    ],
+  },
+] as const
+
+/** Sélectionne les sections du bottom sheet selon le track dual. */
+function getSectionsForTrack(track: TrackAccess): readonly MoreSection[] {
+  switch (track) {
+    case 'annuaire-only':
+      return ANNUAIRE_SECTIONS
+    case 'logiciel-only':
+      return LOGICIEL_SECTIONS
+    case 'dual':
+      return [...LOGICIEL_SECTIONS, ...ANNUAIRE_SECTIONS]
+    case 'free':
+    default:
+      return []
+  }
+}
 
 interface MobileMoreSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   access: UserAccess
   suggestions: readonly PendingUpsellSuggestion[]
+  track: TrackAccess
 }
 
 function isActive(pathname: string | null, href: string): boolean {
@@ -111,8 +145,10 @@ export function MobileMoreSheet({
   onOpenChange,
   access,
   suggestions,
+  track,
 }: MobileMoreSheetProps) {
   const pathname = usePathname()
+  const sections = getSectionsForTrack(track)
 
   // Auto-close à chaque navigation (le user clique sur un Link → on ferme).
   useEffect(() => {
@@ -169,9 +205,9 @@ export function MobileMoreSheet({
             mobile principale, regroupées par catégorie.
           </DialogPrimitive.Description>
 
-          {/* Body : sections scrollables */}
+          {/* Body : sections scrollables (filtrées par track dual) */}
           <div className="flex-1 overflow-y-auto px-6 pb-4">
-            {SECTIONS.map((section) => {
+            {sections.map((section) => {
               const visibleItems = section.items.filter((item) =>
                 hasFeatureAccess(access, item),
               )

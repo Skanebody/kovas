@@ -47,7 +47,7 @@ export function InvoiceListRow({ invoice }: InvoiceListRowProps) {
     <AppListTableRow key={invoice.id}>
       <AppListTableCell>
         <Link
-          href={`/app/factures/${invoice.id}`}
+          href={`/dashboard/factures/${invoice.id}`}
           className="font-mono text-[12px] text-ink hover:underline font-semibold"
         >
           {invoice.reference}

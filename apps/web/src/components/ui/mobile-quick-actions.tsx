@@ -24,35 +24,35 @@ export function MobileQuickActionsFab() {
 
   const items = [
     {
-      href: '/app/dossiers/new',
+      href: '/dashboard/dossiers/new',
       icon: FileText,
       label: 'Nouveau dossier',
       hint: 'Adresse + diagnostics + client',
       available: true,
     },
     {
-      href: '/app/clients/new',
+      href: '/dashboard/clients/new',
       icon: Users,
       label: 'Nouveau client',
       hint: 'Propriétaire, agence ou syndic',
       available: true,
     },
     {
-      href: '/app/properties/new',
+      href: '/dashboard/properties/new',
       icon: Building2,
       label: 'Nouveau bien',
       hint: 'Adresse + caractéristiques',
       available: true,
     },
     {
-      href: '/app/facturation',
+      href: '/dashboard/facturation',
       icon: Receipt,
       label: 'Nouveau devis',
       hint: 'Disponible V1.5',
       available: false,
     },
     {
-      href: '/app/dashboard',
+      href: '/dashboard/dashboard',
       icon: Mic,
       label: 'Démarrer une mission',
       hint: 'Reprendre la mission en cours',

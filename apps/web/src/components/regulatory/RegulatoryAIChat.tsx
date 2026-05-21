@@ -365,7 +365,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             {message.citations.map((c) => (
               <li key={c.document_id}>
                 <Link
-                  href={`/app/veille/${c.document_id}`}
+                  href={`/dashboard/veille/${c.document_id}`}
                   className="inline-flex items-center gap-1 rounded-pill border border-rule bg-paper hover:bg-sage-alt px-2.5 py-1 text-[11px] text-ink transition-colors"
                 >
                   <span className="font-mono uppercase tracking-[0.12em] text-[9px] text-ink-faint">

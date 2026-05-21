@@ -146,7 +146,7 @@ export async function POST(request: Request): Promise<NextResponse<AcceptRespons
         payload: { type: 'pause', pause_months: months },
         succeeded: true,
       })
-      return NextResponse.json({ ok: true, redirect: '/app/account?paused=1' })
+      return NextResponse.json({ ok: true, redirect: '/dashboard/account?paused=1' })
     }
 
     if (type === 'discount') {
@@ -169,7 +169,7 @@ export async function POST(request: Request): Promise<NextResponse<AcceptRespons
         },
         succeeded: true,
       })
-      return NextResponse.json({ ok: true, redirect: '/app/account?discount=1' })
+      return NextResponse.json({ ok: true, redirect: '/dashboard/account?discount=1' })
     }
 
     // type === 'downgrade'
@@ -203,7 +203,7 @@ export async function POST(request: Request): Promise<NextResponse<AcceptRespons
     })
     return NextResponse.json({
       ok: true,
-      redirect: `/app/account?downgraded=${targetPlan.id}`,
+      redirect: `/dashboard/account?downgraded=${targetPlan.id}`,
     })
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'internal error'

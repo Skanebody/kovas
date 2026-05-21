@@ -3,7 +3,8 @@ import { createServerClient } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
 
 /**
- * Rafraîchit la session Supabase à chaque requête + protège les routes /app/*.
+ * Rafraîchit la session Supabase à chaque requête + protège les routes /dashboard/*
+ * (et /app/* en rétrocompat avant redirect 301).
  * Appelé depuis src/middleware.ts.
  */
 export async function updateSession(request: NextRequest) {
@@ -38,8 +39,9 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Routes protégées
-  const isAppRoute = pathname.startsWith('/app')
+  // Routes protégées : /dashboard/* est le nouveau préfixe, /app/* reste protégé
+  // pour les requêtes qui n'auraient pas encore suivi le redirect 301.
+  const isAppRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/app')
   const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup')
 
   if (isAppRoute && !user) {
@@ -51,7 +53,7 @@ export async function updateSession(request: NextRequest) {
 
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/app/dashboard'
+    url.pathname = '/dashboard/dashboard'
     return NextResponse.redirect(url)
   }
 

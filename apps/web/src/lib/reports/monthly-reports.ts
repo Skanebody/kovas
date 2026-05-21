@@ -265,8 +265,8 @@ export async function computeAndSendMonthlyReport(
     timeSavedMinutes: report.time_saved_minutes,
     valueGeneratedCents: report.value_generated_cents,
     topDiagnosticType: report.top_diagnostic_type,
-    dashboardUrl: `${baseUrl}/app/gain`,
-    unsubscribeUrl: `${baseUrl}/app/account`,
+    dashboardUrl: `${baseUrl}/dashboard/gain`,
+    unsubscribeUrl: `${baseUrl}/dashboard/account`,
   })
 
   // 8. Send via Resend

@@ -270,11 +270,11 @@ function buildTargetHref(seq: FollowUpSequence): string | null {
   switch (seq.targetEntityType) {
     case 'quote':
     case 'auto_quote':
-      return `/app/devis/${seq.targetEntityId}`
+      return `/dashboard/devis/${seq.targetEntityId}`
     case 'invoice':
-      return `/app/factures/${seq.targetEntityId}`
+      return `/dashboard/factures/${seq.targetEntityId}`
     case 'mission':
-      return `/app/dossiers/${seq.targetEntityId}`
+      return `/dashboard/dossiers/${seq.targetEntityId}`
     default:
       return null
   }

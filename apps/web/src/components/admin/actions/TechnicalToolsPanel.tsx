@@ -19,7 +19,7 @@ export function TechnicalToolsPanel() {
 
       <ActionRunner
         label="Purger le cache Next.js"
-        description="revalidatePath sur /admin, /, /app/dashboard"
+        description="revalidatePath sur /admin, /, /dashboard/dashboard"
         endpoint="/api/admin/tools/cache-purge"
       />
       <ActionRunner

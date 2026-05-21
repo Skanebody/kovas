@@ -4,6 +4,7 @@ import { MobileMoreSheet } from '@/components/mobile-more-sheet'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { DiscoverSidebarButton } from '@/components/upsell/DiscoverSidebarButton'
 import { cn } from '@/lib/utils'
+import type { TrackAccess } from '@/lib/access/track-access'
 import type { UserAccess } from '@/lib/upsell/access-control'
 import { hasFeatureAccess } from '@/lib/upsell/access-control'
 import type { PendingUpsellSuggestion } from '@/lib/upsell/load-access'
@@ -17,6 +18,8 @@ import {
   ChartLine,
   FileText,
   Home,
+  Inbox,
+  IdCard,
   Menu,
   MessageSquare,
   Radar,
@@ -25,6 +28,7 @@ import {
   Search,
   Send,
   Settings,
+  Sparkles,
   TrendingUp,
   Users,
   Wrench,
@@ -52,36 +56,98 @@ type NavItem = {
  * "Découvrir" sticky en bas.
  */
 const NAV_MAIN: readonly NavItem[] = [
-  { href: '/app/dashboard', label: "Aujourd'hui", icon: Home },
-  { href: '/app/dossiers', label: 'Dossiers', icon: FileText },
-  { href: '/app/calendar', label: 'Planning', icon: CalendarDays },
-  { href: '/app/clients', label: 'Clients', icon: Users },
-  { href: '/app/properties', label: 'Biens', icon: Building2 },
-  { href: '/app/devis', label: 'Devis', icon: ScrollText },
-  { href: '/app/factures', label: 'Factures', icon: Receipt },
-  { href: '/app/relances', label: 'Relances', icon: Send },
-  { href: '/app/gain', label: 'Performance', icon: ChartLine },
-  { href: '/app/cockpit-ademe', label: 'Cockpit ADEME', icon: Radar, requiredTier: 'pro' },
-  { href: '/app/analytics', label: 'Analytics', icon: TrendingUp, requiredTier: 'pro' },
-  { href: '/app/veille', label: 'Veille', icon: Bell, requiredAddons: ['regulatory_watch'] },
+  { href: '/dashboard/dashboard', label: "Aujourd'hui", icon: Home },
+  { href: '/dashboard/dossiers', label: 'Dossiers', icon: FileText },
+  { href: '/dashboard/calendar', label: 'Planning', icon: CalendarDays },
+  { href: '/dashboard/clients', label: 'Clients', icon: Users },
+  { href: '/dashboard/properties', label: 'Biens', icon: Building2 },
+  { href: '/dashboard/devis', label: 'Devis', icon: ScrollText },
+  { href: '/dashboard/factures', label: 'Factures', icon: Receipt },
+  { href: '/dashboard/relances', label: 'Relances', icon: Send },
+  { href: '/dashboard/gain', label: 'Performance', icon: ChartLine },
+  { href: '/dashboard/cockpit-ademe', label: 'Cockpit ADEME', icon: Radar, requiredTier: 'pro' },
+  { href: '/dashboard/analytics', label: 'Analytics', icon: TrendingUp, requiredTier: 'pro' },
+  { href: '/dashboard/veille', label: 'Veille', icon: Bell, requiredAddons: ['regulatory_watch'] },
   {
-    href: '/app/communaute',
+    href: '/dashboard/communaute',
     label: 'Communauté',
     icon: MessageSquare,
     requiredAddons: ['community_pro'],
   },
-  { href: '/app/prescripteurs', label: 'Prescripteurs', icon: Briefcase, requiredTier: 'pro' },
-  { href: '/app/archive', label: 'Mes fichiers', icon: Archive },
-  { href: '/app/outils', label: 'Outils', icon: Wrench },
+  { href: '/dashboard/prescripteurs', label: 'Prescripteurs', icon: Briefcase, requiredTier: 'pro' },
+  { href: '/dashboard/archive', label: 'Mes fichiers', icon: Archive },
+  { href: '/dashboard/outils', label: 'Outils', icon: Wrench },
+] as const
+
+/**
+ * Items spécifiques au track Annuaire (B2C lead-gen) — affichés quand
+ * l'organisation a une souscription annuaire active (annuaire-only ou dual).
+ *
+ * Phase C 2026-05-21 : profil annuaire + leads reçus + analytics fiche.
+ */
+const NAV_ANNUAIRE: readonly NavItem[] = [
+  { href: '/dashboard/annuaire/profile', label: 'Profil annuaire', icon: IdCard },
+  { href: '/dashboard/annuaire/leads', label: 'Leads reçus', icon: Inbox },
+  { href: '/dashboard/annuaire/stats', label: 'Stats fiche', icon: TrendingUp },
 ] as const
 
 const NAV_BOTTOM: readonly NavItem[] = [
-  { href: '/app/account', label: 'Compte', icon: Settings },
+  { href: '/dashboard/account', label: 'Compte', icon: Settings },
 ] as const
+
+interface UpsellCTA {
+  href: string
+  label: string
+}
+
+/**
+ * CTA cross-sell sticky en bas de sidebar selon le track de l'user :
+ *  - annuaire-only → propose KOVAS 360 (logiciel)
+ *  - logiciel-only → propose KOVAS Annuaire (B2C lead-gen)
+ *  - free          → propose le Bundle (parcours essai)
+ *  - dual          → pas de CTA (déjà tout souscrit)
+ */
+function getUpsellCTA(track: TrackAccess): UpsellCTA | null {
+  switch (track) {
+    case 'annuaire-only':
+      return { href: '/dashboard/upgrade/logiciel', label: 'Découvrir KOVAS 360' }
+    case 'logiciel-only':
+      return { href: '/dashboard/upgrade/annuaire', label: 'Découvrir KOVAS Annuaire' }
+    case 'free':
+      return { href: '/dashboard/upgrade/bundle', label: 'Démarrer un essai' }
+    case 'dual':
+    default:
+      return null
+  }
+}
+
+/**
+ * Compose la liste d'items principaux selon le track dual :
+ *  - free          : Aujourd'hui uniquement (la sidebar reste minimale, CTA push tout en bas)
+ *  - annuaire-only : Aujourd'hui + items annuaire (pas de dossiers/devis/factures)
+ *  - logiciel-only : items logiciel V1 standards (NAV_MAIN inchangé)
+ *  - dual          : mix complet = logiciel + items annuaire spécifiques
+ */
+function getMainNavForTrack(track: TrackAccess): readonly NavItem[] {
+  switch (track) {
+    case 'free':
+      return [{ href: '/dashboard/dashboard', label: "Aujourd'hui", icon: Home }]
+    case 'annuaire-only':
+      return [
+        { href: '/dashboard/dashboard', label: "Aujourd'hui", icon: Home },
+        ...NAV_ANNUAIRE,
+      ]
+    case 'dual':
+      return [...NAV_MAIN, ...NAV_ANNUAIRE]
+    case 'logiciel-only':
+    default:
+      return NAV_MAIN
+  }
+}
 
 function isActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false
-  if (href === '/app/dashboard') return pathname === href
+  if (href === '/dashboard/dashboard') return pathname === href
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
@@ -90,6 +156,8 @@ export interface AppSidebarProps {
   access: UserAccess
   /** Suggestions pending pour le badge dot chartreuse. */
   suggestions: readonly PendingUpsellSuggestion[]
+  /** Track dual (annuaire-only / logiciel-only / dual / free). */
+  track: TrackAccess
 }
 
 /**
@@ -102,10 +170,15 @@ export interface AppSidebarProps {
  *
  * Spec : docs/design/KOVAS_UIUX_v5_Final.md §3 + Navigation.
  */
-export function AppSidebar({ access, suggestions }: AppSidebarProps) {
+export function AppSidebar({ access, suggestions, track }: AppSidebarProps) {
   const pathname = usePathname()
 
-  const accessibleItems = NAV_MAIN.filter((item) => hasFeatureAccess(access, item))
+  // Phase C — Dual track : items filtrés par track puis par features
+  // (un user annuaire-only ne voit pas Dossiers, Devis, etc. même s'il a
+  // un legacy `decouverte` plan vu que son track est `annuaire-only`).
+  const trackItems = getMainNavForTrack(track)
+  const accessibleItems = trackItems.filter((item) => hasFeatureAccess(access, item))
+  const upsellCta = getUpsellCTA(track)
 
   return (
     <aside
@@ -114,7 +187,7 @@ export function AppSidebar({ access, suggestions }: AppSidebarProps) {
       aria-label="Navigation principale"
     >
       {/* Logo K monogramme 32×32 */}
-      <Link href="/app/dashboard" className="mt-4 mb-6" aria-label="KOVAS — Tableau de bord">
+      <Link href="/dashboard/dashboard" className="mt-4 mb-6" aria-label="KOVAS — Tableau de bord">
         <div
           aria-hidden
           className="flex size-8 items-center justify-center rounded-md bg-white text-[#0F1419] font-bold text-sm"
@@ -133,9 +206,20 @@ export function AppSidebar({ access, suggestions }: AppSidebarProps) {
         ))}
       </nav>
 
-      {/* Footer : Découvrir + search + compte + theme */}
+      {/* Footer : Découvrir + cross-sell dual track + search + compte + theme */}
       <div className="flex flex-col gap-1 px-2 pb-4 mt-auto">
         <DiscoverSidebarButton access={access} suggestions={suggestions} />
+        {upsellCta && (
+          <Link
+            href={upsellCta.href}
+            title={upsellCta.label}
+            aria-label={upsellCta.label}
+            className="relative flex size-12 items-center justify-center rounded-md text-white/65 hover:text-white transition-colors"
+            style={{ backgroundColor: 'rgba(212, 245, 66, 0.08)' }}
+          >
+            <Sparkles className="size-5" strokeWidth={1.75} style={{ color: '#D4F542' }} />
+          </Link>
+        )}
         <button
           type="button"
           className="flex size-12 items-center justify-center rounded-md text-white/65 hover:bg-white/[0.06] hover:text-white transition-colors"
@@ -187,6 +271,7 @@ function SidebarIconButton({ item, active }: { item: NavItem; active: boolean })
 export interface AppMobileNavProps {
   access: UserAccess
   suggestions: readonly PendingUpsellSuggestion[]
+  track: TrackAccess
 }
 
 /**
@@ -198,16 +283,32 @@ export interface AppMobileNavProps {
  * L1 (2026-06-05) : passe l'access aux composants enfants pour filtrage +
  * passe les suggestions pour le badge dot dans "Plus".
  */
-export function AppMobileNav({ access, suggestions }: AppMobileNavProps) {
+export function AppMobileNav({ access, suggestions, track }: AppMobileNavProps) {
   const pathname = usePathname()
   const [moreOpen, setMoreOpen] = useState(false)
 
-  const tabs: ReadonlyArray<NavItem> = [
-    { href: '/app/dashboard', label: 'Auj.', icon: Home },
-    { href: '/app/dossiers', label: 'Dossiers', icon: FileText },
-    { href: '/app/calendar', label: 'Plan.', icon: CalendarDays },
-    { href: '/app/account', label: 'Compte', icon: Settings },
-  ]
+  // Phase C — Dual track : 4 tabs adaptés selon track
+  const tabs: ReadonlyArray<NavItem> =
+    track === 'annuaire-only'
+      ? [
+          { href: '/dashboard/dashboard', label: 'Auj.', icon: Home },
+          { href: '/dashboard/annuaire/leads', label: 'Leads', icon: Inbox },
+          { href: '/dashboard/annuaire/profile', label: 'Profil', icon: IdCard },
+          { href: '/dashboard/account', label: 'Compte', icon: Settings },
+        ]
+      : track === 'free'
+        ? [
+            { href: '/dashboard/dashboard', label: 'Auj.', icon: Home },
+            { href: '/dashboard/upgrade/bundle', label: 'Découvrir', icon: Sparkles },
+            { href: '/dashboard/account', label: 'Compte', icon: Settings },
+          ]
+        : [
+            // logiciel-only et dual partagent les mêmes tabs primaires
+            { href: '/dashboard/dashboard', label: 'Auj.', icon: Home },
+            { href: '/dashboard/dossiers', label: 'Dossiers', icon: FileText },
+            { href: '/dashboard/calendar', label: 'Plan.', icon: CalendarDays },
+            { href: '/dashboard/account', label: 'Compte', icon: Settings },
+          ]
 
   const hasSuggestion = suggestions.length > 0
 
@@ -268,6 +369,7 @@ export function AppMobileNav({ access, suggestions }: AppMobileNavProps) {
         onOpenChange={setMoreOpen}
         access={access}
         suggestions={suggestions}
+        track={track}
       />
     </>
   )

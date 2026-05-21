@@ -27,6 +27,14 @@ const nextConfig: NextConfig = {
     ],
   },
   poweredByHeader: false,
+  async redirects() {
+    return [
+      // Redirection 301 permanente : ancien préfixe authentifié /app/* → /dashboard/*
+      // (rename Phase C pour clarifier que l'espace authentifié est le tableau de bord
+      // dual track Annuaire + Logiciel).
+      { source: '/app/:path*', destination: '/dashboard/:path*', permanent: true },
+    ]
+  },
 }
 
 // En dev, bypass withSerwist : il injecte une config webpack qui déclenche un

@@ -99,10 +99,10 @@ export function CancellationStep1({ modules, planLabel, effectiveEndDate }: Step
 
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Button asChild variant="default" size="lg" className="flex-1">
-            <Link href="/app/account">Garder mon abonnement</Link>
+            <Link href="/dashboard/account">Garder mon abonnement</Link>
           </Button>
           <Button asChild variant="ghost" size="lg" className="flex-1 text-ink-mute">
-            <Link href="/app/account/cancellation?step=2">
+            <Link href="/dashboard/account/cancellation?step=2">
               Continuer la résiliation <ArrowRight className="size-4" />
             </Link>
           </Button>

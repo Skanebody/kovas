@@ -28,7 +28,7 @@ export function QuoteListRow({ row }: QuoteListRowProps) {
     <AppListTableRow>
       <AppListTableCell>
         <Link
-          href={`/app/devis/${row.id}`}
+          href={`/dashboard/devis/${row.id}`}
           className="font-mono text-[12px] font-semibold text-ink hover:underline"
         >
           {row.reference}

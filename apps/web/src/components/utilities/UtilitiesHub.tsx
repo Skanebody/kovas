@@ -59,7 +59,7 @@ export function UtilitiesHub() {
       {UTILITIES.map((u) => {
         const Icon = u.icon
         return (
-          <Link key={u.slug} href={`/app/outils/${u.slug}`} className="group">
+          <Link key={u.slug} href={`/dashboard/outils/${u.slug}`} className="group">
             <Card
               variant="opaque"
               padding="default"

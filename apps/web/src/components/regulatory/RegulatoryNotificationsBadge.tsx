@@ -51,7 +51,7 @@ export function RegulatoryNotificationsBadge() {
 
   return (
     <Link
-      href="/app/veille"
+      href="/dashboard/veille"
       aria-label={
         count > 0
           ? `${count} nouvelle${count > 1 ? 's' : ''} évolution${count > 1 ? 's' : ''} réglementaire${count > 1 ? 's' : ''}`

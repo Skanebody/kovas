@@ -107,7 +107,7 @@ export function RoomRow({ dossierId, room, className }: RoomRowProps) {
         {isSuggested && (
           <Button asChild variant="accent" size="sm">
             <Link
-              href={`/app/dossiers/${encodeURIComponent(dossierId)}/mission?room=${encodeURIComponent(room.id)}`}
+              href={`/dashboard/dossiers/${encodeURIComponent(dossierId)}/mission?room=${encodeURIComponent(room.id)}`}
               aria-label={`Capturer la pièce ${room.name}`}
             >
               <Camera className="size-3.5" />

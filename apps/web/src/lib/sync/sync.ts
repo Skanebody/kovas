@@ -150,7 +150,7 @@ async function callApi(mut: MutationRow): Promise<Response> {
 
 /**
  * Hook listeners online/offline + Service Worker sync.
- * À appeler une fois côté layout client (`/app/layout.tsx`).
+ * À appeler une fois côté layout client (`/dashboard/layout.tsx`).
  */
 export function setupAutoSync(organizationId: string): () => void {
   if (typeof window === 'undefined') return () => {}

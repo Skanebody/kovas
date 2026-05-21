@@ -35,7 +35,7 @@ export async function UsageWidget() {
   if (!sub || sub.status !== 'active') {
     return (
       <Link
-        href="/app/account"
+        href="/dashboard/account"
         className="hidden md:inline-flex items-center gap-1.5 text-xs text-ink-mute hover:text-ink transition-colors px-2 py-1 rounded-md hover:bg-cream-deep"
       >
         <CreditCard className="size-3.5" />
@@ -51,7 +51,7 @@ export async function UsageWidget() {
 
   return (
     <Link
-      href="/app/account"
+      href="/dashboard/account"
       className="hidden md:inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md hover:bg-cream-deep transition-colors"
     >
       <CreditCard className="size-3.5 text-ink-mute" />

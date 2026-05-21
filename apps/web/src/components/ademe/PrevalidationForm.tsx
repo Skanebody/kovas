@@ -65,7 +65,7 @@ interface ApiResponse {
 
 /**
  * Valeurs initiales optionnelles pour pré-remplir le formulaire depuis un
- * dossier existant (cas d'usage : `/app/dossiers/[id]/prevalidation` qui
+ * dossier existant (cas d'usage : `/dashboard/dossiers/[id]/prevalidation` qui
  * charge les données déjà saisies sur le dossier).
  */
 export interface PrevalidationInitialValues {

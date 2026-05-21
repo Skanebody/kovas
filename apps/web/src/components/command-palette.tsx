@@ -1,6 +1,6 @@
 'use client'
 
-import { logoutAction } from '@/app/app/actions'
+import { logoutAction } from '@/app/dashboard/actions'
 import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -41,19 +41,19 @@ const NAV_ITEMS = [
   {
     id: 'dashboard',
     label: 'Tableau de bord',
-    href: '/app/dashboard',
+    href: '/dashboard/dashboard',
     icon: Home,
     shortcut: 'G D',
   },
-  { id: 'dossiers', label: 'Dossiers', href: '/app/dossiers', icon: FileText, shortcut: 'G O' },
-  { id: 'clients', label: 'Clients', href: '/app/clients', icon: Users, shortcut: 'G C' },
-  { id: 'properties', label: 'Biens', href: '/app/properties', icon: Building2, shortcut: 'G B' },
+  { id: 'dossiers', label: 'Dossiers', href: '/dashboard/dossiers', icon: FileText, shortcut: 'G O' },
+  { id: 'clients', label: 'Clients', href: '/dashboard/clients', icon: Users, shortcut: 'G C' },
+  { id: 'properties', label: 'Biens', href: '/dashboard/properties', icon: Building2, shortcut: 'G B' },
 ] as const
 
 const QUICK_ACTIONS = [
-  { id: 'new-dossier', label: 'Nouveau dossier', href: '/app/dossiers/new', icon: Plus },
-  { id: 'new-client', label: 'Nouveau client', href: '/app/clients/new', icon: Plus },
-  { id: 'new-property', label: 'Nouveau bien', href: '/app/properties/new', icon: Plus },
+  { id: 'new-dossier', label: 'Nouveau dossier', href: '/dashboard/dossiers/new', icon: Plus },
+  { id: 'new-client', label: 'Nouveau client', href: '/dashboard/clients/new', icon: Plus },
+  { id: 'new-property', label: 'Nouveau bien', href: '/dashboard/properties/new', icon: Plus },
 ] as const
 
 /**
@@ -238,7 +238,7 @@ export function CommandPalette() {
               {today.map((m) => (
                 <CommandRow
                   key={`today-${m.missionId}`}
-                  onSelect={() => go(`/app/dossiers/${m.dossierId}#mission-${m.missionId}`)}
+                  onSelect={() => go(`/dashboard/dossiers/${m.dossierId}#mission-${m.missionId}`)}
                   icon={<CalendarClock className="size-4" />}
                   label={`${m.time ? `${m.time} · ` : ''}${m.label}`}
                   subtitle={m.client ?? undefined}
@@ -260,7 +260,7 @@ export function CommandPalette() {
               onSelect={() => {
                 close()
                 // Quick add vocal V1.5 — placeholder qui scroll vers dashboard
-                router.push('/app/dashboard')
+                router.push('/dashboard/dashboard')
               }}
               icon={<Mic className="size-4" />}
               label="Saisie vocale (V1.5)"
@@ -285,10 +285,10 @@ export function CommandPalette() {
               {recent.map((r) => {
                 const href =
                   r.kind === 'dossier'
-                    ? `/app/dossiers/${r.id}`
+                    ? `/dashboard/dossiers/${r.id}`
                     : r.kind === 'client'
-                      ? `/app/clients/${r.id}`
-                      : `/app/properties/${r.id}`
+                      ? `/dashboard/clients/${r.id}`
+                      : `/dashboard/properties/${r.id}`
                 const icon =
                   r.kind === 'dossier' ? (
                     <FileText className="size-4" />
@@ -312,7 +312,7 @@ export function CommandPalette() {
 
           <CommandGroup heading="Aide & compte">
             <CommandRow
-              onSelect={() => go('/app/account')}
+              onSelect={() => go('/dashboard/account')}
               icon={<Settings className="size-4" />}
               label="Mon compte"
               shortcut="⌘ ,"

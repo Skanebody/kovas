@@ -16,8 +16,8 @@ interface Props {
  */
 export function DiagnosticRequirementsShortcut({ postalCode }: Props) {
   const href = postalCode
-    ? `/app/outils/diagnostics-obligatoires?postal=${encodeURIComponent(postalCode)}`
-    : '/app/outils/diagnostics-obligatoires'
+    ? `/dashboard/outils/diagnostics-obligatoires?postal=${encodeURIComponent(postalCode)}`
+    : '/dashboard/outils/diagnostics-obligatoires'
 
   return (
     <Button asChild variant="outline" size="sm">

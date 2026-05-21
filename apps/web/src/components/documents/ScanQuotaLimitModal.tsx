@@ -50,7 +50,7 @@ export function ScanQuotaLimitModal({ open, onOpenChange, quota }: ScanQuotaLimi
 
         <div className="flex flex-col gap-2">
           <Button asChild variant="accent" size="lg">
-            <Link href="/app/account#subscription">
+            <Link href="/dashboard/account#subscription">
               Passer au plan Standard
               <ArrowRight className="size-4" />
             </Link>

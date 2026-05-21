@@ -49,7 +49,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   if (dossier.notes) descriptionParts.push(`Notes : ${dossier.notes}`)
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kovas.fr'
-  const dossierUrl = `${baseUrl}/app/dossiers/${dossier.id}`
+  const dossierUrl = `${baseUrl}/dashboard/dossiers/${dossier.id}`
 
   const ics = buildIcs({
     uid: `kovas-${dossier.id}@kovas.fr`,

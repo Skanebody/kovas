@@ -2,7 +2,7 @@
  * KOVAS — Calendrier : types et constantes partagés entre vues.
  *
  * `CalendarEvent` est la forme normalisée passée à toutes les vues (jour,
- * semaine, mois, agenda). Le server component `/app/calendar/page.tsx` fait
+ * semaine, mois, agenda). Le server component `/dashboard/calendar/page.tsx` fait
  * le mapping depuis Supabase + dossiers + properties (lat/lon optionnels).
  */
 

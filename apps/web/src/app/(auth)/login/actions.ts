@@ -28,5 +28,5 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     return { error: error.message === 'Invalid login credentials' ? 'Email ou mot de passe incorrect' : error.message }
   }
 
-  redirect('/app/dashboard')
+  redirect('/dashboard/dashboard')
 }

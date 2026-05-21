@@ -27,7 +27,7 @@ export const getCurrentUser = cache(async () => {
   // redirect vers onboarding au lieu de throw — évite HTTP 500 sur toutes
   // les pages /app/* quand l'organisation n'est pas encore créée.
   if (!profile?.default_org_id) {
-    redirect('/app/onboarding')
+    redirect('/dashboard/onboarding')
   }
 
   return {

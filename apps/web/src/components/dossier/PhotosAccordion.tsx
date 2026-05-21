@@ -1,6 +1,6 @@
 'use client'
 
-import { PhotoGallery } from '@/app/app/dossiers/[id]/photo-gallery'
+import { PhotoGallery } from '@/app/dashboard/dossiers/[id]/photo-gallery'
 import { CollapsibleSection } from '@/components/ui/collapsible-section'
 import { cn } from '@/lib/utils'
 import { Camera } from 'lucide-react'

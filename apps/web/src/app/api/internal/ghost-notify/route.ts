@@ -92,7 +92,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kovas.fr'
-  const reactivationUrl = `${baseUrl}/app/compte/disponibilites`
+  const reactivationUrl = `${baseUrl}/dashboard/compte/disponibilites`
 
   const windowDays = status === 'warned' ? 30 : status === 'demoted' ? 60 : 90
 

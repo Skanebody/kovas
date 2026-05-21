@@ -97,7 +97,7 @@ export function LegacyGrandfatherBanner({
           </li>
         </ul>
         <Link
-          href="/app/account/billing/migration"
+          href="/dashboard/account/billing/migration"
           aria-label="Comparer mes options de migration grille V3"
           className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-[12px] text-[13px] font-semibold bg-chartreuse text-[#0F1419] hover:bg-chartreuse-deep transition-colors"
         >

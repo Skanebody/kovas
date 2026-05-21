@@ -64,7 +64,7 @@ function buildPageHref(baseQuery: string, page: number): string {
     params.set('page', String(page))
   }
   const q = params.toString()
-  return q ? `/app/archive?${q}` : '/app/archive'
+  return q ? `/dashboard/archive?${q}` : '/dashboard/archive'
 }
 
 export function ArchiveTable({
@@ -144,7 +144,7 @@ export function ArchiveTable({
                 <AppListTableCell className="hidden md:table-cell">
                   {file.dossier_id && file.dossier_reference ? (
                     <Link
-                      href={`/app/dossiers/${file.dossier_id}`}
+                      href={`/dashboard/dossiers/${file.dossier_id}`}
                       className="font-mono text-[11px] font-semibold text-ink hover:underline"
                     >
                       {file.dossier_reference}
@@ -171,7 +171,7 @@ export function ArchiveTable({
                     ) : null}
                     {file.dossier_id ? (
                       <Button asChild variant="ghost" size="sm" aria-label="Ouvrir le dossier">
-                        <Link href={`/app/dossiers/${file.dossier_id}`}>
+                        <Link href={`/dashboard/dossiers/${file.dossier_id}`}>
                           <ExternalLink className="size-4" />
                           <span className="sr-only sm:not-sr-only">Ouvrir</span>
                         </Link>

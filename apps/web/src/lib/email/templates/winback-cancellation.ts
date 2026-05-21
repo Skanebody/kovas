@@ -43,7 +43,7 @@ function escapeHtml(input: string): string {
 
 export function buildWinbackEmail(vars: WinbackEmailVars): WinbackEmailPayload {
   const firstNameClean = (vars.firstName || '').trim().split(' ')[0] || 'bonjour'
-  const reactivateUrl = `${vars.appUrl.replace(/\/+$/, '')}/app/account?reactivate=${encodeURIComponent(vars.winbackCode)}`
+  const reactivateUrl = `${vars.appUrl.replace(/\/+$/, '')}/dashboard/account?reactivate=${encodeURIComponent(vars.winbackCode)}`
 
   const subject = `On regrette de vous voir partir, ${firstNameClean}`
 

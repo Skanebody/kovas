@@ -278,7 +278,7 @@ Nous avons bien enregistré votre demande de résiliation de votre abonnement KO
 
 Votre abonnement restera actif jusqu'au ${dateFr}. Aucune nouvelle facturation ne sera effectuée après cette date.
 
-Après cette échéance, votre compte basculera 90 jours en mode lecture et export complet (PDF, Word, CSV, JSON, ZIP Liciel). Vous pourrez exporter tous vos dossiers à votre rythme depuis votre compte : https://kovas.fr/app/account
+Après cette échéance, votre compte basculera 90 jours en mode lecture et export complet (PDF, Word, CSV, JSON, ZIP Liciel). Vous pourrez exporter tous vos dossiers à votre rythme depuis votre compte : https://kovas.fr/dashboard/account
 
 Au-delà des 90 jours, vos données opérationnelles seront purgées. Vos factures restent conservées 10 ans (obligation légale comptable).
 

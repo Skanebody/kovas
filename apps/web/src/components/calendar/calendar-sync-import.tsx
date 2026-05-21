@@ -224,7 +224,7 @@ function EventRow({ event, onIgnore }: { event: ParsedIcsEvent; onIgnore: () => 
   if (event.location) prefillParams.set('location', event.location)
   prefillParams.set('scheduled_at', event.dtstart.toISOString())
   if (event.description) prefillParams.set('notes', event.description)
-  const prefillHref = `/app/dossiers/new?${prefillParams.toString()}`
+  const prefillHref = `/dashboard/dossiers/new?${prefillParams.toString()}`
 
   return (
     <li className="rounded-xl border border-rule bg-paper p-3 space-y-2">

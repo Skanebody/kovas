@@ -47,7 +47,7 @@ export function CommunityCaseCard({ row, className }: Props) {
       )}
     >
       <Link
-        href={`/app/communaute/${row.id}`}
+        href={`/dashboard/communaute/${row.id}`}
         className="absolute inset-0 z-0"
         aria-label={`Ouvrir le cas : ${row.title}`}
       />

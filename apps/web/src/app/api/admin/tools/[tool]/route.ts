@@ -84,7 +84,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         case 'cache-purge': {
           revalidatePath('/admin')
           revalidatePath('/')
-          revalidatePath('/app/dashboard')
+          revalidatePath('/dashboard/dashboard')
           resultMessage = 'Cache Next.js purgé (3 paths)'
           break
         }

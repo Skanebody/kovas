@@ -36,7 +36,7 @@ export function EmptyPricingState({ className, message }: EmptyPricingStateProps
         {message ?? 'Configure tes tarifs pour afficher le prix indicatif.'}
       </p>
       <Link
-        href="/app/compte/tarifs"
+        href="/dashboard/compte/tarifs"
         className="text-[12px] font-semibold text-ink underline underline-offset-4 decoration-chartreuse-deep hover:decoration-2"
       >
         Configurer mes tarifs →

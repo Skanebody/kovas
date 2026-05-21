@@ -97,7 +97,7 @@ export function CancellationStep4({ effectiveEndDate, userEmail, calendlyUrl }: 
 
       <div className="pt-2">
         <Button asChild variant="ghost" size="sm">
-          <Link href="/app/dashboard">
+          <Link href="/dashboard/dashboard">
             <ArrowLeft className="size-4" /> Retour à l&apos;application
           </Link>
         </Button>

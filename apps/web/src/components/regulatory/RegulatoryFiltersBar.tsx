@@ -70,7 +70,7 @@ export function RegulatoryFiltersBar({ initial }: RegulatoryFiltersBarProps) {
       setParam(params, 'date_from', merged.dateFrom)
       setParam(params, 'date_to', merged.dateTo)
       startTransition(() => {
-        router.push(`/app/veille${params.toString() ? `?${params.toString()}` : ''}`)
+        router.push(`/dashboard/veille${params.toString() ? `?${params.toString()}` : ''}`)
       })
     },
     [initial, router, searchParams],

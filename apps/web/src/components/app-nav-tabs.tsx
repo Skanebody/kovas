@@ -13,15 +13,15 @@ type NavItem = {
 }
 
 const NAV: readonly NavItem[] = [
-  { href: '/app/dashboard', label: 'Tableau de bord', icon: Home },
-  { href: '/app/dossiers', label: 'Dossiers', icon: FileText },
-  { href: '/app/clients', label: 'Clients', icon: Users },
-  { href: '/app/properties', label: 'Biens', icon: Building2 },
+  { href: '/dashboard/dashboard', label: 'Tableau de bord', icon: Home },
+  { href: '/dashboard/dossiers', label: 'Dossiers', icon: FileText },
+  { href: '/dashboard/clients', label: 'Clients', icon: Users },
+  { href: '/dashboard/properties', label: 'Biens', icon: Building2 },
 ] as const
 
 function isActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false
-  if (href === '/app/dashboard') return pathname === href
+  if (href === '/dashboard/dashboard') return pathname === href
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 

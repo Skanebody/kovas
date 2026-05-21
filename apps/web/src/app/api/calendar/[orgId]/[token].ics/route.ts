@@ -96,7 +96,7 @@ export async function GET(
         summary: `Diagnostic ${missionLabels || ''} — ${client?.display_name ?? 'Client'}`.trim(),
         description: descriptionParts.join('\n'),
         location: address,
-        url: `${baseUrl}/app/dossiers/${d.id}`,
+        url: `${baseUrl}/dashboard/dossiers/${d.id}`,
       }
     })
 

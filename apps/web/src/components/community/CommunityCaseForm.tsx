@@ -99,7 +99,7 @@ export function CommunityCaseForm() {
       setSubmitted(true)
       // Redirige après 2.5s vers la liste.
       setTimeout(() => {
-        router.push('/app/communaute')
+        router.push('/dashboard/communaute')
       }, 2500)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur réseau')
