@@ -239,6 +239,32 @@
     @apply font-serif italic font-normal;
   }
 
+  /* v5 — label monospace (eyebrow / mono label, JetBrains Mono) */
+  .label-mono {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* v5 — hero serif italic (Instrument Serif) */
+  .hero-serif {
+    font-family: var(--font-serif), Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  /* v5 — KPI hero (dramatisé, Instrument Serif italic 60-120px responsive) */
+  .kpi-hero {
+    font-family: var(--font-serif), Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(60px, 8vw, 120px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
   .prose-legal strong {
     @apply font-semibold text-ink;
   }

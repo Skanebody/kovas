@@ -2,44 +2,64 @@ import { cn } from '@/lib/utils'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 
 export type KpiHeroProps = {
+  /** Valeur affichée en grand serif italic (Instrument Serif). */
   value: string | number
+  /** Label court en mono uppercase au-dessus de la valeur. */
   label: string
+  /** Phrase d'aide additionnelle sous le KPI. */
   hint?: string
-  /** Variation % vs période précédente (null = masqué) */
+  /** Variation % vs période précédente (null = masqué). */
   trend?: number | null
   className?: string
-  /** Mise en avant visuelle (Ron — chiffre hero) */
+  /** Mise en avant visuelle hero (cocon grand format, KPI dramatisé pleine page). */
   featured?: boolean
+  /** Variante "naked" sans bordure ni glass-opaque (pour intégrer dans une carte parente). */
+  variant?: 'card' | 'naked'
 }
 
 /**
- * KPI dramatisé — Instrument Serif italic sur le chiffre (registre Ron / Tectra).
+ * KpiHero — composant signature v5 (KPI dramatisé).
+ *
+ * Pattern : label mono uppercase (eyebrow) + chiffre énorme Instrument Serif
+ * italic 60-120px (utilitaire .kpi-hero). Pendant éditorial du dashboard
+ * cockpit + cards conversion / gain tracker.
+ *
+ * Exemple :
+ *   <KpiHero label="CHIFFRE D'AFFAIRES MENSUEL" value="12 450 €" />
+ *
+ * Variant "naked" : pas de fond/bordure (à utiliser dans une Card<accent>).
  */
-export function KpiHero({ value, label, hint, trend, className, featured }: KpiHeroProps) {
+export function KpiHero({
+  value,
+  label,
+  hint,
+  trend,
+  className,
+  featured,
+  variant = 'card',
+}: KpiHeroProps) {
   return (
     <div
       className={cn(
-        'rounded-2xl border border-rule/80 glass-opaque p-5 shadow-glass-sm',
-        featured && 'md:col-span-2 md:row-span-2 md:p-8',
+        variant === 'card' && 'rounded-2xl border border-rule/80 glass-opaque p-5 shadow-glass-sm',
+        featured && variant === 'card' && 'md:col-span-2 md:row-span-2 md:p-8',
         className,
       )}
     >
+      <p className="label-mono text-ink-mute">{label}</p>
       <p
         className={cn(
-          'font-serif italic tracking-tight text-ink leading-none',
-          featured ? 'text-6xl md:text-7xl' : 'text-4xl md:text-5xl',
+          'mt-2 hero-serif tracking-tight text-ink leading-none',
+          featured ? 'text-6xl md:text-7xl lg:text-8xl' : 'text-5xl md:text-6xl',
         )}
       >
         {value}
       </p>
-      <p className={cn('mt-3 font-semibold text-ink', featured ? 'text-lg' : 'text-sm')}>
-        {label}
-      </p>
-      {hint ? <p className="mt-1 text-sm text-ink-mute">{hint}</p> : null}
+      {hint ? <p className="mt-3 text-sm text-ink-mute">{hint}</p> : null}
       {trend !== null && trend !== undefined ? (
         <p
           className={cn(
-            'mt-2 inline-flex items-center gap-1 text-xs font-medium rounded-pill px-2.5 py-1',
+            'mt-3 inline-flex items-center gap-1 text-xs font-medium rounded-pill px-2.5 py-1',
             trend >= 0
               ? 'bg-accent-green/15 text-accent-green'
               : 'bg-accent-red/15 text-accent-red',

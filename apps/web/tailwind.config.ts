@@ -14,19 +14,34 @@ const config: Config = {
         mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       colors: {
+        /* === v5 piliers (3) — sage / navy-deep / chartreuse === */
         navy: {
+          /* v5 5 niveaux canoniques #0F2436/#163144/#1B405B/#2A5478/#3B6995 */
+          900: '#0F2436',
+          800: '#163144',
+          700: '#1B405B',
+          600: '#2A5478',
+          500: '#3B6995',
+          /* Rétrocompat v3 — aliases */
           DEFAULT: '#163144',
           deep: '#0B1D2E',
           soft: '#2C4A63',
           mute: '#475F77',
+          hover: '#0B1D2E',
         },
+        /* v5 sidebar/navy-deep Synthex #0F1419 noir bleuté */
+        'navy-deep': '#0F1419',
         cyan: {
           deep: '#4E8FA8',
           mid: '#7FB5C7',
           light: '#DFF3EB',
         },
         amber: { DEFAULT: '#D97706' },
-        /* v5 accent unique chartreuse Synthex (signature) */
+        /* v5 accent unique chartreuse Synthex (signature) — USAGE STRICT
+         * Réservé exclusivement à : badge "Actif/En direct" · underline tab actif ·
+         * validation IA confirmée · CTA conversion principale · dot notification.
+         * JAMAIS pour : fonds larges, textes permanents, bordures container,
+         * séparateurs, gradients. */
         chartreuse: {
           DEFAULT: '#D4F542',
           soft: '#F4FAD9',
@@ -34,10 +49,14 @@ const config: Config = {
         },
         paper: '#FFFFFF',
         /* v5 sage pâle remplace cream Ron sur l'app prod.
-         * Alias rétrocompat : 'cream' pointe désormais vers les mêmes hex
-         * que 'sage' pour migration douce des 30+ fichiers legacy (bg-cream
-         * → rendu sage v5 sans toucher chaque fichier). */
-        sage: { DEFAULT: '#F5F7F4', alt: '#EEF2F0' },
+         * Conventions addendum V5 finale (2026-05-22) :
+         *   - sage flat hex pour utilisation directe (bg-sage, border-sage)
+         *   - sage-alt pour les surfaces alternées
+         *   - cream conservé en alias rétrocompat vers sage pour migration
+         *     douce des 30+ fichiers legacy (bg-cream → rendu sage v5 sans
+         *     toucher chaque fichier). */
+        sage: '#F5F7F4',
+        'sage-alt': '#EEF2F0',
         cream: { DEFAULT: '#F5F7F4', deep: '#EEF2F0' },
         /* v5 sidebar Synthex #0F1419 noir bleuté */
         'sidebar-bg': '#0F1419',
@@ -53,10 +72,31 @@ const config: Config = {
         'orange-mist': '#FFE5C9',
         'lime-mist': '#F0FBD5',
         'coral-mist': '#FCE3E1',
-        success: '#10B981',
+        success: '#16A66B',
         warning: '#F59E0B',
         danger: '#EF4444',
         info: '#3B82F6',
+        /* v5 accent ambre saturé (alertes douces, énergie célébration). */
+        'accent-warm': '#D97706',
+        /* v5 status pills — 5 figés (amber/blue/green/coral/muted) */
+        status: {
+          amber: '#F59E0B',
+          blue: '#3B82F6',
+          green: '#16A66B',
+          coral: '#FB7185',
+          muted: '#94A3B8',
+        },
+        /* v5 diagnostic chips — 8 types canoniques (fonds pastel) */
+        chip: {
+          dpe: '#DBEAFE',
+          amiante: '#FFE4C9',
+          plomb: '#FECACA',
+          gaz: '#ECFCCB',
+          elec: '#DDD6FE',
+          termites: '#FEF3C7',
+          carrez: '#E0E7FF',
+          erp: '#FCE7F3',
+        },
         // HSL aliases (composants existants)
         background: 'hsl(var(--background) / <alpha-value>)',
         foreground: 'hsl(var(--foreground) / <alpha-value>)',
@@ -145,14 +185,24 @@ const config: Config = {
           '0%': { opacity: '0', transform: 'translateY(4px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        'slide-up': {
+          '0%': { opacity: '0', transform: 'translateY(12px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         'pulse-soft': {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.55' },
         },
+        'progress-stripe': {
+          '0%': { backgroundPosition: '0 0' },
+          '100%': { backgroundPosition: '24px 0' },
+        },
       },
       animation: {
-        'fade-in': 'fade-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'fade-in': 'fade-in 200ms ease-out',
+        'slide-up': 'slide-up 300ms ease-out',
         'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
+        'progress-stripe': 'progress-stripe 1.2s linear infinite',
       },
     },
   },

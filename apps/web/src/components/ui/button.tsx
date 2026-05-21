@@ -4,6 +4,23 @@ import { type VariantProps, cva } from 'class-variance-authority'
 import { forwardRef } from 'react'
 import type { ButtonHTMLAttributes } from 'react'
 
+/**
+ * Button — v5 canonique.
+ *
+ * RÈGLES D'USAGE CHARTREUSE (variant="accent", #D4F542) — STRICTES :
+ *   ✅ AUTORISÉ uniquement pour :
+ *     1. Badge "Actif" / "En direct" (pastille 8px)
+ *     2. Underline tab actif (barre 2px)
+ *     3. Validation IA confirmée (check, score IA élevé)
+ *     4. CTA conversion principale (essai gratuit, signup payant)
+ *     5. Dot notification 8px
+ *   ❌ INTERDIT pour : fonds larges, textes permanents, bordures container,
+ *      séparateurs, gradients, hover de boutons standards.
+ *
+ *   Une seule occurrence chartreuse visible par écran maximum (signature).
+ *   Pour CTA secondaire / standard, utiliser variant="default" (navy)
+ *   ou variant="warm" (ambre #D97706 célébration).
+ */
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 rounded-pill font-display font-medium whitespace-nowrap leading-none ' +
     'transition-all duration-fast ease-spring focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-navy/20 ' +
