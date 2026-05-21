@@ -1,14 +1,12 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { ReactivationModal } from '@/components/cancellation/ReactivationModal'
-import { Button } from '@/components/ui/button'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { buildCalendarSubscriptionUrl, buildCalendarWebcalUrl } from '@/lib/calendar-token'
 import { parisMonthBounds } from '@/lib/paris-dates'
 import { PRICING_PLANS, type PricingPlanCode, ADDON_MODULES } from '@/lib/pricing-plans'
 import { getStorageUsage } from '@/lib/storage/quota'
-import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { AccountSettingsClient } from './account-settings-client'
 
 export const metadata: Metadata = { title: 'Réglages' }
@@ -233,7 +231,7 @@ export default async function AccountPage({
     : null
 
   return (
-    <div className="animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {winbackValid && (
         <ReactivationModal
           code={winbackValid.code}
@@ -243,22 +241,13 @@ export default async function AccountPage({
         />
       )}
 
-      {/* RETOUR DASHBOARD */}
-      <Button variant="ghost" size="sm" asChild className="mb-3">
-        <Link href="/dashboard/dashboard">
-          <ArrowLeft className="size-4" /> Tableau de bord
-        </Link>
-      </Button>
+      <AppPageHeader
+        title="Vos"
+        accent="réglages"
+        description="Profil, cabinet, abonnement, modules, conformité ADEME et données."
+      />
 
-      {/* HEADER GREETING — titre iOS Settings simple */}
-      <header className="pb-4 mb-4">
-        <h1 className="font-sans font-semibold text-[28px] leading-tight tracking-tight text-[#0F1419]">
-          Réglages
-        </h1>
-      </header>
-
-      {/* CONTENU max-w-2xl pour lisibilité iOS-style */}
-      <div className="max-w-2xl mx-auto">
+      <div>
         <AccountSettingsClient
           profile={{
             full_name: profile.full_name,

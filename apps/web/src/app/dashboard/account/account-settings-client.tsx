@@ -103,9 +103,9 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
   const initials = getInitials(props.profile.full_name ?? props.profile.email)
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 items-start">
       {/* ============== 1. PROFIL & CABINET ============== */}
-      <Card variant="opaque" padding="default" className="space-y-4">
+      <Card variant="opaque" padding="default" className="space-y-4 lg:col-span-2">
         {/* Identité user */}
         <div className="flex items-center gap-3">
           <div
@@ -428,26 +428,28 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
               <li
                 key={m.code}
                 className={cn(
-                  'flex items-center gap-3 p-3 rounded-[12px] border',
+                  'flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 rounded-[12px] border',
                   included
                     ? 'border-[#D4F542]/40 bg-[#D4F542]/[0.08]'
                     : 'border-[#0F1419]/[0.08] bg-white',
                 )}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-medium text-[#0F1419] truncate">{m.name}</p>
-                  <p className="text-[11px] text-[#0F1419]/55 line-clamp-1">{m.description}</p>
+                  <p className="text-[14px] font-medium text-[#0F1419]">{m.name}</p>
+                  <p className="text-[11px] text-[#0F1419]/55 mt-0.5">{m.description}</p>
                 </div>
-                <span className="font-mono text-[11px] tabular-nums text-[#0F1419]/55 shrink-0">
-                  {m.monthlyPrice}€/mo
-                </span>
-                {included ? (
-                  <Badge variant="green" className="text-[9px]">
-                    Inclus
-                  </Badge>
-                ) : (
-                  <StartTrialButton moduleCode={m.code} />
-                )}
+                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                  <span className="font-mono text-[11px] tabular-nums text-[#0F1419]/55">
+                    {m.monthlyPrice}€/mo
+                  </span>
+                  {included ? (
+                    <Badge variant="green" className="text-[9px]">
+                      Inclus
+                    </Badge>
+                  ) : (
+                    <StartTrialButton moduleCode={m.code} />
+                  )}
+                </div>
               </li>
             )
           })}
@@ -458,7 +460,7 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
       <Card variant="opaque" padding="default" className="space-y-3">
         <SectionHeader icon={Shield} iconColor="#48484A" title="Légal & RGPD" />
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <LegalLink href="/mentions-legales" label="Mentions légales" />
           <LegalLink href="/cgu" label="CGU" />
           <LegalLink href="/cgv" label="CGV" />
