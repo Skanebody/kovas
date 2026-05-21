@@ -20,6 +20,7 @@ import { PropertyIdentitySection } from '@/components/property/v5simp/PropertyId
 import { parsePropertyLocation } from '@/components/property/v5simp/PropertyInteractiveMap'
 import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { fetchPublicLocalStats } from '@/lib/external/public-stats'
 import { formatPropertyAddress } from '@/lib/property-display'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -172,11 +173,13 @@ export default async function PropertyDetailPage({
     insee_code: property.insee_code,
   }
 
-  // 9. Contexte local (V1 mock — APIs publiques DVF/INSEE/ADEME à câbler ultérieurement)
+  // 9. Contexte local — fetch parallèle DVF (Etalab) + INSEE (geo.api.gouv) + ADEME (data-fair)
+  //    Toutes APIs publiques gratuites. Cache Next.js 24h. Fallback null si fetch échoue.
+  const localStats = await fetchPublicLocalStats(property.insee_code)
   const contexte: PropertyContexteLocalData = {
-    dvfMedianEurM2: null,
-    inseeMainResidencePct: null,
-    ademeDpeCount: null,
+    dvfMedianEurM2: localStats.dvfMedianEurM2,
+    inseePopulation: localStats.inseePopulation,
+    ademeDpeCount: localStats.ademeDpeCount,
     inseeCode: property.insee_code,
     postalCode: property.postal_code,
     city: property.city,

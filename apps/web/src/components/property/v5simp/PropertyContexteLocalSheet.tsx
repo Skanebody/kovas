@@ -22,11 +22,11 @@ const PropertyInteractiveMap = dynamic(
 )
 
 export interface PropertyContexteLocalData {
-  /** Prix médian DVF €/m² sur la commune (V1 mock) */
+  /** Prix médian DVF €/m² sur la commune (Etalab/DGFiP) */
   dvfMedianEurM2: number | null
-  /** Taux d'occupation INSEE (logement principal/résidence secondaire) */
-  inseeMainResidencePct: number | null
-  /** Nombre de DPE déjà déposés sur la commune (ADEME public) */
+  /** Population INSEE de la commune (geo.api.gouv.fr) */
+  inseePopulation: number | null
+  /** Nombre de DPE déjà déposés sur la commune (ADEME data-fair) */
   ademeDpeCount: number | null
   /** Code INSEE commune (pour ouvrir liens externes) */
   inseeCode: string | null
@@ -40,7 +40,8 @@ interface Props {
   data: PropertyContexteLocalData
 }
 
-const pct = (v: number | null) => (v === null ? '—' : `${Math.round(v * 100)} %`)
+const intNumber = (v: number | null) =>
+  v === null ? '—' : new Intl.NumberFormat('fr-FR').format(Math.round(v))
 const eurM2 = (v: number | null) =>
   v === null ? '—' : `${new Intl.NumberFormat('fr-FR').format(Math.round(v))} €/m²`
 
@@ -76,16 +77,20 @@ export function PropertyContexteLocalSheet({ data }: Props) {
         }
       >
         <ul className="divide-y divide-rule/40 px-2 pb-4">
-          <Row label="Prix médian DVF" value={eurM2(data.dvfMedianEurM2)} source="DVF" />
           <Row
-            label="Résidences principales"
-            value={pct(data.inseeMainResidencePct)}
-            source="INSEE"
+            label="Prix médian DVF (€/m²)"
+            value={eurM2(data.dvfMedianEurM2)}
+            source="DVF — Etalab/DGFiP"
           />
           <Row
-            label="DPE déposés (ADEME)"
-            value={data.ademeDpeCount === null ? '—' : `${data.ademeDpeCount}`}
-            source="ADEME"
+            label="Population commune"
+            value={intNumber(data.inseePopulation)}
+            source="INSEE — geo.api.gouv.fr"
+          />
+          <Row
+            label="DPE déposés (commune)"
+            value={data.ademeDpeCount === null ? '—' : intNumber(data.ademeDpeCount)}
+            source="ADEME — data-fair"
           />
           {data.inseeCode ? (
             <li className="flex items-center justify-between py-3">
@@ -97,8 +102,8 @@ export function PropertyContexteLocalSheet({ data }: Props) {
           ) : null}
         </ul>
         <p className="px-2 pb-2 text-[11px] text-ink-mute">
-          Les données proviennent des sources publiques DVF (Demandes de Valeurs Foncières), INSEE
-          et ADEME. Connexion API prévue dans une prochaine version.
+          Données publiques temps réel : DVF (Demandes de Valeurs Foncières, Etalab/DGFiP), INSEE
+          (geo.api.gouv.fr), ADEME (data-fair). Cache 24 h.
         </p>
       </BottomSheet>
     </>

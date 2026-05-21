@@ -1,11 +1,13 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
-import { BottomSheet } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { FileText, Mail, MessageSquare, Phone } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
+
+import { EmailComposeSheet } from './EmailComposeSheet'
+import { SmsComposeSheet } from './SmsComposeSheet'
 
 const TYPE_LABELS_CAPS: Record<string, string> = {
   particulier: 'PARTICULIER',
@@ -102,44 +104,21 @@ export function ClientIdentitySection({ client, fidele }: ClientIdentityProps) {
         />
       </div>
 
-      {/* Stub SMS (V1 : envoi Brevo non câblé) */}
-      <BottomSheet
+      {/* Envoi SMS via Brevo */}
+      <SmsComposeSheet
         open={smsOpen}
         onOpenChange={setSmsOpen}
-        title="Envoyer un SMS"
-        description="Disponible dans une prochaine version (Brevo SMS)"
-      >
-        <div className="space-y-3 px-2 pb-4">
-          <p className="text-sm text-ink-mute">
-            L'envoi de SMS depuis l'application sera disponible dans une prochaine version. Pour
-            contacter ce client par SMS, utilisez l'application native de votre téléphone.
-          </p>
-          {client.phone ? <p className="font-mono text-[13px] text-ink">{client.phone}</p> : null}
-        </div>
-      </BottomSheet>
+        defaultPhone={client.phone}
+        clientId={client.id}
+      />
 
-      {/* Stub Email compose (V1 : modal compose non câblé) */}
-      <BottomSheet
+      {/* Envoi Email via Brevo */}
+      <EmailComposeSheet
         open={emailOpen}
         onOpenChange={setEmailOpen}
-        title="Envoyer un email"
-        description="Disponible dans une prochaine version (Resend)"
-      >
-        <div className="space-y-3 px-2 pb-4">
-          <p className="text-sm text-ink-mute">
-            La composition d'emails depuis l'application sera disponible dans une prochaine version.
-            Pour écrire à ce client maintenant, ouvrez votre client de messagerie habituel.
-          </p>
-          {client.email ? (
-            <a
-              href={`mailto:${client.email}`}
-              className="font-mono text-[13px] text-ink hover:underline"
-            >
-              {client.email}
-            </a>
-          ) : null}
-        </div>
-      </BottomSheet>
+        defaultTo={client.email}
+        clientId={client.id}
+      />
     </section>
   )
 }

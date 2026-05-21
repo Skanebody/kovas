@@ -203,7 +203,11 @@ export function DossierSimpLayoutClient(props: DossierSimpLayoutClientProps) {
         onContinueWriting={() => setVerifySheetOpen(false)}
       />
 
-      <DossierAIAssistantSheet open={aiSheetOpen} onOpenChange={setAiSheetOpen} />
+      <DossierAIAssistantSheet
+        open={aiSheetOpen}
+        onOpenChange={setAiSheetOpen}
+        dossierId={dossierId}
+      />
 
       <DossierFABRadial
         onPhoto={handlePhoto}
