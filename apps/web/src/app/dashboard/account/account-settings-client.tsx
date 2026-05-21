@@ -1,30 +1,22 @@
 'use client'
 
 /**
- * AccountSettingsClient V5 — refonte 2026-05-21.
+ * AccountSettingsClient V5.2 — refonte 2026-05-21 (3e itération).
  *
- * Architecture cible (DS v5 sage + dark + chartreuse) :
+ * Architecture tabs horizontaux + content focus (1 section à la fois).
+ * Hiérarchie visuelle claire : un seul groupe d'infos visible, le reste
+ * accessible via la navigation onglets. URL hash sync pour partage/refresh.
  *
- *   ┌───────────────────────────────────────────────────────────────┐
- *   │ HERO STRIPE (full width)                                       │
- *   │  Avatar dark/chartreuse + Nom + Cabinet + Plan actif KPI       │
- *   │  Instrument Serif italic sur le nom du plan.                   │
- *   └───────────────────────────────────────────────────────────────┘
- *   ┌─────────────────┬─────────────────┬─────────────────┐
- *   │ COL 1 — Identité│ COL 2 — Abo +   │ COL 3 — Réglages│
- *   │ Profil          │ Stockage        │ ADEME           │
- *   │ Cabinet         │ Cap missions    │ Notifications   │
- *   │                 │ Period end      │ Calendrier      │
- *   └─────────────────┴─────────────────┴─────────────────┘
- *   ┌───────────────────────────────────────────────────────────────┐
- *   │ MODULES (full width, grid 4-col xl, 2-col sm, 1-col mobile)   │
- *   └───────────────────────────────────────────────────────────────┘
- *   ┌─────────────────┬─────────────────────────────────────────────┐
- *   │ LÉGAL & RGPD    │ ZONE DANGER (résilier + supprimer)         │
- *   └─────────────────┴─────────────────────────────────────────────┘
+ * 5 tabs :
+ *   1. Profil       — user + cabinet (forms inline always visible)
+ *   2. Abonnement   — plan KPI hero + quotas + stockage + factures
+ *   3. Modules      — 9 add-ons (grid 2-col lg, 1 col mobile)
+ *   4. Conformité   — ADEME + notifications + sync calendrier
+ *   5. Légal        — mentions/CGU/CGV/RGPD + zone danger
  *
- * Workflow résiliation `/dashboard/account/cancellation?step=1` PROTÉGÉ
- * (décret 2023-417). ReactivationModal géré par la page server parent.
+ * DS v5 : sage bg + dark accents + chartreuse active state.
+ * Mobile : tabs en flex scrollable horizontal.
+ * Workflow résiliation `/dashboard/account/cancellation?step=1` PROTÉGÉ.
  */
 
 import { CalendarSyncExport } from '@/components/calendar/calendar-sync-export'
@@ -41,11 +33,9 @@ import {
   Building2,
   Calculator,
   Calendar,
-  ChevronDown,
   CreditCard,
   Download,
   ExternalLink,
-  HardDrive,
   IdCard,
   Layers,
   Palette,
@@ -55,7 +45,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 
 import { AdemeForm } from './ademe-form'
 import { CompanyForm } from './company-form'
@@ -64,7 +54,15 @@ import { NotificationPrefsForm } from './notification-prefs-form'
 import { ProfileForm } from './profile-form'
 import { StartTrialButton } from './start-trial-button'
 
-type ExpandedSection = null | 'profile' | 'company' | 'ademe' | 'notifications'
+type TabKey = 'profil' | 'abonnement' | 'modules' | 'conformite' | 'legal'
+
+const TABS: ReadonlyArray<{ key: TabKey; label: string; icon: typeof CreditCard }> = [
+  { key: 'profil', label: 'Profil', icon: UserIcon },
+  { key: 'abonnement', label: 'Abonnement', icon: CreditCard },
+  { key: 'modules', label: 'Modules', icon: Layers },
+  { key: 'conformite', label: 'Conformité', icon: Radar },
+  { key: 'legal', label: 'Légal', icon: Shield },
+]
 
 interface AccountSettingsClientProps {
   profile: { full_name: string | null; email: string; phone: string | null }
@@ -102,13 +100,182 @@ interface AccountSettingsClientProps {
 }
 
 export function AccountSettingsClient(props: AccountSettingsClientProps) {
-  const [expanded, setExpanded] = useState<ExpandedSection>(null)
-  const toggle = (key: Exclude<ExpandedSection, null>) =>
-    setExpanded((cur) => (cur === key ? null : key))
+  const [tab, setTab] = useState<TabKey>('profil')
 
+  // Sync URL hash ↔ tab pour deep link / share / refresh.
+  useEffect(() => {
+    const hash = window.location.hash.slice(1) as TabKey
+    if (hash && TABS.some((t) => t.key === hash)) {
+      setTab(hash)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (window.location.hash !== `#${tab}`) {
+      window.history.replaceState(null, '', `#${tab}`)
+    }
+  }, [tab])
+
+  return (
+    <div className="space-y-5">
+      {/* ════════════════════════════════════════════════════════════
+          TABS NAVIGATION
+          ══════════════════════════════════════════════════════════ */}
+      <div
+        role="tablist"
+        aria-label="Sections réglages"
+        className="flex items-center gap-1 overflow-x-auto pb-1 -mx-1 px-1 border-b border-[#0F1419]/[0.08]"
+      >
+        {TABS.map((t) => {
+          const Icon = t.icon
+          const active = tab === t.key
+          return (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              aria-controls={`panel-${t.key}`}
+              onClick={() => setTab(t.key)}
+              className={cn(
+                'relative flex items-center gap-2 px-4 py-2.5 rounded-t-[10px] text-[13px] font-medium whitespace-nowrap transition-colors',
+                active
+                  ? 'text-[#0F1419] bg-white'
+                  : 'text-[#0F1419]/55 hover:text-[#0F1419] hover:bg-white/50',
+              )}
+            >
+              <Icon className="size-4" strokeWidth={active ? 2.25 : 1.75} />
+              <span>{t.label}</span>
+              {active && (
+                <span
+                  aria-hidden
+                  className="absolute left-3 right-3 -bottom-px h-0.5 rounded-full bg-[#D4F542]"
+                />
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════
+          TAB CONTENT
+          ══════════════════════════════════════════════════════════ */}
+      <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={tab} className="max-w-4xl">
+        {tab === 'profil' && <ProfilTab props={props} />}
+        {tab === 'abonnement' && <AbonnementTab props={props} />}
+        {tab === 'modules' && <ModulesTab props={props} />}
+        {tab === 'conformite' && <ConformiteTab props={props} />}
+        {tab === 'legal' && <LegalTab props={props} />}
+      </div>
+    </div>
+  )
+}
+
+/* ============== TAB 1 — PROFIL ============== */
+
+function ProfilTab({ props }: { props: AccountSettingsClientProps }) {
+  const initials = getInitials(props.profile.full_name ?? props.profile.email)
+
+  return (
+    <div className="space-y-5">
+      {/* Identité user */}
+      <Card variant="opaque" padding="default" className="space-y-5">
+        <div className="flex items-center gap-4">
+          <div
+            aria-hidden
+            className="size-14 rounded-full bg-[#0F1419] text-[#D4F542] flex items-center justify-center font-mono font-semibold text-[18px] shrink-0"
+          >
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#0F1419]/55">
+              Identité
+            </p>
+            <p className="text-[18px] font-semibold text-[#0F1419] truncate mt-0.5">
+              {props.profile.full_name ?? '—'}
+            </p>
+            <p className="text-[13px] text-[#0F1419]/65 truncate">
+              {props.profile.email}
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-[#0F1419]/[0.08]">
+          <ProfileForm
+            initial={{
+              full_name: props.profile.full_name,
+              email: props.profile.email,
+              phone: props.profile.phone,
+            }}
+          />
+        </div>
+      </Card>
+
+      {/* Cabinet */}
+      <Card variant="opaque" padding="default" className="space-y-5">
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden
+            className="size-10 rounded-md bg-[#AF52DE]/15 text-[#AF52DE] flex items-center justify-center shrink-0"
+          >
+            <Building2 className="size-5" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#0F1419]/55">
+              Cabinet
+            </p>
+            <p className="text-[16px] font-semibold text-[#0F1419] truncate mt-0.5">
+              {props.organization.name ?? '—'}
+            </p>
+            {props.organization.siret && (
+              <p className="text-[12px] text-[#0F1419]/55">
+                SIRET {formatSiret(props.organization.siret)}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-[#0F1419]/[0.08]">
+          <CompanyForm initial={props.organization} />
+        </div>
+      </Card>
+
+      {/* Raccourcis personnalisation */}
+      <Card variant="opaque" padding="default" className="space-y-4">
+        <SectionTitle icon={Palette} title="Personnalisation" iconColor="#FF9500" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <ShortcutCard
+            href="/dashboard/compte/branding"
+            icon={Palette}
+            iconBg="#FF9500"
+            label="Logo & couleur"
+            sublabel="Identité visuelle cabinet"
+          />
+          <ShortcutCard
+            href="/dashboard/compte/tarifs"
+            icon={Calculator}
+            iconBg="#34C759"
+            label="Mes tarifs"
+            sublabel="Prestations & packs"
+          />
+          <ShortcutCard
+            href="/dashboard/compte/carte-visite"
+            icon={IdCard}
+            iconBg="#5AC8FA"
+            label="Carte de visite"
+            sublabel="QR + Wallet"
+          />
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+/* ============== TAB 2 — ABONNEMENT ============== */
+
+function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
   const isCancelling = props.subscription?.cancel_at_period_end === true
   const isActive = props.subscription?.status === 'active'
-  const initials = getInitials(props.profile.full_name ?? props.profile.email)
   const currentPlan = props.planCode
     ? PRICING_PLANS.find((p) => p.code === props.planCode) ?? null
     : null
@@ -116,143 +283,49 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
 
   return (
     <div className="space-y-5">
-      {/* ════════════════════════════════════════════════════════════
-          HERO STRIPE — Identité + plan KPI dramatisé
-          ══════════════════════════════════════════════════════════ */}
-      <Card variant="opaque" padding="default" className="relative overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] items-center gap-4 md:gap-6">
-          {/* Avatar */}
-          <div
-            aria-hidden
-            className="size-14 md:size-16 rounded-full bg-[#0F1419] text-[#D4F542] flex items-center justify-center font-mono font-semibold text-[18px] md:text-[20px] shrink-0"
-          >
-            {initials}
-          </div>
-
-          {/* Identité + cabinet */}
-          <div className="min-w-0">
+      {/* HERO Plan KPI dramatisé */}
+      <Card variant="opaque" padding="default" className="overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div className="space-y-3">
             <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#0F1419]/55">
-              Compte
+              Forfait actuel
             </p>
-            <h2 className="text-[20px] md:text-[24px] font-semibold text-[#0F1419] leading-tight mt-0.5 truncate">
-              {props.profile.full_name ?? '—'}
-            </h2>
-            <p className="text-[13px] text-[#0F1419]/65 mt-0.5 truncate">
-              {props.organization.name ?? 'Sans cabinet'}
-              {props.organization.siret ? ` · SIRET ${formatSiret(props.organization.siret)}` : ''}
-            </p>
-          </div>
-
-          {/* Plan KPI dramatisé Instrument Serif */}
-          <div className="md:text-right">
-            <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#0F1419]/55">
-              Forfait actif
-            </p>
-            <p className="font-serif italic text-[28px] md:text-[36px] leading-none text-[#0F1419] mt-1">
+            <p className="font-serif italic text-[44px] md:text-[56px] leading-none text-[#0F1419]">
               {props.planName ?? 'Aucun'}
             </p>
-            <div className="flex md:justify-end items-center gap-2 mt-1.5 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               {currentPlan && (
-                <span className="font-mono text-[12px] tabular-nums text-[#0F1419]/70">
-                  {formatPriceEurCompact(currentPlan.monthlyPrice)} HT/mois
+                <span className="font-mono text-[15px] tabular-nums text-[#0F1419] font-semibold">
+                  {formatPriceEurCompact(currentPlan.monthlyPrice)} HT
+                  <span className="text-[#0F1419]/55 font-normal">/mois</span>
                 </span>
               )}
               {isActive && (
-                <Badge
-                  variant={isCancelling ? 'orange' : 'green'}
-                  className="text-[10px]"
-                >
+                <Badge variant={isCancelling ? 'orange' : 'green'} className="text-[10px]">
                   {isCancelling ? 'Annulation en cours' : 'Actif'}
                 </Badge>
               )}
             </div>
+            {periodEnd && (
+              <p className="text-[12px] text-[#0F1419]/55">
+                Renouvellement le {formatDateFr(periodEnd)}
+              </p>
+            )}
           </div>
-        </div>
-      </Card>
-
-      {/* ════════════════════════════════════════════════════════════
-          GRID 3 COLONNES — Identité / Abonnement+Stockage / Réglages
-          ══════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5 items-start">
-        {/* ============== COL 1 — IDENTITÉ ============== */}
-        <Card variant="opaque" padding="default" className="space-y-4">
-          <SectionHeader icon={UserIcon} iconColor="#007AFF" title="Identité" />
-
-          <InlineRow
-            label="Mon profil"
-            value={props.profile.email}
-            sublabel={props.profile.phone ?? 'Téléphone non renseigné'}
-            expanded={expanded === 'profile'}
-            onToggle={() => toggle('profile')}
-            expandContent={
-              <ProfileForm
-                initial={{
-                  full_name: props.profile.full_name,
-                  email: props.profile.email,
-                  phone: props.profile.phone,
-                }}
-              />
-            }
-          />
-
-          <InlineRow
-            label="Mon cabinet"
-            value={props.organization.name ?? '—'}
-            sublabel={
-              props.organization.siret
-                ? `SIRET ${formatSiret(props.organization.siret)}`
-                : 'SIRET non renseigné'
-            }
-            icon={Building2}
-            iconColor="#AF52DE"
-            expanded={expanded === 'company'}
-            onToggle={() => toggle('company')}
-            expandContent={<CompanyForm initial={props.organization} />}
-          />
-
-          {/* Raccourcis identité visuelle */}
-          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#0F1419]/55 mb-2">
-              Personnalisation
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <ShortcutTile
-                href="/dashboard/compte/branding"
-                icon={Palette}
-                iconBg="#FF9500"
-                label="Logo"
-              />
-              <ShortcutTile
-                href="/dashboard/compte/tarifs"
-                icon={Calculator}
-                iconBg="#34C759"
-                label="Tarifs"
-              />
-              <ShortcutTile
-                href="/dashboard/compte/carte-visite"
-                icon={IdCard}
-                iconBg="#5AC8FA"
-                label="Carte"
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* ============== COL 2 — ABONNEMENT + STOCKAGE ============== */}
-        <Card variant="opaque" padding="default" className="space-y-4">
-          <SectionHeader icon={CreditCard} iconColor="#0F1419" title="Abonnement" />
 
           {/* KPI missions ce mois */}
           {props.missionsQuota > 0 ? (
-            <div className="rounded-[14px] bg-[#F5F7F4] p-4 space-y-2">
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#0F1419]/55">
-                  Missions ce mois
-                </p>
-                <p className="font-mono text-[13px] tabular-nums">
-                  <span className="text-[#0F1419] font-semibold">{props.missionsCount}</span>
-                  <span className="text-[#0F1419]/55"> / {props.missionsQuota}</span>
-                </p>
+            <div className="rounded-[14px] bg-[#F5F7F4] p-5 space-y-3">
+              <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#0F1419]/55">
+                Missions ce mois
+              </p>
+              <div className="flex items-baseline gap-2">
+                <span className="font-serif italic text-[36px] leading-none text-[#0F1419]">
+                  {props.missionsCount}
+                </span>
+                <span className="text-[#0F1419]/55 text-[14px]">
+                  / {props.missionsQuota}
+                </span>
               </div>
               <div className="h-2 rounded-full bg-[#0F1419]/[0.08] overflow-hidden">
                 <div
@@ -273,247 +346,211 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
                   {formatPriceEur(Math.round(props.overageTotal * 100))}
                 </p>
               )}
-              {periodEnd && (
-                <p className="text-[11px] text-[#0F1419]/55 pt-1 border-t border-[#0F1419]/[0.06]">
-                  Renouvellement le {formatDateFr(periodEnd)}
-                </p>
-              )}
             </div>
           ) : (
-            <div className="rounded-[14px] bg-[#F5F7F4] p-4">
+            <div className="rounded-[14px] bg-[#F5F7F4] p-5 space-y-2">
               <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#0F1419]/55">
                 Missions ce mois
               </p>
-              <p className="font-serif italic text-[36px] leading-none text-[#0F1419] mt-1">
+              <p className="font-serif italic text-[44px] leading-none text-[#0F1419]">
                 {props.missionsCount}
               </p>
-              <p className="text-[11px] text-[#0F1419]/55 mt-1">Forfait illimité</p>
+              <p className="text-[11px] text-[#0F1419]/55">Forfait illimité</p>
             </div>
           )}
-
-          {/* Storage gauge */}
-          {props.storageUsage && (
-            <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-              <div className="flex items-center gap-2 mb-2">
-                <span
-                  aria-hidden
-                  className="size-6 rounded-md bg-[#0F1419] text-[#D4F542] flex items-center justify-center shrink-0"
-                >
-                  <HardDrive className="size-3" />
-                </span>
-                <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#0F1419]/55">
-                  Stockage cloud
-                </p>
-              </div>
-              <StorageQuotaCard
-                usedBytes={props.storageUsage.usedBytes}
-                quotaBytes={props.storageUsage.quotaBytes}
-              />
-            </div>
-          )}
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-2 pt-2">
-            <Button asChild variant="outline" size="sm" className="flex-1">
-              <Link href="/dashboard/facturation">
-                <CreditCard className="size-3.5" /> Mes factures
-              </Link>
-            </Button>
-            {isActive && (
-              <Button asChild variant="default" size="sm" className="flex-1">
-                <Link href="/pricing">
-                  Changer de formule <ArrowRight className="size-3.5" />
-                </Link>
-              </Button>
-            )}
-          </div>
-        </Card>
-
-        {/* ============== COL 3 — CONFORMITÉ + NOTIFS + CALENDRIER ============== */}
-        <Card variant="opaque" padding="default" className="space-y-4">
-          <SectionHeader icon={Radar} iconColor="#FF9500" title="Réglages" />
-
-          <InlineRow
-            label="Surveillance ADEME"
-            value={
-              props.certificatRge
-                ? `Cert. RGE ${props.certificatRge}`
-                : 'Cert. RGE à renseigner'
-            }
-            sublabel={
-              props.lastAdemeSyncAt
-                ? `${props.ademeMonitoringEnabled ? 'Active' : 'En pause'} · Dernière sync ${formatRelative(props.lastAdemeSyncAt)}`
-                : props.ademeMonitoringEnabled
-                  ? 'Active · jamais sync'
-                  : 'En pause'
-            }
-            icon={Radar}
-            iconColor="#FF9500"
-            expanded={expanded === 'ademe'}
-            onToggle={() => toggle('ademe')}
-            expandContent={
-              <AdemeForm
-                initialCertificatRge={props.certificatRge}
-                initialMonitoringEnabled={props.ademeMonitoringEnabled}
-                lastSyncAt={props.lastAdemeSyncAt}
-              />
-            }
-          />
-
-          <InlineRow
-            label="Notifications email"
-            value={`Rapport mensuel : ${props.monthlyReportEnabled ? 'Activé' : 'Désactivé'}`}
-            icon={Bell}
-            iconColor="#34C759"
-            expanded={expanded === 'notifications'}
-            onToggle={() => toggle('notifications')}
-            expandContent={
-              <NotificationPrefsForm
-                initialMonthlyReportEnabled={props.monthlyReportEnabled}
-              />
-            }
-          />
-
-          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-            <div className="flex items-center gap-2 mb-3">
-              <span
-                aria-hidden
-                className="size-6 rounded-md bg-[#5AC8FA] text-white flex items-center justify-center shrink-0"
-              >
-                <Calendar className="size-3" />
-              </span>
-              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#0F1419]/55">
-                Sync calendrier
-              </p>
-            </div>
-            <CalendarSyncExport
-              httpsUrl={props.calendarHttpsUrl}
-              webcalUrl={props.calendarWebcalUrl}
-            />
-          </div>
-        </Card>
-      </div>
-
-      {/* ════════════════════════════════════════════════════════════
-          MODULES ADD-ONS — full width grid 4-col xl
-          ══════════════════════════════════════════════════════════ */}
-      <Card variant="opaque" padding="default" className="space-y-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <SectionHeader
-            icon={Layers}
-            iconColor="#D4F542"
-            iconFg="#0F1419"
-            title={`Modules · ${ADDON_MODULES.length}`}
-          />
-          <p className="text-[11px] text-[#0F1419]/55">
-            Essai gratuit 14 jours · résiliable d'un clic
-          </p>
         </div>
 
-        <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {ADDON_MODULES.map((m) => {
-            const included = props.modulesIncludedMap[m.code] === true
-            return (
-              <li
-                key={m.code}
-                className={cn(
-                  'flex flex-col gap-2 p-4 rounded-[14px] border transition-all',
-                  included
-                    ? 'border-[#D4F542]/50 bg-[#D4F542]/[0.10]'
-                    : 'border-[#0F1419]/[0.08] bg-white hover:border-[#0F1419]/20 hover:shadow-sm',
-                )}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-[14px] font-semibold text-[#0F1419] leading-tight">
-                    {m.name}
-                  </p>
-                  {included ? (
-                    <Badge variant="green" className="text-[9px] shrink-0">
-                      Inclus
-                    </Badge>
-                  ) : (
-                    <span className="font-mono text-[12px] tabular-nums text-[#0F1419] shrink-0">
-                      {formatPriceEurCompact(m.monthlyPrice)}
-                    </span>
-                  )}
-                </div>
-                <p className="text-[11px] text-[#0F1419]/55 line-clamp-2 flex-1">
-                  {m.description}
-                </p>
-                {!included && (
-                  <div className="pt-2">
-                    <StartTrialButton moduleCode={m.code} />
-                  </div>
-                )}
-              </li>
-            )
-          })}
-        </ul>
+        <div className="flex flex-col sm:flex-row gap-2 mt-5 pt-5 border-t border-[#0F1419]/[0.08]">
+          <Button asChild variant="outline" size="default" className="flex-1">
+            <Link href="/dashboard/facturation">
+              <CreditCard className="size-4" /> Mes factures
+            </Link>
+          </Button>
+          {isActive && (
+            <Button asChild variant="default" size="default" className="flex-1">
+              <Link href="/pricing">
+                Changer de formule <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          )}
+        </div>
       </Card>
 
-      {/* ════════════════════════════════════════════════════════════
-          LÉGAL + ZONE DANGER — 2 cols lg
-          ══════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 items-start">
-        {/* Légal & RGPD */}
+      {/* Storage */}
+      {props.storageUsage && (
         <Card variant="opaque" padding="default" className="space-y-3">
-          <SectionHeader icon={Shield} iconColor="#48484A" title="Légal & RGPD" />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <LegalLink href="/mentions-legales" label="Mentions légales" />
-            <LegalLink href="/cgu" label="CGU" />
-            <LegalLink href="/cgv" label="CGV" />
-            <LegalLink href="/confidentialite" label="Politique RGPD" />
-          </div>
-
-          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-            <form action="/api/rgpd/request" method="POST">
-              <input type="hidden" name="type" value="export" />
-              <Button type="submit" variant="outline" size="sm" className="w-full">
-                <Download className="size-3.5" /> Exporter mes données (RGPD)
-              </Button>
-            </form>
-          </div>
-
-          <p className="text-[10px] text-[#0F1419]/55 leading-relaxed pt-1">
-            Factures émises HT avec TVA 20% en sus, déductible si assujetti.
-            Conservation 10 ans (L.123-22).
-          </p>
+          <SectionTitle icon={Layers} title="Stockage cloud" iconColor="#0F1419" />
+          <StorageQuotaCard
+            usedBytes={props.storageUsage.usedBytes}
+            quotaBytes={props.storageUsage.quotaBytes}
+          />
         </Card>
+      )}
+    </div>
+  )
+}
 
-        {/* Zone danger */}
-        <Card
-          variant="opaque"
-          padding="default"
-          className="border-l-2 border-l-[#DC2626]/30 space-y-3"
-        >
-          <SectionHeader icon={XCircle} iconColor="#DC2626" title="Zone danger" />
+/* ============== TAB 3 — MODULES ============== */
 
-          <p className="text-[11px] text-[#0F1419]/55 leading-relaxed">
-            Conformément au décret 2023-417, vos données sont conservées 90 jours en
-            grâce avant suppression irréversible. Factures conservées 10 ans
-            (L.123-22).
-          </p>
+function ModulesTab({ props }: { props: AccountSettingsClientProps }) {
+  return (
+    <div className="space-y-4">
+      <Card variant="opaque" padding="default" className="space-y-2">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <SectionTitle
+            icon={Layers}
+            title={`Modules add-ons · ${ADDON_MODULES.length}`}
+            iconColor="#D4F542"
+            iconFg="#0F1419"
+          />
+        </div>
+        <p className="text-[12px] text-[#0F1419]/55">
+          Modules activables séparément. Essai gratuit 14 jours, désactivables d'un clic.
+        </p>
+      </Card>
 
-          <div className="flex flex-col sm:flex-row gap-2">
-            {isActive && (
-              <Button asChild variant="outline" size="sm" className="flex-1">
-                <Link href="/dashboard/account/cancellation?step=1">
-                  Résilier mon abonnement
-                </Link>
-              </Button>
-            )}
-            <DeleteAccountButton />
-          </div>
-        </Card>
-      </div>
+      <ul className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {ADDON_MODULES.map((m) => {
+          const included = props.modulesIncludedMap[m.code] === true
+          return (
+            <li
+              key={m.code}
+              className={cn(
+                'flex flex-col gap-3 p-4 rounded-[14px] border transition-all bg-white',
+                included
+                  ? 'border-[#D4F542]/50 bg-[#D4F542]/[0.10]'
+                  : 'border-[#0F1419]/[0.08] hover:border-[#0F1419]/20 hover:shadow-sm',
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[15px] font-semibold text-[#0F1419] leading-tight">
+                    {m.name}
+                  </p>
+                  <p className="text-[12px] text-[#0F1419]/55 mt-1 line-clamp-2">
+                    {m.description}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-mono text-[14px] tabular-nums font-semibold text-[#0F1419]">
+                    {formatPriceEurCompact(m.monthlyPrice)}
+                  </p>
+                  <p className="text-[10px] text-[#0F1419]/55">par mois</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-[#0F1419]/[0.06]">
+                {included ? (
+                  <Badge variant="green" className="text-[10px]">
+                    Inclus dans votre forfait
+                  </Badge>
+                ) : (
+                  <span className="text-[11px] text-[#0F1419]/55">14 j d'essai gratuit</span>
+                )}
+                {!included && <StartTrialButton moduleCode={m.code} />}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
+/* ============== TAB 4 — CONFORMITÉ ============== */
+
+function ConformiteTab({ props }: { props: AccountSettingsClientProps }) {
+  return (
+    <div className="space-y-5">
+      <Card variant="opaque" padding="default" className="space-y-4">
+        <SectionTitle icon={Radar} title="Surveillance ADEME" iconColor="#FF9500" />
+        <AdemeForm
+          initialCertificatRge={props.certificatRge}
+          initialMonitoringEnabled={props.ademeMonitoringEnabled}
+          lastSyncAt={props.lastAdemeSyncAt}
+        />
+      </Card>
+
+      <Card variant="opaque" padding="default" className="space-y-4">
+        <SectionTitle icon={Bell} title="Notifications email" iconColor="#34C759" />
+        <NotificationPrefsForm initialMonthlyReportEnabled={props.monthlyReportEnabled} />
+      </Card>
+
+      <Card variant="opaque" padding="default" className="space-y-4">
+        <SectionTitle icon={Calendar} title="Synchronisation calendrier" iconColor="#5AC8FA" />
+        <CalendarSyncExport
+          httpsUrl={props.calendarHttpsUrl}
+          webcalUrl={props.calendarWebcalUrl}
+        />
+      </Card>
+    </div>
+  )
+}
+
+/* ============== TAB 5 — LÉGAL ============== */
+
+function LegalTab({ props }: { props: AccountSettingsClientProps }) {
+  const isActive = props.subscription?.status === 'active'
+
+  return (
+    <div className="space-y-5">
+      {/* Légal & RGPD */}
+      <Card variant="opaque" padding="default" className="space-y-4">
+        <SectionTitle icon={Shield} title="Légal & RGPD" iconColor="#48484A" />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <LegalLink href="/mentions-legales" label="Mentions légales" />
+          <LegalLink href="/cgu" label="CGU" />
+          <LegalLink href="/cgv" label="CGV" />
+          <LegalLink href="/confidentialite" label="Politique RGPD" />
+        </div>
+
+        <div className="pt-4 border-t border-[#0F1419]/[0.08]">
+          <form action="/api/rgpd/request" method="POST">
+            <input type="hidden" name="type" value="export" />
+            <Button type="submit" variant="outline" size="default" className="w-full sm:w-auto">
+              <Download className="size-4" /> Exporter toutes mes données (RGPD)
+            </Button>
+          </form>
+        </div>
+
+        <p className="text-[11px] text-[#0F1419]/55 leading-relaxed pt-2 border-t border-[#0F1419]/[0.08]">
+          Vos factures KOVAS sont émises HT avec TVA 20% en sus, déductible si vous êtes
+          assujetti. Conservation 10 ans (obligation comptable L.123-22).
+        </p>
+      </Card>
+
+      {/* Zone danger */}
+      <Card
+        variant="opaque"
+        padding="default"
+        className="border-l-2 border-l-[#DC2626]/30 space-y-4"
+      >
+        <SectionTitle icon={XCircle} title="Zone danger" iconColor="#DC2626" />
+
+        <p className="text-[12px] text-[#0F1419]/55 leading-relaxed">
+          Conformément au décret 2023-417 et au RGPD, vos données sont conservées 90 jours en
+          grâce avant suppression irréversible. Vos factures restent conservées 10 ans
+          (obligation comptable L.123-22).
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-2">
+          {isActive && (
+            <Button asChild variant="outline" size="default" className="flex-1">
+              <Link href="/dashboard/account/cancellation?step=1">
+                Résilier mon abonnement
+              </Link>
+            </Button>
+          )}
+          <DeleteAccountButton />
+        </div>
+      </Card>
     </div>
   )
 }
 
 /* ============== SOUS-COMPOSANTS ============== */
 
-function SectionHeader({
+function SectionTitle({
   icon: Icon,
   iconColor,
   iconFg = '#FFFFFF',
@@ -528,104 +565,45 @@ function SectionHeader({
     <div className="flex items-center gap-2.5">
       <span
         aria-hidden
-        className="size-7 rounded-md flex items-center justify-center"
+        className="size-8 rounded-md flex items-center justify-center shrink-0"
         style={{ backgroundColor: iconColor }}
       >
-        <Icon className="size-3.5" style={{ color: iconFg }} />
+        <Icon className="size-4" style={{ color: iconFg }} />
       </span>
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.15em] font-semibold text-[#0F1419]">
-        {title}
-      </h2>
+      <h2 className="font-sans text-[15px] font-semibold text-[#0F1419]">{title}</h2>
     </div>
   )
 }
 
-function InlineRow({
-  label,
-  value,
-  sublabel,
-  icon,
-  iconColor,
-  expanded,
-  onToggle,
-  expandContent,
-}: {
-  label: string
-  value: string
-  sublabel?: string
-  icon?: typeof CreditCard
-  iconColor?: string
-  expanded: boolean
-  onToggle: () => void
-  expandContent: ReactNode
-}) {
-  const Icon = icon
-  return (
-    <div className={cn(expanded ? 'space-y-3' : '')}>
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        className="w-full text-left flex items-start gap-3 group"
-      >
-        {Icon && iconColor && (
-          <span
-            aria-hidden
-            className="size-9 rounded-md flex items-center justify-center shrink-0"
-            style={{ backgroundColor: `${iconColor}15`, color: iconColor }}
-          >
-            <Icon className="size-4" />
-          </span>
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#0F1419]/55">
-            {label}
-          </p>
-          <p className="text-[14px] font-medium text-[#0F1419] truncate mt-0.5">
-            {value}
-          </p>
-          {sublabel && (
-            <p className="text-[11px] text-[#0F1419]/55 mt-0.5 truncate">{sublabel}</p>
-          )}
-        </div>
-        <ChevronDown
-          className={cn(
-            'size-4 text-[#0F1419]/40 shrink-0 transition-transform',
-            expanded && 'rotate-180',
-          )}
-        />
-      </button>
-      {expanded && (
-        <div className="pt-3 border-t border-[#0F1419]/[0.08]">{expandContent}</div>
-      )}
-    </div>
-  )
-}
-
-function ShortcutTile({
+function ShortcutCard({
   href,
   icon: Icon,
   iconBg,
   label,
+  sublabel,
 }: {
   href: string
   icon: typeof CreditCard
   iconBg: string
   label: string
+  sublabel: string
 }) {
   return (
     <Link
       href={href}
-      className="group flex flex-col items-center gap-1.5 p-2 rounded-[10px] bg-white border border-[#0F1419]/[0.08] hover:border-[#0F1419]/20 hover:shadow-sm transition-all"
+      className="group flex items-start gap-3 p-4 rounded-[12px] bg-white border border-[#0F1419]/[0.08] hover:border-[#0F1419]/20 hover:shadow-sm transition-all"
     >
       <span
         aria-hidden
-        className="size-8 rounded-md flex items-center justify-center"
+        className="size-10 rounded-md flex items-center justify-center shrink-0"
         style={{ backgroundColor: iconBg }}
       >
-        <Icon className="size-3.5 text-white" />
+        <Icon className="size-5 text-white" />
       </span>
-      <p className="text-[11px] font-medium text-[#0F1419]">{label}</p>
+      <div className="flex-1 min-w-0">
+        <p className="text-[14px] font-semibold text-[#0F1419] leading-tight">{label}</p>
+        <p className="text-[11px] text-[#0F1419]/55 leading-tight mt-1">{sublabel}</p>
+      </div>
     </Link>
   )
 }
@@ -634,7 +612,7 @@ function LegalLink({ href, label }: { href: string; label: string }): ReactNode 
   return (
     <Link
       href={href}
-      className="flex items-center justify-between gap-2 px-3 py-2 rounded-[10px] text-[13px] text-[#0F1419] hover:bg-[#F5F7F4] transition-colors"
+      className="flex items-center justify-between gap-2 px-4 py-3 rounded-[10px] text-[13px] text-[#0F1419] hover:bg-[#F5F7F4] transition-colors border border-[#0F1419]/[0.06]"
     >
       <span>{label}</span>
       <ExternalLink className="size-3.5 text-[#0F1419]/40" />
@@ -658,17 +636,6 @@ function formatSiret(siret: string): string {
   const clean = siret.replace(/\s/g, '')
   if (clean.length !== 14) return siret
   return `${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6, 9)} ${clean.slice(9, 14)}`
-}
-
-function formatRelative(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime()
-  const min = Math.round(diffMs / 60_000)
-  if (min < 1) return "à l'instant"
-  if (min < 60) return `il y a ${min} min`
-  const h = Math.round(min / 60)
-  if (h < 24) return `il y a ${h} h`
-  const d = Math.round(h / 24)
-  return `il y a ${d} j`
 }
 
 function formatDateFr(iso: string): string {
