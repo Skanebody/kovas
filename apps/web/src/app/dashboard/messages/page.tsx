@@ -22,7 +22,7 @@ export default function MessagesPage() {
       description="La messagerie centralisée arrive en V1.5 : conversations clients, suggestions IA en draft, notifications consolidées. Pour l'instant, utilisez email et SMS depuis vos missions du jour."
       action={
         <Button asChild>
-          <Link href="/dashboard/dashboard">Retour au tableau de bord</Link>
+          <Link href="/dashboard/dossiers">Voir mes dossiers</Link>
         </Button>
       }
     />

@@ -31,11 +31,6 @@ export default async function FacturationPage() {
           icon={CreditCard}
           title="Facturation indisponible."
           description="Le service de facturation n'est pas encore configuré sur cet environnement."
-          action={
-            <Button asChild>
-              <Link href="/dashboard/dashboard">Retour au tableau de bord</Link>
-            </Button>
-          }
         />
       </div>
     )
@@ -65,11 +60,6 @@ export default async function FacturationPage() {
           action={
             <Button asChild variant="accent">
               <Link href="/pricing">Voir les formules</Link>
-            </Button>
-          }
-          secondaryAction={
-            <Button variant="ghost" asChild>
-              <Link href="/dashboard/dashboard">Retour au tableau de bord</Link>
             </Button>
           }
         />

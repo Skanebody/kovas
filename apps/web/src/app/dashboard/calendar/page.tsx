@@ -1,12 +1,9 @@
 import { AppPageHeader } from '@/components/app-page-header'
 import { CalendarSyncDialog } from '@/components/calendar/calendar-sync-dialog'
-import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { buildCalendarSubscriptionUrl, buildCalendarWebcalUrl } from '@/lib/calendar-token'
 import type { CalendarEvent, OriginCoords } from '@/lib/calendar/shared'
-import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { CalendarView } from './calendar-view'
 
 export const metadata: Metadata = { title: 'Planning' }
@@ -94,12 +91,6 @@ export default async function CalendarPage() {
 
   return (
     <div className="max-w-6xl space-y-6 animate-fade-in">
-      <Button variant="ghost" size="sm" asChild>
-        <Link href="/dashboard/dashboard">
-          <ArrowLeft className="size-4" /> Tableau de bord
-        </Link>
-      </Button>
-
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <AppPageHeader
           title="Votre"
