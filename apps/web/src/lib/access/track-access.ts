@@ -104,6 +104,9 @@ export const getUserTrackAccess = cache(async (): Promise<TrackAccessResult> => 
   const logicielActive = planCodes.some((c) => {
     if (c.startsWith('logiciel_')) return c !== 'logiciel_free'
     if (c === 'essential' || c === 'decouverte' || c === 'pro' || c === 'all_inclusive' || c === 'cabinet') return true
+    // Tiers grandfather bruts (avant suffixe `_legacy`) — la colonne `subscriptions.tier`
+    // utilise encore ces noms historiques pour les comptes pré-migration B.
+    if (c === 'volume' || c === 'standard' || c === 'founder') return true
     if (c.endsWith('_legacy')) return true
     return false
   })

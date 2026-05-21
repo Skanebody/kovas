@@ -11,8 +11,11 @@ import { UsageWidget } from '@/components/usage-widget'
 import { UserMenu } from '@/components/user-menu'
 import { getUserTrackAccess } from '@/lib/access/track-access'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { checkTrialGuard, isPathWhitelisted } from '@/lib/billing/trial-guard'
 import { loadPendingSuggestions, loadUserAccess } from '@/lib/upsell/load-access'
+import { headers } from 'next/headers'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { logoutAction } from './actions'
 
@@ -24,11 +27,23 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // la sidebar adaptive et le bouton "Découvrir" + dot chartreuse.
   // Phase C — Dual track : charge également l'état Annuaire/Logiciel pour
   // adapter la sidebar (annuaire-only / logiciel-only / dual / free).
-  const [access, suggestions, trackAccess] = await Promise.all([
+  const [access, suggestions, trackAccess, trialVerdict] = await Promise.all([
     loadUserAccess(supabase, orgId),
     loadPendingSuggestions(supabase, user.id),
     getUserTrackAccess(),
+    checkTrialGuard(supabase, orgId),
   ])
+
+  // Garde "essai expiré sans paiement" — redirige vers /dashboard/account?expired=1
+  // sauf si déjà sur une route whitelistée (account, billing, API, status, etc.).
+  if (trialVerdict.kind === 'expired') {
+    const h = await headers()
+    const pathname = h.get('x-invoke-path') ?? h.get('referer') ?? ''
+    const currentPath = pathname.startsWith('/dashboard') ? pathname : '/dashboard'
+    if (!isPathWhitelisted(currentPath)) {
+      redirect('/dashboard/account?expired=1')
+    }
+  }
 
   return (
     <AppShell background="light" className="min-h-dvh flex">
@@ -51,7 +66,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
                 K
               </div>
             </Link>
-            <AppNavTabs />
+            <AppNavTabs access={access} />
             <div className="flex items-center gap-1.5 shrink-0 ml-auto">
               <SyncIndicator organizationId={orgId} />
               <CommandPaletteTrigger />

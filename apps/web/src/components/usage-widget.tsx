@@ -1,12 +1,19 @@
 import { Badge } from '@/components/ui/badge'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { cn } from '@/lib/utils'
-import { CreditCard } from 'lucide-react'
+import { CreditCard, Infinity as InfinityIcon } from 'lucide-react'
 import Link from 'next/link'
 
 /**
  * Widget mini "consommation mensuelle" dans le header app.
  * Cf. CLAUDE.md §5 — UX anti-friction paiement (transparence permanente).
+ *
+ * Comportement :
+ *  - Pas d'abonnement actif → "Essai · X missions"
+ *  - Forfait illimité (Volume, All Inclusive, Cabinet, tiers V3 ≥ active) →
+ *    "X missions · Illimité" (pas de ratio, pas de jauge)
+ *  - Forfait avec quota (Essential, Découverte, Pro) →
+ *    "X / N missions" + badge orange si dépassement
  */
 export async function UsageWidget() {
   const { supabase, orgId } = await getCurrentUser()
@@ -41,6 +48,37 @@ export async function UsageWidget() {
         <CreditCard className="size-3.5" />
         <span>
           Essai · {count} mission{count > 1 ? 's' : ''}
+        </span>
+      </Link>
+    )
+  }
+
+  // Tiers "illimité" : Volume legacy, All Inclusive, Cabinet, ou seuil >= 9000
+  // (la subscription seed du compte démo affiche missions_included=99999
+  // ce qui n'a pas de sens à afficher tel quel).
+  const unlimitedTiers = new Set<string>([
+    'volume',
+    'all_inclusive',
+    'all_inclusive_legacy',
+    'cabinet',
+    'cabinet_legacy',
+    'logiciel_active',
+    'logiciel_cabinet',
+    'logiciel_enterprise',
+  ])
+  const isUnlimited =
+    unlimitedTiers.has(sub.tier ?? '') || (included !== null && included >= 9000)
+
+  if (isUnlimited) {
+    return (
+      <Link
+        href="/dashboard/account"
+        className="hidden md:inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md hover:bg-cream-deep transition-colors"
+        title="Forfait illimité"
+      >
+        <InfinityIcon className="size-3.5 text-ink-mute" strokeWidth={1.5} />
+        <span className="text-ink-mute">
+          {count} mission{count > 1 ? 's' : ''} · Illimité
         </span>
       </Link>
     )

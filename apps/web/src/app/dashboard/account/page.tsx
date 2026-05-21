@@ -66,6 +66,8 @@ async function loadValidWinbackCode(
 
 interface AccountSearchParams {
   reactivate?: string
+  /** ?expired=1 → bannière "Essai expiré, choisissez un forfait" en haut de page. */
+  expired?: string
 }
 
 /**
@@ -230,6 +232,8 @@ export default async function AccountPage({
       }
     : null
 
+  const expired = sp.expired === '1'
+
   return (
     <div className="space-y-6 animate-fade-in">
       {winbackValid && (
@@ -240,6 +244,22 @@ export default async function AccountPage({
           expiresAt={winbackValid.expiresAt}
         />
       )}
+
+      {expired ? (
+        <div
+          role="alert"
+          className="rounded-xl border border-amber-300/80 bg-amber-50 px-4 py-3 sm:px-5 sm:py-4"
+        >
+          <p className="font-sans text-[15px] font-semibold text-amber-900">
+            Votre essai gratuit est arrivé à échéance.
+          </p>
+          <p className="mt-1 text-[13px] text-amber-900/85">
+            Pour continuer à utiliser KOVAS 360, choisissez un forfait ci-dessous et
+            enregistrez un moyen de paiement. Vos données sont conservées : la
+            réactivation est immédiate.
+          </p>
+        </div>
+      ) : null}
 
       <AppPageHeader
         title="Vos"
