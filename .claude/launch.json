@@ -2,23 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "Next.js web (PWA)",
-      "runtimeExecutable": "/usr/bin/env",
-      "runtimeArgs": [
-        "-C",
-        "/Users/benjaminbel/Desktop/KOVAS/apps/web",
-        "/usr/local/bin/node",
-        "/Users/benjaminbel/Desktop/KOVAS/apps/web/node_modules/next/dist/bin/next",
-        "dev",
-        "--turbopack"
-      ],
+      "name": "kovas-web",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": ["pnpm", "-F", "@kovas/web", "dev"],
       "port": 3000
-    },
-    {
-      "name": "Supabase local (Postgres + Auth + Storage + Studio)",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["supabase", "start"],
-      "port": 54321
     }
   ]
 }
