@@ -38,7 +38,7 @@ export function AddToHomeScreen() {
   if (!show || isStandalone || !isIos) return null
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 p-4 md:p-6">
+    <div className="above-mobile-nav fixed inset-x-0 z-50 p-4 md:p-6">
       <div className="mx-auto max-w-md glass-opaque rounded-xl p-6 shadow-glass-sm ring-1 ring-rule/80">
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-ink">

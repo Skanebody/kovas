@@ -114,7 +114,7 @@ export function PostPhotoActionBar({
             className="size-10 shrink-0 rounded-lg border border-rule object-cover"
           />
         ) : (
-          <div className="size-10 shrink-0 rounded-lg border border-rule bg-cream-deep/40" />
+          <div className="size-10 shrink-0 rounded-lg border border-rule bg-sage-alt/40" />
         )}
 
         {/* Boutons */}

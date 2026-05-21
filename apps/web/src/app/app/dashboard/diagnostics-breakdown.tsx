@@ -29,7 +29,7 @@ export async function DiagnosticsBreakdown() {
       label: MISSION_TYPE_LABELS[type] ?? type,
       count,
       pct: total > 0 ? Math.round((count / total) * 100) : 0,
-      barClass: MISSION_PASTEL_CLASS[type as MissionType] ?? 'bg-cream-deep',
+      barClass: MISSION_PASTEL_CLASS[type as MissionType] ?? 'bg-sage-alt',
     }))
     .sort((a, b) => b.count - a.count)
 
@@ -60,7 +60,7 @@ export async function DiagnosticsBreakdown() {
                     {r.count} · {r.pct}%
                   </span>
                 </div>
-                <div className="h-1.5 rounded-full bg-cream-deep overflow-hidden">
+                <div className="h-1.5 rounded-full bg-sage-alt overflow-hidden">
                   <div
                     className={cn('h-full transition-all', r.barClass)}
                     style={{ width: `${r.pct}%` }}

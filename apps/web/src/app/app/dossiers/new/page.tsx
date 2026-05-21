@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { DossierForm } from './dossier-form'
+import { DossierWizard } from './dossier-wizard'
 
 export const metadata: Metadata = { title: 'Nouveau RDV' }
 
@@ -43,10 +43,10 @@ export default async function NewDossierPage({
         title="Nouveau RDV"
         accent="dossier"
         eyebrow="📞 PRISE DE RDV · 90 SECONDES CHRONO"
-        description="Optimisé pour saisir pendant l'appel — adresse BAN autocomplete, contact en 3 champs, pack en 1 clic. Tout se crée d'un coup à la validation."
+        description="Wizard 3 étapes — bien & client, diagnostics & créneau, confirmation. Tout se crée d'un coup à la validation."
       />
 
-      <DossierForm
+      <DossierWizard
         properties={properties ?? []}
         clients={clients ?? []}
         defaultPropertyId={params.propertyId}

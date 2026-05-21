@@ -102,7 +102,7 @@ function StepperHeader({
               className={cn(
                 'group flex items-center gap-2 rounded-pill border px-2.5 py-1 transition-colors',
                 isCurrent && 'bg-chartreuse text-ink border-chartreuse',
-                isDone && 'bg-navy text-paper border-navy hover:bg-navy/90 cursor-pointer',
+                isDone && 'bg-[#0F1419] text-paper border-[#0F1419] hover:bg-[#0F1419]/90 cursor-pointer',
                 isFuture && 'bg-paper text-ink-mute border-rule cursor-default',
               )}
             >
@@ -110,8 +110,8 @@ function StepperHeader({
                 className={cn(
                   'inline-flex size-5 items-center justify-center rounded-full text-[10px] font-bold',
                   isCurrent && 'bg-ink text-chartreuse',
-                  isDone && 'bg-paper text-navy',
-                  isFuture && 'bg-cream-deep text-ink-mute',
+                  isDone && 'bg-paper text-ink',
+                  isFuture && 'bg-sage-alt text-ink-mute',
                 )}
               >
                 {isDone ? <Check className="size-3" strokeWidth={3} /> : s.id}
@@ -125,7 +125,7 @@ function StepperHeader({
             </button>
             {!isLast && (
               <ChevronRight
-                className={cn('size-3 shrink-0', isDone ? 'text-navy' : 'text-ink-mute')}
+                className={cn('size-3 shrink-0', isDone ? 'text-ink' : 'text-ink-mute')}
                 aria-hidden
               />
             )}
@@ -253,7 +253,7 @@ function ImportItem({
 }) {
   return (
     <li className="flex items-start gap-3">
-      <span className="inline-flex size-8 items-center justify-center rounded-lg bg-cream-deep/60 text-ink-soft shrink-0">
+      <span className="inline-flex size-8 items-center justify-center rounded-lg bg-sage-alt/60 text-ink-soft shrink-0">
         <Icon className="size-4" />
       </span>
       <div className="flex-1 min-w-0 space-y-0.5">
@@ -316,8 +316,8 @@ function Step2Export({
                   className={cn(
                     'inline-flex items-center gap-1.5 rounded-pill border px-3 py-1.5 text-xs font-medium transition-colors',
                     active
-                      ? 'bg-navy text-paper border-navy'
-                      : 'bg-paper text-ink border-rule hover:border-navy/40 hover:bg-cream-deep/40',
+                      ? 'bg-[#0F1419] text-paper border-[#0F1419]'
+                      : 'bg-paper text-ink border-rule hover:border-[#0F1419]/40 hover:bg-sage-alt/40',
                   )}
                 >
                   <span
@@ -371,7 +371,7 @@ function Step2Export({
                   href={link.href}
                   target={link.href.startsWith('http') ? '_blank' : undefined}
                   rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
-                  className="inline-flex items-center gap-1.5 rounded-pill border border-rule bg-paper px-3 py-1.5 text-xs font-medium text-ink hover:border-navy/40 hover:bg-cream-deep/40 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-pill border border-rule bg-paper px-3 py-1.5 text-xs font-medium text-ink hover:border-[#0F1419]/40 hover:bg-sage-alt/40 transition-colors"
                 >
                   <Icon className="size-3.5" /> {link.label}
                 </a>
@@ -403,7 +403,7 @@ function TutoStepCard({ step }: { step: TutoStepContent }) {
   return (
     <li className="rounded-xl border border-rule bg-paper p-4 space-y-2">
       <div className="flex items-start gap-3">
-        <span className="inline-flex size-7 items-center justify-center rounded-full bg-navy text-paper text-xs font-bold shrink-0">
+        <span className="inline-flex size-7 items-center justify-center rounded-full bg-[#0F1419] text-paper text-xs font-bold shrink-0">
           {step.num}
         </span>
         <div className="flex-1 min-w-0 space-y-1.5">
@@ -418,7 +418,7 @@ function TutoStepCard({ step }: { step: TutoStepContent }) {
           )}
         </div>
         {step.screenshot && (
-          <div className="hidden md:flex shrink-0 items-center justify-center size-24 rounded-lg border border-dashed border-rule bg-cream-deep/40 text-[10px] text-ink-mute font-mono">
+          <div className="hidden md:flex shrink-0 items-center justify-center size-24 rounded-lg border border-dashed border-rule bg-sage-alt/40 text-[10px] text-ink-mute font-mono">
             {/* TODO — capture {step.screenshot}.png à ajouter dans /public/tutos/ */}
             capture
             <br />à venir
@@ -443,7 +443,7 @@ function renderTutoBody(text: string): React.ReactNode {
     if (seg.startsWith('`') && seg.endsWith('`')) {
       return (
         // biome-ignore lint/suspicious/noArrayIndexKey: static segmentation
-        <code key={i} className="font-mono text-xs bg-cream-deep/60 px-1 py-0.5 rounded">
+        <code key={i} className="font-mono text-xs bg-sage-alt/60 px-1 py-0.5 rounded">
           {seg.slice(1, -1)}
         </code>
       )

@@ -1,0 +1,219 @@
+'use client'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
+import { MissionTypeTag } from '@/components/ui/mission-type-tag'
+import {
+  type CalendarEvent,
+  DAY_NAMES_LONG,
+  MONTH_NAMES,
+  STATUS_LABELS,
+  STATUS_VARIANT,
+  isWeekend,
+  sameDay,
+} from '@/lib/calendar/shared'
+import { cn } from '@/lib/utils'
+import { CalendarPlus, ChevronRight, MapPin } from 'lucide-react'
+import Link from 'next/link'
+import { useMemo } from 'react'
+
+interface AgendaViewProps {
+  /** Date pivot — la vue affiche typiquement la semaine ou le mois courant. */
+  anchor: Date
+  /** Plage de dates à inclure (par exemple semaine ou mois) — events seront filtrés. */
+  rangeStart: Date
+  rangeEnd: Date
+  events: CalendarEvent[]
+  onSelectEvent: (event: CalendarEvent) => void
+}
+
+export function AgendaView({ rangeStart, rangeEnd, events, onSelectEvent }: AgendaViewProps) {
+  const today = new Date()
+
+  // Filtrage + groupement par jour.
+  const groupedDays = useMemo(() => {
+    const filtered = events
+      .filter((ev) => {
+        const t = new Date(ev.scheduledAt).getTime()
+        return t >= rangeStart.getTime() && t <= rangeEnd.getTime()
+      })
+      .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
+
+    const map: Map<string, { date: Date; events: CalendarEvent[] }> = new Map()
+    for (const ev of filtered) {
+      const d = new Date(ev.scheduledAt)
+      const key = d.toDateString()
+      if (!map.has(key)) {
+        map.set(key, { date: d, events: [] })
+      }
+      map.get(key)?.events.push(ev)
+    }
+    return Array.from(map.values())
+  }, [events, rangeStart, rangeEnd])
+
+  if (groupedDays.length === 0) {
+    return (
+      <div className="rounded-2xl border border-rule/70 bg-[#F5F7F4] overflow-hidden">
+        <EmptyState
+          icon={CalendarPlus}
+          title="Agenda vide"
+          description="Aucun rendez-vous sur la période sélectionnée. Élargissez la fenêtre ou planifiez un nouveau RDV."
+          action={
+            <Button asChild variant="accent" size="sm">
+              <Link href="/app/dossiers/new">
+                <CalendarPlus className="size-4" /> Planifier un rendez-vous
+              </Link>
+            </Button>
+          }
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-2xl border border-rule/70 bg-paper overflow-hidden">
+      <div className="divide-y divide-rule/40">
+        {groupedDays.map(({ date, events: dayEvents }) => {
+          const isToday = sameDay(date, today)
+          const dayLabel = formatDayHeader(date, isToday)
+          const showWeekendBadge = isWeekend(date)
+          return (
+            <section key={date.toISOString()}>
+              <div
+                className={cn(
+                  'sticky top-0 z-10 px-3 sm:px-4 py-2 border-b border-rule/40 flex items-center justify-between gap-2 flex-wrap',
+                  'bg-sage-alt/80 backdrop-blur-md',
+                  isToday && 'bg-chartreuse/[0.12]',
+                )}
+              >
+                <h3
+                  className={cn(
+                    'text-[13px] font-semibold capitalize',
+                    isToday ? 'text-ink' : 'text-ink-soft',
+                  )}
+                >
+                  {dayLabel}
+                </h3>
+                <div className="flex items-center gap-2">
+                  {showWeekendBadge && (
+                    <Badge variant="amber" className="text-[9px]">
+                      Weekend · majoration +50€
+                    </Badge>
+                  )}
+                  <span className="text-[10px] font-mono text-ink-mute tabular-nums">
+                    {dayEvents.length} RDV
+                  </span>
+                </div>
+              </div>
+              <ul className="divide-y divide-rule/30">
+                {dayEvents.map((ev) => (
+                  <AgendaRow key={ev.dossierId} event={ev} onClick={() => onSelectEvent(ev)} />
+                ))}
+              </ul>
+            </section>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function formatDayHeader(date: Date, isToday: boolean): string {
+  const dayName = DAY_NAMES_LONG[date.getDay() === 0 ? 6 : date.getDay() - 1]
+  const month = MONTH_NAMES[date.getMonth()]
+  const base = `${dayName} ${date.getDate()} ${month}`
+  if (isToday) return `${base} · Aujourd'hui`
+  return base
+}
+
+interface AgendaRowProps {
+  event: CalendarEvent
+  onClick: () => void
+}
+
+function AgendaRow({ event, onClick }: AgendaRowProps) {
+  const start = new Date(event.scheduledAt)
+  const end = new Date(start.getTime() + event.durationMinutes * 60_000)
+  const timeStart = start.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Europe/Paris',
+  })
+  const timeEnd = end.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Europe/Paris',
+  })
+  const addressLine = [event.address, event.city].filter(Boolean).join(', ')
+  const isCancelled = event.status === 'cancelled'
+
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          'w-full text-left px-3 sm:px-4 py-3 hover:bg-[#0F1419]/[0.04] transition-colors',
+          'flex items-start gap-3',
+          isCancelled && 'opacity-60',
+        )}
+      >
+        {/* Heure */}
+        <div className="shrink-0 w-20 sm:w-24">
+          <div className="font-mono font-semibold tabular-nums text-ink text-[12px]">
+            {timeStart}
+          </div>
+          <div className="font-mono tabular-nums text-ink-mute text-[10px]">→ {timeEnd}</div>
+        </div>
+
+        {/* Contenu central */}
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={cn(
+                'font-semibold text-ink text-[13px] truncate',
+                isCancelled && 'line-through decoration-1',
+              )}
+            >
+              {event.clientName ?? 'Sans client'}
+            </span>
+            <Badge
+              variant={STATUS_VARIANT[event.status] ?? 'muted'}
+              className="text-[9px] px-1.5 py-0 leading-tight"
+            >
+              {STATUS_LABELS[event.status] ?? event.status}
+            </Badge>
+          </div>
+
+          {addressLine && (
+            <div className="flex items-center gap-1 text-[11px] text-ink-mute">
+              <MapPin className="size-3 shrink-0" />
+              <span className="truncate">{addressLine}</span>
+            </div>
+          )}
+
+          {event.missionTypes.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {event.missionTypes.map((t) => (
+                <MissionTypeTag
+                  key={t}
+                  type={t}
+                  size="short"
+                  className="text-[9px] px-1.5 py-0.5"
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="font-mono text-[9px] text-ink-mute/70 uppercase tracking-wider">
+            {event.reference}
+          </div>
+        </div>
+
+        {/* Chevron */}
+        <ChevronRight className="size-4 text-ink-mute/60 shrink-0 mt-1" aria-hidden />
+      </button>
+    </li>
+  )
+}

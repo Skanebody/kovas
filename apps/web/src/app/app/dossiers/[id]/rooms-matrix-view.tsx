@@ -104,7 +104,7 @@ export function RoomsMatrixView({
             id={`room-${room.id}`}
             variant="opaque"
             padding="none"
-            className={cn('scroll-mt-20', isOpen ? 'border-navy/25' : '')}
+            className={cn('scroll-mt-20', isOpen ? 'border-[#0F1419]/25' : '')}
           >
             <button
               type="button"

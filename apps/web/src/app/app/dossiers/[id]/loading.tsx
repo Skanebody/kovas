@@ -3,11 +3,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 
 function SkelLine({ className }: { className?: string }) {
-  return <div className={`h-3 rounded-md bg-cream-deep/80 animate-pulse ${className ?? ''}`} />
+  return <div className={`h-3 rounded-md bg-sage-alt/80 animate-pulse ${className ?? ''}`} />
 }
 
 function SkelBlock({ className }: { className?: string }) {
-  return <div className={`rounded-lg bg-cream-deep/80 animate-pulse ${className ?? ''}`} />
+  return <div className={`rounded-lg bg-sage-alt/80 animate-pulse ${className ?? ''}`} />
 }
 
 /**

@@ -59,7 +59,7 @@ export function AddMissionButton({ dossierId, existingTypes }: AddMissionButtonP
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="glass" size="sm" disabled={pending}>
+          <Button variant="outline" size="sm" disabled={pending}>
             {triggerLabel}
           </Button>
         </DropdownMenuTrigger>
@@ -93,7 +93,7 @@ export function AddMissionButton({ dossierId, existingTypes }: AddMissionButtonP
   // Mobile : bottom sheet
   return (
     <>
-      <Button variant="glass" size="sm" disabled={pending} onClick={() => setSheetOpen(true)}>
+      <Button variant="outline" size="sm" disabled={pending} onClick={() => setSheetOpen(true)}>
         {triggerLabel}
       </Button>
       <BottomSheet

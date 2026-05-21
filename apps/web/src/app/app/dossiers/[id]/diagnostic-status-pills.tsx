@@ -35,10 +35,10 @@ function statusColor(pct: number): {
     }
   if (pct >= 25)
     return {
-      dot: 'bg-accent-orange',
+      dot: 'bg-accent-warm',
       text: 'text-ink',
-      border: 'border-accent-orange/30',
-      bg: 'bg-accent-orange/5',
+      border: 'border-accent-warm/30',
+      bg: 'bg-accent-warm/5',
     }
   return {
     dot: 'bg-accent-red',

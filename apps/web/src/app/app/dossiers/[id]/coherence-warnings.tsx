@@ -9,7 +9,7 @@ interface CoherenceWarningsProps {
 
 const SEVERITY_STYLES: Record<CoherenceWarning['severity'], string> = {
   info: 'text-ink-mute',
-  warning: 'text-accent-orange',
+  warning: 'text-accent-warm',
   error: 'text-accent-red',
 }
 

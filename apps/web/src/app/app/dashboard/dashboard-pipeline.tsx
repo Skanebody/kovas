@@ -1,178 +1,168 @@
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DiagChip } from '@/components/ui/diag-chip'
+import { Card } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { cn } from '@/lib/utils'
-import type { MissionType } from '@kovas/shared'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
-interface MissionRow {
-  id: string
-  type: string
-  reference: string
-  status: string
-  dossier_id: string
-  scheduled_at: string | null
-  client_name: string | null
-  property_city: string | null
+interface PipelineStage {
+  key: string
+  label: string
+  count: number
+  valueCents?: number
+  valueOverride?: string
 }
 
-const COLUMNS = [
-  {
-    id: 'todo' as const,
-    label: 'À démarrer',
-    statuses: ['draft', 'scheduled'] as string[],
-    accent: 'bg-accent-blue/40',
-  },
-  {
-    id: 'in_progress' as const,
-    label: 'En cours',
-    statuses: ['in_progress'] as string[],
-    accent: 'bg-accent-orange',
-  },
-  {
-    id: 'to_finalize' as const,
-    label: 'À finaliser',
-    statuses: ['to_review'] as string[],
-    accent: 'bg-accent-green',
-  },
-  {
-    id: 'done' as const,
-    label: 'Terminé',
-    statuses: ['done', 'exported'] as string[],
-    accent: 'bg-subtle-foreground',
-  },
-] as const
+function formatEurosCompact(cents: number): string {
+  const eur = cents / 100
+  return `${eur.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} € HT`
+}
 
 /**
- * Pipeline Kanban horizontal 4 colonnes — vue semaine + jours adjacents.
- * Pas de drag-and-drop V1. Tap card = ouvre la mission.
+ * Section 04 — Pipeline commercial.
+ *
+ * Refonte stages-grid style mockup. 4 stages côte à côte :
+ *   1. Devis envoyés (quotes status='sent' depuis 30j)
+ *   2. Devis consultés (proxy 65% — vrai tracking V1.5)
+ *   3. Devis signés (quotes status='accepted' depuis 30j)
+ *   4. RDV planifiés (dossiers scheduled 7 jours à venir)
+ *
+ * Chaque stage : label mono uppercase + count en mono 28px + valeur HT en mono
+ * 11px + barre proportionnelle (max = 100%, autres relatifs).
  */
 export async function DashboardPipeline() {
   const { supabase, orgId } = await getCurrentUser()
-  const sinceIso = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
+  const now = Date.now()
+  const dayMs = 24 * 3600 * 1000
+  const thirtyDaysAgo = new Date(now - 30 * dayMs).toISOString()
+  const sevenDaysAhead = new Date(now + 7 * dayMs).toISOString()
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
-  const { data: missions } = await supabase
-    .from('missions')
-    .select(
-      'id, type, reference, status, dossier_id, dossiers(scheduled_at, clients(display_name), properties(city))',
-    )
-    .eq('organization_id', orgId)
-    .is('deleted_at', null)
-    .in('status', ['draft', 'scheduled', 'in_progress', 'to_review', 'done', 'exported'])
-    .gte('created_at', sinceIso)
-    .order('created_at', { ascending: false })
-    .limit(60)
+  type QuoteRow = { total_ht_cents: number }
 
-  const rows: MissionRow[] = (missions ?? []).map((m) => {
-    const d = Array.isArray(m.dossiers) ? m.dossiers[0] : m.dossiers
-    const client = Array.isArray(d?.clients) ? d?.clients[0] : d?.clients
-    const prop = Array.isArray(d?.properties) ? d?.properties[0] : d?.properties
-    return {
-      id: m.id,
-      type: m.type,
-      reference: m.reference,
-      status: m.status,
-      dossier_id: m.dossier_id,
-      scheduled_at: d?.scheduled_at ?? null,
-      client_name: client?.display_name ?? null,
-      property_city: prop?.city ?? null,
-    }
-  })
-
-  const byColumn = new Map<string, MissionRow[]>(COLUMNS.map((c) => [c.id, []]))
-  for (const r of rows) {
-    for (const col of COLUMNS) {
-      if (col.statuses.includes(r.status)) {
-        byColumn.get(col.id)?.push(r)
-        break
+  const [sentRes, signedRes, scheduledRes] = await Promise.all([
+    (
+      supabase as unknown as {
+        from: (t: string) => {
+          select: (cols: string) => {
+            eq: (col: string, val: string) => {
+              eq: (col2: string, val2: string) => {
+                gte: (col: string, val: string) => Promise<{ data: QuoteRow[] | null }>
+              }
+            }
+          }
+        }
       }
-    }
-  }
-  // Terminé : limite à 5 récents pour éviter de noyer le pipeline
-  const done = byColumn.get('done') ?? []
-  byColumn.set('done', done.slice(0, 5))
+    )
+      .from('quotes')
+      .select('total_ht_cents')
+      .eq('organization_id', orgId)
+      .eq('status', 'sent')
+      .gte('sent_at', thirtyDaysAgo),
+    (
+      supabase as unknown as {
+        from: (t: string) => {
+          select: (cols: string) => {
+            eq: (col: string, val: string) => {
+              eq: (col2: string, val2: string) => {
+                gte: (col: string, val: string) => Promise<{ data: QuoteRow[] | null }>
+              }
+            }
+          }
+        }
+      }
+    )
+      .from('quotes')
+      .select('total_ht_cents')
+      .eq('organization_id', orgId)
+      .eq('status', 'accepted')
+      .gte('accepted_at', thirtyDaysAgo),
+    supabase
+      .from('dossiers')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .gte('scheduled_at', today.toISOString())
+      .lt('scheduled_at', sevenDaysAhead),
+  ])
+
+  const sentRows = sentRes.data ?? []
+  const sentCount = sentRows.length
+  const sentSum = sentRows.reduce((a, r) => a + (r.total_ht_cents ?? 0), 0)
+
+  // V1 : "Consultés" = proxy 65% des envoyés (taux ouverture B2B moyen).
+  // TODO V1.5 : remplacer par vrai tracking viewed_at sur quotes.
+  const consultedCount = Math.round(sentCount * 0.65)
+  const consultedSum = Math.round(sentSum * 0.65)
+
+  const signedRows = signedRes.data ?? []
+  const signedCount = signedRows.length
+  const signedSum = signedRows.reduce((a, r) => a + (r.total_ht_cents ?? 0), 0)
+
+  const rdvCount = scheduledRes.count ?? 0
+
+  const stages: PipelineStage[] = [
+    { key: 'sent', label: 'Devis envoyés', count: sentCount, valueCents: sentSum },
+    { key: 'consulted', label: 'Consultés', count: consultedCount, valueCents: consultedSum },
+    { key: 'signed', label: 'Signés', count: signedCount, valueCents: signedSum },
+    {
+      key: 'scheduled',
+      label: 'RDV planifiés',
+      count: rdvCount,
+      valueOverride: 'cette semaine',
+    },
+  ]
+
+  const maxCount = Math.max(1, ...stages.map((s) => s.count))
 
   return (
-    <Card variant="opaque" padding="default">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute">
-          Pipeline de la semaine
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {COLUMNS.map((col) => {
-            const cards = byColumn.get(col.id) ?? []
-            return (
-              <div
-                key={col.id}
-                className="rounded-xl border border-rule/80 bg-cream/60 p-2 min-h-[180px] flex flex-col"
-              >
-                <div className="flex items-center justify-between px-1 pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className={cn('size-2 rounded-full', col.accent)} aria-hidden />
-                    <span className="text-xs font-semibold uppercase tracking-wide">
-                      {col.label}
-                    </span>
-                  </div>
-                  <Badge variant="muted" className="text-[10px] py-0">
-                    {cards.length}
-                  </Badge>
-                </div>
-                {cards.length === 0 ? (
-                  <p className="text-xs text-ink-mute italic px-1 py-3">—</p>
-                ) : (
-                  <ul className="space-y-1.5">
-                    {cards.map((r) => (
-                      <li key={r.id}>
-                        <Link
-                          href={`/app/dossiers/${r.dossier_id}#mission-${r.id}`}
-                          className="flex items-stretch gap-2 rounded-lg bg-paper/90 hover:bg-ink/5 transition-colors duration-fast overflow-hidden border border-rule/60"
-                        >
-                          <span className={cn('w-1 shrink-0', col.accent)} aria-hidden />
-                          <div className="flex-1 min-w-0 py-2 pr-2 space-y-0.5">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <DiagChip type={r.type as MissionType} />
-                              <span className="text-[10px] font-mono text-ink-mute">
-                                {r.reference}
-                              </span>
-                            </div>
-                            <div className="text-xs font-medium truncate">
-                              {r.client_name ?? 'Sans client'}
-                            </div>
-                            <div className="text-[10px] text-ink-mute truncate">
-                              {r.property_city ?? ''}
-                              {r.scheduled_at && (
-                                <>
-                                  {r.property_city && ' · '}
-                                  {new Date(r.scheduled_at).toLocaleDateString('fr-FR', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                  })}
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+    <Card variant="opaque" padding="none" className="flex flex-col">
+      <header className="flex items-center justify-between gap-3 border-b border-rule/60 px-5 py-4">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] font-semibold text-ink">
+          <span className="text-ink-mute">04 ·</span> Pipeline commercial
+        </p>
+        <Link
+          href="/app/dossiers"
+          className="font-mono text-[11px] text-ink-mute border-b border-rule pb-0.5 hover:text-ink hover:border-ink transition-colors inline-flex items-center gap-1"
+        >
+          Voir les dossiers <ArrowRight className="size-3" />
+        </Link>
+      </header>
+
+      <div className="grid grid-cols-2 md:grid-cols-4">
+        {stages.map((stage, idx) => {
+          const pct = (stage.count / maxCount) * 100
+          const isLast = idx === stages.length - 1
+          const valueLabel =
+            stage.valueOverride ??
+            (stage.valueCents !== undefined ? formatEurosCompact(stage.valueCents) : '')
+          return (
+            <div
+              key={stage.key}
+              className={cn(
+                'p-4',
+                !isLast && idx % 2 === 0 && 'border-r border-rule/60',
+                !isLast && idx % 2 === 1 && 'md:border-r border-rule/60',
+                idx < 2 && 'border-b md:border-b-0 border-rule/60',
+              )}
+            >
+              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-mute mb-3 min-h-[14px]">
+                {stage.label}
+              </p>
+              <p className="font-mono text-[28px] font-medium text-ink leading-none tabular-nums">
+                {stage.count}
+              </p>
+              <p className="font-mono text-[11px] text-ink-mute mt-2">{valueLabel}</p>
+              <div className="mt-3 h-[2px] bg-rule/40 overflow-hidden">
+                <div
+                  className="h-full bg-[#0F1419] transition-all"
+                  style={{ width: `${pct}%` }}
+                />
               </div>
-            )
-          })}
-        </div>
-        <div className="flex justify-end mt-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/app/dossiers">
-              Tous les dossiers <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
-      </CardContent>
+            </div>
+          )
+        })}
+      </div>
     </Card>
   )
 }

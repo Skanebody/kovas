@@ -10,7 +10,9 @@ type AppListTableProps = {
 export function AppListTable({ children, className }: AppListTableProps) {
   return (
     <div className={cn('glass-opaque rounded-lg overflow-hidden', className)}>
-      <table className="w-full text-[13px] text-ink-soft">{children}</table>
+      <div className="overflow-x-auto">
+        <table className="w-full text-[13px] text-ink-soft min-w-[560px]">{children}</table>
+      </div>
     </div>
   )
 }

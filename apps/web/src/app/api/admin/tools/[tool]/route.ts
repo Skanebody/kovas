@@ -16,6 +16,11 @@
 
 import { withAuditWrapper } from '@/lib/admin/admin-actions-wrapper'
 import { verifyAdminAccess } from '@/lib/admin/admin-middleware'
+import {
+  computeAndSendMonthlyReport,
+  createMonthlyReportsSupabaseClient,
+  previousMonth,
+} from '@/lib/reports/monthly-reports'
 import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 
@@ -32,6 +37,7 @@ const SUPPORTED_TOOLS = new Set([
   'refund-payment',
   'generate-invoice',
   'reset-missions',
+  'trigger-monthly-reports',
 ])
 
 export async function POST(request: Request, { params }: RouteParams) {
@@ -51,6 +57,14 @@ export async function POST(request: Request, { params }: RouteParams) {
     payload = ((await request.json().catch(() => ({}))) as Record<string, unknown>) ?? {}
   } catch {
     payload = {}
+  }
+
+  // Permet d'overrider via query string (utile pour ActionRunner sans inputField)
+  const qs = new URL(request.url).searchParams
+  for (const [k, v] of qs.entries()) {
+    if (!(k in payload)) {
+      payload[k] = v === 'true' ? true : v === 'false' ? false : v
+    }
   }
 
   const start = Date.now()
@@ -116,6 +130,38 @@ export async function POST(request: Request, { params }: RouteParams) {
         }
         case 'reset-missions': {
           resultMessage = 'Reset compteur missions : V1 log only (V2 action démo idempotente)'
+          break
+        }
+        case 'trigger-monthly-reports': {
+          // Test manuel : déclenche le rapport mensuel pour 1 org (ou toutes
+          // via clé `all=true`). Forçage même si déjà 'sent'.
+          // Payload : { organization_id?: string, year?: number, month?: number, force?: boolean, all?: boolean }
+          const orgId = typeof payload.organization_id === 'string' ? payload.organization_id : null
+          const all = payload.all === true
+          const force = payload.force === true
+          const now = new Date()
+          const def = previousMonth(now)
+          const year = typeof payload.year === 'number' ? payload.year : def.year
+          const month = typeof payload.month === 'number' ? payload.month : def.month
+
+          const supabase = createMonthlyReportsSupabaseClient()
+
+          if (all) {
+            const { runMonthlyReportsCron } = await import('@/lib/reports/monthly-reports')
+            const result = await runMonthlyReportsCron(supabase, now)
+            resultMessage = `Cron all: scanned=${result.organizations_scanned} sent=${result.emails_sent} skipped=${result.emails_skipped} failed=${result.emails_failed}`
+          } else if (orgId) {
+            const res = await computeAndSendMonthlyReport({
+              supabase,
+              organizationId: orgId,
+              year,
+              month,
+              force,
+            })
+            resultMessage = `Org ${orgId.slice(0, 8)}… ${year}-${String(month).padStart(2, '0')} : ${res.status}${res.reason ? ' — ' + res.reason : ''}`
+          } else {
+            resultMessage = 'trigger-monthly-reports : organization_id ou all=true requis'
+          }
           break
         }
       }

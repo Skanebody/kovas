@@ -16,16 +16,55 @@
 
 ## 1. Identité projet
 
+### 1.1. Convention de naming (verrouillée 2026-06-02)
+
+| Entité | Nom officiel | Périmètre |
+|---|---|---|
+| **Société éditrice** | KOVAS (SASU Nexus 1993) | Personne morale, mentions légales, juridique |
+| **Marque ombrelle** | KOVAS | Domaine `kovas.fr`, identité globale |
+| **Produit B2C — Annuaire** | **KOVAS Annuaire** | Service public gratuit de mise en relation particuliers ↔ diagnostiqueurs (pages `/`, `/diagnostiqueurs/*`, fiches publiques, formulaire devis B2C) |
+| **Produit B2B — Logiciel SaaS** | **KOVAS 360** | Logiciel SaaS payant pour diagnostiqueurs indépendants (page `/pour-les-diagnostiqueurs`, `/pricing`, application authentifiée `/app/*`, tous les Forfaits payants 19/29/39/99/149€) |
+
+**Rationale du nom KOVAS 360** :
+- Évoque vue à 360° / complet / tout-en-un — cohérent avec le pitch "saisie vocale + exports universels + conformité ADEME + facturation Factur-X + annuaire premium en un seul outil"
+- Sépare cognitivement annuaire (gratuit) du logiciel (payant) sans casser la marque ombrelle
+- Permet à la marque KOVAS d'héberger d'autres produits futurs (KOVAS Cabinet, KOVAS Marketplace…)
+
+**Convention rédactionnelle** :
+- Dans les CGV, mentions légales, charte diagnostiqueur, factures KOVAS → SaaS payant désigné par **« KOVAS 360 »** (avec espace, sans tiret)
+- Dans les Conditions B2C, Conditions Annuaire, Information RGPD préalable → annuaire désigné par **« KOVAS »** ou **« KOVAS Annuaire »** selon le contexte
+- Email signature support : **« L'équipe KOVAS 360 »** pour les tickets logiciel, **« L'équipe KOVAS »** pour les questions annuaire/particuliers
+- Logo : KOVAS (wordmark de base) + KOVAS 360 (variante avec suffixe 360 en typo mono plus petite, séparé par un demi-cadratin)
+
+### 1.2. Données société
+
+> **Source unique de vérité (code)** : [`apps/web/src/lib/legal/company-identity.ts`](apps/web/src/lib/legal/company-identity.ts) — exporte `COMPANY_IDENTITY`, `formatLegalMentions()`, `formatInvoiceFooter()`, `buildInvoiceLegalBlock()`. Toute modification SIRET/RCS/adresse/marques se fait là, et auto-propage dans footer / PDFs / emails.
+
 | Champ | Valeur |
 |---|---|
-| Produit | **KOVAS App** |
-| Société éditrice | SASU **Nexus 1993** (siège Paris 8, fondateur en Normandie) |
-| Fondateur | Benjamin Bel (solopreneur, 100% temps, ~24 mois runway) |
+| Produit B2C | **KOVAS Annuaire** (gratuit, public) |
+| Produit B2B | **KOVAS 360** (SaaS payant) |
+| Société éditrice | **NEXUS 1993** (SASU au capital de 500,00 €) |
+| Nom commercial historique | IDOL TALK (peut être abandonné — non utilisé en façade) |
+| Fondateur & Président | Benjamin BEL (solopreneur, 100% temps, ~24 mois runway) |
+| SIREN | 982 786 154 |
+| SIRET (siège) | 982 786 154 00012 |
+| TVA intracom | FR18982786154 |
+| RCS | 982 786 154 R.C.S. Paris (inscrit le 27/12/2023) |
+| Code APE/NAF | 58.29C — Édition de logiciels applicatifs |
+| Convention collective | IDCC 1486 — Bureaux d'études techniques et sociétés de conseils |
+| Adresse du siège | 66 Avenue des Champs Élysées, 75008 Paris, France |
+| Domiciliation | HelloDom |
+| Clôture exercice | 31/12 |
+| Greffe d'immatriculation | Tribunal de commerce de Paris |
+| Cour d'appel compétente | Cour d'appel de Paris |
 | Domaine | **kovas.fr** |
 | Date démarrage dev | avril 2026 |
 | Lancement public visé | **septembre-octobre 2026** |
-| Cible | ~13 000 diagnostiqueurs immobiliers indépendants FR |
-| Concurrence | Liciel (40-52% PdM, Enersweet/Pictet AM) + AnalysImmo + OBBC + ORIS |
+| Cible KOVAS 360 | ~13 000 diagnostiqueurs immobiliers indépendants FR |
+| Cible KOVAS Annuaire | Particuliers FR cherchant un diagnostiqueur (vendeurs, bailleurs, acheteurs) |
+| Concurrence KOVAS 360 | Liciel (40-52% PdM, Enersweet/Pictet AM) + AnalysImmo + OBBC + ORIS |
+| Concurrence KOVAS Annuaire | Pages Jaunes Pro, Annuaire DHUP (officiel mais sec) |
 
 ---
 
@@ -100,67 +139,67 @@
 
 ---
 
-## 4. Pricing intelligent — 4 tiers simplifiés
+## 4. Pricing all-you-can-eat — 5 tiers + fair-use (refonte P9 2026-05-28)
 
 ### Architecture
 
-**4 tiers** avec quotas missions inclus + surplus à l'usage. **AUCUN add-on activable**. Toutes les fonctionnalités sont incluses dans tous les tiers.
+**5 tiers** à prix fixe mensuel + **missions ILLIMITÉES** sous fair-use cap. AUCUN surplus à l'usage. Hard caps IA Whisper/Vision silencieux jusqu'au plafonnement.
 
-### Phase 1 — Compagnon (M1-M9)
+### Grille publique (Phase 1)
 
-| Tier | Prix HT/mo | Missions incluses | Surplus | Users | Stockage |
+| Code | Nom | Prix HT/mo | Diagnostics | IA & modules | Users | Storage | Soft cap missions/mo | Hard cap Whisper | Hard cap Vision | Burst /j |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `essential` | Essential | **9€** | DPE + Amiante + Carrez + ERP | Voice basique | 1 | 10 Go | 50 | 5h | — | 10 |
+| `decouverte` | Découverte | **19€** | 8 diagnostics complets | + IA Haiku | 1 | 20 Go | 100 | 15h | — | 20 |
+| `pro` | Pro (recommandé) | **35€** | 8 + Cockpit ADEME Mode 1 | + Vision IA + Reco F/G + sig 2€/ponc. | 1 | 50 Go | **200** | 30h | 200 | 30 |
+| `all_inclusive` | All Inclusive | **49€** | + Croquis Apple Pencil | + Analytics + Templates ∞ + 5 sig/mo + Pennylane + ADEME Mode 2 | 1 | 100 Go | 350 | 60h | 500 | 50 |
+| `cabinet` | Cabinet | **89€** | + Marketplace sous-traitance | + Reporting + Audit + Factur-X + Communauté | 3 | 200 Go | 500 | 120h | 1500 | 80 |
+
+**Annuel** : 2 mois offerts (10 mois payés sur 12) sur tous les tiers — prix annuel = `monthlyPrice × 10`.
+
+### Plans grandfather (rétrocompat à vie)
+
+Les utilisateurs existants restent sur leur ancien plan à vie. Codes `*_legacy`, jamais affichés en pricing public, lisibles en backend Stripe + DB :
+
+| Code | Display | Prix | Missions inclus | Surplus | Users |
 |---|---|---|---|---|---|
-| **Découverte** | **29€** | 20 | 2€/mission | 1 | 20 Go |
-| **Standard (recommandé)** | **59€** | 60 | 1,50€/mission | 1 | 50 Go |
-| **Volume** | **99€** | 150 | 1€/mission | 1 | 100 Go |
+| `decouverte_legacy` | Découverte (héritage) | 29€ | 20 | 2€ | 1 |
+| `standard_legacy` | Standard (héritage) | 59€ | 60 | 1,50€ | 1 |
+| `volume_legacy` | Volume (héritage) | 99€ | 150 | 1€ | 1 |
+| `founder_legacy` | Founder à vie ✦ | 49€ | 70 | 1€ | 1 |
+| `cabinet_legacy` | Cabinet (héritage) | 199€ | 400 | 0,80€ | 3 |
 
-### Phase 2 — Complet (M10-M18, après cert ADEME)
+Si user legacy souhaite changer → propose nouvelle grille avec calculateur "économies estimées" (pas de migration forcée).
 
-| Tier | Prix HT/mo | Missions | Surplus | Users |
-|---|---|---|---|---|
-| Standard Complet | **99€** | 60 | 1,50€ | 1 |
-| Volume Complet | **149€** | 150 | 1€ | 1 |
-| **Cabinet** | **199€** | 400 | 0,80€ | jusqu'à 3 |
+### Logique fair-use
 
-### Phase 3 — Augmenté (M19+)
+- **Soft cap missions** : visible UI, jamais blocant. Au-delà 3 mois consécutifs → email upgrade automatique.
+- **Hard cap Whisper/Vision** : silencieux jusqu'au plafonnement. Si atteint : toast "Limite IA mensuelle atteinte. Mode rapide reprend le 1er du mois prochain." + bascule en parser local. Aucun surplus facturé.
+- **Burst quotidien** : anti-abus rafale (botnet/script). Inutile en usage normal.
+- **1 SIRET = 1 compte** : Cabinet (3 users inclus) couvre le cas multi-diagnostiqueurs.
 
-| Tier | Prix HT/mo |
-|---|---|
-| Standard Augmenté | 149€ |
-| Volume Augmenté | 199€ |
-| Cabinet Augmenté | 299€ |
-| **Enterprise** (4-10 users) | 499€ |
-
-### Tarif Founder à vie (40-50 bêta-testeurs M6-M9)
-
-- **M6-M7** : accès gratuit total (1 mois, validation fonctionnelle)
-- **M7-M9** : tier Découverte à 29€/mo (validation économique willingness-to-pay)
-- **M9+** : **Standard Founder à vie = 49€/mo** (vs 59€ public) avec **70 missions inclus** (vs 60) et **surplus 1€/mission** (vs 1,50€)
-- **Cabinet Phase 2 Founder** : **169€/mo à vie** (vs 199€ public, rabais ~15%)
-- Badge Founder + accès anticipé Phase 2 + influence roadmap
-
-### Options ponctuelles (paiement à l'usage, AUCUN pack mensuel)
+### Options ponctuelles (paiement à l'usage)
 
 | Action | Tarif unitaire |
 |---|---|
-| Signature eIDAS Yousign (tiers Découverte/Standard/Volume) | **2€/signature** |
+| Signature eIDAS Yousign (Pro) | **2€/signature** |
 | Rapport bilingue FR/EN | **5€/rapport** |
 | SMS rappel client J-1 | **0,15€/SMS** |
 
-### Annuel : 2 mois offerts (10 mois payés sur 12) sur tous les tiers.
+All Inclusive inclut 5 signatures/mois. Cabinet : signatures illimitées + Factur-X.
 
 ---
 
-## 5. UX anti-friction paiement
+## 5. UX anti-friction paiement (refonte P9)
 
 | Composant | Comportement |
 |---|---|
-| **CB enregistrée 1 seule fois** (Stripe Customer + PaymentMethod) | Saisie à la conversion essai → payant. **Jamais redemandée** pour dépassements ou changement de tier |
-| **Widget transparence permanent** (dashboard, en haut à droite) | `Ce mois : 73 missions • 13 au-delà du forfait — Estimation : 78,50€ [Voir le détail]` — temps réel |
-| **Notifications positives aux seuils** | 80% : info contextuelle. 100% : valorisation gain de temps + suggestion upgrade. 150% : calcul économies upgrade explicite |
-| **Plafond mensuel auto-protecteur activable** | `Plafond max : [120€] — Au-delà, missions restent fonctionnelles mais branding KOVAS revient sur PDF` |
-| **Email récap mensuel transparent** (28 du mois) | Missions réalisées, temps économisé, détail facturation, prélèvement annoncé |
-| **Email "Tu paies trop" auto** | Si dépassement régulier 3 mois consécutifs → suggestion upgrade tier économique (même si MRR baisse temporairement) |
+| **CB enregistrée 1 seule fois** (Stripe Customer + PaymentMethod) | Saisie à la conversion essai → payant. Jamais redemandée — pas de surplus à facturer après tout. |
+| **Widget transparence permanent** (dashboard) | Nouveau plan : `142 missions ce mois · Forfait illimité ✓` (informationnel, mention cap fair-use). Plan grandfathered : affichage historique avec barre + estimation surplus. |
+| **Notifications fair-use** | Au dépassement du soft cap : aucune notification immédiate. Si 3 mois consécutifs au-dessus → email upgrade automatique au 1er du mois suivant. |
+| **Hard cap IA** | Silencieux jusqu'à atteinte. Toast "Limite IA mensuelle atteinte" + bascule parser local jusqu'au 1er du mois prochain. Pas de facture supplémentaire. |
+| **Email récap mensuel** (28 du mois) | Missions réalisées, temps économisé, prélèvement annoncé (= prix fixe forfait, donc identique chaque mois). |
+| **Email "Tu paies trop" auto** | Si 3 mois consécutifs au-dessus du soft cap → suggestion upgrade tier supérieur (Resend via Edge Function `fair-use-monthly-check`). |
 
 ---
 
@@ -189,7 +228,7 @@
 
 ### Conversion à J14
 
-- Choix : Découverte 29€ OU Standard 59€ OU Volume 99€
+- Choix : Essential 9€ / Découverte 19€ / Pro 35€ / All Inclusive 49€ / Cabinet 89€ (5 tiers nouvelle grille)
 - Sans conversion : compte gelé 90j, données conservées, réactivation possible
 
 ### Cibles conversion essai → payant (glissante)
@@ -200,18 +239,29 @@
 
 ---
 
-## 7. Économie réaliste
+## 7. Économie réaliste (refonte P9 — all-you-can-eat)
 
-### Marge brute par profil (Phase 1)
+### Marge brute par profil nouvelle grille (Phase 1)
 
-| Profil | Missions | Coûts variables | ARPU | Marge brute |
-|---|---|---|---|---|
-| Démarrant (Découverte) | 30 | ~8€ | 49€ (29+10×2) | **41€ (84%)** |
-| Solopreneur typique (Standard) | 75 | ~16€ | 81,50€ (59+15×1,50) | **65,50€ (80%)** |
-| Power user (Volume) | 110 | ~26€ | 99€ | **73€ (74%)** |
-| Cabinet Phase 2 (2 users) | 220 | ~48€ | 199€ | **151€ (76%)** |
+Modèle prix fixe : marge brute monte mécaniquement avec le volume (coûts variables IA progressifs mais bornés par hard caps).
 
-**ARPU moyen pondéré Phase 1** : ~75€/mo. **Marge brute moyenne : ~77%**.
+| Profil cible | Tier | Missions/mo typique | Coûts variables | ARPU | Marge brute |
+|---|---|---|---|---|---|
+| Curieux occasionnel | Essential 9€ | 15 | ~3€ | **9€** | **6€ (67%)** |
+| Démarrant | Découverte 19€ | 40 | ~6€ | **19€** | **13€ (68%)** |
+| Solopreneur typique | Pro 35€ | 80 | ~10€ | **35€** | **25€ (71%)** |
+| Power user | All Inclusive 49€ | 150 | ~17€ | **49€** | **32€ (65%)** |
+| Cabinet 2-3 users | Cabinet 89€ | 250 | ~28€ | **89€** | **61€ (69%)** |
+
+**ARPU moyen pondéré Phase 1 nouvelle grille** : ~**38€/mo** (mix 15% Essential / 25% Découverte / 35% Pro / 15% All Inclusive / 10% Cabinet). **Marge brute moyenne : ~69%** (vs 77% ancienne grille avec surplus).
+
+### Différence stratégique vs ancien modèle
+
+L'ARPU baisse (~75→38€) mais le **churn baisse aussi** (modèle prévisible vs stress du compteur), la **conversion essai→payant monte** (objection prix d'entrée 29€ → 9€), et la **viralité augmente** (recommandation pair-à-pair sur un produit "sans piège"). Hypothèse validée par 50 entretiens découverte M0-M5.
+
+### Plans grandfathered (lecture seule)
+
+Les anciens utilisateurs restent sur leur grille historique avec marge brute ~77% (cf. tableau précédent). Leur ARPU contribue à part entière au MRR mais ne représente plus la trajectoire future. Cf. `lib/pricing-plans.ts` → `LEGACY_PLANS`.
 
 ### 7bis. Stratégie d'autonomisation IA progressive sur 36 mois
 
@@ -235,23 +285,27 @@ Objectif : **marge brute 77% (M12) → 85%+ (M36)** via réduction progressive d
 
 **Métriques à tracker dès J0** : `ai.claude.cost_eur`, `ai.whisper.cost_eur`, `ai.cache_hit_rate`, `vision.user_correction_rate`, `ai.{operation}.latency_p95_ms`.
 
-### Projections corrigées
+### Projections corrigées P9 (all-you-can-eat)
+
+ARPU plus bas mais volume d'abonnés plus haut (prix d'entrée Essential 9€ démocratise l'accès, conversion essai→payant attendue à 30-35% vs 22-28% ancien modèle).
 
 | Horizon | Abonnés | ARPU moyen | MRR | ARR | Marge brute | Marge nette annuelle |
 |---|---|---|---|---|---|---|
-| **M12** | 140 | 70€ | 9 800€ | 117 600€ | ~90 600€ | **~85 800€** |
-| **M24** | 800 | 80€ | 64 000€ | 768 000€ | ~591 000€ | **~582 600€** |
-| **M36** | 2 100 | 110€ | 231 000€ | 2,77 M€ | ~2,15 M€ | **~2,13 M€** |
+| **M12** | 300 | 35€ | 10 500€ | 126 000€ | ~87 000€ | **~82 000€** |
+| **M24** | 1 800 | 42€ | 75 600€ | 907 200€ | ~626 000€ | **~617 000€** |
+| **M36** | 4 500 | 55€ | 247 500€ | 2,97 M€ | ~2,1 M€ | **~2,08 M€** |
 
-**Objectif révisé** : **1 M€ ARR à M24** (vs initial 500-600k€).
+Hypothèses : mix 15/25/35/15/10% sur les tiers nouvelle grille, ARPU moyen pondéré 38€ à M12 puis dérive vers 55€ à M36 (montée en gamme Pro→All Inclusive→Cabinet + montée Phase 2/3 modules).
 
-### CAC & LTV réalistes
+**Objectif révisé** : **1 M€ ARR à M24** maintenu (atteint par volume vs ARPU). Cible M36 : **3 M€ ARR**.
 
-- **CAC essai blended** : ~80€
-- **CAC payant blended** : ~400€ (conversion 22-28%)
-- **LTV** (24 mois moyenne à 80€/mois) : ~1 920€
-- **LTV/CAC** : **4,8** (cible standard SaaS B2B > 3, OK)
-- **Payback period** : **5 mois**
+### CAC & LTV (refonte P9)
+
+- **CAC essai blended** : ~50€ (essai sans CB = moins de friction acquisition)
+- **CAC payant blended** : ~150€ (conversion 30-35% nouveau modèle)
+- **LTV** (30 mois moyenne à 42€/mois — churn ↓ vs ancien modèle car prévisible) : ~1 260€
+- **LTV/CAC** : **8,4** (cible standard SaaS B2B > 3, excellent)
+- **Payback period** : **4 mois**
 
 ---
 
@@ -689,7 +743,7 @@ Anthropic Console / OpenAI Platform / Stripe / Supabase (Free → Pro M2 → PIT
 
 ### M1
 
-Apple Developer Program / **Google Play Developer** ($25 lifetime, créer tôt) / **INPI dépôt marque KOVAS** / LinkedIn Premium Business
+Apple Developer Program / **Google Play Developer** ($25 lifetime, créer tôt) / **INPI dépôt marques KOVAS + KOVAS 360 + KOVAS Annuaire** (classes 9 + 42, à planifier M1-M3) / LinkedIn Premium Business
 
 ### M2-M3
 

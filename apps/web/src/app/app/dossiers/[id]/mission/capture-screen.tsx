@@ -248,7 +248,7 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
               'mb-4 flex items-center justify-between gap-3 rounded-xl border px-4 py-2.5',
               failedCount > 0
                 ? 'border-accent-red/30 bg-accent-red/5'
-                : 'border-rule bg-cream-deep/30',
+                : 'border-rule bg-sage-alt/30',
             )}
           >
             <div className="flex items-center gap-2 text-sm text-ink">
@@ -526,10 +526,10 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
       className={cn(
         'group relative shrink-0 overflow-hidden rounded-xl',
         'h-20 w-20 sm:h-24 sm:w-24',
-        'border bg-cream-deep/40',
-        photo.isBlurry ? 'border-accent-orange/60' : 'border-rule',
+        'border bg-sage-alt/40',
+        photo.isBlurry ? 'border-accent-warm/60' : 'border-rule',
         'transition-transform hover:-translate-y-0.5 hover:shadow-md',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/40',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/40',
       )}
       title={
         photo.isBlurry
@@ -571,7 +571,7 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
         <span
           className={cn(
             'absolute bottom-1 left-1 inline-flex items-center gap-0.5',
-            'rounded-full bg-navy/90 px-1.5 py-0.5 text-paper shadow-sm backdrop-blur-sm',
+            'rounded-full bg-[#0F1419]/90 px-1.5 py-0.5 text-paper shadow-sm backdrop-blur-sm',
             'text-[10px]',
           )}
           aria-label={annotationBadgeLabel(annotations.voiceCount, annotations.textCount)}
@@ -587,7 +587,7 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
         <span
           className={cn(
             'absolute top-1 left-1 inline-flex items-center justify-center',
-            'h-5 w-5 rounded-full bg-accent-orange text-paper',
+            'h-5 w-5 rounded-full bg-accent-warm text-paper',
             'shadow-sm',
           )}
           aria-label="Photo floue"

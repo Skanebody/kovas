@@ -3,6 +3,7 @@
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { joinFullName } from '@/lib/name-utils'
 import { getEmailValidationMessage, validateProEmail } from '@/lib/validation/email'
 import {
   getSiretValidationMessage,
@@ -15,7 +16,8 @@ import type { Database } from '@kovas/database/types'
 const signupSchema = z.object({
   email: z.string().email('Email invalide'),
   password: z.string().min(8, '8 caractères minimum'),
-  fullName: z.string().min(2, 'Nom complet requis').max(80),
+  firstName: z.string().trim().min(1, 'Prénom requis').max(60),
+  lastName: z.string().trim().min(1, 'Nom requis').max(60),
   siret: z.string().min(1, 'SIRET requis'),
 })
 
@@ -30,7 +32,8 @@ export async function signupAction(
   const parsed = signupSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
-    fullName: formData.get('fullName'),
+    firstName: formData.get('firstName'),
+    lastName: formData.get('lastName'),
     siret: formData.get('siret'),
   })
 
@@ -89,16 +92,23 @@ export async function signupAction(
     }
     return {
       error:
-        'Votre cabinet a déjà bénéficié d\'un essai KOVAS. Choisissez un abonnement à partir de 29€/mois.',
+        'Votre cabinet a déjà bénéficié d\'un essai KOVAS 360. Choisissez un abonnement à partir de 29€/mois.',
     }
   }
+
+  // Recompose `full_name` pour compat schema legacy (cf. profiles trigger)
+  const fullName = joinFullName(parsed.data.firstName, parsed.data.lastName)
 
   // Création user (auto-confirm en V1 dev — cf. CLAUDE.md §6)
   const { data: createdUser, error: adminError } = await admin.auth.admin.createUser({
     email: parsed.data.email,
     password: parsed.data.password,
     email_confirm: true,
-    user_metadata: { full_name: parsed.data.fullName },
+    user_metadata: {
+      full_name: fullName,
+      first_name: parsed.data.firstName,
+      last_name: parsed.data.lastName,
+    },
   })
 
   if (adminError || !createdUser?.user) {

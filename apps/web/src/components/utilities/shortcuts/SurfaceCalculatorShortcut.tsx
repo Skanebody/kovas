@@ -14,7 +14,9 @@ export function SurfaceCalculatorShortcut() {
       asChild
       variant="default"
       size="icon"
-      className="fixed bottom-24 right-4 z-30 shadow-lg md:bottom-8"
+      // Mobile : bottom-24 (96px) = 32px au-dessus de mobile-nav (64px).
+      // Desktop (md+) : bottom-8. z-20 (FAB) selon scale.
+      className="fixed bottom-24 right-4 z-20 shadow-lg md:bottom-8"
       aria-label="Ouvrir la calculatrice de surface"
     >
       <Link href="/app/outils/calculatrice-surface" target="_blank" rel="noopener noreferrer">

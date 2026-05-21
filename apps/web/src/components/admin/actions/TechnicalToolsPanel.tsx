@@ -37,6 +37,22 @@ export function TechnicalToolsPanel() {
         description="Affiche les instructions CLI à exécuter en local"
         endpoint="/api/admin/tools/regen-types"
       />
+      <ActionRunner
+        label="Tester rapport mensuel (org)"
+        description="Calcule + envoie le rapport du mois précédent. Payload : organization_id. Force=true pour ré-envoi."
+        endpoint="/api/admin/tools/trigger-monthly-reports"
+        inputField={{
+          key: 'organization_id',
+          label: 'Organization ID',
+          placeholder: 'uuid d’une organisation',
+        }}
+      />
+      <ActionRunner
+        label="Déclencher cron rapports mensuels (toutes orgs)"
+        description="Simule le 1er du mois sur toutes les orgs actives (idempotent). Long si > 100 orgs."
+        endpoint="/api/admin/tools/trigger-monthly-reports?all=true"
+        confirm
+      />
     </Card>
   )
 }

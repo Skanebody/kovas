@@ -197,11 +197,11 @@ export function JobStatusPoller({ jobId, initialStatus }: JobStatusPollerProps) 
 
         {/* Barre de progression globale */}
         {!isFailed && !isCancelled && progressPercent !== null && (
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-cream-deep">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-sage-alt">
             <div
               className={cn(
                 'h-full transition-all duration-700 ease-out',
-                isComplete ? 'bg-accent-green' : 'bg-navy',
+                isComplete ? 'bg-accent-green' : 'bg-[#0F1419]',
               )}
               style={{ width: `${progressPercent}%` }}
               aria-hidden

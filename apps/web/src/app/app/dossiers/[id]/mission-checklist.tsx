@@ -81,8 +81,8 @@ export function MissionChecklist({
             <Badge variant="orange">Items obligatoires manquants</Badge>
           )}
         </div>
-        <div className="h-1.5 rounded-full bg-cream-deep overflow-hidden">
-          <div className="h-full bg-navy transition-all" style={{ width: `${percent}%` }} />
+        <div className="h-1.5 rounded-full bg-sage-alt overflow-hidden">
+          <div className="h-full bg-[#0F1419] transition-all" style={{ width: `${percent}%` }} />
         </div>
       </CardHeader>
       <CardContent className="p-5 pt-0 space-y-5">

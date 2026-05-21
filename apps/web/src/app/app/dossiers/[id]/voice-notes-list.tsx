@@ -102,7 +102,7 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
             )}
 
             {parsed && (parsed.surface_m2 || parsed.year_built || parsed.equipment.length > 0) && (
-              <div className="rounded-md bg-cream-deep/60 p-3 space-y-2 text-xs">
+              <div className="rounded-md bg-sage-alt/60 p-3 space-y-2 text-xs">
                 <div className="font-semibold text-ink">Données extraites</div>
                 <div className="flex flex-wrap gap-2">
                   {parsed.surface_m2 && (

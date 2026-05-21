@@ -117,10 +117,13 @@ export function DossierStickyBar({
     <section
       aria-label="Actions du dossier"
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-40 md:left-20',
+        // Position : au-dessus de AppMobileNav (64px) sur mobile via helper
+        // `.above-mobile-nav` (globals.css). Sur md+, `bottom: 0` restauré et
+        // sidebar 80px gérée par `md:left-20`.
+        'above-mobile-nav fixed left-0 right-0 z-40 md:left-20',
         'border-t border-rule/60 bg-navy/95 text-paper shadow-lg backdrop-blur-md',
         'supports-[backdrop-filter]:bg-navy/85',
-        // Safe area iOS PWA (home indicator).
+        // Safe area iOS PWA (home indicator) — utile sur md+ où helper = 0.
         'pb-[max(env(safe-area-inset-bottom),0px)]',
         className,
       )}

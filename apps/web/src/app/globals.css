@@ -272,3 +272,29 @@
 .dark .bg-fluid-cyan {
   background: var(--bg-fluid-navy);
 }
+
+/* ============================================================
+ * Mobile-safe positioning helpers (DS v5)
+ * Pour éviter la collision avec AppMobileNav (64px + safe-area).
+ * Utilisable sur sticky/fixed bottom UI : `.above-mobile-nav` calcule
+ * automatiquement l'offset bottom avec env(safe-area-inset-bottom).
+ * ============================================================ */
+.above-mobile-nav {
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .above-mobile-nav {
+    bottom: 0;
+  }
+}
+
+/* Z-index scale globale documentée pour éviter collisions :
+ *   z-10  : éléments inline (tooltips, dropdowns courts)
+ *   z-20  : floating action buttons (FAB)
+ *   z-30  : header app sticky
+ *   z-40  : mobile nav + sticky bars conditionnels (avec .above-mobile-nav)
+ *   z-50  : modals / sheets / drawers
+ *   z-60  : toasts / notifications
+ *   z-100 : command palette overlay (au-dessus de tout)
+ */

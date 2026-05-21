@@ -180,20 +180,20 @@ export function UploadDropZone({ sourceLogiciel, onJobCreated }: UploadDropZoneP
         onDrop={onDrop}
         className={cn(
           'relative flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 text-center transition-colors',
-          'cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-navy/20',
+          'cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-[#0F1419]/20',
           'disabled:cursor-wait',
           !isDragOver &&
             !isError &&
             !isUploading &&
-            'border-rule bg-paper/40 hover:border-navy/40 hover:bg-cream-deep/40',
+            'border-rule bg-paper/40 hover:border-[#0F1419]/40 hover:bg-sage-alt/40',
           isDragOver && 'border-chartreuse bg-chartreuse/10',
           isError && 'border-danger/60 bg-danger/5',
-          isUploading && 'border-navy/40 bg-cream-deep/40',
+          isUploading && 'border-[#0F1419]/40 bg-sage-alt/40',
         )}
       >
         {isUploading ? (
           <>
-            <Loader2 className="size-8 text-navy animate-spin" aria-hidden />
+            <Loader2 className="size-8 text-ink animate-spin" aria-hidden />
             <p className="text-sm font-medium text-ink">Téléversement en cours…</p>
             {file && (
               <p className="text-xs text-ink-mute">
@@ -203,7 +203,7 @@ export function UploadDropZone({ sourceLogiciel, onJobCreated }: UploadDropZoneP
           </>
         ) : (
           <>
-            <span className="inline-flex size-12 items-center justify-center rounded-full bg-cream-deep/60 text-ink">
+            <span className="inline-flex size-12 items-center justify-center rounded-full bg-sage-alt/60 text-ink">
               <Upload className="size-5" aria-hidden />
             </span>
             <div className="space-y-1">
@@ -222,9 +222,9 @@ export function UploadDropZone({ sourceLogiciel, onJobCreated }: UploadDropZoneP
 
       {/* Barre de progression visuelle (uploading) */}
       {isUploading && (
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-cream-deep">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-sage-alt">
           <div
-            className="h-full bg-navy transition-all duration-500 ease-out"
+            className="h-full bg-[#0F1419] transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
             aria-hidden
           />

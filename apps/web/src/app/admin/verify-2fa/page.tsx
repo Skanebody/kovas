@@ -1,4 +1,5 @@
 import { verifyAdminAccess } from '@/lib/admin/admin-middleware'
+import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { VerifyTwoFaForm } from './verify-2fa-form'
@@ -67,7 +68,7 @@ export default async function VerifyTwoFaPage() {
       </main>
 
       <footer className="px-6 py-4 text-[11px] text-ink-faint text-center">
-        © 2026 SASU Nexus 1993 · Espace admin réservé
+        © 2026 SASU {COMPANY_IDENTITY.legalName} · Espace admin réservé
       </footer>
     </div>
   )

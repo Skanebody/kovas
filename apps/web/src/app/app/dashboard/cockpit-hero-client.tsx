@@ -173,7 +173,7 @@ function EveningHero({
           </p>
         )}
 
-        <Button asChild variant="glass" className="border-paper/25 bg-paper/10 text-paper hover:bg-paper/20">
+        <Button asChild variant="outline" className="border-paper/25 bg-paper/10 text-paper hover:bg-paper/20">
           <Link href="/app/gain">
             Voir le détail
             <ArrowRight className="size-4" />

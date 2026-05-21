@@ -1,0 +1,45 @@
+# Cron orchestrator — absorption hebdomadaire de l'annuaire DHUP officiel.
+#
+# Le dataset DHUP est mis a jour environ une fois par mois en pratique mais on
+# le scrute toutes les semaines (lundi 03:00 UTC) pour rester reactif.
+#
+# Ce workflow est volontairement separe de `cron-cross-validation.yml` pour :
+#   - cadencer DHUP a une frequence plus faible (hebdo vs quotidien)
+#   - eviter que l'echec/duree DHUP perturbe les autres steps
+#
+# ---------------------------------------------------------------------------
+# Secrets GitHub a provisionner (Settings > Secrets and variables > Actions) :
+#
+#   SUPABASE_FUNCTIONS_BASE_URL   ex: https://<project-ref>.supabase.co/functions/v1
+#   SUPABASE_SERVICE_ROLE_KEY     service_role key Supabase
+#   CRON_SECRET                   secret partage avec les Edge Functions
+# ---------------------------------------------------------------------------
+
+name: cron-dhup-weekly
+
+on:
+  schedule:
+    # Tous les lundis a 03:00 UTC
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  absorb-dhup:
+    name: Absorb DHUP directory (annuaire diagnostiqueurs officiel)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_FUNCTIONS_BASE_URL: ${{ secrets.SUPABASE_FUNCTIONS_BASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Absorb DHUP directory
+        continue-on-error: true
+        run: |
+          curl -fsS -X POST \
+            "$SUPABASE_FUNCTIONS_BASE_URL/absorb-dhup-directory" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            || echo "absorb-dhup-directory: step failed (non-blocking)"

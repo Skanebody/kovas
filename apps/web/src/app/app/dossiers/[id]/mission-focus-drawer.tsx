@@ -89,7 +89,7 @@ export function MissionFocusDrawer({
       <MissionTour />
       <header className="glass-dark px-4 py-3 flex items-center gap-3 shrink-0 border-b border-paper/10">
         <Button
-          variant="glass"
+          variant="outline"
           size="sm"
           onClick={onClose}
           className="border-paper/20 bg-paper/10 text-paper hover:bg-paper/15"
@@ -106,7 +106,7 @@ export function MissionFocusDrawer({
           <p className="text-[10px] font-mono text-paper/60 truncate">{mission.reference}</p>
         </div>
         <Button
-          variant="glass"
+          variant="outline"
           size="icon"
           onClick={onClose}
           aria-label="Fermer"
@@ -164,7 +164,7 @@ export function MissionFocusDrawer({
       <footer className="glass-dark fixed bottom-4 inset-x-4 mx-auto max-w-lg rounded-pill px-3 py-2 flex items-center justify-between gap-2 border border-paper/15 shadow-lg">
         <div className="flex items-center gap-1">
           <Button
-            variant="glass"
+            variant="outline"
             size="sm"
             onClick={() => scrollToId('mission-focus-photos')}
             className="border-paper/20 bg-paper/10 text-paper hover:bg-paper/15 min-h-[44px]"
@@ -173,7 +173,7 @@ export function MissionFocusDrawer({
             <Camera className="size-4" />
           </Button>
           <Button
-            variant="glass"
+            variant="outline"
             size="sm"
             onClick={() => scrollToId('mission-focus-voice')}
             className="border-paper/20 bg-paper/10 text-paper hover:bg-paper/15 min-h-[44px]"

@@ -1,121 +1,271 @@
-import { AppPageHeader } from '@/components/app-page-header'
-import { CalendarSyncExport } from '@/components/calendar/calendar-sync-export'
-import { Badge } from '@/components/ui/badge'
+import { ReactivationModal } from '@/components/cancellation/ReactivationModal'
 import { Button } from '@/components/ui/button'
-import { CollapsibleSection } from '@/components/ui/collapsible-section'
+import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { buildCalendarSubscriptionUrl, buildCalendarWebcalUrl } from '@/lib/calendar-token'
 import { parisMonthBounds } from '@/lib/paris-dates'
-import { KOVAS_TIERS } from '@/lib/stripe-config'
-import { cn } from '@/lib/utils'
-import {
-  ArrowLeft,
-  Building2,
-  CalendarSync as CalendarSyncIcon,
-  Check,
-  CreditCard,
-  ExternalLink,
-  Sparkles,
-  User,
-} from 'lucide-react'
+import { PRICING_PLANS, type PricingPlanCode, ADDON_MODULES } from '@/lib/pricing-plans'
+import { getStorageUsage } from '@/lib/storage/quota'
+import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { CheckoutButton } from './checkout-button'
-import { CompanyForm } from './company-form'
-import { ProfileForm } from './profile-form'
+import { AccountSettingsClient } from './account-settings-client'
 
-export const metadata: Metadata = { title: 'Mon compte' }
+export const metadata: Metadata = { title: 'Réglages' }
 
-function eurosCents(cents: number) {
-  return (cents / 100).toFixed(2)
+const WINBACK_DISCOUNT_PERCENT = Number.parseInt(
+  process.env.WINBACK_DISCOUNT_PERCENT ?? '50',
+  10,
+)
+const WINBACK_DISCOUNT_DURATION_MONTHS = Number.parseInt(
+  process.env.WINBACK_DISCOUNT_DURATION_MONTHS ?? '3',
+  10,
+)
+
+interface WinbackCodeRow {
+  id: string
+  user_id: string
+  winback_code_used_at: string | null
+  winback_code_expires_at: string | null
+  confirmed_at: string | null
 }
 
-export default async function AccountPage() {
-  const { supabase, orgId, profile } = await getCurrentUser()
+/**
+ * Valide le code winback côté server. Retourne le payload si valide pour
+ * l'utilisateur courant, sinon null.
+ */
+async function loadValidWinbackCode(
+  rawCode: string | undefined,
+  userId: string,
+): Promise<{ code: string; expiresAt: string } | null> {
+  if (!rawCode || rawCode.length < 10 || rawCode.length > 64) return null
+  const admin = createAdminClient()
+  const res = (await (
+    admin.from('cancellations') as unknown as {
+      select: (cols: string) => {
+        eq: (col: string, val: string) => {
+          maybeSingle: () => Promise<{ data: WinbackCodeRow | null }>
+        }
+      }
+    }
+  )
+    .select(
+      'id, user_id, winback_code_used_at, winback_code_expires_at, confirmed_at',
+    )
+    .eq('winback_code', rawCode)
+    .maybeSingle()) as { data: WinbackCodeRow | null }
+
+  const row = res.data
+  if (!row) return null
+  if (row.user_id !== userId) return null
+  if (row.winback_code_used_at) return null
+  if (!row.confirmed_at) return null
+  if (!row.winback_code_expires_at) return null
+  if (new Date(row.winback_code_expires_at).getTime() < Date.now()) return null
+
+  return { code: rawCode, expiresAt: row.winback_code_expires_at }
+}
+
+interface AccountSearchParams {
+  reactivate?: string
+}
+
+/**
+ * Page "Réglages" /app/account — refonte 2026-05-20 style iOS Settings.
+ *
+ * Architecture :
+ *   - Server component pour fetch parallèle (subscription + organization +
+ *     profile + storage + ADEME snapshot + user_preferences).
+ *   - Délègue toute l'UX d'édition au client `AccountSettingsClient` qui gère
+ *     les sheets (drawers iOS-style) par-dessus les rows cliquables.
+ *   - Layout single-column `max-w-2xl` (lecture optimale, pas trop large).
+ *   - Search bar sticky en haut, filtre client-side les sections par texte.
+ *   - Hero card user (avatar dark + chartreuse signature DS v5) → ouvre Profile sheet.
+ *   - 8 sections groupées : Abonnement / Identité / Modules / Conformité ADEME /
+ *     Préférences notifs+calendrier / Données stockage / Légal RGPD / Zone danger.
+ *   - Workflow résiliation /app/account/cancellation PROTÉGÉ (décret 2023-417),
+ *     bouton visible en zone danger.
+ *
+ * Sources de vérité respectées :
+ *   - DS v5 (sage `#F5F7F4` / dark `#0F1419` / chartreuse `#D4F542`)
+ *   - Icons catégoriels palette iOS Settings (#007AFF, #AF52DE, etc.)
+ *   - Server actions inchangées (updateProfileAction, updateOrganizationAction,
+ *     updateAdemeSettingsAction, updateMonthlyReportPreferenceAction,
+ *     startModuleTrialAction).
+ */
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams?: Promise<AccountSearchParams>
+}) {
+  const { supabase, orgId, profile, user } = await getCurrentUser()
+  const sp = searchParams ? await searchParams : {}
+  const winbackValid = await loadValidWinbackCode(sp.reactivate, user.id)
   const { startIso: monthStartIso } = parisMonthBounds()
 
-  const [{ data: subscription }, { count: monthMissions }, { data: organization }] =
-    await Promise.all([
-      supabase
-        .from('subscriptions')
-        .select(
-          'tier, status, missions_included, overage_price_cents, current_period_end, cancel_at_period_end',
-        )
-        .eq('organization_id', orgId)
-        .maybeSingle(),
-      supabase
-        .from('missions')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', orgId)
-        .is('deleted_at', null)
-        .gte('created_at', monthStartIso),
-      supabase
-        .from('organizations')
-        .select('name, siret, vat_number, address, postal_code, city, certification_n')
-        .eq('id', orgId)
-        .maybeSingle(),
-    ])
+  // Préférence opt-out rapport mensuel (cf. CLAUDE.md §21bis).
+  const userPrefsP = (
+    supabase as unknown as {
+      from: (t: string) => {
+        select: (cols: string) => {
+          eq: (col: string, val: string) => {
+            maybeSingle: () => Promise<{
+              data: { monthly_report_email_enabled: boolean } | null
+            }>
+          }
+        }
+      }
+    }
+  )
+    .from('user_preferences')
+    .select('monthly_report_email_enabled')
+    .eq('user_id', user.id)
+    .maybeSingle()
 
-  const isActive = subscription?.status === 'active'
+  // Dernier snapshot ADEME (tolérant : IIFE async avec try/catch interne).
+  const lastAdemeSyncP: Promise<{ data: { created_at: string } | null }> = (async () => {
+    try {
+      return await (
+        supabase as unknown as {
+          from: (t: string) => {
+            select: (cols: string) => {
+              eq: (col: string, val: string) => {
+                order: (col: string, opts: { ascending: boolean }) => {
+                  limit: (n: number) => {
+                    maybeSingle: () => Promise<{ data: { created_at: string } | null }>
+                  }
+                }
+              }
+            }
+          }
+        }
+      )
+        .from('ademe_kpi_snapshots')
+        .select('created_at')
+        .eq('organization_id', orgId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    } catch {
+      return { data: null }
+    }
+  })()
+
+  const [
+    { data: subscription },
+    { count: monthMissions },
+    { data: organization },
+    { data: profileFull },
+    storageUsage,
+    userPrefs,
+    lastAdemeSync,
+  ] = await Promise.all([
+    supabase
+      .from('subscriptions')
+      .select(
+        'tier, status, missions_included, overage_price_cents, current_period_end, cancel_at_period_end',
+      )
+      .eq('organization_id', orgId)
+      .maybeSingle(),
+    supabase
+      .from('missions')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .gte('created_at', monthStartIso),
+    supabase
+      .from('organizations')
+      .select('name, siret, vat_number, address, postal_code, city, certification_n')
+      .eq('id', orgId)
+      .maybeSingle(),
+    supabase.from('profiles').select('linguistic_profile').eq('id', user.id).maybeSingle(),
+    getStorageUsage(supabase, orgId).catch(() => null),
+    userPrefsP,
+    lastAdemeSyncP,
+  ])
+
+  const monthlyReportEnabled = userPrefs.data?.monthly_report_email_enabled !== false
+
+  const linguisticProfile = (profileFull?.linguistic_profile ?? {}) as Record<string, unknown>
+  const certificatRge =
+    typeof linguisticProfile.certificat_rge === 'string'
+      ? linguisticProfile.certificat_rge
+      : null
+  const ademeMonitoringEnabled = linguisticProfile.ademe_monitoring_enabled === true
+
+  // Mapping legacy tier → plan_code canonique (5 forfaits post-pivot 2026-05-20)
   const currentTier = subscription?.tier
-  const tier = currentTier ? KOVAS_TIERS.find((t) => t.id === currentTier) : null
+  const legacyToPlanCode: Record<string, PricingPlanCode | string> = {
+    decouverte: 'decouverte',
+    standard: 'pro',
+    volume: 'all_inclusive',
+    founder: 'pro',
+    decouverte_legacy: 'decouverte',
+    standard_legacy: 'pro',
+    volume_legacy: 'all_inclusive',
+    founder_legacy: 'pro',
+  }
+  const resolvedCode = currentTier ? legacyToPlanCode[currentTier] ?? currentTier : null
+  const planCode = (resolvedCode &&
+    PRICING_PLANS.find((p) => p.code === resolvedCode)?.code) as PricingPlanCode | null
+  const tier = planCode ? PRICING_PLANS.find((p) => p.code === planCode) ?? null : null
   const missionsCount = monthMissions ?? 0
-  const overage = Math.max(0, missionsCount - (subscription?.missions_included ?? 0))
+  const missionsQuota = subscription?.missions_included ?? 0
+  const overage = Math.max(0, missionsCount - missionsQuota)
   const overagePrice = subscription?.overage_price_cents ?? 0
   const overageTotal = (overage * overagePrice) / 100
   const usagePct =
-    subscription && subscription.missions_included
-      ? Math.min((missionsCount / subscription.missions_included) * 100, 100)
-      : 0
+    missionsQuota > 0 ? Math.min((missionsCount / missionsQuota) * 100, 100) : 0
+
+  // Précalcul des modules inclus dans le plan courant (évite calcul client).
+  const modulesIncludedMap: Record<string, boolean> = {}
+  for (const m of ADDON_MODULES) {
+    modulesIncludedMap[m.code] = planCode
+      ? m.includedInPlans.includes(planCode as (typeof m.includedInPlans)[number])
+      : false
+  }
+
+  const storageProps = storageUsage
+    ? {
+        usedBytes: Number(storageUsage.usedBytes),
+        quotaBytes: Number(storageUsage.quotaBytes),
+      }
+    : null
 
   return (
-    <div className="max-w-3xl space-y-8">
-      <Button variant="ghost" size="sm" asChild>
+    <div className="animate-fade-in">
+      {winbackValid && (
+        <ReactivationModal
+          code={winbackValid.code}
+          discountPercent={WINBACK_DISCOUNT_PERCENT}
+          discountDurationMonths={WINBACK_DISCOUNT_DURATION_MONTHS}
+          expiresAt={winbackValid.expiresAt}
+        />
+      )}
+
+      {/* RETOUR DASHBOARD */}
+      <Button variant="ghost" size="sm" asChild className="mb-3">
         <Link href="/app/dashboard">
           <ArrowLeft className="size-4" /> Tableau de bord
         </Link>
       </Button>
 
-      <AppPageHeader
-        title="Mon"
-        accent="compte"
-        description="Profil, apparence, abonnement, facturation et informations légales."
-      />
+      {/* HEADER GREETING — titre iOS Settings simple */}
+      <header className="pb-4 mb-4">
+        <h1 className="font-sans font-semibold text-[28px] leading-tight tracking-tight text-[#0F1419]">
+          Réglages
+        </h1>
+      </header>
 
-      {/* PROFIL — ouvert par défaut (frequent) */}
-      <CollapsibleSection
-        storageKey="kovas_account_profile"
-        defaultExpanded
-        title={
-          <>
-            <User className="size-4" /> Profil
-          </>
-        }
-      >
-        <ProfileForm
-          initial={{
+      {/* CONTENU max-w-2xl pour lisibilité iOS-style */}
+      <div className="max-w-2xl mx-auto">
+        <AccountSettingsClient
+          profile={{
             full_name: profile.full_name,
             email: profile.email,
             phone: profile.phone ?? null,
           }}
-        />
-      </CollapsibleSection>
-
-      {/* ENTREPRISE — ouvert par défaut (V1 setup) */}
-      <CollapsibleSection
-        storageKey="kovas_account_company"
-        defaultExpanded
-        title={
-          <>
-            <Building2 className="size-4" /> Mon entreprise
-          </>
-        }
-      >
-        <p className="text-xs text-ink-mute pb-3">
-          Ces informations apparaissent sur vos exports et en-têtes de rapports.
-        </p>
-        <CompanyForm
-          initial={{
+          organization={{
             name: organization?.name ?? null,
             siret: organization?.siret ?? null,
             vat_number: organization?.vat_number ?? null,
@@ -124,209 +274,34 @@ export default async function AccountPage() {
             city: organization?.city ?? null,
             certification_n: organization?.certification_n ?? null,
           }}
+          subscription={
+            subscription
+              ? {
+                  status: subscription.status,
+                  cancel_at_period_end: subscription.cancel_at_period_end,
+                  missions_included: subscription.missions_included,
+                  overage_price_cents: subscription.overage_price_cents,
+                  current_period_end: subscription.current_period_end,
+                }
+              : null
+          }
+          planCode={planCode}
+          planName={tier?.name ?? null}
+          missionsCount={missionsCount}
+          missionsQuota={missionsQuota}
+          overage={overage}
+          overageTotal={overageTotal}
+          usagePct={usagePct}
+          certificatRge={certificatRge}
+          ademeMonitoringEnabled={ademeMonitoringEnabled}
+          lastAdemeSyncAt={lastAdemeSync.data?.created_at ?? null}
+          monthlyReportEnabled={monthlyReportEnabled}
+          calendarHttpsUrl={buildCalendarSubscriptionUrl(orgId)}
+          calendarWebcalUrl={buildCalendarWebcalUrl(orgId)}
+          storageUsage={storageProps}
+          modulesIncludedMap={modulesIncludedMap}
         />
-      </CollapsibleSection>
-
-      {/* ABONNEMENT — ouvert par défaut (usage du mois pertinent) */}
-      <CollapsibleSection
-        storageKey="kovas_account_subscription"
-        defaultExpanded
-        title={
-          <>
-            <Sparkles className="size-4" /> Abonnement
-          </>
-        }
-      >
-        <div className="space-y-4">
-          {isActive && subscription ? (
-            <>
-              <div className="flex items-end justify-between gap-3 flex-wrap">
-                <div>
-                  <div className="text-xs text-ink-mute uppercase tracking-wider font-semibold">
-                    Formule actuelle
-                  </div>
-                  <div className="text-2xl font-bold tracking-tight">
-                    {tier?.label ?? currentTier}
-                  </div>
-                  <div className="text-xs text-ink-mute">
-                    {tier
-                      ? `${eurosCents(tier.priceMonthlyCents)}€ HT/mois · ${tier.missionsIncluded} missions incluses`
-                      : ''}
-                  </div>
-                </div>
-                <Badge variant={subscription.cancel_at_period_end ? 'orange' : 'green'}>
-                  {subscription.cancel_at_period_end ? 'Annulation en cours' : 'Actif'}
-                </Badge>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-sm font-medium">
-                    {missionsCount}
-                    <span className="text-ink-mute">
-                      {' '}
-                      / {subscription.missions_included} missions ce mois
-                    </span>
-                  </span>
-                  <span className="text-xs tabular-nums text-ink-mute">
-                    {Math.round(usagePct)}%
-                  </span>
-                </div>
-                <div className="h-2 rounded-full bg-cream-deep overflow-hidden">
-                  <div
-                    className={cn(
-                      'h-full transition-all',
-                      usagePct >= 100 ? 'bg-accent-orange' : 'bg-navy',
-                    )}
-                    style={{ width: `${usagePct}%` }}
-                  />
-                </div>
-              </div>
-
-              {overage > 0 && (
-                <div className="rounded-lg border border-accent-orange/30 bg-accent-orange/5 p-3 space-y-1">
-                  <p className="text-sm font-medium text-accent-orange">
-                    {overage} mission{overage > 1 ? 's' : ''} au-delà du forfait
-                  </p>
-                  <p className="text-xs text-ink-mute">
-                    Surplus estimé : {overageTotal.toFixed(2)}€ HT · facturé en fin de cycle. Aucune
-                    rupture de service.
-                  </p>
-                </div>
-              )}
-
-              <PortalButton />
-            </>
-          ) : (
-            <p className="text-sm text-ink-mute">
-              Aucun abonnement actif. Choisissez une offre ci-dessous pour activer votre compte.
-            </p>
-          )}
-        </div>
-      </CollapsibleSection>
-
-      {/* SYNCHRONISATION CALENDRIER — abonnement URL .ics vers Google/Apple/Outlook */}
-      <CollapsibleSection
-        storageKey="kovas_account_calendar"
-        title={
-          <>
-            <CalendarSyncIcon className="size-4" /> Synchronisation calendrier
-          </>
-        }
-      >
-        <CalendarSyncExport
-          httpsUrl={buildCalendarSubscriptionUrl(orgId)}
-          webcalUrl={buildCalendarWebcalUrl(orgId)}
-        />
-      </CollapsibleSection>
-
-      {/* PLANS COMPARISON — ouvert si pas d'abonnement actif (subscribe flow),
-          fermé sinon (action peu fréquente quand abonnement déjà actif) */}
-      <CollapsibleSection
-        storageKey="kovas_account_plans"
-        defaultExpanded={!isActive}
-        title={
-          <>
-            <CreditCard className="size-4" /> Changer de formule
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {KOVAS_TIERS.map((t) => {
-              const isCurrent = isActive && currentTier === t.id
-              return (
-                <div
-                  key={t.id}
-                  className={cn(
-                    'rounded-lg border p-4 space-y-3',
-                    isCurrent ? 'border-navy/40 bg-navy/[0.04]' : 'border-rule/80 glass-opaque',
-                    t.recommended && !isCurrent && 'border-navy/20',
-                  )}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.1em] font-semibold text-ink-mute">
-                        {t.label}
-                      </span>
-                      {t.recommended && (
-                        <Badge variant="muted" className="text-[10px] py-0">
-                          Recommandé
-                        </Badge>
-                      )}
-                      {isCurrent && (
-                        <Badge variant="green" className="text-[10px] py-0">
-                          Actuelle
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="font-serif italic text-4xl text-ink leading-none tracking-tight">
-                      {eurosCents(t.priceMonthlyCents)}€
-                    </div>
-                    <p className="text-xs text-ink-mute">HT/mois · {t.description}</p>
-                  </div>
-                  <ul className="space-y-1.5 text-xs">
-                    <li className="flex items-start gap-2">
-                      <Check className="size-3.5 mt-0.5 shrink-0 text-accent-green" />
-                      <span>{t.missionsIncluded} missions incluses / mois</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="size-3.5 mt-0.5 shrink-0 text-accent-green" />
-                      <span>Surplus {eurosCents(t.overagePriceCents)}€ HT / mission au-delà</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="size-3.5 mt-0.5 shrink-0 text-accent-green" />
-                      <span>{t.storageGb} Go de stockage</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="size-3.5 mt-0.5 shrink-0 text-accent-green" />
-                      <span>Toutes les fonctionnalités KOVAS</span>
-                    </li>
-                  </ul>
-                  {!isCurrent && <CheckoutButton tier={t.id} label={t.label} />}
-                </div>
-              )
-            })}
-          </div>
-          <p className="text-xs text-ink-mute mt-4 text-center">
-            Annuel : 2 mois offerts (10 mois payés sur 12). Sans engagement. Plafond mensuel
-            auto-protecteur activable depuis le portail Stripe.
-          </p>
-        </div>
-      </CollapsibleSection>
-
-      {/* INFORMATIONS LÉGALES KOVAS — fermé par défaut (référence statique) */}
-      <CollapsibleSection storageKey="kovas_account_legal" title={<>Informations légales KOVAS</>}>
-        <div className="space-y-2 text-sm">
-          <Row label="Éditeur">SASU Nexus 1993</Row>
-          <Row label="Siège social">66 Av Champs Élysées, 75008 Paris</Row>
-          <Row label="SIREN">982 786 154</Row>
-          <Row label="Domaine">kovas.fr</Row>
-          <p className="text-xs text-ink-mute pt-2">
-            Vos factures KOVAS sont émises HT avec TVA 20% en sus, déductible si vous êtes
-            assujetti.
-          </p>
-        </div>
-      </CollapsibleSection>
+      </div>
     </div>
-  )
-}
-
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 flex-wrap">
-      <span className="text-xs text-ink-mute uppercase tracking-wider font-semibold">{label}</span>
-      <span className="text-ink">{children}</span>
-    </div>
-  )
-}
-
-function PortalButton() {
-  return (
-    <form action="/api/billing/portal" method="POST">
-      <Button type="submit" variant="glass" size="sm">
-        <ExternalLink className="size-4" /> Gérer factures et paiement (Stripe)
-      </Button>
-    </form>
   )
 }

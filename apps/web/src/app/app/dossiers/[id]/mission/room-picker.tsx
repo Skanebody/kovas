@@ -135,7 +135,7 @@ export function RoomPicker({
                       className={cn(
                         'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2',
                         'text-left text-sm text-ink',
-                        'transition-colors hover:bg-cream-deep/40',
+                        'transition-colors hover:bg-sage-alt/40',
                       )}
                       role="menuitemradio"
                       aria-checked={selected}
@@ -169,7 +169,7 @@ export function RoomPicker({
                     className={cn(
                       'flex-1 rounded-md border border-rule bg-paper px-3 py-1.5',
                       'text-sm text-ink placeholder:text-ink-ghost',
-                      'focus:outline-none focus:ring-2 focus:ring-navy/20',
+                      'focus:outline-none focus:ring-2 focus:ring-[#0F1419]/20',
                       'disabled:opacity-50',
                     )}
                     maxLength={60}
@@ -194,7 +194,7 @@ export function RoomPicker({
                 className={cn(
                   'flex w-full items-center gap-2 rounded-lg px-3 py-2',
                   'text-sm font-medium text-ink',
-                  'transition-colors hover:bg-cream-deep/40',
+                  'transition-colors hover:bg-sage-alt/40',
                 )}
               >
                 <Plus className="h-4 w-4" aria-hidden />

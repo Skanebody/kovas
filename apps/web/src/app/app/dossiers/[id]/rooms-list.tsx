@@ -80,7 +80,7 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="glass" size="sm">
+              <Button variant="outline" size="sm">
                 <Sparkles className="size-4" /> Template
               </Button>
             </DropdownMenuTrigger>

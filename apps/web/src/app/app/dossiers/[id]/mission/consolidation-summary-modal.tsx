@@ -95,10 +95,10 @@ export function ConsolidationSummaryModal({
 
         {/* Warnings */}
         {warnings && warnings.length > 0 ? (
-          <div className="space-y-1 rounded-lg border border-amber/30 bg-amber/10 px-3 py-2 text-xs text-ink-soft">
+          <div className="space-y-1 rounded-lg border border-chartreuse/30 bg-chartreuse/10 px-3 py-2 text-xs text-ink-soft">
             {warnings.map((w) => (
               <p key={w} className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 size-3 shrink-0 text-amber" aria-hidden />
+                <AlertTriangle className="mt-0.5 size-3 shrink-0 text-[#95B11A]" aria-hidden />
                 <span>{w}</span>
               </p>
             ))}
@@ -157,7 +157,7 @@ export function ConsolidationSummaryModal({
               {conflicts.slice(0, 5).map((c) => (
                 <li
                   key={`${c.diagnostic}::${c.field_path}`}
-                  className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-xs"
+                  className="rounded-lg border border-chartreuse/30 bg-chartreuse/5 p-3 text-xs"
                 >
                   <div className="flex items-baseline gap-2">
                     <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute">
@@ -211,13 +211,13 @@ function StatCard({ icon, value, label, tone }: StatCardProps) {
     <div
       className={cn(
         'rounded-xl border p-3 text-center',
-        tone === 'ok' ? 'border-rule bg-paper/60' : 'border-amber/30 bg-amber/10',
+        tone === 'ok' ? 'border-rule bg-paper/60' : 'border-chartreuse/30 bg-chartreuse/10',
       )}
     >
       <div
         className={cn(
           'flex items-center justify-center gap-1',
-          tone === 'ok' ? 'text-ink-mute' : 'text-amber',
+          tone === 'ok' ? 'text-ink-mute' : 'text-[#95B11A]',
         )}
       >
         {icon}

@@ -60,18 +60,18 @@ export function PhotoButton({
           'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-chartreuse/40',
           'disabled:cursor-not-allowed disabled:opacity-40',
           isEmpty
-            ? 'size-[200px] border-2 border-dashed border-navy/30 bg-cream-deep/40'
+            ? 'size-[200px] border-2 border-dashed border-[#0F1419]/30 bg-sage-alt/40'
             : 'size-[160px] border border-rule bg-paper shadow-md',
-          'hover:-translate-y-px hover:border-navy/50 hover:shadow-lg',
+          'hover:-translate-y-px hover:border-[#0F1419]/50 hover:shadow-lg',
           'active:translate-y-0 active:shadow-sm',
         )}
         aria-label="Capturer une photo"
       >
         <Camera
           className={cn(
-            'text-navy transition-colors',
+            'text-ink transition-colors',
             isEmpty ? 'size-16' : 'size-12',
-            'group-hover:text-navy-deep',
+            'group-hover:text-[#0F1419]',
           )}
           aria-hidden
         />

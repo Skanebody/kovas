@@ -329,7 +329,7 @@ export function DuplicateReviewView({ job, matches, newEntitiesCount }: Duplicat
                     'relative px-3 py-2 text-xs font-medium uppercase tracking-wider transition-colors',
                     '-mb-[1px] border-b-2',
                     tab === t
-                      ? 'border-navy text-ink'
+                      ? 'border-[#0F1419] text-ink'
                       : 'border-transparent text-ink-mute hover:text-ink',
                   )}
                 >
@@ -465,7 +465,7 @@ export function DuplicateReviewView({ job, matches, newEntitiesCount }: Duplicat
             'fixed bottom-4 right-4 z-50 rounded-pill px-4 py-2 text-xs font-medium shadow-md',
             toast.kind === 'success' && 'bg-accent-green text-paper',
             toast.kind === 'error' && 'bg-danger text-paper',
-            toast.kind === 'info' && 'bg-navy text-paper',
+            toast.kind === 'info' && 'bg-[#0F1419] text-paper',
           )}
         >
           {toast.message}
@@ -594,7 +594,7 @@ function MatchCard({
           {match.match_reasons.slice(0, 5).map((r) => (
             <span
               key={r}
-              className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-cream-deep/60 text-ink-mute"
+              className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-sage-alt/60 text-ink-mute"
             >
               {r}
             </span>

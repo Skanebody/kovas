@@ -44,7 +44,7 @@ export function LoginForm({ defaultEmail = '', defaultPassword = '' }: LoginForm
       </div>
 
       {state?.error && (
-        <p className="text-sm text-accent-red" role="alert">
+        <p className="text-sm text-[#DC2626]" role="alert">
           {state.error}
         </p>
       )}

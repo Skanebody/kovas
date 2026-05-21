@@ -78,7 +78,7 @@ export function OwnerTransfer({ propertyId, currentOwner, clients }: OwnerTransf
               </span>
             )}
           </div>
-          <Button variant="glass" size="sm" onClick={() => setEditing(true)}>
+          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
             <ArrowRightLeft className="size-4" />{' '}
             {currentOwner ? 'Transférer / changer' : 'Lier un propriétaire'}
           </Button>

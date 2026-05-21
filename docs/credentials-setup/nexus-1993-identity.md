@@ -1,6 +1,8 @@
 # SASU Nexus 1993 — Identité officielle
 
-> **Source vérité** : ce document est l'authority sur l'identité légale Nexus 1993. Tout artefact en conflit doit être mis à jour pour pointer ici.
+> **Source vérité (humaine)** : ce document est l'authority documentaire sur l'identité légale Nexus 1993.
+> **Source vérité (code)** : [`apps/web/src/lib/legal/company-identity.ts`](../../apps/web/src/lib/legal/company-identity.ts) — exporte `COMPANY_IDENTITY` + helpers (`formatLegalMentions()`, `formatInvoiceFooter()`, `buildInvoiceLegalBlock()`). Toute modification SIRET/RCS/adresse/marques se fait là, et auto-propage dans footer / PDFs / emails.
+> Tout artefact en conflit doit être mis à jour pour pointer ici et vers la constante TypeScript.
 
 ## Identité légale (à utiliser dans tous documents officiels)
 

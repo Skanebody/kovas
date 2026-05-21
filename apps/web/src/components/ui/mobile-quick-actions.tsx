@@ -67,7 +67,9 @@ export function MobileQuickActionsFab() {
         onClick={() => setOpen(true)}
         aria-label="Créer rapidement"
         className={cn(
-          'md:hidden fixed bottom-[72px] left-1/2 -translate-x-1/2 z-40',
+          // FAB centré au-dessus de la mobile-nav (64px nav + 8px gap visuel).
+          // z-20 (sous z-40 nav) selon scale docs/design/z-index-scale.md.
+          'md:hidden fixed bottom-[calc(72px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-20',
           'flex size-14 items-center justify-center rounded-full',
           /* v5 : accent UNIQUE chartreuse Synthex (était bg-amber v4) */
           'bg-chartreuse text-ink shadow-[0_6px_18px_rgba(212,245,66,0.45)] hover:bg-chartreuse-deep',

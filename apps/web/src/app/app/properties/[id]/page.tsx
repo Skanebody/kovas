@@ -85,7 +85,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         }
         action={
           <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="glass" asChild>
+            <Button variant="outline" asChild>
               <Link href={`/app/properties/${property.id}/edit`}>
                 <Pencil className="size-4" /> Modifier
               </Link>

@@ -23,8 +23,11 @@ export const getCurrentUser = cache(async () => {
     .eq('id', user.id)
     .single()
 
+  // Profile incomplet (signup non finalisé / migrations non appliquées) :
+  // redirect vers onboarding au lieu de throw — évite HTTP 500 sur toutes
+  // les pages /app/* quand l'organisation n'est pas encore créée.
   if (!profile?.default_org_id) {
-    throw new Error('Profile or default organization missing — onboarding incomplete')
+    redirect('/app/onboarding')
   }
 
   return {

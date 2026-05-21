@@ -198,7 +198,7 @@ export function PhotoCapture({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="glass" size="sm" className="h-7 text-xs">
+              <Button variant="outline" size="sm" className="h-7 text-xs">
                 {!pinned.find((v) => v.id === selectedView) &&
                   selectedView !== 'vue_generale' && (
                     <span className="font-medium">{getViewType(selectedView)?.label} · </span>
@@ -216,7 +216,7 @@ export function PhotoCapture({
                       <DropdownMenuItem
                         key={v.id}
                         onClick={() => setSelectedView(v.id)}
-                        className={selectedView === v.id ? 'bg-cream-deep' : ''}
+                        className={selectedView === v.id ? 'bg-sage-alt' : ''}
                       >
                         {v.label}
                       </DropdownMenuItem>
@@ -260,7 +260,7 @@ function ViewPill({
       className={cn(
         'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
         active
-          ? 'border-navy bg-navy text-paper'
+          ? 'border-[#0F1419] bg-[#0F1419] text-paper'
           : 'border-rule bg-paper text-ink hover:bg-ink/5',
       )}
     >

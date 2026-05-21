@@ -48,9 +48,17 @@ export async function GET(request: Request) {
     const slots = await findAvailableSlots(session.user.id, date, duration, session.supabase)
     return NextResponse.json(slots)
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'available slots failed' },
-      { status: 500 },
-    )
+    const msg = err instanceof Error ? err.message : 'available slots failed'
+    // Graceful degradation : si colonnes scheduling pas créées (migration pas appliquée),
+    // retourner liste vide. L'UI affichera "Aucun créneau dispo" propre au lieu de 500.
+    if (
+      msg.includes('does not exist') ||
+      msg.includes('schema cache') ||
+      msg.includes('column')
+    ) {
+      console.warn('[available-slots] schema mismatch, returning empty list:', msg)
+      return NextResponse.json([])
+    }
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

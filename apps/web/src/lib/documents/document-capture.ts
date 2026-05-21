@@ -15,6 +15,7 @@
 
 import { randomUUID } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { assertStorageAvailable, StorageQuotaExceeded } from '@/lib/storage/quota'
 import type { DocumentSource } from './backend-types'
 import { fileToBuffer, mimeToExt, uploadDocument } from './document-storage'
 import { checkAndDeductQuota } from './quota-enforcer'
@@ -47,6 +48,7 @@ export interface CapturedDocument {
 export class CaptureError extends Error {
   readonly code:
     | 'quota_exceeded'
+    | 'storage_quota_exceeded'
     | 'file_too_large'
     | 'invalid_mime'
     | 'storage_failed'
@@ -79,7 +81,7 @@ export async function captureDocument(
   input: DocumentCaptureInput,
   supabase: SupabaseClient,
 ): Promise<CapturedDocument> {
-  // 1. Quota check + deduct (atomique)
+  // 1. Quota scans mensuel (Document Intelligence) — check + deduct atomique
   const quotaResult = await checkAndDeductQuota(input.userId, supabase)
   if (!quotaResult.ok) {
     throw new CaptureError('quota_exceeded', quotaResult.reason ?? 'Quota dépassé', 402)
@@ -92,6 +94,19 @@ export async function captureDocument(
       `Fichier trop volumineux : ${Math.round(fileSize / 1024 / 1024)} Mo > 20 Mo`,
       413,
     )
+  }
+
+  // 1bis. Quota stockage organisation — vérifie qu'on a la place pour ce fichier
+  //       (raw + thumbnail, donc on compte ~2× la taille du fichier image)
+  try {
+    const isImage = (input.mimeType ?? (input.file instanceof File ? input.file.type : '')).startsWith('image/')
+    const projectedSize = isImage ? fileSize * 2 : fileSize
+    await assertStorageAvailable(supabase, input.organizationId, projectedSize)
+  } catch (e) {
+    if (e instanceof StorageQuotaExceeded) {
+      throw new CaptureError('storage_quota_exceeded', e.message, 413)
+    }
+    throw e
   }
 
   const mimeType =

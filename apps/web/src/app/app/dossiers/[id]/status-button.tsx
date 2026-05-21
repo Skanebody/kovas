@@ -76,7 +76,7 @@ export function MissionStatusButton({
       {transitions.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="glass" size="sm" disabled={isPending}>
+            <Button variant="outline" size="sm" disabled={isPending}>
               {isPending ? <Loader2 className="size-3 animate-spin" /> : <ChevronDown className="size-3" />}
               Changer
             </Button>

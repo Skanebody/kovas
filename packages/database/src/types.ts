@@ -661,6 +661,14 @@ export type Database = {
           reminder_j30_sent_at: string | null
           client_snapshot: Json | null
           issued_at: string | null
+          payment_terms_days: number
+          notes: string | null
+          credit_note_for_invoice_id: string | null
+          user_id: string | null
+          contact_id: string | null
+          sent_at: string | null
+          stripe_payment_link_url: string | null
+          xml_path: string | null
           created_at: string
           updated_at: string
         }
@@ -692,6 +700,14 @@ export type Database = {
           reminder_j30_sent_at?: string | null
           client_snapshot?: Json | null
           issued_at?: string | null
+          payment_terms_days?: number
+          notes?: string | null
+          credit_note_for_invoice_id?: string | null
+          user_id?: string | null
+          contact_id?: string | null
+          sent_at?: string | null
+          stripe_payment_link_url?: string | null
+          xml_path?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -723,6 +739,14 @@ export type Database = {
           reminder_j30_sent_at?: string | null
           client_snapshot?: Json | null
           issued_at?: string | null
+          payment_terms_days?: number
+          notes?: string | null
+          credit_note_for_invoice_id?: string | null
+          user_id?: string | null
+          contact_id?: string | null
+          sent_at?: string | null
+          stripe_payment_link_url?: string | null
+          xml_path?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -1031,6 +1055,9 @@ export type Database = {
           current_period_end: string | null
           default_logiciel: string | null
           default_export_mode: string | null
+          iban: string | null
+          bic: string | null
+          bank_name: string | null
           created_at: string
           updated_at: string
           deleted_at: string | null
@@ -1052,6 +1079,9 @@ export type Database = {
           current_period_end?: string | null
           default_logiciel?: string | null
           default_export_mode?: string | null
+          iban?: string | null
+          bic?: string | null
+          bank_name?: string | null
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
@@ -1073,6 +1103,9 @@ export type Database = {
           current_period_end?: string | null
           default_logiciel?: string | null
           default_export_mode?: string | null
+          iban?: string | null
+          bic?: string | null
+          bank_name?: string | null
           created_at?: string
           updated_at?: string
           deleted_at?: string | null
@@ -2174,6 +2207,18 @@ export type Database = {
         Args: {
           p_org: string
           p_kind: string
+        }
+        Returns: string
+      }
+      generate_invoice_reference: {
+        Args: {
+          p_org_id: string
+        }
+        Returns: string
+      }
+      generate_credit_note_reference: {
+        Args: {
+          p_org_id: string
         }
         Returns: string
       }

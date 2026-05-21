@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Database } from '@kovas/database/types'
 import { getStripe, isStripeConfigured } from '@/lib/stripe'
-import { getTier } from '@/lib/stripe-config'
+import { getPlan, getTier } from '@/lib/stripe-config'
 
 /**
  * Webhook Stripe : sync les états subscription/customer dans `subscriptions`.
@@ -45,27 +45,43 @@ export async function POST(request: Request) {
         const orgId = session.metadata?.organization_id
         const tierId = session.metadata?.tier
         if (!orgId || !tierId) break
-        const tier = getTier(tierId)
-        if (!tier) break
 
-        await admin
-          .from('subscriptions')
-          .upsert(
-            {
-              organization_id: orgId,
-              stripe_customer_id:
-                typeof session.customer === 'string' ? session.customer : session.customer?.id ?? null,
-              stripe_subscription_id:
-                typeof session.subscription === 'string'
-                  ? session.subscription
-                  : session.subscription?.id ?? null,
-              status: 'active',
-              tier: tier.id,
-              missions_included: tier.missionsIncluded,
-              overage_price_cents: tier.overagePriceCents,
-            },
-            { onConflict: 'organization_id' },
-          )
+        // Refonte P9 : on cherche d'abord dans les nouveaux plans (illimités +
+        // fair-use), puis on retombe sur les anciens tiers legacy pour la
+        // rétrocompat des checkouts en cours.
+        const newPlan = getPlan(tierId)
+        const legacyTier = newPlan ? null : getTier(tierId)
+        const planLabel = newPlan?.id ?? legacyTier?.id
+        if (!planLabel) break
+
+        // Types Database pas encore régénérés pour les nouvelles colonnes
+        // (fair_use_cap_missions, hard_cap_*, is_grandfathered). Cast unknown
+        // jusqu'à la prochaine génération.
+        const subscriptionPayload = {
+          organization_id: orgId,
+          stripe_customer_id:
+            typeof session.customer === 'string'
+              ? session.customer
+              : session.customer?.id ?? null,
+          stripe_subscription_id:
+            typeof session.subscription === 'string'
+              ? session.subscription
+              : session.subscription?.id ?? null,
+          status: 'active',
+          tier: planLabel,
+          // Nouveau modèle all-you-can-eat : pas de missions_included ni
+          // d'overage_price_cents. Fair-use caps stockés à part.
+          missions_included: newPlan ? null : legacyTier?.missionsIncluded ?? null,
+          overage_price_cents: newPlan ? null : legacyTier?.overagePriceCents ?? null,
+          fair_use_cap_missions: newPlan?.fairUseMissionsSoftCap ?? null,
+          hard_cap_whisper_seconds: newPlan?.hardCapWhisperSeconds ?? null,
+          hard_cap_vision_calls: newPlan?.hardCapVisionCalls ?? null,
+          hard_cap_burst_per_day: newPlan?.hardCapBurstPerDay ?? null,
+          is_grandfathered: !newPlan && Boolean(legacyTier),
+        }
+        await (admin.from('subscriptions') as unknown as {
+          upsert: (row: typeof subscriptionPayload, opts: { onConflict: string }) => Promise<unknown>
+        }).upsert(subscriptionPayload, { onConflict: 'organization_id' })
 
         // Mark trial as converted
         await admin

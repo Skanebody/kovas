@@ -62,7 +62,7 @@ export async function TodayBlock() {
             <span className="text-ink-mute capitalize">{todayLabel}</span>
             <Link
               href="/app/calendar"
-              className="text-navy hover:underline underline-offset-4 inline-flex items-center gap-1"
+              className="text-ink hover:underline underline-offset-4 inline-flex items-center gap-1"
             >
               Voir le planning <ArrowRight className="size-3" />
             </Link>

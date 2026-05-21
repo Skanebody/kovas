@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KOVAS — Tarification simple, sans surprise.</title>
+<meta name="description" content="Trois paliers, toutes les fonctionnalités. Découverte 29 €, Standard 59 € recommandé, Volume 99 €. Sans engagement, sans carte bancaire pour l'essai. Surplus à l'usage, résiliation en un clic." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* === Palette KOVAS SaaS (mirroir strict de la home) === */
+    --dark: #0F1419;
+    --sage: #F5F7F4;
+    --white: #FFFFFF;
+    --accent: #D4F542;
+    --accent-hover: #C9EB35;
+    --accent-dark: #95B11A;
+
+    --t: #0F1419;
+    --t-72: rgba(15, 20, 25, 0.72);
+    --t-55: rgba(15, 20, 25, 0.55);
+    --t-35: rgba(15, 20, 25, 0.35);
+    --t-15: rgba(15, 20, 25, 0.15);
+    --t-08: rgba(15, 20, 25, 0.08);
+    --t-04: rgba(15, 20, 25, 0.04);
+
+    --w-90: rgba(255, 255, 255, 0.9);
+    --w-60: rgba(255, 255, 255, 0.6);
+    --w-35: rgba(255, 255, 255, 0.35);
+    --w-15: rgba(255, 255, 255, 0.15);
+    --w-08: rgba(255, 255, 255, 0.08);
+
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    --serif: 'Instrument Serif', "Times New Roman", serif;
+
+    --max: 1240px;
+    --pad-x: clamp(20px, 4vw, 48px);
+    --pad-y: clamp(80px, 12vw, 160px);
+
+    --r-pill: 999px;
+    --r-btn: 16px;
+    --r-card: 24px;
+    --r-hero: 32px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    color: var(--t);
+    background: var(--sage);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+  /* ============ HEADER (mirroir home) ============ */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(245, 247, 244, 0.86);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--t-08);
+  }
+  .nav {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 14px var(--pad-x);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 14px;
+  }
+  .logo {
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    font-size: 15px;
+  }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a { color: var(--t-72); transition: color 0.15s; }
+  .nav-links a:hover { color: var(--t); }
+  .nav-links a.current { color: var(--t); }
+  .nav-cta { display: flex; gap: 12px; align-items: center; }
+  .nav-cta .signin { color: var(--t-72); padding: 8px 14px; }
+  .nav-cta .trial {
+    background: var(--accent); color: var(--dark);
+    padding: 9px 18px; border-radius: var(--r-pill);
+    font-weight: 600; transition: background 0.15s;
+  }
+  .nav-cta .trial:hover { background: var(--accent-hover); }
+  @media (max-width: 720px) { .nav-links { display: none; } }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: clamp(60px, 10vw, 120px) var(--pad-x) clamp(40px, 6vw, 80px);
+    text-align: center;
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--t-55);
+    margin-bottom: 32px;
+    font-weight: 500;
+  }
+  .hero h1 {
+    font-size: clamp(48px, 8vw, 104px);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+  .hero h1 .accent-text { display: block; color: var(--t-35); }
+  .hero p.lead {
+    font-size: clamp(18px, 2.3vw, 24px);
+    color: var(--t-72);
+    max-width: 760px;
+    margin: 0 auto 40px;
+    line-height: 1.45;
+  }
+  .trust-bar {
+    font-size: 14px;
+    color: var(--t-55);
+    display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+  }
+  .trust-bar span::before { content: "·"; margin-right: 24px; color: var(--t-15); }
+  .trust-bar span:first-child::before { content: ""; margin-right: 0; }
+
+  /* ============ TOGGLE MENSUEL / ANNUEL ============ */
+  .toggle-wrap {
+    text-align: center;
+    margin: 32px auto 56px;
+    max-width: 560px;
+    padding: 0 var(--pad-x);
+  }
+  .toggle {
+    display: inline-flex;
+    background: var(--white);
+    border: 1px solid var(--t-08);
+    border-radius: var(--r-pill);
+    padding: 4px;
+    gap: 4px;
+  }
+  .toggle button {
+    padding: 10px 22px;
+    border-radius: var(--r-pill);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--t-55);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .toggle button.active {
+    background: var(--dark);
+    color: var(--white);
+  }
+  .toggle button .save-badge {
+    background: var(--accent);
+    color: var(--dark);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+  }
+  .toggle button.active .save-badge { background: var(--accent); }
+  .toggle-hint {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--t-55);
+    line-height: 1.5;
+  }
+
+  /* ============ TIERS GRID ============ */
+  .tiers-section {
+    padding: 0 var(--pad-x) clamp(80px, 12vw, 160px);
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+  .tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: stretch;
+  }
+  .tier-card {
+    background: var(--white);
+    border: 1px solid var(--t-08);
+    border-radius: var(--r-card);
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .tier-card:hover { border-color: var(--t-35); }
+  .tier-card.featured {
+    background: var(--dark);
+    color: var(--white);
+    border-color: var(--dark);
+    transform: translateY(-8px);
+    padding: 44px 32px;
+  }
+  .tier-card.featured:hover { border-color: var(--dark); }
+  .tier-badge {
+    position: absolute;
+    top: -12px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: var(--dark);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: var(--r-pill);
+    white-space: nowrap;
+  }
+  .tier-name {
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--t-55);
+  }
+  .tier-card.featured .tier-name { color: var(--w-60); }
+  .tier-tagline {
+    font-size: 15px;
+    color: var(--t-72);
+    margin-bottom: 28px;
+    line-height: 1.4;
+    min-height: 42px;
+  }
+  .tier-card.featured .tier-tagline { color: var(--w-90); }
+  .tier-price {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .tier-price .num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 88px;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+  .tier-price .per { font-size: 14px; color: var(--t-55); }
+  .tier-card.featured .tier-price .per { color: var(--w-60); }
+  .tier-price-sub {
+    font-size: 13px;
+    color: var(--t-55);
+    margin-bottom: 24px;
+    min-height: 19px;
+  }
+  .tier-card.featured .tier-price-sub { color: var(--w-60); }
+  .tier-divider {
+    height: 1px;
+    background: var(--t-08);
+    margin: 4px 0 24px;
+  }
+  .tier-card.featured .tier-divider { background: var(--w-15); }
+  .tier-volume {
+    margin-bottom: 24px;
+  }
+  .tier-volume-label {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--t-55);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .tier-card.featured .tier-volume-label { color: var(--accent); }
+  .tier-volume-value {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .tier-surplus {
+    font-size: 14px;
+    color: var(--t-55);
+  }
+  .tier-card.featured .tier-surplus { color: var(--w-60); }
+  .tier-meta {
+    font-size: 13px;
+    color: var(--t-72);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .tier-card.featured .tier-meta { color: var(--w-90); }
+  .tier-meta li {
+    list-style: none;
+    padding-left: 22px;
+    position: relative;
+    padding-bottom: 4px;
+  }
+  .tier-meta li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 9px;
+    width: 8px;
+    height: 4px;
+    border-left: 2px solid var(--accent-dark);
+    border-bottom: 2px solid var(--accent-dark);
+    transform: rotate(-45deg);
+  }
+  .tier-card.featured .tier-meta li::before {
+    border-left-color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* CTA tier */
+  .tier-cta {
+    margin-top: auto;
+    padding-top: 8px;
+  }
+  .tier-cta .btn {
+    display: block;
+    width: 100%;
+    padding: 16px 24px;
+    border-radius: var(--r-btn);
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .tier-card:not(.featured) .tier-cta .btn {
+    background: var(--dark);
+    color: var(--white);
+  }
+  .tier-card:not(.featured) .tier-cta .btn:hover { transform: translateY(-1px); }
+  .tier-card.featured .tier-cta .btn {
+    background: var(--accent);
+    color: var(--dark);
+  }
+  .tier-card.featured .tier-cta .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .tier-cta-sub {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--t-55);
+  }
+  .tier-card.featured .tier-cta-sub { color: var(--w-60); }
+
+  /* === ROI CALCULATOR (intégré au Standard) === */
+  .roi-calc {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--w-15);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 0 0 24px;
+  }
+  .roi-calc-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .roi-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--w-90);
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .roi-input {
+    background: var(--white);
+    color: var(--dark);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 17px;
+    font-weight: 600;
+    font-family: inherit;
+    width: 78px;
+    text-align: center;
+  }
+  .roi-input:focus { outline: 2px solid var(--accent); }
+  .roi-output {
+    padding-top: 16px;
+    border-top: 1px solid var(--w-15);
+  }
+  .roi-big {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .roi-big .unit {
+    font-family: var(--font);
+    font-style: normal;
+    font-weight: 500;
+    font-size: 0.32em;
+    color: var(--w-60);
+    margin-left: 4px;
+  }
+  .roi-line {
+    font-size: 13px;
+    color: var(--w-90);
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+  .roi-advice {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: rgba(212, 245, 66, 0.1);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--w-90);
+    line-height: 1.5;
+  }
+  .roi-advice strong { color: var(--accent); }
+
+  @media (max-width: 900px) {
+    .tiers-grid { grid-template-columns: 1fr; gap: 32px; }
+    .tier-card.featured { transform: none; padding: 36px 32px; }
+  }
+
+  /* ============ INCLUS PARTOUT ============ */
+  .included {
+    background: var(--white);
+    padding: var(--pad-y) var(--pad-x);
+    border-top: 1px solid var(--t-08);
+    border-bottom: 1px solid var(--t-08);
+  }
+  .included-inner { max-width: 1080px; margin: 0 auto; }
+  .section-header {
+    text-align: center;
+    margin-bottom: 64px;
+    max-width: 800px;
+    margin-left: auto; margin-right: auto;
+  }
+  .section-header h2 {
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .section-header h2 .accent-text { color: var(--t-35); }
+  .section-header p {
+    font-size: clamp(17px, 1.8vw, 20px);
+    color: var(--t-72);
+    line-height: 1.5;
+  }
+  .included-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px 32px;
+    font-size: 15px;
+  }
+  .included-grid li {
+    list-style: none;
+    padding: 10px 0 10px 32px;
+    position: relative;
+    line-height: 1.4;
+    color: var(--t);
+  }
+  .included-grid li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 14px;
+    width: 12px;
+    height: 6px;
+    border-left: 2px solid var(--accent-dark);
+    border-bottom: 2px solid var(--accent-dark);
+    transform: rotate(-45deg);
+  }
+  @media (max-width: 800px) { .included-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .included-grid { grid-template-columns: 1fr; } }
+
+  /* ============ OPTIONS PONCTUELLES ============ */
+  .options {
+    padding: clamp(80px, 10vw, 120px) var(--pad-x);
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .options-card {
+    background: var(--white);
+    border: 1px solid var(--t-08);
+    border-radius: var(--r-hero);
+    padding: clamp(28px, 4vw, 48px);
+  }
+  .options-card .options-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--t-55);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .options-card h3 {
+    font-size: clamp(26px, 3vw, 36px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .options-card h3 .accent-text { color: var(--t-55); font-weight: 400; font-family: var(--serif); font-style: italic; }
+  .options-card p.lead {
+    font-size: 16px;
+    color: var(--t-72);
+    line-height: 1.5;
+    margin-bottom: 32px;
+  }
+  .options-list {
+    border-top: 1px solid var(--t-08);
+  }
+  .options-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--t-08);
+    font-size: 16px;
+  }
+  .options-row .label { color: var(--t); }
+  .options-row .price {
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 17px;
+    white-space: nowrap;
+  }
+  .options-row .price .unit {
+    color: var(--t-55);
+    font-weight: 400;
+    font-size: 14px;
+    margin-left: 4px;
+  }
+
+  /* ============ ANNUAL BAND ============ */
+  .annual {
+    background: var(--dark);
+    color: var(--white);
+    padding: var(--pad-y) var(--pad-x);
+  }
+  .annual-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+  }
+  .annual-inner .eyebrow { color: var(--w-60); margin-bottom: 24px; }
+  .annual-inner h2 {
+    font-size: clamp(36px, 5vw, 60px);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 20px;
+  }
+  .annual-inner h2 .accent-text { color: var(--accent); font-family: var(--serif); font-style: italic; font-weight: 400; }
+  .annual-inner p {
+    font-size: 17px;
+    color: var(--w-90);
+    line-height: 1.55;
+  }
+  .annual-table {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--w-15);
+    border-radius: var(--r-card);
+    padding: 28px;
+  }
+  .annual-table-title {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--w-60);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .annual-table-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: baseline;
+    padding: 14px 0;
+    border-top: 1px solid var(--w-15);
+    font-size: 14px;
+  }
+  .annual-table-row:first-of-type { border-top: none; padding-top: 0; }
+  .annual-table-row .tier-label { color: var(--w-90); font-weight: 500; }
+  .annual-table-row .month {
+    color: var(--w-60);
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    min-width: 80px;
+  }
+  .annual-table-row .saved {
+    color: var(--accent);
+    font-weight: 600;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    min-width: 80px;
+  }
+  .annual-fineprint {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--w-60);
+    line-height: 1.5;
+  }
+  @media (max-width: 800px) {
+    .annual-inner { grid-template-columns: 1fr; }
+  }
+
+  /* ============ FAQ ============ */
+  .faq-section {
+    padding: var(--pad-y) var(--pad-x);
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .faq-list { margin-top: 56px; }
+  .faq-item {
+    border-top: 1px solid var(--t-15);
+    padding: 22px 0;
+  }
+  .faq-item:last-child { border-bottom: 1px solid var(--t-15); }
+  .faq-question {
+    width: 100%;
+    text-align: left;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: clamp(17px, 1.8vw, 20px);
+    font-weight: 500;
+    color: var(--t);
+    padding: 0;
+    letter-spacing: -0.005em;
+    gap: 16px;
+  }
+  .faq-question::after {
+    content: "+";
+    font-size: 24px;
+    color: var(--t-55);
+    transition: transform 0.2s;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .faq-item.open .faq-question::after { transform: rotate(45deg); }
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding-top 0.3s ease;
+    color: var(--t-72);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .faq-item.open .faq-answer {
+    max-height: 800px;
+    padding-top: 16px;
+  }
+
+  /* ============ FINAL CTA (avec retour home) ============ */
+  .final-cta {
+    padding: var(--pad-y) var(--pad-x);
+    text-align: center;
+    border-top: 1px solid var(--t-08);
+  }
+  .final-cta h2 {
+    font-size: clamp(40px, 6vw, 80px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    margin-bottom: 28px;
+    max-width: 900px;
+    margin-left: auto; margin-right: auto;
+  }
+  .final-cta h2 .accent-text { color: var(--t-35); }
+  .final-cta p {
+    font-size: clamp(17px, 1.8vw, 20px);
+    color: var(--t-72);
+    max-width: 640px;
+    margin: 0 auto 40px;
+    line-height: 1.5;
+  }
+  .final-cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--accent); color: var(--dark);
+    padding: 16px 32px; border-radius: var(--r-pill);
+    font-size: 16px; font-weight: 600;
+    transition: transform 0.15s, background 0.15s;
+    display: inline-block;
+  }
+  .btn-primary:hover { transform: translateY(-1px); background: var(--accent-hover); }
+  .btn-secondary {
+    color: var(--t); padding: 16px 28px;
+    font-size: 16px; font-weight: 500;
+    display: inline-block;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--t); }
+
+  /* ============ FOOTER ============ */
+  footer {
+    border-top: 1px solid var(--t-08);
+    padding: 40px var(--pad-x);
+    color: var(--t-55);
+    font-size: 13px;
+    background: var(--sage);
+  }
+  .footer-inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+  }
+  .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .footer-links a:hover { color: var(--t); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="/" class="logo">KOVAS</a>
+    <nav class="nav-links">
+      <a href="/#features">Fonctionnalités</a>
+      <a href="/pricing" class="current">Tarifs</a>
+      <a href="/faq">FAQ</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="/login" class="signin">Se connecter</a>
+      <a href="/signup" class="trial">Essai 14j</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="eyebrow">Tarification simple</div>
+    <h1>
+      Trois paliers.
+      <span class="accent-text">Toutes les fonctionnalités.</span>
+    </h1>
+    <p class="lead">
+      Découverte 29 €, Standard 59 €, Volume 99 €. La seule chose qui change entre les tiers : combien de missions vous faites par mois. Tout le reste — saisie vocale, exports, sync, offline, support — est livré à l'identique.
+    </p>
+    <div class="trust-bar">
+      <span>Sans carte bancaire à l'essai</span>
+      <span>14 jours d'essai · 30 missions</span>
+      <span>Résiliation en un clic</span>
+    </div>
+  </section>
+
+  <!-- ============ BILLING TOGGLE ============ -->
+  <div class="toggle-wrap">
+    <div class="toggle" role="tablist" aria-label="Période de facturation">
+      <button id="toggle-monthly" class="active" role="tab" aria-selected="true">Mensuel</button>
+      <button id="toggle-annual" role="tab" aria-selected="false">
+        Annuel
+        <span class="save-badge">2 mois offerts</span>
+      </button>
+    </div>
+    <div class="toggle-hint">
+      Mensuel : résiliable en un clic. Annuel : 10 mois payés sur 12, prélèvement unique.
+    </div>
+  </div>
+
+  <!-- ============ TIERS GRID ============ -->
+  <section class="tiers-section">
+    <div class="tiers-grid">
+
+      <!-- TIER 1 : DÉCOUVERTE -->
+      <div class="tier-card">
+        <div class="tier-name">Découverte</div>
+        <div class="tier-tagline">Pour démarrer ou pour les petits volumes.</div>
+        <div class="tier-price">
+          <span class="num" data-monthly="29" data-annual="24">29</span>
+          <span class="per">€ HT / mois</span>
+        </div>
+        <div class="tier-price-sub" data-monthly-sub="Ou 24 € en annuel" data-annual-sub="Soit 290 € HT / an">Ou 24 € en annuel</div>
+        <div class="tier-divider"></div>
+        <div class="tier-volume">
+          <div class="tier-volume-label">Volume mensuel</div>
+          <div class="tier-volume-value">20 missions</div>
+          <div class="tier-surplus">Au-delà : 2,00 € / mission</div>
+        </div>
+        <ul class="tier-meta">
+          <li>20 Go de stockage</li>
+          <li>1 utilisateur</li>
+          <li>Surplus à l'usage, jamais en pack</li>
+        </ul>
+        <div class="tier-cta">
+          <a href="/signup?tier=decouverte" class="btn">Démarrer en Découverte</a>
+          <div class="tier-cta-sub">Sans carte bancaire</div>
+        </div>
+      </div>
+
+      <!-- TIER 2 : STANDARD (featured + ROI calc) -->
+      <div class="tier-card featured">
+        <div class="tier-badge">Recommandé</div>
+        <div class="tier-name">Standard</div>
+        <div class="tier-tagline">Le tier choisi par 7 solopreneurs sur 10. Calibré sur 60 missions / mois.</div>
+        <div class="tier-price">
+          <span class="num" data-monthly="59" data-annual="49">59</span>
+          <span class="per">€ HT / mois</span>
+        </div>
+        <div class="tier-price-sub" data-monthly-sub="Ou 49 € en annuel" data-annual-sub="Soit 590 € HT / an, 118 € économisés">Ou 49 € en annuel</div>
+        <div class="tier-divider"></div>
+        <div class="tier-volume">
+          <div class="tier-volume-label">Volume mensuel</div>
+          <div class="tier-volume-value">60 missions</div>
+          <div class="tier-surplus">Au-delà : 1,50 € / mission</div>
+        </div>
+
+        <!-- ROI Calculator intégré -->
+        <div class="roi-calc">
+          <div class="roi-calc-label">À votre volume, ça coûte combien ?</div>
+          <div class="roi-input-row">
+            <span>Je fais</span>
+            <input type="number" id="roi-missions" class="roi-input" value="60" min="1" max="300" />
+            <span>missions / mois</span>
+          </div>
+          <div class="roi-output">
+            <div class="roi-big">
+              <span id="roi-price-per-mission">0,98 €</span>
+              <span class="unit">par mission, tout compris</span>
+            </div>
+            <div class="roi-line" id="roi-detail">59 € de forfait ÷ 60 missions = 0,98 € chaque mission, soit le prix d'un café pour vous éviter 80 min de re-saisie.</div>
+            <div class="roi-advice" id="roi-advice">
+              <strong>Standard est votre tier.</strong> Vous êtes pile sur la zone d'usage prévue.
+            </div>
+          </div>
+        </div>
+
+        <ul class="tier-meta">
+          <li>50 Go de stockage</li>
+          <li>1 utilisateur</li>
+          <li>Plafond mensuel auto-protecteur activable</li>
+        </ul>
+        <div class="tier-cta">
+          <a href="/signup?tier=standard" class="btn">Démarrer en Standard</a>
+          <div class="tier-cta-sub">Sans carte bancaire</div>
+        </div>
+      </div>
+
+      <!-- TIER 3 : VOLUME -->
+      <div class="tier-card">
+        <div class="tier-name">Volume</div>
+        <div class="tier-tagline">Pour les power users : 100+ missions par mois.</div>
+        <div class="tier-price">
+          <span class="num" data-monthly="99" data-annual="82">99</span>
+          <span class="per">€ HT / mois</span>
+        </div>
+        <div class="tier-price-sub" data-monthly-sub="Ou 82 € en annuel" data-annual-sub="Soit 990 € HT / an, 198 € économisés">Ou 82 € en annuel</div>
+        <div class="tier-divider"></div>
+        <div class="tier-volume">
+          <div class="tier-volume-label">Volume mensuel</div>
+          <div class="tier-volume-value">150 missions</div>
+          <div class="tier-surplus">Au-delà : 1,00 € / mission</div>
+        </div>
+        <ul class="tier-meta">
+          <li>100 Go de stockage</li>
+          <li>1 utilisateur</li>
+          <li>Suggestion auto de downgrade si vous payez trop</li>
+        </ul>
+        <div class="tier-cta">
+          <a href="/signup?tier=volume" class="btn">Démarrer en Volume</a>
+          <div class="tier-cta-sub">Sans carte bancaire</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ INCLUS PARTOUT ============ -->
+  <section class="included">
+    <div class="included-inner">
+      <div class="section-header">
+        <div class="eyebrow">Inclus partout</div>
+        <h2>
+          La seule différence,
+          <span class="accent-text">c'est le volume.</span>
+        </h2>
+        <p>Pas de feature gating, pas d'options activables. Découverte ouvre les mêmes portes que Volume. La différence se joue uniquement sur le nombre de missions mensuelles incluses et le tarif du surplus.</p>
+      </div>
+      <ul class="included-grid">
+        <li>8 diagnostics standards (DPE, amiante, plomb, gaz, électricité, termites, Carrez/Boutin, ERP)</li>
+        <li>Saisie vocale terrain illimitée</li>
+        <li>Photos géolocalisées illimitées</li>
+        <li>Exports universels (PDF, Word, CSV, JSON, ZIP Liciel)</li>
+        <li>Bouton « Partager » 3 modes vers votre logiciel</li>
+        <li>Sync iPad / iPhone / Web en temps réel</li>
+        <li>Mode offline complet, jusqu'à 14 jours</li>
+        <li>Templates T2 / T3 / T4 / T5 maison &amp; appartement</li>
+        <li>Check-lists de complétude par diagnostic</li>
+        <li>Validation cohérence avant export</li>
+        <li>Hébergement EU (Paris) · conformité RGPD</li>
+        <li>Support email sous 24 h ouvrées</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ OPTIONS PONCTUELLES ============ -->
+  <section class="options">
+    <div class="options-card">
+      <div class="options-eyebrow">Options à l'usage</div>
+      <h3>
+        Trois petits suppléments, <span class="accent-text">jamais en pack mensuel.</span>
+      </h3>
+      <p class="lead">
+        Vous ne payez que ce que vous utilisez, à l'unité, sur la facture du mois en cours. Pas d'add-on mensuel imposé, pas de bundle qui dort.
+      </p>
+      <div class="options-list">
+        <div class="options-row">
+          <span class="label">Signature électronique eIDAS (Yousign)</span>
+          <span class="price">2,00 €<span class="unit">/ signature</span></span>
+        </div>
+        <div class="options-row">
+          <span class="label">Rapport bilingue français / anglais</span>
+          <span class="price">5,00 €<span class="unit">/ rapport</span></span>
+        </div>
+        <div class="options-row">
+          <span class="label">SMS de rappel client J-1</span>
+          <span class="price">0,15 €<span class="unit">/ SMS</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ANNUAL BAND ============ -->
+  <section class="annual">
+    <div class="annual-inner">
+      <div>
+        <div class="eyebrow">Engagement annuel</div>
+        <h2>
+          Payez 10 mois, <span class="accent-text">utilisez-en 12.</span>
+        </h2>
+        <p>
+          Pas de réduction floue affichée en pourcentage. Deux mois entiers offerts, prélèvement unique en début d'année, résiliation à échéance. Pour ceux qui savent déjà que KOVAS reste — pas pour les indécis.
+        </p>
+      </div>
+      <div class="annual-table">
+        <div class="annual-table-title">Comparaison mensuel · annuel</div>
+        <div class="annual-table-row">
+          <span class="tier-label">Découverte</span>
+          <span class="month">348 €/an</span>
+          <span class="saved">−58 € en annuel</span>
+        </div>
+        <div class="annual-table-row">
+          <span class="tier-label">Standard</span>
+          <span class="month">708 €/an</span>
+          <span class="saved">−118 € en annuel</span>
+        </div>
+        <div class="annual-table-row">
+          <span class="tier-label">Volume</span>
+          <span class="month">1 188 €/an</span>
+          <span class="saved">−198 € en annuel</span>
+        </div>
+        <div class="annual-fineprint">
+          Mensuel : sans engagement, résiliable à tout moment. Annuel : engagement 12 mois, prélèvement unique, remboursement au prorata sur les mois non consommés en cas de cessation d'activité justifiée.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ PRICING ============ -->
+  <section class="faq-section" id="faq">
+    <div class="section-header">
+      <div class="eyebrow">Questions tarifaires</div>
+      <h2>
+        Quatre questions <span class="accent-text">qu'on vous pose tout le temps.</span>
+      </h2>
+      <p>Réponses sèches, sans jargon commercial. Pour le reste, la FAQ complète est sur <a href="/faq" style="border-bottom: 1px solid currentColor;">kovas.fr/faq</a>.</p>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">Pourquoi pas d'engagement ?</button>
+        <div class="faq-answer">
+          Parce qu'on n'a aucune envie de vous garder de force. L'abonnement mensuel se résilie en un clic depuis votre compte, sans email à envoyer, sans formulaire de rétention. La conséquence directe : on est obligé de rester utile pour vous chaque mois, sinon vous partez. L'annuel existe pour ceux qui le veulent — économie de deux mois — mais il n'est jamais imposé, jamais coché par défaut, jamais mis en avant comme « la seule offre vraiment intéressante ».
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">Que se passe-t-il si je dépasse mon quota ?</button>
+        <div class="faq-answer">
+          Rien ne s'interrompt. Chaque mission au-delà du quota est facturée au tarif surplus du tier (2,00 €, 1,50 € ou 1,00 € selon Découverte / Standard / Volume). Vous voyez votre consommation en temps réel dans le widget transparence du dashboard, vous recevez une notification à 80 %, à 100 %, puis à 150 % du quota — pas une de plus. Vous pouvez activer un plafond mensuel auto-protecteur (par exemple : 120 € max) : au-delà du seuil, les missions restent fonctionnelles, mais un footer « Édité avec KOVAS » réapparaît sur les PDF jusqu'au mois suivant.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">Le surplus est-il facturé automatiquement ?</button>
+        <div class="faq-answer">
+          Oui, sur la carte enregistrée à l'inscription, en même temps que l'abonnement du mois suivant. Aucune deuxième saisie de CB n'est jamais demandée, jamais. Le 28 de chaque mois, vous recevez un email récapitulatif : missions réalisées, temps économisé estimé, détail facturation, montant exact du prélèvement à venir. Si vous dépassez votre quota trois mois consécutifs, on vous propose automatiquement de basculer sur un tier supérieur — même si ça fait baisser notre revenu sur votre compte. C'est notre seul moyen honnête de ne pas vous facturer trop.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">Comment résilier ?</button>
+        <div class="faq-answer">
+          Un clic depuis « Mon compte » → « Abonnement » → « Résilier ». Pas de formulaire à remplir, pas d'appel à passer, pas d'email à confirmer. L'abonnement s'arrête à la fin de la période en cours (mensuelle ou annuelle). Vos données restent accessibles 90 jours pour export complet en PDF, Word, CSV, JSON ou ZIP Liciel. Au-delà, suppression définitive sous 30 jours, conformément RGPD. On vous demandera — sans obligation de répondre — ce qui n'a pas fonctionné, pour ajuster le produit. C'est tout.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="final-cta">
+    <h2>
+      Pas encore convaincu ?
+      <span class="accent-text">Revenez voir pourquoi.</span>
+    </h2>
+    <p>14 jours d'essai, sans carte bancaire, 30 missions complètes pour tester sur vos vrais dossiers. Si KOVAS ne change pas votre soir, vous partez sans rien payer.</p>
+    <div class="final-cta-buttons">
+      <a href="/signup" class="btn-primary">Commencer mon essai</a>
+      <a href="/" class="btn-secondary">← Revoir comment ça marche</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>© 2026 SASU Nexus 1993 · 66 Av Champs Elysées, 75008 Paris · SIREN 982 786 154</div>
+    <div class="footer-links">
+      <a href="/faq">FAQ</a>
+      <a href="/mentions-legales">Mentions légales</a>
+      <a href="/cgu">CGU</a>
+      <a href="/confidentialite">Confidentialité</a>
+      <a href="/contact">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ============ TOGGLE MENSUEL / ANNUEL ============
+  const btnMonthly = document.getElementById('toggle-monthly');
+  const btnAnnual = document.getElementById('toggle-annual');
+  let billing = 'monthly';
+
+  function updateBilling(period) {
+    billing = period;
+    btnMonthly.classList.toggle('active', period === 'monthly');
+    btnAnnual.classList.toggle('active', period === 'annual');
+    btnMonthly.setAttribute('aria-selected', period === 'monthly');
+    btnAnnual.setAttribute('aria-selected', period === 'annual');
+
+    document.querySelectorAll('.tier-price .num').forEach(el => {
+      el.textContent = el.getAttribute('data-' + period);
+    });
+    document.querySelectorAll('.tier-price-sub').forEach(el => {
+      el.textContent = el.getAttribute('data-' + period + '-sub');
+    });
+    updateRoi();
+  }
+
+  btnMonthly.addEventListener('click', () => updateBilling('monthly'));
+  btnAnnual.addEventListener('click', () => updateBilling('annual'));
+
+  // ============ ROI CALCULATOR (Standard tier) ============
+  function updateRoi() {
+    const input = document.getElementById('roi-missions');
+    const missions = parseInt(input.value, 10) || 0;
+
+    // Tarifs Standard (réajustés selon billing)
+    const standardFee = billing === 'annual' ? 49 : 59;
+    const standardIncluded = 60;
+    const standardSurplus = 1.50;
+
+    // Tarifs Découverte / Volume pour recommandation
+    const decouverteFee = billing === 'annual' ? 24 : 29;
+    const decouverteIncluded = 20;
+    const decouverteSurplus = 2.00;
+    const volumeFee = billing === 'annual' ? 82 : 99;
+    const volumeIncluded = 150;
+    const volumeSurplus = 1.00;
+
+    function totalCost(fee, included, surplus, m) {
+      const extra = Math.max(0, m - included);
+      return fee + extra * surplus;
+    }
+
+    if (missions === 0) {
+      document.getElementById('roi-price-per-mission').textContent = '—';
+      document.getElementById('roi-detail').textContent = 'Indiquez votre volume mensuel pour voir le calcul.';
+      document.getElementById('roi-advice').innerHTML = '';
+      return;
+    }
+
+    const costStandard = totalCost(standardFee, standardIncluded, standardSurplus, missions);
+    const perMissionStandard = costStandard / missions;
+    const costDecouverte = totalCost(decouverteFee, decouverteIncluded, decouverteSurplus, missions);
+    const costVolume = totalCost(volumeFee, volumeIncluded, volumeSurplus, missions);
+
+    // Trouve le tier optimal
+    const candidates = [
+      { name: 'Découverte', cost: costDecouverte, fee: decouverteFee, included: decouverteIncluded, surplus: decouverteSurplus },
+      { name: 'Standard', cost: costStandard, fee: standardFee, included: standardIncluded, surplus: standardSurplus },
+      { name: 'Volume', cost: costVolume, fee: volumeFee, included: volumeIncluded, surplus: volumeSurplus }
+    ];
+    const optimal = candidates.reduce((a, b) => b.cost < a.cost ? b : a);
+
+    // Affichage du prix/mission au Standard
+    const formatted = perMissionStandard.toFixed(2).replace('.', ',') + ' €';
+    document.getElementById('roi-price-per-mission').textContent = formatted;
+
+    // Détail du calcul Standard
+    const extraStandard = Math.max(0, missions - standardIncluded);
+    let detail;
+    if (extraStandard === 0) {
+      const wasted = standardIncluded - missions;
+      if (wasted > 0) {
+        detail = standardFee + ' € de forfait ÷ ' + missions + ' missions = ' + formatted + ' chaque mission. Vous laissez ' + wasted + ' missions inutilisées dans le quota.';
+      } else {
+        detail = standardFee + ' € de forfait ÷ ' + missions + ' missions = ' + formatted + ' chaque mission, soit le prix d\'un café pour vous éviter 80 min de re-saisie.';
+      }
+    } else {
+      detail = standardFee + ' € de forfait + ' + extraStandard + ' × 1,50 € de surplus = ' + costStandard.toFixed(0) + ' € ÷ ' + missions + ' missions = ' + formatted + ' par mission.';
+    }
+    document.getElementById('roi-detail').textContent = detail;
+
+    // Conseil tier optimal (anti-biais d'autorité)
+    let advice;
+    if (optimal.name === 'Standard') {
+      advice = '<strong>Standard est votre tier.</strong> Vous êtes pile sur la zone d\'usage prévue, c\'est le meilleur rapport prix/mission pour votre volume.';
+    } else if (optimal.name === 'Découverte') {
+      const savings = (costStandard - costDecouverte).toFixed(0);
+      advice = '<strong>À votre volume, prenez Découverte.</strong> Économie de ' + savings + ' € / mois (' + costDecouverte.toFixed(0) + ' € au lieu de ' + costStandard.toFixed(0) + ' €). On préfère vous le dire.';
+    } else if (optimal.name === 'Volume') {
+      const savings = (costStandard - costVolume).toFixed(0);
+      advice = '<strong>À votre volume, passez en Volume.</strong> Économie de ' + savings + ' € / mois (' + costVolume.toFixed(0) + ' € au lieu de ' + costStandard.toFixed(0) + ' € en Standard avec surplus). On préfère vous le dire.';
+    }
+    document.getElementById('roi-advice').innerHTML = advice;
+  }
+
+  document.getElementById('roi-missions').addEventListener('input', updateRoi);
+  updateRoi();
+</script>
+
+</body>
+</html>

@@ -1,4 +1,6 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { AppListToolbar } from '@/components/app-list-toolbar'
+import { parseListSearchParams } from '@/components/app-list-toolbar-utils'
 import {
   AppListTable,
   AppListTableCell,
@@ -37,28 +39,117 @@ const DOSSIER_STATUS_VARIANT: Record<string, 'muted' | 'blue' | 'green' | 'orang
   cancelled: 'red',
 }
 
-export default async function DossiersPage() {
+const DOSSIER_STATUS_FILTER_OPTIONS = Object.entries(DOSSIER_STATUS_LABELS).map(
+  ([value, label]) => ({ value, label }),
+)
+
+const MISSION_TYPE_FILTER_OPTIONS: { value: MissionType; label: string }[] = [
+  { value: 'dpe_vente', label: 'DPE (vente)' },
+  { value: 'dpe_location', label: 'DPE (location)' },
+  { value: 'amiante_vente', label: 'Amiante (vente)' },
+  { value: 'amiante_avant_travaux', label: 'Amiante (avant travaux)' },
+  { value: 'plomb_crep', label: 'Plomb CREP' },
+  { value: 'gaz', label: 'Gaz' },
+  { value: 'electricite', label: 'Électricité' },
+  { value: 'termites', label: 'Termites' },
+  { value: 'carrez_boutin', label: 'Carrez / Boutin' },
+  { value: 'erp', label: 'ERP' },
+  { value: 'copropriete', label: 'Copropriété' },
+]
+
+const VALID_STATUSES = new Set(Object.keys(DOSSIER_STATUS_LABELS))
+const VALID_MISSION_TYPES = new Set(MISSION_TYPE_FILTER_OPTIONS.map((o) => o.value))
+
+const PAGE_SIZE = 25
+
+interface DossiersPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+export default async function DossiersPage({ searchParams }: DossiersPageProps) {
+  const sp = await searchParams
+  const parsed = parseListSearchParams(sp, {
+    pageSize: PAGE_SIZE,
+    filterKeys: ['status', 'mission_type'] as const,
+  })
+
+  const statusRaw = parsed.filters.status
+  const statusFilter = Array.isArray(statusRaw) ? statusRaw[0] : statusRaw
+  const missionTypeRaw = parsed.filters.mission_type
+  const missionTypeFilter = Array.isArray(missionTypeRaw) ? missionTypeRaw[0] : missionTypeRaw
+
+  const validStatus =
+    typeof statusFilter === 'string' && VALID_STATUSES.has(statusFilter) ? statusFilter : null
+  const validMissionType =
+    typeof missionTypeFilter === 'string' && VALID_MISSION_TYPES.has(missionTypeFilter as MissionType)
+      ? (missionTypeFilter as MissionType)
+      : null
+
   const { supabase, orgId } = await getCurrentUser()
 
-  const { data: dossiers } = await supabase
+  // Si filtre missions.type actif → utiliser un join `!inner` pour filtrer côté DB.
+  const missionsRelation = validMissionType ? 'missions!inner(type)' : 'missions(type)'
+
+  let query = supabase
     .from('dossiers')
     .select(
-      'id, reference, status, scheduled_at, properties(address, city, postal_code), missions(type)',
+      `id, reference, status, scheduled_at, properties(address, city, postal_code), ${missionsRelation}`,
+      { count: 'exact' },
     )
     .eq('organization_id', orgId)
     .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(100)
 
-  const count = dossiers?.length ?? 0
+  if (validStatus) {
+    query = query.eq('status', validStatus)
+  }
+  if (validMissionType) {
+    query = query.eq('missions.type', validMissionType)
+  }
+
+  if (parsed.q) {
+    const escaped = parsed.q.replace(/[%,]/g, ' ').trim()
+    if (escaped.length > 0) {
+      const pattern = `%${escaped}%`
+      // Search sur `reference` du dossier uniquement côté `.or()` (les colonnes
+      // de tables jointes ne sont pas adressables dans un même `.or()`).
+      // L'address côté `properties` est filtrée côté client en best-effort.
+      query = query.ilike('reference', pattern)
+    }
+  }
+
+  const { data: dossiers, count } = await query
+    .order('created_at', { ascending: false })
+    .range(parsed.offset, parsed.offset + PAGE_SIZE - 1)
+
+  const totalCount = count ?? 0
+  const hasActiveFilter = Boolean(parsed.q || validStatus || validMissionType)
 
   return (
     <div className="space-y-6 animate-fade-in">
       <AppPageHeader
         title="Vos"
         accent="dossiers"
-        description={`${count} dossier${count > 1 ? 's' : ''} · regroupant les diagnostics par visite et par bien`}
-        action={
+        description="Regroupant les diagnostics par visite et par bien."
+      />
+
+      <AppListToolbar
+        searchPlaceholder="Rechercher un dossier (référence)…"
+        totalCount={totalCount}
+        currentPage={parsed.page}
+        pageSize={PAGE_SIZE}
+        filters={[
+          {
+            key: 'status',
+            label: 'Tous les statuts',
+            options: DOSSIER_STATUS_FILTER_OPTIONS,
+          },
+          {
+            key: 'mission_type',
+            label: 'Tous les diagnostics',
+            options: MISSION_TYPE_FILTER_OPTIONS,
+          },
+        ]}
+        primaryAction={
           <Button asChild variant="accent">
             <Link href="/app/dossiers/new">
               <Plus className="size-4" />
@@ -125,6 +216,12 @@ export default async function DossiersPage() {
             })}
           </tbody>
         </AppListTable>
+      ) : hasActiveFilter ? (
+        <EmptyState
+          icon={FolderOpen}
+          title="Aucun dossier ne correspond à cette recherche."
+          description="Affinez les filtres ou videz la recherche pour retrouver vos dossiers."
+        />
       ) : (
         <EmptyState
           icon={FolderOpen}

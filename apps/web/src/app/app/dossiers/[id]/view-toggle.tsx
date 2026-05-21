@@ -38,7 +38,7 @@ export function ViewToggle({ dossierId, current }: ViewToggleProps) {
         disabled={isPending}
         className={cn(
           'h-7 px-3 text-xs',
-          current === 'rooms' ? 'bg-cream-deep text-ink' : 'text-ink-mute',
+          current === 'rooms' ? 'bg-sage-alt text-ink' : 'text-ink-mute',
         )}
       >
         <DoorOpen className="size-3.5" />
@@ -51,7 +51,7 @@ export function ViewToggle({ dossierId, current }: ViewToggleProps) {
         disabled={isPending}
         className={cn(
           'h-7 px-3 text-xs',
-          current === 'diags' ? 'bg-cream-deep text-ink' : 'text-ink-mute',
+          current === 'diags' ? 'bg-sage-alt text-ink' : 'text-ink-mute',
         )}
       >
         <ListChecks className="size-3.5" />

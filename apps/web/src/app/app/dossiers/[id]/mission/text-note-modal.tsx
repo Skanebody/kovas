@@ -176,7 +176,7 @@ export function TextNoteModal({
             className={cn(
               'w-full resize-none rounded-xl border border-rule bg-paper px-3 py-2.5',
               'text-base text-ink placeholder:text-ink-ghost',
-              'focus-visible:border-navy/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/20',
+              'focus-visible:border-[#0F1419]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/20',
             )}
             disabled={submitting}
           />
@@ -197,7 +197,7 @@ export function TextNoteModal({
               <span
                 className={cn(
                   'font-mono tabular-nums',
-                  remaining < 50 ? 'text-accent-orange' : 'text-ink-mute',
+                  remaining < 50 ? 'text-accent-warm' : 'text-ink-mute',
                 )}
               >
                 {remaining}

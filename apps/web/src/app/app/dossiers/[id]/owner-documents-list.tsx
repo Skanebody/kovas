@@ -279,7 +279,7 @@ function ExtractedPanel({
   )
 
   return (
-    <div className="rounded-md bg-cream-deep/60 p-3 space-y-3 text-sm">
+    <div className="rounded-md bg-sage-alt/60 p-3 space-y-3 text-sm">
       <div className="space-y-1">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <span className="font-semibold flex items-center gap-1.5">

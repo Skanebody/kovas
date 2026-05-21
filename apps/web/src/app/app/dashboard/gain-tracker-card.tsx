@@ -38,7 +38,7 @@ export async function GainTrackerCard() {
 
   return (
     <Card
-      variant="navy"
+      variant="accent"
       className="relative overflow-hidden p-8 md:p-10 h-full flex flex-col justify-between"
     >
       {/* Glow ambre radial en background (signature v2) */}

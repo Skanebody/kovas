@@ -37,7 +37,7 @@ export function MissionToolbar({
           className={cn(
             'inline-flex items-center gap-2 rounded-pill px-3 py-2',
             'text-sm font-medium text-ink',
-            'transition-colors hover:bg-cream-deep/40',
+            'transition-colors hover:bg-sage-alt/40',
           )}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />

@@ -163,8 +163,8 @@ export function DuplicateMergeModal({
                   className={cn(
                     'cursor-pointer rounded-md border px-2 py-1.5 text-xs',
                     s.kind === 'existing'
-                      ? 'border-navy bg-navy/5 text-ink'
-                      : 'border-rule bg-paper text-ink-mute hover:border-navy/40',
+                      ? 'border-[#0F1419] bg-[#0F1419]/5 text-ink'
+                      : 'border-rule bg-paper text-ink-mute hover:border-[#0F1419]/40',
                   )}
                 >
                   <input
@@ -205,7 +205,7 @@ export function DuplicateMergeModal({
                       'rounded-pill border px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider',
                       s.kind === 'edited'
                         ? 'border-ink bg-ink text-paper'
-                        : 'border-rule bg-paper text-ink-mute hover:border-navy/40',
+                        : 'border-rule bg-paper text-ink-mute hover:border-[#0F1419]/40',
                     )}
                   >
                     Éditer

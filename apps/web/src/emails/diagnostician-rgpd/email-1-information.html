@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{first_name}}, votre fiche professionnelle est sur KOVAS</title>
+<!-- Préheader caché -->
+<style>
+  .preheader { display: none !important; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0; overflow: hidden; }
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#F5F2EC;font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0B1D33;line-height:1.5;">
+
+<div class="preheader" style="display:none;font-size:1px;color:#F5F2EC;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+  Voici ce que nous avons publié à partir des données officielles + comment la réclamer en 2 minutes
+</div>
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F2EC;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background-color:#FDFBF6;border:1px solid #D5CDB8;border-radius:8px;">
+
+        <!-- Header -->
+        <tr>
+          <td style="padding:32px 40px 16px 40px;border-bottom:1px solid #E5DECB;">
+            <table width="100%"><tr>
+              <td style="font-size:18px;font-weight:700;color:#0B1D33;letter-spacing:-0.01em;">KOVAS</td>
+              <td align="right" style="font-family:'Geist Mono','SF Mono',Menlo,Monaco,Consolas,monospace;font-size:11px;color:#7E8AA4;text-transform:uppercase;letter-spacing:0.06em;">Information préalable RGPD</td>
+            </tr></table>
+          </td>
+        </tr>
+
+        <!-- Corps -->
+        <tr>
+          <td style="padding:32px 40px;">
+            <h1 style="margin:0 0 24px 0;font-size:22px;font-weight:600;color:#0B1D33;line-height:1.3;letter-spacing:-0.01em;">
+              Bonjour {{first_name}} {{last_name}},
+            </h1>
+
+            <p style="margin:0 0 16px 0;font-size:15px;color:#1F2E4D;">
+              Je suis Benjamin Bel, fondateur de KOVAS, plateforme professionnelle dédiée aux diagnostiqueurs immobiliers indépendants.
+            </p>
+
+            <p style="margin:0 0 16px 0;font-size:15px;color:#1F2E4D;">
+              Nous avons publié une fiche professionnelle vous concernant à partir des données officielles disponibles publiquement (annuaires des certifications COFRAC, registres professionnels). Voici ce qu'elle contient :
+            </p>
+
+            <!-- Récapitulatif fiche -->
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;background-color:#F8F5EE;border:1px solid #E5DECB;border-radius:6px;">
+              <tr><td style="padding:20px 24px;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="padding:6px 0;font-size:13px;color:#4A5878;width:140px;font-family:'Geist Mono','SF Mono',Menlo,Monaco,Consolas,monospace;text-transform:uppercase;letter-spacing:0.04em;">Nom</td>
+                    <td style="padding:6px 0;font-size:14px;color:#0B1D33;">{{first_name}} {{last_name}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;font-size:13px;color:#4A5878;font-family:'Geist Mono','SF Mono',Menlo,Monaco,Consolas,monospace;text-transform:uppercase;letter-spacing:0.04em;">Localisation</td>
+                    <td style="padding:6px 0;font-size:14px;color:#0B1D33;">{{city}} ({{department_name}})</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;font-size:13px;color:#4A5878;font-family:'Geist Mono','SF Mono',Menlo,Monaco,Consolas,monospace;text-transform:uppercase;letter-spacing:0.04em;vertical-align:top;">Certifications</td>
+                    <td style="padding:6px 0;font-size:14px;color:#0B1D33;">{{certifications_list}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;font-size:13px;color:#4A5878;font-family:'Geist Mono','SF Mono',Menlo,Monaco,Consolas,monospace;text-transform:uppercase;letter-spacing:0.04em;">Organisme</td>
+                    <td style="padding:6px 0;font-size:14px;color:#0B1D33;">{{certification_organization}}</td>
+                  </tr>
+                </table>
+                <p style="margin:16px 0 0 0;font-size:13px;color:#4A5878;">
+                  Page publique : <a href="{{public_page_url}}" style="color:#0B1D33;text-decoration:underline;">{{public_page_url}}</a>
+                </p>
+              </td></tr>
+            </table>
+
+            <p style="margin:0 0 24px 0;font-size:15px;color:#1F2E4D;">
+              Cette publication est fondée sur l'<strong>article 6.1.f du RGPD (intérêt légitime)</strong> : permettre aux particuliers de trouver un diagnostiqueur certifié dans leur secteur. Vous disposez d'un contrôle total sur cette fiche.
+            </p>
+
+            <!-- 3 options -->
+            <h2 style="margin:32px 0 16px 0;font-size:16px;font-weight:600;color:#0B1D33;">Trois options s'offrent à vous</h2>
+
+            <!-- Option 1 : Réclamer -->
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 16px 0;background-color:#FFF7E8;border:1px solid #FFEDD5;border-radius:6px;">
+              <tr><td style="padding:20px 24px;">
+                <p style="margin:0 0 6px 0;font-size:14px;font-weight:600;color:#0B1D33;">1. Réclamer votre fiche (recommandé, 2 minutes)</p>
+                <p style="margin:0 0 14px 0;font-size:13px;color:#4A5878;line-height:1.5;">
+                  Vous prenez le contrôle complet : photo, présentation, tarifs, zones d'intervention. Vous apparaissez dans les résultats de recherche locale et recevez les demandes de devis.
+                </p>
+                <a href="{{claim_url}}" style="display:inline-block;background-color:#0B1D33;color:#FDFBF6;text-decoration:none;padding:10px 22px;border-radius:999px;font-size:13px;font-weight:600;">Réclamer ma fiche →</a>
+              </td></tr>
+            </table>
+
+            <!-- Option 2 : Corriger -->
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 16px 0;background-color:#FDFBF6;border:1px solid #E5DECB;border-radius:6px;">
+              <tr><td style="padding:20px 24px;">
+                <p style="margin:0 0 6px 0;font-size:14px;font-weight:600;color:#0B1D33;">2. Signaler une erreur</p>
+                <p style="margin:0 0 14px 0;font-size:13px;color:#4A5878;line-height:1.5;">
+                  Une information est inexacte ? Indiquez-nous la correction à apporter, nous traitons sous 72 heures.
+                </p>
+                <a href="{{correction_url}}" style="display:inline-block;color:#0B1D33;text-decoration:underline;font-size:13px;font-weight:500;">Proposer une correction →</a>
+              </td></tr>
+            </table>
+
+            <!-- Option 3 : Retrait -->
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px 0;background-color:#FDFBF6;border:1px solid #E5DECB;border-radius:6px;">
+              <tr><td style="padding:20px 24px;">
+                <p style="margin:0 0 6px 0;font-size:14px;font-weight:600;color:#0B1D33;">3. Demander le retrait</p>
+                <p style="margin:0 0 14px 0;font-size:13px;color:#4A5878;line-height:1.5;">
+                  Vous ne souhaitez pas figurer sur KOVAS. Le retrait est effectif sous 72 heures, sans justification requise.
+                </p>
+                <a href="{{withdrawal_url}}" style="display:inline-block;color:#4A5878;text-decoration:underline;font-size:13px;font-weight:500;">Demander le retrait →</a>
+              </td></tr>
+            </table>
+
+            <p style="margin:24px 0 8px 0;font-size:15px;color:#1F2E4D;">
+              Je reste disponible si vous avez la moindre question. Vous pouvez répondre directement à cet email.
+            </p>
+
+            <p style="margin:0 0 4px 0;font-size:15px;color:#0B1D33;">Cordialement,</p>
+            <p style="margin:0 0 4px 0;font-size:15px;color:#0B1D33;font-weight:600;">Benjamin Bel</p>
+            <p style="margin:0;font-size:13px;color:#4A5878;">Fondateur · KOVAS</p>
+          </td>
+        </tr>
+
+        <!-- Footer légal -->
+        <tr>
+          <td style="padding:24px 40px 32px 40px;border-top:1px solid #E5DECB;background-color:#F8F5EE;border-radius:0 0 8px 8px;">
+            <p style="margin:0 0 12px 0;font-size:11px;color:#7E8AA4;line-height:1.6;font-family:'Geist Mono','SF Mono',Menlo,Monaco,Consolas,monospace;text-transform:uppercase;letter-spacing:0.04em;">Mentions légales</p>
+            <p style="margin:0 0 8px 0;font-size:12px;color:#4A5878;line-height:1.6;">
+              Traitement fondé sur l'article 6.1.f du RGPD (intérêt légitime). Vous disposez à tout moment d'un droit d'accès, de rectification, d'opposition et d'effacement (articles 15 à 22 du RGPD).
+            </p>
+            <p style="margin:0 0 8px 0;font-size:12px;color:#4A5878;line-height:1.6;">
+              Responsable de traitement : SASU Nexus 1993 · {{kovas_legal_address}} · SIRET {{kovas_siret}}
+            </p>
+            <p style="margin:0;font-size:12px;color:#7E8AA4;line-height:1.6;">
+              <a href="{{unsubscribe_url}}" style="color:#7E8AA4;text-decoration:underline;">Ne plus recevoir ces emails</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

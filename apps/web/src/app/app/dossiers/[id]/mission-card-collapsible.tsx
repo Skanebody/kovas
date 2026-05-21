@@ -22,7 +22,7 @@ interface MissionCardCollapsibleProps {
 function pillColor(pct: number, missing: number): { dot: string; ring: string } {
   if (pct >= 100) return { dot: 'bg-accent-blue', ring: 'ring-accent-blue/30' }
   if (pct >= 75) return { dot: 'bg-accent-green', ring: 'ring-accent-green/30' }
-  if (pct >= 25 || missing > 0) return { dot: 'bg-accent-orange', ring: 'ring-accent-orange/30' }
+  if (pct >= 25 || missing > 0) return { dot: 'bg-accent-warm', ring: 'ring-accent-warm/30' }
   return { dot: 'bg-accent-red', ring: 'ring-accent-red/30' }
 }
 

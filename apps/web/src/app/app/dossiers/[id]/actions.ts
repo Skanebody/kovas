@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { assertStorageAvailable, StorageQuotaExceeded } from '@/lib/storage/quota'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -138,6 +139,18 @@ export async function createPhotoAction(input: z.infer<typeof photoSchema>) {
 
   const { supabase, orgId, user } = await getCurrentUser()
 
+  // Quota stockage organisation — bloque l'INSERT (et donc le trigger qui
+  // décompte) si on dépasse. La photo a déjà été uploadée bucket-side mais on
+  // évite de l'enregistrer (le client peut nettoyer).
+  try {
+    await assertStorageAvailable(supabase, orgId, parsed.data.sizeBytes)
+  } catch (e) {
+    if (e instanceof StorageQuotaExceeded) {
+      throw new Error(e.message)
+    }
+    throw e
+  }
+
   const location =
     parsed.data.longitude && parsed.data.latitude
       ? `SRID=4326;POINT(${parsed.data.longitude} ${parsed.data.latitude})`
@@ -209,6 +222,7 @@ const voiceNoteSchema = z.object({
   roomId: z.string().uuid().optional().or(z.literal('')),
   storagePath: z.string().min(5),
   durationSeconds: z.coerce.number().int().min(0).max(3600),
+  fileSizeBytes: z.coerce.number().int().min(0).optional(),
   transcriptRaw: z.string().optional().or(z.literal('')),
   transcriptStructured: z.unknown().optional(),
   provider: z.string().max(50).optional(),
@@ -224,6 +238,18 @@ export async function createVoiceNoteAction(input: z.infer<typeof voiceNoteSchem
   }
   const { supabase, orgId, user } = await getCurrentUser()
 
+  // Quota stockage organisation — estimation 200 KB si taille non fournie
+  // (cohérent avec le trigger SQL trg_voice_notes_storage_delta).
+  const estimatedBytes = parsed.data.fileSizeBytes ?? 204800
+  try {
+    await assertStorageAvailable(supabase, orgId, estimatedBytes)
+  } catch (e) {
+    if (e instanceof StorageQuotaExceeded) {
+      throw new Error(e.message)
+    }
+    throw e
+  }
+
   const { data, error } = await supabase
     .from('voice_notes')
     .insert({
@@ -232,6 +258,8 @@ export async function createVoiceNoteAction(input: z.infer<typeof voiceNoteSchem
       room_id: parsed.data.roomId || null,
       storage_path: parsed.data.storagePath,
       duration_seconds: parsed.data.durationSeconds,
+      // Colonne ajoutée par la migration 20260524100000 — pas encore dans les types Database générés
+      file_size_bytes: (parsed.data.fileSizeBytes ?? null) as never,
       language: 'fr',
       provider: parsed.data.provider ?? 'openai',
       transcript_raw: parsed.data.transcriptRaw || null,

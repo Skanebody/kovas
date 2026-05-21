@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Database } from '@kovas/database/types'
 import { Card } from '@/components/ui/card'
+import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import { UploadForm } from './upload-form'
 
 export const metadata: Metadata = {
@@ -114,7 +115,7 @@ export default async function PublicUploadPage({ params }: PageProps) {
 
       <footer className="px-6 py-6 border-t border-rule/80">
         <p className="text-[11px] text-ink-faint text-center">
-          © 2026 SASU Nexus 1993 · SIREN 982 786 154
+          © 2026 SASU {COMPANY_IDENTITY.legalName} · SIREN {COMPANY_IDENTITY.sirenFormatted}
         </p>
       </footer>
     </div>

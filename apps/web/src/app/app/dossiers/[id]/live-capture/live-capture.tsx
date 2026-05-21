@@ -398,7 +398,7 @@ export function LiveCapture({ dossierId, property, rooms, missions }: LiveCaptur
 
       {/* Banner support */}
       {mode === 'voice' && !supported && (
-        <div className="rounded-lg border border-amber/30 bg-amber/5 px-3 py-2 text-[12px] text-ink-soft">
+        <div className="rounded-lg border border-chartreuse/30 bg-chartreuse/5 px-3 py-2 text-[12px] text-ink-soft">
           Saisie vocale différée — votre navigateur ne supporte pas la transcription live. Utilisez
           le mode <strong>Texte</strong> ou la note vocale (record-then-upload) ci-dessous.
         </div>
@@ -491,12 +491,12 @@ export function LiveCapture({ dossierId, property, rooms, missions }: LiveCaptur
                     'inline-flex items-center gap-1.5 rounded-pill border px-3 py-1.5 text-[12px] font-medium transition-all animate-in fade-in slide-in-from-bottom-2 duration-300',
                     enabled
                       ? isConflict
-                        ? 'border-amber/60 bg-amber/10 text-ink'
+                        ? 'border-chartreuse/60 bg-chartreuse/10 text-ink'
                         : 'border-chartreuse-deep/60 bg-chartreuse/30 text-ink'
                       : 'border-rule bg-paper/60 text-ink-mute opacity-60',
                   )}
                 >
-                  {isConflict && <AlertTriangle className="size-3.5 text-amber" />}
+                  {isConflict && <AlertTriangle className="size-3.5 text-[#95B11A]" />}
                   {!isConflict && enabled && <Check className="size-3.5" />}
                   {formatChipLabel(chip)}
                 </button>
@@ -509,19 +509,19 @@ export function LiveCapture({ dossierId, property, rooms, missions }: LiveCaptur
       {/* Conflits — résolution inline */}
       {conflicts.length > 0 && (
         <div className="space-y-2">
-          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-amber flex items-center gap-1.5">
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#95B11A] flex items-center gap-1.5">
             <AlertTriangle className="size-3.5" /> Conflits ({conflicts.length})
           </p>
           <div className="space-y-2">
             {conflicts.map((c) => (
               <div
                 key={c.field}
-                className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-[12px] space-y-2"
+                className="rounded-lg border border-chartreuse/30 bg-chartreuse/5 p-3 text-[12px] space-y-2"
               >
                 <p className="text-ink-soft">
                   <strong className="font-medium text-ink">{c.field}</strong> : existant{' '}
                   <span className="font-mono">{c.existing}</span> ≠ détecté{' '}
-                  <span className="font-mono text-amber">{c.suggested}</span>
+                  <span className="font-mono text-[#95B11A]">{c.suggested}</span>
                 </p>
                 <div className="flex gap-2">
                   <Button

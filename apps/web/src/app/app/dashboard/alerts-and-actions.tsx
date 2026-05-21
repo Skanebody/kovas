@@ -17,7 +17,7 @@ interface AlertRow {
 
 const LEVEL_COLORS: Record<AlertRow['level'], string> = {
   critical: 'text-accent-red',
-  warning: 'text-accent-orange',
+  warning: 'text-accent-warm',
   success: 'text-accent-green',
 }
 

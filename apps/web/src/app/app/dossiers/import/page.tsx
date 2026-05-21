@@ -45,7 +45,7 @@ export default function ImportPage() {
         eyebrow="📥 IMPORT BASE EXISTANTE · 5 MIN"
         description="Récupérez votre base de clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC, ORIS ou tout autre logiciel de diagnostic — dans le cadre de votre droit à la portabilité (art. 20 RGPD)."
         action={
-          <Button variant="glass" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild>
             <a
               href="/help/import"
               target="_blank"

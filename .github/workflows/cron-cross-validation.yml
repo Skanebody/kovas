@@ -1,0 +1,91 @@
+# Cron orchestrator — pipeline de cross-validation diagnostiqueurs (Phase A).
+#
+# Declenche les Edge Functions Supabase en cascade quotidienne, sequentiellement,
+# avec resilience (l'echec d'une fonction ne bloque pas les suivantes).
+#
+# Le workflow `cron-dhup-weekly.yml` (separe) gere l'import DHUP hebdomadaire
+# (lundi 03:00 UTC). Ce workflow-ci enchaine les 5 fonctions quotidiennes
+# a partir de 03:30 UTC, soit apres la fin probable de l'import DHUP.
+#
+# ---------------------------------------------------------------------------
+# Secrets GitHub a provisionner (Settings > Secrets and variables > Actions) :
+#
+#   SUPABASE_FUNCTIONS_BASE_URL   ex: https://<project-ref>.supabase.co/functions/v1
+#   SUPABASE_SERVICE_ROLE_KEY     service_role key Supabase
+#   CRON_SECRET                   secret partage avec les Edge Functions
+#
+# Manual dispatch : utile pour tester / rejouer sans attendre 24h.
+# ---------------------------------------------------------------------------
+
+name: cron-cross-validation
+
+on:
+  schedule:
+    # 03:30 UTC tous les jours
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  cross-validate:
+    name: Pipeline diagnostiqueurs (BAN, SIRENE, INPI, ADEME, score)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_FUNCTIONS_BASE_URL: ${{ secrets.SUPABASE_FUNCTIONS_BASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Geocode with BAN (batch 500)
+        continue-on-error: true
+        run: |
+          curl -fsS -X POST \
+            "$SUPABASE_FUNCTIONS_BASE_URL/geocode-with-ban" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"batch","limit":500}' \
+            || echo "geocode-with-ban: step failed (non-blocking)"
+
+      - name: Cross-validate SIRENE (batch 200)
+        continue-on-error: true
+        run: |
+          curl -fsS -X POST \
+            "$SUPABASE_FUNCTIONS_BASE_URL/cross-validate-sirene" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"batch","limit":200}' \
+            || echo "cross-validate-sirene: step failed (non-blocking)"
+
+      - name: Cross-validate INPI (batch 200)
+        continue-on-error: true
+        run: |
+          curl -fsS -X POST \
+            "$SUPABASE_FUNCTIONS_BASE_URL/cross-validate-inpi" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"batch","limit":200}' \
+            || echo "cross-validate-inpi: step failed (non-blocking)"
+
+      - name: Detect ADEME activity signal (batch 100)
+        continue-on-error: true
+        run: |
+          curl -fsS -X POST \
+            "$SUPABASE_FUNCTIONS_BASE_URL/detect-ademe-activity-signal" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"batch","limit":100}' \
+            || echo "detect-ademe-activity-signal: step failed (non-blocking)"
+
+      - name: Compute diagnostician activity score (batch 5000)
+        continue-on-error: true
+        run: |
+          curl -fsS -X POST \
+            "$SUPABASE_FUNCTIONS_BASE_URL/compute-diagnostician-activity-score" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"mode":"batch"}' \
+            || echo "compute-diagnostician-activity-score: step failed (non-blocking)"

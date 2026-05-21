@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Vous avez une nouvelle demande de devis sur KOVAS</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        background: #fafbfc;
+        color: #0b1d33;
+        margin: 0;
+        padding: 0;
+        line-height: 1.5;
+      }
+      .container {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 32px 24px;
+      }
+      .header {
+        margin-bottom: 24px;
+      }
+      .logo {
+        display: inline-block;
+        width: 36px;
+        height: 36px;
+        background: #0b1d33;
+        border-radius: 8px;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      .brand {
+        font-size: 18px;
+        font-weight: 700;
+        vertical-align: middle;
+        color: #0b1d33;
+      }
+      h1 {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 24px 0 16px;
+        color: #0b1d33;
+      }
+      p {
+        font-size: 15px;
+        color: #4a5878;
+        margin: 0 0 16px;
+      }
+      .lead-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 20px;
+        margin: 24px 0;
+      }
+      .lead-card .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 14px;
+      }
+      .lead-card .row:last-child {
+        border-bottom: none;
+      }
+      .lead-card .label {
+        color: #6b7280;
+      }
+      .lead-card .value {
+        color: #0b1d33;
+        font-weight: 500;
+      }
+      .lock-banner {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin: 16px 0 24px;
+        color: #9a3412;
+        font-size: 14px;
+      }
+      .cta {
+        display: inline-block;
+        background: #0b1d33;
+        color: #ffffff !important;
+        text-decoration: none;
+        padding: 14px 28px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .footer {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+        font-size: 12px;
+        color: #9ca3af;
+      }
+      .footer a {
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <span class="logo"></span>
+        <span class="brand">KOVAS</span>
+      </div>
+
+      <h1>Vous avez une nouvelle demande de devis</h1>
+
+      <p>Bonjour {{first_name}},</p>
+
+      <p>Une personne recherche un diagnostiqueur dans votre zone :</p>
+
+      <div class="lead-card">
+        <div class="row">
+          <span class="label">Prospect</span>
+          <span class="value">{{requester_first_name}} {{anonymized_lastname_initial}}.</span>
+        </div>
+        <div class="row">
+          <span class="label">Ville</span>
+          <span class="value">{{property_city}} ({{property_postal_code}})</span>
+        </div>
+        <div class="row">
+          <span class="label">Bien</span>
+          <span class="value">{{property_type}} · {{property_surface_m2}} m²</span>
+        </div>
+        <div class="row">
+          <span class="label">Diagnostics</span>
+          <span class="value">{{diagnostics_list}}</span>
+        </div>
+        <div class="row">
+          <span class="label">Reçue</span>
+          <span class="value">il y a {{time_ago}}</span>
+        </div>
+      </div>
+
+      <div class="lock-banner">
+        <strong>Coordonnées client verrouillées.</strong> Pour découvrir le téléphone et l&rsquo;email de
+        {{requester_first_name}} {{anonymized_lastname_initial}}. et répondre à sa demande, réclamez
+        votre fiche KOVAS et activez votre compte.
+      </div>
+
+      <p style="text-align: center; margin: 32px 0">
+        <a class="cta" href="{{claim_url}}">Réclamer ma fiche et débloquer</a>
+      </p>
+
+      <p style="font-size: 13px; color: #6b7280">
+        Vous avez <strong>{{total_pending_leads}}</strong> demande(s) de devis en attente sur KOVAS.
+        Voir le détail (anonymisé) :
+        <a href="{{pending_leads_url}}" style="color: #0b1d33">{{pending_leads_url}}</a>
+      </p>
+
+      <div class="footer">
+        <p>
+          Cet email vous est envoyé parce qu&rsquo;une demande de devis a été déposée pour votre
+          fiche dans l&rsquo;annuaire KOVAS. Vous pouvez à tout moment demander le retrait de votre
+          fiche : <a href="{{withdrawal_url}}">retrait de fiche</a>.
+        </p>
+        <p>
+          KOVAS · SASU Nexus 1993 · 66 Avenue des Champs Élysées, 75008 Paris · SIREN
+          982 786 154 · RCS Paris · TVA FR18982786154 ·
+          <a href="https://kovas.fr">kovas.fr</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -83,7 +83,7 @@ export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
               <p className="text-sm text-ink-mute">
                 Le dossier sera invisible (soft-delete). Les données restent en base 30 jours puis
                 sont purgées. Tapez{' '}
-                <code className="rounded bg-cream-deep px-1 py-0.5 font-mono text-xs">supprimer</code>{' '}
+                <code className="rounded bg-sage-alt px-1 py-0.5 font-mono text-xs">supprimer</code>{' '}
                 pour confirmer.
               </p>
             </div>

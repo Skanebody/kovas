@@ -3,23 +3,32 @@ import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { AppShell } from '@/components/app-shell'
 import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
+import { RegulatoryNotificationsBadge } from '@/components/regulatory/RegulatoryNotificationsBadge'
 import { MobileQuickActionsFab } from '@/components/ui/mobile-quick-actions'
 import { OfflineBanner } from '@/components/ui/offline-banner'
 import { SyncIndicator } from '@/components/ui/sync-indicator'
 import { UsageWidget } from '@/components/usage-widget'
 import { UserMenu } from '@/components/user-menu'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { loadPendingSuggestions, loadUserAccess } from '@/lib/upsell/load-access'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { logoutAction } from './actions'
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const { profile, orgId } = await getCurrentUser()
+  const { user, profile, orgId, supabase } = await getCurrentUser()
   const displayName = profile.full_name ?? profile.email
+
+  // L1 — Upsell intelligent : charge l'accès et les suggestions pending pour
+  // la sidebar adaptive et le bouton "Découvrir" + dot chartreuse.
+  const [access, suggestions] = await Promise.all([
+    loadUserAccess(supabase, orgId),
+    loadPendingSuggestions(supabase, user.id),
+  ])
 
   return (
     <AppShell background="light" className="min-h-dvh flex">
-      <AppSidebar />
+      <AppSidebar access={access} suggestions={suggestions} />
 
       <div className="flex-1 flex flex-col min-w-0">
         <OfflineBanner />
@@ -43,6 +52,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               <SyncIndicator organizationId={orgId} />
               <CommandPaletteTrigger />
               <UsageWidget />
+              <RegulatoryNotificationsBadge />
               <UserMenu displayName={displayName} email={profile.email} onLogout={logoutAction} />
             </div>
           </div>
@@ -51,7 +61,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <main className="flex-1 px-4 md:px-8 py-4 pb-24 md:pb-8 w-full min-w-0">{children}</main>
       </div>
 
-      <AppMobileNav />
+      <AppMobileNav access={access} suggestions={suggestions} />
       <MobileQuickActionsFab />
       <CommandPalette />
     </AppShell>

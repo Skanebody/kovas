@@ -20,6 +20,12 @@ export interface EmailPayload {
   text?: string
   /** Type d'email pour tracking / opt-out par catégorie */
   category: EmailCategory
+  /** Override expéditeur par défaut (KOVAS <hello@kovas.fr>). */
+  from?: string
+  /** Reply-To custom (transactional / personnal sender). */
+  replyTo?: string
+  /** Tags Resend additionnels (sequence, step, etc.). La catégorie est toujours ajoutée. */
+  tags?: Array<{ name: string; value: string }>
 }
 
 export type EmailCategory =
@@ -65,12 +71,16 @@ export async function sendEmail(payload: EmailPayload): Promise<EmailResult> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM_DEFAULT,
+        from: payload.from ?? FROM_DEFAULT,
         to: Array.isArray(payload.to) ? payload.to : [payload.to],
         subject: payload.subject,
         html: payload.html,
         text: payload.text,
-        tags: [{ name: 'category', value: payload.category }],
+        reply_to: payload.replyTo,
+        tags: [
+          { name: 'category', value: payload.category },
+          ...(payload.tags ?? []),
+        ],
       }),
     })
 

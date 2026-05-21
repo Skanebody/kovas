@@ -95,7 +95,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               </span>
             )}
             {missionsCount > 0 ? (
-              <Button variant="glass" asChild>
+              <Button variant="outline" asChild>
                 <a
                   href={`/api/clients/${client.id}/export.zip`}
                   download
@@ -105,7 +105,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 </a>
               </Button>
             ) : null}
-            <Button variant="glass" asChild>
+            <Button variant="outline" asChild>
               <Link href={`/app/clients/${client.id}/edit`}>
                 <Pencil className="size-4" /> Modifier
               </Link>
@@ -199,7 +199,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               ({ownedProperties?.length ?? 0})
             </span>
           </CardTitle>
-          <Button variant="glass" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild>
             <Link href={`/app/properties/new?clientId=${id}`}>
               <Plus className="size-4" /> Ajouter un logement
             </Link>

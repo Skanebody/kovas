@@ -1,6 +1,7 @@
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import type { Database } from '@kovas/database/types'
+import { assertStorageAvailable, StorageQuotaExceeded } from '@/lib/storage/quota'
 
 /**
  * Endpoint upload public token-validated.
@@ -61,6 +62,17 @@ export async function POST(request: Request) {
     new Date(dossier.client_upload_expires_at) < new Date()
   ) {
     return NextResponse.json({ error: 'Lien expiré' }, { status: 410 })
+  }
+
+  // Quota stockage organisation — bloque AVANT l'upload pour éviter d'écrire
+  // un fichier qui dépassera la jauge (cf. lib/storage/quota.ts).
+  try {
+    await assertStorageAvailable(admin, dossier.organization_id, file.size)
+  } catch (e) {
+    if (e instanceof StorageQuotaExceeded) {
+      return NextResponse.json({ error: e.message, code: e.code }, { status: 413 })
+    }
+    throw e
   }
 
   // Storage path : <org_id>/<dossier_id>/<timestamp>-<random>.<ext>

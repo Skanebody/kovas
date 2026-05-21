@@ -113,7 +113,7 @@ export function TodayMissionActions({
       </Button>
       {docsMissing && (
         <Button
-          variant="glass"
+          variant="outline"
           size="sm"
           onClick={handleRelance}
           aria-label="Relancer le client pour les documents manquants"

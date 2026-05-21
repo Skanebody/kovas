@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card'
 import { FAQ_CATEGORIES, FAQ_LANDING } from '@/lib/faq-data'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
-import { SiteFooter } from '@/components/site-footer'
+import { LandingFooter } from '@/components/landing/LandingFooter'
 import Link from 'next/link'
 import Script from 'next/script'
 
@@ -37,7 +37,7 @@ export default function FaqPage() {
   const jsonLd = buildFaqJsonLd()
 
   return (
-    <div className="min-h-dvh">
+    <div className="min-h-dvh bg-sage text-[#0F1419] font-sans">
       {/* JSON-LD FAQPage pour rich snippets Google */}
       <Script
         id="faq-jsonld"
@@ -46,11 +46,13 @@ export default function FaqPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <header className="glass-header sticky top-0 z-40">
+      <header className="sticky top-0 z-30 bg-[#F5F7F4]/86 backdrop-blur-xl border-b border-[#0F1419]/[0.08]">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-md bg-navy shadow-accent" aria-hidden />
-            <span className="text-base font-bold tracking-tight">KOVAS</span>
+          <Link
+            href="/"
+            className="font-semibold tracking-[0.22em] text-[15px] text-[#0F1419]"
+          >
+            KOVAS
           </Link>
           <Button variant="ghost" size="sm" asChild>
             <Link href="/">
@@ -120,7 +122,7 @@ export default function FaqPage() {
             {FAQ_CATEGORIES.map((cat) => (
               <section key={cat.id} id={cat.id} className="scroll-mt-24 space-y-4">
                 <div className="space-y-1">
-                  <h2 className="font-display font-light text-2xl tracking-tight text-ink">{cat.title}</h2>
+                  <h2 className="font-sans font-semibold text-2xl tracking-tight text-ink">{cat.title}</h2>
                   <p className="text-sm text-ink-mute">{cat.description}</p>
                 </div>
                 <div className="space-y-3">
@@ -138,17 +140,17 @@ export default function FaqPage() {
             Votre question n&apos;est pas dans la liste ? Écrivez-nous à{' '}
             <a
               href="mailto:contact@kovas.fr"
-              className="text-navy underline-offset-4 hover:underline"
+              className="text-[#0F1419] underline-offset-4 hover:underline"
             >
               contact@kovas.fr
             </a>
           </p>
           <Button asChild variant="accent">
-            <Link href="/signup">Commencer mon essai 14 jours</Link>
+            <Link href="/signup">Commencer mon essai 30 jours</Link>
           </Button>
         </div>
       </main>
-      <SiteFooter />
+      <LandingFooter />
     </div>
   )
 }

@@ -1,4 +1,6 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { AppListToolbar } from '@/components/app-list-toolbar'
+import { parseListSearchParams } from '@/components/app-list-toolbar-utils'
 import {
   AppListTable,
   AppListTableCell,
@@ -15,34 +17,90 @@ import { getCurrentUser } from '@/lib/auth/current-user'
 
 export const metadata: Metadata = { title: 'Clients' }
 
-const TYPE_LABELS: Record<string, string> = {
+const TYPE_LABELS = {
   particulier: 'Particulier',
   agence: 'Agence',
   notaire: 'Notaire',
   syndic: 'Syndic',
   entreprise: 'Entreprise',
   collectivite: 'Collectivité',
+} as const satisfies Record<string, string>
+
+const CLIENT_TYPE_FILTER_OPTIONS = Object.entries(TYPE_LABELS).map(([value, label]) => ({
+  value,
+  label,
+}))
+
+const PAGE_SIZE = 25
+
+interface ClientsPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function ClientsPage() {
+export default async function ClientsPage({ searchParams }: ClientsPageProps) {
+  const sp = await searchParams
+  const parsed = parseListSearchParams(sp, {
+    pageSize: PAGE_SIZE,
+    filterKeys: ['type'] as const,
+  })
+  type ClientType = keyof typeof TYPE_LABELS
+  const typeFilterRaw = parsed.filters.type
+  const typeFilterStr = Array.isArray(typeFilterRaw) ? typeFilterRaw[0] : typeFilterRaw
+  const typeFilter: ClientType | null =
+    typeof typeFilterStr === 'string' && typeFilterStr in TYPE_LABELS
+      ? (typeFilterStr as ClientType)
+      : null
+
   const { supabase, orgId } = await getCurrentUser()
 
-  const { data: clients } = await supabase
+  let query = supabase
     .from('clients')
-    .select('id, display_name, type, email, phone, created_at')
+    .select('id, display_name, type, email, phone, created_at', { count: 'exact' })
     .eq('organization_id', orgId)
     .is('deleted_at', null)
-    .order('created_at', { ascending: false })
 
-  const count = clients?.length ?? 0
+  if (parsed.q) {
+    // Escape `%` et `,` pour `.or()` Supabase (limitation PostgREST).
+    const escaped = parsed.q.replace(/[%,]/g, ' ').trim()
+    if (escaped.length > 0) {
+      const pattern = `%${escaped}%`
+      query = query.or(
+        `display_name.ilike.${pattern},email.ilike.${pattern},phone.ilike.${pattern}`,
+      )
+    }
+  }
+
+  if (typeFilter) {
+    query = query.eq('type', typeFilter)
+  }
+
+  const { data: clients, count } = await query
+    .order('created_at', { ascending: false })
+    .range(parsed.offset, parsed.offset + PAGE_SIZE - 1)
+
+  const totalCount = count ?? 0
 
   return (
     <div className="space-y-6 animate-fade-in">
       <AppPageHeader
         title="Vos"
         accent="clients"
-        description={`${count} client${count > 1 ? 's' : ''} · propriétaires, agences, syndics`}
-        action={
+        description="Propriétaires, agences, syndics — toute la base contacts."
+      />
+
+      <AppListToolbar
+        searchPlaceholder="Rechercher un client (nom, email, téléphone)…"
+        totalCount={totalCount}
+        currentPage={parsed.page}
+        pageSize={PAGE_SIZE}
+        filters={[
+          {
+            key: 'type',
+            label: 'Tous les types',
+            options: CLIENT_TYPE_FILTER_OPTIONS,
+          },
+        ]}
+        primaryAction={
           <Button asChild variant="accent">
             <Link href="/app/clients/new">
               <Plus className="size-4" />
@@ -82,6 +140,12 @@ export default async function ClientsPage() {
             ))}
           </tbody>
         </AppListTable>
+      ) : parsed.q || typeFilter ? (
+        <EmptyState
+          icon={Users}
+          title="Aucun client ne correspond à cette recherche."
+          description="Affinez les filtres ou videz la recherche pour retrouver vos clients."
+        />
       ) : (
         <EmptyState
           icon={Users}
