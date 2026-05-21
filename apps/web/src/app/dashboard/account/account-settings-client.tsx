@@ -1,26 +1,30 @@
 'use client'
 
 /**
- * AccountSettingsClient — Page Réglages simplifiée 2026-05-21.
+ * AccountSettingsClient V5 — refonte 2026-05-21.
  *
- * Refonte UX : remplace les drawers Radix iOS-style par un layout **plat
- * et direct**. Toutes les infos sont visibles d'un coup, l'édition se fait
- * inline via expand/collapse (un seul bloc ouvert à la fois).
+ * Architecture cible (DS v5 sage + dark + chartreuse) :
  *
- * Architecture :
- *   1. Carte "Mon profil" — preview + bouton "Modifier" qui expand le form
- *   2. Carte "Mon cabinet" — idem
- *   3. Carte "Mon abonnement" — KPIs visibles + portail Stripe + résilier
- *   4. Carte "Mes raccourcis" — grid 2×3 de liens (Logo / Tarifs / Carte visite / Modules / ADEME / Notifications)
- *   5. Carte "Mon stockage" — StorageQuotaCard directement visible
- *   6. Carte "Préférences" — toggles inline (rapport mensuel)
- *   7. Carte "Calendrier" — sync iCal/webcal direct
- *   8. Carte "Modules add-ons" — liste verticale 9 modules avec essai 14j inline
- *   9. Carte "Légal & RGPD" — 5 liens texte + Export RGPD
- *  10. Zone danger en bas — résilier abonnement + supprimer compte
+ *   ┌───────────────────────────────────────────────────────────────┐
+ *   │ HERO STRIPE (full width)                                       │
+ *   │  Avatar dark/chartreuse + Nom + Cabinet + Plan actif KPI       │
+ *   │  Instrument Serif italic sur le nom du plan.                   │
+ *   └───────────────────────────────────────────────────────────────┘
+ *   ┌─────────────────┬─────────────────┬─────────────────┐
+ *   │ COL 1 — Identité│ COL 2 — Abo +   │ COL 3 — Réglages│
+ *   │ Profil          │ Stockage        │ ADEME           │
+ *   │ Cabinet         │ Cap missions    │ Notifications   │
+ *   │                 │ Period end      │ Calendrier      │
+ *   └─────────────────┴─────────────────┴─────────────────┘
+ *   ┌───────────────────────────────────────────────────────────────┐
+ *   │ MODULES (full width, grid 4-col xl, 2-col sm, 1-col mobile)   │
+ *   └───────────────────────────────────────────────────────────────┘
+ *   ┌─────────────────┬─────────────────────────────────────────────┐
+ *   │ LÉGAL & RGPD    │ ZONE DANGER (résilier + supprimer)         │
+ *   └─────────────────┴─────────────────────────────────────────────┘
  *
- * Workflow résiliation `/dashboard/account/cancellation?step=1` PROTÉGÉ (décret 2023-417).
- * ReactivationModal + winback code gérés par la page server parent.
+ * Workflow résiliation `/dashboard/account/cancellation?step=1` PROTÉGÉ
+ * (décret 2023-417). ReactivationModal géré par la page server parent.
  */
 
 import { CalendarSyncExport } from '@/components/calendar/calendar-sync-export'
@@ -28,10 +32,12 @@ import { StorageQuotaCard } from '@/components/storage/StorageQuotaCard'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { formatPriceEur, formatPriceEurCompact } from '@/lib/format/price'
 import { cn } from '@/lib/utils'
 import { ADDON_MODULES, type PricingPlanCode, PRICING_PLANS } from '@/lib/pricing-plans'
 import {
   ArrowRight,
+  Bell,
   Building2,
   Calculator,
   Calendar,
@@ -39,11 +45,13 @@ import {
   CreditCard,
   Download,
   ExternalLink,
+  HardDrive,
   IdCard,
   Layers,
   Palette,
   Radar,
   Shield,
+  User as UserIcon,
   XCircle,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -95,423 +103,410 @@ interface AccountSettingsClientProps {
 
 export function AccountSettingsClient(props: AccountSettingsClientProps) {
   const [expanded, setExpanded] = useState<ExpandedSection>(null)
-  const toggle = (key: ExpandedSection) =>
+  const toggle = (key: Exclude<ExpandedSection, null>) =>
     setExpanded((cur) => (cur === key ? null : key))
 
   const isCancelling = props.subscription?.cancel_at_period_end === true
   const isActive = props.subscription?.status === 'active'
   const initials = getInitials(props.profile.full_name ?? props.profile.email)
+  const currentPlan = props.planCode
+    ? PRICING_PLANS.find((p) => p.code === props.planCode) ?? null
+    : null
+  const periodEnd = props.subscription?.current_period_end ?? null
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 items-start">
-      {/* ============== 1. PROFIL & CABINET ============== */}
-      <Card variant="opaque" padding="default" className="space-y-4 lg:col-span-2">
-        {/* Identité user */}
-        <div className="flex items-center gap-3">
+    <div className="space-y-5">
+      {/* ════════════════════════════════════════════════════════════
+          HERO STRIPE — Identité + plan KPI dramatisé
+          ══════════════════════════════════════════════════════════ */}
+      <Card variant="opaque" padding="default" className="relative overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] items-center gap-4 md:gap-6">
+          {/* Avatar */}
           <div
             aria-hidden
-            className="size-12 rounded-full bg-[#0F1419] text-[#D4F542] flex items-center justify-center font-mono font-semibold text-[15px] shrink-0"
+            className="size-14 md:size-16 rounded-full bg-[#0F1419] text-[#D4F542] flex items-center justify-center font-mono font-semibold text-[18px] md:text-[20px] shrink-0"
           >
             {initials}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[15px] font-semibold text-[#0F1419] truncate">
+
+          {/* Identité + cabinet */}
+          <div className="min-w-0">
+            <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#0F1419]/55">
+              Compte
+            </p>
+            <h2 className="text-[20px] md:text-[24px] font-semibold text-[#0F1419] leading-tight mt-0.5 truncate">
               {props.profile.full_name ?? '—'}
+            </h2>
+            <p className="text-[13px] text-[#0F1419]/65 mt-0.5 truncate">
+              {props.organization.name ?? 'Sans cabinet'}
+              {props.organization.siret ? ` · SIRET ${formatSiret(props.organization.siret)}` : ''}
             </p>
-            <p className="text-[12px] text-[#0F1419]/55 truncate">{props.profile.email}</p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggle('profile')}
-            aria-expanded={expanded === 'profile'}
-          >
-            {expanded === 'profile' ? 'Fermer' : 'Modifier'}
-            <ChevronDown
-              className={cn(
-                'size-4 transition-transform',
-                expanded === 'profile' && 'rotate-180',
+
+          {/* Plan KPI dramatisé Instrument Serif */}
+          <div className="md:text-right">
+            <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#0F1419]/55">
+              Forfait actif
+            </p>
+            <p className="font-serif italic text-[28px] md:text-[36px] leading-none text-[#0F1419] mt-1">
+              {props.planName ?? 'Aucun'}
+            </p>
+            <div className="flex md:justify-end items-center gap-2 mt-1.5 flex-wrap">
+              {currentPlan && (
+                <span className="font-mono text-[12px] tabular-nums text-[#0F1419]/70">
+                  {formatPriceEurCompact(currentPlan.monthlyPrice)} HT/mois
+                </span>
               )}
-            />
-          </Button>
-        </div>
-
-        {/* Form profil expand */}
-        {expanded === 'profile' && (
-          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-            <ProfileForm
-              initial={{
-                full_name: props.profile.full_name,
-                email: props.profile.email,
-                phone: props.profile.phone,
-              }}
-            />
-          </div>
-        )}
-
-        {/* Entreprise summary */}
-        <div className="pt-3 border-t border-[#0F1419]/[0.08] flex items-start gap-3">
-          <span
-            aria-hidden
-            className="size-9 rounded-md bg-[#AF52DE]/10 text-[#AF52DE] flex items-center justify-center shrink-0"
-          >
-            <Building2 className="size-4" />
-          </span>
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#0F1419]/55">
-              Cabinet
-            </p>
-            <p className="text-[14px] font-medium text-[#0F1419] mt-0.5">
-              {props.organization.name ?? '—'}
-            </p>
-            <p className="text-[12px] text-[#0F1419]/55 mt-0.5">
-              {props.organization.siret
-                ? `SIRET ${formatSiret(props.organization.siret)}`
-                : 'SIRET non renseigné'}
-              {props.organization.city ? ` · ${props.organization.city}` : ''}
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggle('company')}
-            aria-expanded={expanded === 'company'}
-          >
-            {expanded === 'company' ? 'Fermer' : 'Modifier'}
-            <ChevronDown
-              className={cn(
-                'size-4 transition-transform',
-                expanded === 'company' && 'rotate-180',
-              )}
-            />
-          </Button>
-        </div>
-
-        {/* Form entreprise expand */}
-        {expanded === 'company' && (
-          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-            <CompanyForm initial={props.organization} />
-          </div>
-        )}
-      </Card>
-
-      {/* ============== 2. ABONNEMENT ============== */}
-      <Card variant="opaque" padding="default" className="space-y-4">
-        <SectionHeader icon={CreditCard} iconColor="#007AFF" title="Abonnement" />
-
-        <div className="flex items-start gap-3">
-          <div className="flex-1">
-            <p className="font-serif italic text-2xl text-[#0F1419] leading-tight">
-              {props.planName ?? 'Aucune formule active'}
-            </p>
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               {isActive && (
-                <Badge variant={isCancelling ? 'orange' : 'green'} className="text-[10px]">
+                <Badge
+                  variant={isCancelling ? 'orange' : 'green'}
+                  className="text-[10px]"
+                >
                   {isCancelling ? 'Annulation en cours' : 'Actif'}
                 </Badge>
               )}
-              {props.planCode && (
-                <span className="font-mono text-[11px] text-[#0F1419]/55">
-                  {PRICING_PLANS.find((p) => p.code === props.planCode)?.monthlyPrice ?? '—'}€
-                  HT/mois
-                </span>
-              )}
             </div>
           </div>
         </div>
+      </Card>
 
-        {/* KPI missions ce mois */}
-        {props.missionsQuota > 0 ? (
-          <div className="rounded-[12px] bg-[#F5F7F4] p-3 space-y-2">
-            <div className="flex items-baseline justify-between gap-2">
+      {/* ════════════════════════════════════════════════════════════
+          GRID 3 COLONNES — Identité / Abonnement+Stockage / Réglages
+          ══════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5 items-start">
+        {/* ============== COL 1 — IDENTITÉ ============== */}
+        <Card variant="opaque" padding="default" className="space-y-4">
+          <SectionHeader icon={UserIcon} iconColor="#007AFF" title="Identité" />
+
+          <InlineRow
+            label="Mon profil"
+            value={props.profile.email}
+            sublabel={props.profile.phone ?? 'Téléphone non renseigné'}
+            expanded={expanded === 'profile'}
+            onToggle={() => toggle('profile')}
+            expandContent={
+              <ProfileForm
+                initial={{
+                  full_name: props.profile.full_name,
+                  email: props.profile.email,
+                  phone: props.profile.phone,
+                }}
+              />
+            }
+          />
+
+          <InlineRow
+            label="Mon cabinet"
+            value={props.organization.name ?? '—'}
+            sublabel={
+              props.organization.siret
+                ? `SIRET ${formatSiret(props.organization.siret)}`
+                : 'SIRET non renseigné'
+            }
+            icon={Building2}
+            iconColor="#AF52DE"
+            expanded={expanded === 'company'}
+            onToggle={() => toggle('company')}
+            expandContent={<CompanyForm initial={props.organization} />}
+          />
+
+          {/* Raccourcis identité visuelle */}
+          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#0F1419]/55 mb-2">
+              Personnalisation
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <ShortcutTile
+                href="/dashboard/compte/branding"
+                icon={Palette}
+                iconBg="#FF9500"
+                label="Logo"
+              />
+              <ShortcutTile
+                href="/dashboard/compte/tarifs"
+                icon={Calculator}
+                iconBg="#34C759"
+                label="Tarifs"
+              />
+              <ShortcutTile
+                href="/dashboard/compte/carte-visite"
+                icon={IdCard}
+                iconBg="#5AC8FA"
+                label="Carte"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* ============== COL 2 — ABONNEMENT + STOCKAGE ============== */}
+        <Card variant="opaque" padding="default" className="space-y-4">
+          <SectionHeader icon={CreditCard} iconColor="#0F1419" title="Abonnement" />
+
+          {/* KPI missions ce mois */}
+          {props.missionsQuota > 0 ? (
+            <div className="rounded-[14px] bg-[#F5F7F4] p-4 space-y-2">
+              <div className="flex items-baseline justify-between gap-2">
+                <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#0F1419]/55">
+                  Missions ce mois
+                </p>
+                <p className="font-mono text-[13px] tabular-nums">
+                  <span className="text-[#0F1419] font-semibold">{props.missionsCount}</span>
+                  <span className="text-[#0F1419]/55"> / {props.missionsQuota}</span>
+                </p>
+              </div>
+              <div className="h-2 rounded-full bg-[#0F1419]/[0.08] overflow-hidden">
+                <div
+                  className={cn(
+                    'h-full transition-all',
+                    props.usagePct >= 100
+                      ? 'bg-[#DC2626]'
+                      : props.usagePct >= 80
+                        ? 'bg-[#FF9500]'
+                        : 'bg-[#D4F542]',
+                  )}
+                  style={{ width: `${Math.min(props.usagePct, 100)}%` }}
+                />
+              </div>
+              {props.overage > 0 && (
+                <p className="text-[12px] text-[#DC2626] font-medium">
+                  +{props.overage} mission{props.overage > 1 ? 's' : ''} hors forfait —{' '}
+                  {formatPriceEur(Math.round(props.overageTotal * 100))}
+                </p>
+              )}
+              {periodEnd && (
+                <p className="text-[11px] text-[#0F1419]/55 pt-1 border-t border-[#0F1419]/[0.06]">
+                  Renouvellement le {formatDateFr(periodEnd)}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-[14px] bg-[#F5F7F4] p-4">
               <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#0F1419]/55">
                 Missions ce mois
               </p>
-              <p className="font-mono text-[14px] tabular-nums">
-                <span className="text-[#0F1419] font-semibold">{props.missionsCount}</span>
-                <span className="text-[#0F1419]/55"> / {props.missionsQuota}</span>
+              <p className="font-serif italic text-[36px] leading-none text-[#0F1419] mt-1">
+                {props.missionsCount}
               </p>
+              <p className="text-[11px] text-[#0F1419]/55 mt-1">Forfait illimité</p>
             </div>
-            <div className="h-1.5 rounded-full bg-[#0F1419]/[0.08] overflow-hidden">
-              <div
-                className={cn(
-                  'h-full transition-all',
-                  props.usagePct >= 100
-                    ? 'bg-[#DC2626]'
-                    : props.usagePct >= 80
-                      ? 'bg-[#FF9500]'
-                      : 'bg-[#D4F542]',
-                )}
-                style={{ width: `${Math.min(props.usagePct, 100)}%` }}
+          )}
+
+          {/* Storage gauge */}
+          {props.storageUsage && (
+            <div className="pt-3 border-t border-[#0F1419]/[0.08]">
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  aria-hidden
+                  className="size-6 rounded-md bg-[#0F1419] text-[#D4F542] flex items-center justify-center shrink-0"
+                >
+                  <HardDrive className="size-3" />
+                </span>
+                <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#0F1419]/55">
+                  Stockage cloud
+                </p>
+              </div>
+              <StorageQuotaCard
+                usedBytes={props.storageUsage.usedBytes}
+                quotaBytes={props.storageUsage.quotaBytes}
               />
             </div>
-            {props.overage > 0 && (
-              <p className="text-[12px] text-[#DC2626] font-medium">
-                +{props.overage} mission{props.overage > 1 ? 's' : ''} hors forfait —{' '}
-                {props.overageTotal.toFixed(2)} €
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="rounded-[12px] bg-[#F5F7F4] p-3">
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#0F1419]/55">
-              Missions ce mois
-            </p>
-            <p className="font-serif italic text-2xl text-[#0F1419] mt-1">
-              {props.missionsCount}
-            </p>
-            <p className="text-[11px] text-[#0F1419]/55 mt-0.5">Forfait illimité</p>
-          </div>
-        )}
+          )}
 
-        <div className="flex gap-2 flex-wrap">
-          <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-none">
-            <Link href="/dashboard/facturation">
-              <CreditCard className="size-3.5" /> Mes factures
-            </Link>
-          </Button>
-          {isActive && (
-            <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-none">
-              <Link href="/pricing">
-                Changer de formule <ArrowRight className="size-3.5" />
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <Button asChild variant="outline" size="sm" className="flex-1">
+              <Link href="/dashboard/facturation">
+                <CreditCard className="size-3.5" /> Mes factures
               </Link>
             </Button>
-          )}
-        </div>
-      </Card>
+            {isActive && (
+              <Button asChild variant="default" size="sm" className="flex-1">
+                <Link href="/pricing">
+                  Changer de formule <ArrowRight className="size-3.5" />
+                </Link>
+              </Button>
+            )}
+          </div>
+        </Card>
 
-      {/* ============== 3. RACCOURCIS (grid 2×3) ============== */}
-      <Card variant="opaque" padding="default" className="space-y-3">
-        <SectionHeader icon={Layers} iconColor="#0F1419" title="Mes raccourcis" />
+        {/* ============== COL 3 — CONFORMITÉ + NOTIFS + CALENDRIER ============== */}
+        <Card variant="opaque" padding="default" className="space-y-4">
+          <SectionHeader icon={Radar} iconColor="#FF9500" title="Réglages" />
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <ShortcutTile
-            href="/dashboard/compte/branding"
-            icon={Palette}
-            iconBg="#FF9500"
-            label="Logo & couleur"
-            sublabel="Identité visuelle"
+          <InlineRow
+            label="Surveillance ADEME"
+            value={
+              props.certificatRge
+                ? `Cert. RGE ${props.certificatRge}`
+                : 'Cert. RGE à renseigner'
+            }
+            sublabel={
+              props.lastAdemeSyncAt
+                ? `${props.ademeMonitoringEnabled ? 'Active' : 'En pause'} · Dernière sync ${formatRelative(props.lastAdemeSyncAt)}`
+                : props.ademeMonitoringEnabled
+                  ? 'Active · jamais sync'
+                  : 'En pause'
+            }
+            icon={Radar}
+            iconColor="#FF9500"
+            expanded={expanded === 'ademe'}
+            onToggle={() => toggle('ademe')}
+            expandContent={
+              <AdemeForm
+                initialCertificatRge={props.certificatRge}
+                initialMonitoringEnabled={props.ademeMonitoringEnabled}
+                lastSyncAt={props.lastAdemeSyncAt}
+              />
+            }
           />
-          <ShortcutTile
-            href="/dashboard/compte/tarifs"
-            icon={Calculator}
-            iconBg="#34C759"
-            label="Mes tarifs"
-            sublabel="Prestations & packs"
-          />
-          <ShortcutTile
-            href="/dashboard/compte/carte-visite"
-            icon={IdCard}
-            iconBg="#5AC8FA"
-            label="Carte de visite"
-            sublabel="QR + Wallet"
-          />
-        </div>
-      </Card>
 
-      {/* ============== 4. PRÉFÉRENCES ADEME + NOTIFICATIONS ============== */}
+          <InlineRow
+            label="Notifications email"
+            value={`Rapport mensuel : ${props.monthlyReportEnabled ? 'Activé' : 'Désactivé'}`}
+            icon={Bell}
+            iconColor="#34C759"
+            expanded={expanded === 'notifications'}
+            onToggle={() => toggle('notifications')}
+            expandContent={
+              <NotificationPrefsForm
+                initialMonthlyReportEnabled={props.monthlyReportEnabled}
+              />
+            }
+          />
+
+          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
+            <div className="flex items-center gap-2 mb-3">
+              <span
+                aria-hidden
+                className="size-6 rounded-md bg-[#5AC8FA] text-white flex items-center justify-center shrink-0"
+              >
+                <Calendar className="size-3" />
+              </span>
+              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#0F1419]/55">
+                Sync calendrier
+              </p>
+            </div>
+            <CalendarSyncExport
+              httpsUrl={props.calendarHttpsUrl}
+              webcalUrl={props.calendarWebcalUrl}
+            />
+          </div>
+        </Card>
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════
+          MODULES ADD-ONS — full width grid 4-col xl
+          ══════════════════════════════════════════════════════════ */}
       <Card variant="opaque" padding="default" className="space-y-4">
-        <SectionHeader icon={Radar} iconColor="#FF9500" title="Conformité & notifications" />
-
-        {/* ADEME monitoring */}
-        <div className="flex items-start gap-3">
-          <div className="flex-1">
-            <p className="text-[14px] font-medium text-[#0F1419]">Surveillance ADEME</p>
-            <p className="text-[12px] text-[#0F1419]/55 mt-0.5">
-              {props.certificatRge ? (
-                <>
-                  Cert. RGE {props.certificatRge} ·{' '}
-                  {props.ademeMonitoringEnabled ? 'Active' : 'En pause'}
-                </>
-              ) : (
-                'Cert. RGE à renseigner'
-              )}
-              {props.lastAdemeSyncAt && (
-                <span> · Dernière sync {formatRelative(props.lastAdemeSyncAt)}</span>
-              )}
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggle('ademe')}
-            aria-expanded={expanded === 'ademe'}
-          >
-            {expanded === 'ademe' ? 'Fermer' : 'Modifier'}
-            <ChevronDown
-              className={cn(
-                'size-4 transition-transform',
-                expanded === 'ademe' && 'rotate-180',
-              )}
-            />
-          </Button>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <SectionHeader
+            icon={Layers}
+            iconColor="#D4F542"
+            iconFg="#0F1419"
+            title={`Modules · ${ADDON_MODULES.length}`}
+          />
+          <p className="text-[11px] text-[#0F1419]/55">
+            Essai gratuit 14 jours · résiliable d'un clic
+          </p>
         </div>
-        {expanded === 'ademe' && (
-          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-            <AdemeForm
-              initialCertificatRge={props.certificatRge}
-              initialMonitoringEnabled={props.ademeMonitoringEnabled}
-              lastSyncAt={props.lastAdemeSyncAt}
-            />
-          </div>
-        )}
 
-        {/* Notifications */}
-        <div className="pt-3 border-t border-[#0F1419]/[0.08] flex items-start gap-3">
-          <div className="flex-1">
-            <p className="text-[14px] font-medium text-[#0F1419]">Notifications email</p>
-            <p className="text-[12px] text-[#0F1419]/55 mt-0.5">
-              Rapport mensuel d'activité :{' '}
-              {props.monthlyReportEnabled ? 'Activé' : 'Désactivé'}
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggle('notifications')}
-            aria-expanded={expanded === 'notifications'}
-          >
-            {expanded === 'notifications' ? 'Fermer' : 'Modifier'}
-            <ChevronDown
-              className={cn(
-                'size-4 transition-transform',
-                expanded === 'notifications' && 'rotate-180',
-              )}
-            />
-          </Button>
-        </div>
-        {expanded === 'notifications' && (
-          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-            <NotificationPrefsForm
-              initialMonthlyReportEnabled={props.monthlyReportEnabled}
-            />
-          </div>
-        )}
-      </Card>
-
-      {/* ============== 5. CALENDRIER & STOCKAGE ============== */}
-      <Card variant="opaque" padding="default" className="space-y-4">
-        <SectionHeader icon={Calendar} iconColor="#5AC8FA" title="Calendrier & stockage" />
-
-        <CalendarSyncExport
-          httpsUrl={props.calendarHttpsUrl}
-          webcalUrl={props.calendarWebcalUrl}
-        />
-
-        {props.storageUsage && (
-          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-            <StorageQuotaCard
-              usedBytes={props.storageUsage.usedBytes}
-              quotaBytes={props.storageUsage.quotaBytes}
-            />
-          </div>
-        )}
-      </Card>
-
-      {/* ============== 6. MODULES ADD-ONS ============== */}
-      <Card variant="opaque" padding="default" className="space-y-3">
-        <SectionHeader
-          icon={Layers}
-          iconColor="#D4F542"
-          iconFg="#0F1419"
-          title={`Mes modules · ${ADDON_MODULES.length}`}
-        />
-
-        <p className="text-[12px] text-[#0F1419]/55">
-          Modules activables séparément. Essai gratuit 14 jours, désactivables d'un clic.
-        </p>
-
-        <ul className="space-y-2">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {ADDON_MODULES.map((m) => {
             const included = props.modulesIncludedMap[m.code] === true
             return (
               <li
                 key={m.code}
                 className={cn(
-                  'flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 rounded-[12px] border',
+                  'flex flex-col gap-2 p-4 rounded-[14px] border transition-all',
                   included
-                    ? 'border-[#D4F542]/40 bg-[#D4F542]/[0.08]'
-                    : 'border-[#0F1419]/[0.08] bg-white',
+                    ? 'border-[#D4F542]/50 bg-[#D4F542]/[0.10]'
+                    : 'border-[#0F1419]/[0.08] bg-white hover:border-[#0F1419]/20 hover:shadow-sm',
                 )}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-medium text-[#0F1419]">{m.name}</p>
-                  <p className="text-[11px] text-[#0F1419]/55 mt-0.5">{m.description}</p>
-                </div>
-                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                  <span className="font-mono text-[11px] tabular-nums text-[#0F1419]/55">
-                    {m.monthlyPrice}€/mo
-                  </span>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-[14px] font-semibold text-[#0F1419] leading-tight">
+                    {m.name}
+                  </p>
                   {included ? (
-                    <Badge variant="green" className="text-[9px]">
+                    <Badge variant="green" className="text-[9px] shrink-0">
                       Inclus
                     </Badge>
                   ) : (
-                    <StartTrialButton moduleCode={m.code} />
+                    <span className="font-mono text-[12px] tabular-nums text-[#0F1419] shrink-0">
+                      {formatPriceEurCompact(m.monthlyPrice)}
+                    </span>
                   )}
                 </div>
+                <p className="text-[11px] text-[#0F1419]/55 line-clamp-2 flex-1">
+                  {m.description}
+                </p>
+                {!included && (
+                  <div className="pt-2">
+                    <StartTrialButton moduleCode={m.code} />
+                  </div>
+                )}
               </li>
             )
           })}
         </ul>
       </Card>
 
-      {/* ============== 7. LÉGAL & RGPD ============== */}
-      <Card variant="opaque" padding="default" className="space-y-3">
-        <SectionHeader icon={Shield} iconColor="#48484A" title="Légal & RGPD" />
+      {/* ════════════════════════════════════════════════════════════
+          LÉGAL + ZONE DANGER — 2 cols lg
+          ══════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 items-start">
+        {/* Légal & RGPD */}
+        <Card variant="opaque" padding="default" className="space-y-3">
+          <SectionHeader icon={Shield} iconColor="#48484A" title="Légal & RGPD" />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <LegalLink href="/mentions-legales" label="Mentions légales" />
-          <LegalLink href="/cgu" label="CGU" />
-          <LegalLink href="/cgv" label="CGV" />
-          <LegalLink href="/confidentialite" label="Politique RGPD" />
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <LegalLink href="/mentions-legales" label="Mentions légales" />
+            <LegalLink href="/cgu" label="CGU" />
+            <LegalLink href="/cgv" label="CGV" />
+            <LegalLink href="/confidentialite" label="Politique RGPD" />
+          </div>
 
-        <div className="pt-3 border-t border-[#0F1419]/[0.08]">
-          <form action="/api/rgpd/request" method="POST">
-            <input type="hidden" name="type" value="export" />
-            <Button
-              type="submit"
-              variant="outline"
-              size="sm"
-              className="w-full sm:w-auto"
-            >
-              <Download className="size-3.5" /> Exporter toutes mes données (RGPD)
-            </Button>
-          </form>
-        </div>
+          <div className="pt-3 border-t border-[#0F1419]/[0.08]">
+            <form action="/api/rgpd/request" method="POST">
+              <input type="hidden" name="type" value="export" />
+              <Button type="submit" variant="outline" size="sm" className="w-full">
+                <Download className="size-3.5" /> Exporter mes données (RGPD)
+              </Button>
+            </form>
+          </div>
 
-        <p className="text-[11px] text-[#0F1419]/55 leading-relaxed">
-          Vos factures KOVAS sont émises HT avec TVA 20% en sus, déductible si vous êtes
-          assujetti. Conservation 10 ans (obligation comptable L.123-22).
-        </p>
-      </Card>
+          <p className="text-[10px] text-[#0F1419]/55 leading-relaxed pt-1">
+            Factures émises HT avec TVA 20% en sus, déductible si assujetti.
+            Conservation 10 ans (L.123-22).
+          </p>
+        </Card>
 
-      {/* ============== 8. ZONE DANGER ============== */}
-      <Card
-        variant="opaque"
-        padding="default"
-        className="border-l-2 border-l-[#DC2626]/30 space-y-3"
-      >
-        <SectionHeader icon={XCircle} iconColor="#DC2626" title="Zone danger" />
+        {/* Zone danger */}
+        <Card
+          variant="opaque"
+          padding="default"
+          className="border-l-2 border-l-[#DC2626]/30 space-y-3"
+        >
+          <SectionHeader icon={XCircle} iconColor="#DC2626" title="Zone danger" />
 
-        <p className="text-[12px] text-[#0F1419]/55 leading-relaxed">
-          Conformément au décret 2023-417 et au RGPD, vos données sont conservées 90 jours en
-          grâce avant suppression irréversible. Vos factures restent conservées 10 ans
-          (obligation comptable L.123-22).
-        </p>
+          <p className="text-[11px] text-[#0F1419]/55 leading-relaxed">
+            Conformément au décret 2023-417, vos données sont conservées 90 jours en
+            grâce avant suppression irréversible. Factures conservées 10 ans
+            (L.123-22).
+          </p>
 
-        <div className="flex flex-col sm:flex-row gap-2">
-          {isActive && (
-            <Button asChild variant="outline" size="sm" className="flex-1">
-              <Link href="/dashboard/account/cancellation?step=1">
-                Résilier mon abonnement
-              </Link>
-            </Button>
-          )}
-          <DeleteAccountButton />
-        </div>
-      </Card>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {isActive && (
+              <Button asChild variant="outline" size="sm" className="flex-1">
+                <Link href="/dashboard/account/cancellation?step=1">
+                  Résilier mon abonnement
+                </Link>
+              </Button>
+            )}
+            <DeleteAccountButton />
+          </div>
+        </Card>
+      </div>
     </div>
   )
 }
@@ -545,35 +540,92 @@ function SectionHeader({
   )
 }
 
+function InlineRow({
+  label,
+  value,
+  sublabel,
+  icon,
+  iconColor,
+  expanded,
+  onToggle,
+  expandContent,
+}: {
+  label: string
+  value: string
+  sublabel?: string
+  icon?: typeof CreditCard
+  iconColor?: string
+  expanded: boolean
+  onToggle: () => void
+  expandContent: ReactNode
+}) {
+  const Icon = icon
+  return (
+    <div className={cn(expanded ? 'space-y-3' : '')}>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className="w-full text-left flex items-start gap-3 group"
+      >
+        {Icon && iconColor && (
+          <span
+            aria-hidden
+            className="size-9 rounded-md flex items-center justify-center shrink-0"
+            style={{ backgroundColor: `${iconColor}15`, color: iconColor }}
+          >
+            <Icon className="size-4" />
+          </span>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#0F1419]/55">
+            {label}
+          </p>
+          <p className="text-[14px] font-medium text-[#0F1419] truncate mt-0.5">
+            {value}
+          </p>
+          {sublabel && (
+            <p className="text-[11px] text-[#0F1419]/55 mt-0.5 truncate">{sublabel}</p>
+          )}
+        </div>
+        <ChevronDown
+          className={cn(
+            'size-4 text-[#0F1419]/40 shrink-0 transition-transform',
+            expanded && 'rotate-180',
+          )}
+        />
+      </button>
+      {expanded && (
+        <div className="pt-3 border-t border-[#0F1419]/[0.08]">{expandContent}</div>
+      )}
+    </div>
+  )
+}
+
 function ShortcutTile({
   href,
   icon: Icon,
   iconBg,
   label,
-  sublabel,
 }: {
   href: string
   icon: typeof CreditCard
   iconBg: string
   label: string
-  sublabel: string
 }) {
   return (
     <Link
       href={href}
-      className="group flex flex-col items-start gap-2 p-3 rounded-[12px] bg-white border border-[#0F1419]/[0.08] hover:border-[#0F1419]/20 hover:shadow-sm transition-all"
+      className="group flex flex-col items-center gap-1.5 p-2 rounded-[10px] bg-white border border-[#0F1419]/[0.08] hover:border-[#0F1419]/20 hover:shadow-sm transition-all"
     >
       <span
         aria-hidden
-        className="size-9 rounded-md flex items-center justify-center"
+        className="size-8 rounded-md flex items-center justify-center"
         style={{ backgroundColor: iconBg }}
       >
-        <Icon className="size-4 text-white" />
+        <Icon className="size-3.5 text-white" />
       </span>
-      <div className="space-y-0.5">
-        <p className="text-[13px] font-medium text-[#0F1419] leading-tight">{label}</p>
-        <p className="text-[11px] text-[#0F1419]/55 leading-tight">{sublabel}</p>
-      </div>
+      <p className="text-[11px] font-medium text-[#0F1419]">{label}</p>
     </Link>
   )
 }
@@ -617,4 +669,13 @@ function formatRelative(iso: string): string {
   if (h < 24) return `il y a ${h} h`
   const d = Math.round(h / 24)
   return `il y a ${d} j`
+}
+
+function formatDateFr(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }

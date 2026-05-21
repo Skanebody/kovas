@@ -1,3 +1,4 @@
+import { formatPriceEurCompact } from '@/lib/format/price'
 import { ADDON_MODULES, PRICING_PLANS, type PricingPlanCode } from '@/lib/pricing-plans'
 import { ArrowLeft, Check } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -97,7 +98,7 @@ export default async function SignupPage({
               </p>
             </div>
             <p className="font-mono text-sm font-semibold tabular-nums text-[#0F1419]">
-              {planMonthlyPrice} € HT/mois
+              {formatPriceEurCompact(planMonthlyPrice)} HT/mois
             </p>
           </div>
 
@@ -117,7 +118,7 @@ export default async function SignupPage({
                       {a.name}
                     </span>
                     <span className="font-mono text-xs text-[#0F1419]/55 tabular-nums">
-                      +{a.monthlyPrice} €
+                      +{formatPriceEurCompact(a.monthlyPrice)}
                     </span>
                   </li>
                 ))}
@@ -128,7 +129,7 @@ export default async function SignupPage({
           <div className="pt-3 border-t border-[#0F1419]/[0.08] flex items-baseline justify-between gap-3">
             <span className="text-xs text-[#0F1419]/72">Total prévisionnel après essais</span>
             <span className="font-serif italic font-normal text-lg text-[#0F1419] tabular-nums">
-              {totalAfterTrials} € HT/mois
+              {formatPriceEurCompact(totalAfterTrials)} HT/mois
             </span>
           </div>
         </div>

@@ -7,6 +7,7 @@ import {
   type PricingPlan,
   type PricingPlanCode,
 } from '@/lib/pricing-plans'
+import { formatPriceEur, formatPriceEurCompact } from '@/lib/format/price'
 import { cn } from '@/lib/utils'
 import { ArrowRight, Check, Sparkles } from 'lucide-react'
 import Link from 'next/link'
@@ -142,7 +143,7 @@ export function CheckoutFlow({ planCode, billing }: CheckoutFlowProps) {
                           14 j essai gratuit
                         </span>
                         <span className="font-mono text-[12px] font-semibold tabular-nums">
-                          {addon.monthlyPrice} € HT/mois
+                          {formatPriceEur(addon.monthlyPrice)} HT/mois
                         </span>
                       </div>
                     </button>
@@ -208,7 +209,7 @@ export function CheckoutFlow({ planCode, billing }: CheckoutFlowProps) {
               Missions illimitées (jusqu'à {plan.caps.missions}/mois) · {plan.caps.storageGb} Go
             </p>
             <p className="font-mono text-sm text-white tabular-nums mt-2">
-              {monthlyPrice} € HT / mois
+              {formatPriceEur(monthlyPrice)} HT / mois
               {billing === 'annual' && (
                 <span className="text-white/60 text-xs"> · facturé annuellement</span>
               )}
@@ -234,7 +235,7 @@ export function CheckoutFlow({ planCode, billing }: CheckoutFlowProps) {
                         {addon.name}
                       </span>
                       <span className="font-mono text-xs text-white/60 tabular-nums shrink-0">
-                        + {addon.monthlyPrice} €/mo
+                        + {formatPriceEurCompact(addon.monthlyPrice)}/mo
                       </span>
                     </li>
                   )
@@ -260,7 +261,7 @@ export function CheckoutFlow({ planCode, billing }: CheckoutFlowProps) {
             </p>
             <p className="text-xs text-white/60 mt-2 leading-snug">
               {selectedAddons.size > 0
-                ? `${monthlyPrice} € (forfait) + ${selectedAddonsPrice} € (modules) après leurs essais respectifs. Rien n'est prélevé immédiatement.`
+                ? `${formatPriceEur(monthlyPrice)} (forfait) + ${formatPriceEur(selectedAddonsPrice)} (modules) après leurs essais respectifs. Rien n'est prélevé immédiatement.`
                 : "Aucun prélèvement immédiat. Premier débit à J+30, annulable d'ici là en 3 clics."}
             </p>
           </div>
