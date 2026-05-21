@@ -62,7 +62,15 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 px-4 md:px-8 py-4 pb-24 md:pb-8 w-full min-w-0">{children}</main>
+        {/*
+          Cap global largeur à 1280px (max-w-7xl) + centré (mx-auto) pour éviter
+          que les formulaires/cards s'étirent grotesquement sur écrans >1800px.
+          Pages avec tables/grids dense peuvent override via `max-w-none` sur
+          leur container racine si elles ont besoin de la pleine largeur.
+        */}
+        <main className="flex-1 px-4 md:px-8 py-4 pb-24 md:pb-8 w-full max-w-7xl mx-auto min-w-0">
+          {children}
+        </main>
       </div>
 
       <AppMobileNav access={access} suggestions={suggestions} track={trackAccess.track} />

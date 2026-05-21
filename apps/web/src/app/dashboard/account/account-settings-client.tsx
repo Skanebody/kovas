@@ -158,14 +158,35 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
       </div>
 
       {/* ════════════════════════════════════════════════════════════
-          TAB CONTENT
+          TAB CONTENT — max-width adapté par tab pour lisibilité optimale
+          (forms compact 2xl, grid modules 5xl, etc.)
           ══════════════════════════════════════════════════════════ */}
-      <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={tab} className="max-w-4xl">
-        {tab === 'profil' && <ProfilTab props={props} />}
-        {tab === 'abonnement' && <AbonnementTab props={props} />}
-        {tab === 'modules' && <ModulesTab props={props} />}
-        {tab === 'conformite' && <ConformiteTab props={props} />}
-        {tab === 'legal' && <LegalTab props={props} />}
+      <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={tab}>
+        {tab === 'profil' && (
+          <div className="max-w-2xl">
+            <ProfilTab props={props} />
+          </div>
+        )}
+        {tab === 'abonnement' && (
+          <div className="max-w-3xl">
+            <AbonnementTab props={props} />
+          </div>
+        )}
+        {tab === 'modules' && (
+          <div className="max-w-5xl">
+            <ModulesTab props={props} />
+          </div>
+        )}
+        {tab === 'conformite' && (
+          <div className="max-w-2xl">
+            <ConformiteTab props={props} />
+          </div>
+        )}
+        {tab === 'legal' && (
+          <div className="max-w-3xl">
+            <LegalTab props={props} />
+          </div>
+        )}
       </div>
     </div>
   )
