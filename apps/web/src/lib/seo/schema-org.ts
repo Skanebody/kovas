@@ -13,6 +13,11 @@
  */
 
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
+import type {
+  AnnuairePlan,
+  BundleCombo,
+  LogicielPlan,
+} from '@/lib/pricing-plans'
 import { KOVAS_TIERS, type KovasTier } from '@/lib/stripe-config'
 
 /** URL canonique du site KOVAS (sans slash final). */
@@ -393,8 +398,8 @@ export function buildProductSchema(plan: KovasTier): ProductSchema {
   }
 }
 
-/** Construit la liste itémisée des plans tarifaires KOVAS. */
-export function buildPricingItemListSchema(): ItemListSchema {
+/** Construit la liste itémisée des plans tarifaires KOVAS (legacy 3 tiers). */
+export function buildLegacyPricingItemListSchema(): ItemListSchema {
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -403,6 +408,140 @@ export function buildPricingItemListSchema(): ItemListSchema {
       '@type': 'ListItem' as const,
       position: idx + 1,
       item: buildProductSchema(plan),
+    })),
+  }
+}
+
+/** Données minimales d'un plan tarifaire V3 (Annuaire / Logiciel / Bundle). */
+export interface V3PlanForSchema {
+  readonly code: string
+  readonly name: string
+  readonly tagline: string
+  /** Prix mensuel en centimes HT. */
+  readonly monthlyPrice: number
+  /** Prix annuel en centimes HT. */
+  readonly annualPrice: number
+}
+
+/**
+ * Construit la balise Service Schema.org pour un plan V3 (Annuaire / Logiciel / Bundle).
+ *
+ * On utilise le type `Service` plutôt que `SoftwareApplication` parce qu'il
+ * englobe à la fois l'annuaire (service de mise en relation B2C) et le SaaS
+ * logiciel B2B, sans contraindre la nature applicative.
+ */
+export function buildV3ServiceSchema(
+  plan: V3PlanForSchema,
+  pricingAnchor: string,
+): ProductSchema {
+  const offerUrl = `${KOVAS_BASE_URL}/pricing${pricingAnchor}`
+  const monthlyPriceEur = (plan.monthlyPrice / 100).toFixed(2)
+  const annualPriceEur = (plan.annualPrice / 100).toFixed(2)
+
+  const offers: OfferSchema[] = [
+    {
+      '@type': 'Offer',
+      name: `${plan.name} — Mensuel`,
+      price: monthlyPriceEur,
+      priceCurrency: 'EUR',
+      availability: 'https://schema.org/InStock',
+      url: offerUrl,
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: Number(monthlyPriceEur),
+        priceCurrency: 'EUR',
+        unitText: 'mois',
+        referenceQuantity: {
+          '@type': 'QuantitativeValue',
+          value: 1,
+          unitCode: 'MON',
+        },
+      },
+    },
+  ]
+
+  if (plan.annualPrice > 0) {
+    offers.push({
+      '@type': 'Offer',
+      name: `${plan.name} — Annuel`,
+      price: annualPriceEur,
+      priceCurrency: 'EUR',
+      availability: 'https://schema.org/InStock',
+      url: offerUrl,
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: Number(annualPriceEur),
+        priceCurrency: 'EUR',
+        unitText: 'an',
+        referenceQuantity: {
+          '@type': 'QuantitativeValue',
+          value: 1,
+          unitCode: 'ANN',
+        },
+      },
+    })
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${KOVAS_BASE_URL}/pricing#${plan.code}`,
+    name: `${COMPANY_IDENTITY.brands.umbrella} ${plan.name}`,
+    description: plan.tagline,
+    brand: {
+      '@type': 'Brand',
+      name: COMPANY_IDENTITY.brands.umbrella,
+      url: KOVAS_BASE_URL,
+    },
+    offers,
+  }
+}
+
+/** Paramètres d'entrée du builder ItemList V3 (3 sous-listes optionnelles). */
+export interface PricingItemListInput {
+  readonly annuairePlans?: ReadonlyArray<AnnuairePlan>
+  readonly logicielPlans?: ReadonlyArray<LogicielPlan>
+  readonly bundles?: ReadonlyArray<BundleCombo>
+}
+
+/**
+ * Construit la liste itémisée Schema.org des forfaits KOVAS V3.
+ *
+ * Combine annuaire + logiciel + bundles dans un seul ItemList ordonné.
+ * Les plans gratuits (monthlyPrice = 0) sont conservés mais avec un seul
+ * offer mensuel à 0,00 €. Les bundles utilisent le label `name`.
+ *
+ * Surcharge sans argument : retourne la liste legacy KOVAS_TIERS (3 tiers).
+ */
+export function buildPricingItemListSchema(
+  input?: PricingItemListInput,
+): ItemListSchema {
+  if (!input) {
+    return buildLegacyPricingItemListSchema()
+  }
+
+  const items: ProductSchema[] = []
+
+  for (const plan of input.annuairePlans ?? []) {
+    items.push(buildV3ServiceSchema(plan, `#${plan.code}`))
+  }
+
+  for (const plan of input.logicielPlans ?? []) {
+    items.push(buildV3ServiceSchema(plan, `#${plan.code}`))
+  }
+
+  for (const bundle of input.bundles ?? []) {
+    items.push(buildV3ServiceSchema(bundle, `#${bundle.code}`))
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: `Forfaits ${COMPANY_IDENTITY.brands.umbrella}`,
+    itemListElement: items.map((item, idx) => ({
+      '@type': 'ListItem' as const,
+      position: idx + 1,
+      item,
     })),
   }
 }

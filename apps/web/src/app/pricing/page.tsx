@@ -11,6 +11,13 @@ import { PricingFaq } from '@/components/pricing/PricingFaq'
 import { type BillingCycle, PricingToggle } from '@/components/pricing/PricingToggle'
 import { RoiCalculator } from '@/components/pricing/RoiCalculator'
 import { SponsoredSlotPicker } from '@/components/pricing/SponsoredSlotPicker'
+import { JsonLd } from '@/components/seo/JsonLd'
+import {
+  ANNUAIRE_PLANS,
+  BUNDLES,
+  LOGICIEL_PLANS,
+} from '@/lib/pricing-plans'
+import { buildPricingItemListSchema } from '@/lib/seo/schema-org'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -39,6 +46,14 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-dvh flex flex-col bg-[#F5F7F4] text-[#0F1419] font-sans">
+      <JsonLd
+        id="pricing-itemlist"
+        data={buildPricingItemListSchema({
+          annuairePlans: ANNUAIRE_PLANS,
+          logicielPlans: LOGICIEL_PLANS,
+          bundles: BUNDLES,
+        })}
+      />
       <LandingHeader current="pricing" />
 
       <main className="flex-1">

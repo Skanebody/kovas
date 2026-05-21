@@ -1,5 +1,11 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { JsonLd } from '@/components/seo/JsonLd'
+import {
+  buildBreadcrumbList,
+  buildLocalBusinessSchema,
+  type DiagnosticianForSchema,
+} from '@/lib/seo/schema-org'
 import { createClient } from '@/lib/supabase/server'
 import { DiagnosticianPageContent } from './diagnostician-page-content'
 
@@ -167,12 +173,62 @@ export default async function DiagnosticianPage({ params }: PageProps) {
     url: `${SITE_URL}/diagnostiqueurs/${dept}/${city}/${slug}`,
   }
 
+  // LocalBusiness Schema.org enrichi (complète le Person ci-dessus).
+  const certForSchema: Array<{ type: string }> = credentials
+    .map((c) => ({ type: c.type ?? '' }))
+    .filter((c) => c.type !== '')
+
+  const diagSchemaInput: DiagnosticianForSchema = {
+    fullName,
+    slug: String(diag.slug ?? slug),
+    city: String(diag.city ?? decodeURIComponent(city)),
+    postalCode: typeof diag.postal_code === 'string' ? diag.postal_code : undefined,
+    dept: String(diag.slug_dept ?? dept),
+    streetAddress: typeof diag.street_address === 'string' ? diag.street_address : undefined,
+    geoLat: typeof diag.geo_lat === 'number' ? diag.geo_lat : undefined,
+    geoLng: typeof diag.geo_lng === 'number' ? diag.geo_lng : undefined,
+    certifications: certForSchema.length ? certForSchema : undefined,
+    phone: typeof diag.official_phone === 'string' ? diag.official_phone : undefined,
+    email: typeof diag.official_email === 'string' ? diag.official_email : undefined,
+    photoUrl: typeof diag.photo_url === 'string' ? diag.photo_url : undefined,
+    bio: typeof diag.bio === 'string' ? diag.bio : undefined,
+    rating: typeof diag.gmb_rating === 'number' ? diag.gmb_rating : undefined,
+    reviewCount:
+      typeof diag.gmb_review_count === 'number' ? diag.gmb_review_count : undefined,
+  }
+
+  // Libellés breadcrumb humanlisibles (dérive du slug si pas de label dédié).
+  const deptLabel = humanizeSlug(String(diag.slug_dept ?? dept))
+  const cityLabel = String(diag.city ?? decodeURIComponent(city))
+  const slugDept = String(diag.slug_dept ?? dept)
+  const slugCity = String(diag.slug_city ?? city)
+  const slugProfile = String(diag.slug ?? slug)
+
   return (
     <>
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <JsonLd
+        id={`diag-${slugProfile}`}
+        data={[
+          buildLocalBusinessSchema(diagSchemaInput),
+          buildBreadcrumbList([
+            { name: 'Accueil', path: '/' },
+            { name: 'Diagnostiqueurs', path: '/diagnostiqueurs' },
+            { name: deptLabel, path: `/diagnostiqueurs/${slugDept}` },
+            {
+              name: cityLabel,
+              path: `/diagnostiqueurs/${slugDept}/${slugCity}`,
+            },
+            {
+              name: fullName,
+              path: `/diagnostiqueurs/${slugDept}/${slugCity}/${slugProfile}`,
+            },
+          ]),
+        ]}
       />
       <DiagnosticianPageContent
         diagnostician={diag}
@@ -182,4 +238,13 @@ export default async function DiagnosticianPage({ params }: PageProps) {
       />
     </>
   )
+}
+
+/** Convertit un slug ("seine-maritime") en label humain ("Seine Maritime"). */
+function humanizeSlug(slugInput: string): string {
+  if (!slugInput) return ''
+  return slugInput
+    .split('-')
+    .map((part) => (part.length > 0 ? part[0].toUpperCase() + part.slice(1) : part))
+    .join(' ')
 }

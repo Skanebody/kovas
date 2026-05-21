@@ -1,7 +1,12 @@
 import { AddToHomeScreen } from '@/components/add-to-home-screen'
 import { QueryProvider } from '@/components/query-provider'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
+import {
+  buildOrganizationSchema,
+  buildWebSiteSchema,
+} from '@/lib/seo/schema-org'
 import type { Metadata, Viewport } from 'next'
 import { instrumentSerif, jetbrainsMono, urbanist } from './fonts'
 import './globals.css'
@@ -67,6 +72,10 @@ export default function RootLayout({
       className={`${urbanist.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
     >
       <body className="font-display antialiased">
+        <JsonLd
+          id="root-org-website"
+          data={[buildOrganizationSchema(), buildWebSiteSchema()]}
+        />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <QueryProvider>
             {children}
