@@ -1,0 +1,41 @@
+# robots.txt — KOVAS (kovas.fr)
+# Authority : voir CLAUDE.md §1 (kovas.fr canonique) et apps/web/src/app/sitemap.ts
+
+User-agent: *
+Allow: /
+
+# Espaces authentifiés et techniques
+Disallow: /app
+Disallow: /admin
+Disallow: /api
+Disallow: /dashboard
+Disallow: /onboarding
+Disallow: /signup
+Disallow: /login
+
+# Pages claim / désabonnement / correction (noindex via robots-tag aussi)
+Disallow: /d/
+Disallow: /reclamer-ma-fiche
+
+# Upload propriétaire via lien public (token confidentiel)
+Disallow: /upload/
+
+# Query params sensibles (Stripe session, tokens)
+Disallow: /*?session_id=
+Disallow: /*?token=
+
+# Sitemap
+Sitemap: https://kovas.fr/sitemap.xml
+
+# Crawl-delay raisonnable pour bots non-Google (limitation rate-limit)
+User-agent: Bingbot
+Crawl-delay: 5
+
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Crawl-delay: 10
