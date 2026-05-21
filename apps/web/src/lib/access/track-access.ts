@@ -114,11 +114,32 @@ export const getUserTrackAccess = cache(async (): Promise<TrackAccessResult> => 
     .map((s) => s.plan_code ?? s.tier)
     .filter((c): c is string => Boolean(c))
 
-  const annuaireActive = planCodes.some((c) => c.startsWith('annuaire_') && c !== 'annuaire_free')
+  // Codes V4 officiels du track Annuaire (grille 2026-05-22).
+  const annuaireActiveCodes = new Set<string>([
+    // V4 officiels
+    'annuaire_local',
+    'annuaire_regional',
+    'annuaire_national',
+    // V3 historiques (alias rétrocompat)
+    'annuaire_pro',
+    'annuaire_visibility',
+    'annuaire_sponsored',
+  ])
+  const annuaireActive = planCodes.some((c) => annuaireActiveCodes.has(c))
 
+  // Codes V4 officiels du track Logiciel (grille 2026-05-22).
+  const logicielV4Codes = new Set<string>([
+    'solo_light',
+    'solo_pro',
+    'cabinet',
+    'cabinet_plus',
+  ])
   const logicielActive = planCodes.some((c) => {
-    if (c.startsWith('logiciel_')) return c !== 'logiciel_free'
-    if (c === 'essential' || c === 'decouverte' || c === 'pro' || c === 'all_inclusive' || c === 'cabinet') return true
+    if (logicielV4Codes.has(c)) return true
+    // Alias V3 historique (logiciel_*) — c.startsWith en excluant logiciel_free.
+    if (c.startsWith('logiciel_')) return c !== 'logiciel_free' && c !== 'essai'
+    // Legacy E2c public encore référencé pour les abonnements pré-pivot.
+    if (c === 'essential' || c === 'decouverte' || c === 'pro' || c === 'all_inclusive') return true
     // Tiers grandfather bruts (avant suffixe `_legacy`) — la colonne `subscriptions.tier`
     // utilise encore ces noms historiques pour les comptes pré-migration B.
     if (c === 'volume' || c === 'standard' || c === 'founder') return true

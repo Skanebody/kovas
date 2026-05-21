@@ -55,85 +55,134 @@ export interface StripePriceIds {
 // Annuaire — 3 tiers payants (annuaire_free exclu, pas de paiement Stripe)
 // ─────────────────────────────────────────────
 
+// Tiers payants Annuaire : V4 officiels (annuaire_local / regional / national)
+// + alias V3 historiques (annuaire_pro / visibility / sponsored) qui partagent
+// les mêmes Stripe Price IDs (mêmes prix 19 / 39 / 79 €).
+const annuaireLocalPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_ANNUAIRE_LOCAL_MONTHLY ?? process.env.STRIPE_PRICE_ANNUAIRE_PRO_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_ANNUAIRE_LOCAL_ANNUAL ?? process.env.STRIPE_PRICE_ANNUAIRE_PRO_ANNUAL ?? null,
+}
+const annuaireRegionalPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_ANNUAIRE_REGIONAL_MONTHLY ?? process.env.STRIPE_PRICE_ANNUAIRE_VISIBILITY_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_ANNUAIRE_REGIONAL_ANNUAL ?? process.env.STRIPE_PRICE_ANNUAIRE_VISIBILITY_ANNUAL ?? null,
+}
+const annuaireNationalPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_ANNUAIRE_NATIONAL_MONTHLY ?? process.env.STRIPE_PRICE_ANNUAIRE_SPONSORED_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_ANNUAIRE_NATIONAL_ANNUAL ?? process.env.STRIPE_PRICE_ANNUAIRE_SPONSORED_ANNUAL ?? null,
+}
+
 export const STRIPE_ANNUAIRE_PRICES: Record<
   Exclude<AnnuairePlanCode, 'annuaire_free'>,
   StripePriceIds
 > = {
-  annuaire_pro: {
-    monthly: process.env.STRIPE_PRICE_ANNUAIRE_PRO_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_ANNUAIRE_PRO_ANNUAL ?? null,
-  },
-  annuaire_visibility: {
-    monthly: process.env.STRIPE_PRICE_ANNUAIRE_VISIBILITY_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_ANNUAIRE_VISIBILITY_ANNUAL ?? null,
-  },
-  annuaire_sponsored: {
-    monthly: process.env.STRIPE_PRICE_ANNUAIRE_SPONSORED_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_ANNUAIRE_SPONSORED_ANNUAL ?? null,
-  },
+  // V4 officiels
+  annuaire_local: annuaireLocalPrices,
+  annuaire_regional: annuaireRegionalPrices,
+  annuaire_national: annuaireNationalPrices,
+  // Alias V3 historiques (mêmes Price IDs)
+  annuaire_pro: annuaireLocalPrices,
+  annuaire_visibility: annuaireRegionalPrices,
+  annuaire_sponsored: annuaireNationalPrices,
 }
 
 // ─────────────────────────────────────────────
 // Logiciel KOVAS 360 — 4 tiers payants (logiciel_free exclu)
 // ─────────────────────────────────────────────
 
+// Tiers payants Logiciel V4 (Solo Light 29 / Solo Pro 59 / Cabinet 149 / Cabinet+ 299€).
+// Les alias V3 (logiciel_*) partagent les mêmes Stripe Price IDs.
+const soloLightPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_LOGICIEL_SOLO_LIGHT_MONTHLY ?? process.env.STRIPE_PRICE_LOGICIEL_STARTER_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_LOGICIEL_SOLO_LIGHT_ANNUAL ?? process.env.STRIPE_PRICE_LOGICIEL_STARTER_ANNUAL ?? null,
+}
+const soloProPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_LOGICIEL_SOLO_PRO_MONTHLY ?? process.env.STRIPE_PRICE_LOGICIEL_ACTIVE_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_LOGICIEL_SOLO_PRO_ANNUAL ?? process.env.STRIPE_PRICE_LOGICIEL_ACTIVE_ANNUAL ?? null,
+}
+const cabinetPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_LOGICIEL_CABINET_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_LOGICIEL_CABINET_ANNUAL ?? null,
+}
+const cabinetPlusPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_LOGICIEL_CABINET_PLUS_MONTHLY ?? process.env.STRIPE_PRICE_LOGICIEL_ENTERPRISE_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_LOGICIEL_CABINET_PLUS_ANNUAL ?? process.env.STRIPE_PRICE_LOGICIEL_ENTERPRISE_ANNUAL ?? null,
+}
+
 export const STRIPE_LOGICIEL_PRICES: Record<
-  Exclude<LogicielPlanCode, 'logiciel_free'>,
+  Exclude<LogicielPlanCode, 'logiciel_free' | 'essai'>,
   StripePriceIds
 > = {
-  logiciel_starter: {
-    monthly: process.env.STRIPE_PRICE_LOGICIEL_STARTER_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_LOGICIEL_STARTER_ANNUAL ?? null,
-  },
-  logiciel_active: {
-    monthly: process.env.STRIPE_PRICE_LOGICIEL_ACTIVE_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_LOGICIEL_ACTIVE_ANNUAL ?? null,
-  },
-  logiciel_cabinet: {
-    monthly: process.env.STRIPE_PRICE_LOGICIEL_CABINET_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_LOGICIEL_CABINET_ANNUAL ?? null,
-  },
-  logiciel_enterprise: {
-    monthly: process.env.STRIPE_PRICE_LOGICIEL_ENTERPRISE_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_LOGICIEL_ENTERPRISE_ANNUAL ?? null,
-  },
+  // V4 officiels
+  solo_light: soloLightPrices,
+  solo_pro: soloProPrices,
+  cabinet: cabinetPrices,
+  cabinet_plus: cabinetPlusPrices,
+  // Alias V3 historiques (mêmes Price IDs)
+  logiciel_starter: soloLightPrices,
+  logiciel_active: soloProPrices,
+  logiciel_cabinet: cabinetPrices,
+  logiciel_enterprise: cabinetPlusPrices,
 }
 
 // ─────────────────────────────────────────────
 // Bundles — 5 combos Annuaire + Logiciel
 // ─────────────────────────────────────────────
 
+// Bundles V4 (Solo Starter 39 / Solo Performance 65 / Solo Régional 79 /
+// Cabinet 360 159 / Cabinet National 319€). Les alias V3 partagent les Price IDs.
+const bundleSoloStarterPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_BUNDLE_SOLO_STARTER_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_STARTER_VISIBILITY_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_BUNDLE_SOLO_STARTER_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_STARTER_VISIBILITY_ANNUAL ?? null,
+}
+const bundleSoloPerformancePrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_BUNDLE_SOLO_PERFORMANCE_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_ACTIVE_PRO_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_BUNDLE_SOLO_PERFORMANCE_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_ACTIVE_PRO_ANNUAL ?? null,
+}
+const bundleSoloRegionalPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_BUNDLE_SOLO_REGIONAL_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_ACTIVE_VISIBILITY_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_BUNDLE_SOLO_REGIONAL_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_ACTIVE_VISIBILITY_ANNUAL ?? null,
+}
+const bundleCabinet360Prices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_BUNDLE_CABINET_360_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_CABINET_PRO_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_BUNDLE_CABINET_360_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_CABINET_PRO_ANNUAL ?? null,
+}
+const bundleCabinetNationalPrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_BUNDLE_CABINET_NATIONAL_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_CABINET_VISIBILITY_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_BUNDLE_CABINET_NATIONAL_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_CABINET_VISIBILITY_ANNUAL ?? null,
+}
+
 export const STRIPE_BUNDLE_PRICES: Record<BundleCode, StripePriceIds> = {
-  bundle_starter_visibility: {
-    monthly: process.env.STRIPE_PRICE_BUNDLE_STARTER_VISIBILITY_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_BUNDLE_STARTER_VISIBILITY_ANNUAL ?? null,
-  },
-  bundle_active_pro: {
-    monthly: process.env.STRIPE_PRICE_BUNDLE_ACTIVE_PRO_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_BUNDLE_ACTIVE_PRO_ANNUAL ?? null,
-  },
-  bundle_active_visibility: {
-    monthly: process.env.STRIPE_PRICE_BUNDLE_ACTIVE_VISIBILITY_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_BUNDLE_ACTIVE_VISIBILITY_ANNUAL ?? null,
-  },
-  bundle_cabinet_pro: {
-    monthly: process.env.STRIPE_PRICE_BUNDLE_CABINET_PRO_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_BUNDLE_CABINET_PRO_ANNUAL ?? null,
-  },
-  bundle_cabinet_visibility: {
-    monthly: process.env.STRIPE_PRICE_BUNDLE_CABINET_VISIBILITY_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_BUNDLE_CABINET_VISIBILITY_ANNUAL ?? null,
-  },
+  // V4 officiels
+  bundle_solo_starter: bundleSoloStarterPrices,
+  bundle_solo_performance: bundleSoloPerformancePrices,
+  bundle_solo_regional: bundleSoloRegionalPrices,
+  bundle_cabinet_360: bundleCabinet360Prices,
+  bundle_cabinet_national: bundleCabinetNationalPrices,
+  // Alias V3 historiques (mêmes Price IDs)
+  bundle_starter_visibility: bundleSoloStarterPrices,
+  bundle_active_pro: bundleSoloPerformancePrices,
+  bundle_active_visibility: bundleSoloRegionalPrices,
+  bundle_cabinet_pro: bundleCabinet360Prices,
+  bundle_cabinet_visibility: bundleCabinet360Prices,
 }
 
 // ─────────────────────────────────────────────
 // Slots sponsorisés — 6 catégories de ville (réservés au tier annuaire_sponsored)
 // ─────────────────────────────────────────────
 
+const slotCommunePrices: StripePriceIds = {
+  monthly: process.env.STRIPE_PRICE_SLOT_COMMUNE_MONTHLY ?? process.env.STRIPE_PRICE_SLOT_RURAL_MONTHLY ?? null,
+  annual: process.env.STRIPE_PRICE_SLOT_COMMUNE_ANNUAL ?? process.env.STRIPE_PRICE_SLOT_RURAL_ANNUAL ?? null,
+}
+
 export const STRIPE_SPONSORED_SLOT_PRICES: Record<
   SponsoredSlotCategory,
   StripePriceIds
 > = {
+  megapole: {
+    monthly: process.env.STRIPE_PRICE_SLOT_MEGAPOLE_MONTHLY ?? null,
+    annual: process.env.STRIPE_PRICE_SLOT_MEGAPOLE_ANNUAL ?? null,
+  },
   metropole: {
     monthly: process.env.STRIPE_PRICE_SLOT_METROPOLE_MONTHLY ?? null,
     annual: process.env.STRIPE_PRICE_SLOT_METROPOLE_ANNUAL ?? null,
@@ -150,14 +199,9 @@ export const STRIPE_SPONSORED_SLOT_PRICES: Record<
     monthly: process.env.STRIPE_PRICE_SLOT_PETITE_VILLE_MONTHLY ?? null,
     annual: process.env.STRIPE_PRICE_SLOT_PETITE_VILLE_ANNUAL ?? null,
   },
-  commune: {
-    monthly: process.env.STRIPE_PRICE_SLOT_COMMUNE_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_SLOT_COMMUNE_ANNUAL ?? null,
-  },
-  rural: {
-    monthly: process.env.STRIPE_PRICE_SLOT_RURAL_MONTHLY ?? null,
-    annual: process.env.STRIPE_PRICE_SLOT_RURAL_ANNUAL ?? null,
-  },
+  commune: slotCommunePrices,
+  // Alias V3 historique : `rural` pointe vers le palier commune.
+  rural: slotCommunePrices,
 }
 
 // ─────────────────────────────────────────────
@@ -211,9 +255,9 @@ export function getStripePriceId(
       return entry ? entry[billingCycle] : null
     }
     case 'logiciel': {
-      if (code === 'logiciel_free') return null
+      if (code === 'logiciel_free' || code === 'essai') return null
       const entry =
-        STRIPE_LOGICIEL_PRICES[code as Exclude<LogicielPlanCode, 'logiciel_free'>]
+        STRIPE_LOGICIEL_PRICES[code as Exclude<LogicielPlanCode, 'logiciel_free' | 'essai'>]
       return entry ? entry[billingCycle] : null
     }
     case 'bundle': {

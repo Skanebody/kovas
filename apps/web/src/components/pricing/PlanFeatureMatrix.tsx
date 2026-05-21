@@ -41,70 +41,78 @@ interface AnnuaireRow {
   values: Record<AnnuairePlanCode, boolean | string>
 }
 
+/**
+ * Helper interne : construit une row Annuaire en propageant la valeur officielle
+ * (annuaire_local / regional / national) vers les alias V3 (annuaire_pro /
+ * visibility / sponsored) pour satisfaire `Record<AnnuairePlanCode, …>` exhaustif.
+ */
+function buildAnnuaireRow(
+  feature: string,
+  values: {
+    annuaire_free: boolean | string
+    annuaire_local: boolean | string
+    annuaire_regional: boolean | string
+    annuaire_national: boolean | string
+  },
+): AnnuaireRow {
+  return {
+    feature,
+    values: {
+      annuaire_free: values.annuaire_free,
+      annuaire_local: values.annuaire_local,
+      annuaire_regional: values.annuaire_regional,
+      annuaire_national: values.annuaire_national,
+      // Alias V3 historiques (rétrocompat type)
+      annuaire_pro: values.annuaire_local,
+      annuaire_visibility: values.annuaire_regional,
+      annuaire_sponsored: values.annuaire_national,
+    },
+  }
+}
+
 const ANNUAIRE_ROWS: readonly AnnuaireRow[] = [
-  {
-    feature: 'Niveau de fiche',
-    values: {
-      annuaire_free: 'Vérifiée',
-      annuaire_pro: 'Premium',
-      annuaire_visibility: 'Premium + boost',
-      annuaire_sponsored: 'Premium top dept',
-    },
-  },
-  {
-    feature: 'Leads particuliers / mois',
-    values: {
-      annuaire_free: '0',
-      annuaire_pro: '5',
-      annuaire_visibility: '15',
-      annuaire_sponsored: '30',
-    },
-  },
-  {
-    feature: 'Photos + services',
-    values: {
-      annuaire_free: false,
-      annuaire_pro: true,
-      annuaire_visibility: true,
-      annuaire_sponsored: true,
-    },
-  },
-  {
-    feature: 'Boost SEO local',
-    values: {
-      annuaire_free: false,
-      annuaire_pro: false,
-      annuaire_visibility: true,
-      annuaire_sponsored: true,
-    },
-  },
-  {
-    feature: 'Analytics fiche',
-    values: {
-      annuaire_free: false,
-      annuaire_pro: false,
-      annuaire_visibility: true,
-      annuaire_sponsored: true,
-    },
-  },
-  {
-    feature: 'Badge "Recommandé"',
-    values: {
-      annuaire_free: false,
-      annuaire_pro: false,
-      annuaire_visibility: false,
-      annuaire_sponsored: true,
-    },
-  },
-  {
-    feature: 'Sponsored Slot exclusif',
-    values: {
-      annuaire_free: false,
-      annuaire_pro: false,
-      annuaire_visibility: false,
-      annuaire_sponsored: 'Inclus (surcoût ville)',
-    },
-  },
+  buildAnnuaireRow('Niveau de fiche', {
+    annuaire_free: 'Vérifiée',
+    annuaire_local: 'Premium',
+    annuaire_regional: 'Premium + boost',
+    annuaire_national: 'Premium top dept',
+  }),
+  buildAnnuaireRow('Leads particuliers / mois', {
+    annuaire_free: '0',
+    annuaire_local: '5',
+    annuaire_regional: '15',
+    annuaire_national: '30',
+  }),
+  buildAnnuaireRow('Photos + services', {
+    annuaire_free: false,
+    annuaire_local: true,
+    annuaire_regional: true,
+    annuaire_national: true,
+  }),
+  buildAnnuaireRow('Boost SEO local', {
+    annuaire_free: false,
+    annuaire_local: false,
+    annuaire_regional: true,
+    annuaire_national: true,
+  }),
+  buildAnnuaireRow('Analytics fiche', {
+    annuaire_free: false,
+    annuaire_local: false,
+    annuaire_regional: true,
+    annuaire_national: true,
+  }),
+  buildAnnuaireRow('Badge "Recommandé"', {
+    annuaire_free: false,
+    annuaire_local: false,
+    annuaire_regional: false,
+    annuaire_national: true,
+  }),
+  buildAnnuaireRow('Sponsored Slot exclusif', {
+    annuaire_free: false,
+    annuaire_local: false,
+    annuaire_regional: false,
+    annuaire_national: 'Inclus (surcoût ville)',
+  }),
 ]
 
 function AnnuaireMatrix() {
@@ -184,117 +192,116 @@ interface LogicielRow {
   values: Record<LogicielPlanCode, boolean | string>
 }
 
+/**
+ * Helper interne : construit une row Logiciel en propageant la valeur officielle
+ * (essai / solo_light / solo_pro / cabinet / cabinet_plus) vers les alias V3
+ * historiques (logiciel_*) pour satisfaire `Record<LogicielPlanCode, …>` exhaustif.
+ */
+function buildLogicielRow(
+  category: string,
+  feature: string,
+  values: {
+    essai: boolean | string
+    solo_light: boolean | string
+    solo_pro: boolean | string
+    cabinet: boolean | string
+    cabinet_plus: boolean | string
+  },
+): LogicielRow {
+  return {
+    category,
+    feature,
+    values: {
+      essai: values.essai,
+      solo_light: values.solo_light,
+      solo_pro: values.solo_pro,
+      cabinet: values.cabinet,
+      cabinet_plus: values.cabinet_plus,
+      // Alias V3 historiques (rétrocompat type)
+      logiciel_free: values.essai,
+      logiciel_starter: values.solo_light,
+      logiciel_active: values.solo_pro,
+      logiciel_cabinet: values.cabinet,
+      logiciel_enterprise: values.cabinet_plus,
+    },
+  }
+}
+
 const LOGICIEL_ROWS: readonly LogicielRow[] = [
-  {
-    category: 'Volume',
-    feature: 'Missions / mois',
-    values: {
-      logiciel_free: '30 (cap)',
-      logiciel_starter: '60',
-      logiciel_active: '150',
-      logiciel_cabinet: '400',
-      logiciel_enterprise: 'illimité',
+  buildLogicielRow('Volume', 'Missions / mois', {
+    essai: '30 (cap)',
+    solo_light: '60',
+    solo_pro: '150',
+    cabinet: '400',
+    cabinet_plus: 'illimité',
+  }),
+  buildLogicielRow(
+    'Diagnostics',
+    '8 diagnostics standards (DPE, Amiante, Plomb, Gaz, Élec, Termites, Carrez, ERP)',
+    {
+      essai: true,
+      solo_light: true,
+      solo_pro: true,
+      cabinet: true,
+      cabinet_plus: true,
     },
-  },
-  {
-    category: 'Diagnostics',
-    feature: '8 diagnostics standards (DPE, Amiante, Plomb, Gaz, Élec, Termites, Carrez, ERP)',
-    values: {
-      logiciel_free: true,
-      logiciel_starter: true,
-      logiciel_active: true,
-      logiciel_cabinet: true,
-      logiciel_enterprise: true,
-    },
-  },
-  {
-    category: 'IA',
-    feature: 'Saisie vocale Whisper',
-    values: {
-      logiciel_free: '1h/mo',
-      logiciel_starter: '5h/mo',
-      logiciel_active: '10h/mo',
-      logiciel_cabinet: '40h/mo',
-      logiciel_enterprise: '80h/mo',
-    },
-  },
-  {
-    category: 'IA',
-    feature: 'Vision IA reconnaissance équipements',
-    values: {
-      logiciel_free: false,
-      logiciel_starter: false,
-      logiciel_active: '100/mo',
-      logiciel_cabinet: '600/mo',
-      logiciel_enterprise: '1 500/mo',
-    },
-  },
-  {
-    category: 'IA',
-    feature: 'Recommandations post-DPE F/G',
-    values: {
-      logiciel_free: false,
-      logiciel_starter: false,
-      logiciel_active: true,
-      logiciel_cabinet: true,
-      logiciel_enterprise: true,
-    },
-  },
-  {
-    category: 'Stockage',
-    feature: 'Capacité cloud',
-    values: {
-      logiciel_free: '5 Go',
-      logiciel_starter: '12 Go',
-      logiciel_active: '25 Go',
-      logiciel_cabinet: '100 Go',
-      logiciel_enterprise: '250 Go',
-    },
-  },
-  {
-    category: 'Comptes',
-    feature: "Nombre d'utilisateurs",
-    values: {
-      logiciel_free: '1',
-      logiciel_starter: '1',
-      logiciel_active: '1',
-      logiciel_cabinet: '3',
-      logiciel_enterprise: '10+',
-    },
-  },
-  {
-    category: 'Facturation',
-    feature: 'Factur-X (obligation 2027)',
-    values: {
-      logiciel_free: false,
-      logiciel_starter: false,
-      logiciel_active: false,
-      logiciel_cabinet: true,
-      logiciel_enterprise: true,
-    },
-  },
-  {
-    category: 'API',
-    feature: 'API publique',
-    values: {
-      logiciel_free: false,
-      logiciel_starter: false,
-      logiciel_active: false,
-      logiciel_cabinet: false,
-      logiciel_enterprise: true,
-    },
-  },
-  {
-    category: 'Support',
-    feature: 'Support',
-    values: {
-      logiciel_free: 'Email 48h',
-      logiciel_starter: 'Email 24h',
-      logiciel_active: 'Prio 4h',
-      logiciel_cabinet: 'Account manager',
-      logiciel_enterprise: 'SLA 4h + onboarding',
-    },
-  },
+  ),
+  buildLogicielRow('IA', 'Saisie vocale Whisper', {
+    essai: '1h/mo',
+    solo_light: '5h/mo',
+    solo_pro: '10h/mo',
+    cabinet: '40h/mo',
+    cabinet_plus: '80h/mo',
+  }),
+  buildLogicielRow('IA', 'Vision IA reconnaissance équipements', {
+    essai: false,
+    solo_light: false,
+    solo_pro: '100/mo',
+    cabinet: '600/mo',
+    cabinet_plus: '1 500/mo',
+  }),
+  buildLogicielRow('IA', 'Recommandations post-DPE F/G', {
+    essai: false,
+    solo_light: false,
+    solo_pro: true,
+    cabinet: true,
+    cabinet_plus: true,
+  }),
+  buildLogicielRow('Stockage', 'Capacité cloud', {
+    essai: '5 Go',
+    solo_light: '12 Go',
+    solo_pro: '25 Go',
+    cabinet: '100 Go',
+    cabinet_plus: '250 Go',
+  }),
+  buildLogicielRow('Comptes', "Nombre d'utilisateurs", {
+    essai: '1',
+    solo_light: '1',
+    solo_pro: '1',
+    cabinet: '3',
+    cabinet_plus: '7',
+  }),
+  buildLogicielRow('Facturation', 'Factur-X (obligation 2027)', {
+    essai: false,
+    solo_light: false,
+    solo_pro: false,
+    cabinet: true,
+    cabinet_plus: true,
+  }),
+  buildLogicielRow('API', 'API publique', {
+    essai: false,
+    solo_light: false,
+    solo_pro: false,
+    cabinet: false,
+    cabinet_plus: true,
+  }),
+  buildLogicielRow('Support', 'Support', {
+    essai: 'Email 48h',
+    solo_light: 'Email 24h',
+    solo_pro: 'Prio 4h',
+    cabinet: 'Account manager',
+    cabinet_plus: 'SLA 4h + onboarding',
+  }),
 ]
 
 function LogicielMatrix() {

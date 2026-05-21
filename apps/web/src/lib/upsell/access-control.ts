@@ -25,7 +25,13 @@ import {
  * grandfather → rank du V3 le plus proche.
  */
 const PLAN_RANK: Record<PricingPlanCode, number> = {
-  // V3 logiciel
+  // V4 officiels (grille 2026-05-22)
+  essai: 0,
+  solo_light: 1,
+  solo_pro: 3,
+  cabinet: 5,
+  cabinet_plus: 6,
+  // Alias V3 historiques
   logiciel_free: 0,
   logiciel_starter: 1,
   logiciel_active: 3,
@@ -36,13 +42,15 @@ const PLAN_RANK: Record<PricingPlanCode, number> = {
   decouverte: 2,
   pro: 3,
   all_inclusive: 4,
-  cabinet: 5,
   // Grandfather (prix historiques préservés)
   essential_legacy: 1,
   decouverte_legacy: 2,
   pro_legacy: 3,
   all_inclusive_legacy: 4,
   cabinet_legacy: 5,
+  standard_legacy: 3,
+  volume_legacy: 4,
+  founder_legacy: 3,
 }
 
 export interface UserAccess {
@@ -124,8 +132,8 @@ export function getActiveFeatures(access: UserAccess): {
   return {
     tiers,
     addons: Array.from(getEffectiveAddons(access)),
-    isPremium: tierAtLeast(access.planCode, 'pro'),
-    isCabinet: access.planCode === 'cabinet',
+    isPremium: tierAtLeast(access.planCode, 'solo_pro'),
+    isCabinet: access.planCode === 'cabinet' || access.planCode === 'cabinet_plus',
   }
 }
 
