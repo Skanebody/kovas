@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
-import { buildWhisperPrompt } from '@/lib/whisper-prompt'
+import { buildWhisperPrompt } from '@/lib/local-ai/vocabulary/diagnostic-jargon'
 
 /**
  * Transcription audio via OpenAI Whisper.

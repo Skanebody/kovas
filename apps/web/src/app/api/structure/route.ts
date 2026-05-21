@@ -36,8 +36,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'missing transcript or dossierId' }, { status: 400 })
   }
 
+  // Fetch mission types to inject the relevant jargon sections into the system prompt
+  const { data: dossier } = await supabase
+    .from('dossiers')
+    .select('id, missions(type)')
+    .eq('id', contextId)
+    .single()
+  const missionTypes = ((dossier?.missions ?? []) as { type: string }[]).map((m) => m.type)
+
   try {
-    const result = await structureWithClaude(transcript)
+    const result = await structureWithClaude(transcript, missionTypes)
 
     // Track usage (sans lien mission spécifique — la note vocale est dossier-level)
     const { orgId } = await getCurrentUser()

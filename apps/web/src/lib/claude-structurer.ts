@@ -10,10 +10,11 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk'
+import { buildClaudeContextVocabulary } from './local-ai/vocabulary/diagnostic-jargon'
 import type { VoiceParsedData } from './voice-parser'
 
 const HAIKU_MODEL = process.env.ANTHROPIC_MODEL_VOICE ?? 'claude-haiku-4-5'
-const SYSTEM_PROMPT = `Tu es un assistant qui structure des transcripts de diagnostic immobilier en français.
+const SYSTEM_PROMPT_BASE = `Tu es un assistant spécialisé en diagnostic immobilier français.
 
 Tu reçois un transcript brut d'un diagnostiqueur qui décrit ce qu'il voit sur place.
 Tu retournes un JSON strictement conforme au schéma indiqué.
@@ -25,6 +26,16 @@ Règles :
 - Marques/modèles seulement si explicitement nommés
 - equipment.kind : exactement parmi {chaudiere, chauffe_eau, radiateur, pac, climatisation, fenetre, isolation, ventilation, tableau_elec, autre}
 - observations[] : phrases d'intérêt (risques, défauts) verbatim depuis le transcript`
+
+/**
+ * Construit le system prompt complet avec le lexique métier injecté.
+ * Si `diagnostics` est vide → lexique complet (toutes sections).
+ * Sinon → uniquement les sections pertinentes (économie de tokens).
+ */
+function buildSystemPrompt(diagnostics: readonly string[]): string {
+  const vocab = buildClaudeContextVocabulary(diagnostics)
+  return `${SYSTEM_PROMPT_BASE}\n\n${vocab}`
+}
 
 const RESPONSE_SCHEMA = {
   type: 'object',
@@ -58,13 +69,17 @@ export interface ClaudeStructureResult {
   latencyMs: number
 }
 
-export async function structureWithClaude(transcript: string): Promise<ClaudeStructureResult> {
+export async function structureWithClaude(
+  transcript: string,
+  diagnostics: readonly string[] = [],
+): Promise<ClaudeStructureResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY not configured')
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const t0 = Date.now()
+  const systemPrompt = buildSystemPrompt(diagnostics)
 
   const response = await client.messages.create({
     model: HAIKU_MODEL,
@@ -72,7 +87,7 @@ export async function structureWithClaude(transcript: string): Promise<ClaudeStr
     system: [
       {
         type: 'text',
-        text: SYSTEM_PROMPT,
+        text: systemPrompt,
         cache_control: { type: 'ephemeral' },
       },
     ],
