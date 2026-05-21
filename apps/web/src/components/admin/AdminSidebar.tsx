@@ -14,6 +14,7 @@ import {
   Gauge,
   HardDrive,
   Home,
+  Inbox,
   LogOut,
   MailCheck,
   Newspaper,
@@ -71,6 +72,10 @@ const NAV_GROUPS: NavGroup[] = [
   {
     group: 'Pipeline SEO',
     items: [{ label: 'Kanban drafts', icon: Newspaper, href: '/admin/seo/kanban', enabled: true }],
+  },
+  {
+    group: 'Leads',
+    items: [{ label: 'Queue leads', icon: Inbox, href: '/admin/leads/queue', enabled: true }],
   },
   {
     group: 'Observabilité',

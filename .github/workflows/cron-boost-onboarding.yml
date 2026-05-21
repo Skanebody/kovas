@@ -1,0 +1,46 @@
+# Cron orchestrator — boost onboarding lead (Mission E2).
+#
+# Declenche l'Edge Function `boost-onboarding-lead` 1x par semaine (lundi
+# 09:00 UTC). La fonction :
+#   - selectionne max 20 diag non-reclames + eligibles + cooldown 60j
+#   - genere un lead synthetique par diag (quote_requests + lead_assignments
+#     + email_queue 'onboarding-gift-lead')
+#   - met a jour diagnosticians.last_boost_lead_sent_at = now()
+#
+# ---------------------------------------------------------------------------
+# Secrets GitHub a provisionner (Settings > Secrets and variables > Actions) :
+#
+#   SUPABASE_FUNCTIONS_BASE_URL   ex: https://<project-ref>.supabase.co/functions/v1
+#   SUPABASE_SERVICE_ROLE_KEY     service_role key Supabase
+#   CRON_SECRET                   secret partage avec les Edge Functions
+#
+# Manual dispatch : utile pour tester (avec dryRun=true) sans attendre lundi.
+# ---------------------------------------------------------------------------
+
+name: cron-boost-onboarding
+
+on:
+  schedule:
+    # Lundi 09:00 UTC (~10h-11h CET selon DST)
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  boost-onboarding:
+    name: Generer 20 boost-leads onboarding hebdomadaires
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_FUNCTIONS_BASE_URL: ${{ secrets.SUPABASE_FUNCTIONS_BASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Trigger boost-onboarding-lead
+        run: |
+          curl -fsS -X POST \
+            "$SUPABASE_FUNCTIONS_BASE_URL/boost-onboarding-lead" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"dryRun": false, "maxLeadsPerWeek": 20}' \
+          || echo "boost-onboarding step failed"

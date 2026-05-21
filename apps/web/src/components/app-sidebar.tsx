@@ -88,6 +88,7 @@ const NAV_MAIN: readonly NavItem[] = [
 const NAV_ANNUAIRE: readonly NavItem[] = [
   { href: '/dashboard/annuaire/profile', label: 'Profil annuaire', icon: IdCard },
   { href: '/dashboard/annuaire/leads', label: 'Leads reçus', icon: Inbox },
+  { href: '/dashboard/leads/incoming', label: 'Leads à répondre', icon: Inbox },
   { href: '/dashboard/annuaire/stats', label: 'Stats fiche', icon: TrendingUp },
 ] as const
 
