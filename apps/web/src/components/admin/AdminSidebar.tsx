@@ -16,6 +16,7 @@ import {
   Home,
   LogOut,
   MailCheck,
+  Newspaper,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -66,6 +67,10 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Actions', icon: Settings, href: '/admin/actions', enabled: true },
       { label: 'Utilities', icon: Wrench, href: '/admin/utilities', enabled: true },
     ],
+  },
+  {
+    group: 'Pipeline SEO',
+    items: [{ label: 'Kanban drafts', icon: Newspaper, href: '/admin/seo/kanban', enabled: true }],
   },
   {
     group: 'Observabilité',
