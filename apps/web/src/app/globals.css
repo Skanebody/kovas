@@ -273,28 +273,30 @@
   background: var(--bg-fluid-navy);
 }
 
-/* ============================================================
- * Mobile-safe positioning helpers (DS v5)
- * Pour éviter la collision avec AppMobileNav (64px + safe-area).
- * Utilisable sur sticky/fixed bottom UI : `.above-mobile-nav` calcule
- * automatiquement l'offset bottom avec env(safe-area-inset-bottom).
- * ============================================================ */
-.above-mobile-nav {
-  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+/* ----------------------------------------------------------------------- */
+/* Mode terrain (data-field-mode sur <html>)                                 */
+/* Activé via useFieldMode() — police +20%, boutons min 64px               */
+/* ----------------------------------------------------------------------- */
+html[data-field-mode='true'] {
+  font-size: 120%;
 }
 
-@media (min-width: 768px) {
-  .above-mobile-nav {
-    bottom: 0;
-  }
+html[data-field-mode='true'] button,
+html[data-field-mode='true'] [role='button'] {
+  min-height: 64px;
 }
 
-/* Z-index scale globale documentée pour éviter collisions :
- *   z-10  : éléments inline (tooltips, dropdowns courts)
- *   z-20  : floating action buttons (FAB)
- *   z-30  : header app sticky
- *   z-40  : mobile nav + sticky bars conditionnels (avec .above-mobile-nav)
- *   z-50  : modals / sheets / drawers
- *   z-60  : toasts / notifications
- *   z-100 : command palette overlay (au-dessus de tout)
- */
+/* Inputs : line-height plus généreux + min-height 56px pour gants */
+html[data-field-mode='true'] input,
+html[data-field-mode='true'] textarea,
+html[data-field-mode='true'] select {
+  min-height: 56px;
+  font-size: 1.05rem;
+}
+
+/* Respect explicite des éléments qui ne doivent pas grandir (badges, icons) */
+html[data-field-mode='true'] [data-field-mode-exempt='true'] {
+  min-height: 0;
+  font-size: inherit;
+}
+

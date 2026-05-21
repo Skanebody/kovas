@@ -1,162 +1,100 @@
 import { AppPageHeader } from '@/components/app-page-header'
-import { Card } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { getQuotaForPlan } from '@/lib/diagnosticians/listing-level'
-import { asUntyped } from '@/lib/diagnosticians/supabase-untyped'
 import type { Metadata } from 'next'
-import { LeadsListClient } from './leads-list-client'
+import { LeadsFocalClient } from './leads-focal-client'
+import type { LeadItem } from './leads-types'
 
 export const metadata: Metadata = { title: 'Leads' }
 
-interface DiagRow {
-  id: string
-  display_name: string | null
-  claim_status: string
+/**
+ * Page Leads — file d'attente focale 1 lead à la fois.
+ *
+ * NB : la table `lead_assignments` (Phase E) n'est pas encore déployée.
+ * Le fetch est volontairement défensif : si la table n'existe pas, la page
+ * affiche un empty state pédagogique sans planter le rendu.
+ */
+async function fetchPendingLeads(orgId: string): Promise<LeadItem[]> {
+  const { supabase } = await getCurrentUser()
+
+  // Try : si la table `lead_assignments` est présente, on l'utilise.
+  // Sinon (Phase E non encore migrée), on retombe sur une liste vide.
+  try {
+    const { data, error } = await supabase
+      .from('lead_assignments' as never)
+      .select(
+        'id, status, received_at, response_note, urgency, client_display_name, client_phone, property_address, property_city, property_postal_code, property_type, property_surface, property_year_built, mission_types',
+      )
+      .eq('organization_id', orgId)
+      .eq('status', 'pending')
+      .order('received_at', { ascending: true })
+      .limit(50)
+
+    if (error) {
+      // Table inexistante → on renvoie [] silencieusement
+      return []
+    }
+
+    const rows = (data ?? []) as unknown as RawLeadRow[]
+    return rows.map(normalizeLead)
+  } catch {
+    return []
+  }
 }
 
-interface LeadRow {
+interface RawLeadRow {
   id: string
-  requester_first_name: string | null
-  requester_last_name: string | null
+  status: string | null
+  received_at: string
+  urgency: string | null
+  client_display_name: string | null
+  client_phone: string | null
+  property_address: string | null
   property_city: string | null
   property_postal_code: string | null
   property_type: string | null
-  property_surface_m2: number | null
-  diagnostics_requested: string[] | null
-  created_at: string
-  status: string
+  property_surface: number | null
+  property_year_built: number | null
+  mission_types: string[] | null
 }
 
-interface UnlockRow {
-  quote_request_id: string
-  unlocked_at: string
-}
-
-interface SubRow {
-  plan_code: string | null
-  tier: string | null
+function normalizeLead(row: RawLeadRow): LeadItem {
+  const status: LeadItem['status'] =
+    row.status === 'responded' || row.status === 'expired' ? row.status : 'pending'
+  return {
+    id: row.id,
+    status,
+    receivedAt: row.received_at,
+    clientDisplayName: row.client_display_name ?? 'Contact à confirmer',
+    clientPhone: row.client_phone,
+    propertyAddress: row.property_address ?? 'Adresse à confirmer',
+    propertyCity: row.property_city,
+    propertyPostalCode: row.property_postal_code,
+    propertyType: row.property_type,
+    propertySurface: row.property_surface,
+    propertyYearBuilt: row.property_year_built,
+    missionTypes: (row.mission_types ?? []) as LeadItem['missionTypes'],
+    urgency: row.urgency,
+  }
 }
 
 export default async function LeadsPage() {
-  const { user, supabase } = await getCurrentUser()
-  const sb = asUntyped(supabase)
-
-  // 1. Liste les diagnosticians claimed par cet user
-  const { data: diagsRaw } = await sb
-    .from('diagnosticians')
-    .select('id, display_name, claim_status')
-    .eq('claimed_by_user_id', user.id)
-
-  const diags = (diagsRaw ?? []) as DiagRow[]
-  const diagIds = diags.map((d) => d.id)
-
-  // 2. Liste tous les leads pour ces diags
-  let leads: LeadRow[] = []
-  if (diagIds.length > 0) {
-    const { data } = await sb
-      .from('quote_requests')
-      .select(
-        'id, requester_first_name, requester_last_name, property_city, property_postal_code, property_type, property_surface_m2, diagnostics_requested, created_at, status',
-      )
-      .in('diagnostician_id', diagIds)
-      .order('created_at', { ascending: false })
-      .limit(200)
-    leads = (data ?? []) as LeadRow[]
-  }
-
-  // 3. Liste les unlocks de l'user
-  let unlockedIds = new Set<string>()
-  if (diagIds.length > 0) {
-    const { data: unlocksRaw } = await sb
-      .from('quote_request_unlocks')
-      .select('quote_request_id, unlocked_at')
-      .eq('user_id', user.id)
-    const unlocks = (unlocksRaw ?? []) as UnlockRow[]
-    unlockedIds = new Set(unlocks.map((u) => u.quote_request_id))
-  }
-
-  // 4. Quota mensuel d'après le plan
-  const { data: subRaw } = await sb
-    .from('subscriptions')
-    .select('plan_code, tier')
-    .eq('user_id', user.id)
-    .maybeSingle<SubRow>()
-
-  const plan = subRaw?.plan_code ?? subRaw?.tier ?? null
-  const quotaMax = getQuotaForPlan(plan)
-
-  // 5. Unlocks du mois pour calculer le restant
-  const startOfMonth = new Date()
-  startOfMonth.setUTCDate(1)
-  startOfMonth.setUTCHours(0, 0, 0, 0)
-  let unlocksThisMonth = 0
-  if (diagIds.length > 0) {
-    const { count } = await sb
-      .from('quote_request_unlocks')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .gte('unlocked_at', startOfMonth.toISOString())
-    unlocksThisMonth = count ?? 0
-  }
-
-  const remaining =
-    quotaMax === Number.POSITIVE_INFINITY ? -1 : Math.max(0, quotaMax - unlocksThisMonth)
-  const quotaDisplay = quotaMax === Number.POSITIVE_INFINITY ? '∞' : String(quotaMax)
-  const remainingDisplay = remaining === -1 ? '∞' : String(remaining)
-
-  const leadsWithStatus = leads.map((l) => ({
-    ...l,
-    unlocked: unlockedIds.has(l.id),
-  }))
+  const { orgId } = await getCurrentUser()
+  const leads = await fetchPendingLeads(orgId)
+  const count = leads.length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in max-w-2xl mx-auto">
       <AppPageHeader
         title="Vos"
         accent="leads"
-        description="Demandes de devis reçues via votre fiche annuaire publique."
+        description={
+          count > 0
+            ? `${count} lead${count > 1 ? 's' : ''} en attente · traitez le plus ancien d'abord`
+            : 'Demandes entrantes des particuliers via l\'annuaire KOVAS'
+        }
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <KpiCard label="Reçus ce mois" value={leads.length} />
-        <KpiCard label="Déverrouillés" value={unlocksThisMonth} />
-        <KpiCard
-          label="Quota restant"
-          value={remainingDisplay}
-          sub={`sur ${quotaDisplay}`}
-          accent={remaining === 0}
-        />
-      </div>
-
-      <LeadsListClient leads={leadsWithStatus} diags={diags} />
+      <LeadsFocalClient leads={leads} />
     </div>
-  )
-}
-
-function KpiCard({
-  label,
-  value,
-  sub,
-  accent,
-}: {
-  label: string
-  value: number | string
-  sub?: string
-  accent?: boolean
-}) {
-  return (
-    <Card variant="flat" padding="default">
-      <p className="text-[11px] font-mono uppercase tracking-[0.06em] text-ink-mute">{label}</p>
-      <p
-        className={
-          accent
-            ? 'mt-2 text-3xl font-serif italic font-normal text-[#D4F542]'
-            : 'mt-2 text-3xl font-serif italic font-normal text-ink'
-        }
-      >
-        {value}
-      </p>
-      {sub ? <p className="text-xs text-ink-mute mt-1">{sub}</p> : null}
-    </Card>
   )
 }

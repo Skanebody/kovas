@@ -1,181 +1,266 @@
-import { AppPageHeader } from '@/components/app-page-header'
-import { DangerZone } from '@/components/danger-zone'
-import { Badge } from '@/components/ui/badge'
+import {
+  PropertyCaracteristiquesSection,
+  type PropertyEssentialSpecs,
+  type PropertyTechnicalSpecs,
+} from '@/components/property/v5simp/PropertyCaracteristiquesSection'
+import {
+  type PropertyContexteLocalData,
+  PropertyContexteLocalSheet,
+} from '@/components/property/v5simp/PropertyContexteLocalSheet'
+import {
+  type PropertyDossierItem,
+  PropertyDossiersSection,
+} from '@/components/property/v5simp/PropertyDossiersSection'
+import { PropertyFab } from '@/components/property/v5simp/PropertyFab'
+import {
+  PropertyGallerieSection,
+  type PropertyPhoto,
+} from '@/components/property/v5simp/PropertyGallerieSection'
+import { PropertyIdentitySection } from '@/components/property/v5simp/PropertyIdentitySection'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { ArrowLeft, Pencil, Plus, User } from 'lucide-react'
+import { formatPropertyAddress } from '@/lib/property-display'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { softDeletePropertyAction } from '../actions'
-import { OwnerTransfer } from './owner-transfer'
 
 export const metadata: Metadata = { title: 'Détail bien' }
 
-const TYPE_LABELS: Record<string, string> = {
-  maison: 'Maison',
-  appartement: 'Appartement',
-  immeuble: 'Immeuble',
-  local_commercial: 'Local commercial',
-  bureau: 'Bureau',
-  autre: 'Autre',
-}
-
-export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PropertyDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const { id } = await params
   const { supabase, orgId } = await getCurrentUser()
 
-  const [{ data: property }, { data: clients }] = await Promise.all([
-    supabase
-      .from('properties')
-      .select('*')
-      .eq('id', id)
-      .eq('organization_id', orgId)
-      .is('deleted_at', null)
-      .single(),
-    supabase
-      .from('clients')
-      .select('id, display_name')
-      .eq('organization_id', orgId)
-      .is('deleted_at', null)
-      .order('display_name'),
-  ])
+  const { data: property } = await supabase
+    .from('properties')
+    .select(
+      'id, address, city, postal_code, insee_code, property_type, year_built, surface_total, surface_carrez, rooms_count, floors, heating_type, apartment_detail, floor_number, building_letter, lot_number, cadastre_prefix, cadastre_section, cadastre_number, client_id, notes',
+    )
+    .eq('id', id)
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .single()
 
   if (!property) notFound()
 
-  // Propriétaire actuel (FK properties.client_id) — peut être null
-  const currentOwner = property.client_id
-    ? ((clients ?? []).find((c) => c.id === property.client_id) ?? null)
-    : null
-
-  const aptParts: string[] = []
-  if (property.building_letter) aptParts.push(`Bât. ${property.building_letter}`)
-  if (property.apartment_detail) aptParts.push(property.apartment_detail)
-  if (typeof property.floor_number === 'number') {
-    aptParts.push(
-      property.floor_number === 0
-        ? 'RDC'
-        : property.floor_number > 0
-          ? `${property.floor_number}e étage`
-          : `sous-sol ${Math.abs(property.floor_number)}`,
-    )
+  // 2. Propriétaire rattaché (via client_id direct)
+  let owner: {
+    id: string
+    display_name: string
+    phone: string | null
+  } | null = null
+  if (property.client_id) {
+    const { data: ownerRow } = await supabase
+      .from('clients')
+      .select('id, display_name, phone')
+      .eq('id', property.client_id)
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .maybeSingle()
+    if (ownerRow) {
+      owner = {
+        id: ownerRow.id,
+        display_name: ownerRow.display_name,
+        phone: ownerRow.phone,
+      }
+    }
   }
-  if (property.lot_number) aptParts.push(`Lot ${property.lot_number}`)
+
+  // 3. Dossiers réalisés sur ce bien
+  const { data: dossierRows } = await supabase
+    .from('dossiers')
+    .select(
+      'id, reference, status, scheduled_at, completed_at, created_at, missions(type, dpe_letter, completed_at)',
+    )
+    .eq('organization_id', orgId)
+    .eq('property_id', id)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .limit(100)
+
+  const dossiers = dossierRows ?? []
+
+  // 4. Photos (via dossier_id) — V1 : sélection des thumbs pour la galerie agrégée du bien
+  const dossierIds = dossiers.map((d) => d.id)
+  let photoRows: {
+    id: string
+    thumb_path: string | null
+    storage_path: string
+    caption: string | null
+  }[] = []
+  if (dossierIds.length > 0) {
+    const { data: photos } = await supabase
+      .from('photos')
+      .select('id, thumb_path, storage_path, caption, created_at')
+      .eq('organization_id', orgId)
+      .in('dossier_id', dossierIds)
+      .order('created_at', { ascending: false })
+      .limit(48)
+    photoRows = photos ?? []
+  }
+
+  // 5. Dérive dernier DPE et dernier amiante (pour Caractéristiques)
+  let lastDpeIso: string | null = null
+  let lastAmianteIso: string | null = null
+  for (const d of dossiers) {
+    const missions = (d.missions ?? []) as {
+      type: string
+      dpe_letter: string | null
+      completed_at: string | null
+    }[]
+    for (const m of missions) {
+      const completed = m.completed_at ?? d.completed_at ?? null
+      if (!completed) continue
+      if (m.type.startsWith('dpe_') && (!lastDpeIso || completed > lastDpeIso)) {
+        lastDpeIso = completed
+      }
+      if (m.type.startsWith('amiante_') && (!lastAmianteIso || completed > lastAmianteIso)) {
+        lastAmianteIso = completed
+      }
+    }
+  }
+
+  // 6. Build dossier items (avec dpe_letter de la première mission DPE trouvée)
+  const dossierItems: PropertyDossierItem[] = dossiers.map((d) => {
+    const missions = (d.missions ?? []) as {
+      type: string
+      dpe_letter: string | null
+    }[]
+    const primaryType = missions[0]?.type ?? null
+    const dpeMission = missions.find((m) => m.type.startsWith('dpe_') && m.dpe_letter)
+    return {
+      id: d.id,
+      reference: d.reference,
+      status: d.status,
+      date_iso: d.scheduled_at ?? d.created_at,
+      primary_mission_type: primaryType,
+      dpe_letter: dpeMission?.dpe_letter ?? null,
+      total_cents: null,
+    }
+  })
+
+  // 7. Photos pour la galerie (signature URL TODO — V1 utilise storage_path direct si pas de signed url helper)
+  const galleryPhotos: PropertyPhoto[] = photoRows.map((p) => ({
+    id: p.id,
+    thumb_url: p.thumb_path ?? p.storage_path ?? null,
+    caption: p.caption,
+  }))
+
+  // 8. Specs essential + technical
+  const essential: PropertyEssentialSpecs = {
+    surface_total: property.surface_total,
+    surface_carrez: property.surface_carrez,
+    rooms_count: property.rooms_count,
+    floor_number: property.floor_number,
+    heating_type: property.heating_type,
+    year_built: property.year_built,
+    last_dpe_iso: lastDpeIso,
+    last_amiante_iso: lastAmianteIso,
+  }
+
+  const technical: PropertyTechnicalSpecs = {
+    cadastre_prefix: property.cadastre_prefix,
+    cadastre_section: property.cadastre_section,
+    cadastre_number: property.cadastre_number,
+    permis_construire: null, // V1 : pas en DB
+    zone_abf: null, // V1 : pas en DB
+    insee_code: property.insee_code,
+  }
+
+  // 9. Contexte local (V1 mock — APIs publiques DVF/INSEE/ADEME à câbler ultérieurement)
+  const contexte: PropertyContexteLocalData = {
+    dvfMedianEurM2: null,
+    inseeMainResidencePct: null,
+    ademeDpeCount: null,
+    inseeCode: property.insee_code,
+    postalCode: property.postal_code,
+    city: property.city,
+  }
+
+  // 10. Adresse mise en forme
+  const addressParts = formatPropertyAddress({
+    address: property.address,
+    postal_code: property.postal_code,
+    city: property.city,
+    apartment_detail: property.apartment_detail,
+    floor_number: property.floor_number,
+    building_letter: property.building_letter,
+    lot_number: property.lot_number,
+  })
 
   return (
-    <div className="max-w-3xl space-y-6 animate-fade-in">
-      <Button variant="ghost" size="sm" asChild>
-        <Link href="/dashboard/properties">
-          <ArrowLeft className="size-4" /> Retour aux biens
-        </Link>
-      </Button>
+    <>
+      {/* Context bar sticky 56px */}
+      <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 mb-6 flex h-14 items-center justify-between gap-3 border-b border-rule/40 bg-sage/85 px-4 sm:px-6 backdrop-blur-md">
+        <div className="flex items-center gap-3 min-w-0">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/dashboard/properties" aria-label="Retour aux biens">
+              <ArrowLeft className="size-4" />
+            </Link>
+          </Button>
+          <span className="font-sans text-[14px] font-medium text-ink truncate">
+            {property.address}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <PropertyContexteLocalSheet data={contexte} />
+          <Button variant="ghost" size="sm" asChild aria-label="Modifier le bien">
+            <Link href={`/dashboard/properties/${property.id}/edit`}>
+              <Pencil className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
 
-      <AppPageHeader
-        title="Bien"
-        accent={property.address}
-        eyebrow={
-          [
-            [property.postal_code, property.city].filter(Boolean).join(' '),
-            property.surface_total ? `${property.surface_total} m²` : null,
-            property.year_built ? `${property.year_built}` : null,
-          ]
-            .filter(Boolean)
-            .join(' · ') || undefined
-        }
-        action={
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" asChild>
-              <Link href={`/dashboard/properties/${property.id}/edit`}>
-                <Pencil className="size-4" /> Modifier
-              </Link>
-            </Button>
-            <Button variant="accent" asChild>
-              <Link href={`/dashboard/dossiers/new?propertyId=${property.id}`}>
-                <Plus className="size-4" /> Nouveau dossier
-              </Link>
-            </Button>
-          </div>
-        }
-      />
-
-      {(aptParts.length > 0 || property.property_type) && (
-        <Card
-          variant="opaque"
-          padding="default"
-          className="flex flex-wrap items-center gap-3 text-[13px]"
+      {/* Barre propriétaire (si rattaché) */}
+      {owner ? (
+        <Link
+          href={`/dashboard/clients/${owner.id}`}
+          className="mb-6 -mx-4 sm:-mx-6 flex items-center justify-between gap-3 border-b border-rule/40 bg-sage/50 px-4 sm:px-6 py-3 hover:bg-foreground/5"
+          aria-label={`Voir le propriétaire ${owner.display_name}`}
         >
-          {aptParts.length > 0 ? (
-            <span className="font-medium text-ink">{aptParts.join(' · ')}</span>
-          ) : null}
-          {property.property_type ? (
-            <Badge variant="muted">
-              {TYPE_LABELS[property.property_type] ?? property.property_type}
-            </Badge>
-          ) : null}
-        </Card>
-      )}
-
-      {/* PROPRIÉTAIRE ACTUEL — transfert possible vers un autre client
-          (un logement peut changer de propriétaire, un propriétaire peut avoir
-          plusieurs logements) */}
-      <Card variant="opaque" padding="default">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <User className="size-4 text-ink-mute" /> Propriétaire actuel
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <OwnerTransfer
-            propertyId={property.id}
-            currentOwner={currentOwner}
-            clients={clients ?? []}
-          />
-        </CardContent>
-      </Card>
-
-      <Card variant="opaque" padding="default">
-        <CardHeader>
-          <CardTitle className="text-base">Caractéristiques</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-          <Field label="Année" value={property.year_built?.toString()} />
-          <Field
-            label="Surface"
-            value={property.surface_total ? `${property.surface_total} m²` : null}
-          />
-          <Field
-            label="Carrez"
-            value={property.surface_carrez ? `${property.surface_carrez} m²` : null}
-          />
-          <Field
-            label="Boutin"
-            value={property.surface_boutin ? `${property.surface_boutin} m²` : null}
-          />
-          <Field label="Pièces" value={property.rooms_count?.toString()} />
-          <Field label="Étages" value={property.floors?.toString()} />
-        </CardContent>
-      </Card>
-
-      {property.notes ? (
-        <Card variant="opaque" padding="default">
-          <CardHeader>
-            <CardTitle className="text-base">Notes</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm whitespace-pre-wrap">{property.notes}</CardContent>
-        </Card>
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
+              Propriétaire
+            </span>
+            <span className="text-[13px] font-medium text-ink truncate">{owner.display_name}</span>
+            {owner.phone ? (
+              <span className="font-mono text-[12px] text-ink-mute hidden sm:inline">
+                · {owner.phone}
+              </span>
+            ) : null}
+          </div>
+          <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink shrink-0">
+            →
+          </span>
+        </Link>
       ) : null}
 
-      <DangerZone entityLabel="bien" onDelete={softDeletePropertyAction.bind(null, property.id)} />
-    </div>
-  )
-}
+      <div className="space-y-10 animate-fade-in pb-24">
+        <PropertyIdentitySection
+          property={{
+            id: property.id,
+            address: addressParts.primary,
+            city: property.city,
+            postal_code: property.postal_code,
+            property_type: property.property_type,
+            year_built: property.year_built,
+            apartmentLine: addressParts.apartmentLine,
+          }}
+        />
 
-function Field({ label, value }: { label: string; value: string | null | undefined }) {
-  return (
-    <div>
-      <div className="text-[11px] text-ink-mute">{label}</div>
-      <div className="font-medium text-ink">{value ?? '—'}</div>
-    </div>
+        <PropertyCaracteristiquesSection essential={essential} technical={technical} />
+
+        <PropertyDossiersSection dossiers={dossierItems} ademeDpeCount={0} />
+
+        <PropertyGallerieSection photos={galleryPhotos} />
+      </div>
+
+      <PropertyFab propertyId={property.id} />
+    </>
   )
 }

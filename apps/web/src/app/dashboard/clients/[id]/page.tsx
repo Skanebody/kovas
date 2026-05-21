@@ -1,45 +1,35 @@
-import { AppPageHeader } from '@/components/app-page-header'
-import { DangerZone } from '@/components/danger-zone'
-import { DocumentScanButton } from '@/components/documents'
+import { ClientBiensSection } from '@/components/client/v5simp/ClientBiensSection'
+import type { ClientBien } from '@/components/client/v5simp/ClientBiensSection'
+import { ClientDossiersSection } from '@/components/client/v5simp/ClientDossiersSection'
+import type { ClientDossier } from '@/components/client/v5simp/ClientDossiersSection'
+import { ClientFab } from '@/components/client/v5simp/ClientFab'
+import { ClientHistoriqueSection } from '@/components/client/v5simp/ClientHistoriqueSection'
+import type { ClientHistoryEvent } from '@/components/client/v5simp/ClientHistoriqueSection'
+import { ClientIdentitySection } from '@/components/client/v5simp/ClientIdentitySection'
+import { type ClientStats, ClientStatsSheet } from '@/components/client/v5simp/ClientStatsSheet'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { formatFullAddress } from '@/lib/format-address'
-import { isBusinessClientType } from '@/lib/validation/client'
-import {
-  ArrowLeft,
-  Building2,
-  Download,
-  Home,
-  Mail,
-  MapPin,
-  Pencil,
-  Phone,
-  Plus,
-} from 'lucide-react'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { deleteClientAction } from '../actions'
 
 export const metadata: Metadata = { title: 'Détail client' }
 
-const TYPE_LABELS: Record<string, string> = {
-  particulier: 'Particulier',
-  agence: 'Agence',
-  notaire: 'Notaire',
-  syndic: 'Syndic',
-  entreprise: 'Entreprise',
-  collectivite: 'Collectivité',
-}
+const HISTORY_MAX = 10
 
-export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ClientDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const { id } = await params
   const { supabase, orgId } = await getCurrentUser()
 
+  // 1. Client de base
   const { data: client } = await supabase
     .from('clients')
-    .select('*')
+    .select('id, display_name, type, city, email, phone')
     .eq('id', id)
     .eq('organization_id', orgId)
     .is('deleted_at', null)
@@ -47,211 +37,157 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   if (!client) notFound()
 
-  // Count dossiers historiques pour badge "Fidèle" (wireframe v4 §6.1)
-  // Mission n'a pas de client_id direct — relation via dossier
-  const [{ count: dossiersCount }, { data: ownedProperties }] = await Promise.all([
-    supabase
-      .from('dossiers')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .is('deleted_at', null)
-      .eq('client_id', id),
-    // Logements actuellement détenus par ce client (propriétaire)
-    // CLAUDE.md §3 — un propriétaire peut avoir plusieurs logements
-    supabase
-      .from('properties')
-      .select('id, address, postal_code, city, year_built, surface_total, property_type')
-      .eq('organization_id', orgId)
-      .is('deleted_at', null)
-      .eq('client_id', id)
-      .order('created_at', { ascending: false }),
-  ])
+  // 2. Biens rattachés (client_id direct sur properties)
+  const { data: propertiesRows } = await supabase
+    .from('properties')
+    .select('id, address, city, postal_code, property_type, surface_total')
+    .eq('organization_id', orgId)
+    .eq('client_id', id)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
 
-  const missionsCount = dossiersCount ?? 0
-  const fidele = missionsCount >= 5
+  const propertyIds = (propertiesRows ?? []).map((p) => p.id)
 
-  const addressLines = formatFullAddress(client)
-  const personName = [client.first_name, client.last_name].filter(Boolean).join(' ')
-  const business = isBusinessClientType(client.type)
-  const typeLabel = TYPE_LABELS[client.type] ?? client.type
+  // 3. Dossiers liés au client (via client_id OU via property_id du client)
+  const { data: dossierRows } = await supabase
+    .from('dossiers')
+    .select(
+      'id, reference, status, scheduled_at, created_at, client_id, property_id, properties(address, city), missions(type)',
+    )
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .or(
+      propertyIds.length > 0
+        ? `client_id.eq.${id},property_id.in.(${propertyIds.join(',')})`
+        : `client_id.eq.${id}`,
+    )
+    .order('created_at', { ascending: false })
+    .limit(200)
+
+  const dossiers = dossierRows ?? []
+  const dossiersCount = dossiers.length
+
+  // 4. Compte dossiers par bien (pour cards Biens)
+  const dossiersByProperty = new Map<string, number>()
+  for (const d of dossiers) {
+    if (!d.property_id) continue
+    dossiersByProperty.set(d.property_id, (dossiersByProperty.get(d.property_id) ?? 0) + 1)
+  }
+
+  const biens: ClientBien[] = (propertiesRows ?? []).map((p) => ({
+    id: p.id,
+    address: p.address,
+    city: p.city,
+    postal_code: p.postal_code,
+    property_type: p.property_type,
+    surface_total: p.surface_total,
+    dossiers_count: dossiersByProperty.get(p.id) ?? 0,
+  }))
+
+  // 5. Factures client (somme amount_ttc → centimes) pour le BottomSheet stats
+  const { data: invoiceRows } = await supabase
+    .from('invoices')
+    .select('amount_ttc')
+    .eq('organization_id', orgId)
+    .eq('client_id', id)
+
+  const caTotalCents = Math.round(
+    (invoiceRows ?? []).reduce((sum, r) => sum + Number(r.amount_ttc ?? 0), 0) * 100,
+  )
+
+  // 6. Dossiers list (côté section dossiers) — enrichi avec type principal + montant
+  const dossierItems: ClientDossier[] = dossiers.map((d) => {
+    const prop = Array.isArray(d.properties) ? d.properties[0] : d.properties
+    const missions = (d.missions ?? []) as { type: string }[]
+    return {
+      id: d.id,
+      reference: d.reference,
+      scheduled_at: d.scheduled_at,
+      created_at: d.created_at,
+      status: d.status,
+      property_address: prop?.address ?? null,
+      property_city: prop?.city ?? null,
+      total_cents: null,
+      primary_mission_type: missions[0]?.type ?? null,
+    }
+  })
+
+  // 7. Historique : dossiers créés + (V1) on n'a pas encore d'events table dédiée → on
+  //    dérive les N derniers événements depuis les dossiers + factures.
+  const historyEvents: ClientHistoryEvent[] = []
+  for (const d of dossiers) {
+    historyEvents.push({
+      id: `dossier:${d.id}:created`,
+      dateIso: d.created_at,
+      kind: 'dossier_created',
+      summary: `Dossier ${d.reference} créé`,
+      href: `/dashboard/dossiers/${d.id}`,
+    })
+  }
+  // V1 : factures non listées dans l'historique (champs requis non sélectionnés).
+  // À enrichir lorsqu'une table d'events dédiée existera.
+  historyEvents.sort((a, b) => b.dateIso.localeCompare(a.dateIso))
+  const historyLimited = historyEvents.slice(0, HISTORY_MAX)
+
+  const firstDossierIso = dossiers.length > 0 ? dossiers[dossiers.length - 1].created_at : null
+  const lastDossierIso = dossiers.length > 0 ? dossiers[0].created_at : null
+
+  const stats: ClientStats = {
+    caTotalCents,
+    dossiersCount,
+    fideliteScore: dossiersCount,
+    lastContactIso: lastDossierIso,
+    firstContactIso: firstDossierIso,
+    biensCount: biens.length,
+  }
+
+  const fidele = dossiersCount >= 5
 
   return (
-    <div className="max-w-3xl space-y-6 animate-fade-in">
-      <Button variant="ghost" size="sm" asChild>
-        <Link href="/dashboard/clients">
-          <ArrowLeft className="size-4" /> Retour aux clients
-        </Link>
-      </Button>
-
-      <AppPageHeader
-        title="Client"
-        accent={client.display_name}
-        eyebrow={`${typeLabel}${missionsCount ? ` · ${missionsCount} dossier${missionsCount > 1 ? 's' : ''}` : ''}`}
-        action={
-          <div className="flex items-center gap-2">
-            {fidele && (
-              <span className="inline-flex items-center gap-1 rounded-pill bg-accent-warm-soft text-accent-warm px-3 py-1 text-xs font-semibold uppercase tracking-wider">
-                Fidèle
-              </span>
-            )}
-            {missionsCount > 0 ? (
-              <Button variant="outline" asChild>
-                <a
-                  href={`/api/clients/${client.id}/export.zip`}
-                  download
-                  aria-label="Exporter tout le fichier client en ZIP"
-                >
-                  <Download className="size-4" /> Exporter tout (.zip)
-                </a>
-              </Button>
-            ) : null}
-            <Button variant="outline" asChild>
-              <Link href={`/dashboard/clients/${client.id}/edit`}>
-                <Pencil className="size-4" /> Modifier
-              </Link>
-            </Button>
-            <DocumentScanButton placement="client_page" variant="secondary" />
-          </div>
-        }
-      />
-
-      {(personName || client.company_name) && (
-        <Card variant="opaque" padding="default">
-          <CardHeader>
-            <CardTitle className="text-base">Identité</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            {personName ? (
-              <p>
-                <span className="text-ink-mute">Contact : </span>
-                {personName}
-              </p>
-            ) : null}
-            {client.company_name ? (
-              <p className="flex items-center gap-2">
-                <Building2 className="size-4 text-ink-mute shrink-0" />
-                {client.company_name}
-              </p>
-            ) : null}
-            {business && client.siret ? (
-              <p>
-                <span className="text-ink-mute">SIRET : </span>
-                {client.siret}
-              </p>
-            ) : null}
-          </CardContent>
-        </Card>
-      )}
-
-      <Card variant="opaque" padding="default">
-        <CardHeader>
-          <CardTitle className="text-base">Coordonnées</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          {client.email ? (
-            <div className="flex items-center gap-2">
-              <Mail className="size-4 text-ink-mute shrink-0" />
-              <a href={`mailto:${client.email}`} className="hover:underline">
-                {client.email}
-              </a>
-            </div>
-          ) : null}
-          {client.phone ? (
-            <div className="flex items-center gap-2">
-              <Phone className="size-4 text-ink-mute shrink-0" />
-              <a href={`tel:${client.phone}`} className="hover:underline">
-                {client.phone}
-              </a>
-            </div>
-          ) : null}
-          {!client.email && !client.phone && (
-            <p className="text-ink-mute">Aucun email ni téléphone renseigné</p>
-          )}
-        </CardContent>
-      </Card>
-
-      {addressLines.length > 0 ? (
-        <Card variant="opaque" padding="default">
-          <CardHeader>
-            <CardTitle className="text-base">Adresse cabinet (facturation)</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm">
-            <div className="flex items-start gap-2">
-              <MapPin className="size-4 text-ink-mute shrink-0 mt-0.5" />
-              <div className="space-y-0.5">
-                {addressLines.map((line) => (
-                  <p key={line}>{line}</p>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {/* LOGEMENTS DU PROPRIÉTAIRE — un propriétaire peut avoir plusieurs biens.
-          Le client_id sur properties.client_id reflète le propriétaire actuel ;
-          un transfert (changement de propriétaire) se fait depuis la fiche bien. */}
-      <Card variant="opaque" padding="default">
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Home className="size-4 text-ink-mute" /> Logements détenus
-            <span className="text-xs font-normal text-ink-mute">
-              ({ownedProperties?.length ?? 0})
-            </span>
-          </CardTitle>
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/properties/new?clientId=${id}`}>
-              <Plus className="size-4" /> Ajouter un logement
+    <>
+      {/* Context bar sticky 56px */}
+      <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 mb-6 flex h-14 items-center justify-between gap-3 border-b border-rule/40 bg-sage/85 px-4 sm:px-6 backdrop-blur-md">
+        <div className="flex items-center gap-3 min-w-0">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/dashboard/clients" aria-label="Retour aux clients">
+              <ArrowLeft className="size-4" />
             </Link>
           </Button>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {!ownedProperties || ownedProperties.length === 0 ? (
-            <p className="text-sm text-ink-mute italic">
-              Aucun logement rattaché. Cliquez « Ajouter un logement » pour en créer un — ou
-              transférez un bien existant depuis la fiche du logement.
-            </p>
-          ) : (
-            <ul className="divide-y divide-rule/60">
-              {ownedProperties.map((p) => {
-                const address = [p.address, p.postal_code, p.city].filter(Boolean).join(', ')
-                return (
-                  <li key={p.id} className="py-2.5 first:pt-0 last:pb-0">
-                    <Link href={`/dashboard/properties/${p.id}`} className="flex items-start gap-3 group">
-                      <MapPin className="size-4 mt-0.5 text-ink-mute shrink-0" />
-                      <div className="flex-1 min-w-0 space-y-0.5">
-                        <p className="text-sm font-medium text-ink group-hover:underline truncate">
-                          {address || 'Adresse non renseignée'}
-                        </p>
-                        <p className="text-[11px] text-ink-mute">
-                          {[
-                            p.property_type,
-                            p.year_built ? `${p.year_built}` : null,
-                            p.surface_total ? `${p.surface_total} m²` : null,
-                          ]
-                            .filter(Boolean)
-                            .join(' · ')}
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+          <span className="font-sans text-[14px] font-medium text-ink truncate">
+            {client.display_name}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <ClientStatsSheet stats={stats} />
+          <Button variant="ghost" size="sm" asChild aria-label="Modifier le client">
+            <Link href={`/dashboard/clients/${client.id}/edit`}>
+              <Pencil className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
 
-      {client.notes ? (
-        <Card variant="opaque" padding="default">
-          <CardHeader>
-            <CardTitle className="text-base">Notes internes</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm whitespace-pre-wrap">{client.notes}</CardContent>
-        </Card>
-      ) : null}
+      <div className="space-y-10 animate-fade-in pb-24">
+        <ClientIdentitySection
+          client={{
+            id: client.id,
+            display_name: client.display_name,
+            type: client.type,
+            city: client.city,
+            email: client.email,
+            phone: client.phone,
+          }}
+          fidele={fidele}
+        />
 
-      <DangerZone entityLabel="client" onDelete={deleteClientAction.bind(null, client.id)} />
-    </div>
+        <ClientBiensSection clientId={client.id} biens={biens} />
+
+        <ClientDossiersSection dossiers={dossierItems} />
+
+        <ClientHistoriqueSection events={historyLimited} />
+      </div>
+
+      <ClientFab clientId={client.id} />
+    </>
   )
 }

@@ -1,33 +1,29 @@
-import { AppListToolbar } from '@/components/app-list-toolbar'
-import { parseListSearchParams } from '@/components/app-list-toolbar-utils'
 import { AppPageHeader } from '@/components/app-page-header'
-import { QuoteListRow, type QuoteRow } from '@/components/quotes/QuoteListRow'
 import {
-  AppListTable,
-  AppListTableHead,
-} from '@/components/ui/app-list-table'
+  DevisUrgencySection,
+  type DevisUrgencyRow,
+} from '@/components/devis/DevisUrgencySection'
 import { Button } from '@/components/ui/button'
-import { EmptyState } from '@/components/ui/empty-state'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { FileText, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Devis' }
+export const dynamic = 'force-dynamic'
 
-const STATUS_FILTER_OPTIONS = [
-  { value: 'draft', label: 'Brouillon' },
-  { value: 'sent', label: 'Envoyé' },
-  { value: 'accepted', label: 'Accepté' },
-  { value: 'refused', label: 'Refusé' },
-  { value: 'expired', label: 'Expiré' },
-]
-
-const PAGE_SIZE = 25
-
-interface QuotesPageProps {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}
+/**
+ * Page Devis refondue 2026-05-22 — focus URGENCE (3 sections empilées).
+ *
+ * Architecture :
+ *   1. Section "À envoyer" (brouillons + reprogrammation) — actions chartreuse
+ *   2. Section "En attente de signature" (envoyés sans réponse) — relancer
+ *   3. Section "Refusés ou expirés" (à archiver) — action ghost
+ *
+ * Les devis acceptés disparaissent (deviennent missions / factures). Pas de
+ * vue "Tous les devis" en défaut : on focalise l'attention sur l'action.
+ * Recherche : Cmd+K (palette globale).
+ */
 
 interface QuoteDbRow {
   id: string
@@ -36,81 +32,82 @@ interface QuoteDbRow {
   amount_ttc: number
   issued_at: string | null
   expires_at: string | null
-  client_id: string
-  client_snapshot: { displayName?: string } | null
-  clients: { display_name: string | null } | null
+  client_id: string | null
+  client_snapshot: { displayName?: string; city?: string | null } | null
+  clients: { display_name: string | null; city: string | null } | null
 }
 
-export default async function QuotesPage({ searchParams }: QuotesPageProps) {
-  const sp = await searchParams
-  const parsed = parseListSearchParams(sp, {
-    pageSize: PAGE_SIZE,
-    filterKeys: ['status'] as const,
-  })
-  const statusFilterRaw = parsed.filters.status
-  const statusFilter = Array.isArray(statusFilterRaw) ? statusFilterRaw[0] : statusFilterRaw
+function formatDateShort(iso: string | null): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+  }).format(d)
+}
 
+function toRow(q: QuoteDbRow): DevisUrgencyRow {
+  const displayName =
+    q.clients?.display_name ?? q.client_snapshot?.displayName ?? 'Client retiré'
+  const city = q.clients?.city ?? q.client_snapshot?.city ?? null
+  const referenceDate = q.issued_at ?? q.expires_at ?? null
+  return {
+    id: q.id,
+    dateShort: formatDateShort(referenceDate),
+    clientName: displayName,
+    clientCity: city,
+    amountTtcEur: Number(q.amount_ttc),
+    reference: q.reference,
+  }
+}
+
+export default async function QuotesPage() {
   const { supabase, orgId } = await getCurrentUser()
 
-  let query = supabase
-    .from('quotes')
-    .select(
-      'id, reference, status, amount_ttc, issued_at, expires_at, client_id, client_snapshot, clients(display_name)',
-      { count: 'exact' },
-    )
-    .eq('organization_id', orgId)
-    .is('deleted_at', null)
+  // 3 requêtes parallèles : draft (à envoyer), sent (en attente), refused/expired.
+  // Limites larges (50) — les sections urgence sont des listes courtes par nature.
+  const baseSelect =
+    'id, reference, status, amount_ttc, issued_at, expires_at, client_id, client_snapshot, clients(display_name, city)'
 
-  if (statusFilter && STATUS_FILTER_OPTIONS.some((o) => o.value === statusFilter)) {
-    query = query.eq('status', statusFilter)
-  }
+  const [draftQ, sentQ, refusedQ] = await Promise.all([
+    supabase
+      .from('quotes')
+      .select(baseSelect)
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .eq('status', 'draft')
+      .order('created_at', { ascending: false })
+      .limit(50),
+    supabase
+      .from('quotes')
+      .select(baseSelect)
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .eq('status', 'sent')
+      .order('created_at', { ascending: false })
+      .limit(50),
+    supabase
+      .from('quotes')
+      .select(baseSelect)
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .in('status', ['refused', 'expired'])
+      .order('created_at', { ascending: false })
+      .limit(50),
+  ])
 
-  if (parsed.q) {
-    const escaped = parsed.q.replace(/[%,]/g, ' ').trim()
-    if (escaped.length > 0) {
-      const pattern = `%${escaped}%`
-      query = query.ilike('reference', pattern)
-    }
-  }
-
-  const { data, count } = await query
-    .order('created_at', { ascending: false })
-    .range(parsed.offset, parsed.offset + PAGE_SIZE - 1)
-
-  const quotes = ((data ?? []) as unknown as QuoteDbRow[]).map<QuoteRow>((q) => ({
-    id: q.id,
-    reference: q.reference,
-    status: q.status,
-    amount_ttc: Number(q.amount_ttc),
-    issued_at: q.issued_at,
-    expires_at: q.expires_at,
-    client_display_name:
-      q.clients?.display_name ?? q.client_snapshot?.displayName ?? 'Client retiré',
-  }))
-
-  const totalCount = count ?? 0
+  const toSend = ((draftQ.data ?? []) as unknown as QuoteDbRow[]).map(toRow)
+  const pendingSignature = ((sentQ.data ?? []) as unknown as QuoteDbRow[]).map(toRow)
+  const refusedExpired = ((refusedQ.data ?? []) as unknown as QuoteDbRow[]).map(toRow)
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       <AppPageHeader
         title="Vos"
         accent="devis"
-        description="Brouillons, envoyés, acceptés — toute la facturation amont au même endroit."
-      />
-
-      <AppListToolbar
-        searchPlaceholder="Rechercher une référence (DEV-2026-…)…"
-        totalCount={totalCount}
-        currentPage={parsed.page}
-        pageSize={PAGE_SIZE}
-        filters={[
-          {
-            key: 'status',
-            label: 'Tous les statuts',
-            options: STATUS_FILTER_OPTIONS,
-          },
-        ]}
-        primaryAction={
+        description="Trois sections par ordre d'urgence — à envoyer, en attente, à archiver."
+        action={
           <Button asChild variant="accent">
             <Link href="/dashboard/devis/nouveau">
               <Plus className="size-4" />
@@ -120,46 +117,9 @@ export default async function QuotesPage({ searchParams }: QuotesPageProps) {
         }
       />
 
-      {quotes.length > 0 ? (
-        <AppListTable>
-          <AppListTableHead>
-            <tr>
-              <th className="text-left font-medium px-4 py-3">Référence</th>
-              <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Statut</th>
-              <th className="text-left font-medium px-4 py-3">Client</th>
-              <th className="text-left font-medium px-4 py-3 hidden md:table-cell">
-                Date d&apos;émission
-              </th>
-              <th className="text-right font-medium px-4 py-3">Montant TTC</th>
-            </tr>
-          </AppListTableHead>
-          <tbody>
-            {quotes.map((q) => (
-              <QuoteListRow key={q.id} row={q} />
-            ))}
-          </tbody>
-        </AppListTable>
-      ) : parsed.q || statusFilter ? (
-        <EmptyState
-          icon={FileText}
-          title="Aucun devis ne correspond à cette recherche."
-          description="Affinez les filtres ou videz la recherche pour retrouver vos devis."
-        />
-      ) : (
-        <EmptyState
-          icon={FileText}
-          title="Aucun devis encore."
-          description="Créez votre premier devis pour démarrer la mission avec un cadre tarifaire clair pour le client."
-          action={
-            <Button asChild variant="accent">
-              <Link href="/dashboard/devis/nouveau">
-                <Plus className="size-4" />
-                Créer un devis
-              </Link>
-            </Button>
-          }
-        />
-      )}
+      <DevisUrgencySection kind="to_send" rows={toSend} />
+      <DevisUrgencySection kind="pending_signature" rows={pendingSignature} />
+      <DevisUrgencySection kind="refused_expired" rows={refusedExpired} />
     </div>
   )
 }

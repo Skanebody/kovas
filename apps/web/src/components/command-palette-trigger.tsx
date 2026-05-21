@@ -1,38 +1,30 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { useCommandPaletteStore } from '@/lib/cmdk/use-command-palette'
 import { Search } from 'lucide-react'
 
 /**
  * Trigger discret pour le command palette dans le header.
- * Affiche le raccourci ⌘K (Mac) ou Ctrl+K (autres).
- * Le component palette lui-même écoute le raccourci global — ce bouton est
- * juste un fallback visuel pour signaler que la palette existe.
+ * Ouvre la palette via le store global Zustand (pas via simulation
+ * d'événement clavier, qui est fragile).
+ *
+ * Affiche le raccourci ⌘K (Mac) ou Ctrl+K (autres) en hint visuel.
  */
 export function CommandPaletteTrigger() {
+  const setOpen = useCommandPaletteStore((s) => s.setOpen)
   return (
     <Button
       variant="glass"
       size="sm"
       aria-label="Recherche rapide (⌘K)"
-      onClick={() => {
-        // Simule un Cmd+K en dispatchant un keyboardEvent
-        const isMac =
-          typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
-        document.dispatchEvent(
-          new KeyboardEvent('keydown', {
-            key: 'k',
-            metaKey: isMac,
-            ctrlKey: !isMac,
-            bubbles: true,
-          }),
-        )
-      }}
+      data-cmdk-trigger
+      onClick={() => setOpen(true)}
       className="gap-2 text-ink-mute"
     >
       <Search className="size-4" />
       <span className="hidden sm:inline">Recherche…</span>
-      <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] bg-cream-deep/50 rounded px-1.5 py-0.5 ml-1">
+      <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] bg-sage rounded-sm px-1.5 py-0.5 ml-1 border border-rule">
         ⌘K
       </kbd>
     </Button>

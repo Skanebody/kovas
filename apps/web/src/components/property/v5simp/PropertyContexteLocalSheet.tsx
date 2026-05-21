@@ -1,0 +1,124 @@
+'use client'
+
+import { BottomSheet } from '@/components/ui/bottom-sheet'
+import { Button } from '@/components/ui/button'
+import { Compass, MapPin } from 'lucide-react'
+import { useState } from 'react'
+
+export interface PropertyContexteLocalData {
+  /** Prix médian DVF €/m² sur la commune (V1 mock) */
+  dvfMedianEurM2: number | null
+  /** Taux d'occupation INSEE (logement principal/résidence secondaire) */
+  inseeMainResidencePct: number | null
+  /** Nombre de DPE déjà déposés sur la commune (ADEME public) */
+  ademeDpeCount: number | null
+  /** Code INSEE commune (pour ouvrir liens externes) */
+  inseeCode: string | null
+  /** Code postal */
+  postalCode: string | null
+  /** Ville */
+  city: string | null
+}
+
+interface Props {
+  data: PropertyContexteLocalData
+}
+
+const pct = (v: number | null) => (v === null ? '—' : `${Math.round(v * 100)} %`)
+const eurM2 = (v: number | null) =>
+  v === null ? '—' : `${new Intl.NumberFormat('fr-FR').format(Math.round(v))} €/m²`
+
+/**
+ * BottomSheet "Contexte local" — DVF + INSEE + ADEME (V1 mock data).
+ */
+export function PropertyContexteLocalSheet({ data }: Props) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => setOpen(true)}
+        aria-label="Voir le contexte local"
+      >
+        <Compass className="size-4" strokeWidth={1.5} />
+        <span className="font-mono text-[10px] uppercase tracking-[0.1em] ml-1.5">
+          Contexte local
+        </span>
+      </Button>
+
+      <BottomSheet
+        open={open}
+        onOpenChange={setOpen}
+        title="Contexte local"
+        description={
+          data.city
+            ? `${data.postalCode ?? ''} ${data.city}`.trim()
+            : 'Indicateurs marché et statistiques publiques'
+        }
+      >
+        <ul className="divide-y divide-rule/40 px-2 pb-4">
+          <Row label="Prix médian DVF" value={eurM2(data.dvfMedianEurM2)} source="DVF" />
+          <Row
+            label="Résidences principales"
+            value={pct(data.inseeMainResidencePct)}
+            source="INSEE"
+          />
+          <Row
+            label="DPE déposés (ADEME)"
+            value={data.ademeDpeCount === null ? '—' : `${data.ademeDpeCount}`}
+            source="ADEME"
+          />
+          {data.inseeCode ? (
+            <li className="flex items-center justify-between py-3">
+              <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+                Code INSEE
+              </span>
+              <span className="font-mono text-[12px] text-ink">{data.inseeCode}</span>
+            </li>
+          ) : null}
+        </ul>
+        <p className="px-2 pb-2 text-[11px] text-ink-mute">
+          Les données proviennent des sources publiques DVF (Demandes de Valeurs Foncières), INSEE
+          et ADEME. Connexion API prévue dans une prochaine version.
+        </p>
+      </BottomSheet>
+    </>
+  )
+}
+
+function Row({ label, value, source }: { label: string; value: string; source: string }) {
+  return (
+    <li className="flex items-center justify-between py-3">
+      <div>
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">{label}</p>
+        <p className="font-mono text-[10px] text-ink-faint">Source : {source}</p>
+      </div>
+      <span className="font-mono text-[14px] font-medium text-ink">{value}</span>
+    </li>
+  )
+}
+
+/** Stub BottomSheet "Voir sur la carte" — placeholder V1 sans rendu OSM. */
+export function PropertyMapSheet({
+  open,
+  onOpenChange,
+  address,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  address: string
+}) {
+  return (
+    <BottomSheet open={open} onOpenChange={onOpenChange} title="Localisation" description={address}>
+      <div className="flex h-[280px] flex-col items-center justify-center gap-3 rounded-lg border border-rule/40 bg-sage/50 mx-2 mb-4">
+        <MapPin className="size-10 text-ink-mute" strokeWidth={1.5} />
+        <p className="text-[12px] text-ink-mute text-center px-6">
+          Carte interactive disponible dans une prochaine version.
+        </p>
+      </div>
+    </BottomSheet>
+  )
+}
