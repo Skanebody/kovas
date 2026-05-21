@@ -73,11 +73,26 @@ export const getUserTrackAccess = cache(async (): Promise<TrackAccessResult> => 
     }
   }
 
-  const { data: rawSubs } = await untyped
+  // La colonne `plan_code` n'existe pas encore dans toutes les DBs (introduite
+  // par la migration Phase B). On essaie d'abord avec ; si le select complet
+  // renvoie [] (colonne manquante = postgrest error silencieuse), on retombe
+  // sur `tier` seul. Sans ce fallback, `rawSubs` reste vide et track='free'
+  // pour les comptes legacy → sidebar quasi-vide.
+  let rawSubs: unknown[] | null = null
+  const subWithPlanCode = await untyped
     .from('subscriptions')
     .select('plan_code, tier, status')
     .eq('organization_id', orgId)
     .eq('status', 'active')
+  rawSubs = subWithPlanCode.data ?? null
+  if (!rawSubs || rawSubs.length === 0) {
+    const subTierOnly = await untyped
+      .from('subscriptions')
+      .select('tier, status')
+      .eq('organization_id', orgId)
+      .eq('status', 'active')
+    rawSubs = subTierOnly.data ?? null
+  }
 
   // Bundles actifs (table `bundle_subscriptions` introduite Phase B).
   // Tolérance erreur si la table n'existe pas encore en dev — return null silencieux.

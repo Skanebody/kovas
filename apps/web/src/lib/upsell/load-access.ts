@@ -96,21 +96,30 @@ export const loadUserAccess = cache(
       }
     }
 
-    const [subRes, addonsRes] = await Promise.all([
-      sb
-        .from('subscriptions')
-        .select('plan_code, tier')
-        .eq('organization_id', orgId)
-        .maybeSingle(),
-      sbAddons
-        .from('user_addons')
-        .select('status, addon_modules!inner(module_code)')
-        .eq('organization_id', orgId)
-        .in('status', ['active', 'trialing']),
-    ])
+    // La colonne `plan_code` n'existe pas encore dans toutes les DBs (introduite
+    // par la migration Phase B). On tente d'abord avec, et si la requête échoue
+    // on retombe sur `tier` seul (legacy). Sans ce fallback, la requête entière
+    // renvoie null → planCode null → sidebar tombe en mode "free".
+    const trySelect = async (columns: string) =>
+      sb.from('subscriptions').select(columns).eq('organization_id', orgId).maybeSingle()
+
+    let subData: SubscriptionRow | null = null
+    const subWithPlanCode = await trySelect('plan_code, tier')
+    if (subWithPlanCode.data) {
+      subData = subWithPlanCode.data
+    } else {
+      const subTierOnly = await trySelect('tier')
+      subData = subTierOnly.data ? ({ tier: subTierOnly.data.tier ?? null, plan_code: null } as SubscriptionRow) : null
+    }
+
+    const addonsRes = await sbAddons
+      .from('user_addons')
+      .select('status, addon_modules!inner(module_code)')
+      .eq('organization_id', orgId)
+      .in('status', ['active', 'trialing'])
 
     const planCode =
-      normalizePlanCode(subRes.data?.plan_code) ?? normalizePlanCode(subRes.data?.tier)
+      normalizePlanCode(subData?.plan_code) ?? normalizePlanCode(subData?.tier)
 
     const activeAddons: AddonCode[] = []
     const activePacks: AddonPackCode[] = []
