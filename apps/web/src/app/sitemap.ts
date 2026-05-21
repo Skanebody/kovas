@@ -8,46 +8,41 @@ import {
 } from '@/lib/seo/sitemap-builders'
 
 /**
- * Sitemap segmenté KOVAS.
+ * Sitemap KOVAS consolidé — un seul `/sitemap.xml` qui agrège tous les segments.
  *
- * Next.js 15 expose un sitemap multi-fichiers via `generateSitemaps()` :
- * - Un index `/sitemap.xml` (auto-généré par Next.js)
- * - N sub-sitemaps `/sitemap/{id}.xml` (un par segment retourné)
+ * Choix V1 : pas de `generateSitemaps()` (qui forcerait des URLs en `/sitemap/[id].xml`
+ * sans index `/sitemap.xml` natif). On retourne tout en un seul fichier, conforme
+ * aux limites Google (50 000 URLs / 50 MB par sitemap).
  *
- * Segments produits :
- *  - `marketing`   : landing / pricing / pour-les-diagnostiqueurs / contact / faq
- *  - `legal`       : CGU / CGV / Confidentialité / Mentions légales / DPA
- *  - `conseils`    : articles SEO publiés (table `seo_publications`)
- *  - `annuaire-N`  : pages diagnostiqueurs + ville + département (paginés par 5000 URLs)
+ * Segments agrégés :
+ *  - marketing   : /, /pricing, /pour-les-diagnostiqueurs, /conseils, /contact, /faq
+ *  - legal       : /cgu, /cgv, /confidentialite, /mentions-legales, /dpa
+ *  - conseils    : articles SEO publiés (table `seo_publications`)
+ *  - annuaire    : pages diagnostiqueurs + ville + département (paginés par 5000 URLs
+ *                  dans les builders, on agrège ici toutes les pages)
  *
- * Revalidation incrémentale : 1h (sitemap regénéré au max toutes les heures).
+ * Revalidation incrémentale : 1h.
  */
 
-/** Revalide le sitemap toutes les 1h (3600s). */
 export const revalidate = 3600
 
-export async function generateSitemaps(): Promise<{ id: string }[]> {
-  const annuaireIds = await generateAnnuaireSitemapIds()
-  return [{ id: 'marketing' }, { id: 'legal' }, { id: 'conseils' }, ...annuaireIds]
-}
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [marketing, legal, conseils, annuaireIds] = await Promise.all([
+    Promise.resolve(buildMarketingSitemap()),
+    Promise.resolve(buildLegalSitemap()),
+    buildConseilsSitemap(),
+    generateAnnuaireSitemapIds(),
+  ])
 
-export default async function sitemap({ id }: { id: string }): Promise<MetadataRoute.Sitemap> {
-  if (id === 'marketing') {
-    return buildMarketingSitemap()
-  }
-  if (id === 'legal') {
-    return buildLegalSitemap()
-  }
-  if (id === 'conseils') {
-    return await buildConseilsSitemap()
-  }
-  if (id.startsWith('annuaire-')) {
-    const indexStr = id.slice('annuaire-'.length)
-    const index = Number.parseInt(indexStr, 10)
-    if (Number.isNaN(index) || index < 0) {
-      return []
-    }
-    return await buildAnnuaireSitemapPage(index)
-  }
-  return []
+  const annuairePages = await Promise.all(
+    annuaireIds.map((s) => {
+      const indexStr = s.id.replace(/^annuaire-/, '')
+      const index = Number.parseInt(indexStr, 10)
+      return Number.isNaN(index) ? Promise.resolve([] as MetadataRoute.Sitemap) : buildAnnuaireSitemapPage(index)
+    }),
+  )
+
+  const annuaire = annuairePages.flat()
+
+  return [...marketing, ...legal, ...conseils, ...annuaire]
 }
