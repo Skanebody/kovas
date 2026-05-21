@@ -1,19 +1,29 @@
 'use client'
 
-import { PRICING_PLANS } from '@/lib/pricing-plans'
+// Type B2 dependency — pricing-plans.ts refonte by parallel agent
+import { LOGICIEL_PLANS, type LogicielPlan } from '@/lib/pricing-plans'
 import { useMemo, useState } from 'react'
 
 interface RoiCalculatorProps {
   billing: 'monthly' | 'annual'
 }
 
-/** Référentiel local synchronisé avec PRICING_PLANS. */
-const PLAN_PARAMS = PRICING_PLANS.map((p) => ({
+interface PlanParam {
+  code: string
+  label: string
+  monthly: number
+  annual: number
+  fairUseCap: number
+}
+
+const PLAN_PARAMS: readonly PlanParam[] = LOGICIEL_PLANS.filter(
+  (p) => p.code !== 'logiciel_free',
+).map((p: LogicielPlan) => ({
   code: p.code,
   label: p.name,
-  monthly: p.monthlyPrice,
-  annual: Math.round(p.annualPrice / 12),
-  fairUseCap: p.caps.missions,
+  monthly: Math.round(p.monthlyPrice / 100),
+  annual: Math.round(p.annualPrice / 12 / 100),
+  fairUseCap: p.code === 'logiciel_enterprise' ? 999_999 : p.caps.missions,
 }))
 
 function formatEurosPrecise(amount: number): string {
@@ -25,14 +35,14 @@ function formatRoundedEuros(amount: number): string {
 }
 
 /**
- * Calculateur ROI compact intégré au tier featured (Pack Pro) — refonte P9.
+ * Calculateur ROI compact — adapté V3 dual track (focus track Logiciel KOVAS 360).
  *
- * Modèle all-you-can-eat : on n'a plus de "surplus à l'usage" à calculer.
- * On compare juste le coût par mission du tier Pro à votre volume.
+ * L'utilisateur saisit son volume mensuel de missions. On compare au tier
+ * `logiciel_active` (recommandé, 59 €/mo) et on suggère le tier optimal selon
+ * son volume (Starter 60 / Active 150 / Cabinet 400 / Enterprise illimité).
  *
- * Si le volume dépasse confortablement le cap fair-use Pro, on suggère All
- * Inclusive ou Cabinet selon le cas. Si le volume est très faible, on suggère
- * Essential ou Découverte.
+ * Pas de surplus à calculer (modèle prix fixe). Le coût par mission diminue
+ * mécaniquement avec le volume.
  */
 export function RoiCalculator({ billing }: RoiCalculatorProps) {
   const [missions, setMissions] = useState(60)
@@ -41,40 +51,49 @@ export function RoiCalculator({ billing }: RoiCalculatorProps) {
     const safeMissions = Number.isFinite(missions) ? Math.max(0, missions) : 0
 
     const feeKey = billing === 'annual' ? 'annual' : 'monthly'
-    const proPlan = PLAN_PARAMS.find((p) => p.code === 'pro')!
-    const proFee = proPlan[feeKey]
-    const perMissionPro = safeMissions > 0 ? proFee / safeMissions : 0
+    const activePlan = PLAN_PARAMS.find((p) => p.code === 'logiciel_active')
+    if (!activePlan) {
+      return {
+        safeMissions,
+        activeFee: 0,
+        perMissionActive: 0,
+        optimal: PLAN_PARAMS[0],
+      }
+    }
+    const activeFee = activePlan[feeKey]
+    const perMissionActive = safeMissions > 0 ? activeFee / safeMissions : 0
 
-    // Tier optimal : plus petit cap qui couvre le volume
     const optimal =
       PLAN_PARAMS.find((p) => safeMissions <= p.fairUseCap) ??
-      PLAN_PARAMS[PLAN_PARAMS.length - 1]!
+      PLAN_PARAMS[PLAN_PARAMS.length - 1]
 
-    return { safeMissions, proFee, perMissionPro, optimal }
+    return { safeMissions, activeFee, perMissionActive, optimal }
   }, [missions, billing])
 
   let detail: string
   if (result.safeMissions === 0) {
     detail = 'Indiquez votre volume mensuel pour voir le calcul.'
+  } else if (result.activeFee === 0) {
+    detail = 'Configuration des plans indisponible.'
   } else {
-    detail = `${formatRoundedEuros(result.proFee)} forfait Pro ÷ ${result.safeMissions} missions = ${formatEurosPrecise(
-      result.perMissionPro,
+    detail = `${formatRoundedEuros(result.activeFee)} forfait Active ÷ ${result.safeMissions} missions = ${formatEurosPrecise(
+      result.perMissionActive,
     )} par mission. Pas de surplus, pas de seconde facture.`
   }
 
   let adviceTitle = ''
   let adviceBody = ''
-  if (result.safeMissions > 0) {
-    if (result.optimal.code === 'pro') {
-      adviceTitle = 'Pack Pro est votre tier.'
+  if (result.safeMissions > 0 && result.optimal) {
+    if (result.optimal.code === 'logiciel_active') {
+      adviceTitle = 'KOVAS 360 Active est votre tier.'
       adviceBody =
-        "Vous êtes dans la zone d'usage confortable du fair-use 200 missions/mois."
+        "Vous êtes dans la zone d'usage confortable du fair-use 150 missions / mois."
     } else if (result.safeMissions < 50) {
       adviceTitle = `À ce volume, regardez ${result.optimal.label}.`
       adviceBody = `${formatRoundedEuros(result.optimal.monthly)} / mois suffisent pour un volume sous ${result.optimal.fairUseCap} missions. On préfère vous le dire.`
     } else {
-      adviceTitle = `Au-delà du cap Pro, regardez ${result.optimal.label}.`
-      adviceBody = `Le cap fair-use Pro est à 200 missions/mois. À ${result.safeMissions}, ${result.optimal.label} (${formatRoundedEuros(result.optimal.monthly)}/mois) est plus tranquille.`
+      adviceTitle = `Au-delà du cap Active, regardez ${result.optimal.label}.`
+      adviceBody = `Le cap fair-use Active est à 150 missions / mois. À ${result.safeMissions}, ${result.optimal.label} (${formatRoundedEuros(result.optimal.monthly)} / mois) est plus tranquille.`
     }
   }
 
@@ -101,8 +120,8 @@ export function RoiCalculator({ billing }: RoiCalculatorProps) {
 
       <div className="pt-4 border-t border-white/15">
         <div className="font-serif italic font-normal text-[48px] leading-[0.95] tracking-[-0.02em] text-chartreuse">
-          {result.safeMissions === 0 ? '—' : formatEurosPrecise(result.perMissionPro)}
-          <span className="font-sans not-italic font-medium text-[16px] text-white/60 ml-1">
+          {result.safeMissions === 0 ? '—' : formatEurosPrecise(result.perMissionActive)}
+          <span className="font-sans not-italic font-medium text-[16px] text-white/72 ml-1">
             par mission, tout compris
           </span>
         </div>

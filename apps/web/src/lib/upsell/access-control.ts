@@ -17,13 +17,32 @@ import {
   type PricingPlanCode,
 } from '@/lib/pricing-plans'
 
-/** Hiérarchie tiers pour comparaisons `>=`. */
+/**
+ * Hiérarchie tiers pour comparaisons `>=`.
+ *
+ * Couvre TOUS les codes plan reconnus (V3 logiciel + legacy E2c + grandfather)
+ * afin de satisfaire `Record<PricingPlanCode, number>` exhaustif. Mapping
+ * grandfather → rank du V3 le plus proche.
+ */
 const PLAN_RANK: Record<PricingPlanCode, number> = {
+  // V3 logiciel
+  logiciel_free: 0,
+  logiciel_starter: 1,
+  logiciel_active: 3,
+  logiciel_cabinet: 5,
+  logiciel_enterprise: 6,
+  // Legacy E2c (display publique)
   essential: 1,
   decouverte: 2,
   pro: 3,
   all_inclusive: 4,
   cabinet: 5,
+  // Grandfather (prix historiques préservés)
+  essential_legacy: 1,
+  decouverte_legacy: 2,
+  pro_legacy: 3,
+  all_inclusive_legacy: 4,
+  cabinet_legacy: 5,
 }
 
 export interface UserAccess {

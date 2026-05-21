@@ -3,59 +3,57 @@
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { AddonPicker } from '@/components/pricing/AddonPicker'
+// Type B2 dependency — pricing-plans.ts refonte by parallel agent
 import {
   ADDON_MODULES,
-  PRICING_PLANS,
-  getAddonByCode,
-  getPlanByCode,
+  LOGICIEL_PLANS,
   type AddonCode,
-  type PricingPlan,
-  type PricingPlanCode,
+  type LogicielPlan,
+  type LogicielPlanCode,
+  getAddon,
+  getLogicielPlan,
 } from '@/lib/pricing-plans'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 /**
- * Page `/pricing/calculator` — constructeur d'offre interactif.
+ * Page `/pricing/calculator` — constructeur d'offre interactif V3.
+ *
+ * Refonte 2026-05-21 : focus track Logiciel KOVAS 360 (5 tiers) + 4 add-ons.
+ * Pour combinaisons Annuaire + Logiciel, l'utilisateur passe par les Bundles
+ * sur `/pricing`. Le calculator reste un explorateur libre pour le track
+ * logiciel.
  *
  * Flow :
- *   1. L'utilisateur choisit son forfait de base (5 mini-cards radio)
- *   2. L'utilisateur sélectionne ses add-ons (modules non inclus dans le plan)
- *   3. Le récap sticky right affiche : plan + modules + total HT / mois
- *   4. CTA "Commencer mon essai 30 jours" → /signup avec params
- *
- * Tous les modules à prix mensuel fixe contribuent au total. Les modules à prix
- * unitaire (signatures, SMS) sont listés pour information mais n'ajoutent rien
- * au total mensuel (consommation à l'usage facturée séparément).
+ *   1. Choix du forfait KOVAS 360 parmi 5 (mini-cards radio)
+ *   2. Sélection des 4 add-ons (toggle)
+ *   3. Récap sticky : plan + modules + total HT / mois
+ *   4. CTA "Démarrer l'essai 14 jours" → /signup avec params
  */
 export default function PricingCalculatorPage() {
-  const defaultPlan =
-    PRICING_PLANS.find((p) => p.featured)?.code ?? PRICING_PLANS[0]?.code ?? 'pro'
+  const defaultPlan: LogicielPlanCode =
+    (LOGICIEL_PLANS.find((p) => p.featured === true)?.code as LogicielPlanCode) ??
+    'logiciel_starter'
 
-  const [planCode, setPlanCode] = useState<PricingPlanCode>(defaultPlan)
+  const [planCode, setPlanCode] = useState<LogicielPlanCode>(defaultPlan)
   const [selectedAddons] = useState<AddonCode[]>([])
 
-  const plan: PricingPlan | undefined = useMemo(() => getPlanByCode(planCode), [planCode])
+  const plan: LogicielPlan | undefined = useMemo(
+    () => getLogicielPlan(planCode),
+    [planCode],
+  )
 
   const monthlyTotal = useMemo(() => {
-    const planPrice = plan?.monthlyPrice ?? 0
-    const addonsPrice = selectedAddons.reduce((sum, code) => {
-      const addon = getAddonByCode(code)
+    const planPriceCents = plan?.monthlyPrice ?? 0
+    const addonsPriceCents = selectedAddons.reduce((sum, code) => {
+      const addon = getAddon(code)
       if (addon === undefined) return sum
-      // Modules unitaires (signature / SMS / rapport) : pas de coût mensuel fixe
-      // (overage facturé séparément à l'usage).
-      if (addon.overageUnit !== null && addon.monthlyPrice === 0) return sum
       return sum + addon.monthlyPrice
     }, 0)
-    return planPrice + addonsPrice
+    return Math.round((planPriceCents + addonsPriceCents) / 100)
   }, [plan, selectedAddons])
 
-  // AddonPicker gère son propre state ; selectedAddons reste en state local
-  // pour le récap sticky et le signupHref.
-
-  // Calculator = exploration libre sans toggle billing ; default monthly pour
-  // signup (l'utilisateur pourra basculer en annuel depuis Stripe Customer Portal).
   const signupHref = `/signup?plan=${planCode}&billing=monthly${
     selectedAddons.length > 0 ? `&addons=${selectedAddons.join(',')}` : ''
   }`
@@ -65,7 +63,6 @@ export default function PricingCalculatorPage() {
       <LandingHeader current="pricing" />
 
       <main className="flex-1">
-        {/* Hero compact */}
         <section className="px-5 sm:px-12 max-w-[1240px] mx-auto text-center pt-16 sm:pt-24 pb-10">
           <p className="font-mono text-[13px] uppercase tracking-[0.18em] text-[#0F1419]/55 font-medium mb-6">
             Constructeur d'offre
@@ -75,13 +72,19 @@ export default function PricingCalculatorPage() {
             <span className="block text-[#0F1419]/35">À l'euro près.</span>
           </h1>
           <p className="text-[16px] sm:text-[18px] text-[#0F1419]/72 max-w-[680px] mx-auto leading-relaxed">
-            Choisissez un forfait, ajoutez les modules dont vous avez vraiment besoin. Total HT
-            mensuel mis à jour en direct, aucune surprise.
+            Choisissez un forfait logiciel, ajoutez les modules dont vous avez vraiment besoin.
+            Pour combiner avec l'Annuaire, voyez les{' '}
+            <Link
+              href="/pricing#bundles"
+              className="border-b border-[#0F1419]/35 hover:border-[#0F1419]"
+            >
+              Bundles
+            </Link>
+            .
           </p>
         </section>
 
         <section className="px-5 sm:px-12 max-w-[1240px] mx-auto pb-20 sm:pb-32 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-10 lg:gap-12 items-start">
-          {/* Colonne principale */}
           <div className="space-y-12">
             <PlanPicker selected={planCode} onSelect={setPlanCode} />
 
@@ -93,17 +96,13 @@ export default function PricingCalculatorPage() {
                 Ajoutez vos modules.
               </h2>
               <p className="text-[14px] text-[#0F1419]/72 mb-6 leading-relaxed">
-                Chaque module activé bénéficie d'un essai 14 jours offert. Les modules déjà
-                inclus dans votre forfait apparaissent en chartreuse — pas besoin de les
-                cocher.
+                Quatre modules indépendants du forfait : signatures eIDAS, Pennylane,
+                SMS rappel, Communauté Pro. Activables à tout moment.
               </p>
               <AddonPicker />
-              {/* state local conservé pour le récap sticky (toggle géré via packs) */}
-              {selectedAddons.length === 0 ? null : null}
             </div>
           </div>
 
-          {/* Récap sticky */}
           <RecapPanel
             plan={plan}
             selectedAddons={selectedAddons}
@@ -125,8 +124,8 @@ function PlanPicker({
   selected,
   onSelect,
 }: {
-  selected: PricingPlanCode
-  onSelect: (code: PricingPlanCode) => void
+  selected: LogicielPlanCode
+  onSelect: (code: LogicielPlanCode) => void
 }) {
   return (
     <div>
@@ -134,17 +133,19 @@ function PlanPicker({
         Étape 1
       </p>
       <h2 className="text-[24px] sm:text-[32px] font-semibold tracking-[-0.02em] mb-6">
-        Choisissez votre forfait.
+        Choisissez votre forfait KOVAS 360.
       </h2>
       <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {PRICING_PLANS.map((plan) => {
+        {LOGICIEL_PLANS.map((plan: LogicielPlan) => {
           const isSelected = plan.code === selected
+          const monthlyEuros = Math.round(plan.monthlyPrice / 100)
           return (
             <li key={plan.code}>
               <button
                 type="button"
-                onClick={() => onSelect(plan.code)}
+                onClick={() => onSelect(plan.code as LogicielPlanCode)}
                 aria-pressed={isSelected}
+                aria-label={`Choisir le forfait ${plan.name}`}
                 className={cn(
                   'w-full h-full text-left rounded-[20px] p-4 border-2 transition-colors duration-150',
                   isSelected
@@ -158,15 +159,15 @@ function PlanPicker({
                     isSelected ? 'text-chartreuse' : 'text-[#0F1419]/55',
                   )}
                 >
-                  {plan.featured ? 'Recommandé' : ' '}
+                  {plan.featured === true ? 'Populaire' : ' '}
                 </p>
                 <p className="text-[14px] font-semibold leading-tight mb-2">{plan.name}</p>
                 <p className="font-serif italic text-[28px] leading-none tracking-[-0.02em]">
-                  {plan.monthlyPrice}
+                  {monthlyEuros}
                   <span
                     className={cn(
                       'font-sans not-italic font-medium text-[11px] ml-1',
-                      isSelected ? 'text-white/60' : 'text-[#0F1419]/55',
+                      isSelected ? 'text-white/72' : 'text-[#0F1419]/55',
                     )}
                   >
                     €
@@ -190,7 +191,7 @@ function RecapPanel({
   monthlyTotal,
   signupHref,
 }: {
-  plan: PricingPlan | undefined
+  plan: LogicielPlan | undefined
   selectedAddons: AddonCode[]
   monthlyTotal: number
   signupHref: string
@@ -199,21 +200,9 @@ function RecapPanel({
     return null
   }
 
-  // Add-on récurrent : monthlyPrice > 0 et pas d'overage à l'unité
   const recurringAddons = selectedAddons
-    .map((c) => getAddonByCode(c))
-    .filter(
-      (a): a is NonNullable<typeof a> =>
-        a !== undefined && !(a.overageUnit !== null && a.monthlyPrice === 0),
-    )
-
-  // Add-on à l'unité : pas de prix mensuel fixe (consommation pure)
-  const unitAddons = selectedAddons
-    .map((c) => getAddonByCode(c))
-    .filter(
-      (a): a is NonNullable<typeof a> =>
-        a !== undefined && a.overageUnit !== null && a.monthlyPrice === 0,
-    )
+    .map((c) => getAddon(c))
+    .filter((a): a is NonNullable<typeof a> => a !== undefined)
 
   return (
     <aside className="bg-white border border-[#0F1419]/[0.08] rounded-[24px] p-6 lg:sticky lg:top-24">
@@ -224,40 +213,27 @@ function RecapPanel({
       <div className="flex items-baseline justify-between gap-3 pb-4 border-b border-[#0F1419]/[0.08]">
         <div>
           <p className="text-[14px] font-semibold text-[#0F1419]">{plan.name}</p>
-          <p className="text-[12px] text-[#0F1419]/55">Forfait de base</p>
+          <p className="text-[12px] text-[#0F1419]/55">Forfait KOVAS 360</p>
         </div>
-        <p className="font-semibold text-[16px] tabular-nums">{plan.monthlyPrice} €</p>
+        <p className="font-semibold text-[16px] tabular-nums">
+          {Math.round(plan.monthlyPrice / 100)} €
+        </p>
       </div>
 
       {recurringAddons.length > 0 && (
         <ul className="py-4 space-y-3 border-b border-[#0F1419]/[0.08]">
           {recurringAddons.map((a) => (
-            <li key={a.code} className="flex items-baseline justify-between gap-3 text-[14px]">
+            <li
+              key={a.code}
+              className="flex items-baseline justify-between gap-3 text-[14px]"
+            >
               <span className="text-[#0F1419]/80 flex-1">{a.name}</span>
-              <span className="font-semibold tabular-nums">{a.monthlyPrice} €</span>
+              <span className="font-semibold tabular-nums">
+                {Math.round(a.monthlyPrice / 100)} €
+              </span>
             </li>
           ))}
         </ul>
-      )}
-
-      {unitAddons.length > 0 && (
-        <div className="pt-4 pb-4 border-b border-[#0F1419]/[0.08]">
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#0F1419]/55 font-semibold mb-2">
-            À l'usage (hors forfait)
-          </p>
-          <ul className="space-y-2">
-            {unitAddons.map((a) => (
-              <li key={a.code} className="flex items-baseline justify-between gap-3 text-[13px]">
-                <span className="text-[#0F1419]/72 flex-1">{a.name}</span>
-                <span className="font-medium text-[#0F1419]/72 tabular-nums">
-                  {a.overagePrice !== null
-                    ? `${(a.overagePrice / 100).toFixed(2).replace('.', ',')} € / ${a.overageUnit}`
-                    : `${(a.monthlyPrice / 100).toFixed(2).replace('.', ',')} €`}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
       )}
 
       <div className="pt-5 flex items-baseline justify-between gap-3">
@@ -271,18 +247,19 @@ function RecapPanel({
 
       <Link
         href={signupHref}
+        aria-label="Démarrer l'essai 14 jours avec la configuration choisie"
         className="mt-6 block w-full text-center py-4 px-5 rounded-[16px] bg-chartreuse text-[#0F1419] font-semibold text-[15px] hover:bg-chartreuse-deep transition-colors"
       >
-        Commencer mon essai 30 jours
+        Démarrer l'essai 14 jours
       </Link>
       <p className="text-center mt-3 text-[11px] text-[#0F1419]/55 leading-snug">
-        CB enregistrée pour continuité sans interruption. Annulable en 3 clics avant J+30.
+        Sans CB. Conversion libre à J14, annulable à tout moment.
       </p>
 
       {ADDON_MODULES.length > 0 && (
         <p className="mt-5 pt-5 border-t border-[#0F1419]/[0.08] text-[12px] text-[#0F1419]/55 leading-snug">
-          Tous les modules optionnels bénéficient d'un essai 14 jours gratuit. Résiliation
-          module-par-module possible à tout moment.
+          Les modules sont activables / désactivables module-par-module depuis Réglages →
+          Modules. Surcharges à l'usage (signatures, SMS) facturées à la consommation.
         </p>
       )}
     </aside>

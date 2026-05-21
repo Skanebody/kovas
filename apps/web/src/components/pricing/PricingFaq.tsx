@@ -1,7 +1,9 @@
 import { Card } from '@/components/ui/card'
 
 /**
- * FAQ tarification — page /pricing.
+ * FAQ tarification — page /pricing (refonte V3 dual track 2026-05-21).
+ *
+ * 5 FAQ dual track ajoutées en tête, suivies des questions historiques.
  * Ton sobre professionnel (avatar : diagnostiqueur 43 ans, cf. docs/avatar-client.md).
  */
 interface FaqEntry {
@@ -11,51 +13,63 @@ interface FaqEntry {
 
 const PRICING_FAQ: readonly FaqEntry[] = [
   {
-    question: 'Quelles différences entre les 5 formules ?',
+    question: 'Quelle différence entre KOVAS Annuaire et KOVAS 360 ?',
     answer:
-      "Les formules diffèrent principalement par le volume mensuel autorisé : jusqu'à 30, 60, 150, 250 ou 400 missions par mois. " +
-      "Les limites de saisie vocale Whisper suivent la même progression (1h, 5h, 10h, 25h, 40h max par mois). " +
-      "Les fonctionnalités cœur (saisie vocale, photos, exports universels, sync iPad/iPhone/Web) sont incluses partout. " +
-      'La formule Cabinet ajoute le multi-utilisateurs (jusqu’à 3).',
+      "KOVAS Annuaire est un service B2C : votre fiche apparaît dans l'annuaire public et reçoit des demandes de particuliers (vendeurs, bailleurs, acheteurs). Vous payez pour la visibilité et les leads. " +
+      "KOVAS 360 est le logiciel SaaS B2B qui vous accompagne sur le terrain : saisie vocale, photos géolocalisées, exports universels, sync iPad/iPhone/Web, conformité ADEME. Vous payez pour la productivité. " +
+      "Les deux produits sont indépendants. Vous pouvez prendre l'un, l'autre, ou les deux ensemble via un Bundle remisé.",
   },
+  {
+    question: 'Puis-je prendre les deux ?',
+    answer:
+      "Oui, et c'est le cas typique pour les diagnostiqueurs qui veulent maximiser visibilité et productivité. Cinq Bundles combinent Annuaire + KOVAS 360 avec une économie de 9 à 19 € / mois par rapport à la souscription séparée. " +
+      "Exemple : Annuaire Pro 19 € + KOVAS 360 Active 59 € séparément = 78 €. En bundle « Active Pro » = 69 €/mo, soit 9 € d'économie chaque mois (108 €/an).",
+  },
+  {
+    question: 'Que se passe-t-il si je suis sur un ancien forfait ?',
+    answer:
+      "Si vous êtes déjà client sur l'ancienne grille (Essential 19 €, Découverte 29 €, Pro 39 €, All Inclusive 99 €, Cabinet 149 €), votre prix actuel est verrouillé à vie. " +
+      "Vous gardez votre tarif tant que votre abonnement reste actif, même quand la grille V3 augmente. Aucune migration forcée. Si vous souhaitez basculer sur la nouvelle grille, nous calculons les économies estimées avant tout changement.",
+  },
+  {
+    question: 'Comment fonctionne le Sponsored Slot ?',
+    answer:
+      "Le Sponsored Slot est un emplacement exclusif en tête des résultats de l'annuaire, par ville. Un seul diagnostiqueur par ville, badge « Recommandé » visible sur fiche, 30 leads premium / mois inclus. " +
+      "Le surcoût mensuel dépend de la population : 9 € (rural < 3 000 hab) à 199 € (métropole > 500 000 hab). Il s'ajoute à l'abonnement Annuaire Sponsorisé (79 €/mo). " +
+      "Réservation par ordre d'arrivée, priorité aux diagnostiqueurs avec un score d'activité ≥ 70. Pas de surenchère cachée.",
+  },
+  {
+    question: 'Puis-je changer de plan en cours d\'abonnement ?',
+    answer:
+      "Oui, sans frais ni engagement. Vous pouvez passer du Starter à Active (ou à Cabinet), upgrader votre Annuaire de Pro à Visibilité, ou basculer vers un Bundle, depuis votre compte. " +
+      "Le prorata est calculé automatiquement par Stripe : vous ne payez que la différence pour le mois en cours. Le downgrade prend effet à la fin du cycle de facturation pour éviter toute interruption de service.",
+  },
+  // ─── FAQ historiques conservées ───
   {
     question: 'Que se passe-t-il si je dépasse mon quota de missions ?',
     answer:
       "Les caps sont en « fair-use » : nous ne vous bloquons pas brutalement. " +
-      "À 80% du quota, vous recevez une notification. À 100%, vous pouvez continuer en mode dégradé léger. " +
-      "Au-delà de 150% sur 2 mois consécutifs, nous vous suggérons la formule supérieure (plus économique pour votre profil).",
-  },
-  {
-    question: 'Puis-je changer de formule à tout moment ?',
-    answer:
-      "Oui, sans frais ni engagement. Vous pouvez passer d’Essential à Pro (ou à Cabinet) en un clic dans votre compte. " +
-      "Le prorata est calculé automatiquement par Stripe : vous ne payez que la différence pour le mois en cours.",
+      "À 80 % du quota, vous recevez une notification. À 100 %, vous pouvez continuer en mode dégradé léger. " +
+      "Au-delà de 150 % sur 2 mois consécutifs, nous vous suggérons la formule supérieure (plus économique pour votre profil).",
   },
   {
     question: 'Y a-t-il un engagement de durée ?',
     answer:
       "Aucun. Toutes les formules sont mensuelles, résiliables à tout moment depuis votre compte. " +
-      "Si vous payez à l’année, vous bénéficiez de 2 mois offerts (10 mois facturés sur 12).",
+      "Si vous payez à l'année, vous bénéficiez de 2 mois offerts (10 mois facturés sur 12).",
   },
   {
-    question: 'Comment fonctionnent les add-ons et les packs ?',
+    question: "L'essai gratuit est-il vraiment sans engagement ?",
     answer:
-      "Les add-ons sont des modules optionnels (signatures eIDAS, rapports bilingues, SMS, Pennylane, Factur-X, etc.) " +
-      "que vous pouvez activer indépendamment, quelle que soit votre formule. " +
-      "Les packs thématiques (Croissance, Cabinet, International) regroupent plusieurs add-ons à tarif réduit.",
-  },
-  {
-    question: 'L’essai gratuit est-il vraiment sans engagement ?',
-    answer:
-      "Oui. 14 jours d’accès complet, sans carte bancaire, sans engagement. " +
-      "À la fin de l’essai, vous choisissez librement votre formule (ou vous ne renouvelez pas — votre compte est gelé 90 jours puis archivé).",
+      "Oui. 14 jours d'accès complet à KOVAS 360, sans carte bancaire, sans engagement. " +
+      "À la fin de l'essai, vous choisissez librement votre formule (ou vous ne renouvelez pas — votre compte est gelé 90 jours puis archivé).",
   },
   {
     question: 'Quel niveau de support est inclus ?',
     answer:
-      "Tous les tiers bénéficient du support par email avec réponse sous 24h ouvrées. " +
-      "À partir de la formule Pro, le support est prioritaire (réponse sous 4h ouvrées). " +
-      "La formule Cabinet inclut un account manager dédié.",
+      "Tous les tiers payants bénéficient du support par email avec réponse sous 24 h ouvrées. " +
+      "À partir du forfait Active (59 €/mo), le support est prioritaire (réponse sous 4 h ouvrées). " +
+      "Les formules Cabinet et Enterprise incluent un account manager dédié.",
   },
 ]
 

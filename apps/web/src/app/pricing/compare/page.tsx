@@ -5,9 +5,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Comparatif des forfaits KOVAS 360',
+  title: 'Comparatif des forfaits KOVAS',
   description:
-    "Tableau comparatif détaillé des fonctionnalités KOVAS 360 pour chacun des 5 forfaits — Essential, Découverte, Pro, All Inclusive, Cabinet.",
+    "Tableau comparatif détaillé KOVAS Annuaire (4 tiers) + KOVAS 360 (5 tiers) + 5 Bundles combinés. Toutes les fonctionnalités comparées ligne par ligne.",
 }
 
 /**
@@ -27,13 +27,13 @@ export default function PricingComparePage() {
             Comparatif détaillé
           </p>
           <h1 className="font-sans font-semibold text-[40px] sm:text-[64px] md:text-[80px] leading-[1.02] tracking-[-0.035em] mb-6">
-            Cinq forfaits.
+            Neuf forfaits.
             <span className="block text-[#0F1419]/35">Une vue d'ensemble.</span>
           </h1>
           <p className="text-[17px] sm:text-[20px] text-[#0F1419]/72 max-w-[760px] mx-auto leading-[1.5]">
-            Toutes les fonctionnalités KOVAS 360 comparées ligne par ligne, du compte Essential au
-            Cabinet illimité. Aucune mention floue : si c'est inclus, c'est coché ; sinon, c'est
-            barré.
+            KOVAS Annuaire (4 tiers) et KOVAS 360 (5 tiers) comparés ligne par ligne. Plus les
+            5 Bundles combinés. Aucune mention floue : si c'est inclus, c'est coché ; sinon,
+            c'est barré.
           </p>
         </section>
 

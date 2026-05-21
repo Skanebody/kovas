@@ -1,6 +1,7 @@
 'use client'
 
-import { PRICING_PLANS } from '@/lib/pricing-plans'
+// Type B2 dependency — pricing-plans.ts refonte by parallel agent
+import { LOGICIEL_PLANS, type LogicielPlan } from '@/lib/pricing-plans'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
@@ -11,6 +12,14 @@ const DEFAULT_MISSIONS = 60
  *  M0-M5 (cf. CLAUDE.md §17). */
 const LICIEL_STACK_ANNUAL_EUR = 1500
 
+interface PayablePlan {
+  plan: LogicielPlan
+  annualCostMonthlyBilled: number // euros (monthly × 12)
+  annualCostBilledAnnual: number // euros (annual price)
+  fitsCap: boolean
+  capMissions: number
+}
+
 function formatEuros(amount: number): string {
   return `${Math.round(amount)} €`
 }
@@ -20,54 +29,58 @@ function formatEurosPrecise(amount: number): string {
 }
 
 /**
- * Section ROI standalone — refonte P9 2026-05-28.
+ * Section ROI standalone — refonte V3 dual track 2026-05-21.
  *
- * Modèle all-you-can-eat : plus de calcul "coût + surplus". On compare
- * directement KOVAS (forfait fixe) à l'empilement Liciel + outils annexes
- * (1500 €/an en moyenne sur 50 entretiens découverte).
+ * Modèle KOVAS 360 prix fixe : on compare directement le coût annuel KOVAS 360
+ * (tier optimal pour le volume) à l'empilement Liciel + outils annexes
+ * (~1500 €/an sur 50 entretiens découverte).
  *
- * Le tier recommandé est calculé par rapport au volume × cap fair-use : on
- * suggère le plus petit tier qui couvre le volume confortablement, pas le
- * plus cher.
+ * Le tier recommandé est le plus petit dont le cap fair-use couvre le volume.
  */
 export function RoiStandalone() {
   const [missions, setMissions] = useState(DEFAULT_MISSIONS)
-  const [billing] = useState<'monthly' | 'annual'>('monthly')
+  const billing: 'monthly' | 'annual' = 'monthly'
 
   const result = useMemo(() => {
     const safe = Math.max(0, Number.isFinite(missions) ? missions : 0)
 
-    // Pour chaque plan : prix annuel + capacité fair-use
-    const candidates = PRICING_PLANS.map((p) => {
-      const annualCost = p.monthlyPrice * 12
-      const annualCostBilledAnnual = p.annualPrice
-      const fitsCap = safe <= p.caps.missions
-      return { plan: p, annualCost, annualCostBilledAnnual, fitsCap }
+    const payablePlans: PayablePlan[] = LOGICIEL_PLANS.filter(
+      (p) => p.code !== 'logiciel_free',
+    ).map((p: LogicielPlan) => {
+      const monthlyEuros = Math.round(p.monthlyPrice / 100)
+      const annualEuros = Math.round(p.annualPrice / 100)
+      const capMissions =
+        p.code === 'logiciel_enterprise' ? 999_999 : p.caps.missions
+      return {
+        plan: p,
+        annualCostMonthlyBilled: monthlyEuros * 12,
+        annualCostBilledAnnual: annualEuros,
+        fitsCap: safe <= capMissions,
+        capMissions,
+      }
     })
 
-    // Tier optimal : le plus petit dont le cap couvre le volume mensuel.
-    // À volume 0 : Essential (le moins cher). Si rien ne couvre : Cabinet.
     const optimal =
-      candidates.find((c) => c.fitsCap) ?? candidates[candidates.length - 1]!
+      payablePlans.find((c) => c.fitsCap) ??
+      payablePlans[payablePlans.length - 1]
 
-    const annualCostMonthly = optimal.annualCost
-    const annualCostBilled = optimal.annualCostBilledAnnual
+    const annualCostBilled = optimal?.annualCostBilledAnnual ?? 0
     const savingsVsLiciel = LICIEL_STACK_ANNUAL_EUR - annualCostBilled
 
     return {
       safe,
-      candidates,
       optimal,
-      annualCostMonthly,
       annualCostBilled,
       savingsVsLiciel,
     }
-  }, [missions, billing])
+  }, [missions])
 
   // Re-saisie économisée (1h30/mission selon CLAUDE.md §2)
   const minutesSavedPerMission = 80
   const totalMinutesSaved = result.safe * minutesSavedPerMission
   const totalHoursSaved = Math.round(totalMinutesSaved / 60)
+
+  if (!result.optimal) return null
 
   return (
     <section className="bg-[#0F1419] text-white rounded-[24px] p-6 sm:p-10 my-20">
@@ -82,17 +95,16 @@ export function RoiStandalone() {
               ça coûte combien ?
             </span>
           </h2>
-          <p className="text-base text-white/70 mt-4 max-w-xl mx-auto">
+          <p className="text-base text-white/72 mt-4 max-w-xl mx-auto">
             Comparaison directe avec l'empilement Liciel + modules ADEME + outils annexes
             (~1 500 € / an sur la base de 50 entretiens diagnostiqueurs).
           </p>
         </div>
 
-        {/* INPUT */}
         <div className="max-w-md mx-auto mb-10">
           <label
             htmlFor="roi-missions-standalone"
-            className="block font-mono text-[11px] uppercase tracking-[0.15em] text-white/60 mb-3 text-center"
+            className="block font-mono text-[11px] uppercase tracking-[0.15em] text-white/72 mb-3 text-center"
           >
             Je fais combien de missions par mois ?
           </label>
@@ -124,45 +136,43 @@ export function RoiStandalone() {
               +
             </button>
           </div>
-          <p className="text-center text-[11px] text-white/50 mt-2 font-mono">missions / mois</p>
+          <p className="text-center text-[11px] text-white/72 mt-2 font-mono">
+            missions / mois
+          </p>
         </div>
 
-        {/* RÉSULTATS — 3 panneaux côte à côte */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/15 rounded-[16px] overflow-hidden">
-          {/* PANNEAU 1 : Tier recommandé */}
           <div className="bg-[#0F1419] p-6">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/72 mb-3">
               Votre tier recommandé
             </p>
             <p className="font-serif italic font-normal text-3xl sm:text-4xl text-chartreuse leading-tight tracking-tight">
               {result.optimal.plan.name}
             </p>
-            <p className="text-[13px] text-white/70 mt-3 leading-snug">
+            <p className="text-[13px] text-white/72 mt-3 leading-snug">
               {result.safe === 0
                 ? 'Indiquez votre volume pour voir la recommandation.'
                 : result.optimal.fitsCap
-                  ? `${result.safe} missions / mois, dans la zone fair-use ${result.optimal.plan.caps.missions}.`
-                  : `Au-delà de ${result.optimal.plan.caps.missions}/mois, on en discute au cas par cas.`}
+                  ? `${result.safe} missions / mois, dans la zone fair-use ${result.optimal.capMissions === 999_999 ? 'illimité' : result.optimal.capMissions}.`
+                  : `Au-delà de ${result.optimal.capMissions}/mois, on en discute au cas par cas.`}
             </p>
           </div>
 
-          {/* PANNEAU 2 : Coût annuel KOVAS 360 */}
           <div className="bg-[#0F1419] p-6">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/72 mb-3">
               Coût KOVAS 360 / an
             </p>
             <p className="font-serif italic font-normal text-5xl sm:text-6xl text-white leading-none tracking-tight">
               {formatEuros(result.annualCostBilled)}
             </p>
-            <p className="text-[13px] text-white/70 mt-3 leading-snug">
+            <p className="text-[13px] text-white/72 mt-3 leading-snug">
               Forfait fixe annuel (2 mois offerts). Pas de surplus, pas de seconde saisie de CB,
               pas de surprise.
             </p>
           </div>
 
-          {/* PANNEAU 3 : Économie vs Liciel stack */}
           <div className="bg-[#0F1419] p-6">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50 mb-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/72 mb-3">
               Économie vs Liciel + outils
             </p>
             <p className="font-serif italic font-normal text-5xl sm:text-6xl text-chartreuse leading-none tracking-tight">
@@ -170,28 +180,28 @@ export function RoiStandalone() {
                 ? `−${formatEuros(result.savingsVsLiciel)}`
                 : '—'}
             </p>
-            <p className="text-[13px] text-white/70 mt-3 leading-snug">
+            <p className="text-[13px] text-white/72 mt-3 leading-snug">
               {result.savingsVsLiciel > 0
                 ? `Économie annuelle vs l'empilement Liciel (~1 500 €/an). Sans compter les ${totalHoursSaved}h de re-saisie évitées.`
                 : `KOVAS 360 reste plus cher que votre stack actuelle. Mais vous gagnez ${totalHoursSaved}h chaque mois.`}
             </p>
-            <p className="text-[11px] text-white/40 mt-2 font-mono">
+            <p className="text-[11px] text-white/72 mt-2 font-mono">
               Volume saisie : {formatEurosPrecise(result.annualCostBilled / 12)} / mois
             </p>
           </div>
         </div>
 
-        {/* CTA vers le tier optimal */}
         {result.safe > 0 && (
           <div className="mt-10 text-center">
             <Link
-              href={`/pricing/checkout?plan=${result.optimal.plan.code}&billing=${billing}`}
+              href={`/api/stripe/checkout?plan=${result.optimal.plan.code}&cycle=${billing}`}
+              aria-label={`Démarrer en ${result.optimal.plan.name}`}
               className="inline-flex items-center gap-2 bg-chartreuse text-[#0F1419] px-7 py-4 rounded-full text-base font-semibold hover:bg-chartreuse-deep hover:-translate-y-px transition-all duration-150"
             >
               Démarrer en {result.optimal.plan.name}
               <ArrowRight className="size-4" />
             </Link>
-            <p className="text-[12px] text-white/50 mt-3 font-mono">
+            <p className="text-[12px] text-white/72 mt-3 font-mono">
               Essai 14 jours · résiliable à tout moment
             </p>
           </div>

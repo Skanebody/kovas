@@ -322,14 +322,31 @@ function nextTierAbove(current: PricingPlanCode | null | undefined): PricingPlan
 function prettyTier(code: PricingPlanCode): string {
   switch (code) {
     case 'essential':
+    case 'essential_legacy':
       return 'Essential'
     case 'decouverte':
+    case 'decouverte_legacy':
       return 'Découverte'
     case 'pro':
+    case 'pro_legacy':
       return 'Pro'
     case 'all_inclusive':
+    case 'all_inclusive_legacy':
       return 'All Inclusive'
     case 'cabinet':
+    case 'cabinet_legacy':
       return 'Cabinet'
+    case 'logiciel_free':
+      return 'Essai 14 jours'
+    case 'logiciel_starter':
+      return 'Starter'
+    case 'logiciel_active':
+      return 'Active'
+    case 'logiciel_cabinet':
+      return 'Cabinet'
+    case 'logiciel_enterprise':
+      return 'Enterprise'
+    default:
+      return code
   }
 }

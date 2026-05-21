@@ -1,5 +1,5 @@
 /**
- * KOVAS — Edge Function : Webhook Stripe pour déverrouillage des rapports payés.
+ * KOVAS — Edge Function : Webhook Stripe (rapports payés + subscriptions V3 dual track).
  *
  * Endpoint POST /functions/v1/stripe-webhook-payment
  *
@@ -7,21 +7,31 @@
  *   - payment_intent.succeeded       (paiement direct via Stripe Elements / Payment Link)
  *   - invoice.payment_succeeded      (Stripe Billing — abonnements + factures one-off)
  *   - checkout.session.completed     (sessions Checkout — relais éventuel)
+ *   - customer.subscription.created  (bundle / sponsored slot / addon V3 — INSERT row)
+ *   - customer.subscription.updated  (period roll, status change → UPDATE)
+ *   - customer.subscription.deleted  (résiliation → set status='cancelled', cancelled_at=now())
  *
- * Workflow par event :
+ * Workflow rapport payé :
  *   1. Vérifie la signature Stripe (constructEventAsync — runtime Deno).
  *   2. INSERT stripe_webhook_events ON CONFLICT DO NOTHING (idempotence par event.id).
  *      Si conflict → on retourne 200 immédiatement (déjà traité).
- *   3. Selon le type d'event, retrouve la `payment_intent_id` et déverrouille
+ *   3. Si event = payment / checkout : retrouve la `payment_intent_id` et déverrouille
  *      `report_payment_locks` (locked=false, payment_received_at=now()).
  *   4. Trigger emails : confirmation client + notification diagnostiqueur (Resend).
+ *
+ * Workflow subscriptions V3 :
+ *   - customer.subscription.created avec metadata.bundle_code        → INSERT bundle_subscriptions
+ *   - customer.subscription.created avec metadata.sponsored_slot_id  → INSERT sponsored_slot_subscriptions
+ *   - customer.subscription.updated                                  → UPDATE current_period_end, status
+ *   - customer.subscription.deleted                                  → UPDATE status='cancelled', cancelled_at=now()
  *
  * Idempotence : PRIMARY KEY de stripe_webhook_events = event.id Stripe. Une seconde
  * réception du même event est silencieusement ignorée. Pas de double-déverrouillage.
  *
  * Erreurs : on retourne 500 → Stripe rejoue jusqu'à 3 jours (back-off exponentiel).
  *
- * Authority : CLAUDE.md §8 stack Stripe + migration 20260525140000_report_payment_locks.
+ * Authority : CLAUDE.md §8 stack Stripe + migration 20260525140000_report_payment_locks
+ * + docs/pricing/v3-dual-track-spec.md (bundles + sponsored slots).
  */
 
 // @ts-nocheck — Deno-only Edge Function ; non compilée par tsc Node.
@@ -252,6 +262,208 @@ function extractPaymentIntentId(event: Stripe.Event): string | null {
 }
 
 // ────────────────────────────────────────────────────────────
+// Subscriptions V3 — bundles + sponsored slots
+// ────────────────────────────────────────────────────────────
+
+function isoFromUnix(seconds: number | null | undefined): string | null {
+  if (!seconds || !Number.isFinite(seconds)) return null
+  return new Date(seconds * 1000).toISOString()
+}
+
+interface SubscriptionPeriod {
+  current_period_start: string | null
+  current_period_end: string | null
+}
+
+function extractSubscriptionPeriod(sub: Stripe.Subscription): SubscriptionPeriod {
+  // Stripe API 2024-12-18+ : current_period_* déplacés sur subscription.items.data[0]
+  const item = sub.items?.data?.[0]
+  // @ts-ignore — Deno + types Stripe peuvent diverger selon la version SDK
+  const startUnix = (item?.current_period_start ?? sub.current_period_start) as number | undefined
+  // @ts-ignore
+  const endUnix = (item?.current_period_end ?? sub.current_period_end) as number | undefined
+  return {
+    current_period_start: isoFromUnix(startUnix),
+    current_period_end: isoFromUnix(endUnix),
+  }
+}
+
+async function handleBundleSubscriptionCreated(
+  supabase: ReturnType<typeof createClient>,
+  sub: Stripe.Subscription,
+  bundleCode: string,
+  orgId: string,
+): Promise<void> {
+  const period = extractSubscriptionPeriod(sub)
+  const payload = {
+    organization_id: orgId,
+    bundle_code: bundleCode,
+    stripe_subscription_id: sub.id,
+    stripe_customer_id: typeof sub.customer === 'string' ? sub.customer : sub.customer.id,
+    status: sub.status,
+    cancel_at_period_end: sub.cancel_at_period_end ?? false,
+    current_period_start: period.current_period_start,
+    current_period_end: period.current_period_end,
+    cancelled_at: null as string | null,
+    billing_cycle: sub.metadata?.billing_cycle ?? null,
+  }
+  const { error } = await supabase
+    .from('bundle_subscriptions')
+    .upsert(payload, { onConflict: 'stripe_subscription_id' })
+  if (error) {
+    throw new Error(`bundle_subscriptions_insert_failed: ${error.message}`)
+  }
+}
+
+async function handleSponsoredSlotSubscriptionCreated(
+  supabase: ReturnType<typeof createClient>,
+  sub: Stripe.Subscription,
+  sponsoredSlotId: string,
+  orgId: string,
+): Promise<void> {
+  const period = extractSubscriptionPeriod(sub)
+  const payload = {
+    organization_id: orgId,
+    sponsored_slot_id: sponsoredSlotId,
+    stripe_subscription_id: sub.id,
+    stripe_customer_id: typeof sub.customer === 'string' ? sub.customer : sub.customer.id,
+    status: sub.status,
+    cancel_at_period_end: sub.cancel_at_period_end ?? false,
+    current_period_start: period.current_period_start,
+    current_period_end: period.current_period_end,
+    cancelled_at: null as string | null,
+    billing_cycle: sub.metadata?.billing_cycle ?? null,
+  }
+  const { error } = await supabase
+    .from('sponsored_slot_subscriptions')
+    .upsert(payload, { onConflict: 'stripe_subscription_id' })
+  if (error) {
+    throw new Error(`sponsored_slot_subscriptions_insert_failed: ${error.message}`)
+  }
+}
+
+async function handleSubscriptionUpdated(
+  supabase: ReturnType<typeof createClient>,
+  sub: Stripe.Subscription,
+): Promise<{ updated: number }> {
+  const period = extractSubscriptionPeriod(sub)
+  const patch = {
+    status: sub.status,
+    cancel_at_period_end: sub.cancel_at_period_end ?? false,
+    current_period_start: period.current_period_start,
+    current_period_end: period.current_period_end,
+  }
+  let updated = 0
+  // Tente d'abord bundle_subscriptions
+  const bundleRes = await supabase
+    .from('bundle_subscriptions')
+    .update(patch)
+    .eq('stripe_subscription_id', sub.id)
+    .select('id')
+  if (!bundleRes.error && Array.isArray(bundleRes.data)) {
+    updated += bundleRes.data.length
+  }
+  // Puis sponsored_slot_subscriptions
+  const slotRes = await supabase
+    .from('sponsored_slot_subscriptions')
+    .update(patch)
+    .eq('stripe_subscription_id', sub.id)
+    .select('id')
+  if (!slotRes.error && Array.isArray(slotRes.data)) {
+    updated += slotRes.data.length
+  }
+  // Et table subscriptions (logiciel / annuaire plans simples)
+  const subsRes = await supabase
+    .from('subscriptions')
+    .update(patch)
+    .eq('stripe_subscription_id', sub.id)
+    .select('id')
+  if (!subsRes.error && Array.isArray(subsRes.data)) {
+    updated += subsRes.data.length
+  }
+  return { updated }
+}
+
+async function handleSubscriptionDeleted(
+  supabase: ReturnType<typeof createClient>,
+  sub: Stripe.Subscription,
+): Promise<{ cancelled: number }> {
+  const patch = {
+    status: 'cancelled',
+    cancelled_at: new Date().toISOString(),
+    cancel_at_period_end: false,
+  }
+  let cancelled = 0
+  const bundleRes = await supabase
+    .from('bundle_subscriptions')
+    .update(patch)
+    .eq('stripe_subscription_id', sub.id)
+    .select('id')
+  if (!bundleRes.error && Array.isArray(bundleRes.data)) {
+    cancelled += bundleRes.data.length
+  }
+  const slotRes = await supabase
+    .from('sponsored_slot_subscriptions')
+    .update(patch)
+    .eq('stripe_subscription_id', sub.id)
+    .select('id')
+  if (!slotRes.error && Array.isArray(slotRes.data)) {
+    cancelled += slotRes.data.length
+  }
+  const subsRes = await supabase
+    .from('subscriptions')
+    .update(patch)
+    .eq('stripe_subscription_id', sub.id)
+    .select('id')
+  if (!subsRes.error && Array.isArray(subsRes.data)) {
+    cancelled += subsRes.data.length
+  }
+  return { cancelled }
+}
+
+async function handleSubscriptionEvent(
+  supabase: ReturnType<typeof createClient>,
+  event: Stripe.Event,
+): Promise<Record<string, unknown>> {
+  const sub = event.data.object as Stripe.Subscription
+  const orgId = (sub.metadata?.organization_id ?? null) as string | null
+  const bundleCode = (sub.metadata?.bundle_code ?? null) as string | null
+  const sponsoredSlotId = (sub.metadata?.sponsored_slot_id ?? null) as string | null
+
+  if (event.type === 'customer.subscription.created') {
+    if (!orgId) {
+      return { ignored: true, reason: 'missing_organization_id_in_metadata' }
+    }
+    const out: Record<string, unknown> = { subscriptionId: sub.id }
+    if (bundleCode) {
+      await handleBundleSubscriptionCreated(supabase, sub, bundleCode, orgId)
+      out.bundle_code = bundleCode
+    }
+    if (sponsoredSlotId) {
+      await handleSponsoredSlotSubscriptionCreated(supabase, sub, sponsoredSlotId, orgId)
+      out.sponsored_slot_id = sponsoredSlotId
+    }
+    if (!bundleCode && !sponsoredSlotId) {
+      // Plan logiciel/annuaire simple — la route Stripe webhook back-end Next.js
+      // (apps/web/.../api/billing/webhook) prend déjà le relais via la table
+      // `subscriptions`. Pas de double traitement ici.
+      return { ignored: true, reason: 'plain_subscription_handled_by_app_webhook' }
+    }
+    return out
+  }
+
+  if (event.type === 'customer.subscription.updated') {
+    return await handleSubscriptionUpdated(supabase, sub)
+  }
+
+  if (event.type === 'customer.subscription.deleted') {
+    return await handleSubscriptionDeleted(supabase, sub)
+  }
+
+  return { ignored: true, reason: 'unhandled_subscription_event' }
+}
+
+// ────────────────────────────────────────────────────────────
 // Entry point
 // ────────────────────────────────────────────────────────────
 
@@ -325,11 +537,30 @@ Deno.serve(async (req: Request) => {
 
   // ── Traitement par type
   try {
-    if (
-      event.type !== 'payment_intent.succeeded' &&
-      event.type !== 'invoice.payment_succeeded' &&
-      event.type !== 'checkout.session.completed'
-    ) {
+    const subscriptionEventTypes = new Set<string>([
+      'customer.subscription.created',
+      'customer.subscription.updated',
+      'customer.subscription.deleted',
+    ])
+    const paymentEventTypes = new Set<string>([
+      'payment_intent.succeeded',
+      'invoice.payment_succeeded',
+      'checkout.session.completed',
+    ])
+
+    // ── Branche 1 : subscription V3 (bundles, sponsored slots, plans simples)
+    if (subscriptionEventTypes.has(event.type)) {
+      const result = await handleSubscriptionEvent(supabase, event)
+      return jsonResponse({
+        ok: true,
+        eventId: event.id,
+        type: event.type,
+        result,
+      })
+    }
+
+    // ── Branche 2 : déverrouillage rapport payé (logique historique, intacte)
+    if (!paymentEventTypes.has(event.type)) {
       // Type non géré — on log "ignored" mais on a déjà inséré 'ok'. Update.
       await supabase
         .from('stripe_webhook_events')
