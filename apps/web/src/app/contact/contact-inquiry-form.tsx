@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
-import { submitContactInquiry, type ContactInquiryInput } from './actions'
+import { submitContactInquiry } from './actions'
+import type { ContactInquiryInput } from './schemas'
 
 type InquiryType = ContactInquiryInput['inquiry_type']
 

@@ -10,7 +10,6 @@
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
-import { z } from 'zod'
 
 import {
   checkRateLimit,
@@ -20,34 +19,11 @@ import {
 } from '@/lib/anti-spam/rate-limits'
 import { sendEmail } from '@/lib/email/send'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
-
-export const spontaneousApplicationSchema = z.object({
-  first_name: z.string().trim().min(2).max(80),
-  last_name: z.string().trim().min(2).max(80),
-  email: z.string().trim().toLowerCase().email(),
-  linkedin_url: z
-    .string()
-    .trim()
-    .max(300)
-    .optional()
-    .refine(
-      (v) => !v || /^https?:\/\/(www\.)?linkedin\.com\//i.test(v),
-      'Renseignez une URL LinkedIn valide.',
-    ),
-  target_role: z.string().trim().min(2).max(120),
-  message: z.string().trim().min(30).max(3000),
-  honeypot: z.string().optional(),
-  consent_rgpd: z.literal(true),
-})
-
-export type SpontaneousApplicationInput = z.infer<typeof spontaneousApplicationSchema>
-
-export interface SpontaneousApplicationResult {
-  ok: boolean
-  message?: string
-  error?: string
-  fieldErrors?: Record<string, string>
-}
+import {
+  spontaneousApplicationSchema,
+  type SpontaneousApplicationInput,
+  type SpontaneousApplicationResult,
+} from './schemas'
 
 async function getClientIp(): Promise<string | null> {
   const h = await headers()

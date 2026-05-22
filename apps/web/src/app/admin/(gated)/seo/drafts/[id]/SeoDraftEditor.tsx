@@ -21,15 +21,13 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useMemo, useState, useTransition } from 'react'
+import { publishDraft, saveDraft, updateDraftStatus } from '../../actions'
 import {
   computeEeatScore,
   computeEeatValidations,
-  publishDraft,
-  saveDraft,
-  updateDraftStatus,
   type EeatValidations,
   type SeoDraftStatus,
-} from '../../actions'
+} from '../../eeat'
 import { EeatValidator } from './EeatValidator'
 
 export interface SeoDraftEditorPayload {

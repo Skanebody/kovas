@@ -14,7 +14,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Check, X } from 'lucide-react'
-import type { EeatValidations } from '../../actions'
+import type { EeatValidations } from '../../eeat'
 
 interface EeatValidatorProps {
   validations: EeatValidations
@@ -98,7 +98,7 @@ export function EeatValidator({ validations, score }: EeatValidatorProps) {
           const ok = validations[c.key]
           return (
             <div
-              key={c.key}
+              key={String(c.key)}
               className="flex items-start gap-2.5 rounded-md border border-rule bg-paper px-3 py-2.5"
             >
               <span

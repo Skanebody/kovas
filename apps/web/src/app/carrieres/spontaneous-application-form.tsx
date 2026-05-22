@@ -6,10 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
-import {
-  submitSpontaneousApplication,
-  type SpontaneousApplicationInput,
-} from './actions'
+import { submitSpontaneousApplication } from './actions'
+import type { SpontaneousApplicationInput } from './schemas'
 
 interface FormState {
   status: 'idle' | 'submitting' | 'success' | 'error'

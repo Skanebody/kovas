@@ -20,7 +20,6 @@
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
-import { z } from 'zod'
 
 import {
   checkRateLimit,
@@ -30,58 +29,11 @@ import {
 } from '@/lib/anti-spam/rate-limits'
 import { sendEmail } from '@/lib/email/send'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
-
-const baseContactSchema = z.object({
-  first_name: z.string().trim().min(2).max(80),
-  last_name: z.string().trim().min(2).max(80),
-  email: z.string().trim().toLowerCase().email(),
-  phone: z.string().trim().max(30).optional(),
-  message: z.string().trim().min(20).max(2000),
-  honeypot: z.string().optional(),
-  consent_rgpd: z.literal(true),
-})
-
-const particulierSchema = baseContactSchema.extend({
-  inquiry_type: z.literal('particulier'),
-  city: z.string().trim().max(120).optional(),
-  project_type: z.enum(['vente', 'location', 'renovation', 'achat', 'curiosite']).optional(),
-})
-
-const diagnostiqueurSchema = baseContactSchema.extend({
-  inquiry_type: z.literal('diagnostiqueur'),
-  monthly_volume: z.coerce.number().int().min(0).max(2000).optional(),
-  current_software: z.string().trim().max(120).optional(),
-})
-
-const journalisteSchema = baseContactSchema.extend({
-  inquiry_type: z.literal('journaliste'),
-  media: z.string().trim().min(2).max(120),
-  deadline: z.string().trim().max(120).optional(),
-})
-
-const partenariatSchema = baseContactSchema.extend({
-  inquiry_type: z.literal('partenariat'),
-  company: z.string().trim().min(2).max(160),
-  partnership_type: z
-    .enum(['notaires', 'agences-immobilieres', 'banques-courtiers', 'fournisseurs-energie', 'autre'])
-    .optional(),
-})
-
-export const contactInquirySchema = z.discriminatedUnion('inquiry_type', [
-  particulierSchema,
-  diagnostiqueurSchema,
-  journalisteSchema,
-  partenariatSchema,
-])
-
-export type ContactInquiryInput = z.infer<typeof contactInquirySchema>
-
-export interface ContactInquiryResult {
-  ok: boolean
-  message?: string
-  error?: string
-  fieldErrors?: Record<string, string>
-}
+import {
+  contactInquirySchema,
+  type ContactInquiryInput,
+  type ContactInquiryResult,
+} from './schemas'
 
 async function getClientIp(): Promise<string | null> {
   const h = await headers()

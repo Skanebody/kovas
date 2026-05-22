@@ -6,10 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
-import {
-  submitPartnerInquiry,
-  type PartnerInquiryInput,
-} from './actions'
+import { submitPartnerInquiry } from './actions'
+import type { PartnerInquiryInput } from './schemas'
 
 interface FormState {
   status: 'idle' | 'submitting' | 'success' | 'error'

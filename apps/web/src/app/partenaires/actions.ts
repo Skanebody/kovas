@@ -11,7 +11,6 @@ import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
-import { z } from 'zod'
 
 import {
   checkRateLimit,
@@ -21,34 +20,11 @@ import {
 } from '@/lib/anti-spam/rate-limits'
 import { sendEmail } from '@/lib/email/send'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
-
-export const partnerInquirySchema = z.object({
-  first_name: z.string().trim().min(2).max(80),
-  last_name: z.string().trim().min(2).max(80),
-  email: z.string().trim().toLowerCase().email(),
-  phone: z.string().trim().min(8).max(30),
-  company_name: z.string().trim().min(2).max(160),
-  company_role: z.string().trim().min(2).max(120),
-  partnership_type: z.enum([
-    'notaires',
-    'agences-immobilieres',
-    'banques-courtiers',
-    'fournisseurs-energie',
-    'autre',
-  ]),
-  message: z.string().trim().min(30).max(3000),
-  honeypot: z.string().optional(),
-  consent_rgpd: z.literal(true),
-})
-
-export type PartnerInquiryInput = z.infer<typeof partnerInquirySchema>
-
-export interface PartnerInquiryResult {
-  ok: boolean
-  message?: string
-  error?: string
-  fieldErrors?: Record<string, string>
-}
+import {
+  partnerInquirySchema,
+  type PartnerInquiryInput,
+  type PartnerInquiryResult,
+} from './schemas'
 
 async function getClientIp(): Promise<string | null> {
   const h = await headers()
