@@ -58,7 +58,7 @@ export function TopCitiesGrid() {
             <Link
               key={`${c.slug}-${c.dept}`}
               href={`/diagnostiqueurs/${c.departmentSlug}/${c.slug}`}
-              className="group flex items-center justify-between gap-2 px-4 py-3 rounded-md border border-rule/60 bg-paper hover:border-ink/20 hover:bg-cream transition-all"
+              className="group flex items-center justify-between gap-2 px-4 py-3 rounded-md border border-rule/60 bg-paper hover:border-ink/20 hover:bg-cream transition-colors duration-200"
             >
               <span className="text-sm font-medium text-ink-soft group-hover:text-ink truncate">
                 {c.name}

@@ -2,6 +2,7 @@ import { AddToHomeScreen } from '@/components/add-to-home-screen'
 import { QueryProvider } from '@/components/query-provider'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { ThemeProvider } from '@/components/theme-provider'
+import { ToastProvider } from '@/components/shared/Toast'
 import { Toaster } from '@/components/ui/toaster'
 import {
   buildOrganizationSchema,
@@ -78,9 +79,11 @@ export default function RootLayout({
         />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <QueryProvider>
-            {children}
-            <AddToHomeScreen />
-            <Toaster />
+            <ToastProvider>
+              {children}
+              <AddToHomeScreen />
+              <Toaster />
+            </ToastProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

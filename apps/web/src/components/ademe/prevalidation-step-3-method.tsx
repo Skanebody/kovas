@@ -239,7 +239,7 @@ function MethodRadio({
   return (
     <label
       className={cn(
-        'cursor-pointer rounded-md border-2 px-3.5 py-3 transition-all',
+        'cursor-pointer rounded-md border-2 px-3.5 py-3 transition-colors duration-200',
         checked
           ? 'border-navy bg-navy/5 shadow-glass-sm'
           : 'border-rule bg-paper hover:border-ink/30',
@@ -257,7 +257,7 @@ function MethodRadio({
         <span
           aria-hidden
           className={cn(
-            'mt-0.5 size-3.5 shrink-0 rounded-full border-2 transition-all',
+            'mt-0.5 size-3.5 shrink-0 rounded-full border-2 transition-colors duration-200',
             checked ? 'border-navy bg-navy' : 'border-ink-mute bg-transparent',
           )}
         />

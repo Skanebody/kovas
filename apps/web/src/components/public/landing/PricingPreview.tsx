@@ -77,7 +77,7 @@ export function PricingPreview() {
             <article
               key={t.id}
               className={cn(
-                'rounded-xl border p-5 flex flex-col space-y-4 transition-all',
+                'rounded-xl border p-5 flex flex-col space-y-4 transition-colors duration-200',
                 t.highlighted
                   ? 'border-chartreuse-deep bg-chartreuse-soft/40 shadow-md'
                   : 'border-rule/70 bg-paper hover:border-ink/20',

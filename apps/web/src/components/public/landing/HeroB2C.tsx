@@ -105,7 +105,7 @@ export function HeroB2C() {
             <label htmlFor="ban-input" className="sr-only">
               Adresse ou ville
             </label>
-            <div className="flex items-center gap-2 border border-rule rounded-md px-3 py-2.5 bg-paper focus-within:border-navy/50 focus-within:ring-2 focus-within:ring-navy/10 transition-all">
+            <div className="flex items-center gap-2 border border-rule rounded-md px-3 py-2.5 bg-paper focus-within:border-navy/50 focus-within:ring-2 focus-within:ring-navy/10 transition-colors duration-200">
               <MapPin className="size-4 text-ink-faint shrink-0" />
               <input
                 id="ban-input"
@@ -160,7 +160,7 @@ export function HeroB2C() {
                     aria-pressed={isOn}
                     onClick={() => toggleDiag(d.id)}
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-pill border px-3 py-1.5 text-xs font-medium transition-all',
+                      'inline-flex items-center gap-1.5 rounded-pill border px-3 py-1.5 text-xs font-medium transition-colors duration-200',
                       isOn
                         ? 'bg-navy text-paper border-navy shadow-sm'
                         : 'bg-paper text-ink-mute border-rule hover:border-ink/30',

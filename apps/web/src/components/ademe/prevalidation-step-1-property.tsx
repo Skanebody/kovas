@@ -89,7 +89,7 @@ export function PrevalidationStep1Property({
                 onClick={() => onChange({ type_batiment: value })}
                 aria-pressed={selected}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-2 rounded-md border-2 px-3 py-4 transition-all',
+                  'flex flex-col items-center justify-center gap-2 rounded-md border-2 px-3 py-4 transition-colors duration-200',
                   'min-h-[88px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-navy/20',
                   selected
                     ? 'border-navy bg-navy/5 shadow-glass-sm'

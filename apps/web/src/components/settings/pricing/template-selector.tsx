@@ -132,7 +132,7 @@ function TemplateCard({
       variant={recommended ? 'opaque' : 'opaque'}
       padding="default"
       className={cn(
-        'relative space-y-4 transition-all',
+        'relative space-y-4 transition-colors duration-200',
         recommended
           ? 'bg-chartreuse-soft border-2 border-chartreuse-deep/30 shadow-md'
           : 'border border-rule/80',

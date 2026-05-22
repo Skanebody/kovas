@@ -97,7 +97,7 @@ export function VatSettingsEditor({ initial }: VatSettingsEditorProps) {
           type="button"
           onClick={() => setVatStatus('with_vat')}
           className={cn(
-            'text-left rounded-lg border p-3 transition-all',
+            'text-left rounded-lg border p-3 transition-colors duration-200',
             isWithVat
               ? 'border-navy bg-navy/[0.04]'
               : 'border-rule/80 hover:border-rule bg-paper/60',
@@ -120,7 +120,7 @@ export function VatSettingsEditor({ initial }: VatSettingsEditorProps) {
           type="button"
           onClick={() => setVatStatus('franchise_vat')}
           className={cn(
-            'text-left rounded-lg border p-3 transition-all',
+            'text-left rounded-lg border p-3 transition-colors duration-200',
             !isWithVat
               ? 'border-navy bg-navy/[0.04]'
               : 'border-rule/80 hover:border-rule bg-paper/60',
