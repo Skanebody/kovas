@@ -6,7 +6,15 @@ import { ObservatoryTeaser } from '@/components/public/landing/ObservatoryTeaser
 import { SocialProof } from '@/components/public/landing/SocialProof'
 import { Button } from '@/components/ui/button'
 import { getPublicStats } from '@/lib/public-stats'
+import { buildMetadata } from '@/lib/seo/metadata'
 import Link from 'next/link'
+
+export const metadata = buildMetadata({
+  title: 'KOVAS — Diagnostic immobilier IA-first',
+  description:
+    'Logiciel SaaS B2B pour diagnostiqueurs immobiliers indépendants. Saisie vocale terrain, photos géolocalisées, exports universels. 1h30 gagnée par mission DPE.',
+  path: '/',
+})
 
 /**
  * KOVAS — Homepage marketing kovas.fr/

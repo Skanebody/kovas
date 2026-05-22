@@ -9,28 +9,19 @@ import { StatsRow, type Stat } from '@/components/public/landing/StatsRow'
 import { Testimonials, type Testimonial } from '@/components/public/landing/TestimonialCard'
 import { PublicFooter } from '@/components/public/PublicFooter'
 import { PublicNav } from '@/components/public/PublicNav'
-import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo/metadata'
 
 /**
  * KOVAS 360 — Page d'accueil B2B (kovas.fr/pour-les-diagnostiqueurs)
  * Cible : diagnostiqueurs immobiliers indépendants (Avatar Benjamin 43 ans ex-cadre).
  * Brand : sage + dark + chartreuse (DS v5 — sobre productivité B2B).
  */
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: 'KOVAS 360 — Le logiciel terrain pour diagnostiqueurs immobiliers indépendants',
   description:
     'Saisie vocale, exports universels, conformité ADEME et Factur-X intégrés. 30 jours gratuits. Sans engagement. À partir de 19€/mois.',
-  alternates: { canonical: 'https://kovas.fr/pour-les-diagnostiqueurs' },
-  openGraph: {
-    type: 'website',
-    locale: 'fr_FR',
-    url: 'https://kovas.fr/pour-les-diagnostiqueurs',
-    siteName: 'KOVAS 360',
-    title: 'KOVAS 360 — Le logiciel terrain pour diagnostiqueurs immobiliers',
-    description:
-      'Saisie vocale, exports universels, conformité ADEME. 30 jours gratuits avec CB enregistrée et débit auto, sans engagement.',
-  },
-}
+  path: '/pour-les-diagnostiqueurs',
+})
 
 const COMPARISON_ROWS: ComparisonRow[] = [
   {
