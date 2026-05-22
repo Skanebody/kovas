@@ -11,8 +11,13 @@
  */
 
 import { jsPDF } from 'jspdf'
-import { formatAddressLine } from './company-identity'
+import type { COMPANY_IDENTITY } from './company-identity'
 import { LAFT_CONDITIONS, type LaftAttestationData, formatFrenchDate } from './laft-attestation'
+
+type CompanyIdentity = typeof COMPANY_IDENTITY
+function formatAddressLine(editor: CompanyIdentity): string {
+  return editor.address.full
+}
 
 const MARGIN = 50
 const PAGE_WIDTH = 595 // A4 en points
@@ -52,13 +57,13 @@ export function generateLaftAttestationPdf(data: LaftAttestationData): Uint8Arra
   // ============ 1. ÉDITEUR ============
   y = sectionTitle(doc, '1. Éditeur attestant', y)
   y = paragraph(doc, `${editor.legalForm} ${editor.legalName}`, y, { bold: true })
-  y = paragraph(doc, `Capital social : ${editor.capital}`, y)
+  y = paragraph(doc, `Capital social : ${editor.capitalLabel}`, y)
   y = paragraph(doc, `Siège social : ${formatAddressLine(editor)}`, y)
-  y = paragraph(doc, `${editor.rcs}`, y)
+  y = paragraph(doc, `${editor.rcs.number}`, y)
   y = paragraph(doc, `SIREN : ${editor.siren} — SIRET : ${editor.siret}`, y)
-  y = paragraph(doc, `TVA intracommunautaire : ${editor.vatNumber}`, y)
+  y = paragraph(doc, `TVA intracommunautaire : ${editor.vatIntracom}`, y)
   y = paragraph(doc, `Code APE : ${editor.apeCode}`, y)
-  y = paragraph(doc, `Représenté par : ${editor.representative}, Président`, y)
+  y = paragraph(doc, `Représenté par : ${editor.legalRepresentative.fullName}, Président`, y)
   y += 8
 
   // ============ 2. CLIENT ============
@@ -80,10 +85,10 @@ export function generateLaftAttestationPdf(data: LaftAttestationData): Uint8Arra
 
   // ============ 3. LOGICIEL ============
   y = sectionTitle(doc, '3. Logiciel concerné', y)
-  y = paragraph(doc, `${editor.product360} — Module Devis & Factures`, y, { bold: true })
+  y = paragraph(doc, `${editor.brands.b2bProduct} — Module Devis & Factures`, y, { bold: true })
   y = paragraph(doc, `Version logicielle attestée : ${softwareVersion}`, y)
   y = paragraph(doc, `Périmètre : ${scope}`, y)
-  y = paragraph(doc, `Domaine : ${editor.domain}`, y)
+  y = paragraph(doc, `Domaine : ${editor.domains.web}`, y)
   y += 8
 
   // ============ 4. DÉCLARATION ============
@@ -91,7 +96,7 @@ export function generateLaftAttestationPdf(data: LaftAttestationData): Uint8Arra
   y = sectionTitle(doc, '4. Déclaration de conformité', y)
   y = paragraph(
     doc,
-    `Je soussigné, ${editor.representative}, Président de ${editor.legalForm} ${editor.legalName}, éditeur du logiciel ${editor.product360}, atteste sur l’honneur que le logiciel délivré à ${client.legalName} satisfait, dans sa version ${softwareVersion} et pour le périmètre ci-dessus, aux quatre conditions cumulatives prévues à l’article 286, I, 3° bis du Code général des impôts, telles que définies par le BOI-TVA-DECLA-30-10-30 et le BOI-CF-COM-20-30-20.`,
+    `Je soussigné, ${editor.legalRepresentative.fullName}, Président de ${editor.legalForm} ${editor.legalName}, éditeur du logiciel ${editor.brands.b2bProduct}, atteste sur l’honneur que le logiciel délivré à ${client.legalName} satisfait, dans sa version ${softwareVersion} et pour le périmètre ci-dessus, aux quatre conditions cumulatives prévues à l’article 286, I, 3° bis du Code général des impôts, telles que définies par le BOI-TVA-DECLA-30-10-30 et le BOI-CF-COM-20-30-20.`,
     y,
   )
   y += 6
@@ -110,7 +115,7 @@ export function generateLaftAttestationPdf(data: LaftAttestationData): Uint8Arra
   y = sectionTitle(doc, '6. Portée et limites', y)
   y = paragraph(
     doc,
-    `La présente attestation couvre exclusivement la fonction « tenue d’un journal des opérations de caisse » au sens de l’art. 286 I 3° bis CGI, appliquée aux factures émises par ${client.legalName} via le module Devis & Factures du logiciel ${editor.product360}. Elle ne couvre pas les opérations de caisse réalisées hors du logiciel ni les éventuels paramétrages contraires à la documentation utilisateur.`,
+    `La présente attestation couvre exclusivement la fonction « tenue d’un journal des opérations de caisse » au sens de l’art. 286 I 3° bis CGI, appliquée aux factures émises par ${client.legalName} via le module Devis & Factures du logiciel ${editor.brands.b2bProduct}. Elle ne couvre pas les opérations de caisse réalisées hors du logiciel ni les éventuels paramétrages contraires à la documentation utilisateur.`,
     y,
   )
   y = paragraph(
@@ -124,7 +129,7 @@ export function generateLaftAttestationPdf(data: LaftAttestationData): Uint8Arra
   y += 18
   y = paragraph(doc, `Fait à ${editor.address.city}, le ${issuedFr}.`, y)
   y += 6
-  y = paragraph(doc, editor.representative, y, { bold: true })
+  y = paragraph(doc, editor.legalRepresentative.fullName, y, { bold: true })
   y = paragraph(doc, `Président, ${editor.legalForm} ${editor.legalName}`, y, { mute: true })
 
   // ============ FOOTER (toutes pages) ============
@@ -199,9 +204,9 @@ function applyFooter(
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(74, 88, 120)
-    const line1 = `${editor.legalForm} ${editor.legalName} — Capital ${editor.capital} — ${editor.rcs}`
-    const line2 = `${formatAddressLine(editor)} — SIREN ${editor.siren} — TVA ${editor.vatNumber} — APE ${editor.apeCode}`
-    const line3 = `Document généré automatiquement — Réf ${attestationNumber} — ${editor.domain} — Page ${i}/${pageCount}`
+    const line1 = `${editor.legalForm} ${editor.legalName} — Capital ${editor.capitalLabel} — ${editor.rcs.number}`
+    const line2 = `${formatAddressLine(editor)} — SIREN ${editor.siren} — TVA ${editor.vatIntracom} — APE ${editor.apeCode}`
+    const line3 = `Document généré automatiquement — Réf ${attestationNumber} — ${editor.domains.web} — Page ${i}/${pageCount}`
     doc.text(line1, MARGIN, PAGE_HEIGHT - 48)
     doc.text(line2, MARGIN, PAGE_HEIGHT - 36)
     doc.text(line3, MARGIN, PAGE_HEIGHT - 24)

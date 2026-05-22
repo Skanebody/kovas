@@ -19,7 +19,12 @@
  * de données consommée par l'endpoint PDF (`/api/legal/laft-attestation/[orgId]`).
  */
 
-import { COMPANY_IDENTITY, type CompanyIdentity, formatAddressLine } from './company-identity'
+import { COMPANY_IDENTITY } from './company-identity'
+
+type CompanyIdentity = typeof COMPANY_IDENTITY
+function formatAddressLine(editor: CompanyIdentity): string {
+  return editor.address.full
+}
 
 export interface DiagnostiqueurIdentity {
   /** Raison sociale du cabinet de diagnostiqueur (client KOVAS). */
@@ -172,11 +177,11 @@ export function renderLaftAttestationHtml(data: LaftAttestationData): string {
 <h2>1. Éditeur attestant</h2>
 <div class="party">
   <strong>${escapeHtml(editor.legalForm)} ${escapeHtml(editor.legalName)}</strong>
-  Capital social : ${escapeHtml(editor.capital)}<br />
+  Capital social : ${escapeHtml(editor.capitalLabel)}<br />
   Siège social : ${escapeHtml(formatAddressLine(editor))}<br />
-  ${escapeHtml(editor.rcs)} — SIREN ${escapeHtml(editor.siren)} — SIRET ${escapeHtml(editor.siret)}<br />
-  TVA intracommunautaire : ${escapeHtml(editor.vatNumber)} — APE ${escapeHtml(editor.apeCode)}<br />
-  Représenté par : ${escapeHtml(editor.representative)}, Président
+  ${escapeHtml(editor.rcs.number)} — SIREN ${escapeHtml(editor.siren)} — SIRET ${escapeHtml(editor.siret)}<br />
+  TVA intracommunautaire : ${escapeHtml(editor.vatIntracom)} — APE ${escapeHtml(editor.apeCode)}<br />
+  Représenté par : ${escapeHtml(editor.legalRepresentative.fullName)}, Président
 </div>
 
 <h2>2. Client utilisateur du logiciel</h2>
@@ -190,21 +195,21 @@ export function renderLaftAttestationHtml(data: LaftAttestationData): string {
 
 <h2>3. Logiciel concerné</h2>
 <div class="party">
-  <strong>${escapeHtml(editor.product360)} — Module Devis &amp; Factures</strong>
+  <strong>${escapeHtml(editor.brands.b2bProduct)} — Module Devis &amp; Factures</strong>
   Version logicielle attestée : ${escapeHtml(softwareVersion)}<br />
   Périmètre : ${escapeHtml(scope)}<br />
-  Domaine : ${escapeHtml(editor.domain)}
+  Domaine : ${escapeHtml(editor.domains.web)}
 </div>
 
 <h2>4. Déclaration de conformité</h2>
 <div class="declaration">
-  Je soussigné, ${escapeHtml(editor.representative)}, Président de ${escapeHtml(editor.legalForm)} ${escapeHtml(editor.legalName)}, éditeur du logiciel ${escapeHtml(editor.product360)}, atteste sur l’honneur que le logiciel délivré à <strong>${escapeHtml(client.legalName)}</strong> satisfait, dans sa version ${escapeHtml(softwareVersion)} et pour le périmètre ci-dessus, aux quatre conditions cumulatives prévues à l’article 286, I, 3° bis du Code général des impôts, telles que définies par le BOI-TVA-DECLA-30-10-30 et le BOI-CF-COM-20-30-20.
+  Je soussigné, ${escapeHtml(editor.legalRepresentative.fullName)}, Président de ${escapeHtml(editor.legalForm)} ${escapeHtml(editor.legalName)}, éditeur du logiciel ${escapeHtml(editor.brands.b2bProduct)}, atteste sur l’honneur que le logiciel délivré à <strong>${escapeHtml(client.legalName)}</strong> satisfait, dans sa version ${escapeHtml(softwareVersion)} et pour le périmètre ci-dessus, aux quatre conditions cumulatives prévues à l’article 286, I, 3° bis du Code général des impôts, telles que définies par le BOI-TVA-DECLA-30-10-30 et le BOI-CF-COM-20-30-20.
 </div>
 
 ${conditionsHtml}
 
 <h2>5. Portée et limites</h2>
-<p>La présente attestation couvre exclusivement la fonction « tenue d’un journal des opérations de caisse » au sens de l’art. 286 I 3° bis CGI, appliquée aux factures émises par ${escapeHtml(client.legalName)} via le module Devis &amp; Factures du logiciel ${escapeHtml(editor.product360)}. Elle ne couvre pas les opérations de caisse réalisées hors du logiciel ni les éventuels paramétrages contraires à la documentation utilisateur. Sa validité est conditionnée à l’usage du logiciel conforme aux conditions générales d’utilisation, sans contournement des mécanismes d’inaltérabilité et de sécurisation.</p>
+<p>La présente attestation couvre exclusivement la fonction « tenue d’un journal des opérations de caisse » au sens de l’art. 286 I 3° bis CGI, appliquée aux factures émises par ${escapeHtml(client.legalName)} via le module Devis &amp; Factures du logiciel ${escapeHtml(editor.brands.b2bProduct)}. Elle ne couvre pas les opérations de caisse réalisées hors du logiciel ni les éventuels paramétrages contraires à la documentation utilisateur. Sa validité est conditionnée à l’usage du logiciel conforme aux conditions générales d’utilisation, sans contournement des mécanismes d’inaltérabilité et de sécurisation.</p>
 <p>En cas d’évolution majeure du logiciel susceptible d’affecter la conformité, une nouvelle attestation est émise automatiquement et notifiée par email à l’adresse du compte. La conservation de la présente attestation incombe au client utilisateur (durée recommandée : durée du contrat + 6 ans).</p>
 
 <h2>6. Référentiels et textes applicables</h2>
@@ -218,14 +223,14 @@ ${conditionsHtml}
 
 <div class="sign">
   <p>Fait à ${escapeHtml(editor.address.city)}, le ${escapeHtml(issuedFr)}.</p>
-  <strong>${escapeHtml(editor.representative)}</strong>
+  <strong>${escapeHtml(editor.legalRepresentative.fullName)}</strong>
   Président, ${escapeHtml(editor.legalForm)} ${escapeHtml(editor.legalName)}
 </div>
 
 <footer>
-  ${escapeHtml(editor.legalForm)} ${escapeHtml(editor.legalName)} — Capital ${escapeHtml(editor.capital)} — ${escapeHtml(editor.rcs)}<br />
-  ${escapeHtml(formatAddressLine(editor))} — SIREN ${escapeHtml(editor.siren)} — TVA ${escapeHtml(editor.vatNumber)} — APE ${escapeHtml(editor.apeCode)}<br />
-  Document généré automatiquement — Référence ${escapeHtml(attestationNumber)} — ${escapeHtml(editor.domain)}
+  ${escapeHtml(editor.legalForm)} ${escapeHtml(editor.legalName)} — Capital ${escapeHtml(editor.capitalLabel)} — ${escapeHtml(editor.rcs.number)}<br />
+  ${escapeHtml(formatAddressLine(editor))} — SIREN ${escapeHtml(editor.siren)} — TVA ${escapeHtml(editor.vatIntracom)} — APE ${escapeHtml(editor.apeCode)}<br />
+  Document généré automatiquement — Référence ${escapeHtml(attestationNumber)} — ${escapeHtml(editor.domains.web)}
 </footer>
 </body>
 </html>`

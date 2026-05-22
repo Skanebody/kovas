@@ -172,19 +172,19 @@ export default async function AccountLegalPage() {
             <span className="font-semibold text-ink-soft">
               {editor.legalForm} {editor.legalName}
             </span>{' '}
-            — Capital {editor.capital}
+            — Capital {editor.capitalLabel}
           </p>
           <p>
-            {editor.address.street}, {editor.address.postalCode} {editor.address.city},{' '}
+            {editor.address.line1}, {editor.address.postalCode} {editor.address.city},{' '}
             {editor.address.country}
           </p>
           <p>
-            {editor.rcs} — SIREN {editor.siren} — SIRET {editor.siret}
+            {editor.rcs.number} — SIREN {editor.siren} — SIRET {editor.siret}
           </p>
           <p>
-            TVA {editor.vatNumber} — APE {editor.apeCode}
+            TVA {editor.vatIntracom} — APE {editor.apeCode}
           </p>
-          <p>Représentant légal : {editor.representative}, Président</p>
+          <p>Représentant légal : {editor.legalRepresentative.fullName}, Président</p>
         </div>
       </Card>
     </div>
