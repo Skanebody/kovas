@@ -1,0 +1,18 @@
+# Règles d'ignore pour OWASP ZAP baseline scan KOVAS.
+# Format TSV : ID	WARN|FAIL|IGNORE	# raison
+# Cf. https://www.zaproxy.org/docs/docker/baseline-scan/#configuration-file
+
+# Stripe Checkout redirige systématiquement (3xx) — comportement normal.
+10044	IGNORE	# Big Redirect Detected (Stripe checkout)
+10038	IGNORE	# Content Security Policy (header) — couvert par Next.js middleware
+10063	IGNORE	# Permissions Policy Header Not Set — V1.5 ajout prévu
+10096	IGNORE	# Timestamp Disclosure - Unix — faux positifs CSS/JS hashed
+
+# Supabase / Vercel injectent leurs propres headers.
+10027	IGNORE	# Information Disclosure - Suspicious Comments — généré par Next build
+10054	IGNORE	# Cookie Without SameSite Attribute — Supabase Auth (correct)
+10055	IGNORE	# CSP: Wildcard Directive — Vercel preview deploys
+
+# Endpoints publics autorisés.
+10202	IGNORE	# Absence of Anti-CSRF Tokens — endpoints GET publics (sitemap, robots)
+90033	IGNORE	# Loosely Scoped Cookie — domaine partagé kovas.fr / *.kovas.fr

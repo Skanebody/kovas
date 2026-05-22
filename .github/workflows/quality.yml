@@ -1,0 +1,352 @@
+# Pipeline qualité principal KOVAS — exécuté sur push/PR vers main & develop.
+# Authority : addendum qualité KOVAS — 8 jobs (static, security, test, build, e2e, lighthouse, a11y, chromatic).
+name: Quality
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+# Annule les runs précédents en cas de nouveau push sur la même ref (économie de minutes CI).
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  # ============================================================
+  # Job 1 — STATIC : typecheck + lint/format + dead code + deps
+  # ============================================================
+  static:
+    name: Static analysis (typecheck + lint + dead code)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript strict (zero any)
+        run: pnpm tsc --noEmit
+
+      - name: Biome check (lint + format)
+        run: pnpm biome check .
+
+      - name: Knip (dead code detection)
+        run: pnpm knip
+
+      - name: Depcheck (unused dependencies)
+        run: pnpm dlx depcheck
+
+  # ============================================================
+  # Job 2 — SECURITY : pnpm audit + Semgrep + Snyk
+  # ============================================================
+  security:
+    name: Security audit (pnpm + Semgrep + Snyk)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: pnpm audit (fail si vulnérabilité high)
+        run: pnpm audit --audit-level high
+
+      - name: Semgrep scan (security + OWASP + TS/React/Next)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/owasp-top-ten
+            p/typescript
+            p/react
+            p/nextjs
+            .semgrep.yml
+
+      - name: Snyk scan (severity high+)
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # ============================================================
+  # Job 3 — TEST : unit tests + coverage Codecov
+  # ============================================================
+  test:
+    name: Unit tests + coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [static]
+    env:
+      SUPABASE_URL_TEST: ${{ secrets.SUPABASE_URL_TEST }}
+      SUPABASE_ANON_KEY_TEST: ${{ secrets.SUPABASE_ANON_KEY_TEST }}
+      SUPABASE_SERVICE_ROLE_KEY_TEST: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_TEST }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests with coverage
+        run: pnpm test:unit --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          verbose: true
+
+  # ============================================================
+  # Job 4 — BUILD : build Next.js web + bundle analysis
+  # ============================================================
+  build:
+    name: Build web app + bundle analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [static]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web app (with bundle analyzer)
+        run: pnpm --filter @kovas/web build
+        env:
+          ANALYZE: "true"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder' }}
+
+      - name: Upload .next/ as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: apps/web/.next/
+          retention-days: 7
+          include-hidden-files: true
+
+      - name: Upload bundle analysis report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: apps/web/.next/analyze/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ============================================================
+  # Job 5 — E2E : Playwright tests sur build prod
+  # ============================================================
+  e2e:
+    name: E2E tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Next.js build
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: apps/web/.next/
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder' }}
+
+      - name: Upload Playwright report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  # ============================================================
+  # Job 6 — LIGHTHOUSE : audit perf/SEO/best-practices
+  # ============================================================
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Next.js build
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: apps/web/.next/
+
+      - name: Run Lighthouse CI
+        run: pnpm dlx @lhci/cli@latest autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+  # ============================================================
+  # Job 7 — A11Y : tests accessibilité
+  # ============================================================
+  a11y:
+    name: Accessibility tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Next.js build
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: apps/web/.next/
+
+      - name: Run accessibility tests
+        run: pnpm test:a11y
+
+  # ============================================================
+  # Job 8 — CHROMATIC : visual regression (PR uniquement)
+  # ============================================================
+  chromatic:
+    name: Chromatic visual regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Chromatic exige l'historique complet pour comparer baseline.
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish to Chromatic
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitOnceUploaded: true

@@ -1,0 +1,43 @@
+# Configuration lychee — link-checker pour docs, app et site KOVAS.
+# Utilisé par .github/workflows/scheduled.yml (job link-check).
+
+# Verbosité : info = warnings + erreurs + résumé.
+verbose = "info"
+
+# Cache des résultats pour ne pas re-checker les URLs valides.
+cache = true
+max_cache_age = "1d"
+
+# Parallélisme.
+threads = 16
+max_concurrency = 32
+
+# Retry & timeout.
+timeout = 20
+max_redirects = 10
+max_retries = 3
+
+# Codes HTTP acceptés (succès + redirections).
+accept = [200, 201, 202, 203, 204, 206, 301, 302, 303, 304, 307, 308]
+
+# Patterns d'URLs à exclure du scan.
+exclude = [
+  "^https?://localhost",
+  "^https?://127\\.0\\.0\\.1",
+  "^mailto:",
+  "^tel:",
+  "^https://twitter\\.com",
+  "^https://x\\.com",
+  "^https://linkedin\\.com",
+]
+
+# Sources scannées (fichiers contenant des liens).
+include = [
+  "./apps/web/src/app/**/*.{ts,tsx,md,mdx}",
+  "./apps/web/src/components/**/*.{ts,tsx}",
+  "./docs/**/*.md",
+]
+
+# Sortie : rapport JSON compact sous reports/.
+output = "./reports/lychee.json"
+format = "compact"

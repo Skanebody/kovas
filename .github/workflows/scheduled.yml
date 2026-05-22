@@ -1,0 +1,175 @@
+# Tâches programmées quotidiennes — link-check, audit SEO, scan ZAP, deps obsolètes.
+# Exécution chaque jour à 3h UTC (5h CEST) + déclenchement manuel via workflow_dispatch.
+name: Scheduled
+
+on:
+  schedule:
+    # Tous les jours à 03:00 UTC (05:00 Europe/Paris en heure d'été).
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  # ============================================================
+  # Link-check : détecte les liens cassés (docs + app + site)
+  # ============================================================
+  link-check:
+    name: Broken link check (lychee)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install lychee CLI
+        run: |
+          LYCHEE_VERSION="0.15.1"
+          curl -sLO "https://github.com/lycheeverse/lychee/releases/download/lychee-v${LYCHEE_VERSION}/lychee-x86_64-unknown-linux-gnu.tar.gz"
+          tar -xzf "lychee-x86_64-unknown-linux-gnu.tar.gz"
+          sudo mv lychee /usr/local/bin/
+          lychee --version
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Run lychee
+        id: lychee
+        continue-on-error: true
+        run: lychee --config lychee.toml https://kovas.fr
+
+      - name: Upload lychee report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lychee-report
+          path: reports/lychee.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Notify Slack on failure
+        if: steps.lychee.outcome == 'failure'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: "Lychee a détecté des liens cassés sur kovas.fr — consulter l'artifact lychee-report."
+          fields: repo,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ============================================================
+  # SEO audit : crawl Playwright + validation données structurées
+  # ============================================================
+  seo-audit:
+    name: SEO audit + structured data
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Run SEO audit
+        run: pnpm tsx scripts/seo-audit.ts
+
+      - name: Validate structured data (JSON-LD)
+        run: pnpm tsx scripts/validate-structured-data.ts
+
+      - name: Upload SEO reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-reports
+          path: reports/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================================
+  # ZAP scan : baseline OWASP sur staging
+  # ============================================================
+  zap-scan:
+    name: OWASP ZAP baseline scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: "https://kovas-staging.vercel.app"
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a"
+          fail_action: false
+          allow_issue_writing: true
+
+      - name: Upload ZAP HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: report_html.html
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================================
+  # Outdated deps : check pnpm outdated + ouverture issue si major
+  # ============================================================
+  outdated-deps:
+    name: Outdated dependencies check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: List outdated packages
+        run: pnpm outdated || true
+
+      - name: Check outdated (crée issue GitHub si major versions)
+        run: pnpm tsx scripts/check-outdated.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}

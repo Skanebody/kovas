@@ -1,0 +1,63 @@
+# Configuration Dependabot — mises à jour hebdomadaires des deps pnpm.
+# Stratégie : un PR groupé minor+patch, PRs séparés pour majors.
+version: 2
+
+updates:
+  # ----------------------------------------------------------------
+  # Dépendances pnpm (Node.js / TypeScript / Next.js)
+  # ----------------------------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    versioning-strategy: "increase"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
+    # Groupement : minor + patch dans un seul PR ; major reste séparé.
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+        exclude-patterns:
+          - "react"
+          - "react-dom"
+          - "next"
+    # On reste sur React 19 et Next 15 (pas de migration auto vers une majeure suivante).
+    ignore:
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+
+  # ----------------------------------------------------------------
+  # GitHub Actions (workflows)
+  # ----------------------------------------------------------------
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(actions)"
+    labels:
+      - "github-actions"
+      - "automated"
+    groups:
+      actions-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
