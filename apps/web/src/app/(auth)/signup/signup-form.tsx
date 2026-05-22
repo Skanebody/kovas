@@ -17,16 +17,28 @@ export function SignupForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      <FormField label="Nom complet" htmlFor="fullName" required error={errors.fullName}>
-        <Input
-          id="fullName"
-          name="fullName"
-          type="text"
-          autoComplete="name"
-          required
-          placeholder="Pierre Martin"
-        />
-      </FormField>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <FormField label="Prénom" htmlFor="firstName" required error={errors.firstName}>
+          <Input
+            id="firstName"
+            name="firstName"
+            type="text"
+            autoComplete="given-name"
+            required
+            placeholder="Pierre"
+          />
+        </FormField>
+        <FormField label="Nom" htmlFor="lastName" required error={errors.lastName}>
+          <Input
+            id="lastName"
+            name="lastName"
+            type="text"
+            autoComplete="family-name"
+            required
+            placeholder="Martin"
+          />
+        </FormField>
+      </div>
 
       <FormField
         label="Email professionnel"
