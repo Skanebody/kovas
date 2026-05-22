@@ -68,6 +68,10 @@ export async function POST() {
 
   for (const invoice of list) {
     try {
+      if (!invoice.client_id) {
+        lastError = `Facture ${invoice.reference} sans client`
+        continue
+      }
       const { data: client } = await userSupabase
         .from('clients')
         .select(
@@ -98,7 +102,7 @@ export async function POST() {
           .eq('organization_id', orgId)
       }
 
-      const payload = mapKovasInvoiceToQonto(invoice as KovasInvoiceForMapping, {
+      const payload = mapKovasInvoiceToQonto(invoice as unknown as KovasInvoiceForMapping, {
         qontoClientId: qontoCustomerId,
       })
       const createdInvoice = await qonto.createInvoice(payload)

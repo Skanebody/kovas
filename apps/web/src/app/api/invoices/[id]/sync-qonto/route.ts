@@ -121,7 +121,7 @@ export async function POST(
     }
 
     // 4. Créer facture Qonto
-    const invoicePayload = mapKovasInvoiceToQonto(invoice as KovasInvoiceForMapping, {
+    const invoicePayload = mapKovasInvoiceToQonto(invoice as unknown as KovasInvoiceForMapping, {
       qontoClientId: qontoCustomerId,
       reportToGovernment: false, // V1 : sync simple, pas de transmission DGFiP automatique
     })

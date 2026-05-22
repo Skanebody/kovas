@@ -11,6 +11,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_connectors: {
+        Row: {
+          id: string
+          organization_id: string
+          provider: 'qonto' | 'pennylane' | 'indy' | 'tiime'
+          token_encrypted: string
+          status: 'active' | 'inactive' | 'error'
+          last_sync_at: string | null
+          last_error: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          provider: 'qonto' | 'pennylane' | 'indy' | 'tiime'
+          token_encrypted: string
+          status?: 'active' | 'inactive' | 'error'
+          last_sync_at?: string | null
+          last_error?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          provider?: 'qonto' | 'pennylane' | 'indy' | 'tiime'
+          token_encrypted?: string
+          status?: 'active' | 'inactive' | 'error'
+          last_sync_at?: string | null
+          last_error?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      connector_api_access_requests: {
+        Row: {
+          id: string
+          organization_id: string
+          provider: 'qonto' | 'pennylane' | 'indy' | 'tiime'
+          requested_at: string
+          status: 'pending' | 'granted' | 'rejected'
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          provider: 'qonto' | 'pennylane' | 'indy' | 'tiime'
+          requested_at?: string
+          status?: 'pending' | 'granted' | 'rejected'
+          notes?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          provider?: 'qonto' | 'pennylane' | 'indy' | 'tiime'
+          requested_at?: string
+          status?: 'pending' | 'granted' | 'rejected'
+          notes?: string | null
+        }
+        Relationships: []
+      }
       abuse_detection_logs: {
         Row: {
           id: string
@@ -244,6 +307,11 @@ export type Database = {
           siret: string | null
           notes: string | null
           tags: unknown[] | null
+          qonto_customer_id: string | null
+          qonto_synced_at: string | null
+          pennylane_customer_id: string | null
+          indy_customer_id: string | null
+          tiime_customer_id: string | null
           created_by: string | null
           created_at: string
           updated_at: string
@@ -270,6 +338,11 @@ export type Database = {
           siret?: string | null
           notes?: string | null
           tags?: unknown[] | null
+          qonto_customer_id?: string | null
+          qonto_synced_at?: string | null
+          pennylane_customer_id?: string | null
+          indy_customer_id?: string | null
+          tiime_customer_id?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -296,6 +369,11 @@ export type Database = {
           siret?: string | null
           notes?: string | null
           tags?: unknown[] | null
+          qonto_customer_id?: string | null
+          qonto_synced_at?: string | null
+          pennylane_customer_id?: string | null
+          indy_customer_id?: string | null
+          tiime_customer_id?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -717,6 +795,14 @@ export type Database = {
           sent_at: string | null
           stripe_payment_link_url: string | null
           xml_path: string | null
+          qonto_invoice_id: string | null
+          qonto_synced_at: string | null
+          pennylane_invoice_id: string | null
+          pennylane_synced_at: string | null
+          indy_invoice_id: string | null
+          indy_synced_at: string | null
+          tiime_invoice_id: string | null
+          tiime_synced_at: string | null
           created_at: string
           updated_at: string
         }
@@ -756,6 +842,14 @@ export type Database = {
           sent_at?: string | null
           stripe_payment_link_url?: string | null
           xml_path?: string | null
+          qonto_invoice_id?: string | null
+          qonto_synced_at?: string | null
+          pennylane_invoice_id?: string | null
+          pennylane_synced_at?: string | null
+          indy_invoice_id?: string | null
+          indy_synced_at?: string | null
+          tiime_invoice_id?: string | null
+          tiime_synced_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -795,6 +889,14 @@ export type Database = {
           sent_at?: string | null
           stripe_payment_link_url?: string | null
           xml_path?: string | null
+          qonto_invoice_id?: string | null
+          qonto_synced_at?: string | null
+          pennylane_invoice_id?: string | null
+          pennylane_synced_at?: string | null
+          indy_invoice_id?: string | null
+          indy_synced_at?: string | null
+          tiime_invoice_id?: string | null
+          tiime_synced_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -1793,6 +1895,10 @@ export type Database = {
           accepted_at: string | null
           signature_provider: string | null
           signature_id: string | null
+          qonto_quote_id: string | null
+          qonto_synced_at: string | null
+          pennylane_quote_id: string | null
+          pennylane_synced_at: string | null
           created_at: string
           updated_at: string
         }
@@ -1814,6 +1920,10 @@ export type Database = {
           accepted_at?: string | null
           signature_provider?: string | null
           signature_id?: string | null
+          qonto_quote_id?: string | null
+          qonto_synced_at?: string | null
+          pennylane_quote_id?: string | null
+          pennylane_synced_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -1835,6 +1945,10 @@ export type Database = {
           accepted_at?: string | null
           signature_provider?: string | null
           signature_id?: string | null
+          qonto_quote_id?: string | null
+          qonto_synced_at?: string | null
+          pennylane_quote_id?: string | null
+          pennylane_synced_at?: string | null
           created_at?: string
           updated_at?: string
         }
