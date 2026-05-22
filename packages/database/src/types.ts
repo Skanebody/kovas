@@ -16,10 +16,18 @@ export type Database = {
           id: string
           organization_id: string
           provider: 'qonto' | 'pennylane' | 'indy' | 'tiime'
-          token_encrypted: string
-          status: 'active' | 'inactive' | 'error'
+          token_encrypted: string | null
+          api_key_encrypted: string | null
+          api_secret_encrypted: string | null
+          oauth_access_token_encrypted: string | null
+          oauth_refresh_token_encrypted: string | null
+          oauth_expires_at: string | null
+          workspace_id: string | null
+          config: Json
+          status: 'active' | 'inactive' | 'error' | 'pending'
           last_sync_at: string | null
           last_error: string | null
+          last_error_at: string | null
           created_at: string
           updated_at: string
         }
@@ -27,10 +35,18 @@ export type Database = {
           id?: string
           organization_id: string
           provider: 'qonto' | 'pennylane' | 'indy' | 'tiime'
-          token_encrypted: string
-          status?: 'active' | 'inactive' | 'error'
+          token_encrypted?: string | null
+          api_key_encrypted?: string | null
+          api_secret_encrypted?: string | null
+          oauth_access_token_encrypted?: string | null
+          oauth_refresh_token_encrypted?: string | null
+          oauth_expires_at?: string | null
+          workspace_id?: string | null
+          config?: Json
+          status?: 'active' | 'inactive' | 'error' | 'pending'
           last_sync_at?: string | null
           last_error?: string | null
+          last_error_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -38,10 +54,18 @@ export type Database = {
           id?: string
           organization_id?: string
           provider?: 'qonto' | 'pennylane' | 'indy' | 'tiime'
-          token_encrypted?: string
-          status?: 'active' | 'inactive' | 'error'
+          token_encrypted?: string | null
+          api_key_encrypted?: string | null
+          api_secret_encrypted?: string | null
+          oauth_access_token_encrypted?: string | null
+          oauth_refresh_token_encrypted?: string | null
+          oauth_expires_at?: string | null
+          workspace_id?: string | null
+          config?: Json
+          status?: 'active' | 'inactive' | 'error' | 'pending'
           last_sync_at?: string | null
           last_error?: string | null
+          last_error_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -52,25 +76,37 @@ export type Database = {
           id: string
           organization_id: string
           provider: 'qonto' | 'pennylane' | 'indy' | 'tiime'
-          requested_at: string
+          requested_by: string | null
+          contact_email: string | null
+          message: string | null
           status: 'pending' | 'granted' | 'rejected'
-          notes: string | null
+          requested_at: string
+          resolved_at: string | null
+          resolved_notes: string | null
         }
         Insert: {
           id?: string
           organization_id: string
           provider: 'qonto' | 'pennylane' | 'indy' | 'tiime'
-          requested_at?: string
+          requested_by?: string | null
+          contact_email?: string | null
+          message?: string | null
           status?: 'pending' | 'granted' | 'rejected'
-          notes?: string | null
+          requested_at?: string
+          resolved_at?: string | null
+          resolved_notes?: string | null
         }
         Update: {
           id?: string
           organization_id?: string
           provider?: 'qonto' | 'pennylane' | 'indy' | 'tiime'
-          requested_at?: string
+          requested_by?: string | null
+          contact_email?: string | null
+          message?: string | null
           status?: 'pending' | 'granted' | 'rejected'
-          notes?: string | null
+          requested_at?: string
+          resolved_at?: string | null
+          resolved_notes?: string | null
         }
         Relationships: []
       }
@@ -1899,6 +1935,10 @@ export type Database = {
           qonto_synced_at: string | null
           pennylane_quote_id: string | null
           pennylane_synced_at: string | null
+          indy_quote_id: string | null
+          indy_synced_at: string | null
+          tiime_quote_id: string | null
+          tiime_synced_at: string | null
           created_at: string
           updated_at: string
         }
@@ -1924,6 +1964,10 @@ export type Database = {
           qonto_synced_at?: string | null
           pennylane_quote_id?: string | null
           pennylane_synced_at?: string | null
+          indy_quote_id?: string | null
+          indy_synced_at?: string | null
+          tiime_quote_id?: string | null
+          tiime_synced_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -1949,6 +1993,10 @@ export type Database = {
           qonto_synced_at?: string | null
           pennylane_quote_id?: string | null
           pennylane_synced_at?: string | null
+          indy_quote_id?: string | null
+          indy_synced_at?: string | null
+          tiime_quote_id?: string | null
+          tiime_synced_at?: string | null
           created_at?: string
           updated_at?: string
         }
