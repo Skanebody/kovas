@@ -1,35 +1,65 @@
-import { ClientBiensSection } from '@/components/client/v5simp/ClientBiensSection'
-import type { ClientBien } from '@/components/client/v5simp/ClientBiensSection'
-import { ClientDossiersSection } from '@/components/client/v5simp/ClientDossiersSection'
-import type { ClientDossier } from '@/components/client/v5simp/ClientDossiersSection'
-import { ClientFab } from '@/components/client/v5simp/ClientFab'
-import { ClientHistoriqueSection } from '@/components/client/v5simp/ClientHistoriqueSection'
-import type { ClientHistoryEvent } from '@/components/client/v5simp/ClientHistoriqueSection'
-import { ClientIdentitySection } from '@/components/client/v5simp/ClientIdentitySection'
-import { type ClientStats, ClientStatsSheet } from '@/components/client/v5simp/ClientStatsSheet'
-import { Button } from '@/components/ui/button'
-import { getCurrentUser } from '@/lib/auth/current-user'
-import { ArrowLeft, Pencil } from 'lucide-react'
+import {
+  ArrowLeft,
+  Building2,
+  FileText,
+  FolderOpen,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Pencil,
+  Phone,
+  Receipt,
+} from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ClientDocumentsTab } from './_tabs/documents-tab'
+import { ClientDossiersTab } from './_tabs/dossiers-tab'
+import { ClientFacturesTab } from './_tabs/factures-tab'
+import { ClientDevisTab } from './_tabs/devis-tab'
+import { ClientStatsCard } from './_tabs/stats-card'
+import { DangerZone } from '@/components/danger-zone'
+import { Avatar } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { PageTabs } from '@/components/ui/page-tabs'
+import { getCurrentUser } from '@/lib/auth/current-user'
+import { formatFullAddress } from '@/lib/format-address'
+import { isBusinessClientType } from '@/lib/validation/client'
+import { deleteClientAction } from '../actions'
 
 export const metadata: Metadata = { title: 'Détail client' }
 
-const HISTORY_MAX = 10
+const TYPE_LABELS: Record<string, string> = {
+  particulier: 'Particulier',
+  agence: 'Agence',
+  notaire: 'Notaire',
+  syndic: 'Syndic',
+  entreprise: 'Entreprise',
+  collectivite: 'Collectivité',
+}
+
+type TabKey = 'devis' | 'factures' | 'dossiers' | 'documents'
+const VALID_TABS: readonly TabKey[] = ['devis', 'factures', 'dossiers', 'documents']
+
+function isValidTab(value: string | undefined): value is TabKey {
+  return typeof value === 'string' && (VALID_TABS as readonly string[]).includes(value)
+}
 
 export default async function ClientDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ tab?: string }>
 }) {
   const { id } = await params
+  const { tab: rawTab } = await searchParams
   const { supabase, orgId } = await getCurrentUser()
 
-  // 1. Client de base
   const { data: client } = await supabase
     .from('clients')
-    .select('id, display_name, type, city, email, phone')
+    .select('*')
     .eq('id', id)
     .eq('organization_id', orgId)
     .is('deleted_at', null)
@@ -37,157 +67,297 @@ export default async function ClientDetailPage({
 
   if (!client) notFound()
 
-  // 2. Biens rattachés (client_id direct sur properties)
-  const { data: propertiesRows } = await supabase
-    .from('properties')
-    .select('id, address, city, postal_code, property_type, surface_total')
-    .eq('organization_id', orgId)
-    .eq('client_id', id)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
+  // ============================================
+  // Comptages par section (parallèles, head:true)
+  // ============================================
+  const [
+    { count: dossiersCount },
+    { count: devisCount },
+    { count: facturesCount },
+    { data: lastDevis },
+    { data: lastFacture },
+  ] = await Promise.all([
+    supabase
+      .from('dossiers')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('client_id', id)
+      .is('deleted_at', null),
+    supabase
+      .from('quotes')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('client_id', id),
+    supabase
+      .from('invoices')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('client_id', id),
+    supabase
+      .from('quotes')
+      .select('created_at')
+      .eq('organization_id', orgId)
+      .eq('client_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('invoices')
+      .select('created_at')
+      .eq('organization_id', orgId)
+      .eq('client_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ])
 
-  const propertyIds = (propertiesRows ?? []).map((p) => p.id)
+  const dossierTotal = dossiersCount ?? 0
+  const devisTotal = devisCount ?? 0
+  const facturesTotal = facturesCount ?? 0
 
-  // 3. Dossiers liés au client (via client_id OU via property_id du client)
-  const { data: dossierRows } = await supabase
-    .from('dossiers')
-    .select(
-      'id, reference, status, scheduled_at, created_at, client_id, property_id, properties(address, city), missions(type)',
-    )
-    .eq('organization_id', orgId)
-    .is('deleted_at', null)
-    .or(
-      propertyIds.length > 0
-        ? `client_id.eq.${id},property_id.in.(${propertyIds.join(',')})`
-        : `client_id.eq.${id}`,
-    )
-    .order('created_at', { ascending: false })
-    .limit(200)
-
-  const dossiers = dossierRows ?? []
-  const dossiersCount = dossiers.length
-
-  // 4. Compte dossiers par bien (pour cards Biens)
-  const dossiersByProperty = new Map<string, number>()
-  for (const d of dossiers) {
-    if (!d.property_id) continue
-    dossiersByProperty.set(d.property_id, (dossiersByProperty.get(d.property_id) ?? 0) + 1)
+  // ============================================
+  // Onglet par défaut intelligent
+  // ============================================
+  function resolveDefaultTab(): TabKey {
+    if (devisTotal === 0 && facturesTotal === 0) return 'dossiers'
+    const devisAt = lastDevis?.created_at ? new Date(lastDevis.created_at).getTime() : 0
+    const facAt = lastFacture?.created_at ? new Date(lastFacture.created_at).getTime() : 0
+    if (devisAt > facAt) return 'devis'
+    if (facAt > 0) return 'factures'
+    return 'dossiers'
   }
 
-  const biens: ClientBien[] = (propertiesRows ?? []).map((p) => ({
-    id: p.id,
-    address: p.address,
-    city: p.city,
-    postal_code: p.postal_code,
-    property_type: p.property_type,
-    surface_total: p.surface_total,
-    dossiers_count: dossiersByProperty.get(p.id) ?? 0,
-  }))
+  const activeTab: TabKey = isValidTab(rawTab) ? rawTab : resolveDefaultTab()
 
-  // 5. Factures client (somme amount_ttc → centimes) pour le BottomSheet stats
-  const { data: invoiceRows } = await supabase
-    .from('invoices')
-    .select('amount_ttc')
-    .eq('organization_id', orgId)
-    .eq('client_id', id)
-
-  const caTotalCents = Math.round(
-    (invoiceRows ?? []).reduce((sum, r) => sum + Number(r.amount_ttc ?? 0), 0) * 100,
-  )
-
-  // 6. Dossiers list (côté section dossiers) — enrichi avec type principal + montant
-  const dossierItems: ClientDossier[] = dossiers.map((d) => {
-    const prop = Array.isArray(d.properties) ? d.properties[0] : d.properties
-    const missions = (d.missions ?? []) as { type: string }[]
-    return {
-      id: d.id,
-      reference: d.reference,
-      scheduled_at: d.scheduled_at,
-      created_at: d.created_at,
-      status: d.status,
-      property_address: prop?.address ?? null,
-      property_city: prop?.city ?? null,
-      total_cents: null,
-      primary_mission_type: missions[0]?.type ?? null,
-    }
-  })
-
-  // 7. Historique : dossiers créés + (V1) on n'a pas encore d'events table dédiée → on
-  //    dérive les N derniers événements depuis les dossiers + factures.
-  const historyEvents: ClientHistoryEvent[] = []
-  for (const d of dossiers) {
-    historyEvents.push({
-      id: `dossier:${d.id}:created`,
-      dateIso: d.created_at,
-      kind: 'dossier_created',
-      summary: `Dossier ${d.reference} créé`,
-      href: `/dashboard/dossiers/${d.id}`,
-    })
-  }
-  // V1 : factures non listées dans l'historique (champs requis non sélectionnés).
-  // À enrichir lorsqu'une table d'events dédiée existera.
-  historyEvents.sort((a, b) => b.dateIso.localeCompare(a.dateIso))
-  const historyLimited = historyEvents.slice(0, HISTORY_MAX)
-
-  const firstDossierIso = dossiers.length > 0 ? dossiers[dossiers.length - 1].created_at : null
-  const lastDossierIso = dossiers.length > 0 ? dossiers[0].created_at : null
-
-  const stats: ClientStats = {
-    caTotalCents,
-    dossiersCount,
-    fideliteScore: dossiersCount,
-    lastContactIso: lastDossierIso,
-    firstContactIso: firstDossierIso,
-    biensCount: biens.length,
-  }
-
-  const fidele = dossiersCount >= 5
+  const addressLines = formatFullAddress(client)
+  const personName = [client.first_name, client.last_name].filter(Boolean).join(' ')
+  const business = isBusinessClientType(client.type)
+  const typeLabel = TYPE_LABELS[client.type] ?? client.type
+  const cityLine = [client.postal_code, client.city].filter(Boolean).join(' ')
 
   return (
-    <>
-      {/* Context bar sticky 56px */}
-      <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 mb-6 flex h-14 items-center justify-between gap-3 border-b border-rule/40 bg-sage/85 px-4 sm:px-6 backdrop-blur-md">
-        <div className="flex items-center gap-3 min-w-0">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/dashboard/clients" aria-label="Retour aux clients">
-              <ArrowLeft className="size-4" />
-            </Link>
-          </Button>
-          <span className="font-sans text-[14px] font-medium text-ink truncate">
-            {client.display_name}
-          </span>
+    <div className="space-y-6 animate-fade-in">
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/dashboard/clients">
+          <ArrowLeft className="size-4" /> Retour aux clients
+        </Link>
+      </Button>
+
+      {/* ============================================
+          Header fiche client — Qonto pattern
+          ============================================ */}
+      <section className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+        <div className="flex flex-col gap-5">
+          {/* Ligne identité */}
+          <div className="flex items-start gap-4">
+            <Avatar
+              name={client.display_name}
+              size="lg"
+              className="size-16 text-lg bg-navy text-chartreuse font-semibold"
+            />
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+                  {client.display_name}
+                </h1>
+                <Badge variant="muted" className="uppercase tracking-wider">
+                  {typeLabel}
+                </Badge>
+                {dossierTotal >= 5 && (
+                  <Badge variant="amber" className="uppercase tracking-wider">
+                    Fidèle
+                  </Badge>
+                )}
+              </div>
+              {personName && client.company_name ? (
+                <p className="text-sm text-ink-mute">
+                  Contact : <span className="text-ink">{personName}</span>
+                </p>
+              ) : null}
+            </div>
+            <Button variant="glass" size="sm" asChild className="shrink-0">
+              <Link href={`/dashboard/clients/${client.id}/edit`}>
+                <Pencil className="size-4" /> Modifier
+              </Link>
+            </Button>
+          </div>
+
+          {/* Grille coordonnées 4 colonnes desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3 border-t border-rule/40 pt-4">
+            <CoordCell
+              icon={Phone}
+              label="Téléphone"
+              value={client.phone}
+              href={client.phone ? `tel:${client.phone}` : undefined}
+            />
+            <CoordCell
+              icon={Mail}
+              label="Email"
+              value={client.email}
+              href={client.email ? `mailto:${client.email}` : undefined}
+            />
+            <CoordCell
+              icon={MapPin}
+              label="Adresse"
+              value={addressLines[0] ?? null}
+              secondary={cityLine || null}
+            />
+            <CoordCell
+              icon={Building2}
+              label="SIRET"
+              value={business && client.siret ? client.siret : null}
+              mono
+            />
+          </div>
+
+          {/* Row actions Qonto-like */}
+          <div className="flex flex-wrap items-center gap-2 border-t border-rule/40 pt-4">
+            {client.phone ? (
+              <Button variant="outline" size="sm" asChild>
+                <a href={`tel:${client.phone}`}>
+                  <Phone className="size-4" />
+                  Appeler
+                </a>
+              </Button>
+            ) : null}
+            {client.phone ? (
+              <Button variant="outline" size="sm" asChild>
+                <a href={`sms:${client.phone}`}>
+                  <MessageSquare className="size-4" />
+                  SMS
+                </a>
+              </Button>
+            ) : null}
+            {client.email ? (
+              <Button variant="outline" size="sm" asChild>
+                <a href={`mailto:${client.email}`}>
+                  <Mail className="size-4" />
+                  Email
+                </a>
+              </Button>
+            ) : null}
+            <Button variant="default" size="sm" asChild>
+              <Link href={`/dashboard/devis/new?client_id=${client.id}`}>
+                <FileText className="size-4" />
+                Devis
+              </Link>
+            </Button>
+            <Button variant="accent" size="sm" asChild>
+              <Link href={`/dashboard/factures/new?client_id=${client.id}`}>
+                <Receipt className="size-4" />
+                Facture
+              </Link>
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <ClientStatsSheet stats={stats} />
-          <Button variant="ghost" size="sm" asChild aria-label="Modifier le client">
-            <Link href={`/dashboard/clients/${client.id}/edit`}>
-              <Pencil className="size-4" />
-            </Link>
-          </Button>
-        </div>
+      </section>
+
+      {/* ============================================
+          Statistiques client (4 KPI)
+          ============================================ */}
+      <ClientStatsCard
+        clientId={client.id}
+        orgId={orgId}
+        dossierTotal={dossierTotal}
+      />
+
+      {/* ============================================
+          Tabs navigation
+          ============================================ */}
+      <PageTabs
+        basePath={`/dashboard/clients/${client.id}`}
+        active={activeTab}
+        tabs={[
+          { key: 'devis', label: 'Devis', icon: FileText, count: devisTotal },
+          { key: 'factures', label: 'Factures', icon: Receipt, count: facturesTotal },
+          { key: 'dossiers', label: 'Dossiers', icon: FolderOpen, count: dossierTotal },
+          { key: 'documents', label: 'Documents', icon: FileText },
+        ]}
+      />
+
+      {/* ============================================
+          Contenu actif (serveur)
+          ============================================ */}
+      <div className="space-y-6">
+        {activeTab === 'devis' && (
+          <ClientDevisTab clientId={client.id} orgId={orgId} />
+        )}
+        {activeTab === 'factures' && (
+          <ClientFacturesTab clientId={client.id} orgId={orgId} />
+        )}
+        {activeTab === 'dossiers' && (
+          <ClientDossiersTab clientId={client.id} orgId={orgId} />
+        )}
+        {activeTab === 'documents' && (
+          <ClientDocumentsTab clientId={client.id} orgId={orgId} />
+        )}
       </div>
 
-      <div className="space-y-10 animate-fade-in pb-24">
-        <ClientIdentitySection
-          client={{
-            id: client.id,
-            display_name: client.display_name,
-            type: client.type,
-            city: client.city,
-            email: client.email,
-            phone: client.phone,
-          }}
-          fidele={fidele}
-        />
+      {/* Notes internes — affichage compact si présent */}
+      {client.notes ? (
+        <div className="rounded-xl border border-rule/60 bg-paper/85 p-5 shadow-glass-sm">
+          <div className="text-[11px] font-mono uppercase tracking-[0.1em] text-ink-mute mb-2">
+            Notes internes
+          </div>
+          <p className="text-sm whitespace-pre-wrap text-ink-soft">{client.notes}</p>
+        </div>
+      ) : null}
 
-        <ClientBiensSection clientId={client.id} biens={biens} />
+      <DangerZone
+        entityLabel="client"
+        onDelete={deleteClientAction.bind(null, client.id)}
+      />
+    </div>
+  )
+}
 
-        <ClientDossiersSection dossiers={dossierItems} />
+// ============================================
+// Cellule coordonnées — pattern Qonto
+// ============================================
+type CoordCellProps = {
+  icon: typeof Phone
+  label: string
+  value?: string | null
+  secondary?: string | null
+  href?: string
+  mono?: boolean
+}
 
-        <ClientHistoriqueSection events={historyLimited} />
+function CoordCell({ icon: Icon, label, value, secondary, href, mono }: CoordCellProps) {
+  return (
+    <div className="flex items-start gap-3 min-w-0">
+      <div className="shrink-0 size-9 rounded-pill bg-cream-deep flex items-center justify-center">
+        <Icon className="size-4 text-ink-mute" />
       </div>
-
-      <ClientFab clientId={client.id} />
-    </>
+      <div className="min-w-0 flex-1 space-y-0.5">
+        <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
+          {label}
+        </div>
+        {value ? (
+          href ? (
+            <a
+              href={href}
+              className={
+                'block truncate text-sm text-ink hover:underline ' +
+                (mono ? 'font-mono tracking-tight' : '')
+              }
+            >
+              {value}
+            </a>
+          ) : (
+            <div
+              className={
+                'block truncate text-sm text-ink ' + (mono ? 'font-mono tracking-tight' : '')
+              }
+            >
+              {value}
+            </div>
+          )
+        ) : (
+          <div className="text-sm text-ink-ghost italic">Non renseigné</div>
+        )}
+        {secondary ? <div className="truncate text-xs text-ink-mute">{secondary}</div> : null}
+      </div>
+    </div>
   )
 }
