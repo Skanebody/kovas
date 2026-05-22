@@ -93,7 +93,7 @@ export function LeadFocalCard({ lead, onCall, onSendQuote, onDeferLater }: LeadF
           <PhoneCall className="size-4" aria-hidden />
           Appeler maintenant
         </Button>
-        <div className={cn('grid grid-cols-2 gap-2')}>
+        <div className={cn('grid grid-cols-1 sm:grid-cols-2 gap-2')}>
           <Button variant="outline" size="default" onClick={onSendQuote}>
             Envoyer un devis
           </Button>

@@ -62,7 +62,7 @@ export function ConsolidationSummaryModal({
         {summary ? <p className="text-sm text-ink-soft leading-relaxed">{summary}</p> : null}
 
         {/* Stats hero : 3 chiffres */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
           <StatCard
             icon={<Sparkles className="size-4" aria-hidden />}
             value={fieldsConsolidated}

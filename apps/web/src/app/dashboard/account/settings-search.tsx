@@ -47,7 +47,7 @@ export function SettingsSearch() {
         onChange={(e) => setQuery(e.target.value)}
         aria-label="Rechercher dans les réglages"
         className={cn(
-          'w-full h-10 rounded-xl pl-9 pr-9 text-[14px]',
+          'w-full h-12 md:h-10 rounded-xl pl-9 pr-9 text-[14px]',
           'bg-[#0F1419]/[0.05] border-0 outline-none',
           'placeholder:text-[#0F1419]/40 text-[#0F1419]',
           'focus:bg-[#0F1419]/[0.07] transition-colors',

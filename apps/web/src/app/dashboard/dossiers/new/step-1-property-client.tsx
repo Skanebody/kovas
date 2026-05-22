@@ -144,7 +144,7 @@ export function Step1PropertyClient({
               })}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-2">
               <FormField
                 label="Année de construction"
                 htmlFor="yearBuilt"

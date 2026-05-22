@@ -68,7 +68,7 @@ export async function CetteSemaineSection() {
       <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute mb-3">
         CETTE SEMAINE
       </p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
         <div className="rounded-xl border border-rule/40 bg-paper/60 px-5 py-4">
           <p className="font-serif italic text-[28px] leading-none text-ink mb-1.5">
             {formatEuros(ca)}

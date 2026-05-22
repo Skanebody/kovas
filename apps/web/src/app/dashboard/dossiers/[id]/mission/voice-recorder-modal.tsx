@@ -353,7 +353,7 @@ export function VoiceRecorderModal({
 
               {/* Compteur */}
               <div className="flex flex-col items-center gap-1">
-                <span className="font-mono text-5xl font-semibold text-ink tabular-nums">
+                <span className="font-mono text-3xl sm:text-5xl font-semibold text-ink tabular-nums">
                   {counterLabel}
                 </span>
                 <span className="text-xs text-ink-mute">{remainingLabel}</span>

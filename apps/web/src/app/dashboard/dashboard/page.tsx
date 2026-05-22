@@ -34,10 +34,10 @@ export default async function DashboardPage() {
       : `${visitCount} mission${visitCount > 1 ? 's' : ''} aujourd'hui`
 
   return (
-    <div className="mx-auto w-full max-w-[800px] space-y-10 animate-fade-in">
+    <div className="mx-auto w-full max-w-[800px] space-y-6 md:space-y-10 animate-fade-in">
       {/* Salutation contextuelle */}
       <header>
-        <h1 className="font-sans font-medium text-[32px] leading-tight tracking-tight text-ink">
+        <h1 className="font-sans font-medium text-[24px] md:text-[32px] leading-tight tracking-tight text-ink">
           Bonjour{firstName ? ` ${firstName}` : ''}
         </h1>
         <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.15em] text-ink-mute capitalize">
