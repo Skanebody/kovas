@@ -1,61 +1,110 @@
 /**
- * /sitemap-diagnostics-villes.xml — pages programmatiques croisées (type × ville).
+ * /sitemap-diagnostics-villes.xml — sitemap des pages programmatiques SEO.
  *
- * URLs canoniques : /diagnostic/{type}/{ville}
+ * Couvre 6 patterns d'URL :
+ *   - /diagnostic/{type}/{ville}      (9 × N villes)
+ *   - /prix/{type}/{ville}            (9 × N villes)
+ *   - /urgent/{ville}                 (N villes)
+ *   - /comparatif/{type}/{ville}      (9 × N villes)
+ *   - /audit-energetique/{ville}      (N villes)
+ *   - /maprimerenov/{ville}           (N villes)
  *
- * Cible SEO : longue traîne "diagnostic dpe paris", "amiante lyon", etc.
- * Volume potentiel : 9 types × 30 villes seeds = 270 URLs Phase 1.
- *  Phase 2 : 9 × 1000 villes Supabase = ~9000 URLs (toujours sous limite 50k).
+ * Volume V1 (213 villes registry) : 6 390 URLs (sous limite 50k).
  *
- * Composition :
- *  - 9 types de diagnostic (8 standards + audit énergétique)
- *  - 30 villes seeds depuis `SEO_CITIES`
+ * Priorités sitemap :
+ *   - /diagnostic/, /prix/ : 0.6 (longue traîne forte)
+ *   - /comparatif/ : 0.55
+ *   - /urgent/ : 0.5 (saisonnier)
+ *   - /audit-energetique/, /maprimerenov/ : 0.55 (réglementaire)
  *
- * Priorité 0.5 (longue traîne, mais volume cumulé important).
+ * Note : si volume dépasse 50k URLs (sprint V2 avec 1000+ villes), passer en
+ * sitemap-index paginé via Next.js `generateSitemaps`.
  */
 
-import { SEO_CITIES } from '@/lib/seo/cities'
+import { CITIES } from '@/lib/cities/registry'
+import { DIAGNOSTIC_TYPES } from '@/lib/diagnostics/types'
 
 export const dynamic = 'force-static'
-export const revalidate = 3600
+export const revalidate = 86400
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kovas.fr'
 
-const DIAGNOSTIC_TYPES: readonly string[] = [
-  'dpe',
-  'amiante',
-  'plomb',
-  'gaz',
-  'electricite',
-  'termites',
-  'carrez',
-  'erp',
-  'audit-energetique',
-]
+interface SitemapEntry {
+  readonly loc: string
+  readonly priority: number
+  readonly changefreq: 'daily' | 'weekly' | 'monthly' | 'yearly'
+}
+
+function priorityForCity(priority: 'top' | 'mid' | 'low'): number {
+  if (priority === 'top') return 0.1
+  if (priority === 'mid') return 0
+  return -0.05
+}
+
+function buildEntries(): ReadonlyArray<SitemapEntry> {
+  const entries: SitemapEntry[] = []
+
+  for (const city of CITIES) {
+    const boost = priorityForCity(city.priority)
+
+    for (const type of DIAGNOSTIC_TYPES) {
+      entries.push({
+        loc: `${BASE_URL}/diagnostic/${type}/${city.slug}`,
+        priority: Math.max(0.3, Math.min(0.9, 0.6 + boost)),
+        changefreq: 'monthly',
+      })
+      entries.push({
+        loc: `${BASE_URL}/prix/${type}/${city.slug}`,
+        priority: Math.max(0.3, Math.min(0.9, 0.6 + boost)),
+        changefreq: 'monthly',
+      })
+      entries.push({
+        loc: `${BASE_URL}/comparatif/${type}/${city.slug}`,
+        priority: Math.max(0.3, Math.min(0.9, 0.55 + boost)),
+        changefreq: 'monthly',
+      })
+    }
+
+    entries.push({
+      loc: `${BASE_URL}/urgent/${city.slug}`,
+      priority: Math.max(0.3, Math.min(0.9, 0.5 + boost)),
+      changefreq: 'weekly',
+    })
+    entries.push({
+      loc: `${BASE_URL}/audit-energetique/${city.slug}`,
+      priority: Math.max(0.3, Math.min(0.9, 0.55 + boost)),
+      changefreq: 'monthly',
+    })
+    entries.push({
+      loc: `${BASE_URL}/maprimerenov/${city.slug}`,
+      priority: Math.max(0.3, Math.min(0.9, 0.55 + boost)),
+      changefreq: 'monthly',
+    })
+  }
+
+  return entries
+}
 
 export function GET(): Response {
   const lastmod = new Date().toISOString()
+  const entries = buildEntries()
 
-  const urls: string[] = []
-
-  for (const type of DIAGNOSTIC_TYPES) {
-    for (const city of SEO_CITIES) {
-      urls.push(
-        [
-          '  <url>',
-          `    <loc>${BASE_URL}/diagnostic/${type}/${city.slug}</loc>`,
-          `    <lastmod>${lastmod}</lastmod>`,
-          '    <changefreq>monthly</changefreq>',
-          '    <priority>0.5</priority>',
-          '  </url>',
-        ].join('\n'),
-      )
-    }
-  }
+  const urls = entries
+    .map((entry) =>
+      [
+        '  <url>',
+        `    <loc>${entry.loc}</loc>`,
+        `    <lastmod>${lastmod}</lastmod>`,
+        `    <changefreq>${entry.changefreq}</changefreq>`,
+        `    <priority>${entry.priority.toFixed(2)}</priority>`,
+        '  </url>',
+      ].join('\n'),
+    )
+    .join('\n')
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.join('\n')}
+${urls}
 </urlset>
 `
 
