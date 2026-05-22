@@ -23,7 +23,7 @@ import { test } from '@playwright/test'
 test.describe('Claim workflow diagnostician', () => {
   test.skip(
     true,
-    "Feature claim diagnostician non implémentée en V1 — routes /reclamer-ma-fiche/* absentes du codebase. À réactiver post-launch annuaire.",
+    'Feature claim diagnostician non implémentée en V1 — routes /reclamer-ma-fiche/* absentes du codebase. À réactiver post-launch annuaire.',
   )
 
   test('claim → admin approve → claim_status=claimed', async ({ page }) => {

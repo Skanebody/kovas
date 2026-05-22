@@ -17,5 +17,23 @@
     "noEmit": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next", "dist", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx", "tests/e2e", "playwright.config.ts", "playwright-report"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "dist",
+    "coverage",
+    "playwright-report",
+    "storybook-static",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.stories.tsx",
+    "tests/e2e",
+    "tests/rls",
+    "playwright.config.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts",
+    ".storybook"
+  ]
 }

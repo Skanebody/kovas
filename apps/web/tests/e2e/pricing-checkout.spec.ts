@@ -22,9 +22,7 @@ test.describe('Pricing page + parcours checkout', () => {
     await page.goto('/pricing')
 
     // Heading principal
-    await expect(
-      page.getByRole('heading', { name: /Tarification simple/i }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Tarification simple/i })).toBeVisible()
 
     // Les 3 tiers V1
     await expect(page.getByText('Découverte', { exact: true }).first()).toBeVisible()

@@ -17,7 +17,15 @@
     "format": "biome format --write .",
     "check": "biome check .",
     "test": "pnpm -r run test",
-    "test:e2e": "pnpm -F tests-e2e test",
+    "test:unit": "pnpm -F @kovas/web test:unit",
+    "test:unit:coverage": "pnpm -F @kovas/web test:unit:coverage",
+    "test:rls": "pnpm -F @kovas/web test:rls",
+    "test:e2e": "pnpm -F @kovas/web test:e2e",
+    "test:a11y": "pnpm -F @kovas/web test:a11y",
+    "test:all": "pnpm -F @kovas/web test:all",
+    "storybook": "pnpm -F @kovas/web storybook",
+    "storybook:build": "pnpm -F @kovas/web storybook:build",
+    "chromatic": "pnpm -F @kovas/web chromatic",
     "dead-code": "knip",
     "dead-code:fix": "knip --fix",
     "outdated": "pnpm outdated --recursive",
@@ -45,12 +53,8 @@
     "typescript": "^5.7.2"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "biome check --no-errors-on-unmatched --write"
-    ],
-    "*.{json,md,css}": [
-      "biome format --write --no-errors-on-unmatched"
-    ]
+    "*.{ts,tsx,js,jsx}": ["biome check --no-errors-on-unmatched --write"],
+    "*.{json,md,css}": ["biome format --write --no-errors-on-unmatched"]
   },
   "engines": {
     "node": ">=20",

@@ -23,7 +23,7 @@ import { test } from '@playwright/test'
 test.describe('Demande devis B2C avec OTP', () => {
   test.skip(
     true,
-    "Feature annuaire B2C + OTP SMS non implémentée en V1 — routes /diagnostiqueurs/* et /api/leads/* absentes du codebase. À réactiver post-launch annuaire.",
+    'Feature annuaire B2C + OTP SMS non implémentée en V1 — routes /diagnostiqueurs/* et /api/leads/* absentes du codebase. À réactiver post-launch annuaire.',
   )
 
   test('quote request with OTP verification', async ({ page }) => {

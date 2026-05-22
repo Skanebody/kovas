@@ -1,22 +1,26 @@
 import { defineConfig, devices } from '@playwright/test'
 
 /**
- * Playwright config — KOVAS App E2E.
+ * Playwright config — KOVAS App E2E + a11y (couche 6 industrialisation).
  *
- * Modes :
- * - Local : démarre `pnpm dev` automatiquement (webServer)
- * - CI / preview : utiliser E2E_BASE_URL pour cibler un serveur déjà lancé
+ * Projects :
+ *   - chromium-desktop  : Desktop Chrome 1280×720 (par défaut, suite principale)
+ *   - webkit-desktop    : Safari desktop (verif rendu webkit)
+ *   - firefox-desktop   : Firefox desktop
+ *   - mobile-chrome     : Pixel 5 (375×851) — opt-in via testMatch *.mobile.spec.ts
+ *   - mobile-safari     : iPhone 13 (390×844) — opt-in idem
+ *   - tablet            : iPad Pro 11 — opt-in via testMatch *.tablet.spec.ts
+ *   - a11y              : projet dédié WCAG 2.1 AA (axe-core)
  *
  * Lancement :
- *   pnpm test:e2e            (headless)
- *   pnpm test:e2e:ui         (UI mode)
- *   pnpm test:e2e:headed     (browser visible)
+ *   pnpm test:e2e            (tous projects sauf opt-in)
+ *   pnpm test:a11y           (suite axe-core seule)
+ *   pnpm test:e2e -- --project=mobile-chrome (un project spécifique)
  */
 export default defineConfig({
   testDir: './tests/e2e',
-  // Serialize tests for V1 — DB partagée avec dev (pas de test DB séparée)
   fullyParallel: false,
-  workers: 1,
+  workers: process.env.CI ? 2 : 1,
   retries: process.env.CI ? 2 : 1,
   forbidOnly: !!process.env.CI,
   timeout: 30_000,
@@ -24,6 +28,7 @@ export default defineConfig({
   reporter: [
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
     ['list'],
+    ['json', { outputFile: 'playwright-report/results.json' }],
   ],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
@@ -35,15 +40,42 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'chromium-desktop',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: [/.*\.mobile\.spec\.ts/, /.*\.tablet\.spec\.ts/, /\/a11y\//],
     },
-    // Activer le profil mobile uniquement pour les tests dédiés (tag @mobile)
-    // {
-    //   name: 'mobile-chrome',
-    //   use: { ...devices['Pixel 7'] },
-    //   testMatch: /.*\.mobile\.spec\.ts/,
-    // },
+    {
+      name: 'webkit-desktop',
+      use: { ...devices['Desktop Safari'] },
+      testMatch: /critical-.*\.spec\.ts$/,
+      testIgnore: [/.*\.mobile\.spec\.ts/, /.*\.tablet\.spec\.ts/, /\/a11y\//],
+    },
+    {
+      name: 'firefox-desktop',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: /critical-.*\.spec\.ts$/,
+      testIgnore: [/.*\.mobile\.spec\.ts/, /.*\.tablet\.spec\.ts/, /\/a11y\//],
+    },
+    {
+      name: 'mobile-chrome',
+      use: { ...devices['Pixel 5'] },
+      testMatch: /.*responsive-mobile\.spec\.ts$|.*\.mobile\.spec\.ts$/,
+    },
+    {
+      name: 'mobile-safari',
+      use: { ...devices['iPhone 13'] },
+      testMatch: /.*\.mobile\.spec\.ts$/,
+    },
+    {
+      name: 'tablet',
+      use: { ...devices['iPad Pro 11'] },
+      testMatch: /.*responsive-tablet\.spec\.ts$|.*\.tablet\.spec\.ts$/,
+    },
+    {
+      name: 'a11y',
+      use: { ...devices['Desktop Chrome'] },
+      testDir: './tests/e2e/a11y',
+    },
   ],
   webServer: process.env.E2E_BASE_URL
     ? undefined
