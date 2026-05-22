@@ -83,6 +83,12 @@ const nextConfig: NextConfig = {
       // (rename Phase C pour clarifier que l'espace authentifié est le tableau de bord
       // dual track Annuaire + Logiciel).
       { source: '/app/:path*', destination: '/dashboard/:path*', permanent: true },
+      // Fusion /dashboard/upgrade/{annuaire,logiciel,bundle} → /dashboard/decouvrir
+      // (page dynamique unifiee avec algorithme d'intention d'achat).
+      { source: '/dashboard/upgrade/annuaire', destination: '/dashboard/decouvrir', permanent: true },
+      { source: '/dashboard/upgrade/logiciel', destination: '/dashboard/decouvrir', permanent: true },
+      { source: '/dashboard/upgrade/bundle', destination: '/dashboard/decouvrir', permanent: true },
+      { source: '/dashboard/upgrade', destination: '/dashboard/decouvrir', permanent: true },
     ]
   },
   async headers() {
