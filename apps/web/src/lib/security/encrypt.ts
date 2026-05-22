@@ -118,6 +118,16 @@ export function decryptToken(ciphertext: string): string {
  * Helper pour masquer un token à l'affichage (UI settings).
  * `qonto_login_xxxx:secret_yyyyyyyy` → `qonto_login_xxxx:secret_*****yy`
  */
+/**
+ * Alias : `decryptSecret` / `encryptSecret` / `maskSecret` — convention Pennylane.
+ * Conserve `encryptToken` / `decryptToken` / `maskToken` pour Qonto.
+ */
+export const encryptSecret = encryptToken
+export const decryptSecret = decryptToken
+export function maskSecret(plaintext: string): string {
+  return maskToken(plaintext)
+}
+
 export function maskToken(plaintext: string): string {
   if (!plaintext || plaintext.length < 8) return '••••••••'
   return `${plaintext.slice(0, 4)}${'•'.repeat(Math.max(8, plaintext.length - 6))}${plaintext.slice(-2)}`
