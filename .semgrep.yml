@@ -1,0 +1,151 @@
+# ============================================
+# KOVAS App — Semgrep custom rules
+# ============================================
+# Règles SAST adaptées au stack KOVAS (Next.js 15 + Supabase + TypeScript strict).
+# Exécutées via .github/workflows/security.yml + en local via `semgrep --config .semgrep.yml`.
+#
+# Sévérités :
+#   - ERROR   : bloque la CI (fail-fast)
+#   - WARNING : remonte un commentaire de review, ne bloque pas
+#
+# Cf. docs/SECURITY.md pour la politique complète.
+
+rules:
+  # ============================================================
+  # 1. Pas de clé Supabase service_role hardcodée dans le code
+  # ============================================================
+  - id: no-hardcoded-supabase-key
+    message: >-
+      Clé Supabase service_role hardcodée détectée. Elle DOIT venir de
+      process.env.SUPABASE_SERVICE_ROLE_KEY (jamais en clair dans le repo).
+      Cf. .env.example + docs/SECURITY.md.
+    severity: ERROR
+    languages:
+      - typescript
+      - javascript
+    patterns:
+      - pattern-either:
+          - pattern: |
+              const $X = "eyJ..."
+          - pattern: |
+              const SUPABASE_SERVICE_ROLE_KEY = "..."
+          - pattern: |
+              SUPABASE_SERVICE_ROLE_KEY = "eyJ..."
+          - pattern-regex: 'SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*[''"]eyJ[A-Za-z0-9_\-\.]{20,}[''"]'
+
+  # ============================================================
+  # 2. Pas de SQL string interpolé directement dans .rpc() ou .from()
+  # ============================================================
+  - id: no-direct-sql-string
+    message: >-
+      Interpolation de chaîne dans un appel Supabase .rpc() ou .from() —
+      risque d'injection SQL. Utilisez les paramètres typés (deuxième argument
+      de .rpc()) ou des constantes statiques pour .from(). Cf. docs/SECURITY.md.
+    severity: ERROR
+    languages:
+      - typescript
+      - javascript
+    patterns:
+      - pattern-either:
+          - pattern: $CLIENT.rpc(`...${$X}...`)
+          - pattern: $CLIENT.from(`...${$X}...`)
+          - pattern: $CLIENT.rpc(`...${$X}...`, ...)
+
+  # ============================================================
+  # 3. Toute CREATE TABLE doit activer RLS dans le même fichier
+  # ============================================================
+  - id: ensure-rls-enabled
+    message: >-
+      CREATE TABLE détectée sans ALTER TABLE ... ENABLE ROW LEVEL SECURITY
+      dans le même fichier. KOVAS est multi-tenant (organization_id) — toute
+      table métier DOIT avoir RLS activé. Cf. docs/SECURITY.md.
+    severity: ERROR
+    languages:
+      - sql
+    patterns:
+      - pattern: CREATE TABLE $X (...);
+      - pattern-not-inside: |
+          CREATE TABLE $X (...);
+          ...
+          ALTER TABLE $X ENABLE ROW LEVEL SECURITY;
+
+  # ============================================================
+  # 4. eval(...) strictement interdit
+  # ============================================================
+  - id: no-eval
+    message: >-
+      eval() est interdit (RCE risk, viole CSP script-src strict). Cf. docs/SECURITY.md.
+    severity: ERROR
+    languages:
+      - typescript
+      - javascript
+    patterns:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: new Function(...)
+          - pattern: window.eval(...)
+          - pattern: globalThis.eval(...)
+
+  # ============================================================
+  # 5. dangerouslySetInnerHTML — autorisé mais justification requise
+  # ============================================================
+  - id: no-dangerously-set-inner-html
+    message: >-
+      dangerouslySetInnerHTML détecté. Acceptable UNIQUEMENT si le contenu
+      est sanitizé (DOMPurify ou équivalent) ET justifié par un commentaire
+      au-dessus de l'appel. Cf. docs/SECURITY.md.
+    severity: WARNING
+    languages:
+      - typescript
+      - javascript
+    patterns:
+      - pattern: dangerouslySetInnerHTML={{$X}}
+
+  # ============================================================
+  # 6. console.log dans server actions — fuite info en logs prod
+  # ============================================================
+  - id: no-console-log-in-server-action
+    message: >-
+      console.log dans un fichier server action (.ts qui démarre par
+      'use server'). Utilisez un logger structuré (Sentry breadcrumb / pino)
+      pour éviter les fuites d'info en logs Vercel prod. Cf. docs/SECURITY.md.
+    severity: WARNING
+    languages:
+      - typescript
+      - javascript
+    patterns:
+      - pattern: console.log(...)
+      - pattern-inside: |
+          "use server"
+          ...
+
+  # ============================================================
+  # 7. process.env dans fichiers client (autre que NEXT_PUBLIC_*)
+  # ============================================================
+  - id: no-process-env-in-client
+    message: >-
+      Accès à process.env.X dans un fichier 'use client' avec une variable
+      qui ne commence pas par NEXT_PUBLIC_. Risque de fuite de secret côté
+      navigateur (la valeur sera undefined ou — pire — bundlée). Cf. docs/SECURITY.md.
+    severity: ERROR
+    languages:
+      - typescript
+      - javascript
+    patterns:
+      - pattern-either:
+          - pattern: process.env.SUPABASE_SERVICE_ROLE_KEY
+          - pattern: process.env.ANTHROPIC_API_KEY
+          - pattern: process.env.OPENAI_API_KEY
+          - pattern: process.env.STRIPE_SECRET_KEY
+          - pattern: process.env.STRIPE_WEBHOOK_SECRET
+          - pattern: process.env.RESEND_API_KEY
+          - pattern: process.env.BREVO_API_KEY
+          - pattern: process.env.DEEPGRAM_API_KEY
+          - pattern: process.env.MDB_WRITER_API_KEY
+          - pattern: process.env.GOOGLE_OAUTH_CLIENT_SECRET
+          - pattern: process.env.DROPBOX_APP_SECRET
+          - pattern: process.env.UPSTASH_REDIS_REST_TOKEN
+          - pattern: process.env.SENTRY_AUTH_TOKEN
+      - pattern-inside: |
+          "use client"
+          ...

@@ -58,6 +58,54 @@ export type Database = {
           },
         ]
       }
+      audit_data_access: {
+        Row: {
+          id: string
+          user_id: string
+          organization_id: string | null
+          data_type: string
+          action: 'read' | 'export' | 'delete'
+          ip: string | null
+          user_agent: string | null
+          accessed_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          organization_id?: string | null
+          data_type: string
+          action: 'read' | 'export' | 'delete'
+          ip?: string | null
+          user_agent?: string | null
+          accessed_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          organization_id?: string | null
+          data_type?: string
+          action?: 'read' | 'export' | 'delete'
+          ip?: string | null
+          user_agent?: string | null
+          accessed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'audit_data_access_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'audit_data_access_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       ai_usage: {
         Row: {
           id: string
@@ -1545,6 +1593,7 @@ export type Database = {
           notification_prefs: Json | null
           linguistic_profile: Json | null
           last_active_at: string | null
+          privacy_policy_accepted_at: string | null
           created_at: string
           updated_at: string
         }
@@ -1560,6 +1609,7 @@ export type Database = {
           notification_prefs?: Json | null
           linguistic_profile?: Json | null
           last_active_at?: string | null
+          privacy_policy_accepted_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -1575,6 +1625,7 @@ export type Database = {
           notification_prefs?: Json | null
           linguistic_profile?: Json | null
           last_active_at?: string | null
+          privacy_policy_accepted_at?: string | null
           created_at?: string
           updated_at?: string
         }

@@ -1,0 +1,60 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Tous les jours à 04:00 UTC (06:00 CEST) pour détecter les nouvelles
+    # CVE pushées pendant la nuit sur des dépendances déjà installées.
+    - cron: '0 4 * * *'
+
+jobs:
+  audit-deps:
+    runs-on: ubuntu-latest
+    name: pnpm audit (high vulnerabilities)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: pnpm audit
+        run: pnpm audit --audit-level high
+
+  semgrep:
+    runs-on: ubuntu-latest
+    name: Semgrep SAST (KOVAS custom + OWASP)
+    container:
+      image: returntocorp/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Semgrep
+        run: |
+          semgrep ci \
+            --config .semgrep.yml \
+            --config p/security-audit \
+            --config p/owasp-top-ten \
+            --config p/typescript \
+            --config p/react \
+            --config p/nextjs
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+  snyk:
+    runs-on: ubuntu-latest
+    name: Snyk Open Source (continue-on-error)
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
