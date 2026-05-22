@@ -263,7 +263,7 @@ export async function updateAdemeSettingsAction(
 }
 
 // ============================================
-// Module add-on trials (essai 14j sans CB)
+// Module add-on trials (essai 14j sans CB demandée — CB déjà enregistrée au moment de la souscription initiale)
 // ============================================
 
 /**

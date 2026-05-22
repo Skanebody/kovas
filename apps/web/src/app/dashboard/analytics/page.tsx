@@ -32,28 +32,6 @@ import {
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { planAtLeast } from '@/lib/billing/feature-gates'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import {
-  Activity,
-  AlertOctagon,
-  ArrowUpRight,
-  Clock,
-  Coins,
-  Download,
-  FileCheck,
-  FileText,
-  HeartHandshake,
-  LineChart,
-  Percent,
-  PiggyBank,
-  Repeat,
-  ShieldAlert,
-  Smile,
-  Star,
-  Target,
-  TrendingDown,
-  TrendingUp,
-  Users,
-} from 'lucide-react'
 import type { Metadata } from 'next'
 import { AnalyticsBrowser } from './analytics-browser'
 import { BenchmarkComparison, type BenchmarkRow } from './benchmark-comparison'
@@ -346,7 +324,7 @@ export default async function AnalyticsPage() {
   const activiteMetrics: MetricRow[] = [
     {
       id: 'missions-month',
-      icon: FileText,
+      icon: 'file-text',
       name: 'Missions ce mois',
       value: String(current?.missions_total ?? 0),
       delta: previous ? pctDelta(Number(current?.missions_total ?? 0), Number(previous.missions_total)) : undefined,
@@ -358,7 +336,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'missions-completed',
-      icon: FileCheck,
+      icon: 'file-check',
       name: 'Missions terminées',
       value: String(current?.missions_completed ?? 0),
       delta: previous
@@ -514,14 +492,14 @@ export default async function AnalyticsPage() {
   const conversionMetrics: MetricRow[] = [
     {
       id: 'quotes-sent',
-      icon: FileText,
+      icon: 'file-text',
       name: 'Devis envoyés (3 mois)',
       value: String(sentCount),
       hint: 'Devis ayant un sent_at',
     },
     {
       id: 'quotes-accepted',
-      icon: FileCheck,
+      icon: 'file-check',
       name: 'Devis acceptés',
       value: String(acceptedCount),
       hint: 'Accepted / signed / paid',
@@ -564,7 +542,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'dpe-month',
-      icon: FileText,
+      icon: 'file-text',
       name: 'DPE ce mois',
       value: String(dpeCount),
       hint: 'Diagnostics DPE saisis',

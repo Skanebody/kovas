@@ -43,7 +43,8 @@ export default function UpgradeLogicielPage() {
       <p className="text-xs text-foreground/55 max-w-2xl">
         KOVAS 360 est le logiciel SaaS B2B pour diagnostiqueurs immobiliers indépendants. Tarif
         fixe mensuel, missions illimitées sous fair-use, sans surplus à l&apos;usage. Essai
-        gratuit 14 jours sans carte bancaire — résiliation conforme au décret n°2023-417.
+        gratuit 30 jours avec carte bancaire enregistrée et débit automatique à l&apos;issue —
+        résiliation conforme au décret n°2023-417.
       </p>
     </div>
   )

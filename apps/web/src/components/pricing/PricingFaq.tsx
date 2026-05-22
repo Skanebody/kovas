@@ -61,8 +61,8 @@ const PRICING_FAQ: readonly FaqEntry[] = [
   {
     question: "L'essai gratuit est-il vraiment sans engagement ?",
     answer:
-      "Oui. 14 jours d'accès complet à KOVAS 360, sans carte bancaire, sans engagement. " +
-      "À la fin de l'essai, vous choisissez librement votre formule (ou vous ne renouvelez pas — votre compte est gelé 90 jours puis archivé).",
+      "Oui. 30 jours d'accès complet à KOVAS 360, avec carte bancaire enregistrée à la souscription et débit automatique à l'issue, sans engagement long terme. " +
+      "Vous pouvez annuler à tout moment depuis votre compte avant J+30 sans aucun débit. À la fin de l'essai, votre formule est activée automatiquement (ou vous résiliez — votre compte est gelé 90 jours puis archivé).",
   },
   {
     question: 'Quel niveau de support est inclus ?',

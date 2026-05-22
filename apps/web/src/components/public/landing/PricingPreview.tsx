@@ -67,8 +67,8 @@ export function PricingPreview() {
             5 forfaits. Aucune surprise.
           </h2>
           <p className="text-ink-mute leading-relaxed">
-            Tous les forfaits incluent : missions illimitées, essai 30 jours, sans CB, sans
-            engagement.
+            Tous les forfaits incluent : missions illimitées, essai 30 jours avec CB enregistrée
+            et débit auto à l&apos;issue, sans engagement.
           </p>
         </div>
 

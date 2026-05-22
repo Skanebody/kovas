@@ -253,7 +253,7 @@ function RecapPanel({
         Démarrer l'essai 14 jours
       </Link>
       <p className="text-center mt-3 text-[11px] text-[#0F1419]/55 leading-snug">
-        Sans CB. Conversion libre à J14, annulable à tout moment.
+        CB enregistrée à la souscription, débit automatique à J+30. Annulable à tout moment.
       </p>
 
       {ADDON_MODULES.length > 0 && (

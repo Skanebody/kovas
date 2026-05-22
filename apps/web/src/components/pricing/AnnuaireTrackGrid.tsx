@@ -182,7 +182,7 @@ function AnnuaireCard({
             plan.featured === true ? 'text-white/72' : 'text-[#0F1419]/55',
           )}
         >
-          {isFree ? 'Aucune CB · Vérification 24-48h' : 'Sans CB · Résiliable à tout moment'}
+          {isFree ? 'Aucune CB · Vérification 24-48h' : 'Débit auto à J+30 · Résiliable à tout moment'}
         </p>
       </div>
     </article>

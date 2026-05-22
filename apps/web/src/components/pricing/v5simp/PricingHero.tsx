@@ -29,16 +29,16 @@ export function PricingHero() {
 
       <Link
         href="/signup?plan=logiciel_starter"
-        aria-label="Essayer KOVAS 360 gratuitement 14 jours sans carte bancaire"
+        aria-label="Essayer KOVAS 360 gratuitement 30 jours avec carte bancaire enregistrée et débit automatique à l’issue"
         className="inline-flex items-center justify-center gap-2 bg-[#D4F542] text-[#0B1D33] px-8 py-4 rounded-full text-[15px] font-semibold hover:bg-[#A3C920] hover:-translate-y-px transition-all duration-150 shadow-[0_8px_24px_rgba(212,245,66,0.35)]"
       >
         Essayer gratuitement
       </Link>
 
       <div className="mt-7 flex gap-5 justify-center flex-wrap text-[13px] text-[#0B1D33]/55">
-        <span>Sans carte bancaire</span>
+        <span>30 jours d&apos;essai</span>
         <span className="hidden sm:inline text-[#0B1D33]/20">·</span>
-        <span>14 jours d&apos;essai</span>
+        <span>CB enregistrée, débit auto à J+30</span>
         <span className="hidden sm:inline text-[#0B1D33]/20">·</span>
         <span>Résiliable à tout moment</span>
       </div>

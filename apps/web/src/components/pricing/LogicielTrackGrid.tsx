@@ -45,7 +45,7 @@ function LogicielCard({
   const annualEuros = Math.round(plan.annualPrice / 100)
   const displayPrice = billing === 'annual' ? Math.round(annualEuros / 12) : monthlyEuros
   const subline = isFree
-    ? 'Essai 14 jours · Sans CB'
+    ? 'Essai 30 jours · CB enregistrée, débit auto à J+30'
     : billing === 'annual'
       ? `${annualEuros} € HT / an · 2 mois offerts`
       : `${annualEuros} € en annuel`
@@ -183,8 +183,8 @@ function LogicielCard({
           )}
         >
           {isFree
-            ? 'Sans CB · Conversion libre à J14'
-            : 'Sans CB requise · Résiliable à tout moment'}
+            ? 'CB enregistrée, débit auto à J+30 · Annulable à tout moment'
+            : 'Débit auto après l’essai · Résiliable à tout moment'}
         </p>
       </div>
     </article>

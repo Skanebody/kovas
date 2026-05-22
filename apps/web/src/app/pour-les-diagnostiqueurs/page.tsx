@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     siteName: 'KOVAS 360',
     title: 'KOVAS 360 — Le logiciel terrain pour diagnostiqueurs immobiliers',
     description:
-      'Saisie vocale, exports universels, conformité ADEME. 30 jours gratuits, sans CB, sans engagement.',
+      'Saisie vocale, exports universels, conformité ADEME. 30 jours gratuits avec CB enregistrée et débit auto, sans engagement.',
   },
 }
 
@@ -74,7 +74,7 @@ const COMPARISON_ROWS: ComparisonRow[] = [
     kovas: 'yes',
   },
   {
-    feature: 'Essai 30 jours sans CB',
+    feature: 'Essai 30 jours sans engagement',
     competitors: ['no', 'partial', 'partial'],
     kovas: 'yes',
   },

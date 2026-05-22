@@ -45,7 +45,7 @@ export function HeroB2B() {
             <ul className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-mute pt-1">
               {[
                 '30 jours gratuits',
-                'Sans CB requise',
+                'Débit auto après essai',
                 'Résiliable à tout moment',
                 'Migration Liciel incluse',
               ].map((t) => (

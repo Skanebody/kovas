@@ -25,7 +25,6 @@ import {
   Radar,
   Receipt,
   ScrollText,
-  Search,
   Send,
   Settings,
   Sparkles,
@@ -221,15 +220,6 @@ export function AppSidebar({ access, suggestions, track }: AppSidebarProps) {
             <Sparkles className="size-5" strokeWidth={1.75} style={{ color: '#D4F542' }} />
           </Link>
         )}
-        <button
-          type="button"
-          className="flex size-12 items-center justify-center rounded-md text-white/65 hover:bg-white/[0.06] hover:text-white transition-colors"
-          title="Rechercher (⌘K)"
-          aria-label="Rechercher"
-          data-cmdk-trigger
-        >
-          <Search className="size-5" strokeWidth={1.75} />
-        </button>
         {NAV_BOTTOM.map((item) => (
           <SidebarIconButton key={item.href} item={item} active={isActive(pathname, item.href)} />
         ))}

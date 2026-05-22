@@ -81,7 +81,7 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   {
     code: 'essai',
     name: 'Essai gratuit',
-    tagline: 'Pour découvrir KOVAS 360 sans CB · 30 jours',
+    tagline: 'Pour découvrir KOVAS 360 · 30 jours · CB enregistrée, débit auto à J+30',
     monthlyPrice: 0,
     annualPrice: 0,
     caps: {
@@ -92,7 +92,7 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
       users: 1,
     },
     features: [
-      '30 jours d’essai complet sans carte bancaire',
+      '30 jours d’essai complet · CB enregistrée à la souscription, débit auto à J+30',
       '30 missions max sur la période (cap anti-abus)',
       '1h Whisper inclus',
       'Exports universels (PDF · Word · CSV · JSON · ZIP)',

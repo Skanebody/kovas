@@ -140,7 +140,7 @@ function Hero() {
           </Button>
         </div>
         <p className="text-sm text-ink-faint">
-          Sans carte bancaire · 30 missions incluses · 8 diagnostics couverts
+          CB enregistrée à la souscription · débit automatique à J+30 · 8 diagnostics couverts
         </p>
       </div>
     </section>
