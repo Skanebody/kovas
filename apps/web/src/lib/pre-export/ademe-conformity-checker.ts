@@ -1,7 +1,7 @@
 /**
  * KOVAS — Pré-export · Analyseur 1 : conformité ADEME 3CL-DPE-2021.
  *
- * Vérifie la présence + validité + bornes des champs obligatoires DPE 3CL.
+ * Vérifiez la présence + validité + bornes des champs obligatoires DPE 3CL.
  * Référentiel : méthode 3CL-DPE-2021 (arrêté du 31 mars 2021 modifié) et
  * cahier des charges ADEME publique. Pour Phase 1 (compagnon Liciel) on vérifie
  * la pré-condition « toutes les données métier sont là pour que le calcul
@@ -175,7 +175,7 @@ const OPTIONAL_FIELDS: FieldCheck[] = [
 ]
 
 /**
- * Vérifie la conformité ADEME du dossier mission.
+ * Vérifiez la conformité ADEME du dossier mission.
  *
  * @returns sous-score 0-1 (1 = parfait) + findings + couples conformité/exhaustivité
  *   utilisés par l'orchestrateur pour calculer les colonnes dédiées du score global.
@@ -202,8 +202,8 @@ export function checkAdemeConformity(ctx: MissionAnalysisContext): AnalyzerResul
         title: `${field.label} manquant`,
         message:
           field.severity === 'critical'
-            ? `Le champ « ${field.label} » est obligatoire pour publier le DPE sur l'observatoire ADEME. Tu pourrais vérifier ce point avant export.`
-            : `Le champ « ${field.label} » devrait être renseigné. Vérifie qu'il n'a pas été oublié pendant la visite.`,
+            ? `Le champ « ${field.label} » est obligatoire pour publier le DPE sur l'observatoire ADEME. Vous pourriez vérifier ce point avant export.`
+            : `Le champ « ${field.label} » devrait être renseigné. Vérifiez qu'il n'a pas été oublié pendant la visite.`,
         suggested_action: 'Ajouter cette donnée à la mission',
         related_field: field.code,
       })

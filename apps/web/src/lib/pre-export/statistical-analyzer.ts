@@ -86,7 +86,7 @@ export function analyzeStatistical(
         title: `Étiquette ${cls} rare pour ce type de bien`,
         message: `Seulement ${(expected * 100).toFixed(
           1,
-        )}% des biens similaires (${propType ?? 'type non précisé'}, bande ${band ?? 'n.c.'}) sont en classe ${cls}. Vérifie qu'aucune donnée n'a été oubliée pour le calcul.`,
+        )}% des biens similaires (${propType ?? 'type non précisé'}, bande ${band ?? 'n.c.'}) sont en classe ${cls}. Vérifiez qu'aucune donnée n'a été oubliée pour le calcul.`,
         context: {
           expected_pct: expected,
           benchmark_scope: matched.scope_type,
@@ -148,7 +148,7 @@ export function analyzeStatistical(
         title: 'Forte proportion de A-B-C',
         message: `${(abcShare * 100).toFixed(
           0,
-        )}% de tes DPE récents sont en A-B-C. Si tu opères majoritairement sur du neuf ou rénové, c'est normal. Sinon, l'ADEME pourrait pointer un biais — pense à documenter.`,
+        )}% de vos DPE récents sont en A-B-C. Si tu opères majoritairement sur du neuf ou rénové, c'est normal. Sinon, l'ADEME pourrait pointer un biais — pensez à documenter.`,
       })
     }
   }

@@ -1,7 +1,7 @@
 /**
  * KOVAS — Pré-export · Analyseur 2 : cohérence interne des données.
  *
- * Règles métier sans IA. Vérifie que les données saisies entre elles sont
+ * Règles métier sans IA. Vérifiez que les données saisies entre elles sont
  * cohérentes (somme surfaces vs total, équipements vs année, étiquette vs
  * bâti). Réutilise une partie de `lib/coherence-validation.ts` mais avec
  * granularité supplémentaire pour le contexte pré-export.
@@ -48,7 +48,7 @@ const RULES: CoherenceRule[] = [
           1,
         )} m²) diffère de la surface totale (${total.toFixed(
           1,
-        )} m²) de ${(ratio * 100).toFixed(0)}%. Tu pourrais vérifier les mesures pour éviter une remontée ADEME.`,
+        )} m²) de ${(ratio * 100).toFixed(0)}%. Vous pourriez vérifier les mesures pour éviter une remontée ADEME.`,
         suggested_action: 'Recompter ou ajuster une mesure pièce',
         context: { sum_rooms: sum, total, ratio },
       }
@@ -70,7 +70,7 @@ const RULES: CoherenceRule[] = [
         category: 'coherence',
         severity: 'info',
         title: 'PAC sur bâti ancien',
-        message: `Une pompe à chaleur est mentionnée pour un bâti de ${year}. Pas anormal en soi, mais vérifie que l'isolation est cohérente avec ce choix (sinon le coefficient de performance restera bas).`,
+        message: `Une pompe à chaleur est mentionnée pour un bâti de ${year}. Pas anormal en soi, mais vérifiez que l'isolation est cohérente avec ce choix (sinon le coefficient de performance restera bas).`,
         context: { year_built: year },
       }
     },
@@ -93,7 +93,7 @@ const RULES: CoherenceRule[] = [
         category: 'coherence',
         severity: 'warning',
         title: 'Étiquette A/B avec convecteurs électriques',
-        message: `Une étiquette ${energyClass} avec des convecteurs électriques classiques est très peu probable. Vérifie le type de chauffage ou l'étiquette proposée.`,
+        message: `Une étiquette ${energyClass} avec des convecteurs électriques classiques est très peu probable. Vérifiez le type de chauffage ou l'étiquette proposée.`,
         suggested_action: 'Revoir le système de chauffage ou la classe DPE',
       }
     },
@@ -120,7 +120,7 @@ const RULES: CoherenceRule[] = [
           2,
         )} m et ${max.toFixed(
           2,
-        )} m (écart ${deltaCm.toFixed(0)} cm). Vérifie si c'est volontaire (combles, sous-pente).`,
+        )} m (écart ${deltaCm.toFixed(0)} cm). Vérifiez si c'est volontaire (combles, sous-pente).`,
         context: { min, max, delta_cm: deltaCm },
       }
     },
@@ -144,7 +144,7 @@ const RULES: CoherenceRule[] = [
           category: 'coherence',
           severity: 'info',
           title: 'Isolation moderne sur bâti ancien',
-          message: `Tu mentionnes "${isolationNote.notes ?? 'isolation'}" sur un bâti de ${year}. Cela suppose une rénovation lourde. Vérifie la date des travaux pour le calcul 3CL.`,
+          message: `Vous mentionnez "${isolationNote.notes ?? 'isolation'}" sur un bâti de ${year}. Cela suppose une rénovation lourde. Vérifiez la date des travaux pour le calcul 3CL.`,
         }
       }
       return null
@@ -166,7 +166,7 @@ const RULES: CoherenceRule[] = [
         category: 'coherence',
         severity: 'info',
         title: 'Double vitrage sur bâti pré-1985',
-        message: `Tu mentionnes du double vitrage sur un bâti de ${year}. C'est probable (remplacement des menuiseries), pense à noter l'année des travaux si tu l'as.`,
+        message: `Vous mentionnez du double vitrage sur un bâti de ${year}. C'est probable (remplacement des menuiseries), pensez à noter l'année des travaux si tu l'as.`,
       }
     },
   },
@@ -184,7 +184,7 @@ const RULES: CoherenceRule[] = [
           category: 'coherence',
           severity: 'critical',
           title: `Bâti ${year} (RT2012/RE2020) en classe ${cls}`,
-          message: `Un bâti construit après 2012 est soumis à la RT2012 puis RE2020. Une classe ${cls} est incohérente réglementairement. Vérifie le calcul avant publication.`,
+          message: `Un bâti construit après 2012 est soumis à la RT2012 puis RE2020. Une classe ${cls} est incohérente réglementairement. Vérifiez le calcul avant publication.`,
           suggested_action: 'Revoir le calcul DPE',
         }
       }

@@ -39,7 +39,7 @@ export function ExportActions({
       <div className="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between gap-4 flex-wrap">
         <p className="text-[12px] text-ink-mute hidden md:block">
           {hasCritical
-            ? 'Tu peux exporter quand même — KOVAS ne bloque jamais l\'envoi.'
+            ? 'Vous pouvez exporter quand même — KOVAS ne bloque jamais l\'envoi.'
             : 'Dossier prêt à l\'export.'}
         </p>
 

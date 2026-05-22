@@ -45,7 +45,7 @@ export function analyzePhotosAndObservations(
       category: 'quality',
       severity: 'warning',
       title: `Seulement ${totalPhotos} photo${totalPhotos > 1 ? 's' : ''} dans le dossier`,
-      message: `Pour un dossier DPE robuste, au moins ${MIN_PHOTOS_RECOMMENDED} photos sont recommandées (façade, équipements de chauffage, isolation, étiquettes énergétiques). Tu en as ${totalPhotos}.`,
+      message: `Pour un dossier DPE robuste, au moins ${MIN_PHOTOS_RECOMMENDED} photos sont recommandées (façade, équipements de chauffage, isolation, étiquettes énergétiques). Vous en avez ${totalPhotos}.`,
       suggested_action: 'Ajouter quelques clichés clés',
     })
   } else if (totalPhotos < MIN_PHOTOS_GOOD) {
@@ -54,7 +54,7 @@ export function analyzePhotosAndObservations(
       category: 'quality',
       severity: 'suggestion',
       title: `${totalPhotos} photos — base correcte`,
-      message: `Tu as ${totalPhotos} photos. Pour un dossier vraiment exemplaire (preuve EEAT en cas de contrôle), pense à atteindre ${MIN_PHOTOS_GOOD}+ avec étiquettes énergétiques et plaques constructeur.`,
+      message: `Vous avez ${totalPhotos} photos. Pour un dossier vraiment exemplaire (preuve EEAT en cas de contrôle), pensez à atteindre ${MIN_PHOTOS_GOOD}+ avec étiquettes énergétiques et plaques constructeur.`,
     })
   }
 
@@ -105,7 +105,7 @@ export function analyzePhotosAndObservations(
       category: 'quality',
       severity: 'suggestion',
       title: `Équipements mentionnés sans photo`,
-      message: `Tu as parlé d'équipements dans certaines pièces sans prendre de photo : ${mismatches
+      message: `Vous avez parlé d'équipements dans certaines pièces sans prendre de photo : ${mismatches
         .slice(0, 3)
         .join(' ; ')}${
         mismatches.length > 3 ? '…' : ''

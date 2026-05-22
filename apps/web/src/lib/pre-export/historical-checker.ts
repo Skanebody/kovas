@@ -59,7 +59,7 @@ export function checkHistorical(
         title: `DPE existant trouvé (${previousCls})`,
         message: `Un DPE antérieur à cette adresse a été publié sur l'observatoire ADEME (classe ${previousCls}${
           historical.diagnostic_date ? `, ${historical.diagnostic_date}` : ''
-        }). Pense à le mentionner si pertinent.`,
+        }). Pensez à le mentionner si pertinent.`,
         context: { previous: historical },
       })
     }
@@ -89,10 +89,10 @@ export function checkHistorical(
         ? `Classe dégradée (${previousCls} → ${currentCls})`
         : `Classe améliorée (${previousCls} → ${currentCls})`,
       message: directionDown
-        ? `Le bien était classé ${previousCls} précédemment, tu proposes ${currentCls} aujourd'hui. Vérifie que les données saisies n'ont pas un biais (équipements, surface) — un écart de ${Math.abs(
+        ? `Le bien était classé ${previousCls} précédemment, tu proposes ${currentCls} aujourd'hui. Vérifiez que les données saisies n'ont pas un biais (équipements, surface) — un écart de ${Math.abs(
             deltaClasses,
           )} classes mérite un contrôle.`
-        : `Le bien était classé ${previousCls} précédemment, tu proposes ${currentCls} aujourd'hui. Si des travaux ont eu lieu, pense à les documenter. Sinon, la méthode 3CL-2021 (modifiée juillet 2021) peut expliquer une partie de l'écart.`,
+        : `Le bien était classé ${previousCls} précédemment, tu proposes ${currentCls} aujourd'hui. Si des travaux ont eu lieu, pensez à les documenter. Sinon, la méthode 3CL-2021 (modifiée juillet 2021) peut expliquer une partie de l'écart.`,
       suggested_action: 'Vérifier les données ou documenter les travaux',
       context: { previous: historical, delta_classes: deltaClasses },
     })

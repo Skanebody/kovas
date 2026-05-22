@@ -39,7 +39,7 @@ const RULES: OpportunityRule[] = [
         category: 'opportunity',
         severity: 'suggestion',
         title: 'Audit énergétique requis (vente F/G)',
-        message: `Pour la vente d'un bien classé ${cls}, un audit énergétique réglementaire est obligatoire depuis le 1er avril 2023. Tu peux orienter le propriétaire vers un partenaire ou un confrère certifié (prestation 400-800 €).`,
+        message: `Pour la vente d'un bien classé ${cls}, un audit énergétique réglementaire est obligatoire depuis le 1er avril 2023. Vous pouvez orienter le propriétaire vers un partenaire ou un confrère certifié (prestation 400-800 €).`,
         suggested_action: 'Informer le propriétaire de l\'obligation',
       }
     },
@@ -94,7 +94,7 @@ const RULES: OpportunityRule[] = [
         category: 'opportunity',
         severity: 'warning',
         title: 'CREP obligatoire (bâti antérieur à 1949)',
-        message: `Le bâti est antérieur à 1949. Le Constat de Risque d'Exposition au Plomb (CREP) est obligatoire pour toute vente/location. Vérifie qu'il a bien été commandé.`,
+        message: `Le bâti est antérieur à 1949. Le Constat de Risque d'Exposition au Plomb (CREP) est obligatoire pour toute vente/location. Vérifiez qu'il a bien été commandé.`,
         suggested_action: 'Proposer le CREP si pas déjà au dossier',
       }
     },
@@ -112,7 +112,7 @@ const RULES: OpportunityRule[] = [
         category: 'opportunity',
         severity: 'suggestion',
         title: `Département ${dept} : zone à risque termites`,
-        message: `Le département ${dept} fait l'objet d'un arrêté préfectoral termites. Un état parasitaire est obligatoire pour la vente. Pense à le proposer si pas déjà commandé.`,
+        message: `Le département ${dept} fait l'objet d'un arrêté préfectoral termites. Un état parasitaire est obligatoire pour la vente. Pensez à le proposer si pas déjà commandé.`,
         suggested_action: 'Proposer le diagnostic termites',
       }
     },
