@@ -1,32 +1,29 @@
-import type {
-  DossierMainContentMission,
-  PreparationItem,
-} from '@/components/dossier/v5simp/DossierMainContent'
-import type { DossierSectionItem } from '@/components/dossier/v5simp/DossierSectionsDrawer'
-import type { VerificationChecklistItem } from '@/components/dossier/v5simp/DossierVerificationSheet'
-import { MissionRealtime } from '@/components/mission-realtime'
+import { BillingSection } from '@/components/dossier/hub/BillingSection'
+import { CaptureSection } from '@/components/dossier/hub/CaptureSection'
+import { CommunicationSection } from '@/components/dossier/hub/CommunicationSection'
+import { DataQualitySection } from '@/components/dossier/hub/DataQualitySection'
+import { ExportsSection } from '@/components/dossier/hub/ExportsSection'
+import { FollowupSection } from '@/components/dossier/hub/FollowupSection'
+import { HubHeader } from '@/components/dossier/hub/HubHeader'
+import { IdentitySection } from '@/components/dossier/hub/IdentitySection'
+import { NotesSection } from '@/components/dossier/hub/NotesSection'
+import { PreExportSection } from '@/components/dossier/hub/PreExportSection'
+import { Sidebar } from '@/components/dossier/hub/Sidebar'
+import type { CalendarEntry } from '@/components/dossier/hub/SidebarBlocks/CalendarBlock'
+import type { Opportunity } from '@/components/dossier/hub/SidebarBlocks/OpportunitiesBlock'
+import type { OtherDossier } from '@/components/dossier/hub/SidebarBlocks/OtherDossiersBlock'
+import type { PropertyHistoryItem } from '@/components/dossier/hub/SidebarBlocks/PropertyHistoryBlock'
+import type { VigilanceSignal } from '@/components/dossier/hub/SidebarBlocks/VigilanceBlock'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { runChecklist } from '@/lib/checklists'
 import { runCoherenceChecks } from '@/lib/coherence-validation'
-import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
+import { getVisibleSections, resolveDossierState } from '@/lib/dossier/states'
 import type { VoiceParsedData } from '@/lib/voice-parser'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { ClientUploadLink } from './client-upload-link'
-import { DossierSimpLayoutClient } from './dossier-simp-layout-client'
-import { MissionChecklist } from './mission-checklist'
-import { OwnerDocumentsList } from './owner-documents-list'
-import { PhotoCapture } from './photo-capture'
-import { PhotoGallery } from './photo-gallery'
-import { RemoveMissionButton } from './remove-mission-button'
-import { ResumeButton } from './resume-button'
-import { RoomsList } from './rooms-list'
-import { ShareMissionButton } from './share-button'
-import { MissionStatusButton } from './status-button'
-import { VoiceNotesList } from './voice-notes-list'
-import { VoiceRecorder } from './voice-recorder'
+import { DossierHubClient } from './dossier-hub-client'
+import { DossierMoreMenu } from './dossier-more-menu'
 
-export const metadata: Metadata = { title: 'Détail dossier' }
+export const metadata: Metadata = { title: 'Dossier — Hub' }
 
 /**
  * Compose l'adresse en évitant la duplication ville si BAN l'a déjà mise dans `address`.
@@ -46,15 +43,6 @@ function compactAddress(
   return [a, [cp, c].filter(Boolean).join(' ')].filter(Boolean).join(', ')
 }
 
-/**
- * Donne une short-label compacte (DPE / AMIANTE / PLOMB / ...) à partir du type mission.
- * Utilisé dans le drawer hamburger sections.
- */
-function shortLabel(type: string): string {
-  const full = MISSION_TYPE_LABELS[type] ?? type
-  return full.split(' ')[0]?.toUpperCase() ?? type.toUpperCase()
-}
-
 export default async function DossierDetailPage({
   params,
 }: {
@@ -63,73 +51,112 @@ export default async function DossierDetailPage({
   const { id } = await params
   const { supabase, orgId } = await getCurrentUser()
 
+  // -------------------------------------------------------------
+  // 1. Charge dossier + relations
+  // -------------------------------------------------------------
+  const { data: dossier } = await supabase
+    .from('dossiers')
+    .select(
+      'id, reference, status, scheduled_at, started_at, completed_at, notes, metadata, client_upload_token, client_upload_expires_at, property_id, client_id, properties(id, address, postal_code, city, surface_total, year_built, property_type), clients(id, display_name, email, phone)',
+    )
+    .eq('id', id)
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .single()
+
+  if (!dossier) notFound()
+
+  const prop = Array.isArray(dossier.properties) ? dossier.properties[0] : dossier.properties
+  const clientRow = Array.isArray(dossier.clients) ? dossier.clients[0] : dossier.clients
+
+  // -------------------------------------------------------------
+  // 2. Charge collections liées en parallèle
+  // -------------------------------------------------------------
   const [
-    { data: dossier },
     { data: missions },
     { data: rooms },
     { data: photos },
     { data: voiceNotes },
     { data: ownerDocs },
+    { data: otherDossiersData },
   ] = await Promise.all([
     supabase
-      .from('dossiers')
-      .select(
-        'id, reference, status, scheduled_at, started_at, completed_at, notes, metadata, client_upload_token, client_upload_expires_at, property_id, client_id, properties(address, postal_code, city, surface_total, year_built, property_type), clients(display_name, email)',
-      )
-      .eq('id', id)
-      .eq('organization_id', orgId)
-      .is('deleted_at', null)
-      .single(),
-    supabase
       .from('missions')
-      .select('id, reference, type, status, completed_at, metadata')
+      .select('id, reference, type, status, completed_at')
       .eq('dossier_id', id)
       .eq('organization_id', orgId)
       .order('created_at', { ascending: true }),
     supabase
       .from('dossier_rooms')
-      .select('id, name, room_type, surface_m2, position')
+      .select('id, name, room_type, surface_m2')
       .eq('dossier_id', id)
       .eq('organization_id', orgId)
       .order('position', { ascending: true }),
     supabase
       .from('photos')
-      .select('id, storage_path, width, height, size_bytes, room_id, taken_at, view_type')
+      .select('id, storage_path, room_id, taken_at')
       .eq('dossier_id', id)
       .eq('organization_id', orgId)
       .order('taken_at', { ascending: false }),
     supabase
       .from('voice_notes')
       .select(
-        'id, storage_path, duration_seconds, transcript_raw, transcript_structured, ai_confidence, parser_used, room_id, created_at',
+        'id, transcript_raw, transcript_structured, ai_confidence, parser_used, room_id, duration_seconds, created_at',
       )
       .eq('dossier_id', id)
       .eq('organization_id', orgId)
       .order('created_at', { ascending: false }),
     supabase
       .from('owner_documents')
-      .select(
-        'id, storage_path, original_name, size_bytes, mime_type, doc_kind, uploaded_at, reviewed_by_diag, extracted_data, extraction_status, extraction_error',
-      )
+      .select('id, doc_kind, original_name, uploaded_at, extraction_status')
       .eq('dossier_id', id)
       .eq('organization_id', orgId)
       .order('uploaded_at', { ascending: false }),
+    dossier.client_id
+      ? supabase
+          .from('dossiers')
+          .select(
+            'id, reference, status, scheduled_at, started_at, completed_at, metadata, properties(address, postal_code, city)',
+          )
+          .eq('client_id', dossier.client_id)
+          .eq('organization_id', orgId)
+          .is('deleted_at', null)
+          .neq('id', dossier.id)
+          .order('created_at', { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] as Array<Record<string, unknown>> }),
   ])
 
-  if (!dossier) notFound()
+  // -------------------------------------------------------------
+  // 3. État conceptuel + sections visibles
+  // -------------------------------------------------------------
+  const meta = (dossier.metadata as Record<string, unknown> | null) ?? {}
+  const dossierState = resolveDossierState({
+    status: dossier.status,
+    scheduled_at: dossier.scheduled_at,
+    started_at: dossier.started_at,
+    completed_at: dossier.completed_at,
+    metadata: meta,
+  })
+  const visibleSections = getVisibleSections(dossierState)
 
-  const prop = Array.isArray(dossier.properties) ? dossier.properties[0] : dossier.properties
-  const client = Array.isArray(dossier.clients) ? dossier.clients[0] : dossier.clients
+  const fullAddress = compactAddress(prop ?? null)
   const missionsList = missions ?? []
+  const roomsList = rooms ?? []
+  const photosList = photos ?? []
+  const voiceNotesList = voiceNotes ?? []
+  const ownerDocsList = ownerDocs ?? []
 
-  // Coherence warnings (calcul partagé sur tout le dossier)
-  const coherenceWarnings = runCoherenceChecks({
+  // -------------------------------------------------------------
+  // 4. Cohérence métier (Section 3 : Data Quality)
+  // -------------------------------------------------------------
+  const coherence = runCoherenceChecks({
     property: {
       surface_total: prop?.surface_total ?? null,
       year_built: prop?.year_built ?? null,
       property_type: prop?.property_type ?? null,
     },
-    voiceNotes: (voiceNotes ?? []).map((v) => {
+    voiceNotes: voiceNotesList.map((v) => {
       const parsed = (v.transcript_structured as VoiceParsedData | null) ?? null
       return {
         surface_m2: parsed?.surface_m2,
@@ -138,282 +165,212 @@ export default async function DossierDetailPage({
       }
     }),
   })
+  const coherenceWarnings = coherence.map((c, i) => ({
+    id: `coh-${i}`,
+    severity: c.severity === 'error' ? ('warn' as const) : ('info' as const),
+    message: c.message,
+  }))
 
-  // Checklist par mission — réutilisée dans le contenu de section + bilan global
-  const missionsWithChecklist = missionsList.map((m) => {
-    const missionMeta = (m.metadata as Record<string, unknown> | null) ?? {}
-    const manualChecklistState =
-      (missionMeta.checklist as Record<string, boolean> | undefined) ?? {}
-    const checklist = runChecklist(
-      m.type,
-      {
-        rooms: (rooms ?? []).map((r) => ({ id: r.id, room_type: r.room_type })),
-        photos: (photos ?? []).map((p) => ({ room_id: p.room_id })),
-        voiceNotes: (voiceNotes ?? []).map((v) => ({
-          room_id: v.room_id,
-          transcript_structured: v.transcript_structured,
-        })),
-        property: {
-          surface_total: prop?.surface_total ?? null,
-          year_built: prop?.year_built ?? null,
-          property_type: prop?.property_type ?? null,
-        },
-      },
-      manualChecklistState,
-    )
-    const percentage = Math.round(checklist.completion * 100)
-    return { mission: m, checklist, percentage }
-  })
+  // -------------------------------------------------------------
+  // 5. Données dérivées sidebar
+  // -------------------------------------------------------------
+  const calendarEntries: CalendarEntry[] = []
+  if (dossier.scheduled_at) {
+    calendarEntries.push({
+      id: 'scheduled',
+      kind: 'mission',
+      at: dossier.scheduled_at,
+      label: 'Mission planifiée',
+    })
+  }
 
-  const fullAddress = compactAddress(prop)
-  const clientName = client?.display_name ?? 'Dossier de visite'
-
-  // --- Construction des sections du drawer hamburger ---
-  // 00 — Préparation (toujours)
-  // 01..N — un par mission/diagnostic
-  // 99 — Documents (toujours)
-  const preparationDone =
-    Boolean(prop?.address) &&
-    Boolean(client?.display_name) &&
-    Boolean(dossier.scheduled_at) &&
-    (ownerDocs?.length ?? 0) > 0
-
-  const diagnosticSections: DossierSectionItem[] = missionsWithChecklist.map(
-    ({ mission, percentage }, idx) => {
-      const number = String(idx + 1).padStart(2, '0')
-      const state: DossierSectionItem['state'] =
-        percentage >= 100 ? 'done' : percentage > 0 ? 'pending' : 'pending'
+  const otherDossiers: OtherDossier[] = (otherDossiersData ?? []).map(
+    (d): OtherDossier => {
+      const dProp = Array.isArray((d as { properties?: unknown }).properties)
+        ? ((d as { properties?: Array<{ address: string | null; city: string | null; postal_code: string | null }> }).properties?.[0] ?? null)
+        : ((d as { properties?: { address: string | null; city: string | null; postal_code: string | null } | null }).properties ?? null)
       return {
-        id: `${number}-${mission.type}`,
-        number,
-        label: shortLabel(mission.type),
-        state,
+        id: String((d as { id: string }).id),
+        reference: String((d as { reference: string }).reference),
+        status: String((d as { status: string }).status),
+        scheduled_at: (d as { scheduled_at: string | null }).scheduled_at ?? null,
+        started_at: (d as { started_at: string | null }).started_at ?? null,
+        completed_at: (d as { completed_at: string | null }).completed_at ?? null,
+        metadata: ((d as { metadata?: Record<string, unknown> | null }).metadata ?? null) as Record<
+          string,
+          unknown
+        > | null,
+        address: dProp ? compactAddress(dProp) : null,
       }
     },
   )
 
-  const documentsDone = (ownerDocs?.length ?? 0) > 0
+  const propertyHistory: PropertyHistoryItem[] = []
 
-  const sections: DossierSectionItem[] = [
-    {
-      id: '00-preparation',
-      number: '00',
-      label: 'Préparation',
-      state: preparationDone ? 'done' : 'pending',
-    },
-    ...diagnosticSections,
-    {
-      id: '99-documents',
-      number: '99',
-      label: 'Documents',
-      state: documentsDone ? 'done' : 'pending',
-    },
-  ]
-
-  // Préparation items (00)
-  const preparationItems: PreparationItem[] = [
-    { id: 'identified', label: 'Bien identifié et géolocalisé', done: Boolean(prop?.address) },
-    { id: 'client', label: 'Client confirmé', done: Boolean(client?.display_name) },
-    { id: 'route', label: 'Itinéraire planifié', done: Boolean(dossier.scheduled_at) },
-    {
-      id: 'docs',
-      label: 'Documents propriétaire reçus',
-      done: (ownerDocs?.length ?? 0) > 0,
-    },
-  ]
-
-  // --- Sections partagées rendues une seule fois et passées aux slots ---
-  const photoCountsByRoom: Record<string, number> = {}
-  for (const p of photos ?? []) {
-    if (p.room_id) photoCountsByRoom[p.room_id] = (photoCountsByRoom[p.room_id] ?? 0) + 1
-  }
-  const roomIndexById: Record<string, number> = {}
-  ;(rooms ?? []).forEach((r, idx) => {
-    roomIndexById[r.id] = idx + 1
-  })
-  const roomsArr = (rooms ?? []).map((r) => ({ id: r.id, name: r.name }))
-
-  const roomsSection = <RoomsList dossierId={dossier.id} rooms={rooms ?? []} />
-
-  const photosSection = (
-    <div className="space-y-6">
-      <PhotoCapture
-        dossierId={dossier.id}
-        dossierReference={dossier.reference}
-        orgId={orgId}
-        rooms={roomsArr}
-        photoCountsByRoom={photoCountsByRoom}
-        roomIndexById={roomIndexById}
-      />
-      <PhotoGallery
-        dossierId={dossier.id}
-        rooms={roomsArr}
-        photos={(photos ?? []).map((p) => ({
-          id: p.id,
-          storage_path: p.storage_path,
-          width: p.width,
-          height: p.height,
-          size_bytes: p.size_bytes,
-          room_id: p.room_id,
-          taken_at: p.taken_at,
-          view_type: (p as { view_type?: string | null }).view_type ?? null,
-          location_text: null,
-        }))}
-      />
-    </div>
-  )
-
-  const voiceSection = (
-    <div className="space-y-6">
-      <VoiceRecorder dossierId={dossier.id} orgId={orgId} rooms={roomsArr} />
-      <VoiceNotesList
-        dossierId={dossier.id}
-        rooms={roomsArr}
-        notes={(voiceNotes ?? []).map((n) => ({
-          id: n.id,
-          storage_path: n.storage_path,
-          duration_seconds: n.duration_seconds,
-          transcript_raw: n.transcript_raw,
-          transcript_structured: n.transcript_structured as VoiceParsedData | null,
-          ai_confidence: n.ai_confidence,
-          parser_used: n.parser_used,
-          room_id: n.room_id,
-          created_at: n.created_at,
-        }))}
-      />
-    </div>
-  )
-
-  const documentsSection = (
-    <div className="space-y-6">
-      <ClientUploadLink
-        dossierId={dossier.id}
-        token={dossier.client_upload_token ?? null}
-        expiresAt={dossier.client_upload_expires_at ?? null}
-      />
-      <OwnerDocumentsList
-        dossierId={dossier.id}
-        documents={(ownerDocs ?? []).map((d) => ({
-          ...d,
-          extracted_data: d.extracted_data as never,
-        }))}
-      />
-    </div>
-  )
-
-  // --- Map missions par section.id pour le main content ---
-  const missionsBySectionId: Record<string, DossierMainContentMission> = {}
-  missionsWithChecklist.forEach(({ mission: m, checklist, percentage }, idx) => {
-    const number = String(idx + 1).padStart(2, '0')
-    const sectionId = `${number}-${m.type}`
-    missionsBySectionId[sectionId] = {
-      id: m.id,
-      type: m.type,
-      typeLabel: MISSION_TYPE_LABELS[m.type] ?? m.type,
-      reference: m.reference,
-      status: m.status,
-      percentage,
-      checklistContent: (
-        <MissionChecklist
-          missionId={m.id}
-          items={checklist.items}
-          completion={checklist.completion}
-          requiredOk={checklist.requiredOk}
-        />
-      ),
-      headerActions: (
-        <>
-          <ResumeButton missionId={m.id} status={m.status} />
-          <MissionStatusButton missionId={m.id} currentStatus={m.status as never} />
-          <ShareMissionButton
-            missionId={m.id}
-            missionReference={m.reference}
-            clientEmail={client?.email ?? null}
-          />
-          <RemoveMissionButton
-            missionId={m.id}
-            missionLabel={MISSION_TYPE_LABELS[m.type] ?? m.type}
-          />
-        </>
-      ),
-    }
-  })
-
-  // --- Checklist agrégée pour la bottom sheet Vérifier ---
-  const verificationChecklist: VerificationChecklistItem[] = [
-    {
-      id: 'identification',
-      label: 'Bien et client identifiés',
-      done: Boolean(prop?.address) && Boolean(client?.display_name),
-    },
-    {
-      id: 'rooms',
-      label: 'Au moins une pièce définie',
-      done: (rooms?.length ?? 0) > 0,
-    },
-    {
-      id: 'photos',
-      label: 'Photos terrain présentes',
-      done: (photos?.length ?? 0) > 0,
-    },
-    {
-      id: 'documents',
-      label: 'Documents propriétaire reçus',
-      done: (ownerDocs?.length ?? 0) > 0,
-    },
-    ...missionsWithChecklist.map(({ mission: m, percentage }) => ({
-      id: `diag-${m.id}`,
-      label: `Diagnostic ${MISSION_TYPE_LABELS[m.type] ?? m.type} complet`,
-      done: percentage >= 100,
-    })),
-  ]
-
-  // EEAT score mock V1 — basé sur la complétude moyenne des diagnostics + items de base
-  const completedItems = verificationChecklist.filter((i) => i.done).length
-  const totalItems = Math.max(1, verificationChecklist.length)
-  const eeatScore = Math.round((completedItems / totalItems) * 100)
-
-  // --- Title + subtitle context bar ---
-  const primaryMissionType = missionsList[0]?.type ?? null
-  const titlePrefix = primaryMissionType ? `${shortLabel(primaryMissionType)} ` : ''
-  const dossierTitle = `${titlePrefix}${clientName}`.trim() || dossier.reference
-  const dossierSubtitle = fullAddress || dossier.reference
-
-  // Ariane items (sans la section active — ajoutée côté client)
-  const arianeItems: { label: string; href?: string }[] = [{ label: 'Dossier' }]
-  if (client?.display_name && dossier.client_id) {
-    arianeItems.push({
-      label: client.display_name,
-      href: `/dashboard/clients/${dossier.client_id}`,
+  const opportunities: Opportunity[] = []
+  // Heuristique simple : si bien ancien (<1975) sans amiante listé → suggestion
+  const hasAmiante = missionsList.some((m) => m.type.startsWith('amiante'))
+  if (prop?.year_built && prop.year_built < 1997 && !hasAmiante) {
+    opportunities.push({
+      id: 'opp-amiante',
+      label: 'Diagnostic amiante recommandé',
+      description: `Bien construit en ${prop.year_built} (avant 1997).`,
     })
-  } else if (client?.display_name) {
-    arianeItems.push({ label: client.display_name })
   }
-  if (prop && dossier.property_id) {
-    const propLabel = fullAddress || 'Bien'
-    arianeItems.push({ label: propLabel, href: `/dashboard/properties/${dossier.property_id}` })
+
+  const vigilanceSignals: VigilanceSignal[] = []
+  if (voiceNotesList.length === 0 && dossierState === 'en_mission') {
+    vigilanceSignals.push({
+      id: 'vig-no-voice',
+      message: 'Aucune note vocale pour le moment.',
+      hint: 'Pensez à utiliser la saisie vocale terrain pour gagner du temps.',
+    })
   }
+
+  // -------------------------------------------------------------
+  // 6. Communication, Billing, Followup — données placeholders V1
+  // (tables non encore créées : communications, invoices, payments, followups)
+  // -------------------------------------------------------------
+  const communicationEvents: ReadonlyArray<{
+    id: string
+    kind: 'email' | 'sms' | 'call'
+    direction: 'in' | 'out'
+    at: string
+    subject: string | null
+    preview: string | null
+  }> = []
+  const billingItems: ReadonlyArray<{
+    id: string
+    kind: 'quote' | 'invoice' | 'payment'
+    reference: string
+    amountCents: number
+    status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+    date: string
+  }> = []
+  const followupItems: ReadonlyArray<{
+    id: string
+    kind: 'milestone' | 'opportunity' | 'reminder'
+    at: string
+    label: string
+    description: string | null
+    done: boolean
+  }> = []
+
+  // -------------------------------------------------------------
+  // 7. Render — assemble sections et passe au Client orchestrateur
+  // -------------------------------------------------------------
+  const client = {
+    id: clientRow?.id ?? null,
+    display_name: clientRow?.display_name ?? null,
+    email: clientRow?.email ?? null,
+    phone: clientRow?.phone ?? null,
+  }
+  const property = {
+    id: prop?.id ?? dossier.property_id,
+    address: prop?.address ?? null,
+    postal_code: prop?.postal_code ?? null,
+    city: prop?.city ?? null,
+    surface_total: prop?.surface_total ?? null,
+    year_built: prop?.year_built ?? null,
+    property_type: prop?.property_type ?? null,
+  }
+
+  const header = (
+    <HubHeader
+      reference={dossier.reference}
+      clientName={client.display_name ?? 'Dossier sans client'}
+      fullAddress={fullAddress}
+      state={dossierState}
+      dossierId={dossier.id}
+      clientPhone={client.phone}
+      moreMenu={<DossierMoreMenu dossierId={dossier.id} />}
+    />
+  )
 
   return (
-    <>
-      <MissionRealtime missionId={dossier.id} />
-      <DossierSimpLayoutClient
-        dossierId={dossier.id}
-        dossierTitle={dossierTitle}
-        dossierSubtitle={dossierSubtitle}
-        arianeItems={arianeItems}
-        propertyAddressLine={fullAddress || null}
-        sections={sections}
-        missionsBySectionId={missionsBySectionId}
-        preparationItems={preparationItems}
-        documentsSection={documentsSection}
-        roomsSection={roomsSection}
-        photosSection={photosSection}
-        voiceSection={voiceSection}
-        verificationChecklist={verificationChecklist}
-        coherenceWarnings={coherenceWarnings}
-        eeatScore={eeatScore}
-      />
-    </>
+    <DossierHubClient
+      dossierId={dossier.id}
+      state={dossierState}
+      visibleSections={visibleSections}
+      header={header}
+      identity={
+        <IdentitySection
+          dossier={{
+            ...dossier,
+            metadata: meta,
+          }}
+          client={client}
+          property={property}
+          missions={missionsList}
+          fullAddress={fullAddress}
+        />
+      }
+      capture={
+        visibleSections.capture ? (
+          <CaptureSection
+            dossierId={dossier.id}
+            rooms={roomsList}
+            photos={photosList}
+            voiceNotes={voiceNotesList}
+            ownerDocs={ownerDocsList}
+          />
+        ) : null
+      }
+      dataQuality={
+        visibleSections.dataQuality ? (
+          <DataQualitySection
+            voiceNotes={voiceNotesList}
+            roomsCount={roomsList.length}
+            coherenceWarnings={coherenceWarnings}
+          />
+        ) : null
+      }
+      preExport={
+        visibleSections.preExport ? (
+          <PreExportSection
+            ademeScore={null}
+            findings={[
+              ...(roomsList.length === 0
+                ? [
+                    {
+                      id: 'no-rooms',
+                      severity: 'warn' as const,
+                      message: 'Aucune pièce renseignée. Ajoutez-en pour permettre le calcul.',
+                    },
+                  ]
+                : []),
+              ...(prop?.surface_total
+                ? []
+                : [
+                    {
+                      id: 'no-surface',
+                      severity: 'warn' as const,
+                      message: 'Surface totale manquante sur le bien.',
+                    },
+                  ]),
+            ]}
+          />
+        ) : null
+      }
+      exports={visibleSections.exports ? <ExportsSection dossierId={dossier.id} exports={[]} /> : null}
+      communication={
+        visibleSections.communication ? <CommunicationSection events={communicationEvents} /> : null
+      }
+      billing={visibleSections.billing ? <BillingSection items={billingItems} /> : null}
+      followup={visibleSections.followup ? <FollowupSection items={followupItems} /> : null}
+      notes={<NotesSection dossierId={dossier.id} initialNotes={dossier.notes} />}
+      sidebar={
+        <Sidebar
+          dossierId={dossier.id}
+          clientPhone={client.phone}
+          clientEmail={client.email}
+          calendarEntries={calendarEntries}
+          propertyHistory={propertyHistory}
+          otherDossiers={otherDossiers}
+          opportunities={opportunities}
+          vigilanceSignals={vigilanceSignals}
+        />
+      }
+    />
   )
 }
