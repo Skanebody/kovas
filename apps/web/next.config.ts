@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs'
 import withSerwistInit from '@serwist/next'
 import type { NextConfig } from 'next'
 
@@ -96,4 +97,21 @@ const nextConfig: NextConfig = {
 
 // En dev, bypass withSerwist : il injecte une config webpack qui déclenche un
 // warning sous Turbopack alors qu'il n'a rien à faire (disable: true en dev).
-export default isDev ? nextConfig : withSerwist(nextConfig)
+const configWithSerwist = isDev ? nextConfig : withSerwist(nextConfig)
+
+// Wrap Sentry : source maps upload + tunnel proxy + auto-instrumentation
+// (uniquement si SENTRY_AUTH_TOKEN configuré, sinon no-op en dev/local).
+export default withSentryConfig(configWithSerwist, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  tunnelRoute: '/monitoring',
+  // Nouvelles APIs Sentry 9+ : options webpack regroupées sous `webpack`.
+  webpack: {
+    reactComponentAnnotation: { enabled: true },
+    automaticVercelMonitors: true,
+    treeshake: { removeDebugLogging: true },
+  },
+})

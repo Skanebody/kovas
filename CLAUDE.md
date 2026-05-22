@@ -858,3 +858,4 @@ Si marché FR saturé (50%+ de part KOVAS) :
 | Roadmap features V1/V2/V3/Phase 2-4 | `.claude/orchestration-kovas-app/features-roadmap.md` |
 | Recrutement advisor + équipe | `.claude/orchestration-kovas-app/team.md` |
 | PRD complet (Phase 1) | `.claude/orchestration-kovas-app/PRD.md` |
+| Observabilité prod | Sentry (errors) + PostHog (analytics+replay) + Better Stack (uptime) + /api/health — cf. `docs/MONITORING-SETUP.md` |
