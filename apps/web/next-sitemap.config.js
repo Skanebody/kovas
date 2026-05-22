@@ -1,21 +1,28 @@
 /**
- * next-sitemap — génération automatique du sitemap.xml statique post-build.
+ * next-sitemap — DÉPRÉCIÉ depuis Lot #145 SEO.
  *
- * Lancé via le `postbuild` script de @kovas/web. Couvre les pages App Router
- * connues à la compilation. Les routes dynamiques massives (fiches diagnostiqueurs,
- * blog) sont déléguées à des sitemaps séparés exposés par des Route Handlers :
+ * La génération du sitemap et du robots.txt est désormais 100% assurée par les
+ * Route Handlers Next.js App Router :
+ *  - /sitemap.xml             → app/sitemap.xml/route.ts (INDEX)
+ *  - /sitemap-static.xml      → segments institutionnels
+ *  - /sitemap-villes.xml      → pages villes annuaire
+ *  - /sitemap-diagnostiqueurs.xml → fiches publiques
+ *  - /sitemap-blog.xml        → articles /conseils/[slug]
+ *  - /sitemap-guides.xml      → guides longs /guide/[type]
+ *  - /sitemap-pros.xml        → pages B2B /pros/*
+ *  - /sitemap-diagnostics-villes.xml → pages programmatiques croisées
+ *  - /robots.txt              → app/robots.ts
  *
- *  - /sitemap-villes.xml → apps/web/src/app/sitemap-villes.xml/route.ts
- *  - /sitemap-blog.xml   → apps/web/src/app/sitemap-blog.xml/route.ts
- *
- * Ces enfants sont déclarés ici via `robotsTxtOptions.additionalSitemaps`
- * pour que Google les découvre automatiquement via robots.txt.
+ * Ce fichier reste présent pour ne pas casser le `postbuild` si réactivé en
+ * urgence, mais `generateRobotsTxt: false` et `generateIndexSitemap: false`
+ * désactivent toute production de fichiers concurrents.
  *
  * @type {import('next-sitemap').IConfig}
  */
 const config = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kovas.fr',
-  generateRobotsTxt: true,
+  generateRobotsTxt: false,
+  generateIndexSitemap: false,
   changefreq: 'weekly',
   priority: 0.7,
   sitemapSize: 5000,
