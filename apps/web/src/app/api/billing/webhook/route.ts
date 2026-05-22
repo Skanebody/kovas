@@ -10,6 +10,7 @@ import {
   sendPaymentFailedNotice,
   sendSubscriptionCanceledNotice,
 } from '@/lib/email/billing'
+import { onFirstInvoicePaid } from '@/lib/referral/referral-engine'
 
 /**
  * Webhook Stripe : sync les états subscription/customer dans `subscriptions`.
@@ -190,6 +191,51 @@ export async function POST(request: Request) {
           .maybeSingle()
         if (!sub?.organization_id) break
         await sendPaymentFailedNotice({ admin, orgId: sub.organization_id, invoice })
+        break
+      }
+
+      case 'invoice.payment_succeeded': {
+        // Programme parrainage : récompenser le parrain à la 1re facture payée
+        // (post trial). Idempotent via `onFirstInvoicePaid`.
+        const invoice = event.data.object
+        let orgId = invoice.metadata?.organization_id ?? null
+
+        // Fallback : retrouver l'orgId via la subscription liée à la facture.
+        // Le SDK Stripe v22+ référence la subscription via plusieurs chemins
+        // selon le contexte de l'invoice — on tente prudemment.
+        const subRef =
+          (invoice as unknown as { subscription?: string | { id: string } | null })
+            .subscription ?? null
+        if (!orgId && subRef) {
+          const subId = typeof subRef === 'string' ? subRef : subRef.id
+          try {
+            const sub = await stripe.subscriptions.retrieve(subId)
+            orgId = sub.metadata?.organization_id ?? null
+          } catch {
+            // Sub introuvable — on ignore
+          }
+        }
+
+        if (!orgId) break
+
+        // Récupère un user de l'organisation (owner) pour matcher la referral.referred_id
+        const { data: membership } = await admin
+          .from('memberships')
+          .select('user_id')
+          .eq('organization_id', orgId)
+          .eq('role', 'owner')
+          .eq('status', 'active')
+          .limit(1)
+          .maybeSingle()
+
+        const ownerUserId = membership?.user_id
+        if (!ownerUserId) break
+
+        try {
+          await onFirstInvoicePaid({ supabase: admin, paidUserId: ownerUserId })
+        } catch (refErr) {
+          console.warn('referral reward failed:', refErr)
+        }
         break
       }
 

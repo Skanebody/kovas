@@ -7,7 +7,7 @@ import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { type SignupState, signupAction } from './actions'
 
-export function SignupForm() {
+export function SignupForm({ referralCode }: { referralCode?: string | null } = {}) {
   const [state, formAction, pending] = useActionState<SignupState, FormData>(
     signupAction,
     undefined,
@@ -17,6 +17,7 @@ export function SignupForm() {
 
   return (
     <form action={formAction} className="space-y-4">
+      {referralCode ? <input type="hidden" name="ref" value={referralCode} /> : null}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <FormField label="Prénom" htmlFor="firstName" required error={errors.firstName}>
           <Input

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { joinFullName } from '@/lib/name-utils'
@@ -10,8 +11,12 @@ import {
   isFakeSiretAllowed,
   validateSiret,
 } from '@/lib/validation/siret'
+import { applyReferralOnSignup } from '@/lib/referral/referral-engine'
+import { isValidReferralCodeFormat } from '@/lib/referral/code-generator'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@kovas/database/types'
+
+const REFERRAL_COOKIE = 'kovas_ref_code'
 
 const signupSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -136,6 +141,31 @@ export async function signupAction(
   if (trialError && !trialError.message.includes('duplicate')) {
     // Non bloquant en V1 — log et continue
     console.error('cabinet_trials insert failed:', trialError)
+  }
+
+  // Programme parrainage : si un code est porté par le cookie ou le formulaire,
+  // on enregistre la referral (non bloquant si le code est invalide).
+  const formRef = (formData.get('ref') ?? '').toString().trim()
+  const cookieStore = await cookies()
+  const cookieRef = cookieStore.get(REFERRAL_COOKIE)?.value ?? ''
+  const refCandidate = isValidReferralCodeFormat(formRef)
+    ? formRef
+    : isValidReferralCodeFormat(cookieRef)
+      ? cookieRef
+      : null
+
+  if (refCandidate) {
+    try {
+      await applyReferralOnSignup({
+        supabase: admin,
+        newUserId: createdUser.user.id,
+        referralCode: refCandidate,
+      })
+    } catch (refErr) {
+      // Non bloquant — on ne casse pas le signup si la table n'existe pas encore
+      console.warn('referral apply failed:', refErr)
+    }
+    cookieStore.delete(REFERRAL_COOKIE)
   }
 
   // Connexion immédiate

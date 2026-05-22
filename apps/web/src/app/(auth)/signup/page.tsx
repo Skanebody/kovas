@@ -1,12 +1,44 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
+import { isValidReferralCodeFormat, normalizeReferralCode } from '@/lib/referral/code-generator'
 import { SignupForm } from './signup-form'
 
 export const metadata: Metadata = {
   title: 'Essai gratuit 30 jours',
 }
 
-export default function SignupPage() {
+const REFERRAL_COOKIE = 'kovas_ref_code'
+const REFERRAL_COOKIE_MAX_AGE_S = 30 * 24 * 60 * 60
+
+interface SignupPageProps {
+  searchParams: Promise<{ ref?: string }>
+}
+
+export default async function SignupPage({ searchParams }: SignupPageProps) {
+  const { ref } = await searchParams
+  const cookieStore = await cookies()
+
+  // Si un ?ref=XXX valide est présent dans l'URL, on (re)pose le cookie
+  // pour porter la donnée jusqu'à la soumission, même si l'utilisateur
+  // navigue ailleurs avant de revenir.
+  let activeRef: string | null = null
+  if (ref && isValidReferralCodeFormat(ref)) {
+    activeRef = normalizeReferralCode(ref)
+    cookieStore.set(REFERRAL_COOKIE, activeRef, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: REFERRAL_COOKIE_MAX_AGE_S,
+      path: '/',
+    })
+  } else {
+    const cookieRef = cookieStore.get(REFERRAL_COOKIE)?.value
+    if (cookieRef && isValidReferralCodeFormat(cookieRef)) {
+      activeRef = cookieRef
+    }
+  }
+
   return (
     <div className="w-full space-y-7">
       {/* Hero serif italic — pattern signature v4 */}
@@ -20,9 +52,14 @@ export default function SignupPage() {
         <p className="text-sm md:text-base text-ink-mute">
           Carte bancaire requise · Aucun débit avant J+30 · Tous les exports inclus.
         </p>
+        {activeRef ? (
+          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-chartreuse-deep">
+            Parrainage actif · {activeRef} · 1 mois offert
+          </p>
+        ) : null}
       </div>
 
-      <SignupForm />
+      <SignupForm referralCode={activeRef} />
 
       <p className="text-center text-[13px] text-ink-mute pt-2 border-t border-rule/40">
         Déjà un compte ?{' '}

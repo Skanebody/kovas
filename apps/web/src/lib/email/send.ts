@@ -144,3 +144,43 @@ Fondateur KOVAS
     category: 'alert',
   })
 }
+
+/**
+ * Email de notification — déblocage d'un nouveau statut professionnel.
+ *
+ * Ton SOBRE PROFESSIONNEL (cf. docs/avatar-client.md) :
+ *   vouvoiement, aucun emoji marketing, signature humaine Benjamin.
+ *
+ * Max 1 email / mois côté caller (anti-spam).
+ */
+export async function sendLevelUnlockedEmail(opts: {
+  to: string
+  firstName: string
+  levelLabel: string
+  levelDescription: string
+}): Promise<EmailResult> {
+  const { to, firstName, levelLabel, levelDescription } = opts
+
+  const text = `Bonjour ${firstName},
+
+Vous venez de débloquer le statut "${levelLabel}" sur KOVAS.
+
+${levelDescription}
+
+Ce statut reconnaît votre engagement et votre activité sur la plateforme. Il est consultable depuis votre tableau de bord :
+https://kovas.fr/app/account/progression
+
+Aucune action n'est requise de votre part. Ce statut ne donne accès à aucun avantage tarifaire — il s'agit d'une marque de reconnaissance.
+
+Cordialement,
+Benjamin Bel
+Fondateur KOVAS
+`
+
+  return sendEmail({
+    to,
+    subject: `Nouveau statut KOVAS : ${levelLabel}`,
+    text,
+    category: 'product',
+  })
+}
