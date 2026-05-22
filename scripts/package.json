@@ -1,0 +1,10 @@
+{
+  "name": "kovas-scripts",
+  "version": "1.0.0",
+  "description": "Scripts d'audit et de maintenance KOVAS — exécutés via node --experimental-strip-types",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pg": "^8.21.0"
+  }
+}

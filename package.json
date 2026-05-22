@@ -38,7 +38,8 @@
     "seo:audit": "tsx scripts/seo-audit.ts",
     "seo:validate-jsonld": "tsx scripts/validate-structured-data.ts",
     "seo:check-outdated": "tsx scripts/check-outdated.ts",
-    "seo:analyze-bundle": "tsx scripts/analyze-bundle.ts"
+    "seo:analyze-bundle": "tsx scripts/analyze-bundle.ts",
+    "audit:invoices": "node --experimental-strip-types --no-warnings scripts/audit-invoice-compliance.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
