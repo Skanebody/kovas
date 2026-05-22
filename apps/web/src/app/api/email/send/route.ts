@@ -65,6 +65,8 @@ function plainTextToHtml(input: string): string {
 }
 
 function buildHtmlContent(subject: string, bodyText: string, fromName: string): string {
+  // Note: subject utilisé pour le header Brevo séparément, pas dans le HTML.
+  void subject
   const bodyHtml = plainTextToHtml(bodyText)
   const c = COMPANY_IDENTITY
   // Footer mentions légales sobres — synchro lib/legal/company-identity.ts
@@ -82,8 +84,6 @@ function buildHtmlContent(subject: string, bodyText: string, fromName: string): 
     '</p>',
     '</div></body></html>',
   ].join('')
-  // Note: subject utilisé pour le header Brevo séparément
-  void subject
 }
 
 export async function POST(request: Request): Promise<NextResponse> {

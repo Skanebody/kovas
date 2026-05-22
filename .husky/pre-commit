@@ -1,1 +1,14 @@
-pnpm test
+#!/usr/bin/env sh
+# KOVAS — pre-commit hook (cf. docs/HUSKY-SETUP.md)
+# Exécute lint-staged sur les fichiers staged uniquement (rapide).
+# corepack expose pnpm via le shim Node si pnpm n'est pas dans PATH.
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  if command -v corepack >/dev/null 2>&1; then
+    exec corepack pnpm lint-staged
+  fi
+  echo "pre-commit skipped (pnpm introuvable, installer corepack ou pnpm)"
+  exit 0
+fi
+
+pnpm lint-staged
