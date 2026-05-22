@@ -859,3 +859,4 @@ Si marché FR saturé (50%+ de part KOVAS) :
 | Recrutement advisor + équipe | `.claude/orchestration-kovas-app/team.md` |
 | PRD complet (Phase 1) | `.claude/orchestration-kovas-app/PRD.md` |
 | Observabilité prod | Sentry (errors) + PostHog (analytics+replay) + Better Stack (uptime) + /api/health — cf. `docs/MONITORING-SETUP.md` |
+| Sécurité DB & Supabase Advisor fixes | `supabase/migrations/20260522200000_supabase_advisor_fixes.sql` (RLS partitions + view security_invoker + search_path pin + FK indexes auto + REVOKE EXECUTE public/anon) — items manuels console : `docs/SUPABASE-MANUAL-FIXES.md` (Leaked Password Protection + extensions move) |
