@@ -425,6 +425,160 @@ export type Database = {
           },
         ]
       }
+      diagnostic_scans: {
+        Row: {
+          id: string
+          organization_id: string
+          client_id: string | null
+          property_id: string | null
+          file_storage_path: string
+          original_name: string | null
+          size_bytes: number | null
+          mime_type: string | null
+          diagnostic_type:
+            | 'dpe'
+            | 'amiante'
+            | 'plomb'
+            | 'gaz'
+            | 'electricite'
+            | 'termites'
+            | 'carrez'
+            | 'erp'
+            | null
+          date_emission: string | null
+          date_expiration: string | null
+          usage_context: 'vente' | 'location' | 'unknown' | null
+          result_positive: boolean | null
+          adresse: string | null
+          proprietaire: string | null
+          ademe_number: string | null
+          energy_class: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | null
+          extracted_data: Json
+          ai_confidence: number | null
+          ai_cost_eur: number | null
+          ai_latency_ms: number | null
+          status: 'pending' | 'analyzing' | 'analyzed' | 'confirmed' | 'rejected' | 'failed'
+          confirmed_at: string | null
+          rejected_at: string | null
+          uploaded_by: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          client_id?: string | null
+          property_id?: string | null
+          file_storage_path: string
+          original_name?: string | null
+          size_bytes?: number | null
+          mime_type?: string | null
+          diagnostic_type?:
+            | 'dpe'
+            | 'amiante'
+            | 'plomb'
+            | 'gaz'
+            | 'electricite'
+            | 'termites'
+            | 'carrez'
+            | 'erp'
+            | null
+          date_emission?: string | null
+          date_expiration?: string | null
+          usage_context?: 'vente' | 'location' | 'unknown' | null
+          result_positive?: boolean | null
+          adresse?: string | null
+          proprietaire?: string | null
+          ademe_number?: string | null
+          energy_class?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | null
+          extracted_data?: Json
+          ai_confidence?: number | null
+          ai_cost_eur?: number | null
+          ai_latency_ms?: number | null
+          status?:
+            | 'pending'
+            | 'analyzing'
+            | 'analyzed'
+            | 'confirmed'
+            | 'rejected'
+            | 'failed'
+          confirmed_at?: string | null
+          rejected_at?: string | null
+          uploaded_by?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          client_id?: string | null
+          property_id?: string | null
+          file_storage_path?: string
+          original_name?: string | null
+          size_bytes?: number | null
+          mime_type?: string | null
+          diagnostic_type?:
+            | 'dpe'
+            | 'amiante'
+            | 'plomb'
+            | 'gaz'
+            | 'electricite'
+            | 'termites'
+            | 'carrez'
+            | 'erp'
+            | null
+          date_emission?: string | null
+          date_expiration?: string | null
+          usage_context?: 'vente' | 'location' | 'unknown' | null
+          result_positive?: boolean | null
+          adresse?: string | null
+          proprietaire?: string | null
+          ademe_number?: string | null
+          energy_class?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | null
+          extracted_data?: Json
+          ai_confidence?: number | null
+          ai_cost_eur?: number | null
+          ai_latency_ms?: number | null
+          status?:
+            | 'pending'
+            | 'analyzing'
+            | 'analyzed'
+            | 'confirmed'
+            | 'rejected'
+            | 'failed'
+          confirmed_at?: string | null
+          rejected_at?: string | null
+          uploaded_by?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'diagnostic_scans_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'diagnostic_scans_client_id_fkey'
+            columns: ['client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'diagnostic_scans_property_id_fkey'
+            columns: ['property_id']
+            isOneToOne: false
+            referencedRelation: 'properties'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       dossier_rooms: {
         Row: {
           id: string
