@@ -17,30 +17,16 @@ export function SignupForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <FormField label="Prénom" htmlFor="firstName" required error={errors.firstName}>
-          <Input
-            id="firstName"
-            name="firstName"
-            type="text"
-            autoComplete="given-name"
-            required
-            placeholder="Pierre"
-            maxLength={60}
-          />
-        </FormField>
-        <FormField label="Nom" htmlFor="lastName" required error={errors.lastName}>
-          <Input
-            id="lastName"
-            name="lastName"
-            type="text"
-            autoComplete="family-name"
-            required
-            placeholder="Martin"
-            maxLength={60}
-          />
-        </FormField>
-      </div>
+      <FormField label="Nom complet" htmlFor="fullName" required error={errors.fullName}>
+        <Input
+          id="fullName"
+          name="fullName"
+          type="text"
+          autoComplete="name"
+          required
+          placeholder="Pierre Martin"
+        />
+      </FormField>
 
       <FormField
         label="Email professionnel"
@@ -92,29 +78,23 @@ export function SignupForm() {
       </FormField>
 
       {state?.error && (
-        <p className="text-sm text-[#DC2626]" role="alert">
+        <p className="text-sm text-accent-red" role="alert">
           {state.error}
         </p>
       )}
 
       <Button type="submit" className="w-full" size="lg" disabled={pending}>
         {pending && <Loader2 className="size-4 animate-spin" />}
-        Commencer l'essai 30 jours
+        Commencer l&apos;essai 30 jours
       </Button>
 
-      <p className="text-xs text-[#0F1419]/55 text-center">
+      <p className="text-xs text-ink-faint text-center">
         En créant un compte, vous acceptez nos{' '}
-        <a
-          href="/cgu"
-          className="text-[#0F1419] underline-offset-4 hover:underline"
-        >
+        <a href="/cgu" className="underline">
           CGU
         </a>{' '}
         et notre{' '}
-        <a
-          href="/confidentialite"
-          className="text-[#0F1419] underline-offset-4 hover:underline"
-        >
+        <a href="/confidentialite" className="underline">
           politique de confidentialité
         </a>
         .

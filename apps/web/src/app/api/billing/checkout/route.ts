@@ -59,6 +59,11 @@ export async function POST(request: Request) {
   }
 
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin
+
+  // Essai 30 jours AVEC CB obligatoire (modèle Qonto/Linear/ManyChat).
+  // Stripe Checkout collecte la CB pendant l'essai (validation Setup Intent transparent).
+  // À J+30, Stripe convertit automatiquement trialing → active et déclenche le débit.
+  // L'utilisateur n'a plus aucune confirmation à donner.
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     line_items: [{ price: priceId, quantity: 1 }],
@@ -66,8 +71,16 @@ export async function POST(request: Request) {
     success_url: `${origin}/dashboard/account?success=1`,
     cancel_url: `${origin}/dashboard/account?canceled=1`,
     automatic_tax: { enabled: true },
+    // payment_method_collection: 'always' force la collecte CB même pendant l'essai.
+    payment_method_collection: 'always',
     metadata: { organization_id: orgId, tier: tier.id, cycle },
     subscription_data: {
+      trial_period_days: 30,
+      // Préserve la CB collectée comme moyen de paiement par défaut sur la subscription
+      // → débit auto à J+30 sans intervention utilisateur.
+      trial_settings: {
+        end_behavior: { missing_payment_method: 'cancel' },
+      },
       metadata: { organization_id: orgId, tier: tier.id },
     },
   })

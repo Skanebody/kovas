@@ -1,6 +1,7 @@
 import { AppNavTabs } from '@/components/app-nav-tabs'
 import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { AppShell } from '@/components/app-shell'
+import { TrialBannerLoader } from '@/components/billing/TrialBannerLoader'
 import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
 import { RegulatoryNotificationsBadge } from '@/components/regulatory/RegulatoryNotificationsBadge'
@@ -51,6 +52,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
       <div className="flex-1 flex flex-col min-w-0">
         <OfflineBanner />
+        <TrialBannerLoader />
         {/* Header app v4 — sans logo (déjà dans sidebar 240px), juste search + usage + user */}
         <header className="md:sticky top-0 z-30 px-4 md:px-6 pt-4 pb-2 bg-transparent">
           <div className="glass-opaque rounded-pill px-3 py-2 flex items-center justify-between gap-3">

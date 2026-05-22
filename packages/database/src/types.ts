@@ -1916,6 +1916,9 @@ export type Database = {
           current_period_end: string | null
           cancel_at_period_end: boolean
           monthly_cap_eur: number | null
+          trial_started_at: string | null
+          trial_ends_at: string | null
+          is_in_trial: boolean
           created_at: string
           updated_at: string
         }
@@ -1932,6 +1935,10 @@ export type Database = {
           current_period_end?: string | null
           cancel_at_period_end?: boolean
           monthly_cap_eur?: number | null
+          trial_started_at?: string | null
+          trial_ends_at?: string | null
+          /** GENERATED ALWAYS — never insert directly */
+          is_in_trial?: never
           created_at?: string
           updated_at?: string
         }
@@ -1948,6 +1955,10 @@ export type Database = {
           current_period_end?: string | null
           cancel_at_period_end?: boolean
           monthly_cap_eur?: number | null
+          trial_started_at?: string | null
+          trial_ends_at?: string | null
+          /** GENERATED ALWAYS — never update directly */
+          is_in_trial?: never
           created_at?: string
           updated_at?: string
         }
