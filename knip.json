@@ -1,0 +1,31 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "apps/web/src/app/**/{page,layout,template,loading,error,not-found}.{ts,tsx}",
+    "apps/web/src/app/api/**/route.{ts,tsx}",
+    "apps/web/src/middleware.ts",
+    "apps/web/next.config.{ts,js,mjs}",
+    "apps/web/tailwind.config.{ts,js}",
+    "supabase/functions/*/index.ts",
+    "packages/*/src/index.ts"
+  ],
+  "project": [
+    "apps/web/src/**/*.{ts,tsx}",
+    "packages/*/src/**/*.{ts,tsx}"
+  ],
+  "ignore": [
+    "**/*.config.{ts,js,mjs}",
+    "**/*.d.ts",
+    "**/*.stories.tsx",
+    "**/*.generated.ts"
+  ],
+  "ignoreDependencies": [],
+  "rules": {
+    "files": "error",
+    "exports": "error",
+    "types": "error",
+    "duplicates": "error",
+    "dependencies": "warn",
+    "unlisted": "warn"
+  }
+}

@@ -13,11 +13,16 @@
       ".turbo",
       "dist",
       "build",
+      "out",
       ".vercel",
       "coverage",
       "supabase/.branches",
       "supabase/.temp",
-      "*.tsbuildinfo"
+      "supabase/migrations/*.sql",
+      "public",
+      "*.generated.ts",
+      "*.tsbuildinfo",
+      "pnpm-lock.yaml"
     ]
   },
   "formatter": {
@@ -36,15 +41,25 @@
       "recommended": true,
       "suspicious": {
         "noExplicitAny": "error",
-        "noConsoleLog": "warn"
+        "noConsoleLog": "warn",
+        "noDebugger": "error",
+        "noEmptyBlockStatements": "error"
       },
       "style": {
         "useImportType": "error",
-        "useNodejsImportProtocol": "error"
+        "useNodejsImportProtocol": "error",
+        "noNonNullAssertion": "error"
       },
       "correctness": {
         "useExhaustiveDependencies": "warn",
-        "noUnusedImports": "error"
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
+      },
+      "a11y": {
+        "useAltText": "error",
+        "useButtonType": "error",
+        "useValidAnchor": "error",
+        "useKeyWithClickEvents": "warn"
       }
     }
   },

@@ -12,19 +12,37 @@
     "build": "pnpm -r run build",
     "start": "pnpm -F @kovas/web start",
     "typecheck": "pnpm -r run typecheck",
-    "lint": "biome check .",
+    "lint": "biome lint .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
+    "check": "biome check .",
     "test": "pnpm -r run test",
     "test:e2e": "pnpm -F tests-e2e test",
+    "dead-code": "knip",
+    "dead-code:fix": "knip --fix",
+    "outdated": "pnpm outdated --recursive",
+    "audit:exports": "ts-prune -p apps/web/tsconfig.json",
     "db:gen-types": "supabase gen types typescript --linked > packages/database/src/types.ts",
     "db:migrate": "supabase db push",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.10.2",
+    "husky": "^9.1.7",
+    "knip": "^6.14.1",
+    "lint-staged": "^17.0.5",
+    "ts-prune": "^0.10.3",
     "typescript": "^5.7.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "biome check --no-errors-on-unmatched --write"
+    ],
+    "*.{json,md,css}": [
+      "biome format --write --no-errors-on-unmatched"
+    ]
   },
   "engines": {
     "node": ">=20",
