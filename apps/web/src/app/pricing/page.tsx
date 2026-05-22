@@ -209,7 +209,7 @@ function FinalCta() {
         engagement.
       </p>
       <Link
-        href="/signup?plan=logiciel_starter"
+        href="/signup?plan=solo_light"
         aria-label="Démarrer mon essai gratuit KOVAS 360"
         className="inline-flex items-center justify-center gap-2 bg-[#D4F542] text-[#0B1D33] px-10 py-4 rounded-full text-[15px] font-semibold hover:bg-[#A3C920] hover:-translate-y-px transition-all duration-150 shadow-[0_8px_24px_rgba(212,245,66,0.35)]"
       >

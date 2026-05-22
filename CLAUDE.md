@@ -139,27 +139,69 @@
 
 ---
 
-## 4. Pricing all-you-can-eat — 5 tiers + fair-use (refonte P9 2026-05-28)
+## 4. Pricing dual track — grille officielle V4 (2026-05-22)
 
 ### Architecture
 
-**5 tiers** à prix fixe mensuel + **missions ILLIMITÉES** sous fair-use cap. AUCUN surplus à l'usage. Hard caps IA Whisper/Vision silencieux jusqu'au plafonnement.
+**Deux tracks distincts** achetables séparément ou via bundle cross-sell.
+Prix fixe mensuel, missions illimitées sous fair-use cap. AUCUN surplus à l'usage. Hard caps IA Whisper/Vision silencieux jusqu'au plafonnement.
 
-### Grille publique (Phase 1)
+**Engagement annuel** : -15% sur tous les forfaits payants.
 
-| Code | Nom | Prix HT/mo | Diagnostics | IA & modules | Users | Storage | Soft cap missions/mo | Hard cap Whisper | Hard cap Vision | Burst /j |
-|---|---|---|---|---|---|---|---|---|---|---|
-| `essential` | Essential | **9€** | DPE + Amiante + Carrez + ERP | Voice basique | 1 | 10 Go | 50 | 5h | — | 10 |
-| `decouverte` | Découverte | **19€** | 8 diagnostics complets | + IA Haiku | 1 | 20 Go | 100 | 15h | — | 20 |
-| `pro` | Pro (recommandé) | **35€** | 8 + Cockpit ADEME Mode 1 | + Vision IA + Reco F/G + sig 2€/ponc. | 1 | 50 Go | **200** | 30h | 200 | 30 |
-| `all_inclusive` | All Inclusive | **49€** | + Croquis Apple Pencil | + Analytics + Templates ∞ + 5 sig/mo + Pennylane + ADEME Mode 2 | 1 | 100 Go | 350 | 60h | 500 | 50 |
-| `cabinet` | Cabinet | **89€** | + Marketplace sous-traitance | + Reporting + Audit + Factur-X + Communauté | 3 | 200 Go | 500 | 120h | 1500 | 80 |
+### Track Logiciel — KOVAS 360 (5 plans officiels)
 
-**Annuel** : 2 mois offerts (10 mois payés sur 12) sur tous les tiers — prix annuel = `monthlyPrice × 10`.
+| Code | Nom | Prix HT/mo | Prix annuel (-15%) | Missions | Users | Storage | Cible |
+|---|---|---|---|---|---|---|---|
+| `essai` | Essai gratuit | **0€** | – | 30 (cap) | 1 | 5 Go | Découverte 30 jours sans CB (puis débit auto vers Solo Light) |
+| `solo_light` | Solo Light | **29€** | 24,65€/mo | 60 | 1 | 12 Go | Démarrer en solo sur 8 diagnostics standards |
+| `solo_pro` | Solo Pro (recommandé) | **59€** | 50,15€/mo | 150 | 1 | 25 Go | Diagnostiqueur indépendant en activité |
+| `cabinet` | Cabinet | **149€** | 126,65€/mo | 400 | 3 | 100 Go | Cabinet 2-3 users avec gouvernance |
+| `cabinet_plus` | Cabinet+ | **299€** | 255€/mo | illimité (fair-use) | 7 | 250 Go | Cabinet élite + API + SLA 4h |
+
+### Track Annuaire — KOVAS Annuaire (4 plans officiels)
+
+| Code | Nom | Prix HT/mo | Prix annuel (-15%) | Leads/mo | Niveau fiche |
+|---|---|---|---|---|---|
+| `annuaire_free` | Fiche réclamée | **0€** | – | 0 (lecture seule) | Vérifiée |
+| `annuaire_local` | Visibilité Local | **19€** | 16,15€/mo | 5 | Premium (ville + alentours) |
+| `annuaire_regional` | Visibilité Régional (recommandé) | **39€** | 33,15€/mo | 15 | Premium + boost SEO (département) |
+| `annuaire_national` | Visibilité National | **79€** | 67,15€/mo | 30 | Top dept + badge "Recommandé" (France) |
+
+### Bundles cross-sell (5 combos remisés)
+
+| Code | Nom | Composition | Prix bundle | Séparé | Économie |
+|---|---|---|---|---|---|
+| `bundle_solo_starter` | Solo Starter | Local 19 + Solo Light 29 | **39€** | 48€ | 9€ |
+| `bundle_solo_performance` | Solo Performance | Local 19 + Solo Pro 59 | **65€** | 78€ | 13€ |
+| `bundle_solo_regional` | Solo Régional (recommandé) | Régional 39 + Solo Pro 59 | **79€** | 98€ | 19€ |
+| `bundle_cabinet_360` | Cabinet 360 | Régional 39 + Cabinet 149 | **159€** | 188€ | 29€ |
+| `bundle_cabinet_national` | Cabinet National | National 79 + Cabinet+ 299 | **319€** | 378€ | 59€ |
+
+### Add-ons optionnels (4 modules)
+
+| Code | Nom | Prix HT/mo | Plans éligibles |
+|---|---|---|---|
+| `addon_extra_user` | Utilisateur supplémentaire | **19€/mo/user** | Cabinet & Cabinet+ uniquement (max 7) |
+| `addon_ia_volume` | Volume IA et Vocal | **19€/mo** | Solo Pro et plus |
+| `addon_conformite_avancee` | Pack Conformité Avancée (Factur-X PPF + ADEME M2 + eIDAS) | **39€/mo** | Solo Pro et plus |
+| `addon_international` | Pack International (FR/EN + multi-devise + zones étendues) | **25€/mo** | Tous payants |
+
+### Sponsorisé dynamique — 6 paliers par tranche ville
+
+| Catégorie | Population | Prix HT/mo |
+|---|---|---|
+| `megapole` | > 1 000 000 | **149€** |
+| `metropole` | 500k - 1M | **99€** |
+| `grande_ville` | 100k - 500k | **69€** |
+| `ville_moyenne` | 30k - 100k | **39€** |
+| `petite_ville` | 10k - 30k | **19€** |
+| `commune` | < 10 000 | **9€** |
+
+Slots sponsorisés réservés au tier `annuaire_national` (`Visibilité National`).
 
 ### Plans grandfather (rétrocompat à vie)
 
-Les utilisateurs existants restent sur leur ancien plan à vie. Codes `*_legacy`, jamais affichés en pricing public, lisibles en backend Stripe + DB :
+Les utilisateurs existants pré-pivot restent sur leur ancien plan à vie. Codes `*_legacy`, jamais affichés en pricing public, lisibles en backend Stripe + DB :
 
 | Code | Display | Prix | Missions inclus | Surplus | Users |
 |---|---|---|---|---|---|
@@ -169,24 +211,34 @@ Les utilisateurs existants restent sur leur ancien plan à vie. Codes `*_legacy`
 | `founder_legacy` | Founder à vie ✦ | 49€ | 70 | 1€ | 1 |
 | `cabinet_legacy` | Cabinet (héritage) | 199€ | 400 | 0,80€ | 3 |
 
-Si user legacy souhaite changer → propose nouvelle grille avec calculateur "économies estimées" (pas de migration forcée).
+**Mapping pré-pivot → grille officielle V4** (cf. `LEGACY_PLAN_MAP` dans `apps/web/src/lib/pricing-plans.ts`) :
+
+| Ancien code public | Ancien prix | → Plan officiel V4 | Nouveau prix |
+|---|---|---|---|
+| `essential` | 9€ | `solo_light` | 29€ |
+| `decouverte` | 19€ | `solo_light` | 29€ |
+| `pro` | 35€ | `solo_pro` | 59€ |
+| `all_inclusive` | 49€ | `cabinet` | 149€ |
+| `cabinet` (89€) | 89€ | `cabinet_plus` | 299€ |
+
+Si user legacy souhaite migrer → propose nouvelle grille avec calculateur "économies estimées" (pas de migration forcée). Les abonnements grandfathered conservent leur prix Stripe historique.
 
 ### Logique fair-use
 
 - **Soft cap missions** : visible UI, jamais blocant. Au-delà 3 mois consécutifs → email upgrade automatique.
 - **Hard cap Whisper/Vision** : silencieux jusqu'au plafonnement. Si atteint : toast "Limite IA mensuelle atteinte. Mode rapide reprend le 1er du mois prochain." + bascule en parser local. Aucun surplus facturé.
 - **Burst quotidien** : anti-abus rafale (botnet/script). Inutile en usage normal.
-- **1 SIRET = 1 compte** : Cabinet (3 users inclus) couvre le cas multi-diagnostiqueurs.
+- **1 SIRET = 1 compte** : Cabinet (3 users inclus) couvre le cas multi-diagnostiqueurs, Cabinet+ jusqu'à 7 users.
 
 ### Options ponctuelles (paiement à l'usage)
 
 | Action | Tarif unitaire |
 |---|---|
-| Signature eIDAS Yousign (Pro) | **2€/signature** |
-| Rapport bilingue FR/EN | **5€/rapport** |
+| Signature eIDAS Yousign (hors Pack Conformité) | **2€/signature** |
+| Rapport bilingue FR/EN (hors Pack International) | **5€/rapport** |
 | SMS rappel client J-1 | **0,15€/SMS** |
 
-All Inclusive inclut 5 signatures/mois. Cabinet : signatures illimitées + Factur-X.
+Le Pack Conformité Avancée inclut signatures eIDAS illimitées + Factur-X PPF. Cabinet+ inclut tout.
 
 ---
 

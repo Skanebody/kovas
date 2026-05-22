@@ -40,7 +40,7 @@ function LogicielCard({
   plan: LogicielPlan
   billing: BillingCycle
 }) {
-  const isFree = plan.code === 'logiciel_free'
+  const isFree = plan.code === 'essai' || plan.code === 'logiciel_free'
   const monthlyEuros = Math.round(plan.monthlyPrice / 100)
   const annualEuros = Math.round(plan.annualPrice / 100)
   const displayPrice = billing === 'annual' ? Math.round(annualEuros / 12) : monthlyEuros
@@ -130,7 +130,7 @@ function LogicielCard({
             plan.featured === true ? 'text-white' : 'text-[#0F1419]',
           )}
         >
-          {plan.code === 'logiciel_enterprise'
+          {plan.code === 'cabinet_plus' || plan.code === 'logiciel_enterprise'
             ? 'Missions illimitées'
             : `${plan.caps.missions} missions / mois`}
         </p>
@@ -213,11 +213,12 @@ function FeatureItem({
 }
 
 function ctaHrefFor(code: LogicielPlanCode, billing: BillingCycle): string {
-  if (code === 'logiciel_free') return '/signup?plan=logiciel_starter'
+  // Plan gratuit (V4: 'essai', alias V3: 'logiciel_free') → vers signup Solo Light.
+  if (code === 'essai' || code === 'logiciel_free') return '/signup?plan=solo_light'
   return `/api/stripe/checkout?plan=${code}&cycle=${billing}`
 }
 
 function ctaLabelFor(code: LogicielPlanCode): string {
-  if (code === 'logiciel_free') return "Démarrer l'essai"
+  if (code === 'essai' || code === 'logiciel_free') return "Démarrer l'essai"
   return 'Choisir'
 }

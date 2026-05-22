@@ -1,21 +1,21 @@
 /**
- * Configuration backend des 5 forfaits KOVAS V1 (refonte P9 — 2026-05-28).
+ * Configuration backend des forfaits KOVAS V4 — grille officielle 2026-05-22.
  *
- * Modèle "all-you-can-eat" : prix fixe mensuel, missions ILLIMITÉES,
- * fair-use cap par tier. AUCUN usage-record metered pour les missions.
+ * Conserve l'API publique `KovasPlanId` / `KOVAS_PLANS` / `getPlan` / `KOVAS_TIERS`
+ * pour ne pas casser les consommateurs historiques (admin dashboard, /app/account,
+ * finance-calculator, webhook Stripe, etc.).
  *
- * Les Stripe Price IDs sont créés manuellement dans le dashboard Stripe
- * (ou via `scripts/stripe-provision-plans.ts`) et exposés par les variables
- * d'environnement `STRIPE_PRICE_<PLAN>_<CYCLE>`.
+ * Les noms officiels publics sont désormais Solo Light / Solo Pro / Cabinet /
+ * Cabinet+ (cf. `lib/pricing-plans.ts`). Ce fichier ne contient que les IDs
+ * legacy E2c (essential / decouverte / pro / all_inclusive / cabinet) car les
+ * abonnements DB de phase E2c portent encore ces tier IDs ; le mapping vers la
+ * nouvelle grille est géré par `LEGACY_PLAN_MAP` exporté depuis `pricing-plans.ts`.
  *
- * Source de vérité côté DB : table `subscription_plans`. Ce fichier en est
- * le miroir typé côté Next.js.
+ * Les prix sont alignés sur la grille officielle (29 / 59 / 149 / 299 €) pour
+ * que les futurs writes Stripe utilisent les bons montants.
  *
- * Compat ascendante : l'export `KOVAS_TIERS` est conservé sous forme d'alias
- * qui mappe les anciens IDs ('discovery' / 'standard' / 'volume') vers les
- * nouveaux plans, pour éviter de casser les consommateurs (admin dashboard,
- * /app/account, finance-calculator, etc.). Les anciens plans Stripe restent
- * actifs en backend pour les utilisateurs grandfathered.
+ * Source de vérité côté DB : table `subscription_plans`.
+ * Source de vérité produit : `lib/pricing-plans.ts` + CLAUDE.md §4.
  */
 
 // ============================================
@@ -51,75 +51,91 @@ export interface KovasPlan {
   featured?: boolean
 }
 
+/**
+ * Prix annuels = engagement annuel -15% sur 12× le prix mensuel (cf. CLAUDE.md §4).
+ * Round() pour rester en integer centimes — pas de float ni string.
+ */
+function annualCentsWithDiscount(monthlyCents: number): number {
+  return Math.round(monthlyCents * 12 * 0.85)
+}
+
 export const KOVAS_PLANS: readonly KovasPlan[] = [
   {
+    // Tier `essential` legacy E2c — remappé vers Solo Light 29€ (grille officielle V4).
     id: 'essential',
-    label: 'Essential',
-    description: 'Démarrer en toute simplicité sur les 4 diagnostics socle',
-    priceMonthlyCents: 900,
-    priceAnnualCents: 9000,
-    storageGb: 10,
+    label: 'Solo Light',
+    description: 'Démarrer en solo sur les diagnostics standards',
+    priceMonthlyCents: 2900,
+    priceAnnualCents: annualCentsWithDiscount(2900),
+    storageGb: 12,
     usersIncluded: 1,
-    fairUseMissionsSoftCap: 50,
+    fairUseMissionsSoftCap: 60,
     hardCapWhisperSeconds: 5 * 3600,
     hardCapVisionCalls: 0,
-    hardCapBurstPerDay: 10,
+    hardCapBurstPerDay: 15,
   },
   {
+    // Tier `decouverte` legacy E2c — équivalent Solo Light (alias historique).
     id: 'decouverte',
-    label: 'Découverte',
-    description: 'Les 8 diagnostics standards avec IA Haiku structuration',
-    priceMonthlyCents: 1900,
-    priceAnnualCents: 19000,
-    storageGb: 20,
+    label: 'Solo Light',
+    description: 'Tier d’entrée pour valider le gain de temps — alias historique',
+    priceMonthlyCents: 2900,
+    priceAnnualCents: annualCentsWithDiscount(2900),
+    storageGb: 12,
     usersIncluded: 1,
-    fairUseMissionsSoftCap: 100,
-    hardCapWhisperSeconds: 15 * 3600,
+    fairUseMissionsSoftCap: 60,
+    hardCapWhisperSeconds: 5 * 3600,
     hardCapVisionCalls: 0,
-    hardCapBurstPerDay: 20,
+    hardCapBurstPerDay: 15,
   },
   {
+    // Tier `pro` legacy E2c — remappé vers Solo Pro 59€ (grille officielle V4).
     id: 'pro',
-    label: 'Pro',
-    description: 'Le quotidien du diagnostiqueur indépendant',
-    priceMonthlyCents: 3500,
-    priceAnnualCents: 35000,
-    storageGb: 50,
+    label: 'Solo Pro',
+    description: 'Le choix recommandé pour les diagnostiqueurs en activité',
+    priceMonthlyCents: 5900,
+    priceAnnualCents: annualCentsWithDiscount(5900),
+    storageGb: 25,
     usersIncluded: 1,
-    fairUseMissionsSoftCap: 200,
-    hardCapWhisperSeconds: 30 * 3600,
-    hardCapVisionCalls: 200,
+    fairUseMissionsSoftCap: 150,
+    hardCapWhisperSeconds: 10 * 3600,
+    hardCapVisionCalls: 100,
     hardCapBurstPerDay: 30,
     recommended: true,
     featured: true,
   },
   {
+    // Tier `all_inclusive` legacy E2c — remappé vers Cabinet 149€ (grille officielle V4).
     id: 'all_inclusive',
-    label: 'All Inclusive',
-    description: 'Toute la puissance KOVAS, sans aucune limite à gérer',
-    priceMonthlyCents: 4900,
-    priceAnnualCents: 49000,
-    storageGb: 100,
-    usersIncluded: 1,
-    fairUseMissionsSoftCap: 350,
-    hardCapWhisperSeconds: 60 * 3600,
-    hardCapVisionCalls: 500,
-    hardCapBurstPerDay: 50,
-  },
-  {
-    id: 'cabinet',
     label: 'Cabinet',
-    description: 'Pour les équipes et les cabinets multi-diagnostiqueurs',
-    priceMonthlyCents: 8900,
-    priceAnnualCents: 89000,
-    storageGb: 200,
+    description: 'Multi-utilisateurs (3 inclus) + gouvernance',
+    priceMonthlyCents: 14900,
+    priceAnnualCents: annualCentsWithDiscount(14900),
+    storageGb: 100,
     usersIncluded: 3,
     extraUserPriceCents: 1900,
-    maxUsers: 10,
-    fairUseMissionsSoftCap: 500,
-    hardCapWhisperSeconds: 120 * 3600,
+    maxUsers: 7,
+    fairUseMissionsSoftCap: 400,
+    hardCapWhisperSeconds: 40 * 3600,
+    hardCapVisionCalls: 600,
+    hardCapBurstPerDay: 60,
+  },
+  {
+    // Tier `cabinet` legacy E2c — remappé vers Cabinet+ 299€ (grille officielle V4).
+    // Les anciens abonnements DB à 89€ migrent vers Cabinet+ via LEGACY_PLAN_MAP.
+    id: 'cabinet',
+    label: 'Cabinet+',
+    description: 'API publique + SLA 4h + onboarding white-glove',
+    priceMonthlyCents: 29900,
+    priceAnnualCents: annualCentsWithDiscount(29900),
+    storageGb: 250,
+    usersIncluded: 7,
+    extraUserPriceCents: 1900,
+    maxUsers: 7,
+    fairUseMissionsSoftCap: 999_999,
+    hardCapWhisperSeconds: 80 * 3600,
     hardCapVisionCalls: 1500,
-    hardCapBurstPerDay: 80,
+    hardCapBurstPerDay: 100,
   },
 ]
 
