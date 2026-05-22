@@ -89,6 +89,9 @@ const nextConfig: NextConfig = {
       { source: '/dashboard/upgrade/logiciel', destination: '/dashboard/decouvrir', permanent: true },
       { source: '/dashboard/upgrade/bundle', destination: '/dashboard/decouvrir', permanent: true },
       { source: '/dashboard/upgrade', destination: '/dashboard/decouvrir', permanent: true },
+      // B2B canonique : /pros remplace /pour-les-diagnostiqueurs (Lot #142).
+      { source: '/pour-les-diagnostiqueurs', destination: '/pros', permanent: true },
+      { source: '/pour-les-diagnostiqueurs/:path*', destination: '/pros/:path*', permanent: true },
     ]
   },
   async headers() {
