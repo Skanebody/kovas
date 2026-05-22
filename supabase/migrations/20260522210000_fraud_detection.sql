@@ -11,15 +11,15 @@
 --
 -- Sources scrutées :
 --  - missions internes (DPE produits via KOVAS)
---  - diagnostic_scans externes (DPE importés depuis Liciel ou ADEME public)
+--  - dpe_imports externes (DPE importés depuis Liciel ou ADEME public)
 -- ============================================
 
 -- ============================================
--- 1. Table diagnostic_scans (créée si absente)
+-- 1. Table dpe_imports (créée si absente)
 -- Représente un DPE externe importé (PDF Liciel, base ADEME publique, etc.)
 -- distinct des missions natives KOVAS.
 -- ============================================
-CREATE TABLE IF NOT EXISTS diagnostic_scans (
+CREATE TABLE IF NOT EXISTS dpe_imports (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid REFERENCES organizations(id) ON DELETE CASCADE,
   diagnostician_id uuid REFERENCES diagnosticians(id) ON DELETE SET NULL,
@@ -46,15 +46,15 @@ CREATE TABLE IF NOT EXISTS diagnostic_scans (
 );
 
 CREATE INDEX IF NOT EXISTS idx_diag_scans_diag
-  ON diagnostic_scans(diagnostician_id)
+  ON dpe_imports(diagnostician_id)
   WHERE diagnostician_id IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_diag_scans_org
-  ON diagnostic_scans(organization_id)
+  ON dpe_imports(organization_id)
   WHERE organization_id IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_diag_scans_declared_at
-  ON diagnostic_scans(declared_at DESC);
+  ON dpe_imports(declared_at DESC);
 
 -- ============================================
 -- 2. Table fraud_signals
@@ -64,7 +64,7 @@ CREATE INDEX IF NOT EXISTS idx_diag_scans_declared_at
 CREATE TABLE IF NOT EXISTS fraud_signals (
   id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   mission_id          uuid REFERENCES missions(id) ON DELETE CASCADE,
-  diagnostic_scan_id  uuid REFERENCES diagnostic_scans(id) ON DELETE CASCADE,
+  diagnostic_scan_id  uuid REFERENCES dpe_imports(id) ON DELETE CASCADE,
   pattern             text NOT NULL CHECK (pattern IN (
     'class_anomaly',
     'processing_velocity',
@@ -97,12 +97,12 @@ CREATE INDEX IF NOT EXISTS idx_fraud_signals_pattern
 -- ============================================
 -- 3. RLS — service_role + admins uniquement
 -- ============================================
-ALTER TABLE diagnostic_scans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dpe_imports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fraud_signals ENABLE ROW LEVEL SECURITY;
 
--- Lecture diagnostic_scans : membre de l'organisation propriétaire
+-- Lecture dpe_imports : membre de l'organisation propriétaire
 CREATE POLICY "diag_scans_org_read"
-  ON diagnostic_scans FOR SELECT
+  ON dpe_imports FOR SELECT
   USING (organization_id IS NULL OR public.is_member_of(organization_id));
 
 -- fraud_signals : pas de SELECT public.
