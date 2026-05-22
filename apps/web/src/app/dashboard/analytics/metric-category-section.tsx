@@ -14,8 +14,11 @@
  */
 
 import { Card } from '@/components/ui/card'
+import {
+  type AnalyticsIconName,
+  resolveAnalyticsIcon,
+} from '@/lib/icons/analytics-icon-registry'
 import { cn } from '@/lib/utils'
-import type { LucideIcon } from 'lucide-react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -24,8 +27,8 @@ export type MetricDeltaDirection = 'up' | 'down' | 'flat'
 export interface MetricRow {
   /** Identifiant unique (utilisé pour search + key React). */
   id: string
-  /** Icône Lucide pour le picto métrique. */
-  icon: LucideIcon
+  /** Nom de l'icône Lucide (résolu côté client via le registre). */
+  icon: AnalyticsIconName
   /** Nom métrique (ex: "Missions terminées"). */
   name: string
   /** Valeur formatée (ex: "127", "8 540 €", "92%"). */
@@ -63,8 +66,8 @@ const ACCENT_BG_CLASS: Record<MetricCategoryAccent, string> = {
 interface MetricCategorySectionProps {
   /** Identifiant catégorie pour key + ancrage. */
   id: string
-  /** Icône Lucide catégorie. */
-  icon: LucideIcon
+  /** Nom de l'icône Lucide catégorie (résolu côté client). */
+  icon: AnalyticsIconName
   /** Nom catégorie (ex: "Activité"). */
   name: string
   /** Variante d'accent (statique pour Tailwind). */
@@ -122,7 +125,7 @@ function deltaClass(direction: MetricDeltaDirection | undefined): string {
 }
 
 export function MetricCategorySection({
-  icon: Icon,
+  icon: iconName,
   name,
   accentClass = 'chartreuse',
   metrics,
@@ -130,6 +133,7 @@ export function MetricCategorySection({
   defaultOpen = false,
 }: MetricCategorySectionProps) {
   const [open, setOpen] = useState(defaultOpen)
+  const Icon = resolveAnalyticsIcon(iconName)
 
   // Filtre client-side
   const filtered = useMemo(() => {
@@ -185,7 +189,7 @@ export function MetricCategorySection({
       {isOpen ? (
         <ul className="border-t border-rule/60 divide-y divide-rule/40">
           {filtered.map((m) => {
-            const MetricIcon = m.icon
+            const MetricIcon = resolveAnalyticsIcon(m.icon)
             return (
               <li key={m.id}>
                 <div className="flex items-center gap-4 px-5 py-3.5 hover:bg-ink/[0.02] transition-colors">

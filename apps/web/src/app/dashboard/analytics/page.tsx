@@ -350,7 +350,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'missions-exported',
-      icon: Download,
+      icon: 'download',
       name: 'Missions exportées',
       value: String(current?.missions_exported ?? 0),
       delta: previous
@@ -364,7 +364,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'avg-time-export',
-      icon: Clock,
+      icon: 'clock',
       name: 'Temps moyen jusqu\'à export',
       value:
         current?.avg_time_to_export_seconds != null
@@ -381,7 +381,7 @@ export default async function AnalyticsPage() {
   const finishersMetrics: MetricRow[] = [
     {
       id: 'revenue-ht',
-      icon: Coins,
+      icon: 'coins',
       name: 'CA HT ce mois',
       value: formatEur(currentRevenue),
       delta: previous ? pctDelta(currentRevenue, previousRevenue) : undefined,
@@ -391,7 +391,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'avg-mission-value',
-      icon: Star,
+      icon: 'star',
       name: 'Panier moyen mission',
       value: current?.avg_mission_value_cents
         ? formatEur(Number(current.avg_mission_value_cents))
@@ -413,7 +413,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'gross-margin',
-      icon: PiggyBank,
+      icon: 'piggy-bank',
       name: 'Marge brute',
       value:
         current?.gross_margin_ratio != null
@@ -424,7 +424,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'ai-cost',
-      icon: Activity,
+      icon: 'activity',
       name: 'Coût IA ce mois',
       value: current?.ai_cost_cents ? formatEur(Number(current.ai_cost_cents)) : '—',
       hint: 'Claude + Whisper cumulés',
@@ -440,7 +440,7 @@ export default async function AnalyticsPage() {
   const satisfactionMetrics: MetricRow[] = [
     {
       id: 'unique-clients',
-      icon: Users,
+      icon: 'users',
       name: 'Clients uniques',
       value: String(current?.unique_clients ?? 0),
       delta: previous
@@ -454,7 +454,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'recurring-clients',
-      icon: Repeat,
+      icon: 'repeat',
       name: 'Clients récurrents',
       value: String(current?.recurring_clients ?? 0),
       delta: previous
@@ -468,14 +468,14 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'recurring-ratio',
-      icon: Smile,
+      icon: 'smile',
       name: 'Taux de récurrence',
       value: recurringRatio != null ? `${recurringRatio}%` : '—',
       hint: 'Récurrents / uniques',
     },
     {
       id: 'top-client-share',
-      icon: HeartHandshake,
+      icon: 'heart-handshake',
       name: 'Part du 1er client',
       value:
         current?.top_client_share_pct != null
@@ -506,7 +506,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'conversion-rate',
-      icon: Percent,
+      icon: 'percent',
       name: 'Taux de conversion',
       value: conversionRatio != null ? `${Math.round(conversionRatio * 100)}%` : '—',
       hint: 'Signés / envoyés',
@@ -519,7 +519,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'prescribers-active',
-      icon: Users,
+      icon: 'users',
       name: 'Prescripteurs actifs',
       value: String(prescribersList.length),
       hint: 'Apporteurs identifiés 12 mois',
@@ -531,7 +531,7 @@ export default async function AnalyticsPage() {
   const ademeMetrics: MetricRow[] = [
     {
       id: 'dpe-last-12m',
-      icon: AlertOctagon,
+      icon: 'alert-octagon',
       name: 'DPE cumulés 12 mois',
       value: dpeLast12m.toLocaleString('fr-FR'),
       hint: 'Seuil ADEME : 1000 DPE/an',
@@ -549,7 +549,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'ademe-distance',
-      icon: ShieldAlert,
+      icon: 'shield-alert',
       name: 'Marge avant seuil',
       value: `${Math.max(0, 1000 - dpeLast12m).toLocaleString('fr-FR')} DPE`,
       hint: '1000 − cumulés 12 mois',
@@ -557,7 +557,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'ademe-risk-score',
-      icon: Target,
+      icon: 'target',
       name: 'Niveau d\'exposition',
       value: `${ademeRiskScore}%`,
       hint: 'Cumul / seuil 1000',
@@ -568,7 +568,7 @@ export default async function AnalyticsPage() {
   const growthMetrics: MetricRow[] = [
     {
       id: 'mom-missions',
-      icon: TrendingUp,
+      icon: 'trending-up',
       name: 'Croissance missions M-1',
       value: previous ? pctDelta(Number(current?.missions_total ?? 0), Number(previous.missions_total)) : '—',
       deltaDirection: previous
@@ -579,7 +579,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'mom-revenue',
-      icon: ArrowUpRight,
+      icon: 'arrow-up-right',
       name: 'Croissance CA M-1',
       value: previous ? pctDelta(currentRevenue, previousRevenue) : '—',
       deltaDirection: previous ? pctDeltaDirection(currentRevenue, previousRevenue) : undefined,
@@ -588,7 +588,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'growth-12m',
-      icon: LineChart,
+      icon: 'line-chart',
       name: 'Évolution sur 12 mois',
       value:
         last12.length >= 2 && Number(last12[0]?.missions_total ?? 0) > 0
@@ -609,7 +609,7 @@ export default async function AnalyticsPage() {
     },
     {
       id: 'health-trend',
-      icon: TrendingDown,
+      icon: 'trending-down',
       name: 'Health score',
       value: healthBreakdown ? `${healthBreakdown.total}/100` : '—',
       delta:
@@ -728,42 +728,42 @@ export default async function AnalyticsPage() {
           categories={[
             {
               id: 'activite',
-              icon: Activity,
+              icon: 'activity',
               name: 'Activité',
               accentClass: 'chartreuse',
               metrics: activiteMetrics,
             },
             {
               id: 'finances',
-              icon: Coins,
+              icon: 'coins',
               name: 'Santé financière',
               accentClass: 'success',
               metrics: finishersMetrics,
             },
             {
               id: 'satisfaction',
-              icon: Smile,
+              icon: 'smile',
               name: 'Satisfaction client',
               accentClass: 'info',
               metrics: satisfactionMetrics,
             },
             {
               id: 'conversion',
-              icon: Target,
+              icon: 'target',
               name: 'Conversion',
               accentClass: 'warning',
               metrics: conversionMetrics,
             },
             {
               id: 'ademe',
-              icon: ShieldAlert,
+              icon: 'shield-alert',
               name: 'Risque ADEME',
               accentClass: 'danger',
               metrics: ademeMetrics,
             },
             {
               id: 'croissance',
-              icon: TrendingUp,
+              icon: 'trending-up',
               name: 'Croissance',
               accentClass: 'chartreuse',
               metrics: growthMetrics,
