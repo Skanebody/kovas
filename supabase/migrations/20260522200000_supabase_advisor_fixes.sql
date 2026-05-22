@@ -80,8 +80,8 @@ DROP POLICY IF EXISTS "incidents: admin write" ON public.incidents;
 CREATE POLICY "incidents: admin write"
   ON public.incidents FOR ALL
   TO authenticated
-  USING (public.is_admin((SELECT auth.uid())))
-  WITH CHECK (public.is_admin((SELECT auth.uid())));
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND is_admin = true))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND is_admin = true));
 
 -- 1.d. spatial_ref_sys : table système PostGIS, NON modifiable.
 -- L'Advisor remonte un faux positif. Ignoré intentionnellement.
@@ -121,8 +121,8 @@ COMMENT ON VIEW public.monthly_mission_counts IS
 DROP POLICY IF EXISTS "user_addons: admin write" ON public.user_addons;
 CREATE POLICY "user_addons: admin write"
   ON public.user_addons FOR ALL
-  USING (public.is_admin((SELECT auth.uid())))
-  WITH CHECK (public.is_admin((SELECT auth.uid())));
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND is_admin = true))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = (SELECT auth.uid()) AND is_admin = true));
 
 -- La policy "user_addons: org members read" utilise déjà public.is_member_of
 -- (SECURITY DEFINER) et ne souffre pas du même problème.
