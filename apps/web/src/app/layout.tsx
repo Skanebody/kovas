@@ -46,6 +46,23 @@ export const metadata: Metadata = {
     siteName: 'KOVAS',
     title: 'KOVAS — Diagnostic immobilier IA',
     description: "L'app iPad qui transforme 3h de DPE en 30 minutes",
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'KOVAS — Diagnostic immobilier IA',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'KOVAS — Diagnostic immobilier IA',
+    description: "L'app iPad qui transforme 3h de DPE en 30 minutes. Compagnon Liciel IA-first.",
+    images: ['/og-image.png'],
+  },
+  alternates: {
+    canonical: 'https://kovas.fr',
   },
 }
 

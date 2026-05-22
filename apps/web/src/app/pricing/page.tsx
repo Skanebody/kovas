@@ -1,15 +1,38 @@
+import { StructuredData } from '@/components/seo/structured-data'
+import { SiteFooter } from '@/components/site-footer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  type PricingPlanMeta,
+  getBreadcrumbListSchema,
+  getProductSchema,
+} from '@/lib/seo/structured-data'
 import { Check } from 'lucide-react'
 import type { Metadata } from 'next'
-import { SiteFooter } from '@/components/site-footer'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Tarifs',
+  title: 'Tarifs — Découverte 29€ · Standard 59€ · Volume 99€',
   description:
-    'Découverte 29€, Standard 59€, Volume 99€ par mois. Essai gratuit 30 jours, sans engagement, résiliable à tout moment.',
+    'Solo Light 29€, Solo Pro 59€, Cabinet 149€, Cabinet+ 299€ par mois HT. Essai gratuit 30 jours avec CB, sans engagement, résiliable à tout moment. 8 diagnostics, exports universels.',
+  alternates: { canonical: 'https://kovas.fr/pricing' },
+  openGraph: {
+    title: 'Tarifs KOVAS 360 — à partir de 29€/mois',
+    description:
+      'Solo Light, Solo Pro, Cabinet, Cabinet+ — 4 forfaits transparents, sans engagement, résiliable à tout moment.',
+    url: 'https://kovas.fr/pricing',
+    siteName: 'KOVAS',
+    locale: 'fr_FR',
+    type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Tarifs KOVAS' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tarifs KOVAS 360 — à partir de 29€/mois',
+    description: '4 forfaits transparents pour diagnostiqueurs indépendants. Essai 30 jours.',
+    images: ['/og-image.png'],
+  },
 }
 
 interface Tier {
@@ -68,9 +91,47 @@ const INCLUDED_FEATURES = [
   'Support email sous 24h',
 ]
 
+const PLAN_META: ReadonlyArray<PricingPlanMeta> = [
+  {
+    code: 'decouverte',
+    name: 'Découverte',
+    priceEurMonthly: 29,
+    description: '20 missions/mois, surplus 2€. Pour démarrer ou petits volumes.',
+    features: ['20 missions/mois', 'Surplus 2€/mission', '20 Go stockage'],
+  },
+  {
+    code: 'standard',
+    name: 'Standard',
+    priceEurMonthly: 59,
+    description: '60 missions/mois, surplus 1,50€. Le tier le plus choisi par les solopreneurs.',
+    features: ['60 missions/mois', 'Surplus 1,50€/mission', '50 Go stockage'],
+  },
+  {
+    code: 'volume',
+    name: 'Volume',
+    priceEurMonthly: 99,
+    description: '150 missions/mois, surplus 1€. Pour les power users en cabinet solo.',
+    features: ['150 missions/mois', 'Surplus 1€/mission', '100 Go stockage'],
+  },
+]
+
 export default function PricingPage() {
   return (
     <div className="min-h-dvh flex flex-col bg-cream">
+      {PLAN_META.map((plan) => (
+        <StructuredData
+          key={plan.code}
+          schema={getProductSchema(plan)}
+          id={`ld-product-${plan.code}`}
+        />
+      ))}
+      <StructuredData
+        schema={getBreadcrumbListSchema([
+          { name: 'Accueil', url: 'https://kovas.fr/' },
+          { name: 'Tarifs', url: 'https://kovas.fr/pricing' },
+        ])}
+        id="ld-breadcrumb"
+      />
       <header className="glass-header sticky top-0 z-50">
         <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
@@ -139,11 +200,7 @@ export default function PricingPage() {
                     <span>1 utilisateur</span>
                   </li>
                 </ul>
-                <Button
-                  className="w-full"
-                  variant={tier.highlighted ? 'warm' : 'glass'}
-                  asChild
-                >
+                <Button className="w-full" variant={tier.highlighted ? 'warm' : 'glass'} asChild>
                   <Link href="/signup">{tier.cta}</Link>
                 </Button>
               </CardContent>

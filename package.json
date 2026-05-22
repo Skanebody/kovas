@@ -25,15 +25,23 @@
     "db:gen-types": "supabase gen types typescript --linked > packages/database/src/types.ts",
     "db:migrate": "supabase db push",
     "db:reset": "supabase db reset",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lighthouse": "lhci autorun",
+    "seo:audit": "tsx scripts/seo-audit.ts",
+    "seo:validate-jsonld": "tsx scripts/validate-structured-data.ts",
+    "seo:check-outdated": "tsx scripts/check-outdated.ts",
+    "seo:analyze-bundle": "tsx scripts/analyze-bundle.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@lhci/cli": "^0.14.0",
     "@types/node": "^22.10.2",
     "husky": "^9.1.7",
     "knip": "^6.14.1",
     "lint-staged": "^17.0.5",
+    "playwright": "^1.49.1",
     "ts-prune": "^0.10.3",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
   "lint-staged": {

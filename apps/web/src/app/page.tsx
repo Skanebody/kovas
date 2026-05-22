@@ -1,8 +1,15 @@
 import { FaqAnswer } from '@/components/faq-answer'
+import { StructuredData } from '@/components/seo/structured-data'
+import { SiteFooter } from '@/components/site-footer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FAQ_LANDING } from '@/lib/faq-data'
+import {
+  getFAQPageSchema,
+  getLocalBusinessSchema,
+  getOrganizationSchema,
+} from '@/lib/seo/structured-data'
 import {
   ArrowRight,
   Camera,
@@ -13,8 +20,35 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react'
-import { SiteFooter } from '@/components/site-footer'
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'KOVAS — Diagnostic immobilier IA-first',
+  description:
+    'Logiciel SaaS B2B pour diagnostiqueurs immobiliers indépendants. Saisie vocale terrain, photos géolocalisées, exports universels. 1h30 gagnée par mission DPE.',
+  alternates: {
+    canonical: 'https://kovas.fr/',
+  },
+  openGraph: {
+    title: 'KOVAS — Diagnostic immobilier IA-first',
+    description:
+      'Logiciel SaaS B2B pour diagnostiqueurs immobiliers indépendants. 1h30 gagnée par mission DPE typique.',
+    url: 'https://kovas.fr/',
+    siteName: 'KOVAS',
+    locale: 'fr_FR',
+    type: 'website',
+    images: [
+      { url: '/og-image.png', width: 1200, height: 630, alt: 'KOVAS — Diagnostic immobilier IA' },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'KOVAS — Diagnostic immobilier IA-first',
+    description: 'Saisie vocale terrain + exports universels pour diagnostiqueurs indépendants.',
+    images: ['/og-image.png'],
+  },
+}
 
 /**
  * KOVAS — Landing page marketing (kovas.fr/)
@@ -24,6 +58,14 @@ import Link from 'next/link'
 export default function HomePage() {
   return (
     <div className="min-h-dvh flex flex-col bg-cream">
+      <StructuredData schema={getOrganizationSchema()} id="ld-organization" />
+      <StructuredData schema={getLocalBusinessSchema()} id="ld-localbusiness" />
+      <StructuredData
+        schema={getFAQPageSchema(
+          FAQ_LANDING.map((q) => ({ question: q.question, answer: q.answer })),
+        )}
+        id="ld-faq"
+      />
       <SiteHeader />
       <main className="flex-1">
         <Hero />
@@ -48,22 +90,13 @@ function SiteHeader() {
           <span className="text-base font-bold tracking-tight">KOVAS</span>
         </Link>
         <nav className="hidden sm:flex items-center gap-6 text-sm">
-          <Link
-            href="/#features"
-            className="text-ink-mute hover:text-ink transition-colors"
-          >
+          <Link href="/#features" className="text-ink-mute hover:text-ink transition-colors">
             Fonctionnalités
           </Link>
-          <Link
-            href="/pricing"
-            className="text-ink-mute hover:text-ink transition-colors"
-          >
+          <Link href="/pricing" className="text-ink-mute hover:text-ink transition-colors">
             Tarifs
           </Link>
-          <Link
-            href="/faq"
-            className="text-ink-mute hover:text-ink transition-colors"
-          >
+          <Link href="/faq" className="text-ink-mute hover:text-ink transition-colors">
             FAQ
           </Link>
         </nav>
