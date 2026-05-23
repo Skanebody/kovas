@@ -1,9 +1,15 @@
-import { BillingSection } from '@/components/dossier/hub/BillingSection'
+import { ActivityLogSection, type ActivityEvent } from '@/components/dossier/hub/ActivityLogSection'
+import { BillingSection, type BillingItem } from '@/components/dossier/hub/BillingSection'
 import { CaptureSection } from '@/components/dossier/hub/CaptureSection'
 import { CommunicationSection } from '@/components/dossier/hub/CommunicationSection'
 import { DataQualitySection } from '@/components/dossier/hub/DataQualitySection'
 import { ExportsSection } from '@/components/dossier/hub/ExportsSection'
 import { FollowupSection } from '@/components/dossier/hub/FollowupSection'
+import {
+  HistoricalDocumentsSection,
+  type HistoricalDocumentCategory,
+  type HistoricalDocumentItem,
+} from '@/components/dossier/hub/HistoricalDocumentsSection'
 import { HubHeader } from '@/components/dossier/hub/HubHeader'
 import { IdentitySection } from '@/components/dossier/hub/IdentitySection'
 import { NotesSection } from '@/components/dossier/hub/NotesSection'
@@ -50,6 +56,8 @@ export default async function DossierDetailPage({
 }) {
   const { id } = await params
   const { supabase, orgId } = await getCurrentUser()
+  // biome-ignore lint/suspicious/noExplicitAny: types DB pas encore regénérés post-migration FIX-KK.
+  const sb = supabase as any
 
   // -------------------------------------------------------------
   // 1. Charge dossier + relations
@@ -79,6 +87,10 @@ export default async function DossierDetailPage({
     { data: voiceNotes },
     { data: ownerDocs },
     { data: otherDossiersData },
+    { data: quotesData },
+    { data: invoicesData },
+    { data: historicalDocsData },
+    { data: activityLogData },
   ] = await Promise.all([
     supabase
       .from('missions')
@@ -125,6 +137,38 @@ export default async function DossierDetailPage({
           .order('created_at', { ascending: false })
           .limit(6)
       : Promise.resolve({ data: [] as Array<Record<string, unknown>> }),
+    // Chantier A (FIX-KK §A) — devis rattachés à ce dossier
+    sb
+      .from('quotes')
+      .select('id, reference, status, amount_ttc, issued_at, created_at')
+      .eq('dossier_id', id)
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false }),
+    // Chantier A (FIX-KK §A) — factures rattachées à ce dossier
+    sb
+      .from('invoices')
+      .select('id, reference, status, amount_ttc, paid_amount, issued_at, created_at')
+      .eq('dossier_id', id)
+      .eq('organization_id', orgId)
+      .order('created_at', { ascending: false }),
+    // Chantier B (FIX-KK §B) — docs historiques du bien
+    sb
+      .from('dossier_historical_documents')
+      .select(
+        'id, category, storage_path, original_filename, file_size_bytes, mime_type, uploaded_at, ai_extraction_status, ai_extracted_data',
+      )
+      .eq('dossier_id', id)
+      .eq('organization_id', orgId)
+      .order('uploaded_at', { ascending: false }),
+    // Chantier E (FIX-KK §E) — timeline activité
+    sb
+      .from('dossier_activity_log')
+      .select('id, event_type, event_data, occurred_at')
+      .eq('dossier_id', id)
+      .eq('organization_id', orgId)
+      .order('occurred_at', { ascending: false })
+      .limit(100),
   ])
 
   // -------------------------------------------------------------
@@ -228,8 +272,7 @@ export default async function DossierDetailPage({
   }
 
   // -------------------------------------------------------------
-  // 6. Communication, Billing, Followup — données placeholders V1
-  // (tables non encore créées : communications, invoices, payments, followups)
+  // 6. Communication, Followup — placeholders V1 (tables à venir)
   // -------------------------------------------------------------
   const communicationEvents: ReadonlyArray<{
     id: string
@@ -239,14 +282,6 @@ export default async function DossierDetailPage({
     subject: string | null
     preview: string | null
   }> = []
-  const billingItems: ReadonlyArray<{
-    id: string
-    kind: 'quote' | 'invoice' | 'payment'
-    reference: string
-    amountCents: number
-    status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
-    date: string
-  }> = []
   const followupItems: ReadonlyArray<{
     id: string
     kind: 'milestone' | 'opportunity' | 'reminder'
@@ -255,6 +290,111 @@ export default async function DossierDetailPage({
     description: string | null
     done: boolean
   }> = []
+
+  // -------------------------------------------------------------
+  // 6bis. Chantier A (FIX-KK §A) — Billing items réels (devis + factures)
+  // -------------------------------------------------------------
+  const quotesRows = (quotesData ?? []) as Array<{
+    id: string
+    reference: string
+    status: string
+    amount_ttc: number | string | null
+    issued_at: string | null
+    created_at: string
+  }>
+  const invoicesRows = (invoicesData ?? []) as Array<{
+    id: string
+    reference: string
+    status: string
+    amount_ttc: number | string | null
+    paid_amount: number | string | null
+    issued_at: string | null
+    created_at: string
+  }>
+
+  function toCents(v: number | string | null): number {
+    const n = typeof v === 'string' ? Number(v) : (v ?? 0)
+    return Math.round(Number.isFinite(n) ? n * 100 : 0)
+  }
+
+  const billingItems: ReadonlyArray<BillingItem> = [
+    ...quotesRows.map<BillingItem>((q) => ({
+      id: q.id,
+      kind: 'quote',
+      reference: q.reference,
+      amountCents: toCents(q.amount_ttc ?? null),
+      status: (q.status as BillingItem['status']) ?? 'draft',
+      date: q.issued_at ?? q.created_at,
+    })),
+    ...invoicesRows.map<BillingItem>((inv) => ({
+      id: inv.id,
+      kind: 'invoice',
+      reference: inv.reference,
+      amountCents: toCents(inv.amount_ttc ?? null),
+      status: (inv.status as BillingItem['status']) ?? 'draft',
+      date: inv.issued_at ?? inv.created_at,
+    })),
+  ]
+
+  // -------------------------------------------------------------
+  // 6ter. Chantier B (FIX-KK §B) — documents historiques + signed URLs
+  // -------------------------------------------------------------
+  const historicalDocsRows = (historicalDocsData ?? []) as Array<{
+    id: string
+    category: HistoricalDocumentCategory
+    storage_path: string
+    original_filename: string | null
+    file_size_bytes: number | null
+    mime_type: string | null
+    uploaded_at: string
+    ai_extraction_status: HistoricalDocumentItem['ai_extraction_status']
+    ai_extracted_data: Record<string, unknown> | null
+  }>
+
+  let historicalDocs: HistoricalDocumentItem[] = []
+  if (historicalDocsRows.length > 0) {
+    const paths = historicalDocsRows.map((d) => d.storage_path)
+    const { data: signed } = await supabase.storage
+      .from('dossier-documents')
+      .createSignedUrls(paths, 3600)
+    const signedMap = new Map<string, string>()
+    ;(signed ?? []).forEach((entry, i) => {
+      const p = paths[i]
+      if (entry?.signedUrl && p) signedMap.set(p, entry.signedUrl)
+    })
+    historicalDocs = historicalDocsRows.map((d) => ({
+      id: d.id,
+      category: d.category,
+      storage_path: d.storage_path,
+      original_filename: d.original_filename,
+      file_size_bytes: d.file_size_bytes,
+      mime_type: d.mime_type,
+      uploaded_at: d.uploaded_at,
+      ai_extraction_status: d.ai_extraction_status ?? null,
+      ai_extracted_data: d.ai_extracted_data,
+      signed_url: signedMap.get(d.storage_path) ?? null,
+    }))
+  }
+
+  // -------------------------------------------------------------
+  // 6quater. Chantier E (FIX-KK §E) — activity log timeline
+  // -------------------------------------------------------------
+  const activityEvents: ReadonlyArray<ActivityEvent> = ((activityLogData ?? []) as unknown[]).map(
+    (e) => {
+      const row = e as {
+        id: string
+        event_type: string
+        event_data?: Record<string, unknown> | null
+        occurred_at: string
+      }
+      return {
+        id: String(row.id),
+        event_type: String(row.event_type),
+        event_data: row.event_data ?? null,
+        occurred_at: String(row.occurred_at),
+      }
+    },
+  )
 
   // -------------------------------------------------------------
   // 7. Render — assemble sections et passe au Client orchestrateur
@@ -356,8 +496,25 @@ export default async function DossierDetailPage({
       communication={
         visibleSections.communication ? <CommunicationSection events={communicationEvents} /> : null
       }
-      billing={visibleSections.billing ? <BillingSection items={billingItems} /> : null}
+      billing={
+        visibleSections.billing ? (
+          <BillingSection
+            items={billingItems}
+            dossierId={dossier.id}
+            clientId={client.id}
+            propertyId={property.id ?? null}
+          />
+        ) : null
+      }
       followup={visibleSections.followup ? <FollowupSection items={followupItems} /> : null}
+      historicalDocs={
+        visibleSections.historicalDocs ? (
+          <HistoricalDocumentsSection dossierId={dossier.id} documents={historicalDocs} />
+        ) : null
+      }
+      activityLog={
+        visibleSections.activityLog ? <ActivityLogSection events={activityEvents} /> : null
+      }
       notes={<NotesSection dossierId={dossier.id} initialNotes={dossier.notes} />}
       sidebar={
         <Sidebar
