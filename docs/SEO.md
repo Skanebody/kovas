@@ -12,7 +12,7 @@ KOVAS répond à deux intents SEO distincts :
 | Intent | Produit | Pages | Volume estimé FR |
 |---|---|---|---|
 | **B2B** "logiciel diagnostic immobilier", "alternative Liciel" | KOVAS 360 (SaaS payant) | `/`, `/pricing`, `/pour-les-diagnostiqueurs`, `/blog` | 5-10k recherches/mois |
-| **B2C** "diagnostiqueur immobilier {ville}", "DPE {ville}" | KOVAS Annuaire (gratuit) | `/diagnostiqueurs/{slug}`, fiches publiques | **20-50k recherches/mois** |
+| **B2C** "diagnostiqueur immobilier {ville}", "DPE {ville}" | KOVAS Annuaire (gratuit) | `/trouver-un-diagnostiqueur/{slug}`, fiches publiques | **20-50k recherches/mois** |
 
 Le **B2C est le levier d'acquisition principal** : il génère du trafic organique vers la marque, sur lequel on greffe la conversion B2B via les liens latéraux "Vous êtes diagnostiqueur ?".
 
@@ -29,7 +29,7 @@ Le **B2C est le levier d'acquisition principal** : il génère du trafic organiq
 - `/qui-sommes-nous` — about/founder story (NEXUS 1993, Benjamin Bel)
 - `/pour-les-diagnostiqueurs` — landing acquisition B2B (différencier vs Liciel)
 - `/blog` + `/blog/{slug}` — contenu SEO (20 articles M0-M5)
-- `/diagnostiqueurs` (index) + `/diagnostiqueurs/{slug}` — fiches villes + diagnostiqueurs
+- `/trouver-un-diagnostiqueur` (index) + `/trouver-un-diagnostiqueur/{slug}` — fiches villes + diagnostiqueurs
 
 ## 2. Schémas schema.org utilisés
 
@@ -38,7 +38,7 @@ Implémentation typée via `schema-dts` dans [`apps/web/src/lib/seo/structured-d
 | Schéma | Page(s) | Helper |
 |---|---|---|
 | `Organization` | toutes (publisher node) | `getOrganizationSchema()` |
-| `LocalBusiness` | `/`, `/diagnostiqueurs/{slug}` | `getLocalBusinessSchema(diagnostician?)` |
+| `LocalBusiness` | `/`, `/trouver-un-diagnostiqueur/{slug}` | `getLocalBusinessSchema(diagnostician?)` |
 | `Service` | `/pour-les-diagnostiqueurs`, fiche diagnostiqueur | `getServiceSchema(type)` |
 | `Product` (×3) | `/pricing` (1 par tier) | `getProductSchema(plan)` |
 | `FAQPage` | `/`, `/faq` | `getFAQPageSchema(faqs)` |
@@ -64,7 +64,7 @@ Le `robots.txt` (généré par `next-sitemap` ET la metadata route `apps/web/src
 | Path pattern | Priority | Changefreq |
 |---|---|---|
 | `/` | 1.0 | daily |
-| `/diagnostiqueurs/{slug}` | 0.9 | weekly |
+| `/trouver-un-diagnostiqueur/{slug}` | 0.9 | weekly |
 | `/pricing`, `/qui-sommes-nous`, `/pour-les-diagnostiqueurs` | 0.7 | weekly |
 | `/blog/{slug}` | 0.6 | monthly |
 | Reste | 0.7 | weekly |
@@ -129,7 +129,7 @@ Uploads : `temporary-public-storage` (lien public 7 jours). Migrer vers LHCI Ser
 |---|---|
 | Sprint MVP J1-J14 | Pages publiques de base + robots/sitemap minimal (déjà fait) |
 | **Couche 5 (ce sprint)** | Lighthouse CI + schema-dts + scripts audit + sitemaps villes/blog (FAIT) |
-| Sprint M2 contenu | 20 articles blog + intégration table `cities` Supabase + fiches /diagnostiqueurs/{slug} dynamiques |
+| Sprint M2 contenu | 20 articles blog + intégration table `cities` Supabase + fiches /trouver-un-diagnostiqueur/{slug} dynamiques |
 | Sprint M3 SEO local | Outreach annuaires + bonification fiches diagnostiqueurs payantes |
 | Sprint M5 GSC | Verification + monitoring + first audit Search Console |
 

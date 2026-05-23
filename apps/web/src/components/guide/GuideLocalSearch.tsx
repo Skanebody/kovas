@@ -2,9 +2,9 @@
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { useRouter } from 'next/navigation'
-import { useState, type FormEvent } from 'react'
 import { MapPin, Search } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { type FormEvent, useState } from 'react'
 
 interface GuideLocalSearchProps {
   readonly diagnosticLabel: string
@@ -13,9 +13,9 @@ interface GuideLocalSearchProps {
 /**
  * CTA "Trouver un diagnostiqueur [type] dans votre ville" en bas de guide.
  *
- * Input code postal + bouton ; submit redirige vers `/diagnostiqueurs?cp=XX`
+ * Input code postal + bouton ; submit redirige vers `/trouver-un-diagnostiqueur?cp=XX`
  * qui prend en charge le filtrage côté annuaire. En l'absence de code postal
- * valide (5 chiffres FR), fallback vers `/diagnostiqueurs` simple.
+ * valide (5 chiffres FR), fallback vers `/trouver-un-diagnostiqueur` simple.
  */
 export function GuideLocalSearch({ diagnosticLabel }: GuideLocalSearchProps) {
   const router = useRouter()
@@ -25,9 +25,9 @@ export function GuideLocalSearch({ diagnosticLabel }: GuideLocalSearchProps) {
     event.preventDefault()
     const trimmed = postalCode.trim()
     if (/^\d{5}$/.test(trimmed)) {
-      router.push(`/diagnostiqueurs?cp=${trimmed}`)
+      router.push(`/trouver-un-diagnostiqueur?cp=${trimmed}`)
     } else {
-      router.push('/diagnostiqueurs')
+      router.push('/trouver-un-diagnostiqueur')
     }
   }
 
@@ -53,10 +53,7 @@ export function GuideLocalSearch({ diagnosticLabel }: GuideLocalSearchProps) {
             </p>
           </div>
         </div>
-        <form
-          onSubmit={handleSubmit}
-          className="flex w-full max-w-md shrink-0 gap-2"
-        >
+        <form onSubmit={handleSubmit} className="flex w-full max-w-md shrink-0 gap-2">
           <label htmlFor="local-search-cp" className="sr-only">
             Code postal de votre bien
           </label>

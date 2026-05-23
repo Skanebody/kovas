@@ -5,7 +5,7 @@
 
 ## 1. Vue d'ensemble
 
-L'annuaire public KOVAS (`/diagnostiqueurs`) référence **~13 000 diagnostiqueurs
+L'annuaire public KOVAS (`/trouver-un-diagnostiqueur`) référence **~13 000 diagnostiqueurs
 immobiliers FR certifiés**. La table `diagnosticians` est alimentée par **4 sources
 croisées** + dédupliquées + validées en continu.
 
@@ -189,13 +189,13 @@ publiées + non retirées + Sirene active + ≥1 certif valide).
 
 **Routes consommatrices** :
 - `GET /api/diagnosticians/search` — JSON public
-- `/diagnostiqueurs` (page Next.js Server Component)
-- `/diagnostiqueurs/[dept]/[city]` (à venir FIX-H — pages SEO city)
+- `/trouver-un-diagnostiqueur` (page Next.js Server Component)
+- `/trouver-un-diagnostiqueur/[dept]/[city]` (à venir FIX-H — pages SEO city)
 
 ## 6. Page admin
 
 **URL** : `/admin/diagnostiqueurs/import`
-**Code** : `apps/web/src/app/admin/(gated)/diagnostiqueurs/import/page.tsx`
+**Code** : `apps/web/src/app/admin/(gated)/trouver-un-diagnostiqueur/import/page.tsx`
 **Auth** : `requireAdmin()` (allowlist email `ADMIN_EMAILS`)
 
 **Affiche** :

@@ -10,7 +10,7 @@
  *  - 0.9  /pour-les-diagnostiqueurs      (page d'entrée B2B)
  *  - 0.9  /calculateur-dpe-gratuit       (lead magnet B2C)
  *  - 0.8  /observatoire                  (data PR + backlinks)
- *  - 0.8  /diagnostiqueurs               (index annuaire)
+ *  - 0.8  /trouver-un-diagnostiqueur               (index annuaire)
  *  - 0.7  /pricing                       (page tarifs)
  *  - 0.7  /guide/*                       (guides longs SEO)
  *  - 0.6  /conseils                      (index blog)
@@ -25,14 +25,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kovas.fr'
 
 interface StaticEntry {
   readonly path: string
-  readonly changefreq:
-    | 'always'
-    | 'hourly'
-    | 'daily'
-    | 'weekly'
-    | 'monthly'
-    | 'yearly'
-    | 'never'
+  readonly changefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'
   readonly priority: number
 }
 
@@ -42,7 +35,7 @@ const STATIC_PAGES: readonly StaticEntry[] = [
   { path: '/pour-les-diagnostiqueurs', changefreq: 'monthly', priority: 0.9 },
   { path: '/calculateur-dpe-gratuit', changefreq: 'monthly', priority: 0.9 },
   { path: '/observatoire', changefreq: 'monthly', priority: 0.8 },
-  { path: '/diagnostiqueurs', changefreq: 'daily', priority: 0.8 },
+  { path: '/trouver-un-diagnostiqueur', changefreq: 'daily', priority: 0.8 },
 
   // Tarifs & support — mid priority
   { path: '/pricing', changefreq: 'monthly', priority: 0.7 },

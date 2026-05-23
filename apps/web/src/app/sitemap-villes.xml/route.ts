@@ -1,7 +1,7 @@
 import { SEO_CITIES } from '@/lib/seo/cities'
 
 /**
- * sitemap-villes.xml — fiches /diagnostiqueurs/{slug} pour acquisition SEO local.
+ * sitemap-villes.xml — fiches /trouver-un-diagnostiqueur/{slug} pour acquisition SEO local.
  *
  * Phase 1 : lecture depuis la source statique `SEO_CITIES` (30 villes seed).
  * Phase 2 : remplacer par une requête Supabase quand la table `cities` sera
@@ -19,7 +19,7 @@ export function GET(): Response {
   const lastmod = new Date().toISOString()
 
   const urls = SEO_CITIES.map((city) => {
-    const loc = `${baseUrl}/diagnostiqueurs/${city.slug}`
+    const loc = `${baseUrl}/trouver-un-diagnostiqueur/${city.slug}`
     return [
       '  <url>',
       `    <loc>${loc}</loc>`,

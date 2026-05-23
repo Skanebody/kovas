@@ -11,7 +11,7 @@
  *  - Mention obligatoire non-opposable.
  *  - Liste des 3 facteurs positifs + 3 négatifs.
  *  - 2 CTA :
- *      1. Primary chartreuse → `/diagnostiqueurs/{dept}/{ville-slug}` (geoloc)
+ *      1. Primary chartreuse → `/trouver-un-diagnostiqueur/{dept}/{ville-slug}` (geoloc)
  *      2. Outline → `onRequestLeadForm()` (ouvre LeadForm pour estimation+devis)
  */
 
@@ -19,13 +19,10 @@ import { ArrowLeft, CheckCircle2, MapPin, ShieldAlert, XCircle } from 'lucide-re
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import {
-  DPE_CLASS_STYLES,
-  classToColor,
-} from '@/lib/dpe-calculator/energy-class-mapper'
+import { DPE_CLASS_STYLES, classToColor } from '@/lib/dpe-calculator/energy-class-mapper'
 import type { EstimationResult } from '@/lib/dpe-calculator/estimation-engine'
 import type { CalculatorAnswers } from '@/lib/dpe-calculator/question-tree'
+import { cn } from '@/lib/utils'
 
 interface ResultCardProps {
   estimation: EstimationResult
@@ -56,12 +53,12 @@ export function ResultCard({
   const colorKey = classToColor(estimation.estimatedClass)
   const styles = DPE_CLASS_STYLES[colorKey]
 
-  // CTA "Trouver un diagnostiqueur" → /diagnostiqueurs/{dept}/{ville-slug}
+  // CTA "Trouver un diagnostiqueur" → /trouver-un-diagnostiqueur/{dept}/{ville-slug}
   // Si geoloc pas dispo, on tombe sur la liste générale.
   const findUrl =
     detectedDepartment && detectedCity
-      ? `/diagnostiqueurs/${detectedDepartment}/${slugify(detectedCity)}`
-      : '/diagnostiqueurs'
+      ? `/trouver-un-diagnostiqueur/${detectedDepartment}/${slugify(detectedCity)}`
+      : '/trouver-un-diagnostiqueur'
 
   // Suppress unused warning — answers peut être utilisé en V1.5 pour
   // personnaliser davantage les recommandations (ex. mention chauffage).
@@ -85,33 +82,24 @@ export function ResultCard({
           >
             {estimation.estimatedClass}
           </span>
-          <span className="pb-3 font-display text-[16px] font-medium text-ink-mute">
-            probable
-          </span>
+          <span className="pb-3 font-display text-[16px] font-medium text-ink-mute">probable</span>
         </div>
         <p className="mt-3 text-[14px] text-ink-mute">
           Confiance d'estimation :{' '}
-          <strong className="font-semibold text-ink">
-            {estimation.confidence}%
-          </strong>{' '}
-          · Score énergétique {estimation.score} / 100
+          <strong className="font-semibold text-ink">{estimation.confidence}%</strong> · Score
+          énergétique {estimation.score} / 100
         </p>
       </div>
 
       {/* Mention obligatoire non-opposable */}
       <div
-        className={cn(
-          'flex items-start gap-3 rounded-lg border p-4',
-          styles.border,
-          styles.bgSoft,
-        )}
+        className={cn('flex items-start gap-3 rounded-lg border p-4', styles.border, styles.bgSoft)}
       >
         <ShieldAlert className={cn('size-5 shrink-0', styles.text)} aria-hidden />
         <p className="text-[13px] leading-relaxed text-ink">
-          <strong>Cette estimation est indicative et non opposable.</strong> Seul un
-          DPE officiel établi par un diagnostiqueur certifié a une valeur
-          réglementaire pour une vente, une location ou une déclaration d'audit
-          énergétique.
+          <strong>Cette estimation est indicative et non opposable.</strong> Seul un DPE officiel
+          établi par un diagnostiqueur certifié a une valeur réglementaire pour une vente, une
+          location ou une déclaration d'audit énergétique.
         </p>
       </div>
 
@@ -184,9 +172,7 @@ function FactorsList({
   const Icon = kind === 'positive' ? CheckCircle2 : XCircle
   return (
     <section className="rounded-lg border border-border bg-paper p-4">
-      <h3 className="mb-3 text-[11px] font-mono uppercase tracking-wide text-ink-mute">
-        {title}
-      </h3>
+      <h3 className="mb-3 text-[11px] font-mono uppercase tracking-wide text-ink-mute">{title}</h3>
       <ul className="space-y-2">
         {items.map((label) => (
           <li key={label} className="flex items-start gap-2">

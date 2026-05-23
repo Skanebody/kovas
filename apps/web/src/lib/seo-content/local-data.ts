@@ -3,7 +3,7 @@
  *
  * Génère des métriques chiffrées localisées (prix médian DPE, classe énergétique
  * médiane, taux F-G, volume estimé) pour enrichir les pages
- * `/diagnostiqueurs/[dept]/[city]` et `/diagnostic/[type]/[ville]`.
+ * `/trouver-un-diagnostiqueur/[dept]/[city]` et `/diagnostic/[type]/[ville]`.
  *
  * Stratégie données :
  *   1. V1 — heuristiques déterministes basées sur (population, dept, region)
@@ -46,34 +46,34 @@ export interface CityLocalData {
 
 const REGION_FG_RATE: Record<string, number> = {
   'ile-de-france': 21.3,
-  'paca': 14.2,
+  paca: 14.2,
   'auvergne-rhone-alpes': 18.5,
-  'occitanie': 15.7,
+  occitanie: 15.7,
   'nouvelle-aquitaine': 16.4,
   'hauts-de-france': 22.9,
   'grand-est': 23.1,
   'pays-de-la-loire': 14.8,
-  'bretagne': 13.9,
-  'normandie': 19.2,
+  bretagne: 13.9,
+  normandie: 19.2,
   'bourgogne-franche-comte': 20.7,
   'centre-val-de-loire': 18.3,
-  'corse': 12.4,
+  corse: 12.4,
 }
 
 const REGION_AVG_YEAR: Record<string, number> = {
   'ile-de-france': 1968,
-  'paca': 1972,
+  paca: 1972,
   'auvergne-rhone-alpes': 1971,
-  'occitanie': 1973,
+  occitanie: 1973,
   'nouvelle-aquitaine': 1969,
   'hauts-de-france': 1958,
   'grand-est': 1962,
   'pays-de-la-loire': 1975,
-  'bretagne': 1976,
-  'normandie': 1960,
+  bretagne: 1976,
+  normandie: 1960,
   'bourgogne-franche-comte': 1963,
   'centre-val-de-loire': 1965,
-  'corse': 1978,
+  corse: 1978,
 }
 
 const NATIONAL_AVG_FG_RATE = 17.4
@@ -129,16 +129,14 @@ export function getCityLocalData(city: City): CityLocalData {
   const maxDpePrice = Math.round(medianDpePrice * 1.42)
 
   const fgBase = getRegionFgRate(city.region)
-  const fgRatePct = Math.round((fgBase * (1 + noise * 0.5)) * 10) / 10
+  const fgRatePct = Math.round(fgBase * (1 + noise * 0.5) * 10) / 10
 
   const avgYear = Math.round(getRegionAvgYear(city.region) + noise * 6)
   const medianEnergyClass = pickEnergyClass(avgYear)
 
   // Volume estimé : ~3 % de la population a produit un DPE dans l'année
   // (acheteurs + bailleurs + propriétaires venant de rénover)
-  const estimatedDpePerYear = Math.round(
-    city.population * 0.028 * (1 + noise * 2),
-  )
+  const estimatedDpePerYear = Math.round(city.population * 0.028 * (1 + noise * 2))
 
   // Pré-1948 : ~ varie 8-35 % selon région et taille ville
   const preWarBase = city.region === 'ile-de-france' || city.region === 'grand-est' ? 22 : 12
@@ -169,7 +167,14 @@ export function getCityLocalData(city: City): CityLocalData {
  * (200-300 mots, intent-match, sources implicites).
  */
 export function buildLocalMarketParagraph(data: CityLocalData): string {
-  const { city, medianDpePrice, medianEnergyClass, fgRatePct, estimatedDpePerYear, avgConstructionYear } = data
+  const {
+    city,
+    medianDpePrice,
+    medianEnergyClass,
+    fgRatePct,
+    estimatedDpePerYear,
+    avgConstructionYear,
+  } = data
 
   const fgComparison =
     fgRatePct > NATIONAL_AVG_FG_RATE + 2
@@ -201,7 +206,15 @@ Le délai médian observé entre la commande et la livraison d'un rapport est de
 export function buildEnrichedFaq(
   data: CityLocalData,
 ): ReadonlyArray<{ question: string; answer: string }> {
-  const { city, medianDpePrice, minDpePrice, maxDpePrice, fgRatePct, pre1997RatePct, preWar2RatePct } = data
+  const {
+    city,
+    medianDpePrice,
+    minDpePrice,
+    maxDpePrice,
+    fgRatePct,
+    pre1997RatePct,
+    preWar2RatePct,
+  } = data
   return [
     {
       question: `Quel est le prix moyen d'un DPE à ${city.name} ?`,
@@ -262,8 +275,10 @@ export function buildNeighborLinks(
         slug: target.slug,
         name: target.name,
         postalCode: target.postalCode,
-        href: `/diagnostiqueurs/${target.dept}/${target.slug}`,
+        href: `/trouver-un-diagnostiqueur/${target.dept}/${target.slug}`,
       }
     })
-    .filter((x): x is { slug: string; name: string; postalCode: string; href: string } => x !== null)
+    .filter(
+      (x): x is { slug: string; name: string; postalCode: string; href: string } => x !== null,
+    )
 }

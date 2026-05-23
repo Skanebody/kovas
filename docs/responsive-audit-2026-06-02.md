@@ -73,9 +73,9 @@ Aucun. Toutes les pages identifiées comme potentiellement problématiques se so
 
 Toutes OK. Patterns vérifiés :
 - `/` (page.tsx) : HeroB2C, ValueProps, HowItWorks, Testimonials, TopCitiesGrid, FaqAccordion, CtaBanner — tous responsive
-- `/diagnostiqueurs` : grid `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` pour cartes résultats
-- `/diagnostiqueurs/[dept]/[city]/[slug]` : hero grid `md:grid-cols-[160px_1fr_auto]` qui empile sur mobile, table prix `<table className="w-full text-sm">` à 2 colonnes (compatible mobile)
-- `/diagnostiqueurs/[id]/leads-en-attente` : list mobile-first
+- `/trouver-un-diagnostiqueur` : grid `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` pour cartes résultats
+- `/trouver-un-diagnostiqueur/[dept]/[city]/[slug]` : hero grid `md:grid-cols-[160px_1fr_auto]` qui empile sur mobile, table prix `<table className="w-full text-sm">` à 2 colonnes (compatible mobile)
+- `/trouver-un-diagnostiqueur/[id]/leads-en-attente` : list mobile-first
 - `/c/[token]` : carte centrée `max-w-md` parfaite mobile
 - `/reclamer-ma-fiche/[id]` : layout `max-w-2xl mx-auto`
 

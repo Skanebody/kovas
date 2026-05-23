@@ -23,34 +23,39 @@ interface Tier {
   cta: string
 }
 
+// SOURCE DE VÉRITÉ : apps/web/src/lib/pricing-plans.ts (LOGICIEL_PLANS).
+// Valeurs corrigées audit FIX-W (2026-05-23) : missions, storage, seats
+// étaient désynchronisés (Solo Light affichait 20 missions vs 60 canoniques,
+// Cabinet+ affichait 500 missions vs UNLIMITED). Ne plus dupliquer dans cette
+// page : si le canonique change, mettre à jour ici en miroir.
 const TIERS: Tier[] = [
   {
     name: 'Solo Light',
     price: '29€',
-    missions: 20,
-    surplus: '2,00€ / mission',
-    storage: '20 Go',
+    missions: 60,
+    surplus: '1,50€ / mission',
+    storage: '12 Go',
     users: '1 utilisateur',
-    description: 'Pour démarrer ou pour les très faibles volumes.',
+    description: 'Démarrer en solo sur les diagnostics standards.',
     cta: 'Commencer Solo Light',
   },
   {
     name: 'Solo Pro',
     price: '59€',
-    missions: 60,
-    surplus: '1,50€ / mission',
-    storage: '50 Go',
+    missions: 150,
+    surplus: '1,20€ / mission',
+    storage: '25 Go',
     users: '1 utilisateur',
-    description: 'Le tier le plus choisi par les solopreneurs.',
+    description: 'Le tier le plus choisi par les solopreneurs actifs.',
     highlighted: true,
     cta: 'Commencer Solo Pro',
   },
   {
     name: 'Cabinet',
     price: '149€',
-    missions: 200,
-    surplus: '1,00€ / mission',
-    storage: '200 Go',
+    missions: 400,
+    surplus: '0,90€ / mission',
+    storage: '100 Go',
     users: "jusqu'à 3 utilisateurs",
     description: 'Cabinet 2 à 3 diagnostiqueurs.',
     cta: 'Commencer Cabinet',
@@ -58,11 +63,11 @@ const TIERS: Tier[] = [
   {
     name: 'Cabinet+',
     price: '299€',
-    missions: 500,
-    surplus: '0,80€ / mission',
-    storage: '500 Go',
+    missions: 0, // UNLIMITED — affichage spécifique ci-dessous
+    surplus: 'inclus',
+    storage: '250 Go',
     users: "jusqu'à 6 utilisateurs",
-    description: 'Cabinet en croissance ou multi-sites.',
+    description: 'Cabinet en croissance, multi-sites ou volume très élevé.',
     cta: 'Commencer Cabinet+',
   },
 ]
@@ -113,7 +118,8 @@ const ANNUAIRE_BUNDLES: AnnuaireBundle[] = [
   {
     name: 'Visibilité National',
     price: '79€',
-    description: 'Multi-départements, top de page kovas.fr/diagnostiqueurs, leads enrichis.',
+    description:
+      'Multi-départements, top de page kovas.fr/trouver-un-diagnostiqueur, leads enrichis.',
   },
 ]
 
@@ -174,9 +180,7 @@ export default function TarifsPage() {
             style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}
           >
             Tarifs{' '}
-            <span className="font-serif italic font-normal text-chartreuse-deep">
-              transparents
-            </span>
+            <span className="font-serif italic font-normal text-chartreuse-deep">transparents</span>
             .
           </h1>
           <p className="text-ink-mute text-lg">
@@ -212,13 +216,18 @@ export default function TarifsPage() {
                 <li className="flex gap-2">
                   <Check className="size-4 shrink-0 mt-0.5" />
                   <span>
-                    <strong>{tier.missions} missions</strong> incluses
+                    <strong>
+                      {tier.missions === 0 ? 'Missions illimitées' : `${tier.missions} missions`}
+                    </strong>
+                    {tier.missions !== 0 && ' incluses'}
                   </span>
                 </li>
-                <li className="flex gap-2">
-                  <Check className="size-4 shrink-0 mt-0.5" />
-                  <span>Surplus : {tier.surplus}</span>
-                </li>
+                {tier.missions !== 0 && (
+                  <li className="flex gap-2">
+                    <Check className="size-4 shrink-0 mt-0.5" />
+                    <span>Surplus : {tier.surplus}</span>
+                  </li>
+                )}
                 <li className="flex gap-2">
                   <Check className="size-4 shrink-0 mt-0.5" />
                   <span>{tier.storage} de stockage</span>

@@ -47,7 +47,7 @@ const DIAGNOSTIC_TYPES_FOR_INTERNAL_LINKS = DIAGNOSTIC_TYPES_INTERNAL_LINKS
 
 /**
  * KOVAS — Page ville SEO (Mission C1)
- * Route : /diagnostiqueurs/[dept]/[city]
+ * Route : /trouver-un-diagnostiqueur/[dept]/[city]
  * Charge seo_geo_pages.slug = <city> + page_type = 'city'.
  * Distincte de /[dept]/[city]/[slug] (fiche diag, scope A2).
  */
@@ -151,7 +151,7 @@ export async function generateMetadata({
     title: page.meta_title,
     description: page.meta_description,
     alternates: {
-      canonical: page.canonical_url ?? `https://kovas.fr/diagnostiqueurs/${dept}/${city}`,
+      canonical: page.canonical_url ?? `https://kovas.fr/trouver-un-diagnostiqueur/${dept}/${city}`,
     },
   }
 }
@@ -266,7 +266,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
             <span className="text-base font-bold tracking-tight">KOVAS</span>
           </Link>
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/diagnostiqueurs/${dept}`}>
+            <Link href={`/trouver-un-diagnostiqueur/${dept}`}>
               <ArrowLeft className="size-4" />
               {page.department_name ?? `Dépt ${dept}`}
             </Link>
@@ -553,7 +553,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
             </h2>
             {page.diagnosticians_count > 12 ? (
               <Link
-                href={`/diagnostiqueurs/${dept}/${city}/tous`}
+                href={`/trouver-un-diagnostiqueur/${dept}/${city}/tous`}
                 className="text-sm text-navy hover:underline underline-offset-4"
               >
                 Voir tous &rarr;
@@ -571,7 +571,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
               {diagnosticians.map((d) => (
                 <Link
                   key={d.id}
-                  href={`/diagnostiqueurs/${dept}/${city}/${d.slug_full}`}
+                  href={`/trouver-un-diagnostiqueur/${dept}/${city}/${d.slug_full}`}
                   className="block"
                 >
                   <Card className="p-5 hover:shadow-glass transition-shadow h-full">

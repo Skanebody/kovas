@@ -1,10 +1,10 @@
+import { Card } from '@/components/ui/card'
+import { isFrenchMobile, maskEmail, maskPhone, maskSiret } from '@/lib/diagnosticians/mask-contact'
+import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { MapPin, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import type { Database } from '@kovas/database/types'
-import { Card } from '@/components/ui/card'
-import { isFrenchMobile, maskEmail, maskPhone, maskSiret } from '@/lib/diagnosticians/mask-contact'
 import { ClaimMethodTabs } from './claim-method-tabs'
 
 /**
@@ -76,14 +76,14 @@ export default async function ReclamerMaFichePage({ params }: PageProps) {
             <ShieldCheck className="size-12 text-navy mx-auto mb-4" aria-hidden />
             <h1 className="text-xl font-bold text-ink mb-2">Fiche déjà réclamée</h1>
             <p className="text-[14px] text-ink-mute mb-6">
-              Cette fiche professionnelle a déjà été réclamée par son titulaire.
-              Si vous pensez qu&apos;il s&apos;agit d&apos;une erreur, contactez{' '}
+              Cette fiche professionnelle a déjà été réclamée par son titulaire. Si vous pensez
+              qu&apos;il s&apos;agit d&apos;une erreur, contactez{' '}
               <a href="mailto:contact@kovas.fr" className="underline">
                 contact@kovas.fr
               </a>
               .
             </p>
-            <Link href="/diagnostiqueurs" className="text-[13px] underline text-ink">
+            <Link href="/trouver-un-diagnostiqueur" className="text-[13px] underline text-ink">
               Retour à l&apos;annuaire
             </Link>
           </Card>
@@ -103,8 +103,8 @@ export default async function ReclamerMaFichePage({ params }: PageProps) {
   const citySlug = diag.city?.toLowerCase().replace(/\s+/g, '-') ?? null
   const detailHref =
     dept && citySlug && diag.slug
-      ? `/diagnostiqueurs/${dept}/${citySlug}/${diag.slug}?report=wrong_person`
-      : '/diagnostiqueurs'
+      ? `/trouver-un-diagnostiqueur/${dept}/${citySlug}/${diag.slug}?report=wrong_person`
+      : '/trouver-un-diagnostiqueur'
 
   return (
     <div className="min-h-dvh bg-cream py-12 px-4 md:py-16">
@@ -121,8 +121,8 @@ export default async function ReclamerMaFichePage({ params }: PageProps) {
             </span>
           </h1>
           <p className="text-[14px] text-ink-mute mt-3">
-            Vérifiez votre identité pour récupérer le contrôle de votre fiche publique
-            et créer votre compte KOVAS.
+            Vérifiez votre identité pour récupérer le contrôle de votre fiche publique et créer
+            votre compte KOVAS.
           </p>
         </div>
 

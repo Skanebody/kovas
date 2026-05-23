@@ -7,7 +7,7 @@
 
 Modèle Google Ads serruriers / "Locksmith near me" : les **3 premiers résultats** d'une recherche locale capturent **80% des clics**.
 
-Sur KOVAS, on transpose ce constat à l'annuaire `/diagnostiqueurs/[dept]/[city]` : pour chaque ville française avec ≥ 5 diagnostiqueurs concurrents, on ouvre **3 slots TOP** réservés aux abonnés Pro+/Cabinet ayant souscrit cette option.
+Sur KOVAS, on transpose ce constat à l'annuaire `/trouver-un-diagnostiqueur/[dept]/[city]` : pour chaque ville française avec ≥ 5 diagnostiqueurs concurrents, on ouvre **3 slots TOP** réservés aux abonnés Pro+/Cabinet ayant souscrit cette option.
 
 ## Modèle économique
 
@@ -81,7 +81,7 @@ Quand la fonctionnalité sera activée, il suffira de :
 
 1. Insérer des lignes `city_premium_slots` avec `enabled = true`.
 2. Créer le flow Stripe (`/api/annuaire/premium-slots/checkout`) pour souscrire.
-3. Modifier le tri `/diagnostiqueurs/[dept]/[city]/page.tsx` pour mettre les bookings en tête (avant le tri `premium > verified > basic`).
+3. Modifier le tri `/trouver-un-diagnostiqueur/[dept]/[city]/page.tsx` pour mettre les bookings en tête (avant le tri `premium > verified > basic`).
 
 ## Cohabitation avec les 3 niveaux
 

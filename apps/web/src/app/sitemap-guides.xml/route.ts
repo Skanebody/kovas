@@ -7,7 +7,7 @@
  * sont construites comme des landing pages SEO Long-tail haute valeur :
  *  - 2000-3500 mots
  *  - Schema HowTo + FAQPage
- *  - Backlinks internes vers /calculateur-dpe-gratuit + /diagnostiqueurs
+ *  - Backlinks internes vers /calculateur-dpe-gratuit + /trouver-un-diagnostiqueur
  *
  * Priorité 0.7 (juste sous la home et les pages CTA principales).
  *

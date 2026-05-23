@@ -85,13 +85,36 @@ const nextConfig: NextConfig = {
       { source: '/app/:path*', destination: '/dashboard/:path*', permanent: true },
       // Fusion /dashboard/upgrade/{annuaire,logiciel,bundle} → /dashboard/decouvrir
       // (page dynamique unifiee avec algorithme d'intention d'achat).
-      { source: '/dashboard/upgrade/annuaire', destination: '/dashboard/decouvrir', permanent: true },
-      { source: '/dashboard/upgrade/logiciel', destination: '/dashboard/decouvrir', permanent: true },
+      {
+        source: '/dashboard/upgrade/annuaire',
+        destination: '/dashboard/decouvrir',
+        permanent: true,
+      },
+      {
+        source: '/dashboard/upgrade/logiciel',
+        destination: '/dashboard/decouvrir',
+        permanent: true,
+      },
       { source: '/dashboard/upgrade/bundle', destination: '/dashboard/decouvrir', permanent: true },
       { source: '/dashboard/upgrade', destination: '/dashboard/decouvrir', permanent: true },
       // B2B canonique : /pros remplace /pour-les-diagnostiqueurs (Lot #142).
       { source: '/pour-les-diagnostiqueurs', destination: '/pros', permanent: true },
       { source: '/pour-les-diagnostiqueurs/:path*', destination: '/pros/:path*', permanent: true },
+      // SEO intent transactionnel (FIX-T) : /diagnostiqueurs → /trouver-un-diagnostiqueur
+      // (slug long-tail action ciblant la requête « trouver un diagnostiqueur DPE »,
+      // 14k recherches/mois SEMrush FR). Préserve le link juice via 301 permanent.
+      { source: '/diagnostiqueurs', destination: '/trouver-un-diagnostiqueur', permanent: true },
+      {
+        source: '/diagnostiqueurs/:path*',
+        destination: '/trouver-un-diagnostiqueur/:path*',
+        permanent: true,
+      },
+      // Sitemap segment rename (cohérent avec rename racine).
+      {
+        source: '/sitemap-diagnostiqueurs.xml',
+        destination: '/sitemap-trouver-un-diagnostiqueur.xml',
+        permanent: true,
+      },
     ]
   },
   async headers() {

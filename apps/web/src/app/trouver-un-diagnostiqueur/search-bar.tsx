@@ -1,9 +1,9 @@
 'use client'
 
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { searchBanAddress, type BanFeature } from '@/lib/ban'
-import { Search, Loader2, MapPin, LocateFixed, X } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { type BanFeature, searchBanAddress } from '@/lib/ban'
+import { Loader2, LocateFixed, MapPin, Search, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { FormEvent, KeyboardEvent } from 'react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
@@ -55,7 +55,7 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
       // Reset to page 1 on any search change
       params.delete('page')
       const s = params.toString()
-      return s ? `/diagnostiqueurs?${s}` : '/diagnostiqueurs'
+      return s ? `/trouver-un-diagnostiqueur?${s}` : '/trouver-un-diagnostiqueur'
     },
     [preservedParams],
   )
@@ -255,7 +255,9 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
                     onClick={() => handlePickSuggestion(feat)}
                     onMouseEnter={() => setActiveIndex(idx)}
                     className={`w-full text-left px-4 py-2.5 flex items-start gap-2 text-[13px] transition-colors ${
-                      idx === activeIndex ? 'bg-cream-deep text-ink' : 'text-ink-mute hover:bg-cream-deep/60'
+                      idx === activeIndex
+                        ? 'bg-cream-deep text-ink'
+                        : 'text-ink-mute hover:bg-cream-deep/60'
                     }`}
                     role="option"
                     aria-selected={idx === activeIndex}

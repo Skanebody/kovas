@@ -1,15 +1,15 @@
 /**
- * /sitemap-diagnostiqueurs.xml — fiches publiques diagnostiqueurs.
+ * /sitemap-trouver-un-diagnostiqueur.xml — fiches publiques diagnostiqueurs.
  *
- * URLs canoniques : /diagnostiqueurs/{slug_dept}/{slug_city}/{slug}
+ * URLs canoniques : /trouver-un-diagnostiqueur/{slug_dept}/{slug_city}/{slug}
  *
  * Source : table Supabase `diagnosticians` (où `is_published = true` et
  * `withdrawal_requested = false`). RLS doit autoriser le lecture publique
  * de ces colonnes minimales pour permettre l'accès anonyme depuis l'edge.
  *
  * Limite stricte : 50 000 URLs / fichier. Au-delà → pagination
- * `sitemap-diagnostiqueurs-1.xml`, `-2.xml`, etc. À implémenter quand le
- * volume dépassera 40 000 (réserve 20%). À ce stade, on agrège tout en un.
+ * `sitemap-trouver-un-diagnostiqueur-1.xml`, `-2.xml`, etc. À implémenter quand
+ * le volume dépassera 40 000 (réserve 20%). À ce stade, on agrège tout en un.
  *
  * Plan Phase 2 :
  *  - bascule sur un `generateStaticParams` + ISR par dept (94 depts FR)
@@ -54,7 +54,7 @@ export async function GET(): Promise<Response> {
         r.slug !== null && r.slug_city !== null && r.slug_dept !== null,
     )
     .map((r) => {
-      const loc = `${BASE_URL}/diagnostiqueurs/${r.slug_dept}/${r.slug_city}/${r.slug}`
+      const loc = `${BASE_URL}/trouver-un-diagnostiqueur/${r.slug_dept}/${r.slug_city}/${r.slug}`
       const lastmod =
         r.updated_at !== null ? new Date(r.updated_at).toISOString() : new Date().toISOString()
       return [

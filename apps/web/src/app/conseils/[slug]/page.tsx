@@ -2,11 +2,7 @@ import { PublicFooter } from '@/components/public/PublicFooter'
 import { PublicNav } from '@/components/public/PublicNav'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { MarkdownArticle } from '@/components/seo/MarkdownArticle'
-import {
-  KOVAS_BASE_URL,
-  buildArticleSchema,
-  buildBreadcrumbList,
-} from '@/lib/seo/schema-org'
+import { KOVAS_BASE_URL, buildArticleSchema, buildBreadcrumbList } from '@/lib/seo/schema-org'
 import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -32,9 +28,7 @@ interface PublicationArticle {
   readonly contentHtml: string | null
 }
 
-async function fetchPublicationBySlug(
-  slug: string,
-): Promise<PublicationArticle | null> {
+async function fetchPublicationBySlug(slug: string): Promise<PublicationArticle | null> {
   const supabase = await createClient()
   const publishedUrl = `/conseils/${slug}`
 
@@ -65,16 +59,12 @@ async function fetchPublicationBySlug(
       typeof row.canonical_url === 'string' && row.canonical_url.length > 0
         ? row.canonical_url
         : null,
-    contentMarkdown:
-      typeof draft?.content_markdown === 'string' ? draft.content_markdown : null,
-    contentHtml:
-      typeof draft?.content_html === 'string' ? draft.content_html : null,
+    contentMarkdown: typeof draft?.content_markdown === 'string' ? draft.content_markdown : null,
+    contentHtml: typeof draft?.content_html === 'string' ? draft.content_html : null,
   }
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const article = await fetchPublicationBySlug(slug)
 
@@ -85,8 +75,7 @@ export async function generateMetadata({
     }
   }
 
-  const canonical =
-    article.canonicalUrl ?? `${KOVAS_BASE_URL}${article.publishedUrl}`
+  const canonical = article.canonicalUrl ?? `${KOVAS_BASE_URL}${article.publishedUrl}`
 
   return {
     title: article.seoTitle,
@@ -181,10 +170,7 @@ export default async function ConseilArticlePage({ params }: PageProps) {
             ) : null}
           </header>
 
-          <MarkdownArticle
-            html={article.contentHtml}
-            markdown={article.contentMarkdown}
-          />
+          <MarkdownArticle html={article.contentHtml} markdown={article.contentMarkdown} />
         </article>
 
         <section className="border-t border-rule/60 bg-paper">
@@ -193,11 +179,11 @@ export default async function ConseilArticlePage({ params }: PageProps) {
               Vous avez besoin d'un diagnostic ?
             </h2>
             <p className="text-ink/72 leading-relaxed max-w-[560px] mx-auto mb-7">
-              Obtenez un devis gratuit en moins de 2 minutes auprès d'un
-              diagnostiqueur immobilier certifié près de chez vous.
+              Obtenez un devis gratuit en moins de 2 minutes auprès d'un diagnostiqueur immobilier
+              certifié près de chez vous.
             </p>
             <Link
-              href="/diagnostiqueurs"
+              href="/trouver-un-diagnostiqueur"
               className="inline-block px-7 py-3.5 rounded-full bg-navy text-cream font-semibold hover:bg-navy/90 transition-colors"
             >
               Demander un devis particulier

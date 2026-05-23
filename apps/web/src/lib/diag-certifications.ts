@@ -1,21 +1,13 @@
 /**
  * Référentiel des 8 types de certifications diagnostic affichés dans l'annuaire public
- * `/diagnostiqueurs`. Les codes correspondent à ceux stockés en base dans la colonne
+ * `/trouver-un-diagnostiqueur`. Les codes correspondent à ceux stockés en base dans la colonne
  * `diagnosticians.certifications` (text[]).
  *
  * Ces 8 types couvrent ~92% du volume diagnostic standard FR
  * (cf. CLAUDE.md §3 — Plan couverture progressive).
  */
 
-export type DiagCertCode =
-  | 'DPE'
-  | 'AM'
-  | 'PL'
-  | 'GZ'
-  | 'EL'
-  | 'TR'
-  | 'CR'
-  | 'ERP'
+export type DiagCertCode = 'DPE' | 'AM' | 'PL' | 'GZ' | 'EL' | 'TR' | 'CR' | 'ERP'
 
 export interface DiagCertDef {
   code: DiagCertCode

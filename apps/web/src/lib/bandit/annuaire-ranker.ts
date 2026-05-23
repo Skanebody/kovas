@@ -1,6 +1,6 @@
 /**
  * Wrapper métier : classement Thompson sampling des diagnostiqueurs
- * sur les pages annuaire publiques `/diagnostiqueurs/[dept]/[city]`.
+ * sur les pages annuaire publiques `/trouver-un-diagnostiqueur/[dept]/[city]`.
  *
  * Pipeline :
  *  1. Lire stats Supabase pour les diagnostiqueurs candidats

@@ -5,7 +5,7 @@
  * Importeur : Edge Function `import-dhup-annuaire` (cron mensuel, dataset DHUP data.gouv.fr).
  *
  * Mission A1 : fondation annuaire ~13 000 diagnostiqueurs FR certifies.
- * Les autres routes `/diagnostiqueurs/*` (liste, fiche, claim, etc.) sont
+ * Les autres routes `/trouver-un-diagnostiqueur/*` (liste, fiche, claim, etc.) sont
  * livrees par d'autres agents — ce module fournit uniquement les contrats
  * de types et les helpers de lecture publique.
  */
@@ -251,9 +251,7 @@ export async function searchDiagnosticians(
   const limit = Math.min(filters.limit ?? 20, 100)
   const offset = Math.max(filters.offset ?? 0, 0)
 
-  let q = supabase
-    .from('diagnosticians')
-    .select(LIST_FIELDS, { count: 'exact' })
+  let q = supabase.from('diagnosticians').select(LIST_FIELDS, { count: 'exact' })
 
   if (filters.department_code) {
     q = q.eq('department_code', filters.department_code)
@@ -284,7 +282,7 @@ export async function searchDiagnosticians(
 
 /**
  * Liste les départements ayant au moins un diagnostiqueur publié.
- * Pour la page index `/diagnostiqueurs`.
+ * Pour la page index `/trouver-un-diagnostiqueur`.
  */
 export async function listDepartmentsWithCount(
   supabase: SupabaseClient,
@@ -325,7 +323,9 @@ export const DIAGNOSTIC_LABEL_FR: Record<DiagnosticType, string> = {
   ERP: 'État des risques (ERP)',
 }
 
-export function formatDiagnosticianFullName(d: Pick<DiagnosticianRow, 'first_name' | 'last_name'>): string {
+export function formatDiagnosticianFullName(
+  d: Pick<DiagnosticianRow, 'first_name' | 'last_name'>,
+): string {
   return `${d.first_name} ${d.last_name}`.trim()
 }
 

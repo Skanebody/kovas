@@ -2,7 +2,7 @@
  * Liste statique des 101 départements français (métropole + DROM)
  * groupés par région administrative (13 régions métropole + 5 DROM).
  *
- * Sert au filtre département de l'annuaire `/diagnostiqueurs`.
+ * Sert au filtre département de l'annuaire `/trouver-un-diagnostiqueur`.
  * Aucune dépendance réseau.
  */
 

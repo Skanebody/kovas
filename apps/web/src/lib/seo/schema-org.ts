@@ -13,11 +13,7 @@
  */
 
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
-import type {
-  AnnuairePlan,
-  BundleCombo,
-  LogicielPlan,
-} from '@/lib/pricing-plans'
+import type { AnnuairePlan, BundleCombo, LogicielPlan } from '@/lib/pricing-plans'
 import { KOVAS_TIERS, type KovasTier } from '@/lib/stripe-config'
 
 /** URL canonique du site KOVAS (sans slash final). */
@@ -161,7 +157,9 @@ export interface ArticleSchema extends SchemaContext {
   readonly image?: readonly string[]
   readonly datePublished: string
   readonly dateModified?: string
-  readonly author: PersonSchema | { readonly '@type': 'Organization'; readonly name: string; readonly url?: string }
+  readonly author:
+    | PersonSchema
+    | { readonly '@type': 'Organization'; readonly name: string; readonly url?: string }
   readonly publisher: { readonly '@id': string }
   readonly mainEntityOfPage: WebPageRef
   readonly inLanguage: 'fr-FR'
@@ -236,14 +234,14 @@ export function buildWebSiteSchema(): WebSiteSchema {
     url: KOVAS_BASE_URL,
     name: COMPANY_IDENTITY.brands.umbrella,
     description:
-      "KOVAS — Logiciel et annuaire pour diagnostiqueurs immobiliers indépendants en France.",
+      'KOVAS — Logiciel et annuaire pour diagnostiqueurs immobiliers indépendants en France.',
     inLanguage: 'fr-FR',
     publisher: { '@id': `${KOVAS_BASE_URL}/#organization` },
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${KOVAS_BASE_URL}/diagnostiqueurs?q={search_term_string}`,
+        urlTemplate: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur?q={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -254,7 +252,7 @@ export function buildWebSiteSchema(): WebSiteSchema {
 export interface DiagnosticianForSchema {
   /** Nom complet du diagnostiqueur ou raison sociale */
   readonly fullName: string
-  /** Slug URL (utilisé dans `/diagnostiqueurs/[dept]/[city]/[slug]`) */
+  /** Slug URL (utilisé dans `/trouver-un-diagnostiqueur/[dept]/[city]/[slug]`) */
   readonly slug: string
   /** Ville d'exercice */
   readonly city: string
@@ -292,7 +290,7 @@ export interface DiagnosticianForSchema {
  * sémantiquement plus précis pour un prestataire B2C/B2B de services techniques.
  */
 export function buildLocalBusinessSchema(diag: DiagnosticianForSchema): LocalBusinessSchema {
-  const url = `${KOVAS_BASE_URL}/diagnostiqueurs/${diag.dept}/${slugify(diag.city)}/${diag.slug}`
+  const url = `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${diag.dept}/${slugify(diag.city)}/${diag.slug}`
 
   const schema: LocalBusinessSchema = {
     '@context': 'https://schema.org',
@@ -318,7 +316,9 @@ export function buildLocalBusinessSchema(diag: DiagnosticianForSchema): LocalBus
     areaServed: diag.areasServed,
     serviceType: diag.certifications?.map((c) => c.type),
     aggregateRating:
-      typeof diag.rating === 'number' && typeof diag.reviewCount === 'number' && diag.reviewCount > 0
+      typeof diag.rating === 'number' &&
+      typeof diag.reviewCount === 'number' &&
+      diag.reviewCount > 0
         ? {
             '@type': 'AggregateRating',
             ratingValue: diag.rating,
@@ -430,10 +430,7 @@ export interface V3PlanForSchema {
  * englobe à la fois l'annuaire (service de mise en relation B2C) et le SaaS
  * logiciel B2B, sans contraindre la nature applicative.
  */
-export function buildV3ServiceSchema(
-  plan: V3PlanForSchema,
-  pricingAnchor: string,
-): ProductSchema {
+export function buildV3ServiceSchema(plan: V3PlanForSchema, pricingAnchor: string): ProductSchema {
   const offerUrl = `${KOVAS_BASE_URL}/pricing${pricingAnchor}`
   const monthlyPriceEur = (plan.monthlyPrice / 100).toFixed(2)
   const annualPriceEur = (plan.annualPrice / 100).toFixed(2)
@@ -513,9 +510,7 @@ export interface PricingItemListInput {
  *
  * Surcharge sans argument : retourne la liste legacy KOVAS_TIERS (3 tiers).
  */
-export function buildPricingItemListSchema(
-  input?: PricingItemListInput,
-): ItemListSchema {
+export function buildPricingItemListSchema(input?: PricingItemListInput): ItemListSchema {
   if (!input) {
     return buildLegacyPricingItemListSchema()
   }
@@ -584,7 +579,7 @@ export function buildArticleSchema(article: ArticleForSchema): ArticleSchema {
 /** Élément simple d'un fil d'Ariane. */
 export interface BreadcrumbItemInput {
   readonly name: string
-  /** Chemin absolu (ex. "/diagnostiqueurs/75/paris"). Sera préfixé par KOVAS_BASE_URL. */
+  /** Chemin absolu (ex. "/trouver-un-diagnostiqueur/75/paris"). Sera préfixé par KOVAS_BASE_URL. */
   readonly path: string
 }
 

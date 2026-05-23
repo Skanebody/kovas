@@ -34,7 +34,7 @@ const TOP_CITIES: City[] = [
 
 /**
  * Maillage SEO 20 villes top France pour annuaire B2C.
- * Liens vers /diagnostiqueurs/[dept]/[city].
+ * Liens vers /trouver-un-diagnostiqueur/[dept]/[city].
  */
 export function TopCitiesGrid() {
   return (
@@ -57,7 +57,7 @@ export function TopCitiesGrid() {
           {TOP_CITIES.map((c) => (
             <Link
               key={`${c.slug}-${c.dept}`}
-              href={`/diagnostiqueurs/${c.departmentSlug}/${c.slug}`}
+              href={`/trouver-un-diagnostiqueur/${c.departmentSlug}/${c.slug}`}
               className="group flex items-center justify-between gap-2 px-4 py-3 rounded-md border border-rule/60 bg-paper hover:border-ink/20 hover:bg-cream transition-colors duration-200"
             >
               <span className="text-sm font-medium text-ink-soft group-hover:text-ink truncate">
@@ -70,7 +70,7 @@ export function TopCitiesGrid() {
 
         <div className="text-center">
           <Button variant="outline" asChild>
-            <Link href="/diagnostiqueurs">
+            <Link href="/trouver-un-diagnostiqueur">
               Voir toutes les villes
               <ArrowRight className="size-4" />
             </Link>

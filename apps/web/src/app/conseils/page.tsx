@@ -1,10 +1,7 @@
 import { PublicFooter } from '@/components/public/PublicFooter'
 import { PublicNav } from '@/components/public/PublicNav'
 import { JsonLd } from '@/components/seo/JsonLd'
-import {
-  KOVAS_BASE_URL,
-  buildBreadcrumbList,
-} from '@/lib/seo/schema-org'
+import { KOVAS_BASE_URL, buildBreadcrumbList } from '@/lib/seo/schema-org'
 import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -28,8 +25,7 @@ export const metadata: Metadata = {
     url: `${KOVAS_BASE_URL}/conseils`,
     siteName: 'KOVAS',
     title: 'Conseils & expertises diagnostics immobiliers — KOVAS',
-    description:
-      'Guides et conseils pour comprendre vos diagnostics immobiliers obligatoires.',
+    description: 'Guides et conseils pour comprendre vos diagnostics immobiliers obligatoires.',
   },
 }
 
@@ -59,7 +55,7 @@ async function fetchPublications(): Promise<PublicationListItem[]> {
     const publishedUrl = String(row.published_url ?? '')
     const slug = publishedUrl.startsWith('/conseils/')
       ? publishedUrl.slice('/conseils/'.length)
-      : publishedUrl.split('/').filter(Boolean).pop() ?? ''
+      : (publishedUrl.split('/').filter(Boolean).pop() ?? '')
     return {
       id: String(row.id),
       publishedUrl,
@@ -105,30 +101,25 @@ export default async function ConseilsListPage() {
           </p>
           <h1 className="font-sans font-semibold text-[44px] sm:text-[64px] md:text-[80px] leading-[1.02] tracking-[-0.03em] mb-6">
             Conseils &amp;{' '}
-            <span className="font-serif italic font-normal text-ink/72">
-              expertises.
-            </span>
+            <span className="font-serif italic font-normal text-ink/72">expertises.</span>
           </h1>
           <p className="text-[17px] sm:text-[19px] text-ink/72 max-w-[720px] leading-relaxed">
-            Guides clairs sur le DPE, l'amiante, le plomb, le gaz, l'électricité,
-            les termites, les surfaces Carrez/Boutin et les ERP. Rédigés par
-            l'équipe KOVAS sur la base des textes ADEME et DHUP en vigueur.
+            Guides clairs sur le DPE, l'amiante, le plomb, le gaz, l'électricité, les termites, les
+            surfaces Carrez/Boutin et les ERP. Rédigés par l'équipe KOVAS sur la base des textes
+            ADEME et DHUP en vigueur.
           </p>
         </section>
 
         <section className="max-w-[1200px] mx-auto px-6 pb-24">
           {items.length === 0 ? (
             <div className="rounded-2xl border border-rule/60 bg-paper p-12 text-center">
-              <h2 className="text-2xl font-semibold mb-3">
-                Articles bientôt disponibles
-              </h2>
+              <h2 className="text-2xl font-semibold mb-3">Articles bientôt disponibles</h2>
               <p className="text-ink/72 max-w-[520px] mx-auto">
-                Notre équipe rédige actuellement les premiers guides. Revenez
-                dans quelques jours, ou consultez l'annuaire des diagnostiqueurs
-                pour obtenir un devis dès maintenant.
+                Notre équipe rédige actuellement les premiers guides. Revenez dans quelques jours,
+                ou consultez l'annuaire des diagnostiqueurs pour obtenir un devis dès maintenant.
               </p>
               <Link
-                href="/diagnostiqueurs"
+                href="/trouver-un-diagnostiqueur"
                 className="inline-block mt-6 px-6 py-3 rounded-full bg-navy text-cream font-medium hover:bg-navy/90 transition-colors"
               >
                 Voir l'annuaire
@@ -151,9 +142,7 @@ export default async function ConseilsListPage() {
                   <p className="text-[15px] text-ink/72 leading-relaxed flex-1">
                     {item.seoDescription}
                   </p>
-                  <p className="mt-5 text-sm font-medium text-navy">
-                    Lire l'article →
-                  </p>
+                  <p className="mt-5 text-sm font-medium text-navy">Lire l'article →</p>
                 </Link>
               ))}
             </div>

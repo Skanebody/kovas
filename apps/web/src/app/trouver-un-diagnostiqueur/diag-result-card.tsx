@@ -1,7 +1,7 @@
-import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 import { DIAG_CERT_BY_CODE, type DiagCertCode } from '@/lib/diag-certifications'
-import { MapPin, Star, ShieldCheck } from 'lucide-react'
+import { MapPin, ShieldCheck, Star } from 'lucide-react'
 import Link from 'next/link'
 
 export interface DiagResultCardProps {
@@ -27,10 +27,10 @@ function getInitials(name: string): string {
 }
 
 /**
- * Card individuelle d'un diagnostiqueur dans la liste de résultats `/diagnostiqueurs`.
+ * Card individuelle d'un diagnostiqueur dans la liste de résultats `/trouver-un-diagnostiqueur`.
  * Server component pur — toute action utilisateur passe par le lien plein-largeur.
  *
- * Lien généré : `/diagnostiqueurs/<deptCode>/<citySlug>/<slug>`
+ * Lien généré : `/trouver-un-diagnostiqueur/<deptCode>/<citySlug>/<slug>`
  * (cohérent avec scope agent A2 qui construit les pages détail).
  */
 export function DiagResultCard({
@@ -46,7 +46,7 @@ export function DiagResultCard({
   distanceKm,
   photoUrl,
 }: DiagResultCardProps) {
-  const href = `/diagnostiqueurs/${deptCode}/${citySlug}/${slug}`
+  const href = `/trouver-un-diagnostiqueur/${deptCode}/${citySlug}/${slug}`
   const claimed = claimStatus === 'claimed'
   const initials = getInitials(fullName)
 
@@ -69,24 +69,15 @@ export function DiagResultCard({
         <div className="shrink-0 size-14 rounded-full bg-cream-deep flex items-center justify-center overflow-hidden border border-rule">
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={photoUrl}
-              alt=""
-              className="size-full object-cover"
-              loading="lazy"
-            />
+            <img src={photoUrl} alt="" className="size-full object-cover" loading="lazy" />
           ) : (
-            <span className="font-display text-base font-semibold text-ink-mute">
-              {initials}
-            </span>
+            <span className="font-display text-base font-semibold text-ink-mute">{initials}</span>
           )}
         </div>
 
         {/* Nom + localisation */}
         <div className="flex-1 min-w-0 space-y-1">
-          <h3 className="text-[15px] font-semibold leading-tight text-ink truncate">
-            {fullName}
-          </h3>
+          <h3 className="text-[15px] font-semibold leading-tight text-ink truncate">{fullName}</h3>
           {city ? (
             <p className="flex items-center gap-1 text-[12px] text-ink-mute">
               <MapPin className="size-3.5 shrink-0" aria-hidden />

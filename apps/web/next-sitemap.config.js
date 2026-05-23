@@ -6,7 +6,7 @@
  *  - /sitemap.xml             → app/sitemap.xml/route.ts (INDEX)
  *  - /sitemap-static.xml      → segments institutionnels
  *  - /sitemap-villes.xml      → pages villes annuaire
- *  - /sitemap-diagnostiqueurs.xml → fiches publiques
+ *  - /sitemap-trouver-un-diagnostiqueur.xml → fiches publiques
  *  - /sitemap-blog.xml        → articles /conseils/[slug]
  *  - /sitemap-guides.xml      → guides longs /guide/[type]
  *  - /sitemap-pros.xml        → pages B2B /pros/*
@@ -64,7 +64,7 @@ const config = {
   /**
    * Custom priorités SEO :
    *  - 1.0  pour la home (intent commercial maximal)
-   *  - 0.9  pour chaque fiche /diagnostiqueurs/{slug} (acquisition SEO local)
+   *  - 0.9  pour chaque fiche /trouver-un-diagnostiqueur/{slug} (acquisition SEO local)
    *  - 0.6  pour chaque /blog/{slug}
    *  - 0.7  défaut pour le reste
    */
@@ -75,7 +75,7 @@ const config = {
     if (path === '/') {
       priority = 1.0
       changefreq = 'daily'
-    } else if (path.startsWith('/diagnostiqueurs/')) {
+    } else if (path.startsWith('/trouver-un-diagnostiqueur/')) {
       priority = 0.9
       changefreq = 'weekly'
     } else if (path.startsWith('/blog/')) {

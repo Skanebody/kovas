@@ -7,7 +7,7 @@ type FooterCity = { city: string; dept: string; slug: string }
 
 const PARTICULIERS: readonly FooterLink[] = [
   { label: 'Calculateur DPE gratuit', href: '/calculateur-dpe-gratuit' },
-  { label: 'Annuaire diagnostiqueurs', href: '/diagnostiqueurs' },
+  { label: 'Annuaire diagnostiqueurs', href: '/trouver-un-diagnostiqueur' },
   { label: 'Guides', href: '/guides' },
   { label: 'Observatoire', href: '/observatoire' },
   { label: 'FAQ particuliers', href: '/faq' },
@@ -124,7 +124,7 @@ export function SiteFooter({ className }: SiteFooterProps) {
             title="Villes"
             links={VILLES.map((v) => ({
               label: v.city,
-              href: `/diagnostiqueurs/${v.dept}/${v.slug}`,
+              href: `/trouver-un-diagnostiqueur/${v.dept}/${v.slug}`,
             }))}
             compact
           />

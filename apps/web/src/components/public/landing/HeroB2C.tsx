@@ -71,7 +71,7 @@ export function HeroB2C() {
       params.set('q', query.trim())
     }
     if (selectedDiag.size > 0) params.set('diag', Array.from(selectedDiag).join(','))
-    router.push(`/diagnostiqueurs?${params.toString()}`)
+    router.push(`/trouver-un-diagnostiqueur?${params.toString()}`)
   }
 
   return (
@@ -198,7 +198,7 @@ export function HeroB2C() {
         <p className="text-xs text-ink-faint pt-2">
           Pas (encore) de diagnostiqueur dans votre ville ?{' '}
           <Link
-            href="/diagnostiqueurs"
+            href="/trouver-un-diagnostiqueur"
             className="text-ink underline-offset-4 hover:underline"
           >
             Parcourir tout l&apos;annuaire

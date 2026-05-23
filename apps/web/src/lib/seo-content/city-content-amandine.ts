@@ -1,7 +1,7 @@
 /**
  * KOVAS — Module SEO Amandine Bart « city-content »
  *
- * Génère 4 sections enrichies pour chaque page `/diagnostiqueurs/[dept]/[city]` :
+ * Génère 4 sections enrichies pour chaque page `/trouver-un-diagnostiqueur/[dept]/[city]` :
  *   1. Top 5 diagnostics demandés (data simulée déterministe par city_slug)
  *   2. Évolution prix DPE médian {city} 2021-2026 (5 points mini-chart)
  *   3. Spécificités locales {city} (3-5 paragraphes variant par dept)

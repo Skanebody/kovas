@@ -2,9 +2,9 @@
  * /sitemap.xml — INDEX racine qui agrège les segments KOVAS.
  *
  * Architecture multi-segments (Google recommande < 50 000 URLs / 50 MB par fichier) :
- *  - /sitemap-static.xml             → pages institutionnelles (~30 URLs)
- *  - /sitemap-villes.xml             → /diagnostiqueurs/{ville} (30 seeds → ~10k Phase 2)
- *  - /sitemap-diagnostiqueurs.xml    → fiches publiques /diagnostiqueurs/{dept}/{ville}/{slug}
+ *  - /sitemap-static.xml                  → pages institutionnelles (~30 URLs)
+ *  - /sitemap-villes.xml                  → /trouver-un-diagnostiqueur/{ville} (30 seeds → ~10k Phase 2)
+ *  - /sitemap-trouver-un-diagnostiqueur.xml → fiches publiques /trouver-un-diagnostiqueur/{dept}/{ville}/{slug}
  *  - /sitemap-blog.xml               → articles /conseils/{slug}
  *  - /sitemap-guides.xml             → /guide/{type} (8 diagnostics + audit énergétique)
  *  - /sitemap-pros.xml               → /pour-les-diagnostiqueurs et pages B2B
@@ -24,7 +24,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kovas.fr'
 const SEGMENTS: readonly string[] = [
   'sitemap-static.xml',
   'sitemap-villes.xml',
-  'sitemap-diagnostiqueurs.xml',
+  'sitemap-trouver-un-diagnostiqueur.xml',
   'sitemap-blog.xml',
   'sitemap-guides.xml',
   'sitemap-pros.xml',

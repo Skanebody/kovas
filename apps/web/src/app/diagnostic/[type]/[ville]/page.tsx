@@ -1,5 +1,3 @@
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import {
   ProgrammaticShell,
   SeoCtaBlock,
@@ -8,6 +6,8 @@ import {
   SeoInternalLinking,
   SeoSection,
 } from '@/components/seo-prog/ProgrammaticShell'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 import { CITIES, getCityBySlug, getNeighborCities } from '@/lib/cities/registry'
 import {
   DIAGNOSTIC_LABELS,
@@ -17,7 +17,6 @@ import {
   type DiagnosticType,
   isDiagnosticType,
 } from '@/lib/diagnostics/types'
-import { buildSeoMetadata } from '@/lib/seo-content/metadata-builder'
 import {
   buildBreadcrumbLD,
   buildFaqLD,
@@ -25,6 +24,7 @@ import {
   buildMockDiagnosticians,
   buildServiceLD,
 } from '@/lib/seo-content/jsonld-builders'
+import { buildSeoMetadata } from '@/lib/seo-content/metadata-builder'
 import { generateLocalContent } from '@/lib/seo-content/template-generator'
 import { MapPin, Star } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -95,7 +95,7 @@ export default async function DiagnosticVillePage({
 
   const breadcrumbs = [
     { label: 'Accueil', href: '/' },
-    { label: 'Diagnostics', href: '/diagnostiqueurs' },
+    { label: 'Diagnostics', href: '/trouver-un-diagnostiqueur' },
     { label: label, href: `/diagnostic/${diagnosticType}/${city.slug}` },
     { label: city.name, href: `/diagnostic/${diagnosticType}/${city.slug}` },
   ]
@@ -127,25 +127,19 @@ export default async function DiagnosticVillePage({
         <Card className="p-6 mt-4">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">
-                Minimum
-              </p>
+              <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">Minimum</p>
               <p className="font-mono text-2xl font-semibold text-ink mt-1">
                 {DIAGNOSTIC_PRICE_RANGES[diagnosticType].min} €
               </p>
             </div>
             <div className="border-x border-rule">
-              <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">
-                Médiane
-              </p>
+              <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">Médiane</p>
               <p className="font-serif italic text-3xl text-chartreuse-deep mt-1">
                 {DIAGNOSTIC_PRICE_RANGES[diagnosticType].median} €
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">
-                Maximum
-              </p>
+              <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">Maximum</p>
               <p className="font-mono text-2xl font-semibold text-ink mt-1">
                 {DIAGNOSTIC_PRICE_RANGES[diagnosticType].max} €
               </p>
@@ -159,27 +153,20 @@ export default async function DiagnosticVillePage({
 
       <SeoSection title={`Diagnostiqueurs ${label} certifiés à ${city.name}`}>
         <p className="mb-4">
-          KOVAS référence les diagnostiqueurs certifiés exerçant à {city.name} (
-          {city.postalCode}). Voici une sélection de professionnels disponibles
-          dans votre commune.
+          KOVAS référence les diagnostiqueurs certifiés exerçant à {city.name} ({city.postalCode}).
+          Voici une sélection de professionnels disponibles dans votre commune.
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {mockDiags.slice(0, 3).map((d) => (
             <Card key={d.id} className="p-5">
               <h3 className="font-semibold text-ink text-base">{d.displayName}</h3>
               <p className="text-sm text-ink-soft mt-2 flex items-start gap-1.5">
-                <MapPin
-                  className="size-3.5 text-ink-mute mt-0.5 shrink-0"
-                  aria-hidden
-                />
+                <MapPin className="size-3.5 text-ink-mute mt-0.5 shrink-0" aria-hidden />
                 <span>{d.streetAddress}</span>
               </p>
               {d.ratingAvg !== undefined ? (
                 <p className="text-xs text-ink-mute mt-3 flex items-center gap-1.5">
-                  <Star
-                    className="size-3.5 text-chartreuse-deep fill-chartreuse"
-                    aria-hidden
-                  />
+                  <Star className="size-3.5 text-chartreuse-deep fill-chartreuse" aria-hidden />
                   {d.ratingAvg.toFixed(1)}/5 · {d.ratingCount} avis
                 </p>
               ) : null}
@@ -188,7 +175,7 @@ export default async function DiagnosticVillePage({
         </div>
         <p className="text-sm text-ink-mute mt-5">
           <Link
-            href={`/diagnostiqueurs/${city.dept}/${city.slug}`}
+            href={`/trouver-un-diagnostiqueur/${city.dept}/${city.slug}`}
             className="text-ink hover:underline underline-offset-4 font-medium"
           >
             Voir tous les diagnostiqueurs à {city.name} →
@@ -244,8 +231,8 @@ export default async function DiagnosticVillePage({
           .
         </p>
         <p className="mt-3 text-xs text-ink-faint">
-          Information : pour la prestation {longLabel.toLowerCase()}, vérifiez
-          toujours la certification COFRAC du diagnostiqueur avant signature.
+          Information : pour la prestation {longLabel.toLowerCase()}, vérifiez toujours la
+          certification COFRAC du diagnostiqueur avant signature.
         </p>
       </div>
     </ProgrammaticShell>

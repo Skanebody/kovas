@@ -2,7 +2,7 @@
  * Annuaire freemium 3 niveaux + pay-to-unlock leads.
  * Cf. CLAUDE.md §4 + spec G1.
  *
- * 3 niveaux de fiche dans l'annuaire public /diagnostiqueurs :
+ * 3 niveaux de fiche dans l'annuaire public /trouver-un-diagnostiqueur :
  * - basic    : non-réclamée (donnée DHUP brute, contact masqué)
  * - verified : claimed + tier d'entrée (Essential 19€ ou Découverte 29€)
  * - premium  : claimed + tier supérieur (Pro 39€, All Inclusive 99€, Cabinet 149€)
@@ -15,7 +15,7 @@
  * tant que la fiche n'est pas claimed avec un abonnement actif.
  */
 
-import { asUntyped, type SupabaseUntyped } from './supabase-untyped'
+import { type SupabaseUntyped, asUntyped } from './supabase-untyped'
 
 export type ListingLevel = 'basic' | 'verified' | 'premium'
 
@@ -187,12 +187,7 @@ export async function getDiagnosticianListingContext(
 
 export interface UnlockCheckResult {
   allowed: boolean
-  reason?:
-    | 'not_claimed'
-    | 'no_subscription'
-    | 'quota_exceeded'
-    | 'already_unlocked'
-    | 'not_owner'
+  reason?: 'not_claimed' | 'no_subscription' | 'quota_exceeded' | 'already_unlocked' | 'not_owner'
   remainingUnlocks?: number
   quotaMax?: number
   level?: ListingLevel
@@ -277,7 +272,7 @@ function startOfCurrentMonthIso(): string {
 
 /**
  * Mappe un ListingLevel vers les classes de bordure de la card annuaire.
- * Utilisé côté UI publique /diagnostiqueurs (navy brand).
+ * Utilisé côté UI publique /trouver-un-diagnostiqueur (navy brand).
  */
 export function getCardClassesForLevel(level: ListingLevel): string {
   switch (level) {

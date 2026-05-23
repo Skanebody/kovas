@@ -29,13 +29,7 @@ const DISTANCE_OPTIONS = [5, 10, 20, 50] as const
  * Chaque interaction = mutation immédiate de l'URL via `router.push`.
  * Le bouton "Effacer filtres" n'apparaît que si au moins un filtre est actif.
  */
-export function FilterBar({
-  dept,
-  certs,
-  distance,
-  hasGeo,
-  preservedParams,
-}: FilterBarProps) {
+export function FilterBar({ dept, certs, distance, hasGeo, preservedParams }: FilterBarProps) {
   const router = useRouter()
   const [deptOpen, setDeptOpen] = useState(false)
 
@@ -62,7 +56,7 @@ export function FilterBar({
       // Reset to page 1 on any filter change
       params.delete('page')
       const s = params.toString()
-      return s ? `/diagnostiqueurs?${s}` : '/diagnostiqueurs'
+      return s ? `/trouver-un-diagnostiqueur?${s}` : '/trouver-un-diagnostiqueur'
     },
     [preservedParams],
   )
@@ -77,9 +71,7 @@ export function FilterBar({
 
   const handleCertToggle = useCallback(
     (code: DiagCertCode) => {
-      const next = certs.includes(code)
-        ? certs.filter((c) => c !== code)
-        : [...certs, code]
+      const next = certs.includes(code) ? certs.filter((c) => c !== code) : [...certs, code]
       router.push(buildHref({ cert: next.length > 0 ? next : undefined }))
     },
     [buildHref, certs, router],
@@ -105,7 +97,7 @@ export function FilterBar({
       else params.set(key, val)
     }
     const s = params.toString()
-    router.push(s ? `/diagnostiqueurs?${s}` : '/diagnostiqueurs')
+    router.push(s ? `/trouver-un-diagnostiqueur?${s}` : '/trouver-un-diagnostiqueur')
   }, [preservedParams, router])
 
   const hasActiveFilters = useMemo(

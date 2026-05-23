@@ -23,7 +23,7 @@ interface NavLink {
 }
 
 const LINKS_B2C: NavLink[] = [
-  { href: '/diagnostiqueurs', label: 'Annuaire' },
+  { href: '/trouver-un-diagnostiqueur', label: 'Trouver un diagnostiqueur' },
   { href: '/#how-it-works', label: 'Comment ça marche' },
   { href: '/#faq', label: 'Questions fréquentes' },
 ]
@@ -84,7 +84,7 @@ export function PublicNav({ variant }: PublicNavProps) {
                 <Link href="/pour-les-diagnostiqueurs">Pour les diagnostiqueurs</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/diagnostiqueurs">Trouver un diagnostiqueur</Link>
+                <Link href="/trouver-un-diagnostiqueur">Trouver un diagnostiqueur</Link>
               </Button>
             </>
           ) : (
@@ -138,7 +138,7 @@ export function PublicNav({ variant }: PublicNavProps) {
                     <Link href="/pour-les-diagnostiqueurs">Pour les diagnostiqueurs</Link>
                   </Button>
                   <Button asChild>
-                    <Link href="/diagnostiqueurs">Trouver un diagnostiqueur</Link>
+                    <Link href="/trouver-un-diagnostiqueur">Trouver un diagnostiqueur</Link>
                   </Button>
                 </>
               ) : (

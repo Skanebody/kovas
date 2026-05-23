@@ -1,16 +1,13 @@
+import { FaqAnswer } from '@/components/faq-answer'
+import { SiteFooter } from '@/components/site-footer'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import type { City } from '@/lib/cities/registry'
+import { DIAGNOSTIC_LABELS, type DiagnosticType } from '@/lib/diagnostics/types'
+import type { FaqItem } from '@/lib/seo-content/template-generator'
 import Link from 'next/link'
 import Script from 'next/script'
 import type { ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { FaqAnswer } from '@/components/faq-answer'
-import { SiteFooter } from '@/components/site-footer'
-import type { City } from '@/lib/cities/registry'
-import {
-  DIAGNOSTIC_LABELS,
-  type DiagnosticType,
-} from '@/lib/diagnostics/types'
-import type { FaqItem } from '@/lib/seo-content/template-generator'
 
 /**
  * Shell partagé pour les 6 templates SEO programmatiques.
@@ -30,12 +27,7 @@ export interface ProgrammaticShellProps {
   readonly children: ReactNode
 }
 
-export function ProgrammaticShell({
-  city,
-  breadcrumbs,
-  jsonLd,
-  children,
-}: ProgrammaticShellProps) {
+export function ProgrammaticShell({ city, breadcrumbs, jsonLd, children }: ProgrammaticShellProps) {
   return (
     <div className="min-h-dvh flex flex-col bg-cream">
       {jsonLd.map((schema, idx) => {
@@ -59,14 +51,11 @@ export function ProgrammaticShell({
             <span className="text-base font-bold tracking-tight">KOVAS</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-ink-mute">
-            <Link
-              href="/diagnostiqueurs"
-              className="hover:text-ink transition-colors"
-            >
+            <Link href="/trouver-un-diagnostiqueur" className="hover:text-ink transition-colors">
               Annuaire
             </Link>
             <Link
-              href={`/diagnostiqueurs/${city.dept}/${city.slug}`}
+              href={`/trouver-un-diagnostiqueur/${city.dept}/${city.slug}`}
               className="hover:text-ink transition-colors"
             >
               Diagnostiqueurs {city.name}
@@ -75,10 +64,7 @@ export function ProgrammaticShell({
         </div>
       </header>
 
-      <nav
-        aria-label="Fil d’Ariane"
-        className="border-b border-rule/40 bg-paper/30"
-      >
+      <nav aria-label="Fil d’Ariane" className="border-b border-rule/40 bg-paper/30">
         <ol className="mx-auto max-w-6xl px-6 py-2.5 flex flex-wrap items-center gap-1.5 text-xs text-ink-mute">
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1
@@ -122,13 +108,7 @@ export interface SeoHeroProps {
   readonly lede: string
 }
 
-export function SeoHero({
-  eyebrow,
-  titlePrefix,
-  titleEm,
-  titleSuffix,
-  lede,
-}: SeoHeroProps) {
+export function SeoHero({ eyebrow, titlePrefix, titleEm, titleSuffix, lede }: SeoHeroProps) {
   return (
     <section className="max-w-3xl mb-12 space-y-4">
       <p className="text-xs uppercase tracking-wider font-semibold text-ink-mute font-mono">
@@ -136,9 +116,7 @@ export function SeoHero({
       </p>
       <h1 className="font-sans font-bold text-4xl md:text-5xl tracking-tight text-ink leading-tight">
         {titlePrefix}{' '}
-        <em className="font-serif italic font-normal text-chartreuse-deep">
-          {titleEm}
-        </em>
+        <em className="font-serif italic font-normal text-chartreuse-deep">{titleEm}</em>
         {titleSuffix !== undefined && titleSuffix.length > 0 ? ` ${titleSuffix}` : null}
       </h1>
       <p className="text-ink-mute text-lg leading-relaxed">{lede}</p>
@@ -155,9 +133,7 @@ export interface SectionProps {
 export function SeoSection({ id, title, children }: SectionProps) {
   return (
     <section id={id} className="mb-12 space-y-5 max-w-3xl">
-      <h2 className="font-sans font-bold text-2xl md:text-3xl tracking-tight text-ink">
-        {title}
-      </h2>
+      <h2 className="font-sans font-bold text-2xl md:text-3xl tracking-tight text-ink">{title}</h2>
       <div className="space-y-4 text-ink-soft leading-relaxed">{children}</div>
     </section>
   )
@@ -259,17 +235,10 @@ export interface CtaBlockProps {
   readonly secondary?: { label: string; href: string }
 }
 
-export function SeoCtaBlock({
-  title,
-  description,
-  primary,
-  secondary,
-}: CtaBlockProps) {
+export function SeoCtaBlock({ title, description, primary, secondary }: CtaBlockProps) {
   return (
     <Card className="p-8 md:p-10 mb-12 text-center space-y-5">
-      <h2 className="font-sans font-bold text-2xl md:text-3xl tracking-tight text-ink">
-        {title}
-      </h2>
+      <h2 className="font-sans font-bold text-2xl md:text-3xl tracking-tight text-ink">{title}</h2>
       {description !== undefined ? (
         <p className="text-ink-mute max-w-xl mx-auto leading-relaxed">{description}</p>
       ) : null}

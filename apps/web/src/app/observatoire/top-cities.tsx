@@ -10,7 +10,7 @@ interface TopCitiesProps {
  * Section 5 — Top 10 villes en transition énergétique.
  *
  * Score composite 0-100 = ratio rénovations / 1000 hab. × variation YoY F-G ×
- * taux MaPrimeRénov. Chaque ligne renvoie vers `/diagnostiqueurs/{dept}/{slug}`
+ * taux MaPrimeRénov. Chaque ligne renvoie vers `/trouver-un-diagnostiqueur/{dept}/{slug}`
  * pour générer du backlink SEO interne et faciliter le maillage.
  */
 export function TopCities({ cities }: TopCitiesProps) {
@@ -20,7 +20,7 @@ export function TopCities({ cities }: TopCitiesProps) {
         {cities.map((city) => (
           <li key={city.slug}>
             <Link
-              href={`/diagnostiqueurs/${city.department}/${city.slug}`}
+              href={`/trouver-un-diagnostiqueur/${city.department}/${city.slug}`}
               className="group grid grid-cols-[40px_1fr_auto] sm:grid-cols-[40px_1fr_120px_auto] items-baseline gap-3 sm:gap-6 py-4 hover:bg-sage/40 rounded-md px-2 -mx-2 transition-colors"
             >
               <span
@@ -35,8 +35,8 @@ export function TopCities({ cities }: TopCitiesProps) {
                   {city.name}
                 </span>
                 <span className="text-[12px] text-ink-mute">
-                  {city.renovRatio} rénov./1000 hab. · F-G {city.fgYoy.toFixed(1)} %/an · MaPrimeRénov{' '}
-                  {city.primeRenov} %
+                  {city.renovRatio} rénov./1000 hab. · F-G {city.fgYoy.toFixed(1)} %/an ·
+                  MaPrimeRénov {city.primeRenov} %
                 </span>
               </div>
               <div className="hidden sm:flex items-center gap-2">

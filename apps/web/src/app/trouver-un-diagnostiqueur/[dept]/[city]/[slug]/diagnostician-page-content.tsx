@@ -1,16 +1,8 @@
-import Link from 'next/link'
-import {
-  ChevronRight,
-  MapPin,
-  Phone,
-  Mail,
-  Star,
-  ShieldCheck,
-  Search,
-} from 'lucide-react'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
-import { ClaimBanner } from './claim-banner'
+import { ChevronRight, Mail, MapPin, Phone, Search, ShieldCheck, Star } from 'lucide-react'
+import Link from 'next/link'
 import { CertCard } from './cert-card'
+import { ClaimBanner } from './claim-banner'
 import { DiagMap } from './diag-map'
 
 // Type minimal — A1 régénère le type définitif depuis Supabase
@@ -76,10 +68,7 @@ export function DiagnosticianPageContent({
       {isUnclaimed ? <ClaimBanner diagnosticianId={String(d.id)} /> : null}
 
       {/* Breadcrumb */}
-      <nav
-        aria-label="Fil d'Ariane"
-        className="border-b border-black/5 bg-white"
-      >
+      <nav aria-label="Fil d'Ariane" className="border-b border-black/5 bg-white">
         <ol className="mx-auto max-w-6xl px-6 py-3 flex flex-wrap items-center gap-1.5 text-xs text-black/55">
           <li>
             <Link href="/" className="hover:text-[#0B1D33] transition-colors">
@@ -89,7 +78,7 @@ export function DiagnosticianPageContent({
           <ChevronRight className="h-3.5 w-3.5 text-black/30" aria-hidden />
           <li>
             <Link
-              href="/diagnostiqueurs"
+              href="/trouver-un-diagnostiqueur"
               className="hover:text-[#0B1D33] transition-colors"
             >
               Diagnostiqueurs
@@ -98,7 +87,7 @@ export function DiagnosticianPageContent({
           <ChevronRight className="h-3.5 w-3.5 text-black/30" aria-hidden />
           <li>
             <Link
-              href={`/diagnostiqueurs/${dept}`}
+              href={`/trouver-un-diagnostiqueur/${dept}`}
               className="hover:text-[#0B1D33] transition-colors capitalize"
             >
               {deptLabel}
@@ -107,7 +96,7 @@ export function DiagnosticianPageContent({
           <ChevronRight className="h-3.5 w-3.5 text-black/30" aria-hidden />
           <li>
             <Link
-              href={`/diagnostiqueurs/${dept}/${city}`}
+              href={`/trouver-un-diagnostiqueur/${dept}/${city}`}
               className="hover:text-[#0B1D33] transition-colors capitalize"
             >
               {cityLabel}
@@ -133,9 +122,7 @@ export function DiagnosticianPageContent({
                 <p className="text-xs font-mono uppercase tracking-[0.12em] text-black/50">
                   Diagnostiqueur immobilier · {cityLabel}
                 </p>
-                <h1 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">
-                  {fullName}
-                </h1>
+                <h1 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">{fullName}</h1>
 
                 {d.company_name ? (
                   <p className="mt-2 text-base text-black/70">{d.company_name}</p>
@@ -164,19 +151,13 @@ export function DiagnosticianPageContent({
                   </div>
                   {ratingValue !== null && reviewCount !== null && reviewCount > 0 ? (
                     <div className="flex items-center gap-2">
-                      <Star
-                        className="h-4 w-4 text-amber-500"
-                        fill="currentColor"
-                        aria-hidden
-                      />
+                      <Star className="h-4 w-4 text-amber-500" fill="currentColor" aria-hidden />
                       <dt className="sr-only">Note Google</dt>
                       <dd className="text-black/75">
                         <span className="font-semibold text-[#0B1D33]">
                           {ratingValue.toFixed(1)}
                         </span>{' '}
-                        <span className="text-black/55">
-                          · {reviewCount} avis Google
-                        </span>
+                        <span className="text-black/55">· {reviewCount} avis Google</span>
                       </dd>
                     </div>
                   ) : null}
@@ -184,9 +165,7 @@ export function DiagnosticianPageContent({
                     <div>
                       <dt className="sr-only">Expérience</dt>
                       <dd className="text-black/75">
-                        <span className="font-semibold text-[#0B1D33]">
-                          {d.years_experience}
-                        </span>{' '}
+                        <span className="font-semibold text-[#0B1D33]">{d.years_experience}</span>{' '}
                         <span className="text-black/55">ans d&apos;expérience</span>
                       </dd>
                     </div>
@@ -222,10 +201,7 @@ export function DiagnosticianPageContent({
             {certifications.length > 0 ? (
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {certifications.map((c) => (
-                  <CertCard
-                    key={`${c.type}-${c.number ?? c.organism}`}
-                    certification={c}
-                  />
+                  <CertCard key={`${c.type}-${c.number ?? c.organism}`} certification={c} />
                 ))}
               </div>
             ) : (
@@ -245,16 +221,11 @@ export function DiagnosticianPageContent({
                 <SectionHeader number="02" title="Services proposés" />
                 <div className="mt-8 grid gap-3 sm:grid-cols-2">
                   {serviceCards.map((s) => (
-                    <div
-                      key={s.code}
-                      className="rounded-2xl border border-black/8 bg-white p-5"
-                    >
+                    <div key={s.code} className="rounded-2xl border border-black/8 bg-white p-5">
                       <p className="text-xs font-mono uppercase tracking-[0.08em] text-black/45">
                         {s.code}
                       </p>
-                      <h3 className="mt-1.5 text-base font-semibold text-[#0B1D33]">
-                        {s.label}
-                      </h3>
+                      <h3 className="mt-1.5 text-base font-semibold text-[#0B1D33]">{s.label}</h3>
                       <p className="mt-1 text-sm text-black/60">{s.desc}</p>
                     </div>
                   ))}
@@ -309,23 +280,16 @@ export function DiagnosticianPageContent({
                             />
                           ))}
                         </div>
-                        <p className="text-black/55 mt-0.5">
-                          {reviewCount} avis vérifiés Google
-                        </p>
+                        <p className="text-black/55 mt-0.5">{reviewCount} avis vérifiés Google</p>
                       </div>
                     </div>
 
                     {reviews.length > 0 ? (
                       <ul className="mt-6 space-y-5 divide-y divide-black/5">
                         {reviews.map((r, i) => (
-                          <li
-                            key={`${r.author}-${i}`}
-                            className={i > 0 ? 'pt-5' : ''}
-                          >
+                          <li key={`${r.author}-${i}`} className={i > 0 ? 'pt-5' : ''}>
                             <div className="flex items-center justify-between gap-3 text-sm">
-                              <span className="font-semibold text-[#0B1D33]">
-                                {r.author}
-                              </span>
+                              <span className="font-semibold text-[#0B1D33]">{r.author}</span>
                               <span className="flex items-center gap-0.5" aria-hidden>
                                 {[0, 1, 2, 3, 4].map((j) => (
                                   <Star
@@ -339,9 +303,7 @@ export function DiagnosticianPageContent({
                                 ))}
                               </span>
                             </div>
-                            <p className="mt-1.5 text-sm text-black/70 leading-relaxed">
-                              {r.text}
-                            </p>
+                            <p className="mt-1.5 text-sm text-black/70 leading-relaxed">{r.text}</p>
                           </li>
                         ))}
                       </ul>
@@ -362,9 +324,7 @@ export function DiagnosticianPageContent({
                 <p className="text-xs font-mono uppercase tracking-[0.08em] text-black/50">
                   Demande de devis
                 </p>
-                <h2 className="mt-1 text-xl font-bold text-[#0B1D33]">
-                  Contacter {d.first_name}
-                </h2>
+                <h2 className="mt-1 text-xl font-bold text-[#0B1D33]">Contacter {d.first_name}</h2>
                 <p className="mt-2 text-sm text-black/65">
                   Décrivez votre projet, recevez un devis sous 24h. Sans engagement.
                 </p>
@@ -381,18 +341,10 @@ export function DiagnosticianPageContent({
         {related.length > 0 ? (
           <section className="border-b border-black/5">
             <div className="mx-auto max-w-6xl px-6 py-12">
-              <SectionHeader
-                number="05"
-                title={`Autres diagnostiqueurs à ${cityLabel}`}
-              />
+              <SectionHeader number="05" title={`Autres diagnostiqueurs à ${cityLabel}`} />
               <div className="mt-8 grid gap-4 md:grid-cols-3">
                 {related.map((r) => (
-                  <RelatedCard
-                    key={String(r.id)}
-                    diagnostician={r}
-                    dept={dept}
-                    city={city}
-                  />
+                  <RelatedCard key={String(r.id)} diagnostician={r} dept={dept} city={city} />
                 ))}
               </div>
             </div>
@@ -410,13 +362,8 @@ function TopBar() {
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-black/5">
       <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between gap-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <span
-            aria-hidden
-            className="inline-block size-7 rounded-md bg-[#0B1D33]"
-          />
-          <span className="text-base font-bold tracking-tight text-[#0B1D33]">
-            KOVAS
-          </span>
+          <span aria-hidden className="inline-block size-7 rounded-md bg-[#0B1D33]" />
+          <span className="text-base font-bold tracking-tight text-[#0B1D33]">KOVAS</span>
         </Link>
 
         <div className="hidden md:flex flex-1 max-w-md">
@@ -436,7 +383,7 @@ function TopBar() {
 
         <nav className="flex items-center gap-5 text-sm">
           <Link
-            href="/diagnostiqueurs"
+            href="/trouver-un-diagnostiqueur"
             className="hidden sm:inline text-black/70 hover:text-[#0B1D33] transition-colors"
           >
             Annuaire
@@ -493,9 +440,7 @@ function AvatarBlock({
 function SectionHeader({ number, title }: { number: string; title: string }) {
   return (
     <div className="flex items-baseline gap-4">
-      <span className="font-mono text-xs text-black/40 uppercase tracking-[0.12em]">
-        {number}
-      </span>
+      <span className="font-mono text-xs text-black/40 uppercase tracking-[0.12em]">{number}</span>
       <div className="h-px flex-1 bg-black/8" aria-hidden />
       <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[#0B1D33] shrink-0 ml-4">
         {title}
@@ -514,14 +459,12 @@ function RelatedCard({
   city: string
 }) {
   const fullName = formatName(r.first_name, r.last_name)
-  const certs: Array<{ type: string }> = Array.isArray(r.certifications)
-    ? r.certifications
-    : []
+  const certs: Array<{ type: string }> = Array.isArray(r.certifications) ? r.certifications : []
   const slug = r.slug ?? ''
 
   return (
     <Link
-      href={`/diagnostiqueurs/${dept}/${city}/${slug}`}
+      href={`/trouver-un-diagnostiqueur/${dept}/${city}/${slug}`}
       className="group block rounded-2xl border border-black/8 bg-white p-5 hover:border-[#0B1D33]/30 hover:shadow-sm transition-all"
     >
       <div className="flex items-center gap-3">
@@ -575,7 +518,7 @@ function DarkFooter() {
           <ul className="mt-3 space-y-2 text-sm">
             <li>
               <Link
-                href="/diagnostiqueurs"
+                href="/trouver-un-diagnostiqueur"
                 className="hover:text-white transition-colors"
               >
                 Trouver un diagnostiqueur
@@ -600,10 +543,7 @@ function DarkFooter() {
           </h3>
           <ul className="mt-3 space-y-2 text-sm">
             <li>
-              <Link
-                href="/reclamer-ma-fiche"
-                className="hover:text-white transition-colors"
-              >
+              <Link href="/reclamer-ma-fiche" className="hover:text-white transition-colors">
                 Réclamer ma fiche
               </Link>
             </li>
@@ -616,15 +556,10 @@ function DarkFooter() {
         </div>
 
         <div>
-          <h3 className="text-xs font-mono uppercase tracking-[0.12em] text-white/40">
-            KOVAS
-          </h3>
+          <h3 className="text-xs font-mono uppercase tracking-[0.12em] text-white/40">KOVAS</h3>
           <ul className="mt-3 space-y-2 text-sm">
             <li>
-              <Link
-                href="/mentions-legales"
-                className="hover:text-white transition-colors"
-              >
+              <Link href="/mentions-legales" className="hover:text-white transition-colors">
                 Mentions légales
               </Link>
             </li>
@@ -634,10 +569,7 @@ function DarkFooter() {
               </Link>
             </li>
             <li>
-              <Link
-                href="/confidentialite"
-                className="hover:text-white transition-colors"
-              >
+              <Link href="/confidentialite" className="hover:text-white transition-colors">
                 Confidentialité
               </Link>
             </li>

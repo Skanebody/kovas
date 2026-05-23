@@ -164,7 +164,7 @@ export function B2CStrip() {
             </div>
             <div className="pt-6">
               <Button variant="accent" size="default" className="w-full" asChild>
-                <Link href="/diagnostiqueurs">
+                <Link href="/trouver-un-diagnostiqueur">
                   Trouver un diagnostiqueur près de chez moi{' '}
                   <ArrowRight className="size-4" aria-hidden />
                 </Link>

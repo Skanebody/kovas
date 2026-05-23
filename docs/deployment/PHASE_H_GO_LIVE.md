@@ -369,9 +369,9 @@ ou compte exact de bêta-testeurs à migrer), passer au run réel. Sinon investi
 - [ ] `https://kovas.fr/` charge correctement (homepage marketing)
 - [ ] `https://kovas.fr/pour-les-diagnostiqueurs` (landing B2B SaaS)
 - [ ] `https://kovas.fr/pricing` affiche les 4 plans Annuaire + 5 plans Logiciel + bundles
-- [ ] `https://kovas.fr/diagnostiqueurs` affiche l'annuaire racine
-- [ ] `https://kovas.fr/diagnostiqueurs/paris-75001` (page géo) charge avec liste paginée
-- [ ] `https://kovas.fr/diagnostiqueurs/[ville]/[slug]` (fiche pro) charge avec JSON-LD LocalBusiness
+- [ ] `https://kovas.fr/trouver-un-diagnostiqueur` affiche l'annuaire racine
+- [ ] `https://kovas.fr/trouver-un-diagnostiqueur/paris-75001` (page géo) charge avec liste paginée
+- [ ] `https://kovas.fr/trouver-un-diagnostiqueur/[ville]/[slug]` (fiche pro) charge avec JSON-LD LocalBusiness
 
 #### SEO
 - [ ] `https://kovas.fr/sitemap.xml` retourne index XML valide avec sous-sitemaps
@@ -379,7 +379,7 @@ ou compte exact de bêta-testeurs à migrer), passer au run réel. Sinon investi
 - [ ] `https://kovas.fr/sitemap-cities.xml` retourne sitemap des pages géo
 - [ ] `https://kovas.fr/robots.txt` autorise crawling + référence sitemap
 - [ ] View Source `/` : `<script type="application/ld+json">` Organization + WebSite présents
-- [ ] View Source `/diagnostiqueurs/[ville]/[slug]` : JSON-LD LocalBusiness + BreadcrumbList
+- [ ] View Source `/trouver-un-diagnostiqueur/[ville]/[slug]` : JSON-LD LocalBusiness + BreadcrumbList
 
 #### Flow d'inscription B2B (KOVAS 360)
 - [ ] `https://kovas.fr/signup` → email pro + SIRET (validation INSEE Sirene en live) → onboarding
@@ -389,7 +389,7 @@ ou compte exact de bêta-testeurs à migrer), passer au run réel. Sinon investi
 - [ ] Export PDF + Word + ZIP Liciel
 
 #### Flow B2C (KOVAS Annuaire)
-- [ ] `https://kovas.fr/diagnostiqueurs/[ville]/[slug]` → bouton "Demander un devis"
+- [ ] `https://kovas.fr/trouver-un-diagnostiqueur/[ville]/[slug]` → bouton "Demander un devis"
 - [ ] Formulaire devis (4 champs) → reCAPTCHA v3 → soumission
 - [ ] OTP SMS reçu sur le téléphone fourni → validation OTP
 - [ ] Statut quote_request passe à `submitted`
@@ -438,7 +438,7 @@ Objectifs (mobile + desktop) :
   - `gain_tracker_enabled` (default off, activable per-user pour bêta V1.5)
   - `claude_opus_escape_hatch` (default off)
   - `recaptcha_enforce` (default on)
-- [ ] Better Stack ou status page custom Supabase + Resend : monitoring `kovas.fr`, `/diagnostiqueurs`, `/pricing`, `/sitemap.xml`, `/api/health`
+- [ ] Better Stack ou status page custom Supabase + Resend : monitoring `kovas.fr`, `/trouver-un-diagnostiqueur`, `/pricing`, `/sitemap.xml`, `/api/health`
 - [ ] Status page custom `/status` accessible
 - [ ] Alertes Telegram configurées sur channel `errors` : Sentry → webhook → bot KOVAS admin
 - [ ] Dashboard admin `/admin` métriques : DAU, MAU, MRR, signups jour, error rate

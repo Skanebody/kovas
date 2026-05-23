@@ -47,7 +47,7 @@ export interface RegionInfo {
   code: string
   /** Nom officiel */
   name: string
-  /** Code départements principaux pour résolution `/diagnostiqueurs/{dept}` */
+  /** Code départements principaux pour résolution `/trouver-un-diagnostiqueur/{dept}` */
   mainDepartments: readonly string[]
   /** Population (millions) pour pondération */
   population: number

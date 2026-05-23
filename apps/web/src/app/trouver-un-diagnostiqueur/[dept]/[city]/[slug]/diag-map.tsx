@@ -53,14 +53,12 @@ export function DiagMap({ lat, lng, radiusKm, name, city }: DiagMapProps) {
         attributionControl: true,
       })
       mapInstance = map
-
       ;(L as any)
         .tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
           attribution: '© OpenStreetMap',
         })
         .addTo(map)
-
       ;(L as any)
         .circle([lat, lng], {
           radius: radiusKm * 1000,
@@ -70,13 +68,10 @@ export function DiagMap({ lat, lng, radiusKm, name, city }: DiagMapProps) {
           fillOpacity: 0.08,
         })
         .addTo(map)
-
       ;(L as any)
         .marker([lat, lng])
         .addTo(map)
-        .bindPopup(
-          `<strong>${escapeHtml(name)}</strong><br/><span>${escapeHtml(city)}</span>`,
-        )
+        .bindPopup(`<strong>${escapeHtml(name)}</strong><br/><span>${escapeHtml(city)}</span>`)
 
       initializedRef.current = true
     }

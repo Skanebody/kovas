@@ -6,7 +6,7 @@
  *
  * - `/`                            : Organization + LocalBusiness KOVAS éditeur
  * - `/pricing`                     : Product[] (1 par plan) + Organization
- * - `/diagnostiqueurs/[slug]`      : LocalBusiness (fiche diagnostiqueur) + BreadcrumbList
+ * - `/trouver-un-diagnostiqueur/[slug]`      : LocalBusiness (fiche diagnostiqueur) + BreadcrumbList
  * - `/faq`                         : FAQPage
  * - `/blog/[slug]`                 : Article + BreadcrumbList
  * - `/qui-sommes-nous`             : Organization (NEXUS 1993)
@@ -165,9 +165,9 @@ export function getLocalBusinessSchema(
   const business: WithContext<LocalBusiness> = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': `${SITE_URL}/diagnostiqueurs/${diagnostician.slug}#business`,
+    '@id': `${SITE_URL}/trouver-un-diagnostiqueur/${diagnostician.slug}#business`,
     name: diagnostician.displayName,
-    url: `${SITE_URL}/diagnostiqueurs/${diagnostician.slug}`,
+    url: `${SITE_URL}/trouver-un-diagnostiqueur/${diagnostician.slug}`,
     description: diagnostician.description,
     address: {
       '@type': 'PostalAddress',

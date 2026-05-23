@@ -3,9 +3,9 @@ import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { createClient } from '@/lib/supabase/server'
-import { parseCertCodes, type DiagCertCode } from '@/lib/diag-certifications'
+import { type DiagCertCode, parseCertCodes } from '@/lib/diag-certifications'
 import { getDepartmentName } from '@/lib/fr-departments'
+import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft, ArrowRight, ChevronRight, Inbox } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -47,7 +47,7 @@ interface DiagRow {
 }
 
 /**
- * Annuaire racine `/diagnostiqueurs` — Server Component.
+ * Annuaire racine `/trouver-un-diagnostiqueur` — Server Component.
  *
  * Architecture :
  * - Searchable via `?q=` (texte sur nom/ville), `?dept=` (code département),
@@ -105,8 +105,8 @@ export default async function DiagnostiqueursPage({ searchParams }: PageProps) {
                 Annuaire des diagnostiqueurs immobiliers
               </h1>
               <p className="text-base sm:text-lg text-ink-mute max-w-2xl">
-                13 000+ professionnels certifiés DPE, Amiante, Plomb, Gaz, Électricité,
-                Termites partout en France.
+                13 000+ professionnels certifiés DPE, Amiante, Plomb, Gaz, Électricité, Termites
+                partout en France.
               </p>
             </div>
 
@@ -143,10 +143,16 @@ export default async function DiagnostiqueursPage({ searchParams }: PageProps) {
                 </h2>
                 <p className="text-[12px] text-ink-mute">
                   {dept ? (
-                    <>Département {dept} · {getDepartmentName(dept) ?? ''} </>
+                    <>
+                      Département {dept} · {getDepartmentName(dept) ?? ''}{' '}
+                    </>
                   ) : null}
                   {certs.length > 0 ? (
-                    <>{certs.length > 0 ? `· ${certs.length} certification(s) sélectionnée(s)` : null}</>
+                    <>
+                      {certs.length > 0
+                        ? `· ${certs.length} certification(s) sélectionnée(s)`
+                        : null}
+                    </>
                   ) : null}
                   {hasGeo && dist !== undefined ? <> · dans un rayon de {dist} km</> : null}
                 </p>
@@ -321,7 +327,8 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
     // Pour éviter une 2e RPC, on prend le LIMIT comme borne haute + 1 pour
     // détecter la dernière page. Implémentation simple : si rpcRows.length
     // === PAGE_SIZE on suppose qu'il y en a au moins une page de plus.
-    const approxCount = rpcRows.length === PAGE_SIZE ? offset + PAGE_SIZE + 1 : offset + rpcRows.length
+    const approxCount =
+      rpcRows.length === PAGE_SIZE ? offset + PAGE_SIZE + 1 : offset + rpcRows.length
 
     const rows: DiagRow[] = rpcRows.map((r) => ({
       id: r.id,
@@ -397,23 +404,25 @@ async function fallbackTableQuery(
       return { rows: [], count: 0, error: msg }
     }
 
-    const rows: DiagRow[] = ((data ?? []) as unknown as Array<Record<string, unknown>>).map((r) => ({
-      id: String(r.id),
-      slug: (r.slug as string | null) ?? null,
-      full_name: (r.full_name as string | null) ?? null,
-      city: (r.city as string | null) ?? null,
-      city_slug: (r.city_slug as string | null) ?? null,
-      department_code:
-        (r.department_code as string | null) ?? (r.dept_code as string | null) ?? null,
-      certifications: extractCertCodes(r.certifications),
-      gmb_rating: (r.gmb_rating as number | null) ?? null,
-      gmb_review_count: (r.gmb_review_count as number | null) ?? null,
-      claim_status: (r.claim_status as string | null) ?? null,
-      photo_url: (r.photo_url as string | null) ?? null,
-      latitude: (r.latitude as number | null) ?? (r.geo_lat as number | null) ?? null,
-      longitude: (r.longitude as number | null) ?? (r.geo_lng as number | null) ?? null,
-      created_at: (r.created_at as string | null) ?? null,
-    }))
+    const rows: DiagRow[] = ((data ?? []) as unknown as Array<Record<string, unknown>>).map(
+      (r) => ({
+        id: String(r.id),
+        slug: (r.slug as string | null) ?? null,
+        full_name: (r.full_name as string | null) ?? null,
+        city: (r.city as string | null) ?? null,
+        city_slug: (r.city_slug as string | null) ?? null,
+        department_code:
+          (r.department_code as string | null) ?? (r.dept_code as string | null) ?? null,
+        certifications: extractCertCodes(r.certifications),
+        gmb_rating: (r.gmb_rating as number | null) ?? null,
+        gmb_review_count: (r.gmb_review_count as number | null) ?? null,
+        claim_status: (r.claim_status as string | null) ?? null,
+        photo_url: (r.photo_url as string | null) ?? null,
+        latitude: (r.latitude as number | null) ?? (r.geo_lat as number | null) ?? null,
+        longitude: (r.longitude as number | null) ?? (r.geo_lng as number | null) ?? null,
+        created_at: (r.created_at as string | null) ?? null,
+      }),
+    )
 
     return { rows, count: count ?? 0, error: null }
   } catch (e) {
@@ -449,7 +458,7 @@ function Pagination({
     }
     if (p > 1) params.set('page', String(p))
     const s = params.toString()
-    return s ? `/diagnostiqueurs?${s}` : '/diagnostiqueurs'
+    return s ? `/trouver-un-diagnostiqueur?${s}` : '/trouver-un-diagnostiqueur'
   }
 
   return (
@@ -497,13 +506,13 @@ function EmptyState() {
       <div className="space-y-1.5">
         <h3 className="text-lg font-bold text-ink">Aucun professionnel ne correspond</h3>
         <p className="text-[13px] text-ink-mute max-w-md mx-auto">
-          Essayez d'élargir votre recherche : retirez un filtre, élargissez la distance
-          ou parcourez les départements voisins.
+          Essayez d'élargir votre recherche : retirez un filtre, élargissez la distance ou parcourez
+          les départements voisins.
         </p>
       </div>
       <div className="flex items-center justify-center gap-2 pt-2">
         <Button variant="outline" size="sm" asChild>
-          <Link href="/diagnostiqueurs">Réinitialiser</Link>
+          <Link href="/trouver-un-diagnostiqueur">Réinitialiser</Link>
         </Button>
         <Button size="sm" asChild>
           <Link href="/reclamer-ma-fiche">
@@ -521,13 +530,12 @@ function ErrorState() {
     <Card variant="opaque" padding="lg" className="text-center space-y-3">
       <h3 className="text-base font-bold text-ink">Résultats indisponibles</h3>
       <p className="text-[13px] text-ink-mute">
-        Un incident technique nous empêche d'afficher l'annuaire en ce moment. Réessayez
-        dans quelques instants.
+        Un incident technique nous empêche d'afficher l'annuaire en ce moment. Réessayez dans
+        quelques instants.
       </p>
     </Card>
   )
 }
-
 
 function ItemListJsonLd({ rows }: { rows: DiagRow[] }) {
   if (rows.length === 0) return null
@@ -554,7 +562,7 @@ function ItemListJsonLd({ rows }: { rows: DiagRow[] }) {
             },
           }
         : {}),
-      url: `https://kovas.fr/diagnostiqueurs/${row.department_code ?? '00'}/${row.city_slug ?? 'inconnu'}/${row.slug ?? row.id}`,
+      url: `https://kovas.fr/trouver-un-diagnostiqueur/${row.department_code ?? '00'}/${row.city_slug ?? 'inconnu'}/${row.slug ?? row.id}`,
     },
   }))
 
@@ -610,7 +618,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       title: `Diagnostiqueurs immobiliers ${deptName} (${dept}) | KOVAS`,
       description: `Trouvez un diagnostiqueur immobilier certifié dans le département ${deptName} (${dept}) : DPE, Amiante, Plomb, Gaz, Électricité, Termites, Carrez, ERP.`,
       alternates: {
-        canonical: `https://kovas.fr/diagnostiqueurs?dept=${dept}`,
+        canonical: `https://kovas.fr/trouver-un-diagnostiqueur?dept=${dept}`,
       },
     }
   }
@@ -619,20 +627,20 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     return {
       title: `Diagnostiqueurs ${certs[0]} en France | KOVAS`,
       description: `Annuaire des diagnostiqueurs immobiliers certifiés ${certs[0]} en France.`,
-      alternates: { canonical: 'https://kovas.fr/diagnostiqueurs' },
+      alternates: { canonical: 'https://kovas.fr/trouver-un-diagnostiqueur' },
     }
   }
 
   return {
     title: 'Annuaire des diagnostiqueurs immobiliers en France | KOVAS',
     description:
-      "13 000+ diagnostiqueurs immobiliers certifiés partout en France. Cherchez par ville, département ou certification : DPE, Amiante, Plomb, Gaz, Électricité, Termites, Carrez, ERP.",
-    alternates: { canonical: 'https://kovas.fr/diagnostiqueurs' },
+      '13 000+ diagnostiqueurs immobiliers certifiés partout en France. Cherchez par ville, département ou certification : DPE, Amiante, Plomb, Gaz, Électricité, Termites, Carrez, ERP.',
+    alternates: { canonical: 'https://kovas.fr/trouver-un-diagnostiqueur' },
     openGraph: {
       title: 'Annuaire des diagnostiqueurs immobiliers en France',
       description:
         '13 000+ professionnels certifiés DPE, Amiante, Plomb, Gaz, Électricité, Termites.',
-      url: 'https://kovas.fr/diagnostiqueurs',
+      url: 'https://kovas.fr/trouver-un-diagnostiqueur',
       type: 'website',
     },
   }

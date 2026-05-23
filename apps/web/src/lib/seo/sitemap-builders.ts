@@ -1,5 +1,5 @@
-import type { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import type { MetadataRoute } from 'next'
 
 /**
  * Builders sitemap segmentés.
@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server'
  * Architecture :
  * - Sitemap index : `/sitemap.xml` (généré par `app/sitemap.ts` via `generateSitemaps`)
  * - Sub-sitemaps :
- *    - `marketing`   : landing, pricing, /pour-les-diagnostiqueurs, /diagnostiqueurs (root)
+ *    - `marketing`   : landing, pricing, /pour-les-diagnostiqueurs, /trouver-un-diagnostiqueur (root)
  *    - `legal`       : CGU, CGV, confidentialité, mentions légales, DPA
  *    - `conseils`    : articles SEO (table `seo_publications`)
  *    - `annuaire-N`  : pages diagnostiqueurs + pages ville + pages département (paginé)
@@ -49,10 +49,7 @@ interface PostgrestLikeError {
  * La sécurité runtime est assurée par les RLS Supabase + détection 42P01.
  */
 interface SitemapQueryBuilder {
-  select: (
-    columns: string,
-    options?: { count?: 'exact'; head?: boolean },
-  ) => SitemapQueryBuilder
+  select: (columns: string, options?: { count?: 'exact'; head?: boolean }) => SitemapQueryBuilder
   eq: (column: string, value: unknown) => SitemapQueryBuilder
   order: (column: string) => SitemapQueryBuilder
   range: (from: number, to: number) => SitemapQueryBuilder
@@ -117,7 +114,7 @@ export function buildMarketingSitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${KOVAS_BASE_URL}/diagnostiqueurs`,
+      url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
@@ -209,8 +206,13 @@ export async function buildConseilsSitemap(): Promise<MetadataRoute.Sitemap> {
 
   return rows
     .filter(
-      (row): row is { published_url: string; published_at: string | null; last_gsc_sync_at: string | null } =>
-        typeof row.published_url === 'string' && row.published_url.length > 0,
+      (
+        row,
+      ): row is {
+        published_url: string
+        published_at: string | null
+        last_gsc_sync_at: string | null
+      } => typeof row.published_url === 'string' && row.published_url.length > 0,
     )
     .map((row) => {
       const lastMod = row.last_gsc_sync_at ?? row.published_at
@@ -289,7 +291,7 @@ export async function buildAnnuaireSitemapPage(pageIndex: number): Promise<Metad
       continue
     }
     urls.push({
-      url: `${KOVAS_BASE_URL}/diagnostiqueurs/${diag.slug_dept}/${diag.slug_city}/${diag.slug}`,
+      url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${diag.slug_dept}/${diag.slug_city}/${diag.slug}`,
       lastModified: diag.updated_at !== null ? new Date(diag.updated_at) : new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
@@ -309,7 +311,7 @@ export async function buildAnnuaireSitemapPage(pageIndex: number): Promise<Metad
       if (!deptKeys.has(diag.slug_dept)) {
         deptKeys.add(diag.slug_dept)
         urls.push({
-          url: `${KOVAS_BASE_URL}/diagnostiqueurs/${diag.slug_dept}`,
+          url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${diag.slug_dept}`,
           lastModified: now,
           changeFrequency: 'weekly',
           priority: 0.8,
@@ -322,7 +324,7 @@ export async function buildAnnuaireSitemapPage(pageIndex: number): Promise<Metad
         if (!cityKeys.has(cityKey)) {
           cityKeys.add(cityKey)
           urls.push({
-            url: `${KOVAS_BASE_URL}/diagnostiqueurs/${diag.slug_dept}/${diag.slug_city}`,
+            url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${diag.slug_dept}/${diag.slug_city}`,
             lastModified: now,
             changeFrequency: 'weekly',
             priority: 0.7,

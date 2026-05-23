@@ -18,7 +18,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  /diagnostiqueurs/[dept]/[city]/[slug]                      │
+│  /trouver-un-diagnostiqueur/[dept]/[city]/[slug]                      │
 │  → <QuoteRequestForm /> (3 steps wizard + reCAPTCHA v3)     │
 └────────────────────────────┬────────────────────────────────┘
                              │ POST /api/diagnosticians/[id]/quote-request

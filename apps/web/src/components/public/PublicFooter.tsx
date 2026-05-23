@@ -17,16 +17,16 @@ interface FooterLink {
 }
 
 const LINKS_PARTICULIERS: FooterLink[] = [
-  { href: '/diagnostiqueurs', label: 'Annuaire diagnostiqueurs' },
+  { href: '/trouver-un-diagnostiqueur', label: 'Annuaire diagnostiqueurs' },
   { href: '/#how-it-works', label: 'Comment ça marche' },
   { href: '/#faq', label: 'Questions fréquentes' },
-  { href: '/diagnostiqueurs', label: 'Demander un devis' },
+  { href: '/trouver-un-diagnostiqueur', label: 'Demander un devis' },
 ]
 
 const LINKS_DIAGNOSTIQUEURS: FooterLink[] = [
   { href: '/pour-les-diagnostiqueurs', label: 'Découvrir KOVAS 360' },
   { href: '/pricing', label: 'Tarifs' },
-  { href: '/diagnostiqueurs/reclamer', label: 'Réclamer ma fiche' },
+  { href: '/trouver-un-diagnostiqueur/reclamer', label: 'Réclamer ma fiche' },
   { href: '/login', label: 'Connexion' },
 ]
 

@@ -1,5 +1,3 @@
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import {
   ProgrammaticShell,
   SeoCtaBlock,
@@ -8,6 +6,8 @@ import {
   SeoInternalLinking,
   SeoSection,
 } from '@/components/seo-prog/ProgrammaticShell'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 import { CITIES, getCityBySlug, getNeighborCities } from '@/lib/cities/registry'
 import {
   DIAGNOSTIC_LABELS,
@@ -17,13 +17,13 @@ import {
   type DiagnosticType,
   isDiagnosticType,
 } from '@/lib/diagnostics/types'
-import { buildSeoMetadata } from '@/lib/seo-content/metadata-builder'
 import {
   buildBreadcrumbLD,
   buildFaqLD,
   buildLocalBusinessListLD,
   buildMockDiagnosticians,
 } from '@/lib/seo-content/jsonld-builders'
+import { buildSeoMetadata } from '@/lib/seo-content/metadata-builder'
 import { generateLocalContent } from '@/lib/seo-content/template-generator'
 import { MapPin, Star, Trophy } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -152,7 +152,7 @@ export default async function ComparatifVillePage({
 
   const breadcrumbs = [
     { label: 'Accueil', href: '/' },
-    { label: 'Comparatifs', href: '/diagnostiqueurs' },
+    { label: 'Comparatifs', href: '/trouver-un-diagnostiqueur' },
     {
       label: `Comparatif ${label}`,
       href: `/comparatif/${diagnosticType}/${city.slug}`,
@@ -188,20 +188,16 @@ export default async function ComparatifVillePage({
 
       <SeoSection title={`Top diagnostiqueurs ${label} à ${city.name}`}>
         <p>
-          Sélection des {sortedCandidates.length} meilleurs diagnostiqueurs{' '}
-          {label} à {city.name} selon notre score composite (note clients
-          pondérée par nombre d’avis, prix de référence, délai moyen
-          d’intervention). Les 3 premiers sont mis en avant.
+          Sélection des {sortedCandidates.length} meilleurs diagnostiqueurs {label} à {city.name}{' '}
+          selon notre score composite (note clients pondérée par nombre d’avis, prix de référence,
+          délai moyen d’intervention). Les 3 premiers sont mis en avant.
         </p>
         <div className="space-y-3 mt-5">
           {sortedCandidates.map((d, idx) => {
             const rank = idx + 1
             const isPodium = rank <= 3
             return (
-              <Card
-                key={d.id}
-                className={isPodium ? 'p-5 border-2 border-chartreuse/60' : 'p-5'}
-              >
+              <Card key={d.id} className={isPodium ? 'p-5 border-2 border-chartreuse/60' : 'p-5'}>
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
                     <div
@@ -211,23 +207,14 @@ export default async function ComparatifVillePage({
                           : 'size-12 rounded-pill bg-cream-deep text-ink-mute flex items-center justify-center font-bold text-lg'
                       }
                     >
-                      {rank === 1 ? (
-                        <Trophy className="size-5" aria-hidden />
-                      ) : (
-                        rank
-                      )}
+                      {rank === 1 ? <Trophy className="size-5" aria-hidden /> : rank}
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-ink text-base">
-                      {d.displayName}
-                    </h3>
+                    <h3 className="font-semibold text-ink text-base">{d.displayName}</h3>
                     {d.streetAddress !== undefined ? (
                       <p className="text-sm text-ink-soft mt-1 flex items-start gap-1.5">
-                        <MapPin
-                          className="size-3.5 text-ink-mute mt-0.5 shrink-0"
-                          aria-hidden
-                        />
+                        <MapPin className="size-3.5 text-ink-mute mt-0.5 shrink-0" aria-hidden />
                         <span>{d.streetAddress}</span>
                       </p>
                     ) : null}
@@ -248,17 +235,13 @@ export default async function ComparatifVillePage({
                         <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">
                           Prix
                         </p>
-                        <p className="font-mono text-ink mt-0.5">
-                          dès {d.priceFrom} €
-                        </p>
+                        <p className="font-mono text-ink mt-0.5">dès {d.priceFrom} €</p>
                       </div>
                       <div>
                         <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">
                           Délai
                         </p>
-                        <p className="text-ink mt-0.5">
-                          {d.delayBusinessDays} j ouvrés
-                        </p>
+                        <p className="text-ink mt-0.5">{d.delayBusinessDays} j ouvrés</p>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-3">
@@ -279,9 +262,8 @@ export default async function ComparatifVillePage({
       <SeoSection title={`Comment choisir un diagnostiqueur ${label} à ${city.name}`}>
         <ul className="space-y-2 list-disc pl-5">
           <li>
-            <strong className="font-semibold text-ink">Certification COFRAC</strong> :
-            obligatoire et nominative. Vérifiez sa validité sur le site COFRAC
-            avant signature.
+            <strong className="font-semibold text-ink">Certification COFRAC</strong> : obligatoire
+            et nominative. Vérifiez sa validité sur le site COFRAC avant signature.
           </li>
           <li>
             <strong className="font-semibold text-ink">
@@ -290,20 +272,19 @@ export default async function ComparatifVillePage({
             : indispensable. Demandez l’attestation de moins d’un an.
           </li>
           <li>
-            <strong className="font-semibold text-ink">Indépendance</strong> :
-            le diagnostiqueur ne doit avoir aucun lien avec une agence
-            immobilière, un syndic ou un artisan susceptible de réaliser des
-            travaux suite au diagnostic.
+            <strong className="font-semibold text-ink">Indépendance</strong> : le diagnostiqueur ne
+            doit avoir aucun lien avec une agence immobilière, un syndic ou un artisan susceptible
+            de réaliser des travaux suite au diagnostic.
           </li>
           <li>
-            <strong className="font-semibold text-ink">Devis détaillé</strong> :
-            exigez un devis écrit listant les diagnostics inclus, le délai
-            d’intervention et de remise du rapport, le mode de paiement.
+            <strong className="font-semibold text-ink">Devis détaillé</strong> : exigez un devis
+            écrit listant les diagnostics inclus, le délai d’intervention et de remise du rapport,
+            le mode de paiement.
           </li>
           <li>
-            <strong className="font-semibold text-ink">Avis clients</strong> :
-            consultez Google et les annuaires spécialisés. Au moins 10 avis
-            authentiques sont un bon indicateur d’expérience.
+            <strong className="font-semibold text-ink">Avis clients</strong> : consultez Google et
+            les annuaires spécialisés. Au moins 10 avis authentiques sont un bon indicateur
+            d’expérience.
           </li>
         </ul>
       </SeoSection>
@@ -333,9 +314,9 @@ export default async function ComparatifVillePage({
 
       <div className="mt-12 pt-8 border-t border-rule text-sm text-ink-mute text-center space-y-3">
         <p className="text-xs text-ink-faint">
-          Méthodologie : score composite (60 % note × volume d’avis, 25 % prix
-          rapporté à la médiane locale, 15 % délai moyen d’intervention).
-          Classement mis à jour mensuellement. Données déclaratives diagnostiqueurs.
+          Méthodologie : score composite (60 % note × volume d’avis, 25 % prix rapporté à la médiane
+          locale, 15 % délai moyen d’intervention). Classement mis à jour mensuellement. Données
+          déclaratives diagnostiqueurs.
         </p>
       </div>
     </ProgrammaticShell>

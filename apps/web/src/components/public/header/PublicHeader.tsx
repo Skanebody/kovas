@@ -2,7 +2,7 @@
  * KOVAS — Header public marketing partagé.
  *
  * Sticky, transparent sur background sage, glass léger au scroll.
- * Utilisé sur la home, /faq, /diagnostiqueurs, /pros/* et toutes les
+ * Utilisé sur la home, /faq, /trouver-un-diagnostiqueur, /pros/* et toutes les
  * pages institutionnelles (a-propos, presse, carrieres, partenaires).
  *
  * Brand V5 strict : sage background + navy ink + chartreuse CTA accent.
@@ -36,8 +36,8 @@ export function PublicHeader() {
           >
             Calculateur DPE
           </Link>
-          <Link href="/diagnostiqueurs" className="text-ink-mute hover:text-ink transition-colors">
-            Annuaire
+          <Link href="/trouver-un-diagnostiqueur" className="text-ink-mute hover:text-ink transition-colors">
+            Trouver un diagnostiqueur
           </Link>
           <Link href="/observatoire" className="text-ink-mute hover:text-ink transition-colors">
             Observatoire

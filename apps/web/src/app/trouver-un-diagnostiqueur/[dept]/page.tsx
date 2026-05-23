@@ -1,16 +1,16 @@
+import { SiteFooter } from '@/components/site-footer'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft, MapPin } from 'lucide-react'
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import { SiteFooter } from '@/components/site-footer'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import Script from 'next/script'
 
 /**
  * KOVAS — Page département SEO (Mission C1)
- * Route : /diagnostiqueurs/[dept]
+ * Route : /trouver-un-diagnostiqueur/[dept]
  * Charge seo_geo_pages.slug = <dept> + page_type = 'department'.
  * 404 si pas trouvée.
  */
@@ -88,7 +88,7 @@ export async function generateMetadata({
     title: page.meta_title,
     description: page.meta_description,
     alternates: {
-      canonical: page.canonical_url ?? `https://kovas.fr/diagnostiqueurs/${dept}`,
+      canonical: page.canonical_url ?? `https://kovas.fr/trouver-un-diagnostiqueur/${dept}`,
     },
   }
 }
@@ -137,7 +137,7 @@ export default async function DepartmentPage({
             <span className="text-base font-bold tracking-tight">KOVAS</span>
           </Link>
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/diagnostiqueurs">
+            <Link href="/trouver-un-diagnostiqueur">
               <ArrowLeft className="size-4" /> Annuaire
             </Link>
           </Button>
@@ -173,7 +173,7 @@ export default async function DepartmentPage({
               {cities.map((c) => (
                 <Link
                   key={c.slug}
-                  href={`/diagnostiqueurs/${dept}/${c.city_slug ?? c.slug}`}
+                  href={`/trouver-un-diagnostiqueur/${dept}/${c.city_slug ?? c.slug}`}
                   className="block"
                 >
                   <Card className="p-4 hover:shadow-glass transition-shadow">

@@ -14,8 +14,8 @@
 
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { createClient as createAdminClient, type SupabaseClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/email/send'
+import { type SupabaseClient, createClient as createAdminClient } from '@supabase/supabase-js'
 
 // ============================================
 // Types
@@ -52,9 +52,7 @@ export interface Diagnostician {
 
 export type EmailStep = 1 | 2 | 3
 
-export type SendDecision =
-  | { send: false; reason: SkipReason }
-  | { send: true; step: EmailStep }
+export type SendDecision = { send: false; reason: SkipReason } | { send: true; step: EmailStep }
 
 export type SkipReason =
   | 'unsubscribed'
@@ -84,7 +82,10 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kovas.fr'
 // ============================================
 // Subjects + chemins templates
 // ============================================
-const STEP_CONFIG: Record<EmailStep, { templateFile: string; subject: (d: Diagnostician) => string }> = {
+const STEP_CONFIG: Record<
+  EmailStep,
+  { templateFile: string; subject: (d: Diagnostician) => string }
+> = {
   1: {
     templateFile: 'email-1-information.html',
     subject: (d) => `${d.first_name}, votre fiche professionnelle est sur KOVAS`,
@@ -140,7 +141,7 @@ function getAdmin(): SupabaseClient {
 // ============================================
 function buildUrls(diag: Diagnostician) {
   return {
-    public_page_url: `${APP_URL}/diagnostiqueurs/${diag.public_page_slug ?? diag.id}`,
+    public_page_url: `${APP_URL}/trouver-un-diagnostiqueur/${diag.public_page_slug ?? diag.id}`,
     claim_url: `${APP_URL}/reclamer-ma-fiche/${diag.id}${
       diag.claim_token ? `?token=${diag.claim_token}` : ''
     }`,
@@ -153,7 +154,11 @@ function buildUrls(diag: Diagnostician) {
 // ============================================
 // Render template (placeholder substitution)
 // ============================================
-function renderTemplate(step: EmailStep, diag: Diagnostician, extras: Record<string, string> = {}): string {
+function renderTemplate(
+  step: EmailStep,
+  diag: Diagnostician,
+  extras: Record<string, string> = {},
+): string {
   const raw = loadTemplate(step)
   const urls = buildUrls(diag)
   const certificationsList = (diag.certifications ?? []).join(', ') || 'Non renseignées'
@@ -228,7 +233,11 @@ export async function shouldSendNextEmail(diag: Diagnostician): Promise<SendDeci
   const sent3 = diag.pre_notification_email_3_sent_at
 
   // Quick "too soon" guard sur dernier envoi (toutes étapes)
-  const lastSent = [sent1, sent2, sent3].filter((x): x is string => x !== null).sort().pop() ?? null
+  const lastSent =
+    [sent1, sent2, sent3]
+      .filter((x): x is string => x !== null)
+      .sort()
+      .pop() ?? null
   const daysSinceLast = daysSince(lastSent)
   if (daysSinceLast !== null && daysSinceLast < MIN_DAYS_BETWEEN_SENDS) {
     return { send: false, reason: 'too_soon_since_last_send' }

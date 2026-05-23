@@ -1,7 +1,7 @@
 /**
  * Liste de référence des villes ciblées pour l'acquisition SEO local.
  *
- * Source pour /diagnostiqueurs/[slug] (pages de recherche par ville) et
+ * Source pour /trouver-un-diagnostiqueur/[slug] (pages de recherche par ville) et
  * pour sitemap-villes.xml. Quand la table `cities` Supabase sera créée
  * (sprint SEO M3-M4), ce fichier servira de seed et le sitemap basculera
  * sur la DB.

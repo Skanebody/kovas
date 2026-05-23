@@ -36,7 +36,7 @@ const INTERNAL_LINK_TARGETS = [
   { slug: '/diagnostic/carrez', label: 'loi Carrez' },
   { slug: '/diagnostic/erp', label: 'État des risques (ERP)' },
   { slug: '/observatoire', label: 'Observatoire du diagnostic' },
-  { slug: '/diagnostiqueurs', label: 'annuaire diagnostiqueurs' },
+  { slug: '/trouver-un-diagnostiqueur', label: 'annuaire diagnostiqueurs' },
 ] as const
 
 function formatInternalLinks(): string {
@@ -67,7 +67,7 @@ function intentGuidance(intent: SearchIntent): string {
     case 'commercial':
       return `L'utilisateur évalue des options. Donnez des fourchettes de prix précises, des critères de choix, des comparatifs. Le CTA final vers KOVAS doit être discret et utile.`
     case 'transactional':
-      return `L'utilisateur veut agir. Structurez en étapes concrètes. Le CTA principal en fin d'article peut renvoyer vers /diagnostic/[type] ou /diagnostiqueurs/.`
+      return `L'utilisateur veut agir. Structurez en étapes concrètes. Le CTA principal en fin d'article peut renvoyer vers /diagnostic/[type] ou /trouver-un-diagnostiqueur/.`
     case 'navigational':
       return `L'utilisateur cherche une page précise. Soyez direct et fournissez la réponse immédiate.`
     default:

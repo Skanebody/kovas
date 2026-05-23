@@ -1,12 +1,12 @@
-import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/seo/JsonLd'
 import {
+  type DiagnosticianForSchema,
   buildBreadcrumbList,
   buildLocalBusinessSchema,
-  type DiagnosticianForSchema,
 } from '@/lib/seo/schema-org'
 import { createClient } from '@/lib/supabase/server'
+import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { DiagnosticianPageContent } from './diagnostician-page-content'
 
 type RouteParams = {
@@ -86,11 +86,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const certTypes: string[] = Array.isArray(diag.certifications)
     ? diag.certifications.map((c: { type?: string }) => c.type).filter(Boolean)
     : []
-  const certSentence = certTypes.length
-    ? ` Certifié ${certTypes.slice(0, 4).join(', ')}.`
-    : ''
+  const certSentence = certTypes.length ? ` Certifié ${certTypes.slice(0, 4).join(', ')}.` : ''
   const description = `${fullName}, diagnostiqueur immobilier indépendant à ${cityLabel}.${certSentence} Devis gratuit sous 24h.`
-  const canonical = `${SITE_URL}/diagnostiqueurs/${dept}/${city}/${slug}`
+  const canonical = `${SITE_URL}/trouver-un-diagnostiqueur/${dept}/${city}/${slug}`
 
   return {
     title,
@@ -152,9 +150,7 @@ export default async function DiagnosticianPage({ params }: PageProps) {
       postalCode: diag.postal_code ?? undefined,
       addressCountry: 'FR',
     },
-    worksFor: diag.company_name
-      ? { '@type': 'Organization', name: diag.company_name }
-      : undefined,
+    worksFor: diag.company_name ? { '@type': 'Organization', name: diag.company_name } : undefined,
     hasCredential: credentials.map((c) => ({
       '@type': 'EducationalOccupationalCredential',
       credentialCategory: `Certification ${c.type ?? ''}`.trim(),
@@ -170,7 +166,7 @@ export default async function DiagnosticianPage({ params }: PageProps) {
             worstRating: 1,
           }
         : undefined,
-    url: `${SITE_URL}/diagnostiqueurs/${dept}/${city}/${slug}`,
+    url: `${SITE_URL}/trouver-un-diagnostiqueur/${dept}/${city}/${slug}`,
   }
 
   // LocalBusiness Schema.org enrichi (complète le Person ci-dessus).
@@ -193,8 +189,7 @@ export default async function DiagnosticianPage({ params }: PageProps) {
     photoUrl: typeof diag.photo_url === 'string' ? diag.photo_url : undefined,
     bio: typeof diag.bio === 'string' ? diag.bio : undefined,
     rating: typeof diag.gmb_rating === 'number' ? diag.gmb_rating : undefined,
-    reviewCount:
-      typeof diag.gmb_review_count === 'number' ? diag.gmb_review_count : undefined,
+    reviewCount: typeof diag.gmb_review_count === 'number' ? diag.gmb_review_count : undefined,
   }
 
   // Libellés breadcrumb humanlisibles (dérive du slug si pas de label dédié).
@@ -217,25 +212,20 @@ export default async function DiagnosticianPage({ params }: PageProps) {
           buildLocalBusinessSchema(diagSchemaInput),
           buildBreadcrumbList([
             { name: 'Accueil', path: '/' },
-            { name: 'Diagnostiqueurs', path: '/diagnostiqueurs' },
-            { name: deptLabel, path: `/diagnostiqueurs/${slugDept}` },
+            { name: 'Diagnostiqueurs', path: '/trouver-un-diagnostiqueur' },
+            { name: deptLabel, path: `/trouver-un-diagnostiqueur/${slugDept}` },
             {
               name: cityLabel,
-              path: `/diagnostiqueurs/${slugDept}/${slugCity}`,
+              path: `/trouver-un-diagnostiqueur/${slugDept}/${slugCity}`,
             },
             {
               name: fullName,
-              path: `/diagnostiqueurs/${slugDept}/${slugCity}/${slugProfile}`,
+              path: `/trouver-un-diagnostiqueur/${slugDept}/${slugCity}/${slugProfile}`,
             },
           ]),
         ]}
       />
-      <DiagnosticianPageContent
-        diagnostician={diag}
-        related={related}
-        dept={dept}
-        city={city}
-      />
+      <DiagnosticianPageContent diagnostician={diag} related={related} dept={dept} city={city} />
     </>
   )
 }

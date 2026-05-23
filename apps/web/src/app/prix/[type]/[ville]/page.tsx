@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/card'
 import {
   ProgrammaticShell,
   SeoCtaBlock,
@@ -7,6 +6,7 @@ import {
   SeoInternalLinking,
   SeoSection,
 } from '@/components/seo-prog/ProgrammaticShell'
+import { Card } from '@/components/ui/card'
 import { CITIES, getCityBySlug, getNeighborCities } from '@/lib/cities/registry'
 import {
   DIAGNOSTIC_LABELS,
@@ -16,13 +16,13 @@ import {
   type DiagnosticType,
   isDiagnosticType,
 } from '@/lib/diagnostics/types'
-import { buildSeoMetadata } from '@/lib/seo-content/metadata-builder'
 import {
   buildBreadcrumbLD,
   buildFaqLD,
   buildPriceSpecLD,
   buildServiceLD,
 } from '@/lib/seo-content/jsonld-builders'
+import { buildSeoMetadata } from '@/lib/seo-content/metadata-builder'
 import { generateLocalContent } from '@/lib/seo-content/template-generator'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -135,7 +135,7 @@ export default async function PrixDiagnosticVillePage({
 
   const breadcrumbs = [
     { label: 'Accueil', href: '/' },
-    { label: 'Prix diagnostics', href: '/diagnostiqueurs' },
+    { label: 'Prix diagnostics', href: '/trouver-un-diagnostiqueur' },
     { label: `Prix ${label}`, href: `/prix/${diagnosticType}/${city.slug}` },
     { label: city.name, href: `/prix/${diagnosticType}/${city.slug}` },
   ]
@@ -178,15 +178,9 @@ export default async function PrixDiagnosticVillePage({
           <table className="w-full text-sm">
             <thead className="bg-cream-deep border-b border-rule">
               <tr>
-                <th className="text-left px-4 py-3 font-semibold text-ink">
-                  Type de bien
-                </th>
-                <th className="text-left px-4 py-3 font-semibold text-ink">
-                  Surface
-                </th>
-                <th className="text-right px-4 py-3 font-semibold text-ink">
-                  Tarif {label} (TTC)
-                </th>
+                <th className="text-left px-4 py-3 font-semibold text-ink">Type de bien</th>
+                <th className="text-left px-4 py-3 font-semibold text-ink">Surface</th>
+                <th className="text-right px-4 py-3 font-semibold text-ink">Tarif {label} (TTC)</th>
               </tr>
             </thead>
             <tbody>
@@ -207,29 +201,26 @@ export default async function PrixDiagnosticVillePage({
       <SeoSection title="Facteurs qui font varier le prix">
         <ul className="space-y-2 list-disc pl-5">
           <li>
-            <strong className="font-semibold text-ink">Surface du bien</strong> :
-            la surface est le premier critère de tarification. Le diagnostic
-            d’un studio coûte moins cher que celui d’une grande maison.
+            <strong className="font-semibold text-ink">Surface du bien</strong> : la surface est le
+            premier critère de tarification. Le diagnostic d’un studio coûte moins cher que celui
+            d’une grande maison.
           </li>
           <li>
-            <strong className="font-semibold text-ink">Complexité</strong> :
-            nombre de pièces, accessibilité des combles, équipements multiples
-            augmentent le temps d’intervention.
+            <strong className="font-semibold text-ink">Complexité</strong> : nombre de pièces,
+            accessibilité des combles, équipements multiples augmentent le temps d’intervention.
           </li>
           <li>
-            <strong className="font-semibold text-ink">Urgence</strong> :
-            une intervention sous 48h peut générer un surcoût de 15-30 % selon
-            les diagnostiqueurs à {city.name}.
+            <strong className="font-semibold text-ink">Urgence</strong> : une intervention sous 48h
+            peut générer un surcoût de 15-30 % selon les diagnostiqueurs à {city.name}.
           </li>
           <li>
-            <strong className="font-semibold text-ink">Distance</strong> :
-            certains diagnostiqueurs facturent un déplacement si votre bien
-            est éloigné de leur secteur habituel.
+            <strong className="font-semibold text-ink">Distance</strong> : certains diagnostiqueurs
+            facturent un déplacement si votre bien est éloigné de leur secteur habituel.
           </li>
           <li>
-            <strong className="font-semibold text-ink">Pack groupé</strong> :
-            commander plusieurs diagnostics ensemble permet généralement
-            d’économiser 15-25 % par rapport aux tarifs unitaires.
+            <strong className="font-semibold text-ink">Pack groupé</strong> : commander plusieurs
+            diagnostics ensemble permet généralement d’économiser 15-25 % par rapport aux tarifs
+            unitaires.
           </li>
         </ul>
       </SeoSection>
@@ -243,7 +234,7 @@ export default async function PrixDiagnosticVillePage({
         }}
         secondary={{
           label: `Voir les diagnostiqueurs à ${city.name}`,
-          href: `/diagnostiqueurs/${city.dept}/${city.slug}`,
+          href: `/trouver-un-diagnostiqueur/${city.dept}/${city.slug}`,
         }}
       />
 

@@ -1,5 +1,3 @@
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import {
   ProgrammaticShell,
   SeoCtaBlock,
@@ -7,18 +5,16 @@ import {
   SeoInternalLinking,
   SeoSection,
 } from '@/components/seo-prog/ProgrammaticShell'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 import { CITIES, getCityBySlug, getNeighborCities } from '@/lib/cities/registry'
-import {
-  DIAGNOSTIC_LABELS,
-  DIAGNOSTIC_TYPES,
-  type DiagnosticType,
-} from '@/lib/diagnostics/types'
-import { buildSeoMetadata } from '@/lib/seo-content/metadata-builder'
+import { DIAGNOSTIC_LABELS, DIAGNOSTIC_TYPES, type DiagnosticType } from '@/lib/diagnostics/types'
 import {
   buildBreadcrumbLD,
   buildLocalBusinessListLD,
   buildMockDiagnosticians,
 } from '@/lib/seo-content/jsonld-builders'
+import { buildSeoMetadata } from '@/lib/seo-content/metadata-builder'
 import { Clock, MapPin, Phone, Zap } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -70,7 +66,7 @@ export default async function UrgentVillePage({
 
   const breadcrumbs = [
     { label: 'Accueil', href: '/' },
-    { label: 'Diagnostic urgent', href: '/diagnostiqueurs' },
+    { label: 'Diagnostic urgent', href: '/trouver-un-diagnostiqueur' },
     { label: city.name, href: `/urgent/${city.slug}` },
   ]
 
@@ -132,25 +128,19 @@ export default async function UrgentVillePage({
 
       <section className="mb-12 max-w-3xl">
         <Card variant="warm" className="p-8 text-center">
-          <Zap
-            className="size-10 mx-auto text-chartreuse-deep mb-3"
-            aria-hidden
-          />
-          <p className="font-serif italic text-4xl md:text-5xl text-ink mt-1">
-            Sous 48 heures
-          </p>
+          <Zap className="size-10 mx-auto text-chartreuse-deep mb-3" aria-hidden />
+          <p className="font-serif italic text-4xl md:text-5xl text-ink mt-1">Sous 48 heures</p>
           <p className="text-ink-mute mt-3 max-w-md mx-auto">
-            Diagnostiqueurs disponibles en intervention rapide à {city.name}{' '}
-            pour tous diagnostics réglementaires.
+            Diagnostiqueurs disponibles en intervention rapide à {city.name} pour tous diagnostics
+            réglementaires.
           </p>
         </Card>
       </section>
 
       <SeoSection title={`Pourquoi un diagnostic en urgence à ${city.name}`}>
         <p>
-          À {city.name}, le marché immobilier est actif et de nombreuses
-          situations exigent un diagnostic en urgence. Voici les principaux
-          motifs d’intervention rapide observés.
+          À {city.name}, le marché immobilier est actif et de nombreuses situations exigent un
+          diagnostic en urgence. Voici les principaux motifs d’intervention rapide observés.
         </p>
         <div className="grid sm:grid-cols-2 gap-4 mt-5">
           {reasons.map((r) => (
@@ -165,13 +155,10 @@ export default async function UrgentVillePage({
         </div>
       </SeoSection>
 
-      <SeoSection
-        title={`Diagnostiqueurs disponibles sous 48h à ${city.name}`}
-      >
+      <SeoSection title={`Diagnostiqueurs disponibles sous 48h à ${city.name}`}>
         <p>
-          Sélection de diagnostiqueurs réactifs exerçant à {city.name} et
-          alentours, capables d’intervenir en urgence sur tous types de
-          diagnostics réglementaires.
+          Sélection de diagnostiqueurs réactifs exerçant à {city.name} et alentours, capables
+          d’intervenir en urgence sur tous types de diagnostics réglementaires.
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
           {mockDiags.map((d) => (
@@ -179,14 +166,9 @@ export default async function UrgentVillePage({
               <Badge variant="amber" className="mb-3">
                 Disponible sous 48h
               </Badge>
-              <h3 className="font-semibold text-ink text-base">
-                {d.displayName}
-              </h3>
+              <h3 className="font-semibold text-ink text-base">{d.displayName}</h3>
               <p className="text-sm text-ink-soft mt-2 flex items-start gap-1.5">
-                <MapPin
-                  className="size-3.5 text-ink-mute mt-0.5 shrink-0"
-                  aria-hidden
-                />
+                <MapPin className="size-3.5 text-ink-mute mt-0.5 shrink-0" aria-hidden />
                 <span>{d.streetAddress}</span>
               </p>
               {d.phone !== undefined ? (
@@ -202,23 +184,19 @@ export default async function UrgentVillePage({
 
       <SeoSection title="Diagnostics fréquemment demandés en urgence">
         <p>
-          Tous les diagnostics réglementaires peuvent être réalisés en urgence à{' '}
-          {city.name}. Voici les plus demandés :
+          Tous les diagnostics réglementaires peuvent être réalisés en urgence à {city.name}. Voici
+          les plus demandés :
         </p>
         <div className="flex flex-wrap gap-2 mt-4">
-          {DIAGNOSTIC_TYPES.filter((t) => t !== 'audit-energetique').map(
-            (t: DiagnosticType) => (
-              <Link
-                key={t}
-                href={`/diagnostic/${t}/${city.slug}`}
-                className="inline-flex items-center"
-              >
-                <Badge variant="outline">
-                  {DIAGNOSTIC_LABELS[t]}
-                </Badge>
-              </Link>
-            ),
-          )}
+          {DIAGNOSTIC_TYPES.filter((t) => t !== 'audit-energetique').map((t: DiagnosticType) => (
+            <Link
+              key={t}
+              href={`/diagnostic/${t}/${city.slug}`}
+              className="inline-flex items-center"
+            >
+              <Badge variant="outline">{DIAGNOSTIC_LABELS[t]}</Badge>
+            </Link>
+          ))}
         </div>
       </SeoSection>
 
@@ -231,7 +209,7 @@ export default async function UrgentVillePage({
         }}
         secondary={{
           label: 'Voir tous les diagnostiqueurs',
-          href: `/diagnostiqueurs/${city.dept}/${city.slug}`,
+          href: `/trouver-un-diagnostiqueur/${city.dept}/${city.slug}`,
         }}
       />
 
@@ -244,9 +222,8 @@ export default async function UrgentVillePage({
 
       <div className="mt-12 pt-8 border-t border-rule text-sm text-ink-mute text-center space-y-3">
         <p className="text-xs text-ink-faint">
-          Information : un diagnostic réalisé en urgence a la même valeur
-          juridique qu’un diagnostic planifié. Vérifiez toujours la
-          certification COFRAC du diagnostiqueur.
+          Information : un diagnostic réalisé en urgence a la même valeur juridique qu’un diagnostic
+          planifié. Vérifiez toujours la certification COFRAC du diagnostiqueur.
         </p>
       </div>
     </ProgrammaticShell>

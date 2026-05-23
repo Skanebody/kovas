@@ -403,6 +403,7 @@ Deno.serve(async (req: Request) => {
 
   let limit = 2
   let specificKeywordId: string | null = null
+  let refreshStats = false
 
   try {
     const body = await req.json().catch(() => ({}))
@@ -411,6 +412,9 @@ Deno.serve(async (req: Request) => {
     }
     if (typeof body?.keyword_id === 'string') {
       specificKeywordId = body.keyword_id
+    }
+    if (typeof body?.refresh_stats === 'boolean') {
+      refreshStats = body.refresh_stats
     }
   } catch {
     // Cron call sans body : on garde les defaults
@@ -451,6 +455,25 @@ Deno.serve(async (req: Request) => {
     })
   }
 
+  // Option : déclencher un refresh des stats observatoire à la suite
+  let statsRefresh: { ok: boolean; status?: number } | null = null
+  if (refreshStats) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/observatoire-stats-refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({ source: 'generate-veille-article' }),
+      })
+      statsRefresh = { ok: res.ok, status: res.status }
+    } catch (err) {
+      console.error('[generate-veille-article] stats refresh failed:', err)
+      statsRefresh = { ok: false }
+    }
+  }
+
   return new Response(
     JSON.stringify({
       ok: true,
@@ -458,6 +481,7 @@ Deno.serve(async (req: Request) => {
       failed: results.filter((r) => !r.ok).length,
       total_cost_eur: Math.round(totalCostEur * 10000) / 10000,
       results,
+      stats_refresh: statsRefresh,
     }),
     { status: 200, headers: { 'content-type': 'application/json' } },
   )
