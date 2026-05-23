@@ -81,6 +81,26 @@
           }
         }
       }
+    },
+    {
+      "include": ["supabase/functions/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noConsoleLog": "off",
+            "noMisleadingCharacterClass": "off"
+          },
+          "style": {
+            "useTemplate": "off",
+            "useNumberNamespace": "off"
+          },
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
     }
   ]
 }
