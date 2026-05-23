@@ -29,6 +29,7 @@ import { BottomSheet, BottomSheetTitle } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { type RecordingMode, RecordingOverlay } from '@/components/voice/RecordingOverlay'
 import { TranscriptCoherenceBanner } from '@/components/voice/TranscriptCoherenceBanner'
+import { TranscriptSegments } from '@/components/voice/TranscriptSegments'
 import { VoiceMessageButton } from '@/components/voice/VoiceMessageButton'
 import {
   CHECK_ITEMS_3CL,
@@ -134,6 +135,15 @@ interface MissionTchatInterfaceProps {
   initialChatHistory: InitialChatMessage[]
 }
 
+/** Segment Whisper annoté retourné par /api/transcribe (anti-bruit MISSION-E). */
+interface ChatVoiceSegment {
+  id: number
+  text: string
+  start: number
+  end: number
+  confidence: 'reliable' | 'doubtful' | 'inaudible'
+}
+
 interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system'
@@ -153,6 +163,12 @@ interface ChatMessage {
   photoRoomName?: string | null
   /** Indique si ce message assistant est encore en cours de streaming. */
   streaming?: boolean
+  /** Vrai pendant l'upload + transcription Whisper d'un message vocal. */
+  isTranscribing?: boolean
+  /** Chemin Storage Supabase du blob audio (cleanup éventuel). */
+  audioStoragePath?: string | null
+  /** Segments Whisper annotés (rendu TranscriptSegments avec inaudible/douteux). */
+  audioSegments?: ChatVoiceSegment[]
 }
 
 type ConversationPhase = 'start' | 'mid' | 'end'
@@ -422,6 +438,12 @@ export function MissionTchatInterface({
   // Buffer du transcript final accumulé pendant le record (Web Speech onResult)
   // Utilisé au commit pour créer le ChatMessage avec content = transcript.
   const voiceTranscriptRef = useRef<string>('')
+  // Map messageId → Blob audio des messages vocaux envoyés. Évite le GC précoce
+  // de la blob locale entre la création optimiste de la bulle et le retour
+  // Whisper. Libéré dès qu'une signed URL Supabase remplace l'objectURL local.
+  const voiceBlobsRef = useRef<Map<string, Blob>>(new Map())
+  // Map messageId → objectURL local (pour revokeObjectURL au moment du swap).
+  const voiceLocalUrlsRef = useRef<Map<string, string>>(new Map())
   // Forward-ref vers sendMessage (défini plus bas) — permet à commitVoiceMessage
   // d'appeler sendMessage sans circular dep dans les useCallback.
   const sendMessageRef = useRef<
@@ -876,14 +898,24 @@ export function MissionTchatInterface({
 
   /**
    * COMMIT : l'utilisateur a relâché (press-hold) OU tap sur stop (tap-toggle).
-   * Crée une bulle ChatMessage avec audioUrl + transcript, puis envoie le texte à l'IA.
+   *
+   * Flow :
+   *  1. Crée immédiatement une bulle USER optimiste avec objectURL local +
+   *     `isTranscribing=true` (placeholder "Transcription en cours…").
+   *  2. La blob est conservée dans `voiceBlobsRef` pour empêcher le GC pendant
+   *     l'upload (sinon l'objectURL devient injouable au re-render).
+   *  3. En arrière-plan, POST /api/transcribe (upload Storage + Whisper verbose_json) :
+   *      - Succès : la bulle est mise à jour avec la signed URL persistante +
+   *        markedText + segments, puis envoyée à l'IA Claude.
+   *      - Échec/offline : on garde la blob locale + fallback Web Speech.
+   *  4. Cas edge : audio < 1s → skip Whisper (cost gating), juste la bulle audio.
    */
   const commitVoiceMessage = useCallback(async () => {
     if (recognitionRef.current) recognitionRef.current.stop()
 
     const recorder = audioRecorderRef.current
     audioRecorderRef.current = null
-    const transcript = (voiceTranscriptRef.current || input).trim()
+    const webSpeechTranscript = (voiceTranscriptRef.current || input).trim()
     voiceTranscriptRef.current = ''
 
     setIsListening(false)
@@ -893,44 +925,146 @@ export function MissionTchatInterface({
 
     if (!recorder) {
       // Pas de recorder actif → fallback : envoie juste le texte transcrit
-      if (transcript) void sendMessageRef.current?.(transcript)
+      if (webSpeechTranscript) void sendMessageRef.current?.(webSpeechTranscript)
       return
     }
 
+    let rec: { blob: Blob; durationSeconds: number }
     try {
-      const rec = await recorder.stop()
-      // Crée la bulle USER avec mini-player audio (objectURL local — pas d'upload Storage en V1).
-      // Note V2 : upload vers bucket 'mission-audio-segments' + signed URL pour persistence
-      // multi-device + accessibilité historique chat. Pour l'instant l'audio est local-only.
-      const audioUrl = URL.createObjectURL(rec.blob)
-      const msg: ChatMessage = {
-        id: `voice-${Date.now()}`,
-        role: 'user',
-        content: transcript || '(message vocal sans transcription)',
-        createdAt: Date.now(),
-        isVoice: true,
-        audioUrl,
-        audioDuration: rec.durationSeconds,
-      }
-      setMessages((prev) => [...prev, msg])
-
-      // Envoie le transcript à l'IA pour réponse (uniquement si transcription a réussi).
-      if (transcript) {
-        // On bypass la création d'une 2e bulle user en court-circuitant sendMessage :
-        // on déclenche directement l'appel SSE via sendMessageRef avec un flag interne
-        // ... mais sendMessage actuel ajoute toujours sa propre bulle user.
-        // Solution pragmatique : on garde le double rendu désactivé en suppr la bulle ci-dessus
-        // OU on accepte que sendMessage envoie au backend + crée la sienne (texte simple),
-        // et la nôtre (audio) est purement visuelle. C'est OK : la version "audio" reste
-        // affichée juste au-dessus. Le user voit les deux groupées par timestamp proche.
-        // → On envoie via sendMessageRef en mode "audio-companion" (pas de bulle additionnelle)
-        void sendMessageRef.current?.(transcript, { suppressUserBubble: true })
-      }
+      rec = await recorder.stop()
     } catch {
-      // Recording cassé — on garde quand même le transcript text si dispo
-      if (transcript) void sendMessageRef.current?.(transcript)
+      // Recording cassé — on garde quand même le transcript text Web Speech si dispo
+      if (webSpeechTranscript) void sendMessageRef.current?.(webSpeechTranscript)
+      return
     }
-  }, [input, stopMeterStream])
+
+    // ── 1) Bulle USER optimiste avec objectURL local + spinner ─────────────
+    const messageId = `voice-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const localUrl = URL.createObjectURL(rec.blob)
+    voiceBlobsRef.current.set(messageId, rec.blob)
+    voiceLocalUrlsRef.current.set(messageId, localUrl)
+
+    // Cas edge : audio très court (< 1s) → on n'appelle pas Whisper (coût inutile,
+    // résultat peu fiable). On affiche juste la bulle audio sans texte transcrit.
+    const isTooShort = rec.durationSeconds < 1
+    const optimisticContent = isTooShort ? '(message vocal court)' : 'Transcription en cours…'
+
+    const optimisticMsg: ChatMessage = {
+      id: messageId,
+      role: 'user',
+      content: optimisticContent,
+      createdAt: Date.now(),
+      isVoice: true,
+      audioUrl: localUrl,
+      audioDuration: rec.durationSeconds,
+      isTranscribing: !isTooShort,
+    }
+    setMessages((prev) => [...prev, optimisticMsg])
+
+    if (isTooShort) {
+      // Pas d'appel Whisper, mais on tente quand même d'envoyer le Web Speech
+      // transcript à Claude si dispo (UX continuity).
+      if (webSpeechTranscript) {
+        void sendMessageRef.current?.(webSpeechTranscript, { suppressUserBubble: true })
+      }
+      return
+    }
+
+    // ── 2) Upload + Whisper en arrière-plan ────────────────────────────────
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(() => controller.abort(), 30_000)
+
+    const releaseLocalBlob = (): void => {
+      const url = voiceLocalUrlsRef.current.get(messageId)
+      if (url) {
+        URL.revokeObjectURL(url)
+        voiceLocalUrlsRef.current.delete(messageId)
+      }
+      voiceBlobsRef.current.delete(messageId)
+    }
+
+    try {
+      const form = new FormData()
+      const file = new File([rec.blob], 'voice.webm', {
+        type: rec.blob.type || 'audio/webm',
+      })
+      form.append('audio', file)
+      form.append('dossierId', dossierId)
+      form.append('sessionId', sessionId)
+
+      const res = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: form,
+        signal: controller.signal,
+      })
+      window.clearTimeout(timeoutId)
+
+      if (!res.ok) {
+        throw new Error(`transcribe http ${res.status}`)
+      }
+
+      const data = (await res.json()) as {
+        transcript?: string
+        markedText?: string
+        segments?: ChatVoiceSegment[]
+        audioSignedUrl?: string | null
+        audioStoragePath?: string | null
+      }
+
+      const finalTranscript = (data.markedText || data.transcript || '').trim()
+      const finalSignedUrl = data.audioSignedUrl ?? null
+
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== messageId) return m
+          return {
+            ...m,
+            content: finalTranscript || '(message vocal sans transcription)',
+            audioUrl: finalSignedUrl ?? m.audioUrl,
+            audioStoragePath: data.audioStoragePath ?? null,
+            audioSegments: data.segments ?? undefined,
+            isTranscribing: false,
+          }
+        }),
+      )
+
+      // Si on a swap vers une signed URL, libère la blob locale (sinon on la
+      // garde — la signed URL n'a pas été obtenue, le local reste la seule source).
+      if (finalSignedUrl) releaseLocalBlob()
+
+      // Envoie à Claude le transcript brut (Whisper plus fiable que Web Speech)
+      const rawTranscript = (data.transcript || '').trim() || webSpeechTranscript
+      if (rawTranscript) {
+        void sendMessageRef.current?.(rawTranscript, { suppressUserBubble: true })
+      }
+    } catch (err) {
+      window.clearTimeout(timeoutId)
+      // Offline / timeout / 5xx → fallback Web Speech, on conserve la blob locale
+      // pour permettre la réécoute in-session (objectURL toujours valide tant que
+      // la blob est référencée dans voiceBlobsRef).
+      const isAbort = err instanceof DOMException && err.name === 'AbortError'
+      const fallbackText = webSpeechTranscript
+        ? webSpeechTranscript
+        : '(transcription indisponible — hors connexion)'
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== messageId) return m
+          return {
+            ...m,
+            content: fallbackText,
+            isTranscribing: false,
+          }
+        }),
+      )
+      if (webSpeechTranscript) {
+        void sendMessageRef.current?.(webSpeechTranscript, { suppressUserBubble: true })
+      }
+      // Log léger (ne pas spam Sentry pour les offline classiques)
+      if (!isAbort && process.env.NODE_ENV !== 'production') {
+        console.warn('[mission-tchat] transcribe failed', err)
+      }
+    }
+  }, [input, stopMeterStream, dossierId, sessionId])
 
   /**
    * CANCEL : l'utilisateur a dragé au-delà du seuil cancel OU pointerCancel.
@@ -955,6 +1089,20 @@ export function MissionTchatInterface({
       stopMeterStream()
     }
   }, [stopMeterStream])
+
+  // Cleanup : libère tous les objectURL locaux des messages vocaux au démontage
+  // (sinon memory leak Browser sur les blobs Audio retenues).
+  useEffect(() => {
+    const localUrls = voiceLocalUrlsRef.current
+    const blobs = voiceBlobsRef.current
+    return () => {
+      for (const url of localUrls.values()) {
+        URL.revokeObjectURL(url)
+      }
+      localUrls.clear()
+      blobs.clear()
+    }
+  }, [])
 
   // ----- Apply captures → state rooms -----
   // Quand Claude renvoie une capture `room` ou `measurement` ou autres
@@ -1790,6 +1938,7 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
       ) : null}
 
       <div
+        aria-busy={message.isTranscribing ? true : undefined}
         className={cn(
           'max-w-[78%] sm:max-w-[72%] px-4 py-2.5',
           isAssistant &&
@@ -1816,6 +1965,7 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
               audioUrl={message.audioUrl}
               duration={message.audioDuration ?? 0}
               variant={isUser ? 'user' : 'assistant'}
+              isTranscribing={message.isTranscribing}
             />
           </div>
         ) : null}
@@ -1839,6 +1989,14 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
                 />
               ) : null}
             </>
+          ) : message.isTranscribing ? (
+            <span className="italic text-ink/70">{message.content}</span>
+          ) : message.audioSegments && message.audioSegments.length > 0 ? (
+            // Rendu segments annotés Whisper : inaudible/douteux/fiable (MISSION-E)
+            <TranscriptSegments
+              segments={message.audioSegments}
+              audioUrl={message.audioUrl ?? null}
+            />
           ) : (
             <span>{message.content}</span>
           )}

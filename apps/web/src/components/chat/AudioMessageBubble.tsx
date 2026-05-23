@@ -21,7 +21,7 @@
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Pause, Play } from 'lucide-react'
+import { Loader2, Pause, Play } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface AudioMessageBubbleProps {
@@ -31,6 +31,8 @@ export interface AudioMessageBubbleProps {
   duration: number
   /** Variante visuelle selon contexte de la bulle. */
   variant?: 'user' | 'assistant'
+  /** Affiche un mini-spinner à côté du label durée (upload + transcription Whisper). */
+  isTranscribing?: boolean
   /** Classe additionnelle pour positionnement. */
   className?: string
 }
@@ -39,6 +41,7 @@ export function AudioMessageBubble({
   audioUrl,
   duration,
   variant = 'user',
+  isTranscribing = false,
   className,
 }: AudioMessageBubbleProps): React.ReactElement {
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -173,8 +176,16 @@ export function AudioMessageBubble({
         </div>
       </button>
 
-      <span className={cn('shrink-0 font-mono text-[11px] tabular-nums', colors.label)}>
+      <span
+        className={cn(
+          'shrink-0 inline-flex items-center gap-1 font-mono text-[11px] tabular-nums',
+          colors.label,
+        )}
+      >
         {timeLabel}
+        {isTranscribing ? (
+          <Loader2 className="size-3 animate-spin" aria-label="Transcription en cours" />
+        ) : null}
       </span>
     </div>
   )
