@@ -1,9 +1,9 @@
-import type { Metadata } from 'next'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { parisDayBounds } from '@/lib/paris-dates'
+import type { Metadata } from 'next'
+import { ATraiterSection } from './a-traiter-section'
 import { ActionDuJour } from './action-du-jour'
 import { AujourdhuiSection } from './aujourdhui-section'
-import { ATraiterSection } from './a-traiter-section'
 import { CetteSemaineSection } from './cette-semaine-section'
 
 export const metadata: Metadata = { title: 'Tableau de bord' }
@@ -34,7 +34,7 @@ export default async function DashboardPage() {
       : `${visitCount} mission${visitCount > 1 ? 's' : ''} aujourd'hui`
 
   return (
-    <div className="mx-auto w-full max-w-[800px] space-y-6 md:space-y-10 animate-fade-in">
+    <div className="space-y-6 md:space-y-10 animate-fade-in">
       {/* Salutation contextuelle — header sticky aligné fiche client */}
       <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
         <div className="space-y-1">
@@ -49,17 +49,21 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      {/* Action unique du jour */}
-      <ActionDuJour />
+      {/* Contenu épuré : action du jour + sections minimes (pattern SIMP-2)
+          Cap à 800px pour la lecture confortable, dans le max-w-7xl du layout. */}
+      <div className="mx-auto w-full max-w-[800px] space-y-6 md:space-y-10">
+        {/* Action unique du jour */}
+        <ActionDuJour />
 
-      {/* Liste compacte RDV du jour */}
-      <AujourdhuiSection />
+        {/* Liste compacte RDV du jour */}
+        <AujourdhuiSection />
 
-      {/* Compteurs à traiter */}
-      <ATraiterSection />
+        {/* Compteurs à traiter */}
+        <ATraiterSection />
 
-      {/* Mini-stats semaine */}
-      <CetteSemaineSection />
+        {/* Mini-stats semaine */}
+        <CetteSemaineSection />
+      </div>
     </div>
   )
 }
