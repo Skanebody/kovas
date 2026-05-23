@@ -62,9 +62,7 @@ async function fetchRelatedDiagnosticians(
  * Fetch verification status — sert à afficher le badge "Vérifié" / "Vérifié+".
  * Lecture via service_role pour bypasser le RLS strict de la table (service role only).
  */
-async function fetchVerificationBadge(
-  diagId: string,
-): Promise<{
+async function fetchVerificationBadge(diagId: string): Promise<{
   overallStatus: string | null
   badgeLevel: 'unverified' | 'verified' | 'verified_plus'
 }> {
@@ -164,21 +162,58 @@ export default async function DiagnosticianPage({ params }: PageProps) {
     ? diag.certifications
     : []
 
+  // AUDIT-A — Mapping schema canonique consolidé :
+  //   official_phone → phone, official_email → email, postal_code → postcode,
+  //   street_address → address, slug_dept → department_code/dept_code,
+  //   geo_lat/geo_lng → latitude/longitude (fallback geo_lat/lng),
+  //   company_name → supprimée (n'existe plus en DB ; on dérive label cabinet via SIRET ailleurs).
+  const phoneCanonical: string | null =
+    (typeof diag.phone === 'string' && diag.phone) ||
+    (typeof diag.official_phone === 'string' && diag.official_phone) ||
+    null
+  const emailCanonical: string | null =
+    (typeof diag.email === 'string' && diag.email) ||
+    (typeof diag.official_email === 'string' && diag.official_email) ||
+    null
+  const postcodeCanonical: string | null =
+    (typeof diag.postcode === 'string' && diag.postcode) ||
+    (typeof diag.postal_code === 'string' && diag.postal_code) ||
+    null
+  const addressCanonical: string | null =
+    (typeof diag.address === 'string' && diag.address) ||
+    (typeof diag.street_address === 'string' && diag.street_address) ||
+    null
+  const latCanonical: number | null =
+    typeof diag.latitude === 'number'
+      ? diag.latitude
+      : typeof diag.geo_lat === 'number'
+        ? diag.geo_lat
+        : null
+  const lngCanonical: number | null =
+    typeof diag.longitude === 'number'
+      ? diag.longitude
+      : typeof diag.geo_lng === 'number'
+        ? diag.geo_lng
+        : null
+  const deptCanonical: string =
+    (typeof diag.department_code === 'string' && diag.department_code) ||
+    (typeof diag.dept_code === 'string' && diag.dept_code) ||
+    dept
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: fullName,
     jobTitle: 'Diagnostiqueur immobilier',
     image: diag.photo_url ?? undefined,
-    telephone: diag.official_phone ?? undefined,
-    email: diag.official_email ?? undefined,
+    telephone: phoneCanonical ?? undefined,
+    email: emailCanonical ?? undefined,
     address: {
       '@type': 'PostalAddress',
       addressLocality: diag.city ?? undefined,
-      postalCode: diag.postal_code ?? undefined,
+      postalCode: postcodeCanonical ?? undefined,
       addressCountry: 'FR',
     },
-    worksFor: diag.company_name ? { '@type': 'Organization', name: diag.company_name } : undefined,
     hasCredential: credentials.map((c) => ({
       '@type': 'EducationalOccupationalCredential',
       credentialCategory: `Certification ${c.type ?? ''}`.trim(),
@@ -206,14 +241,14 @@ export default async function DiagnosticianPage({ params }: PageProps) {
     fullName,
     slug: String(diag.slug ?? slug),
     city: String(diag.city ?? decodeURIComponent(city)),
-    postalCode: typeof diag.postal_code === 'string' ? diag.postal_code : undefined,
-    dept: String(diag.slug_dept ?? dept),
-    streetAddress: typeof diag.street_address === 'string' ? diag.street_address : undefined,
-    geoLat: typeof diag.geo_lat === 'number' ? diag.geo_lat : undefined,
-    geoLng: typeof diag.geo_lng === 'number' ? diag.geo_lng : undefined,
+    postalCode: postcodeCanonical ?? undefined,
+    dept: deptCanonical,
+    streetAddress: addressCanonical ?? undefined,
+    geoLat: latCanonical ?? undefined,
+    geoLng: lngCanonical ?? undefined,
     certifications: certForSchema.length ? certForSchema : undefined,
-    phone: typeof diag.official_phone === 'string' ? diag.official_phone : undefined,
-    email: typeof diag.official_email === 'string' ? diag.official_email : undefined,
+    phone: phoneCanonical ?? undefined,
+    email: emailCanonical ?? undefined,
     photoUrl: typeof diag.photo_url === 'string' ? diag.photo_url : undefined,
     bio: typeof diag.bio === 'string' ? diag.bio : undefined,
     rating: typeof diag.gmb_rating === 'number' ? diag.gmb_rating : undefined,
@@ -221,10 +256,10 @@ export default async function DiagnosticianPage({ params }: PageProps) {
   }
 
   // Libellés breadcrumb humanlisibles (dérive du slug si pas de label dédié).
-  const deptLabel = humanizeSlug(String(diag.slug_dept ?? dept))
+  const deptLabel = humanizeSlug(deptCanonical)
   const cityLabel = String(diag.city ?? decodeURIComponent(city))
-  const slugDept = String(diag.slug_dept ?? dept)
-  const slugCity = String(diag.slug_city ?? city)
+  const slugDept = deptCanonical
+  const slugCity = String(diag.city_slug ?? diag.slug_city ?? city)
   const slugProfile = String(diag.slug ?? slug)
 
   return (

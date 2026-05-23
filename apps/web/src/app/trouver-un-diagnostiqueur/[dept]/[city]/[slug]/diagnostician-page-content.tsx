@@ -41,7 +41,12 @@ export function DiagnosticianPageContent({
   city,
   badgeLevel = 'unverified',
 }: DiagnosticianPageContentProps) {
-  const fullName = formatName(d.first_name, d.last_name)
+  // AUDIT-A — Mapping schéma canonique (post-consolidation FIX-AA) :
+  //   full_name canonique (fallback first_name+last_name), postal_code → postcode,
+  //   official_phone → phone, geo_lat/geo_lng → latitude/longitude (fallback geo_*),
+  //   years_experience → years_active, company_name supprimée (n'existe plus en DB).
+  const fullName: string =
+    (typeof d.full_name === 'string' && d.full_name.trim()) || formatName(d.first_name, d.last_name)
   const deptLabel = decodeURIComponent(dept)
   const cityLabel = decodeURIComponent(city)
   const isUnclaimed = d.claim_status === 'unclaimed'
@@ -61,9 +66,29 @@ export function DiagnosticianPageContent({
     typeof d.gmb_review_count === 'number' ? d.gmb_review_count : null
   const reviews: Array<{ author: string; rating: number; text: string; date?: string }> =
     Array.isArray(d.gmb_reviews) ? d.gmb_reviews.slice(0, 3) : []
-  const lat = typeof d.geo_lat === 'number' ? d.geo_lat : null
-  const lng = typeof d.geo_lng === 'number' ? d.geo_lng : null
+  const lat: number | null =
+    typeof d.latitude === 'number' ? d.latitude : typeof d.geo_lat === 'number' ? d.geo_lat : null
+  const lng: number | null =
+    typeof d.longitude === 'number' ? d.longitude : typeof d.geo_lng === 'number' ? d.geo_lng : null
+  const postcodeCanonical: string | null =
+    (typeof d.postcode === 'string' && d.postcode) ||
+    (typeof d.postal_code === 'string' && d.postal_code) ||
+    null
+  const phoneCanonical: string | null =
+    (typeof d.phone === 'string' && d.phone) ||
+    (typeof d.official_phone === 'string' && d.official_phone) ||
+    null
+  const yearsActive: number | null =
+    typeof d.years_active === 'number'
+      ? d.years_active
+      : typeof d.years_experience === 'number'
+        ? d.years_experience
+        : null
   const radiusKm = typeof d.intervention_radius_km === 'number' ? d.intervention_radius_km : 30
+  // Initiales pour l'avatar — dérivées du full_name canonique
+  const nameParts = fullName.split(/\s+/).filter(Boolean)
+  const initialFirst = nameParts[0] ?? ''
+  const initialLast = nameParts.length > 1 ? nameParts[nameParts.length - 1] : ''
 
   return (
     <div className="min-h-dvh flex flex-col bg-white text-[#0B1D33] font-display">
@@ -118,8 +143,8 @@ export function DiagnosticianPageContent({
             <div className="grid gap-8 md:grid-cols-[160px_1fr_auto] md:items-start">
               <AvatarBlock
                 photoUrl={d.photo_url ?? null}
-                firstName={d.first_name ?? ''}
-                lastName={d.last_name ?? ''}
+                firstName={initialFirst}
+                lastName={initialLast}
               />
 
               <div className="min-w-0">
@@ -132,10 +157,6 @@ export function DiagnosticianPageContent({
                   <div className="mt-3">
                     <BadgeVerified level={badgeLevel} size="md" />
                   </div>
-                ) : null}
-
-                {d.company_name ? (
-                  <p className="mt-2 text-base text-black/70">{d.company_name}</p>
                 ) : null}
 
                 <div className="mt-5 flex flex-wrap items-center gap-2">
@@ -156,7 +177,7 @@ export function DiagnosticianPageContent({
                     <dt className="sr-only">Ville</dt>
                     <dd className="text-black/75">
                       {cityLabel}
-                      {d.postal_code ? ` · ${d.postal_code}` : ''}
+                      {postcodeCanonical ? ` · ${postcodeCanonical}` : ''}
                     </dd>
                   </div>
                   {ratingValue !== null && reviewCount !== null && reviewCount > 0 ? (
@@ -171,11 +192,11 @@ export function DiagnosticianPageContent({
                       </dd>
                     </div>
                   ) : null}
-                  {typeof d.years_experience === 'number' && d.years_experience > 0 ? (
+                  {yearsActive !== null && yearsActive > 0 ? (
                     <div>
                       <dt className="sr-only">Expérience</dt>
                       <dd className="text-black/75">
-                        <span className="font-semibold text-[#0B1D33]">{d.years_experience}</span>{' '}
+                        <span className="font-semibold text-[#0B1D33]">{yearsActive}</span>{' '}
                         <span className="text-black/55">ans d&apos;expérience</span>
                       </dd>
                     </div>
@@ -190,13 +211,13 @@ export function DiagnosticianPageContent({
                 >
                   Demander un devis
                 </a>
-                {d.official_phone ? (
+                {phoneCanonical ? (
                   <a
-                    href={`tel:${d.official_phone}`}
+                    href={`tel:${phoneCanonical}`}
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-6 py-3 text-sm font-medium hover:bg-black/[0.03] transition-colors w-full md:w-auto"
                   >
                     <Phone className="h-4 w-4" aria-hidden />
-                    {formatPhone(d.official_phone)}
+                    {formatPhone(phoneCanonical)}
                   </a>
                 ) : null}
               </div>
@@ -247,7 +268,7 @@ export function DiagnosticianPageContent({
                 <SectionHeader number="03" title="Zone d'intervention" />
                 <p className="mt-2 text-sm text-black/60">
                   Rayon de {radiusKm} km autour de {cityLabel}
-                  {d.postal_code ? ` (${d.postal_code})` : ''}.
+                  {postcodeCanonical ? ` (${postcodeCanonical})` : ''}.
                 </p>
                 <div className="mt-6">
                   {lat !== null && lng !== null ? (
@@ -334,7 +355,9 @@ export function DiagnosticianPageContent({
                 <p className="text-xs font-mono uppercase tracking-[0.08em] text-black/50">
                   Demande de devis
                 </p>
-                <h2 className="mt-1 text-xl font-bold text-[#0B1D33]">Contacter {d.first_name}</h2>
+                <h2 className="mt-1 text-xl font-bold text-[#0B1D33]">
+                  Contacter {initialFirst || fullName}
+                </h2>
                 <p className="mt-2 text-sm text-black/65">
                   Décrivez votre projet, recevez un devis sous 24h. Sans engagement.
                 </p>
@@ -481,9 +504,15 @@ function RelatedCard({
   dept: string
   city: string
 }) {
-  const fullName = formatName(r.first_name, r.last_name)
+  // AUDIT-A — Schema canonique : full_name + city (company_name supprimée du schéma).
+  const fullName: string =
+    (typeof r.full_name === 'string' && r.full_name.trim()) || formatName(r.first_name, r.last_name)
   const certs: Array<{ type: string }> = Array.isArray(r.certifications) ? r.certifications : []
   const slug = r.slug ?? ''
+  const cityLabel: string = (typeof r.city === 'string' && r.city) || ''
+  const parts = fullName.split(/\s+/).filter(Boolean)
+  const init1 = (parts[0]?.[0] ?? '').toUpperCase()
+  const init2 = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '').toUpperCase() : ''
 
   return (
     <Link
@@ -495,15 +524,13 @@ function RelatedCard({
           aria-hidden
           className="h-12 w-12 rounded-xl bg-[#0B1D33]/[0.06] flex items-center justify-center font-semibold text-[#0B1D33]"
         >
-          {`${(r.first_name?.[0] ?? '').toUpperCase()}${(r.last_name?.[0] ?? '').toUpperCase()}`}
+          {`${init1}${init2}`}
         </div>
         <div className="min-w-0">
           <h3 className="font-semibold text-[#0B1D33] truncate group-hover:underline underline-offset-2">
             {fullName}
           </h3>
-          {r.company_name ? (
-            <p className="text-xs text-black/55 truncate">{r.company_name}</p>
-          ) : null}
+          {cityLabel ? <p className="text-xs text-black/55 truncate">{cityLabel}</p> : null}
         </div>
       </div>
       <div className="mt-4 flex flex-wrap gap-1.5">
