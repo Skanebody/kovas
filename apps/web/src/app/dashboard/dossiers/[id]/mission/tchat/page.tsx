@@ -105,7 +105,7 @@ export default async function MissionTchatPage({
   const { data: dossier } = await supabase
     .from('dossiers')
     .select(
-      'id, reference, status, scheduled_at, started_at, completed_at, properties(address, postal_code, city, surface_total, year_built), clients(display_name)',
+      'id, reference, status, scheduled_at, started_at, completed_at, properties(address, postal_code, city, surface_total, year_built, property_type), clients(display_name)',
     )
     .eq('id', id)
     .eq('organization_id', orgId)
@@ -191,6 +191,7 @@ export default async function MissionTchatPage({
           ? {
               surface: property.surface_total ?? null,
               yearBuilt: property.year_built ?? null,
+              propertyType: (property.property_type as string | null) ?? null,
             }
           : null
       }

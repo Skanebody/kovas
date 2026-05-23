@@ -50,6 +50,12 @@ const MAX_OUTPUT_TOKENS = 800
 interface ChatRequestBody {
   sessionId?: unknown
   message?: unknown
+  /**
+   * Si fourni : nom de la pièce actuellement sélectionnée par l'utilisateur
+   * dans la sidebar pièces (lot MISSION-A). Contextualise le system prompt
+   * pour que Claude rattache les données saisies à cette pièce par défaut.
+   */
+  activeRoomName?: unknown
 }
 
 interface MissionContext {
@@ -128,8 +134,12 @@ function inferLocalContext(city: string, postalCode: string): string {
 /**
  * System prompt EXPERT MÉTIER — transforme Claude en VRAI assistant
  * diagnostiqueur (pas script bête).
+ *
+ * @param ctx Contexte mission chargé depuis la DB
+ * @param activeRoomName Si fourni (sidebar pièces sélectionnée), Claude
+ *   considère que par défaut toute donnée saisie s'applique à cette pièce.
  */
-function buildMissionSystemPrompt(ctx: MissionContext): string {
+function buildMissionSystemPrompt(ctx: MissionContext, activeRoomName: string | null): string {
   const surfaceStr = ctx.surfaceM2 ? `${ctx.surfaceM2} m²` : 'surface à confirmer'
   const yearStr = ctx.yearBuilt ? `construit en ${ctx.yearBuilt}` : 'année de construction inconnue'
   const roomsStr =
@@ -164,6 +174,9 @@ function buildMissionSystemPrompt(ctx: MissionContext): string {
     `- Pièces déjà saisies (${ctx.roomsCount}) : ${roomsStr}`,
     `- Photos prises : ${ctx.photosCount}`,
     `- Captures cumulées : ${capturesStr}`,
+    activeRoomName
+      ? `- **Pièce active sélectionnée par l'utilisateur : "${activeRoomName}"** — toute donnée saisie s'applique par défaut à cette pièce, sauf indication contraire explicite ("dans le salon", "côté chambre", etc.).`
+      : '',
     '',
     '## Style de réponse',
     '- Vouvoiement SOBRE PROFESSIONNEL (avatar diagnostiqueur 43 ans, ex-cadre).',
@@ -428,6 +441,12 @@ export async function POST(
     })
   }
 
+  // Pièce active optionnelle (lot MISSION-A — sidebar pièces).
+  const activeRoomName =
+    typeof payload.activeRoomName === 'string' && payload.activeRoomName.trim().length > 0
+      ? payload.activeRoomName.trim().slice(0, 120)
+      : null
+
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return new Response(JSON.stringify({ ok: false, error: 'anthropic_not_configured' }), {
@@ -455,7 +474,7 @@ export async function POST(
     content: userMessage,
   })
 
-  const systemPrompt = buildMissionSystemPrompt(ctx)
+  const systemPrompt = buildMissionSystemPrompt(ctx, activeRoomName)
   const anthropic = new Anthropic({ apiKey })
 
   const messagesForApi = [

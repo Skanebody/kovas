@@ -24,7 +24,16 @@
  * Authority : CLAUDE.md §3 features 1 + DISCOVERY tchat IA + FIX-MM.
  */
 
+import { BottomSheet, BottomSheetTitle } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
+import { generateDefaultRooms } from '@/lib/mission/default-rooms'
+import {
+  type RoomCompletionStatus,
+  type RoomType,
+  computeRoomStatus,
+  getRequiredFieldsCount,
+  inferRoomTypeFromName,
+} from '@/lib/mission/room-completion'
 import { cn } from '@/lib/utils'
 import {
   type SpeechRecognitionController,
@@ -42,11 +51,12 @@ import {
   Pause,
   Send,
   Sparkles,
-  WifiOff,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { MissionContextBar } from './MissionContextBar'
+import { MissionRoomsSidebar, type MissionSidebarRoom } from './MissionRoomsSidebar'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -76,7 +86,11 @@ interface MissionTchatInterfaceProps {
   sessionPausedAt: string | null
   existingRooms: ExistingRoom[]
   initialStats: { photos: number; voiceNotes: number }
-  propertyMeta: { surface: number | null; yearBuilt: number | null } | null
+  propertyMeta: {
+    surface: number | null
+    yearBuilt: number | null
+    propertyType: string | null
+  } | null
   initialChatHistory: InitialChatMessage[]
 }
 
@@ -334,7 +348,7 @@ export function MissionTchatInterface({
   sessionPausedAt: _sessionPausedAt,
   existingRooms,
   initialStats,
-  propertyMeta: _propertyMeta,
+  propertyMeta,
   initialChatHistory,
 }: MissionTchatInterfaceProps) {
   const router = useRouter()
@@ -372,10 +386,68 @@ export function MissionTchatInterface({
   const [isOnline, setIsOnline] = useState<boolean>(true)
   const [isPaused, setIsPaused] = useState<boolean>(false)
   const [stats, setStats] = useState(initialStats)
-  const [roomsSaved, setRoomsSaved] = useState<number>(existingRooms.length)
   const [isStreaming, setIsStreaming] = useState<boolean>(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  // ----- Sidebar pièces (lot MISSION-A) -----
+  // Construit l'état initial depuis :
+  //   1. Les pièces déjà persistées en DB (existingRooms)
+  //   2. Pré-rempli par generateDefaultRooms si zéro pièce et propertyMeta dispo
+  //
+  // TODO V1.5 : sync DB des champs filledFields/requiredFields (actuellement
+  // tenu en local state — pas persistant entre refreshes pour les pièces
+  // pré-remplies). En V1 c'est volontaire pour rester read-mostly + simple.
+  const [rooms, setRooms] = useState<MissionSidebarRoom[]>(() => {
+    if (existingRooms.length > 0) {
+      return existingRooms.map((r) => {
+        const type: RoomType = (r.roomType as RoomType | null) ?? inferRoomTypeFromName(r.name)
+        const required = getRequiredFieldsCount(type)
+        // En l'absence de tracking persisté, on suppose "partial" pour les
+        // pièces existantes (au moins le nom + la surface saisis).
+        const filled = r.surfaceM2 != null ? 2 : 1
+        return {
+          id: r.id,
+          name: r.name,
+          type,
+          surfaceSqm: r.surfaceM2 ?? null,
+          requiredFields: required,
+          filledFields: Math.min(filled, required),
+          completionStatus: computeRoomStatus(
+            r.surfaceM2 != null ? ['name', 'surface'] : ['name'],
+            type,
+          ),
+        }
+      })
+    }
+    if (propertyMeta) {
+      return generateDefaultRooms({
+        propertyType: propertyMeta.propertyType,
+        surfaceSqm: propertyMeta.surface,
+      }).map((r) => ({
+        id: r.id,
+        name: r.name,
+        type: r.type,
+        surfaceSqm: r.surfaceSqm,
+        requiredFields: getRequiredFieldsCount(r.type),
+        filledFields: 0,
+        completionStatus: 'empty' as RoomCompletionStatus,
+      }))
+    }
+    return []
+  })
+  const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
+  const [isRoomsSheetOpen, setIsRoomsSheetOpen] = useState<boolean>(false)
+
+  // Compteur "X pièces saisies" pour quick-replies & context bar.
+  const roomsSaved = useMemo(
+    () => rooms.filter((r) => r.completionStatus !== 'empty').length,
+    [rooms],
+  )
+  const roomsCompleted = useMemo(
+    () => rooms.filter((r) => r.completionStatus === 'complete').length,
+    [rooms],
+  )
 
   // ----- Online / offline -----
   useEffect(() => {
@@ -461,6 +533,32 @@ export function MissionTchatInterface({
     setIsListening(false)
   }, [])
 
+  // ----- Apply captures → state rooms -----
+  // Quand Claude renvoie une capture `room` ou `measurement` ou autres
+  // qui touchent une pièce, on met à jour le state local. Implémentation
+  // V1 simple : on cherche par nom, sinon on insère la pièce.
+  // V1.5 : sync DB côté serveur (TODO non bloquant).
+  const applyCapturesToRooms = useCallback(
+    (captures: Array<{ type: string; data?: Record<string, unknown> }>) => {
+      setRooms((prev) => {
+        let next = prev
+        for (const cap of captures) {
+          if (cap.type === 'room' && cap.data) {
+            next = upsertRoomFromCapture(next, cap.data)
+          } else if (cap.type === 'measurement' && cap.data) {
+            next = applyMeasurementCapture(next, cap.data)
+          } else if (cap.type === 'equipment' && cap.data) {
+            next = applyEquipmentCapture(next, cap.data)
+          } else if (cap.type === 'observation' && cap.data) {
+            next = applyObservationCapture(next, cap.data)
+          }
+        }
+        return next
+      })
+    },
+    [],
+  )
+
   // ----- Streaming IA -----
   const sendMessage = useCallback(
     async (rawText: string) => {
@@ -492,11 +590,22 @@ export function MissionTchatInterface({
       setInput('')
       setIsStreaming(true)
 
+      // Contextualise l'IA avec la pièce active si l'utilisateur l'a sélectionnée
+      // dans la sidebar — l'API serveur enrichira le system prompt avec
+      // "L'utilisateur travaille sur la pièce: X" (cf. route stream).
+      const activeRoomName = activeRoomId
+        ? (rooms.find((r) => r.id === activeRoomId)?.name ?? null)
+        : null
+
       try {
         const res = await fetch(`/api/mission/${dossierId}/chat/stream`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ sessionId, message: text }),
+          body: JSON.stringify({
+            sessionId,
+            message: text,
+            activeRoomName,
+          }),
         })
         if (!res.ok || !res.body) {
           throw new Error(`HTTP ${res.status}`)
@@ -526,7 +635,7 @@ export function MissionTchatInterface({
                 type: string
                 text?: string
                 error?: string
-                captures?: Array<{ type: string }>
+                captures?: Array<{ type: string; data?: Record<string, unknown> }>
               }
               if (payload.type === 'delta' && typeof payload.text === 'string') {
                 // On filtre les fragments [CAPTURE: ...] côté client (ils peuvent
@@ -549,11 +658,9 @@ export function MissionTchatInterface({
                     m.id === assistantId ? { ...m, content: finalClean, streaming: false } : m,
                   ),
                 )
-                if (capturesCount > 0) {
-                  // Incrémente le compteur de rooms si une capture room est arrivée
-                  const hasRoom = payload.captures?.some((c) => c.type === 'room')
-                  if (hasRoom) setRoomsSaved((r) => r + 1)
-                  const hasPhoto = payload.captures?.some((c) => c.type === 'photo_taken')
+                if (capturesCount > 0 && payload.captures) {
+                  applyCapturesToRooms(payload.captures)
+                  const hasPhoto = payload.captures.some((c) => c.type === 'photo_taken')
                   if (hasPhoto) setStats((s) => ({ ...s, photos: s.photos + 1 }))
                 }
               } else if (payload.type === 'error') {
@@ -574,7 +681,16 @@ export function MissionTchatInterface({
         scrollToBottom('smooth')
       }
     },
-    [dossierId, sessionId, isListening, isStreaming, scrollToBottom],
+    [
+      dossierId,
+      sessionId,
+      isListening,
+      isStreaming,
+      scrollToBottom,
+      applyCapturesToRooms,
+      activeRoomId,
+      rooms,
+    ],
   )
 
   // ----- Submit -----
@@ -621,22 +737,54 @@ export function MissionTchatInterface({
     }
   }, [dossierId])
 
+  // ----- Sidebar pièces : sélection + ajout manuel -----
+  const handleSelectRoom = useCallback((roomId: string) => {
+    // Toggle : reclic = désélection (libère le contexte de saisie IA)
+    setActiveRoomId((prev) => (prev === roomId ? null : roomId))
+    // Sur mobile, ferme la bottom sheet pour redonner la main au chat
+    setIsRoomsSheetOpen(false)
+  }, [])
+
+  const handleAddRoom = useCallback(() => {
+    // Démarre la conversation avec une question d'ajout — IA générera
+    // ensuite une CAPTURE room=... quand l'utilisateur précisera le nom.
+    void sendMessage('Je souhaite ajouter une nouvelle pièce — laquelle me conseillez-vous ?')
+  }, [sendMessage])
+
   // ----- Phase conversation pour quick replies -----
   const phase: ConversationPhase = useMemo(() => {
     if (roomsSaved === 0 && messages.filter((m) => m.role === 'user').length < 2) return 'start'
-    if (roomsSaved >= 4) return 'end'
+    if (roomsCompleted >= 4) return 'end'
     return 'mid'
-  }, [roomsSaved, messages])
+  }, [roomsSaved, roomsCompleted, messages])
 
   const quickReplies = useMemo(() => {
     const lastAssistant = messages.filter((m) => m.role === 'assistant').slice(-1)[0]
     return getQuickReplies(phase, lastAssistant?.content ?? '')
   }, [phase, messages])
 
+  // Mapping rooms → variant sidebar (props normalisées).
+  const sidebarRooms: MissionSidebarRoom[] = rooms
+
   // ----- Render -----
   return (
     <>
-      {/* Header sticky 56px */}
+      {/* Context bar persistante (lot MISSION-A) — 40px desktop / 36px mobile */}
+      <MissionContextBar
+        client={{ name: clientName }}
+        property={{
+          type: propertyMeta?.propertyType ?? 'Bien',
+          constructionYear: propertyMeta?.yearBuilt ?? null,
+          surfaceSqm: propertyMeta?.surface ?? null,
+        }}
+        rooms={{ total: rooms.length, completed: roomsCompleted }}
+        photosCount={stats.photos}
+        isOffline={!isOnline}
+        onToggleRoomsSidebar={() => setIsRoomsSheetOpen((o) => !o)}
+        isRoomsSidebarOpen={isRoomsSheetOpen}
+      />
+
+      {/* Header sticky 56px (simplifié — info déjà dans ContextBar) */}
       <header className="relative flex h-14 items-center justify-between gap-3 border-b border-rule/70 bg-paper/95 px-3 sm:px-5 backdrop-blur-md shrink-0 z-10">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Button
@@ -655,34 +803,12 @@ export function MissionTchatInterface({
               <span>{reference}</span>
             </div>
             <p className="text-[13px] font-semibold text-ink truncate leading-tight">
-              {clientName}
-              <span className="hidden sm:inline ml-2 font-normal text-ink-mute">
-                · {fullAddress}
-              </span>
+              <span className="font-normal text-ink-mute">{fullAddress}</span>
             </p>
           </div>
         </div>
 
-        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-3 font-mono text-[11px] text-ink-mute">
-          <span>
-            {roomsSaved} pièce{roomsSaved > 1 ? 's' : ''} saisie{roomsSaved > 1 ? 's' : ''}
-          </span>
-          <span className="size-1 rounded-full bg-ink-mute/40" aria-hidden />
-          <span>
-            {stats.photos} photo{stats.photos > 1 ? 's' : ''}
-          </span>
-        </div>
-
         <div className="flex items-center gap-1.5 shrink-0">
-          {!isOnline ? (
-            <span
-              className="inline-flex items-center gap-1 rounded-pill bg-accent-warm-soft px-2 py-1 text-[10px] font-mono uppercase tracking-wide text-accent-warm"
-              title="Hors ligne — messages mis en file d'attente"
-            >
-              <WifiOff className="size-3" />
-              <span className="hidden sm:inline">Hors ligne</span>
-            </span>
-          ) : null}
           <Button
             type="button"
             variant="ghost"
@@ -706,172 +832,310 @@ export function MissionTchatInterface({
         </div>
       </header>
 
-      {/* Bandeau mobile adresse */}
-      <div className="md:hidden border-b border-rule/40 bg-paper/80 px-4 py-1.5 shrink-0">
-        <p className="text-[11px] text-ink-mute truncate">
-          {roomsSaved} pièce{roomsSaved > 1 ? 's' : ''} · {stats.photos} photo
-          {stats.photos > 1 ? 's' : ''} · {fullAddress}
-        </p>
-      </div>
-
-      {/* Zone messages scrollable */}
-      <div
-        ref={messagesContainerRef}
-        className="relative flex-1 overflow-y-auto bg-sage scroll-smooth"
-        aria-live="polite"
-        aria-relevant="additions"
-      >
-        <div className="mx-auto max-w-3xl px-3 sm:px-6 py-4 pb-6 space-y-3">
-          {messages.map((msg) => (
-            <MessageBubble key={msg.id} message={msg} />
-          ))}
-          {errorMsg ? (
-            <div className="mx-auto max-w-md rounded-lg border border-accent-red/30 bg-accent-red/5 px-3 py-2 text-[13px] text-accent-red">
-              {errorMsg}
+      {/* Zone principale 2 colonnes : chat à gauche + sidebar pièces à droite (desktop) */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Colonne gauche : chat + quick replies + input */}
+        <div className="flex flex-1 flex-col min-w-0">
+          {/* Zone messages scrollable */}
+          <div
+            ref={messagesContainerRef}
+            className="relative flex-1 overflow-y-auto bg-sage scroll-smooth"
+            aria-live="polite"
+            aria-relevant="additions"
+          >
+            <div className="mx-auto max-w-3xl px-3 sm:px-6 py-4 pb-6 space-y-3">
+              {messages.map((msg) => (
+                <MessageBubble key={msg.id} message={msg} />
+              ))}
+              {errorMsg ? (
+                <div className="mx-auto max-w-md rounded-lg border border-accent-red/30 bg-accent-red/5 px-3 py-2 text-[13px] text-accent-red">
+                  {errorMsg}
+                </div>
+              ) : null}
+              <div ref={messagesEndRef} className="h-1" />
             </div>
-          ) : null}
-          <div ref={messagesEndRef} className="h-1" />
+
+            {showScrollToBottom ? (
+              <button
+                type="button"
+                onClick={() => scrollToBottom('smooth')}
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-pill border border-rule bg-paper px-3 py-1.5 text-[12px] font-medium text-ink shadow-glass-sm hover:bg-sage-alt transition-colors"
+                aria-label="Voir les nouveaux messages"
+              >
+                <ArrowDown className="size-3.5" />
+                Nouveaux messages
+              </button>
+            ) : null}
+          </div>
+
+          {/* Quick replies contextuelles */}
+          <div className="border-t border-rule/40 bg-paper/60 px-3 sm:px-6 py-2 shrink-0 overflow-x-auto">
+            <div className="mx-auto max-w-3xl flex items-center gap-2 min-w-fit">
+              {quickReplies.map((qr) => (
+                <button
+                  key={qr.label}
+                  type="button"
+                  onClick={() => void sendMessage(qr.message)}
+                  disabled={isStreaming || isPaused}
+                  className={cn(
+                    'shrink-0 rounded-pill border border-rule bg-paper px-3 py-1.5',
+                    'text-[12px] font-medium text-ink',
+                    'hover:bg-sage-alt hover:border-ink/30 transition-colors',
+                    'disabled:opacity-40 disabled:cursor-not-allowed',
+                  )}
+                >
+                  {qr.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Input bar sticky bottom */}
+          <div className="border-t border-rule/70 bg-paper px-3 sm:px-5 py-3 shrink-0">
+            <div className="mx-auto flex max-w-3xl items-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handlePhotoClick}
+                aria-label="Prendre une photo"
+                className="shrink-0 size-10 rounded-full"
+                disabled={isPaused}
+              >
+                <Camera className="size-4" />
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handlePhotoCapture}
+                className="hidden"
+                aria-hidden
+              />
+
+              <Button
+                type="button"
+                variant={isListening ? 'accent' : 'ghost'}
+                size="icon"
+                onClick={isListening ? stopListening : startListening}
+                aria-label={isListening ? 'Arrêter la dictée' : 'Démarrer la dictée vocale'}
+                className="shrink-0 size-10 rounded-full"
+                disabled={isPaused || isStreaming}
+              >
+                {isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
+              </Button>
+
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value)
+                  // Auto-resize
+                  const ta = e.currentTarget
+                  ta.style.height = 'auto'
+                  ta.style.height = `${Math.min(ta.scrollHeight, 180)}px`
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSubmit()
+                  } else if (e.key === 'Escape') {
+                    setInput('')
+                  }
+                }}
+                placeholder={
+                  isListening
+                    ? 'Parlez maintenant…'
+                    : isStreaming
+                      ? "L'assistant rédige sa réponse…"
+                      : 'Tapez votre message — ou utilisez le micro'
+                }
+                disabled={isStreaming || isPaused}
+                rows={1}
+                className={cn(
+                  'flex-1 resize-none rounded-2xl border border-rule bg-sage-alt/40 px-4 py-2.5',
+                  'text-[14px] text-ink placeholder:text-ink-mute',
+                  'focus:outline-none focus:ring-2 focus:ring-chartreuse/40 focus:border-chartreuse/50',
+                  'disabled:opacity-50 transition-colors',
+                  'min-h-[40px] max-h-[180px]',
+                )}
+                aria-label="Votre message"
+              />
+
+              <Button
+                type="button"
+                variant="accent"
+                size="icon"
+                onClick={handleSubmit}
+                disabled={!input.trim() || isStreaming || isPaused}
+                aria-label="Envoyer"
+                className="shrink-0 size-10 rounded-full"
+              >
+                {isStreaming ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Send className="size-4" />
+                )}
+              </Button>
+            </div>
+            <div className="mx-auto max-w-3xl mt-1.5 flex items-center justify-between text-[10px] font-mono text-ink-mute">
+              <span>Entrée pour envoyer · Maj+Entrée pour saut de ligne</span>
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={() => router.push(`/dashboard/dossiers/${dossierId}`)}
+                className="text-[10px] font-mono text-ink-mute hover:text-ink h-auto p-0"
+              >
+                Quitter la mission
+              </Button>
+            </div>
+          </div>
         </div>
+        {/* Fin colonne gauche */}
 
-        {showScrollToBottom ? (
-          <button
-            type="button"
-            onClick={() => scrollToBottom('smooth')}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-pill border border-rule bg-paper px-3 py-1.5 text-[12px] font-medium text-ink shadow-glass-sm hover:bg-sage-alt transition-colors"
-            aria-label="Voir les nouveaux messages"
-          >
-            <ArrowDown className="size-3.5" />
-            Nouveaux messages
-          </button>
-        ) : null}
+        {/* Sidebar pièces desktop (lg+) — sticky droite 280px */}
+        <MissionRoomsSidebar
+          rooms={sidebarRooms}
+          activeRoomId={activeRoomId}
+          onSelectRoom={handleSelectRoom}
+          onAddRoom={handleAddRoom}
+          variant="desktop"
+        />
       </div>
+      {/* Fin zone 2 colonnes */}
 
-      {/* Quick replies contextuelles */}
-      <div className="border-t border-rule/40 bg-paper/60 px-3 sm:px-6 py-2 shrink-0 overflow-x-auto">
-        <div className="mx-auto max-w-3xl flex items-center gap-2 min-w-fit">
-          {quickReplies.map((qr) => (
-            <button
-              key={qr.label}
-              type="button"
-              onClick={() => void sendMessage(qr.message)}
-              disabled={isStreaming || isPaused}
-              className={cn(
-                'shrink-0 rounded-pill border border-rule bg-paper px-3 py-1.5',
-                'text-[12px] font-medium text-ink',
-                'hover:bg-sage-alt hover:border-ink/30 transition-colors',
-                'disabled:opacity-40 disabled:cursor-not-allowed',
-              )}
-            >
-              {qr.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Input bar sticky bottom */}
-      <div className="border-t border-rule/70 bg-paper px-3 sm:px-5 py-3 shrink-0">
-        <div className="mx-auto flex max-w-3xl items-end gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={handlePhotoClick}
-            aria-label="Prendre une photo"
-            className="shrink-0 size-10 rounded-full"
-            disabled={isPaused}
-          >
-            <Camera className="size-4" />
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handlePhotoCapture}
-            className="hidden"
-            aria-hidden
+      {/* Bottom sheet mobile : même sidebar pièces (toggle via ContextBar) */}
+      <BottomSheet open={isRoomsSheetOpen} onOpenChange={setIsRoomsSheetOpen} maxHeight="78vh">
+        <BottomSheetTitle>Pièces du bien</BottomSheetTitle>
+        <div className="px-0 pb-1">
+          <MissionRoomsSidebar
+            rooms={sidebarRooms}
+            activeRoomId={activeRoomId}
+            onSelectRoom={handleSelectRoom}
+            onAddRoom={handleAddRoom}
+            variant="mobile"
           />
-
-          <Button
-            type="button"
-            variant={isListening ? 'accent' : 'ghost'}
-            size="icon"
-            onClick={isListening ? stopListening : startListening}
-            aria-label={isListening ? 'Arrêter la dictée' : 'Démarrer la dictée vocale'}
-            className="shrink-0 size-10 rounded-full"
-            disabled={isPaused || isStreaming}
-          >
-            {isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
-          </Button>
-
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value)
-              // Auto-resize
-              const ta = e.currentTarget
-              ta.style.height = 'auto'
-              ta.style.height = `${Math.min(ta.scrollHeight, 180)}px`
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                handleSubmit()
-              } else if (e.key === 'Escape') {
-                setInput('')
-              }
-            }}
-            placeholder={
-              isListening
-                ? 'Parlez maintenant…'
-                : isStreaming
-                  ? "L'assistant rédige sa réponse…"
-                  : 'Tapez votre message — ou utilisez le micro'
-            }
-            disabled={isStreaming || isPaused}
-            rows={1}
-            className={cn(
-              'flex-1 resize-none rounded-2xl border border-rule bg-sage-alt/40 px-4 py-2.5',
-              'text-[14px] text-ink placeholder:text-ink-mute',
-              'focus:outline-none focus:ring-2 focus:ring-chartreuse/40 focus:border-chartreuse/50',
-              'disabled:opacity-50 transition-colors',
-              'min-h-[40px] max-h-[180px]',
-            )}
-            aria-label="Votre message"
-          />
-
-          <Button
-            type="button"
-            variant="accent"
-            size="icon"
-            onClick={handleSubmit}
-            disabled={!input.trim() || isStreaming || isPaused}
-            aria-label="Envoyer"
-            className="shrink-0 size-10 rounded-full"
-          >
-            {isStreaming ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
-          </Button>
         </div>
-        <div className="mx-auto max-w-3xl mt-1.5 flex items-center justify-between text-[10px] font-mono text-ink-mute">
-          <span>Entrée pour envoyer · Maj+Entrée pour saut de ligne</span>
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            onClick={() => router.push(`/dashboard/dossiers/${dossierId}`)}
-            className="text-[10px] font-mono text-ink-mute hover:text-ink h-auto p-0"
-          >
-            Quitter la mission
-          </Button>
-        </div>
-      </div>
+      </BottomSheet>
     </>
   )
+}
+
+// -----------------------------------------------------------------------------
+// Helpers state rooms — application des captures Claude → MissionSidebarRoom[]
+// -----------------------------------------------------------------------------
+
+/**
+ * Bump le nombre de champs renseignés d'une pièce, recalcule le statut.
+ * Ne dépasse jamais `requiredFields`.
+ */
+function bumpRoomFilled(room: MissionSidebarRoom, extraFields: number): MissionSidebarRoom {
+  const next = Math.min(room.requiredFields, room.filledFields + extraFields)
+  // Pour le calcul de statut, on simule un array de N items pour réutiliser
+  // computeRoomStatus (qui se base sur .length / requiredFields).
+  const simulated = new Array<string>(next).fill('x')
+  return {
+    ...room,
+    filledFields: next,
+    completionStatus: computeRoomStatus(simulated, room.type),
+  }
+}
+
+/**
+ * Trouve ou crée une pièce dans le state à partir d'une capture `room`.
+ * Si le `name` matche (case-insensitive) une pièce existante : on met à jour
+ * (surface + au moins 2 champs supposés saisis). Sinon : on l'insère.
+ */
+function upsertRoomFromCapture(
+  rooms: MissionSidebarRoom[],
+  data: Record<string, unknown>,
+): MissionSidebarRoom[] {
+  const name = typeof data.name === 'string' ? data.name : null
+  if (!name) return rooms
+
+  const surface = typeof data.surface === 'number' ? data.surface : null
+  const type = inferRoomTypeFromName(name)
+
+  const idx = rooms.findIndex((r) => r.name.toLowerCase() === name.toLowerCase())
+  if (idx >= 0) {
+    // Met à jour la pièce existante : surface + bump filled
+    const target = rooms[idx]
+    const updated = bumpRoomFilled(
+      {
+        ...target,
+        surfaceSqm: surface ?? target.surfaceSqm,
+      },
+      // surface + 1 ou 2 champs implicites (features, floor) si données
+      (surface != null ? 1 : 0) +
+        (Array.isArray(data.features) ? 1 : 0) +
+        (typeof data.floor === 'number' ? 1 : 0) || 1,
+    )
+    const next = [...rooms]
+    next[idx] = updated
+    return next
+  }
+
+  // Insertion d'une nouvelle pièce détectée par l'IA
+  const required = getRequiredFieldsCount(type)
+  const initialFilled = Math.min(
+    required,
+    1 + (surface != null ? 1 : 0) + (Array.isArray(data.features) ? 1 : 0),
+  )
+  const newRoom: MissionSidebarRoom = {
+    id: `ai-${Date.now()}-${rooms.length}`,
+    name,
+    type,
+    surfaceSqm: surface,
+    requiredFields: required,
+    filledFields: initialFilled,
+    completionStatus: computeRoomStatus(new Array<string>(initialFilled).fill('x'), type),
+  }
+  return [...rooms, newRoom]
+}
+
+function applyMeasurementCapture(
+  rooms: MissionSidebarRoom[],
+  data: Record<string, unknown>,
+): MissionSidebarRoom[] {
+  const roomName = typeof data.room === 'string' ? data.room : null
+  if (!roomName) return rooms
+  const idx = rooms.findIndex((r) => r.name.toLowerCase() === roomName.toLowerCase())
+  if (idx < 0) return rooms
+  const surface =
+    typeof data.value === 'number' && data.type === 'surface_carrez' ? data.value : null
+  const next = [...rooms]
+  next[idx] = bumpRoomFilled(
+    {
+      ...next[idx],
+      surfaceSqm: surface ?? next[idx].surfaceSqm,
+    },
+    1,
+  )
+  return next
+}
+
+function applyEquipmentCapture(
+  rooms: MissionSidebarRoom[],
+  data: Record<string, unknown>,
+): MissionSidebarRoom[] {
+  const roomName = typeof data.room === 'string' ? data.room : null
+  if (!roomName) return rooms
+  const idx = rooms.findIndex((r) => r.name.toLowerCase() === roomName.toLowerCase())
+  if (idx < 0) return rooms
+  const next = [...rooms]
+  next[idx] = bumpRoomFilled(next[idx], 1)
+  return next
+}
+
+function applyObservationCapture(
+  rooms: MissionSidebarRoom[],
+  data: Record<string, unknown>,
+): MissionSidebarRoom[] {
+  // Les observations comptent comme 1 champ supplémentaire (humidite_observation
+  // dans les schémas 3CL pour basement/attic notamment).
+  return applyEquipmentCapture(rooms, data)
 }
 
 // -----------------------------------------------------------------------------
