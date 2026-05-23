@@ -18,9 +18,9 @@
  */
 
 import { SectionHeader } from '@/app/dashboard/dashboard/section-header'
-import { UpsellEmptyState } from '@/components/upsell/UpsellEmptyState'
-import { trackBehaviorEvent } from '@/lib/upsell/track-event'
 import { Card } from '@/components/ui/card'
+import { KpiHero } from '@/components/ui/kpi-hero'
+import { UpsellEmptyState } from '@/components/upsell/UpsellEmptyState'
 import {
   type AnonymousBenchmarkRow,
   BENCHMARK_MIN_SAMPLE_SIZE,
@@ -30,11 +30,12 @@ import {
 } from '@/lib/analytics/types'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { planAtLeast } from '@/lib/billing/feature-gates'
+import { trackBehaviorEvent } from '@/lib/upsell/track-event'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
 import { AnalyticsBrowser } from './analytics-browser'
 import { BenchmarkComparison, type BenchmarkRow } from './benchmark-comparison'
-import { HealthScoreHero, type HealthScoreDiagnostic } from './health-score-hero'
+import { type HealthScoreDiagnostic, HealthScoreHero } from './health-score-hero'
 import type { MetricRow } from './metric-category-section'
 import { TrendsChart, type TrendsSeries } from './trends-chart'
 
@@ -266,24 +267,23 @@ export default async function AnalyticsPage() {
       ? (Number(previous?.revenue_ht_cents ?? 0) - Number(monthMinus2.revenue_ht_cents)) /
         Number(monthMinus2.revenue_ht_cents)
       : null
-  const previousHealth =
-    previous
-      ? computeHealthScore({
-          revenueCents: previous.revenue_ht_cents,
-          conversionRatio,
-          diversityScore,
-          growthRatio: previousGrowthRatio,
-        })
-      : null
+  const previousHealth = previous
+    ? computeHealthScore({
+        revenueCents: previous.revenue_ht_cents,
+        conversionRatio,
+        diversityScore,
+        growthRatio: previousGrowthRatio,
+      })
+    : null
 
   /* ---------- Diagnostics auto ---------- */
   const diagnostics: HealthScoreDiagnostic[] = []
   const dpeMix = current?.diagnostic_mix ?? {}
-  const dpeCount = Number(dpeMix['DPE'] ?? dpeMix['dpe'] ?? 0)
+  const dpeCount = Number(dpeMix.DPE ?? dpeMix.dpe ?? 0)
   // Estimation seuil ADEME : on cumule sur 12 mois pour le seuil 1000
   const dpeLast12m = list
     .slice(0, 12)
-    .reduce((sum, s) => sum + Number(s.diagnostic_mix?.['DPE'] ?? s.diagnostic_mix?.['dpe'] ?? 0), 0)
+    .reduce((sum, s) => sum + Number(s.diagnostic_mix?.DPE ?? s.diagnostic_mix?.dpe ?? 0), 0)
   if (dpeLast12m > 800) {
     diagnostics.push({
       level: 'warning',
@@ -305,10 +305,15 @@ export default async function AnalyticsPage() {
     })
   }
   // Croissance négative 2 mois consécutifs
-  if (growthRatio != null && growthRatio < -0.1 && previousGrowthRatio != null && previousGrowthRatio < 0) {
+  if (
+    growthRatio != null &&
+    growthRatio < -0.1 &&
+    previousGrowthRatio != null &&
+    previousGrowthRatio < 0
+  ) {
     diagnostics.push({
       level: 'warning',
-      message: `CA en baisse 2 mois consécutifs. Vérifiez votre pipeline commercial.`,
+      message: 'CA en baisse 2 mois consécutifs. Vérifiez votre pipeline commercial.',
     })
   }
 
@@ -335,7 +340,9 @@ export default async function AnalyticsPage() {
       icon: 'file-text',
       name: 'Missions ce mois',
       value: String(current?.missions_total ?? 0),
-      delta: previous ? pctDelta(Number(current?.missions_total ?? 0), Number(previous.missions_total)) : undefined,
+      delta: previous
+        ? pctDelta(Number(current?.missions_total ?? 0), Number(previous.missions_total))
+        : undefined,
       deltaDirection: previous
         ? pctDeltaDirection(Number(current?.missions_total ?? 0), Number(previous.missions_total))
         : undefined,
@@ -351,7 +358,10 @@ export default async function AnalyticsPage() {
         ? pctDelta(Number(current?.missions_completed ?? 0), Number(previous.missions_completed))
         : undefined,
       deltaDirection: previous
-        ? pctDeltaDirection(Number(current?.missions_completed ?? 0), Number(previous.missions_completed))
+        ? pctDeltaDirection(
+            Number(current?.missions_completed ?? 0),
+            Number(previous.missions_completed),
+          )
         : undefined,
       sparkline: last12.map((s) => Number(s.missions_completed)),
       hint: 'Statut "done" ou "exported"',
@@ -365,7 +375,10 @@ export default async function AnalyticsPage() {
         ? pctDelta(Number(current?.missions_exported ?? 0), Number(previous.missions_exported))
         : undefined,
       deltaDirection: previous
-        ? pctDeltaDirection(Number(current?.missions_exported ?? 0), Number(previous.missions_exported))
+        ? pctDeltaDirection(
+            Number(current?.missions_exported ?? 0),
+            Number(previous.missions_exported),
+          )
         : undefined,
       sparkline: last12.map((s) => Number(s.missions_exported)),
       hint: 'Livrées au client (PDF/ZIP)',
@@ -373,14 +386,16 @@ export default async function AnalyticsPage() {
     {
       id: 'avg-time-export',
       icon: 'clock',
-      name: 'Temps moyen jusqu\'à export',
+      name: "Temps moyen jusqu'à export",
       value:
         current?.avg_time_to_export_seconds != null
           ? `${Math.round(Number(current.avg_time_to_export_seconds) / 3600)}h`
           : '—',
-      hint: 'De la création à l\'export',
+      hint: "De la création à l'export",
       sparkline: last12.map((s) =>
-        s.avg_time_to_export_seconds != null ? Math.round(Number(s.avg_time_to_export_seconds) / 3600) : 0,
+        s.avg_time_to_export_seconds != null
+          ? Math.round(Number(s.avg_time_to_export_seconds) / 3600)
+          : 0,
       ),
     },
   ]
@@ -469,7 +484,10 @@ export default async function AnalyticsPage() {
         ? pctDelta(Number(current?.recurring_clients ?? 0), Number(previous.recurring_clients))
         : undefined,
       deltaDirection: previous
-        ? pctDeltaDirection(Number(current?.recurring_clients ?? 0), Number(previous.recurring_clients))
+        ? pctDeltaDirection(
+            Number(current?.recurring_clients ?? 0),
+            Number(previous.recurring_clients),
+          )
         : undefined,
       sparkline: sparkRecurring,
       hint: '≥ 2 missions sur 12 mois',
@@ -544,9 +562,7 @@ export default async function AnalyticsPage() {
       value: dpeLast12m.toLocaleString('fr-FR'),
       hint: 'Seuil ADEME : 1000 DPE/an',
       deltaDirection: dpeLast12m > 800 ? 'down' : 'flat',
-      sparkline: last12.map(
-        (s) => Number(s.diagnostic_mix?.['DPE'] ?? s.diagnostic_mix?.['dpe'] ?? 0),
-      ),
+      sparkline: last12.map((s) => Number(s.diagnostic_mix?.DPE ?? s.diagnostic_mix?.dpe ?? 0)),
     },
     {
       id: 'dpe-month',
@@ -566,7 +582,7 @@ export default async function AnalyticsPage() {
     {
       id: 'ademe-risk-score',
       icon: 'target',
-      name: 'Niveau d\'exposition',
+      name: "Niveau d'exposition",
       value: `${ademeRiskScore}%`,
       hint: 'Cumul / seuil 1000',
     },
@@ -578,7 +594,9 @@ export default async function AnalyticsPage() {
       id: 'mom-missions',
       icon: 'trending-up',
       name: 'Croissance missions M-1',
-      value: previous ? pctDelta(Number(current?.missions_total ?? 0), Number(previous.missions_total)) : '—',
+      value: previous
+        ? pctDelta(Number(current?.missions_total ?? 0), Number(previous.missions_total))
+        : '—',
       deltaDirection: previous
         ? pctDeltaDirection(Number(current?.missions_total ?? 0), Number(previous.missions_total))
         : undefined,
@@ -729,8 +747,7 @@ export default async function AnalyticsPage() {
             {list.length} mois d&apos;historique
           </p>
           <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
-            Performance{' '}
-            <span className="font-serif italic font-normal text-ink-mute">cabinet</span>
+            Performance <span className="font-serif italic font-normal text-ink-mute">cabinet</span>
             <span className="text-ink-mute">.</span>
           </h1>
           <p className="text-sm text-ink-mute max-w-xl">
@@ -738,6 +755,42 @@ export default async function AnalyticsPage() {
           </p>
         </div>
       </header>
+
+      {/* 4 KPI cards alignés sur pattern fiche client */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiHero
+          value={formatEur(currentRevenue)}
+          label="CA HT ce mois"
+          hint={previous ? `${pctDelta(currentRevenue, previousRevenue)} vs M-1` : 'Premier mois'}
+        />
+        <KpiHero
+          value={String(current?.missions_total ?? 0)}
+          label="Missions ce mois"
+          hint={
+            previous
+              ? `${pctDelta(Number(current?.missions_total ?? 0), Number(previous.missions_total))} vs M-1`
+              : 'Premier mois'
+          }
+        />
+        <KpiHero
+          value={
+            current?.gross_margin_ratio != null
+              ? `${Math.round(Number(current.gross_margin_ratio) * 100)}%`
+              : '—'
+          }
+          label="Marge brute"
+          hint="CA HT − coûts variables"
+        />
+        <KpiHero
+          value={healthBreakdown ? `${healthBreakdown.total}/100` : '—'}
+          label="Health score"
+          hint={
+            previousHealth && healthBreakdown
+              ? `${healthBreakdown.total - previousHealth.total >= 0 ? '+' : ''}${healthBreakdown.total - previousHealth.total} vs M-1`
+              : 'Composite global'
+          }
+        />
+      </div>
 
       {/* Search bar sticky + parcours catégoriel */}
       <section>
@@ -797,7 +850,7 @@ export default async function AnalyticsPage() {
             score={healthBreakdown.total}
             previousScore={previousHealth?.total ?? null}
             diagnostics={diagnostics}
-            methodologyHint={`Composite 30% CA · 20% conversion · 20% diversité prescripteurs · 30% croissance — recalculé chaque fin de mois.`}
+            methodologyHint="Composite 30% CA · 20% conversion · 20% diversité prescripteurs · 30% croissance — recalculé chaque fin de mois."
           />
         ) : (
           <Card variant="opaque" padding="default" className="rounded-[24px]">
@@ -841,8 +894,9 @@ export default async function AnalyticsPage() {
       {/* Footer méthodo */}
       <section>
         <p className="font-mono text-[11px] text-ink-mute leading-relaxed border-t border-rule/60 pt-4">
-          Snapshots calculés par worker mensuel · benchmarks k-anonymity ≥ {BENCHMARK_MIN_SAMPLE_SIZE}{' '}
-          cabinets · aucune donnée nominative partagée · Health Score composite recalculé chaque mois.
+          Snapshots calculés par worker mensuel · benchmarks k-anonymity ≥{' '}
+          {BENCHMARK_MIN_SAMPLE_SIZE} cabinets · aucune donnée nominative partagée · Health Score
+          composite recalculé chaque mois.
         </p>
       </section>
     </div>
