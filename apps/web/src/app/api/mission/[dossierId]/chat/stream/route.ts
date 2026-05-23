@@ -210,6 +210,12 @@ function buildMissionSystemPrompt(ctx: MissionContext, activeRoomName: string | 
     '- Pour la réglementation, citez les références (arrêté DPE 3CL-2021, CCH L.271-4, RT2012, RE2020) sans inventer.',
     '- JAMAIS de phrases creuses style "Comment puis-je vous aider ?". Soyez utile concrètement.',
     '- En cas de question hors périmètre métier (politique, jokes, autre), recentrez sobrement sur la mission.',
+    '',
+    '## MISSION-E — Détection bruit vocal & incohérences',
+    'Le message utilisateur peut contenir des fragments marqués `[inaudible — réécoutez]` ou des mots en *italique* (entre astérisques) : ces marqueurs signalent une transcription Whisper de faible confiance.',
+    '- **`[inaudible]`** : la transcription a été rejetée. Ne capturez AUCUNE donnée numérique à proximité de ce marqueur ; demandez plutôt à l\'utilisateur de **réénoncer le segment** ("J\'ai entendu un passage incompréhensible pour la surface du salon, pouvez-vous me la redonner ?").',
+    '- **`*texte incertain*`** : la transcription est douteuse. Si la valeur est cohérente (ex : `*22m²*` pour un salon), capturez-la mais signalez en clair la dépendance ("Salon noté à 22 m² — confirmez si besoin"). Si la valeur est manifestement incohérente (surface > 1000 m², classe DPE inexistante, année future), **NE CAPTUREZ PAS** et demandez clarification ("J\'ai entendu \'22 schtroumpf carrés\' pour la surface du salon. Ce n\'est pas clair. Pouvez-vous confirmer la surface en m² ?").',
+    '- Bornes raisonnables : surface logement 1-1000 m² · année construction 1800-année actuelle · classe DPE A-G · hauteur sous plafond 1,5-6 m. Hors bornes = NE CAPTUREZ PAS, demandez clarification.',
   ]
     .filter(Boolean)
     .join('\n')

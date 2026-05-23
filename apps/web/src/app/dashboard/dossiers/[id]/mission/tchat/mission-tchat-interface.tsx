@@ -27,6 +27,7 @@
 import { BottomSheet, BottomSheetTitle } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { AudioLevelMeter } from '@/components/voice/AudioLevelMeter'
+import { TranscriptCoherenceBanner } from '@/components/voice/TranscriptCoherenceBanner'
 import {
   CHECK_ITEMS_3CL,
   CHECK_ITEMS_3CL_COUNT,
@@ -64,6 +65,7 @@ import {
   type SpeechRecognitionController,
   createSpeechRecognition,
 } from '@/lib/voice/speech-recognition'
+import { type CoherenceIssue, checkTranscriptCoherence } from '@/lib/voice/transcription-coherence'
 import {
   AlertTriangle,
   ArrowDown,
@@ -404,6 +406,10 @@ export function MissionTchatInterface({
   // pendant la dictée Web Speech API (qui ne nous donne pas accès au stream micro).
   const meterStreamRef = useRef<MediaStream | null>(null)
   const [meterStream, setMeterStream] = useState<MediaStream | null>(null)
+  // MISSION-E niveau 4 (local) : incohérences détectées sur le dernier message
+  // user en attente de validation (Ignorer/Refaire/Corriger).
+  const [pendingCoherenceIssues, setPendingCoherenceIssues] = useState<CoherenceIssue[]>([])
+  const [pendingMessageDraft, setPendingMessageDraft] = useState<string | null>(null)
 
   // ----- State principal -----
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -1082,11 +1088,44 @@ export function MissionTchatInterface({
     ],
   )
 
-  // ----- Submit -----
+  // ----- Submit avec cross-check métier (MISSION-E niveau 4 local) -----
   const handleSubmit = useCallback(() => {
-    if (!input.trim()) return
-    void sendMessage(input)
+    const text = input.trim()
+    if (!text) return
+    // Check incoherences metier (surface > 1000m2, annee < 1800, etc.) AVANT
+    // l'envoi serveur. Si OK -> envoi normal. Si NOK -> banner + attente choix.
+    // Le check est leger (regex sur le texte) et ne coute rien sur les requetes
+    // sans donnees structurees.
+    const issues = checkTranscriptCoherence(text)
+    if (issues.length > 0) {
+      setPendingCoherenceIssues(issues)
+      setPendingMessageDraft(text)
+      return
+    }
+    void sendMessage(text)
   }, [input, sendMessage])
+
+  // ----- Handlers banner coherence -----
+  const handleCoherenceIgnore = useCallback(() => {
+    const draft = pendingMessageDraft
+    setPendingCoherenceIssues([])
+    setPendingMessageDraft(null)
+    if (draft) void sendMessage(draft)
+  }, [pendingMessageDraft, sendMessage])
+
+  const handleCoherenceRedo = useCallback(() => {
+    setPendingCoherenceIssues([])
+    setPendingMessageDraft(null)
+    setInput('')
+    startListening()
+  }, [startListening])
+
+  const handleCoherenceEdit = useCallback(() => {
+    // Garde le brouillon dans l'input pour édition manuelle
+    setPendingCoherenceIssues([])
+    setPendingMessageDraft(null)
+    textareaRef.current?.focus()
+  }, [])
 
   // ----- Photo capture (MISSION-B) — handler depuis PhotoCaptureButton -----
   /**
@@ -1313,6 +1352,17 @@ export function MissionTchatInterface({
 
           {/* Input bar sticky bottom */}
           <div className="border-t border-rule/70 bg-paper px-3 sm:px-5 py-3 shrink-0">
+            {/* MISSION-E niveau 4 (local) : banner cross-check metier */}
+            {pendingCoherenceIssues.length > 0 ? (
+              <div className="mx-auto max-w-3xl mb-2">
+                <TranscriptCoherenceBanner
+                  issues={pendingCoherenceIssues}
+                  onIgnore={handleCoherenceIgnore}
+                  onRedo={handleCoherenceRedo}
+                  onEditManually={handleCoherenceEdit}
+                />
+              </div>
+            ) : null}
             {/* MISSION-E niveau 2 : VU-mètre anti-bruit live pendant la dictée */}
             {isListening ? (
               <div className="mx-auto max-w-3xl mb-2">

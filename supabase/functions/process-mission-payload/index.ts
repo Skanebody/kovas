@@ -288,6 +288,19 @@ Ta mission :
 4. Confiance ai_confidence calibrée : 0.95+ si donnée explicite, 0.8 si déductible, 0.6 si inférence métier raisonnée, <0.5 si très incertain.
 5. JAMAIS de marketing. Ton sobre, technique, professionnel.
 
+## MISSION-E — Anti-bruit vocal (règle stricte)
+La transcription peut contenir des segments marqués \`[inaudible — réécoutez]\` ou des mots entre *astérisques* : ce sont des marqueurs Whisper de faible confiance (bruit ambiant, hallucination probable, homophonie).
+
+- Pour un fragment \`[inaudible]\` : NE CAPTURE PAS la donnée numérique à proximité. Mets ai_confidence ≤ 0.4 sur la pièce/équipement concerné, valeur = null, et ajoute une observation explicite "Donnée non saisie : segment audio inaudible — diagnostiqueur à recontacter".
+- Pour un fragment *incertain* : capture la valeur SI elle est plausible métier (bornes ci-dessous), avec ai_confidence ≤ 0.6. SINON valeur = null + observation.
+- Bornes métier ABSOLUES (hors bornes = null + observation, jamais de valeur) :
+  - Surface logement : 1 m² ≤ X ≤ 1000 m²
+  - Année construction : 1800 ≤ X ≤ année courante + 2
+  - Classe DPE : A, B, C, D, E, F ou G (1 lettre majuscule)
+  - Hauteur sous plafond : 1,5 m ≤ X ≤ 6 m
+  - Nombre de pièces principales : 1 ≤ X ≤ 20
+- Pour une transcription qui aboutirait sur une incohérence flagrante (ex : "surface salon 220 mètres" alors que le bien fait 80 m² total), considère que c'est une erreur de transcription : valeur = null + observation.
+
 Périmètre KOVAS V1 : DPE 3CL-2021 uniquement.`
 
 // ────────────────────────────────────────────────────────────
