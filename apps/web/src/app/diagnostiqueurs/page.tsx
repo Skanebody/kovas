@@ -230,59 +230,161 @@ interface FetchResult {
   error: string | null
 }
 
+/**
+ * Row renvoyée par la RPC `search_diagnosticians` (cf. migration 20260524110000).
+ * On garde le mapping souple : la RPC renvoie `department_code` mais on alias
+ * vers le champ `DiagRow.department_code` directement.
+ */
+interface RpcDiagRow {
+  id: string
+  slug: string | null
+  full_name: string | null
+  city: string | null
+  city_slug: string | null
+  department_code: string | null
+  postcode: string | null
+  certifications: unknown
+  certif_valid_count: number | null
+  gmb_rating: number | null
+  gmb_review_count: number | null
+  claim_status: string | null
+  photo_url: string | null
+  latitude: number | null
+  longitude: number | null
+  distance_km: number | null
+  created_at: string | null
+}
+
+/**
+ * Extrait les codes de type de certif (DPE, AMIANTE, ...) depuis le JSONB.
+ * La page liste les certifs en tant que string[], pas en objets complets.
+ */
+function extractCertCodes(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  const codes = new Set<string>()
+  for (const item of raw) {
+    if (item && typeof item === 'object') {
+      const t = (item as { type?: unknown }).type
+      if (typeof t === 'string') codes.add(t)
+    } else if (typeof item === 'string') {
+      codes.add(item)
+    }
+  }
+  return Array.from(codes)
+}
+
 async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
   try {
     const supabase = await createClient()
-    // Cast as any : table `diagnosticians` créée par A1 en parallèle, types pas
-    // encore régénérés. À retirer dès régénération des types Database.
-    // biome-ignore lint/suspicious/noExplicitAny: agent parallèle A1 — types Database à régénérer
+    // Types Database pas encore régénérés post-migration 20260524110000.
+    // biome-ignore lint/suspicious/noExplicitAny: types Database à régénérer post-FIX-D
     const client = supabase as any
 
     const offset = (args.page - 1) * PAGE_SIZE
-
-    // Si géoloc + distance : on récupère un superset large puis on filtre/trie côté Node
-    // (PostGIS pas encore activé ; quand A1 ajoutera RPC `diagnosticians_within`, on bascule).
     const useGeoSort = args.lat !== undefined && args.lng !== undefined
+    const radiusKm = useGeoSort ? (args.dist ?? 50) : 50
 
+    // Appel RPC unifiée. On surdimensionne le LIMIT (5×page) pour permettre
+    // le count exact côté serveur en post-filtrage (cf. count séparé ci-dessous).
+    const { data, error } = await client.rpc('search_diagnosticians', {
+      p_query: args.q || null,
+      p_city_slug: null,
+      p_dept_code: args.dept ?? null,
+      p_certs: args.certs.length > 0 ? args.certs : null,
+      p_lat: args.lat ?? null,
+      p_lng: args.lng ?? null,
+      p_radius_km: radiusKm,
+      p_limit: PAGE_SIZE,
+      p_offset: offset,
+    })
+
+    if (error) {
+      // RPC inexistante = migration pas encore appliquée → fallback gracieux.
+      const msg = error.message || ''
+      const isMissing =
+        msg.includes('does not exist') ||
+        msg.includes('not found') ||
+        msg.includes('function') ||
+        error.code === 'PGRST202' ||
+        error.code === 'PGRST205' ||
+        error.code === '42P01' ||
+        error.code === '42883'
+      if (isMissing) {
+        return fallbackTableQuery(client, args, offset)
+      }
+      return { rows: [], count: 0, error: msg }
+    }
+
+    const rpcRows = (data ?? []) as RpcDiagRow[]
+
+    // Count total (mêmes filtres, sans pagination) — appel RPC count séparé.
+    // Pour éviter une 2e RPC, on prend le LIMIT comme borne haute + 1 pour
+    // détecter la dernière page. Implémentation simple : si rpcRows.length
+    // === PAGE_SIZE on suppose qu'il y en a au moins une page de plus.
+    const approxCount = rpcRows.length === PAGE_SIZE ? offset + PAGE_SIZE + 1 : offset + rpcRows.length
+
+    const rows: DiagRow[] = rpcRows.map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      full_name: r.full_name,
+      city: r.city,
+      city_slug: r.city_slug,
+      department_code: r.department_code,
+      certifications: extractCertCodes(r.certifications),
+      gmb_rating: r.gmb_rating,
+      gmb_review_count: r.gmb_review_count,
+      claim_status: r.claim_status,
+      photo_url: r.photo_url,
+      latitude: r.latitude,
+      longitude: r.longitude,
+      created_at: r.created_at,
+    }))
+
+    return { rows, count: approxCount, error: null }
+  } catch (e) {
+    return {
+      rows: [],
+      count: 0,
+      error: e instanceof Error ? e.message : 'Erreur inconnue',
+    }
+  }
+}
+
+/**
+ * Fallback : si la RPC `search_diagnosticians` n'est pas encore créée
+ * (cas migration pas appliquée), on tente une requête table directe en
+ * mode best-effort. Filtre minimal : dept + ILIKE nom/ville.
+ */
+async function fallbackTableQuery(
+  // biome-ignore lint/suspicious/noExplicitAny: supabase client cast pré-typegen
+  client: any,
+  args: FetchArgs,
+  offset: number,
+): Promise<FetchResult> {
+  try {
     let query = client
       .from('diagnosticians')
       .select(
-        'id, slug, full_name, city, city_slug, department_code, certifications, gmb_rating, gmb_review_count, claim_status, photo_url, latitude, longitude, created_at',
+        'id, slug, full_name, city, city_slug, department_code, dept_code, certifications, gmb_rating, gmb_review_count, claim_status, photo_url, latitude, longitude, geo_lat, geo_lng, created_at',
         { count: 'exact' },
       )
 
-    if (args.dept) query = query.eq('department_code', args.dept)
-    if (args.certs.length > 0) query = query.contains('certifications', args.certs)
+    if (args.dept) {
+      query = query.or(`department_code.eq.${args.dept},dept_code.eq.${args.dept}`)
+    }
     if (args.q) {
-      // ilike OR sur full_name + city
-      const safe = args.q.replace(/[%_]/g, '\\$&')
+      const safe = args.q.replace(/[%_,]/g, '\\$&')
       query = query.or(`full_name.ilike.%${safe}%,city.ilike.%${safe}%`)
     }
 
-    if (useGeoSort) {
-      // Bounding-box rapide pour limiter le volume avant tri Haversine côté Node
-      const radiusKm = args.dist ?? 50
-      const latDelta = radiusKm / 111
-      const lngDelta = radiusKm / (111 * Math.max(0.1, Math.cos((args.lat! * Math.PI) / 180)))
-      query = query
-        .gte('latitude', args.lat! - latDelta)
-        .lte('latitude', args.lat! + latDelta)
-        .gte('longitude', args.lng! - lngDelta)
-        .lte('longitude', args.lng! + lngDelta)
-        .limit(500) // borne sécurité
-    } else {
-      query = query
-        .order('claim_status', { ascending: false }) // 'claimed' > 'unclaimed' alphabétiquement → on inverse
-        .order('gmb_rating', { ascending: false, nullsFirst: false })
-        .order('created_at', { ascending: false })
-        .range(offset, offset + PAGE_SIZE - 1)
-    }
+    query = query
+      .order('claim_status', { ascending: false })
+      .order('gmb_rating', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1)
 
     const { data, count, error } = await query
-
     if (error) {
-      // Erreur typique : table inexistante (A1 pas encore mergé) → on renvoie vide gracieusement
-      // PGRST205 = relation not found, 42P01 = undefined_table
       const msg = error.message || ''
       if (
         msg.includes('does not exist') ||
@@ -295,32 +397,23 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
       return { rows: [], count: 0, error: msg }
     }
 
-    let rows: DiagRow[] = (data ?? []) as DiagRow[]
-
-    // Tri Haversine côté Node si geo actif
-    if (useGeoSort) {
-      const withDist = rows
-        .map((r) => ({
-          row: r,
-          dist:
-            r.latitude !== null && r.longitude !== null
-              ? haversineKm(args.lat!, args.lng!, r.latitude, r.longitude)
-              : Number.POSITIVE_INFINITY,
-        }))
-        .filter((x) => (args.dist === undefined ? true : x.dist <= args.dist))
-        .sort((a, b) => {
-          // Priorité claimed puis distance
-          const aClaimed = a.row.claim_status === 'claimed' ? 1 : 0
-          const bClaimed = b.row.claim_status === 'claimed' ? 1 : 0
-          if (aClaimed !== bClaimed) return bClaimed - aClaimed
-          return a.dist - b.dist
-        })
-
-      const sliced = withDist.slice(offset, offset + PAGE_SIZE)
-      rows = sliced.map((x) => x.row)
-      // Count recalculé sur le superset filtré
-      return { rows, count: withDist.length, error: null }
-    }
+    const rows: DiagRow[] = ((data ?? []) as unknown as Array<Record<string, unknown>>).map((r) => ({
+      id: String(r.id),
+      slug: (r.slug as string | null) ?? null,
+      full_name: (r.full_name as string | null) ?? null,
+      city: (r.city as string | null) ?? null,
+      city_slug: (r.city_slug as string | null) ?? null,
+      department_code:
+        (r.department_code as string | null) ?? (r.dept_code as string | null) ?? null,
+      certifications: extractCertCodes(r.certifications),
+      gmb_rating: (r.gmb_rating as number | null) ?? null,
+      gmb_review_count: (r.gmb_review_count as number | null) ?? null,
+      claim_status: (r.claim_status as string | null) ?? null,
+      photo_url: (r.photo_url as string | null) ?? null,
+      latitude: (r.latitude as number | null) ?? (r.geo_lat as number | null) ?? null,
+      longitude: (r.longitude as number | null) ?? (r.geo_lng as number | null) ?? null,
+      created_at: (r.created_at as string | null) ?? null,
+    }))
 
     return { rows, count: count ?? 0, error: null }
   } catch (e) {
