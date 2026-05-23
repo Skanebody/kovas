@@ -75,3 +75,8 @@ apps/web/public/sw.js.map
 apps/web/public/swe-worker-*.js
 apps/web/public/swe-worker-*.js.map
 .claude/worktrees/
+
+# DB backups & migration audits (FIX-AA reconciliation)
+backups/
+scripts/migration-status-result.json
+scripts/migration-replay-log.json
