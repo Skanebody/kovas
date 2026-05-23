@@ -6,7 +6,7 @@ import { type BanFeature, searchBanAddress } from '@/lib/ban'
 import { Loader2, LocateFixed, MapPin, Search, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { FormEvent, KeyboardEvent } from 'react'
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 interface SearchBarProps {
   /** Valeur initiale du champ texte (read from searchParams.q server-side). */
@@ -15,11 +15,68 @@ interface SearchBarProps {
   preservedParams?: Record<string, string | string[] | undefined>
 }
 
+/** Délai de debounce du fetch BAN (ms). Plus court = UX plus réactive. */
+const BAN_DEBOUNCE_MS = 200
+/** Longueur min de saisie pour déclencher une suggestion. */
+const MIN_QUERY_LEN = 3
+
+/**
+ * Echappe les caractères regex spéciaux d'une string pour usage en RegExp.
+ */
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * Découpe `label` en segments en mettant en évidence les portions correspondant
+ * à `query` (case-insensitive, accents indifférents). Le rendu utilise `<mark>`
+ * pour la sémantique + une classe de gras sobre.
+ */
+function highlightMatch(label: string, query: string): Array<{ text: string; match: boolean }> {
+  const q = query.trim()
+  if (q.length < 1) return [{ text: label, match: false }]
+  // Normalise accents pour matcher "ecole" et "école" — Unicode property
+  // escape `\p{Mn}` (Mark, Nonspacing = diacritiques combinants) avec flag `u`
+  // pour rester valide Biome (pas de char combinant inline dans une class char).
+  const normalize = (s: string) =>
+    s
+      .normalize('NFD')
+      .replace(/\p{Mn}/gu, '')
+      .toLowerCase()
+  const normalizedLabel = normalize(label)
+  const normalizedQuery = normalize(q)
+  if (!normalizedQuery) return [{ text: label, match: false }]
+
+  // Construit un regex qui matche n'importe quelle occurrence (mot ou substring).
+  const pattern = new RegExp(escapeRegex(normalizedQuery), 'gi')
+  const segments: Array<{ text: string; match: boolean }> = []
+  let cursor = 0
+
+  // Itère sur les matchs en travaillant sur la version normalisée (mêmes index
+  // que l'original puisque diacritiques = 0 char added dans NFD->stripped).
+  for (let m = pattern.exec(normalizedLabel); m !== null; m = pattern.exec(normalizedLabel)) {
+    if (m.index > cursor) {
+      segments.push({ text: label.slice(cursor, m.index), match: false })
+    }
+    segments.push({ text: label.slice(m.index, m.index + m[0].length), match: true })
+    cursor = m.index + m[0].length
+    if (m.index === pattern.lastIndex) pattern.lastIndex++ // évite boucle infinie
+  }
+  if (cursor < label.length) {
+    segments.push({ text: label.slice(cursor), match: false })
+  }
+  return segments.length > 0 ? segments : [{ text: label, match: false }]
+}
+
 /**
  * Barre de recherche principale de l'annuaire :
- * - Input texte avec auto-suggest BAN (debounce 300ms, déclenche dès 3 caractères)
+ * - Input texte avec auto-suggest BAN (debounce 200ms, déclenche dès 3 caractères)
  * - Bouton "Près de chez moi" (Geolocation API avec consentement explicite)
  * - Submit → router.push avec searchParams encodés
+ *
+ * Le panel dropdown reste ouvert tant que l'input a le focus + ≥3 chars,
+ * affiche état loading / résultats / empty state ("Aucune adresse trouvée").
+ * Match utilisateur surligné en gras (case + accents insensibles).
  *
  * Les paramètres `dept`, `cert`, etc. sont préservés via `preservedParams`.
  */
@@ -31,9 +88,15 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
   const [loadingSuggest, setLoadingSuggest] = useState(false)
   const [showSuggest, setShowSuggest] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
+  /** True dès qu'une recherche a abouti (success ou empty) pour distinguer
+   * "pas encore demandé" vs "résultats vides → afficher empty state". */
+  const [hasFetched, setHasFetched] = useState(false)
   const [locating, setLocating] = useState(false)
   const [locError, setLocError] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** Identifiant de la dernière requête en vol — protège contre les
+   * race conditions (réponse lente d'une frappe antérieure). */
+  const lastRequestId = useRef(0)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   // Build searchParams string preserving filters
@@ -60,21 +123,26 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
     [preservedParams],
   )
 
-  // Debounced BAN auto-suggest
+  // Debounced BAN auto-suggest — debounce 200ms + protection race condition.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     const q = value.trim()
-    if (q.length < 3) {
+    if (q.length < MIN_QUERY_LEN) {
       setSuggestions([])
       setLoadingSuggest(false)
+      setHasFetched(false)
       return
     }
     setLoadingSuggest(true)
+    const requestId = ++lastRequestId.current
     debounceRef.current = setTimeout(async () => {
       const feats = await searchBanAddress(q, 6)
+      // Ignorer si une frappe plus récente est arrivée pendant l'await
+      if (requestId !== lastRequestId.current) return
       setSuggestions(feats)
       setLoadingSuggest(false)
-    }, 300)
+      setHasFetched(true)
+    }, BAN_DEBOUNCE_MS)
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
@@ -168,6 +236,24 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
     [activeIndex, handlePickSuggestion, showSuggest, suggestions],
   )
 
+  /** Doit-on rendre le panel ? Conditions : focus + ≥3 chars saisis ET
+   * (loading OU suggestions non vides OU une requête a été faite = on connaît
+   * le résultat même vide → empty state). */
+  const trimmedValue = value.trim()
+  const hasMinChars = trimmedValue.length >= MIN_QUERY_LEN
+  const shouldRenderPanel =
+    showSuggest && hasMinChars && (loadingSuggest || suggestions.length > 0 || hasFetched)
+
+  // Memo highlights pour éviter recalcul à chaque hover (activeIndex change)
+  const highlightedSuggestions = useMemo(
+    () =>
+      suggestions.map((feat) => ({
+        feat,
+        segments: highlightMatch(feat.properties.label, trimmedValue),
+      })),
+    [suggestions, trimmedValue],
+  )
+
   return (
     <div ref={containerRef} className="relative w-full">
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
@@ -191,7 +277,7 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
             className="pl-10 pr-10 h-12 text-[14px]"
             aria-label="Recherche annuaire diagnostiqueurs"
             aria-autocomplete="list"
-            aria-expanded={showSuggest && suggestions.length > 0}
+            aria-expanded={shouldRenderPanel}
             aria-controls={`${inputId}-listbox`}
             autoComplete="off"
           />
@@ -201,6 +287,7 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
               onClick={() => {
                 setValue('')
                 setSuggestions([])
+                setHasFetched(false)
               }}
               className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink transition-colors"
               aria-label="Effacer la recherche"
@@ -233,40 +320,73 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
         </div>
       </form>
 
-      {/* Suggestions BAN */}
-      {showSuggest && (suggestions.length > 0 || loadingSuggest) && (
+      {/* Suggestions BAN — slide-down 150ms à l'apparition.
+       * Pattern combobox ARIA APG (https://www.w3.org/WAI/ARIA/apg/patterns/combobox/) :
+       * listbox custom (pas <select> natif) car l'input doit garder le focus
+       * pendant la navigation au clavier. tabIndex=-1 = focusable programmatique
+       * mais retiré de la tab order — clavier via input + aria-activedescendant. */}
+      {shouldRenderPanel && (
         <div
           id={`${inputId}-listbox`}
+          // biome-ignore lint/a11y/useSemanticElements: combobox custom (input + listbox), pas un <select> natif
+          // biome-ignore lint/a11y/useFocusableInteractive: tabIndex=-1 ci-dessous rend le listbox focusable programmatique
           role="listbox"
-          className="absolute z-30 left-0 right-0 sm:right-[208px] top-[calc(100%+4px)] bg-paper border border-rule rounded-lg shadow-lg overflow-hidden"
+          tabIndex={-1}
+          className="absolute z-30 left-0 right-0 sm:right-[208px] top-[calc(100%+4px)] origin-top bg-paper border border-rule rounded-lg shadow-lg overflow-hidden motion-safe:animate-slide-down"
         >
           {loadingSuggest ? (
             <div className="px-4 py-3 text-[12px] text-ink-faint flex items-center gap-2">
               <Loader2 className="size-3 animate-spin" />
-              Recherche...
+              Recherche d'adresses…
+            </div>
+          ) : suggestions.length === 0 ? (
+            <div className="px-4 py-3 text-[12px] text-ink-faint flex items-center gap-2">
+              <MapPin className="size-3.5 text-ink-faint" aria-hidden />
+              Aucune adresse trouvée. Vérifiez l'orthographe ou tapez un code postal.
             </div>
           ) : (
             <ul className="max-h-72 overflow-y-auto py-1">
-              {suggestions.map((feat, idx) => (
-                <li key={`${feat.properties.label}-${idx}`}>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handlePickSuggestion(feat)}
-                    onMouseEnter={() => setActiveIndex(idx)}
-                    className={`w-full text-left px-4 py-2.5 flex items-start gap-2 text-[13px] transition-colors ${
-                      idx === activeIndex
-                        ? 'bg-cream-deep text-ink'
-                        : 'text-ink-mute hover:bg-cream-deep/60'
-                    }`}
-                    role="option"
-                    aria-selected={idx === activeIndex}
-                  >
-                    <MapPin className="size-3.5 mt-0.5 shrink-0 text-ink-faint" aria-hidden />
-                    <span className="truncate">{feat.properties.label}</span>
-                  </button>
-                </li>
-              ))}
+              {highlightedSuggestions.map(({ feat, segments }, idx) => {
+                const isActive = idx === activeIndex
+                return (
+                  <li key={`${feat.properties.label}-${idx}`}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => handlePickSuggestion(feat)}
+                      onMouseEnter={() => setActiveIndex(idx)}
+                      className={`group w-full text-left px-4 py-2.5 flex items-start gap-2 text-[13px] transition-colors ${
+                        isActive ? 'bg-cream-deep text-ink' : 'text-ink-mute hover:bg-cream-deep/60'
+                      }`}
+                      // biome-ignore lint/a11y/useSemanticElements: <button role=option> is the W3C ARIA APG combobox pattern (not <option>)
+                      role="option"
+                      aria-selected={isActive}
+                    >
+                      <MapPin
+                        className={`size-3.5 mt-0.5 shrink-0 transition-colors ${
+                          isActive
+                            ? 'text-chartreuse-deep'
+                            : 'text-ink-faint group-hover:text-chartreuse-deep'
+                        }`}
+                        aria-hidden
+                      />
+                      <span className="truncate">
+                        {segments.map((seg, i) =>
+                          seg.match ? (
+                            // biome-ignore lint/suspicious/noArrayIndexKey: segments stable per render
+                            <mark key={i} className="bg-transparent text-ink font-semibold">
+                              {seg.text}
+                            </mark>
+                          ) : (
+                            // biome-ignore lint/suspicious/noArrayIndexKey: segments stable per render
+                            <Fragment key={i}>{seg.text}</Fragment>
+                          ),
+                        )}
+                      </span>
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </div>

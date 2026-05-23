@@ -210,6 +210,11 @@ const config: Config = {
           '0%, 60%, 100%': { opacity: '0.3', transform: 'scale(0.85)' },
           '30%': { opacity: '1', transform: 'scale(1)' },
         },
+        /* Annuaire SearchBar (FIX-QQ) — apparition dropdown suggestions BAN */
+        'slide-down': {
+          '0%': { opacity: '0', transform: 'translateY(-4px) scaleY(0.98)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scaleY(1)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 200ms ease-out',
@@ -218,6 +223,7 @@ const config: Config = {
         'progress-stripe': 'progress-stripe 1.2s linear infinite',
         'fade-in-up': 'fade-in-up 220ms ease-out',
         'typing-dot': 'typing-dot 1.2s ease-in-out infinite',
+        'slide-down': 'slide-down 150ms ease-out',
       },
     },
   },
