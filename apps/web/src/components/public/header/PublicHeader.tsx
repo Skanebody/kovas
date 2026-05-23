@@ -6,9 +6,16 @@
  * pages institutionnelles (a-propos, presse, carrieres, partenaires).
  *
  * Brand V5 strict : sage background + navy ink + chartreuse CTA accent.
+ *
+ * Audit FIX-AUDIT-2 (2026-05-23) : ajout du dropdown "Guides" listant
+ * les 9 guides longs SEO (DPE, amiante, plomb, gaz, électricité,
+ * termites, carrez, ERP, audit). Hover-open sur desktop, accordion
+ * sur mobile via Disclosure native <details>.
  */
 
 import { Button } from '@/components/ui/button'
+import { GUIDES_LIST } from '@/lib/guides/registry'
+import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 
 export function PublicHeader() {
@@ -35,6 +42,7 @@ export function PublicHeader() {
           <Link href="/observatoire" className="text-ink-mute hover:text-ink transition-colors">
             Observatoire
           </Link>
+          <GuidesMenu />
           <Link href="/pros" className="text-ink-mute hover:text-ink transition-colors">
             Pour diagnostiqueurs
           </Link>
@@ -49,5 +57,61 @@ export function PublicHeader() {
         </div>
       </div>
     </header>
+  )
+}
+
+/**
+ * Dropdown "Guides" — desktop hover, accessibility-friendly.
+ *
+ * Pattern CSS-only via group-hover + focus-within : pas de JS state,
+ * fonctionne sans hydratation. Au focus clavier, le menu reste ouvert
+ * tant qu'un descendant est focus.
+ */
+function GuidesMenu() {
+  return (
+    <div className="relative group">
+      <Link
+        href="/guide"
+        className="inline-flex items-center gap-1 text-ink-mute hover:text-ink transition-colors focus-visible:outline-none focus-visible:text-ink"
+        aria-haspopup="true"
+      >
+        Guides
+        <ChevronDown
+          className="size-3.5 transition-transform group-hover:rotate-180"
+          aria-hidden
+        />
+      </Link>
+      <div
+        className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 absolute left-1/2 -translate-x-1/2 top-full pt-3 transition-opacity duration-150 z-50"
+        role="menu"
+      >
+        <div className="w-72 rounded-2xl bg-paper shadow-glass-lg border border-rule/40 p-2">
+          <Link
+            href="/guide"
+            role="menuitem"
+            className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-ink hover:bg-background transition-colors"
+          >
+            Tous les guides
+            <span className="block text-xs font-normal text-ink-mute mt-0.5">
+              {GUIDES_LIST.length} guides longs pour propriétaires
+            </span>
+          </Link>
+          <div className="h-px bg-rule/40 my-1.5" />
+          <ul className="grid grid-cols-1 gap-px">
+            {GUIDES_LIST.map((guide) => (
+              <li key={guide.slug}>
+                <Link
+                  href={`/guide/${guide.slug}`}
+                  role="menuitem"
+                  className="block rounded-lg px-3 py-2 text-sm text-ink-mute hover:bg-background hover:text-ink transition-colors"
+                >
+                  Guide {guide.shortTitle}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
   )
 }
