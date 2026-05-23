@@ -1,6 +1,3 @@
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
-import type { Database } from '@kovas/database/types'
 import { buildClaimEmailVerification } from '@/lib/diagnosticians/claim-templates'
 import { maskEmail } from '@/lib/diagnosticians/mask-contact'
 import { checkClaimRateLimit, extractIpFromRequest } from '@/lib/diagnosticians/rate-limit'
@@ -9,6 +6,9 @@ import {
   generateVerificationCode,
 } from '@/lib/diagnosticians/verification-code'
 import { sendEmail } from '@/lib/email/send'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
 /**
  * POST /api/diagnosticians/[id]/claim/send-email-code
@@ -39,12 +39,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!rl.allowed) {
     return NextResponse.json(
       { error: 'Trop de demandes. Réessayez dans une heure.' },
-      { status: 429, headers: rl.retryAfterSec ? { 'Retry-After': String(rl.retryAfterSec) } : undefined },
+      {
+        status: 429,
+        headers: rl.retryAfterSec ? { 'Retry-After': String(rl.retryAfterSec) } : undefined,
+      },
     )
   }
 
   const admin = createAdminClient<Database>(
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
@@ -52,9 +57,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const adminAny = admin as any
 
   // Charge le diag — vérifie qu'il existe + est unclaimed
+  // FIX-FF (mai 2026) : colonnes consolidées (full_name/email au lieu de display_name/official_email)
   const { data: diag, error: diagErr } = await adminAny
     .from('diagnosticians')
-    .select('id, display_name, official_email, claim_status')
+    .select('id, full_name, first_name, last_name, email, claim_status')
     .eq('id', diagnosticianId)
     .maybeSingle()
 
@@ -62,14 +68,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: 'Fiche introuvable' }, { status: 404 })
   }
   if (diag.claim_status !== 'unclaimed') {
-    return NextResponse.json(
-      { error: 'Cette fiche a déjà été réclamée.' },
-      { status: 409 },
-    )
+    return NextResponse.json({ error: 'Cette fiche a déjà été réclamée.' }, { status: 409 })
   }
-  if (!diag.official_email) {
+  if (!diag.email) {
     return NextResponse.json(
-      { error: 'Pas d\'email officiel disponible pour cette fiche.' },
+      { error: "Pas d'email officiel disponible pour cette fiche." },
       { status: 422 },
     )
   }
@@ -87,7 +90,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       status: 'code_sent',
       verification_code: code,
       verification_code_expires_at: expiresAt.toISOString(),
-      contact_email: diag.official_email,
+      contact_email: diag.email,
       ip_address: ip,
       user_agent: userAgent,
     })
@@ -95,22 +98,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     .single()
 
   if (insertErr || !claim) {
-    return NextResponse.json(
-      { error: 'Impossible de créer la demande.' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Impossible de créer la demande.' }, { status: 500 })
   }
 
   // Envoi email
   const claimUrl = `${SITE_URL}/reclamer-ma-fiche/${diagnosticianId}?claim=${claim.id}`
+  const diagDisplayName =
+    diag.full_name?.trim() ||
+    `${(diag.first_name ?? '').trim()} ${(diag.last_name ?? '').trim()}`.trim() ||
+    'Diagnostiqueur'
   const payload = buildClaimEmailVerification({
     code,
-    diagnosticianName: diag.display_name ?? 'Diagnostiqueur',
+    diagnosticianName: diagDisplayName,
     claimUrl,
   })
 
   const emailResult = await sendEmail({
-    to: diag.official_email,
+    to: diag.email,
     subject: payload.subject,
     text: payload.text,
     html: payload.html,
@@ -120,7 +124,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!emailResult.success && !emailResult.stub) {
     // On garde la claim_requests pour audit mais on signale l'échec
     return NextResponse.json(
-      { error: 'L\'envoi de l\'email a échoué. Réessayez plus tard.' },
+      { error: "L'envoi de l'email a échoué. Réessayez plus tard." },
       { status: 502 },
     )
   }
@@ -128,7 +132,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   return NextResponse.json({
     ok: true,
     claimId: claim.id,
-    maskedEmail: maskEmail(diag.official_email),
+    maskedEmail: maskEmail(diag.email),
     expiresAt: expiresAt.toISOString(),
   })
 }

@@ -1,9 +1,9 @@
+import { checkClaimRateLimit, extractIpFromRequest } from '@/lib/diagnosticians/rate-limit'
+import { validateSiret } from '@/lib/validation/siret'
+import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import type { Database } from '@kovas/database/types'
-import { checkClaimRateLimit, extractIpFromRequest } from '@/lib/diagnosticians/rate-limit'
-import { validateSiret } from '@/lib/validation/siret'
 
 /**
  * POST /api/diagnosticians/[id]/claim/verify-siret
@@ -52,12 +52,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!rl.allowed) {
     return NextResponse.json(
       { error: 'Trop de demandes. Réessayez dans une heure.' },
-      { status: 429, headers: rl.retryAfterSec ? { 'Retry-After': String(rl.retryAfterSec) } : undefined },
+      {
+        status: 429,
+        headers: rl.retryAfterSec ? { 'Retry-After': String(rl.retryAfterSec) } : undefined,
+      },
     )
   }
 
   const admin = createAdminClient<Database>(
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )

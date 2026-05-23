@@ -1,11 +1,11 @@
+import {
+  MAX_VERIFICATION_ATTEMPTS,
+  checkVerificationCode,
+} from '@/lib/diagnosticians/verification-code'
+import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import type { Database } from '@kovas/database/types'
-import {
-  checkVerificationCode,
-  MAX_VERIFICATION_ATTEMPTS,
-} from '@/lib/diagnosticians/verification-code'
 
 /**
  * POST /api/diagnosticians/[id]/claim/verify-code
@@ -40,7 +40,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const admin = createAdminClient<Database>(
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
@@ -94,10 +96,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!result.valid) {
     // Si > 5 tentatives → on expire la claim (force nouveau code)
     if (claim.verification_attempts + 1 >= MAX_VERIFICATION_ATTEMPTS) {
-      await adminAny
-        .from('claim_requests')
-        .update({ status: 'expired' })
-        .eq('id', claim.id)
+      await adminAny.from('claim_requests').update({ status: 'expired' }).eq('id', claim.id)
 
       return NextResponse.json(
         { error: 'Trop de tentatives. Demandez un nouveau code.' },
@@ -106,9 +105,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     const message =
-      result.reason === 'expired'
-        ? 'Code expiré. Demandez un nouveau code.'
-        : 'Code invalide.'
+      result.reason === 'expired' ? 'Code expiré. Demandez un nouveau code.' : 'Code invalide.'
     return NextResponse.json(
       {
         error: message,

@@ -1,6 +1,3 @@
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
-import type { Database } from '@kovas/database/types'
 import { buildClaimSmsVerification } from '@/lib/diagnosticians/claim-templates'
 import { isFrenchMobile, maskPhone } from '@/lib/diagnosticians/mask-contact'
 import { checkClaimRateLimit, extractIpFromRequest } from '@/lib/diagnosticians/rate-limit'
@@ -9,6 +6,9 @@ import {
   computeCodeExpiresAt,
   generateVerificationCode,
 } from '@/lib/diagnosticians/verification-code'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
 /**
  * POST /api/diagnosticians/[id]/claim/send-sms-code
@@ -36,21 +36,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!rl.allowed) {
     return NextResponse.json(
       { error: 'Trop de demandes. Réessayez dans une heure.' },
-      { status: 429, headers: rl.retryAfterSec ? { 'Retry-After': String(rl.retryAfterSec) } : undefined },
+      {
+        status: 429,
+        headers: rl.retryAfterSec ? { 'Retry-After': String(rl.retryAfterSec) } : undefined,
+      },
     )
   }
 
   const admin = createAdminClient<Database>(
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
   // biome-ignore lint/suspicious/noExplicitAny: types regen post-merge A1+A4
   const adminAny = admin as any
 
+  // FIX-FF (mai 2026) : colonnes consolidées (full_name/phone au lieu de display_name/official_phone)
   const { data: diag, error: diagErr } = await adminAny
     .from('diagnosticians')
-    .select('id, display_name, official_phone, claim_status')
+    .select('id, full_name, first_name, last_name, phone, claim_status')
     .eq('id', diagnosticianId)
     .maybeSingle()
 
@@ -60,7 +66,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (diag.claim_status !== 'unclaimed') {
     return NextResponse.json({ error: 'Cette fiche a déjà été réclamée.' }, { status: 409 })
   }
-  if (!diag.official_phone || !isFrenchMobile(diag.official_phone)) {
+  if (!diag.phone || !isFrenchMobile(diag.phone)) {
     return NextResponse.json(
       { error: 'Pas de mobile FR disponible pour cette fiche.' },
       { status: 422 },
@@ -78,7 +84,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       status: 'code_sent',
       verification_code: code,
       verification_code_expires_at: expiresAt.toISOString(),
-      contact_phone: diag.official_phone,
+      contact_phone: diag.phone,
       ip_address: ip,
       user_agent: userAgent,
     })
@@ -91,14 +97,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const content = buildClaimSmsVerification(code)
   const smsResult = await sendSms({
-    recipient: diag.official_phone,
+    recipient: diag.phone,
     content,
     category: 'claim_verification',
   })
 
   if (!smsResult.success && !smsResult.stub) {
     return NextResponse.json(
-      { error: 'L\'envoi du SMS a échoué. Réessayez plus tard.' },
+      { error: "L'envoi du SMS a échoué. Réessayez plus tard." },
       { status: 502 },
     )
   }
@@ -106,7 +112,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   return NextResponse.json({
     ok: true,
     claimId: claim.id,
-    maskedPhone: maskPhone(diag.official_phone),
+    maskedPhone: maskPhone(diag.phone),
     expiresAt: expiresAt.toISOString(),
   })
 }

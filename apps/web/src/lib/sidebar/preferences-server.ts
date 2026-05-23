@@ -111,7 +111,9 @@ export async function loadSidebarPreferences(
   client?: SupabaseClient,
 ): Promise<SidebarPreferences> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
+  // biome-ignore lint/suspicious/noExplicitAny: table sidebar_preferences non incluse dans types Database (cf. tâche DEPLOY-4 pending)
+  const supabaseAny = supabase as any
+  const { data, error } = await supabaseAny
     .from('sidebar_preferences')
     .select('main_items, more_items, profile_preset, notification_style, sidebar_collapsed')
     .eq('user_id', userId)
@@ -121,8 +123,16 @@ export async function loadSidebarPreferences(
     return buildDefaultPreferences()
   }
 
-  const mainItems = parseItemsJsonb(data.main_items)
-  const moreItems = parseItemsJsonb(data.more_items)
+  const row = data as {
+    main_items: unknown
+    more_items: unknown
+    profile_preset: string | null
+    notification_style: string | null
+    sidebar_collapsed: boolean | null
+  }
+
+  const mainItems = parseItemsJsonb(row.main_items)
+  const moreItems = parseItemsJsonb(row.more_items)
 
   // Si DB renvoie un set vide (jamais customisé), on retombe sur défaut
   if (mainItems.length === 0 && moreItems.length === 0) {
@@ -130,9 +140,9 @@ export async function loadSidebarPreferences(
   }
 
   const notificationStyle: SidebarNotificationStyle =
-    data.notification_style === 'dot' ? 'dot' : 'count'
+    row.notification_style === 'dot' ? 'dot' : 'count'
 
-  const presetCandidate = data.profile_preset
+  const presetCandidate = row.profile_preset
   const profilePreset: ProfilePresetCode | null =
     typeof presetCandidate === 'string' && KNOWN_PRESETS.has(presetCandidate as ProfilePresetCode)
       ? (presetCandidate as ProfilePresetCode)
@@ -143,7 +153,7 @@ export async function loadSidebarPreferences(
     moreItems,
     profilePreset,
     notificationStyle,
-    sidebarCollapsed: Boolean(data.sidebar_collapsed),
+    sidebarCollapsed: Boolean(row.sidebar_collapsed),
   })
 }
 
@@ -157,7 +167,9 @@ export async function saveSidebarPreferences(
   client?: SupabaseClient,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const supabase = client ?? (await createClient())
-  const { error } = await supabase.from('sidebar_preferences').upsert(
+  // biome-ignore lint/suspicious/noExplicitAny: table sidebar_preferences non incluse dans types Database (cf. tâche DEPLOY-4 pending)
+  const supabaseAny = supabase as any
+  const { error } = await supabaseAny.from('sidebar_preferences').upsert(
     {
       user_id: userId,
       main_items: prefs.mainItems,

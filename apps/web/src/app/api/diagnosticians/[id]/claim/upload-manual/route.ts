@@ -1,9 +1,9 @@
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
-import type { Database } from '@kovas/database/types'
 import { buildClaimAdminNotification } from '@/lib/diagnosticians/claim-templates'
 import { checkClaimRateLimit, extractIpFromRequest } from '@/lib/diagnosticians/rate-limit'
 import { sendEmail } from '@/lib/email/send'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
 /**
  * POST /api/diagnosticians/[id]/claim/upload-manual
@@ -47,7 +47,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!rl.allowed) {
     return NextResponse.json(
       { error: 'Trop de demandes. Réessayez dans une heure.' },
-      { status: 429, headers: rl.retryAfterSec ? { 'Retry-After': String(rl.retryAfterSec) } : undefined },
+      {
+        status: 429,
+        headers: rl.retryAfterSec ? { 'Retry-After': String(rl.retryAfterSec) } : undefined,
+      },
     )
   }
 
@@ -89,7 +92,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const admin = createAdminClient<Database>(
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    // biome-ignore lint/style/noNonNullAssertion: env vars validees au boot Next.js
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
@@ -97,9 +102,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const adminAny = admin as any
 
   // Charge le diag
+  // FIX-FF (mai 2026) : colonnes consolidées (full_name au lieu de display_name)
   const { data: diag, error: diagErr } = await adminAny
     .from('diagnosticians')
-    .select('id, display_name, claim_status')
+    .select('id, full_name, first_name, last_name, claim_status')
     .eq('id', diagnosticianId)
     .maybeSingle()
 
@@ -148,7 +154,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await adminAny.from('claim_requests').delete().eq('id', claim.id)
     if (idPath) await admin.storage.from('claim-id-uploads').remove([idPath])
     if (certPath) await admin.storage.from('claim-id-uploads').remove([certPath])
-    return NextResponse.json({ error: 'Échec d\'upload Storage.' }, { status: 500 })
+    return NextResponse.json({ error: "Échec d'upload Storage." }, { status: 500 })
   }
 
   // Update claim avec les paths
@@ -166,8 +172,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   // Notification admin
+  const diagDisplayName =
+    diag.full_name?.trim() ||
+    `${(diag.first_name ?? '').trim()} ${(diag.last_name ?? '').trim()}`.trim() ||
+    'Diagnostiqueur'
   const notif = buildClaimAdminNotification({
-    diagnosticianName: diag.display_name ?? 'Diagnostiqueur',
+    diagnosticianName: diagDisplayName,
     claimId: claim.id,
     contactEmail,
     contactPhone,
@@ -199,13 +209,11 @@ async function uploadFile(opts: {
   const path = `${claimId}/${prefix}-${Date.now()}.${safeExt}`
   const buffer = Buffer.from(await file.arrayBuffer())
 
-  const { error } = await admin.storage
-    .from('claim-id-uploads')
-    .upload(path, buffer, {
-      contentType: file.type,
-      cacheControl: '3600',
-      upsert: false,
-    })
+  const { error } = await admin.storage.from('claim-id-uploads').upload(path, buffer, {
+    contentType: file.type,
+    cacheControl: '3600',
+    upsert: false,
+  })
 
   if (error) {
     console.error(`claim upload ${prefix} failed:`, error.message)

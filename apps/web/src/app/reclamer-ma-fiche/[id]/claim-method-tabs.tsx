@@ -1,19 +1,30 @@
 'use client'
 
-import { CheckCircle2, FileText, Mail, MessageSquare, ShieldCheck } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CheckCircle2, FileText, Mail, MessageSquare, ShieldCheck } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 /**
- * Client component : 4 onglets de vérification (Email / SMS / SIRET / Manuel).
- * On affiche uniquement les onglets disponibles selon les données du diag.
+ * Composant claim — FIX-FF refonte (mai 2026).
  *
- * UX choice (cf. spec) : tabs visibles d'un coup (pas de drawer ni de stepper)
- * pour que l'utilisateur voit immédiatement les options qu'il a et choisisse.
+ * 3 méthodes principales affichées en **3 colonnes côte à côte** (responsive
+ * 1 colonne sur mobile, 3 sur desktop) :
+ *
+ *   1. Email pro (badge Recommandé) — magic code 6 chiffres envoyé à l'email
+ *      officiel masqué stocké sur la fiche.
+ *   2. SIRET     (badge Automatique) — match exact + audit, valide immédiat.
+ *   3. SMS OTP   (badge Manuel)      — code 6 chiffres envoyé au mobile officiel.
+ *
+ * 4e méthode "Justificatif manuel" disponible en **lien escape discret en bas**
+ * pour les cas où aucune des 3 méthodes principales ne fonctionne (CNI +
+ * attestation cert, review humaine sous 24-48h).
+ *
+ * Quand une méthode passe en mode "code_sent" (Email/SMS) ou validée (SIRET),
+ * elle prend tout l'écran avec un panel détaillé.
  */
 
 type Method = 'email' | 'sms' | 'siret' | 'manual'
@@ -34,16 +45,7 @@ export function ClaimMethodTabs({
   maskedSiret,
   companyName,
 }: Props) {
-  // Auto-pick le 1er onglet dispo
-  const initialMethod: Method = maskedEmail
-    ? 'email'
-    : maskedPhone
-      ? 'sms'
-      : maskedSiret || companyName
-        ? 'siret'
-        : 'manual'
-
-  const [method, setMethod] = useState<Method>(initialMethod)
+  const [selectedMethod, setSelectedMethod] = useState<Method | null>(null)
   const [step, setStep] = useState<Step>('choose')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -52,17 +54,11 @@ export function ClaimMethodTabs({
 
   const apiBase = `/api/diagnosticians/${diagnosticianId}/claim`
 
-  const availableTabs: { key: Method; label: string; icon: typeof Mail; available: boolean }[] = [
-    { key: 'email', label: 'Email', icon: Mail, available: !!maskedEmail },
-    { key: 'sms', label: 'SMS', icon: MessageSquare, available: !!maskedPhone },
-    { key: 'siret', label: 'SIRET', icon: ShieldCheck, available: !!(maskedSiret || companyName) },
-    { key: 'manual', label: 'Justificatif', icon: FileText, available: true },
-  ]
-
-  function switchTab(newMethod: Method) {
-    setMethod(newMethod)
+  function reset() {
+    setSelectedMethod(null)
     setStep('choose')
     setError(null)
+    setClaimId(null)
   }
 
   // ─── Envoi code email ────────────────────────────────────────────
@@ -77,7 +73,7 @@ export function ClaimMethodTabs({
       })
       const data = (await res.json()) as { ok?: boolean; claimId?: string; error?: string }
       if (!res.ok || !data.ok || !data.claimId) {
-        setError(data.error ?? 'Échec de l\'envoi du code.')
+        setError(data.error ?? "Échec de l'envoi du code.")
         return
       }
       setClaimId(data.claimId)
@@ -101,7 +97,7 @@ export function ClaimMethodTabs({
       })
       const data = (await res.json()) as { ok?: boolean; claimId?: string; error?: string }
       if (!res.ok || !data.ok || !data.claimId) {
-        setError(data.error ?? 'Échec de l\'envoi du SMS.')
+        setError(data.error ?? "Échec de l'envoi du SMS.")
         return
       }
       setClaimId(data.claimId)
@@ -115,7 +111,7 @@ export function ClaimMethodTabs({
 
   // ─── Vérification code ───────────────────────────────────────────
   async function handleVerifyCode(code: string) {
-    if (!claimId) return
+    if (!claimId || !selectedMethod) return
     setLoading(true)
     setError(null)
     try {
@@ -124,7 +120,7 @@ export function ClaimMethodTabs({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code,
-          method: method === 'email' ? 'email_official' : 'sms_official',
+          method: selectedMethod === 'email' ? 'email_official' : 'sms_official',
           claimId,
         }),
       })
@@ -191,7 +187,7 @@ export function ClaimMethodTabs({
       })
       const data = (await res.json()) as { ok?: boolean; error?: string }
       if (!res.ok || !data.ok) {
-        setError(data.error ?? 'Échec de l\'envoi.')
+        setError(data.error ?? "Échec de l'envoi.")
         return
       }
       setStep('manual_submitted')
@@ -202,102 +198,208 @@ export function ClaimMethodTabs({
     }
   }
 
+  // ─── Vues "succès" overlay ──────────────────────────────────────
+  if (step === 'verified') {
+    return (
+      <Card variant="flat" padding="lg" className="text-center">
+        <CheckCircle2 className="size-12 text-ink mx-auto mb-3" aria-hidden />
+        <h3 className="text-[19px] font-semibold text-ink mb-1">Vérification réussie</h3>
+        <p className="text-[13px] text-ink-mute">Redirection vers la création de compte&hellip;</p>
+      </Card>
+    )
+  }
+
+  if (step === 'manual_submitted') {
+    return (
+      <Card variant="flat" padding="lg" className="text-center">
+        <CheckCircle2 className="size-12 text-ink mx-auto mb-3" aria-hidden />
+        <h3 className="text-[19px] font-semibold text-ink mb-1">Demande envoyée</h3>
+        <p className="text-[13px] text-ink-mute max-w-md mx-auto">
+          Nous vérifions vos justificatifs. Vous recevrez une réponse sous 24 à 48 heures à
+          l&apos;adresse email indiquée.
+        </p>
+      </Card>
+    )
+  }
+
+  // ─── Vue détail méthode active ──────────────────────────────────
+  if (selectedMethod) {
+    return (
+      <Card variant="flat" padding="lg">
+        <button
+          type="button"
+          onClick={reset}
+          className="text-[11px] font-mono uppercase tracking-wider text-ink-mute hover:text-ink mb-4 underline underline-offset-4"
+        >
+          ← Choisir une autre méthode
+        </button>
+
+        {selectedMethod === 'email' && (
+          <EmailPanel
+            maskedEmail={maskedEmail}
+            step={step}
+            loading={loading}
+            onSendCode={handleSendEmailCode}
+            onVerifyCode={handleVerifyCode}
+          />
+        )}
+        {selectedMethod === 'sms' && (
+          <SmsPanel
+            maskedPhone={maskedPhone}
+            step={step}
+            loading={loading}
+            onSendCode={handleSendSmsCode}
+            onVerifyCode={handleVerifyCode}
+          />
+        )}
+        {selectedMethod === 'siret' && (
+          <SiretPanel
+            maskedSiret={maskedSiret}
+            companyName={companyName}
+            loading={loading}
+            onVerifySiret={handleVerifySiret}
+          />
+        )}
+        {selectedMethod === 'manual' && (
+          <ManualPanel loading={loading} onSubmit={handleUploadManual} />
+        )}
+
+        {error && (
+          <div className="mt-4 p-3 rounded-md bg-danger/10 border border-danger/30 text-[12px] text-danger">
+            {error}
+          </div>
+        )}
+      </Card>
+    )
+  }
+
+  // ─── Vue par défaut : 3 colonnes méthodes claim ─────────────────
   return (
-    <Card variant="flat" padding="default">
-      {/* Tab bar */}
-      <div className="flex flex-wrap gap-1 mb-6 border-b border-rule pb-3">
-        {availableTabs.map((tab) => {
-          const Icon = tab.icon
-          const isActive = method === tab.key
-          const disabled = !tab.available
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              disabled={disabled}
-              onClick={() => !disabled && switchTab(tab.key)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-[12px] font-medium transition-colors ${
-                isActive
-                  ? 'bg-navy text-paper'
-                  : disabled
-                    ? 'text-ink-ghost cursor-not-allowed'
-                    : 'text-ink-mute hover:text-ink hover:bg-ink/5'
-              }`}
-            >
-              <Icon className="size-3.5" aria-hidden />
-              {tab.label}
-            </button>
-          )
-        })}
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MethodColumn
+          icon={Mail}
+          title="Email professionnel"
+          description="Recevez un code à 6 chiffres sur l'email officiel enregistré pour cette fiche."
+          badge="Recommandé"
+          badgeTone="info"
+          available={!!maskedEmail}
+          unavailableHint="Aucun email officiel"
+          onSelect={() => setSelectedMethod('email')}
+        />
+        <MethodColumn
+          icon={ShieldCheck}
+          title="Numéro SIRET"
+          description="Saisissez le SIRET du cabinet. Vérification immédiate par match exact."
+          badge="Automatique"
+          badgeTone="success"
+          available={!!maskedSiret}
+          unavailableHint="Pas de SIRET enregistré"
+          onSelect={() => setSelectedMethod('siret')}
+        />
+        <MethodColumn
+          icon={MessageSquare}
+          title="OTP par SMS"
+          description="Code à 6 chiffres envoyé au mobile officiel enregistré pour cette fiche."
+          badge="Manuel"
+          badgeTone="neutral"
+          available={!!maskedPhone}
+          unavailableHint="Pas de mobile FR"
+          onSelect={() => setSelectedMethod('sms')}
+        />
       </div>
 
-      {/* Status verified — overlay sur tous les onglets */}
-      {step === 'verified' && (
-        <div className="text-center py-8">
-          <CheckCircle2 className="size-12 text-success mx-auto mb-3" aria-hidden />
-          <h3 className="text-[17px] font-semibold text-ink mb-1">Vérification réussie</h3>
-          <p className="text-[13px] text-ink-mute">Redirection vers la création de compte&hellip;</p>
+      {/* Lien escape : justificatif manuel */}
+      <Card variant="flat" padding="default">
+        <div className="flex items-start gap-4">
+          <FileText className="size-5 text-ink-mute shrink-0 mt-0.5" aria-hidden />
+          <div className="flex-1">
+            <h3 className="text-[15px] font-semibold text-ink mb-1">
+              Aucune de ces méthodes ne fonctionne&nbsp;?
+            </h3>
+            <p className="text-[13px] text-ink-mute mb-3 leading-relaxed">
+              Si vos coordonnées officielles sont obsolètes (changement d&apos;email, de cabinet, de
+              téléphone), transmettez votre pièce d&apos;identité et votre attestation de
+              certification. Vérification manuelle sous 24 à 48 heures.
+            </p>
+            <button
+              type="button"
+              onClick={() => setSelectedMethod('manual')}
+              className="text-[13px] underline underline-offset-4 text-ink hover:text-ink-mute font-medium"
+            >
+              Soumettre un justificatif manuel
+            </button>
+          </div>
         </div>
-      )}
-
-      {step === 'manual_submitted' && (
-        <div className="text-center py-8">
-          <CheckCircle2 className="size-12 text-success mx-auto mb-3" aria-hidden />
-          <h3 className="text-[17px] font-semibold text-ink mb-1">Demande envoyée</h3>
-          <p className="text-[13px] text-ink-mute max-w-md mx-auto">
-            Nous vérifions vos justificatifs. Vous recevrez une réponse sous 24 à 48 heures
-            à l&apos;adresse email indiquée.
-          </p>
-        </div>
-      )}
-
-      {/* Tab content : choose ou code_sent */}
-      {step !== 'verified' && step !== 'manual_submitted' && (
-        <>
-          {method === 'email' && (
-            <EmailPanel
-              maskedEmail={maskedEmail}
-              step={step}
-              loading={loading}
-              onSendCode={handleSendEmailCode}
-              onVerifyCode={handleVerifyCode}
-            />
-          )}
-          {method === 'sms' && (
-            <SmsPanel
-              maskedPhone={maskedPhone}
-              step={step}
-              loading={loading}
-              onSendCode={handleSendSmsCode}
-              onVerifyCode={handleVerifyCode}
-            />
-          )}
-          {method === 'siret' && (
-            <SiretPanel
-              maskedSiret={maskedSiret}
-              companyName={companyName}
-              loading={loading}
-              onVerifySiret={handleVerifySiret}
-            />
-          )}
-          {method === 'manual' && (
-            <ManualPanel loading={loading} onSubmit={handleUploadManual} />
-          )}
-        </>
-      )}
+      </Card>
 
       {error && (
-        <div className="mt-4 p-3 rounded-md bg-danger/10 border border-danger/30 text-[12px] text-danger">
+        <div className="p-3 rounded-md bg-danger/10 border border-danger/30 text-[12px] text-danger">
           {error}
         </div>
       )}
-    </Card>
+    </div>
   )
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Panels
+// Sub-components
 // ────────────────────────────────────────────────────────────────────
+
+interface MethodColumnProps {
+  icon: typeof Mail
+  title: string
+  description: string
+  badge: string
+  badgeTone: 'info' | 'success' | 'neutral'
+  available: boolean
+  unavailableHint: string
+  onSelect: () => void
+}
+
+function MethodColumn({
+  icon: Icon,
+  title,
+  description,
+  badge,
+  badgeTone,
+  available,
+  unavailableHint,
+  onSelect,
+}: MethodColumnProps) {
+  const badgeClasses =
+    badgeTone === 'info'
+      ? 'bg-pastel-sky text-ink'
+      : badgeTone === 'success'
+        ? 'bg-pastel-lime text-ink'
+        : 'bg-rule/40 text-ink-mute'
+
+  return (
+    <Card
+      variant="flat"
+      padding="default"
+      className={`flex flex-col gap-3 transition-all ${available ? 'hover:shadow-glass-lg cursor-pointer' : 'opacity-60'}`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <Icon className="size-5 text-ink" aria-hidden />
+        <span
+          className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-pill ${badgeClasses}`}
+        >
+          {badge}
+        </span>
+      </div>
+      <h3 className="text-[15px] font-semibold text-ink leading-snug">{title}</h3>
+      <p className="text-[12px] text-ink-mute leading-relaxed flex-1">{description}</p>
+      {available ? (
+        <Button type="button" size="sm" onClick={onSelect} className="w-full">
+          Choisir cette méthode
+        </Button>
+      ) : (
+        <p className="text-[11px] text-ink-faint italic">{unavailableHint}</p>
+      )}
+    </Card>
+  )
+}
 
 function EmailPanel(props: {
   maskedEmail: string | null
@@ -319,6 +421,7 @@ function EmailPanel(props: {
   if (props.step === 'code_sent') {
     return (
       <div className="space-y-4">
+        <h3 className="text-[17px] font-semibold text-ink">Vérification email</h3>
         <p className="text-[14px] text-ink">
           Un code à 6 chiffres a été envoyé à <strong>{props.maskedEmail}</strong>.
         </p>
@@ -359,9 +462,10 @@ function EmailPanel(props: {
 
   return (
     <div className="space-y-4">
+      <h3 className="text-[17px] font-semibold text-ink">Vérification par email professionnel</h3>
       <p className="text-[14px] text-ink">
-        Nous allons envoyer un code à 6 chiffres à l&apos;adresse email enregistrée
-        sur votre fiche professionnelle&nbsp;:
+        Nous allons envoyer un code à 6 chiffres à l&apos;adresse email enregistrée sur votre fiche
+        professionnelle&nbsp;:
       </p>
       <p className="text-[15px] font-mono text-ink bg-cream-deep rounded-md px-3 py-2 inline-block">
         {props.maskedEmail}
@@ -372,8 +476,8 @@ function EmailPanel(props: {
         </Button>
       </div>
       <p className="text-[12px] text-ink-mute">
-        Vous ne reconnaissez pas cet email&nbsp;? Utilisez la méthode <em>SIRET</em> ou{' '}
-        <em>Justificatif</em>.
+        Vous ne reconnaissez pas cet email&nbsp;? Choisissez la méthode <em>SIRET</em> ou{' '}
+        <em>Justificatif manuel</em>.
       </p>
     </div>
   )
@@ -399,6 +503,7 @@ function SmsPanel(props: {
   if (props.step === 'code_sent') {
     return (
       <div className="space-y-4">
+        <h3 className="text-[17px] font-semibold text-ink">Vérification SMS</h3>
         <p className="text-[14px] text-ink">
           Un code à 6 chiffres a été envoyé par SMS au <strong>{props.maskedPhone}</strong>.
         </p>
@@ -439,9 +544,10 @@ function SmsPanel(props: {
 
   return (
     <div className="space-y-4">
+      <h3 className="text-[17px] font-semibold text-ink">Vérification par SMS</h3>
       <p className="text-[14px] text-ink">
-        Nous allons envoyer un code à 6 chiffres par SMS au numéro mobile enregistré
-        sur votre fiche&nbsp;:
+        Nous allons envoyer un code à 6 chiffres par SMS au numéro mobile enregistré sur votre
+        fiche&nbsp;:
       </p>
       <p className="text-[15px] font-mono text-ink bg-cream-deep rounded-md px-3 py-2 inline-block">
         {props.maskedPhone}
@@ -465,11 +571,13 @@ function SiretPanel(props: {
 
   return (
     <div className="space-y-4">
+      <h3 className="text-[17px] font-semibold text-ink">Vérification par SIRET</h3>
       <p className="text-[14px] text-ink">
         Saisissez le SIRET de votre cabinet pour confirmer votre identité.
         {props.companyName && (
           <>
-            {' '}Cabinet enregistré&nbsp;: <strong>{props.companyName}</strong>.
+            {' '}
+            Cabinet enregistré&nbsp;: <strong>{props.companyName}</strong>.
           </>
         )}
       </p>
@@ -514,9 +622,10 @@ function ManualPanel(props: {
       }}
       className="space-y-4"
     >
+      <h3 className="text-[17px] font-semibold text-ink">Justificatif manuel</h3>
       <p className="text-[14px] text-ink">
-        Si aucune autre méthode ne fonctionne, transmettez votre pièce d&apos;identité
-        et votre attestation de certification. Nous vérifions manuellement sous 24 à 48 heures.
+        Si aucune autre méthode ne fonctionne, transmettez votre pièce d&apos;identité et votre
+        attestation de certification. Nous vérifions manuellement sous 24 à 48 heures.
       </p>
 
       <div>
