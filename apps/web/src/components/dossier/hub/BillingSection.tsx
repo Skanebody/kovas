@@ -1,35 +1,62 @@
 import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Euro, FileText } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Euro, FileText, Plus } from 'lucide-react'
+import Link from 'next/link'
 
 export interface BillingItem {
   id: string
   kind: 'quote' | 'invoice' | 'payment'
   reference: string
   amountCents: number
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+  status:
+    | 'draft'
+    | 'sent'
+    | 'accepted'
+    | 'refused'
+    | 'expired'
+    | 'paid'
+    | 'overdue'
+    | 'partial'
+    | 'issued'
+    | 'cancelled'
   date: string
 }
 
 interface BillingSectionProps {
   items: ReadonlyArray<BillingItem>
+  dossierId: string
+  clientId: string | null
+  propertyId: string | null
 }
 
-const STATUS_VARIANT: Record<BillingItem['status'], 'muted' | 'blue' | 'green' | 'red' | 'yellow'> = {
+const STATUS_VARIANT: Record<
+  BillingItem['status'],
+  'muted' | 'blue' | 'green' | 'red' | 'yellow' | 'orange'
+> = {
   draft: 'muted',
   sent: 'blue',
+  accepted: 'green',
+  refused: 'red',
+  expired: 'muted',
   paid: 'green',
   overdue: 'red',
+  partial: 'yellow',
+  issued: 'blue',
   cancelled: 'muted',
 }
 
 const STATUS_LABEL: Record<BillingItem['status'], string> = {
   draft: 'Brouillon',
   sent: 'Envoyé',
-  paid: 'Payé',
+  accepted: 'Accepté',
+  refused: 'Refusé',
+  expired: 'Expiré',
+  paid: 'Payée',
   overdue: 'En retard',
-  cancelled: 'Annulé',
+  partial: 'Partielle',
+  issued: 'Émise',
+  cancelled: 'Annulée',
 }
 
 function eur(cents: number): string {
@@ -37,73 +64,129 @@ function eur(cents: number): string {
 }
 
 /**
- * Section 7 — Facturation + paiement.
- * Devis, factures, paiements rattachés au dossier.
+ * Section 7 — Documents commerciaux (devis, factures) rattachés au dossier.
+ *
+ * Chantier A (FIX-KK §A) : permet d'afficher les devis/factures liés via
+ * `quotes.dossier_id` / `invoices.dossier_id` + boutons de création pré-remplie.
  */
-export function BillingSection({ items }: BillingSectionProps) {
+export function BillingSection({ items, dossierId, clientId, propertyId }: BillingSectionProps) {
   const quotes = items.filter((i) => i.kind === 'quote')
   const invoices = items.filter((i) => i.kind === 'invoice')
-  const payments = items.filter((i) => i.kind === 'payment')
 
-  const totalInvoiced = invoices.reduce(
+  const totalInvoicedCents = invoices.reduce(
     (acc, i) => (i.status !== 'cancelled' ? acc + i.amountCents : acc),
     0,
   )
-  const totalPaid = payments.reduce((acc, i) => acc + i.amountCents, 0)
-  const outstanding = totalInvoiced - totalPaid
+  const totalPaidCents = invoices.reduce(
+    (acc, i) => (i.status === 'paid' ? acc + i.amountCents : acc),
+    0,
+  )
+  const outstanding = totalInvoicedCents - totalPaidCents
+
+  // Query string pour pré-remplir les wizards
+  const qs = new URLSearchParams()
+  qs.set('dossierId', dossierId)
+  if (clientId) qs.set('clientId', clientId)
+  if (propertyId) qs.set('propertyId', propertyId)
+  const newQuoteHref = `/dashboard/devis/nouveau?${qs.toString()}`
+  const newInvoiceHref = `/dashboard/factures/nouveau?${qs.toString()}`
 
   return (
     <Card variant="flat" padding="default" id="billing" className="space-y-4">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[15px] font-semibold text-ink">Facturation & paiement</h2>
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-faint">Section 07</p>
+        <h2 className="text-[15px] font-semibold text-ink">Documents commerciaux</h2>
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-faint">
+          Section 07
+        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <Stat label="Facturé" value={eur(totalInvoiced)} />
-        <Stat label="Payé" value={eur(totalPaid)} />
+        <Stat label="Facturé" value={eur(totalInvoicedCents)} />
+        <Stat label="Encaissé" value={eur(totalPaidCents)} />
         <Stat label="Solde" value={eur(outstanding)} highlight={outstanding > 0} />
       </div>
 
-      {items.length > 0 ? (
-        <ul className="divide-y divide-rule/60 rounded-md border border-rule/60">
-          {[...quotes, ...invoices, ...payments].map((it) => (
-            <li key={it.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
-              <div className="flex items-center gap-3 min-w-0">
-                {it.kind === 'payment' ? (
-                  <Euro className="size-4 text-ink-mute shrink-0" />
-                ) : (
-                  <FileText className="size-4 text-ink-mute shrink-0" />
-                )}
-                <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-ink truncate">{it.reference}</p>
-                  <p className="text-[11px] text-ink-faint">
-                    {new Date(it.date).toLocaleDateString('fr-FR', { dateStyle: 'short' })}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <Badge variant={STATUS_VARIANT[it.status]}>{STATUS_LABEL[it.status]}</Badge>
-                <p className="font-mono text-[13px] text-ink">{eur(it.amountCents)}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="rounded-md border border-dashed border-rule/60 bg-cream-deep/30 p-4 text-center text-[13px] text-ink-mute">
-          Aucun devis ou facture pour ce dossier. Le devis peut être généré une fois la mission planifiée.
+      {/* Devis */}
+      <div>
+        <div className="mb-2 flex items-baseline justify-between">
+          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+            Devis · {quotes.length}
+          </p>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href={newQuoteHref}>
+              <Plus className="size-3.5" />
+              Nouveau devis
+            </Link>
+          </Button>
         </div>
-      )}
+        {quotes.length > 0 ? (
+          <ul className="divide-y divide-rule/60 rounded-md border border-rule/60">
+            {quotes.map((q) => (
+              <BillingRow key={q.id} item={q} detailHref={`/dashboard/devis/${q.id}`} />
+            ))}
+          </ul>
+        ) : (
+          <p className="rounded-md border border-dashed border-rule/60 bg-cream-deep/30 px-3 py-3 text-[12px] text-ink-mute">
+            Aucun devis pour ce dossier.
+          </p>
+        )}
+      </div>
 
-      <div className="flex flex-wrap gap-2 pt-1">
-        <Button variant="outline" size="sm" disabled>
-          Générer un devis
-        </Button>
-        <Button variant="outline" size="sm" disabled>
-          Émettre la facture
-        </Button>
+      {/* Factures */}
+      <div>
+        <div className="mb-2 flex items-baseline justify-between">
+          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+            Factures · {invoices.length}
+          </p>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href={newInvoiceHref}>
+              <Plus className="size-3.5" />
+              Nouvelle facture
+            </Link>
+          </Button>
+        </div>
+        {invoices.length > 0 ? (
+          <ul className="divide-y divide-rule/60 rounded-md border border-rule/60">
+            {invoices.map((inv) => (
+              <BillingRow key={inv.id} item={inv} detailHref={`/dashboard/factures/${inv.id}`} />
+            ))}
+          </ul>
+        ) : (
+          <p className="rounded-md border border-dashed border-rule/60 bg-cream-deep/30 px-3 py-3 text-[12px] text-ink-mute">
+            Aucune facture pour ce dossier.
+          </p>
+        )}
       </div>
     </Card>
+  )
+}
+
+function BillingRow({ item, detailHref }: { item: BillingItem; detailHref: string }) {
+  return (
+    <li>
+      <Link
+        href={detailHref}
+        className="flex items-center justify-between gap-3 px-3 py-2.5 hover:bg-foreground/[0.03]"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          {item.kind === 'payment' ? (
+            <Euro className="size-4 text-ink-mute shrink-0" />
+          ) : (
+            <FileText className="size-4 text-ink-mute shrink-0" />
+          )}
+          <div className="min-w-0">
+            <p className="text-[13px] font-medium text-ink truncate">{item.reference}</p>
+            <p className="text-[11px] text-ink-faint">
+              {new Date(item.date).toLocaleDateString('fr-FR', { dateStyle: 'short' })}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <Badge variant={STATUS_VARIANT[item.status]}>{STATUS_LABEL[item.status]}</Badge>
+          <p className="font-mono text-[13px] text-ink">{eur(item.amountCents)}</p>
+        </div>
+      </Link>
+    </li>
   )
 }
 
