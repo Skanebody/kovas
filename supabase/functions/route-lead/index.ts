@@ -26,7 +26,7 @@
 // Réponse: { ok, strategy, assignedCount, assignments[], durationMs }
 // ============================================
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
 
 // ============================================
 // Types
@@ -83,7 +83,7 @@ interface RoutingResponse {
 
 interface DiagContactRow {
   id: string
-  official_email: string | null
+  email: string | null
   first_name: string | null
   last_name: string | null
 }
@@ -135,10 +135,7 @@ async function geocodeFromCityPostal(
 }
 
 async function getLeadCoords(lead: LeadRow): Promise<Coords | null> {
-  if (
-    typeof lead.property_geo_lat === 'number' &&
-    typeof lead.property_geo_lng === 'number'
-  ) {
+  if (typeof lead.property_geo_lat === 'number' && typeof lead.property_geo_lng === 'number') {
     return { lat: lead.property_geo_lat, lng: lead.property_geo_lng }
   }
   return geocodeFromCityPostal(lead.property_city, lead.property_postal_code)
@@ -148,14 +145,8 @@ async function getLeadCoords(lead: LeadRow): Promise<Coords | null> {
 // Helper : vérifie la présence d'une table (tolérance migrations partielles)
 // ============================================
 
-async function tableExists(
-  supabase: SupabaseClient,
-  table: string,
-): Promise<boolean> {
-  const { error } = await supabase
-    .from(table)
-    .select('*', { count: 'exact', head: true })
-    .limit(0)
+async function tableExists(supabase: SupabaseClient, table: string): Promise<boolean> {
+  const { error } = await supabase.from(table).select('*', { count: 'exact', head: true }).limit(0)
   return !error
 }
 
@@ -209,7 +200,7 @@ async function createAssignments(
     const diagIds = results.map((r) => r.diagnosticianId)
     const { data: contacts } = await supabase
       .from('diagnosticians')
-      .select('id, official_email, first_name, last_name')
+      .select('id, email, first_name, last_name')
       .in('id', diagIds)
 
     const contactMap = new Map<string, DiagContactRow>()
@@ -220,10 +211,10 @@ async function createAssignments(
     const emailRows = results
       .map((r) => {
         const contact = contactMap.get(r.diagnosticianId)
-        if (!contact?.official_email) return null
+        if (!contact?.email) return null
         return {
           template: `lead-notification-${assignmentType}`,
-          to_email: contact.official_email,
+          to_email: contact.email,
           subject:
             assignmentType === 'subscribed'
               ? 'Nouvelle demande KOVAS Annuaire dans votre zone'
@@ -562,10 +553,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     .eq('id', lead.id)
 
   if (updateErr) {
-    return new Response(
-      JSON.stringify({ error: `update quote_requests: ${updateErr.message}` }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ error: `update quote_requests: ${updateErr.message}` }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   const response: RoutingResponse = {

@@ -47,7 +47,7 @@ interface RequestBody {
 interface EligibleDiagRow {
   id: string
   city: string | null
-  postal_code: string | null
+  postcode: string | null
   certifications: Array<{ type?: string }> | null
   geo_lat: number | null
   geo_lng: number | null
@@ -151,7 +151,7 @@ async function processDiagnostician(
     property_type: 'maison',
     property_situation: 'vente',
     property_address: address,
-    property_postal_code: diag.postal_code,
+    property_postal_code: diag.postcode,
     property_city: city,
     property_surface_m2: surface,
     diagnostics_requested: [certType],
@@ -366,7 +366,7 @@ Deno.serve(async (req) => {
     }
   )
     .from('diagnosticians')
-    .select('id, city, postal_code, certifications, geo_lat, geo_lng, department_code')
+    .select('id, city, postcode, certifications, geo_lat, geo_lng, department_code')
     .eq('claim_status', 'unclaimed')
     .in('validation_status', ['verified', 'pending'])
     .eq('unsubscribed', false)

@@ -28,7 +28,7 @@
 
 /// <reference lib="deno.ns" />
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
 
 // ────────────────────────────────────────────────────────────
 // Types
@@ -88,36 +88,118 @@ interface AbsorbResponse {
 // Mapping department code → slug (idem import-dhup-annuaire)
 // ────────────────────────────────────────────────────────────
 const DEPT_SLUGS: Record<string, string> = {
-  '01': 'ain', '02': 'aisne', '03': 'allier', '04': 'alpes-de-haute-provence',
-  '05': 'hautes-alpes', '06': 'alpes-maritimes', '07': 'ardeche', '08': 'ardennes',
-  '09': 'ariege', '10': 'aube', '11': 'aude', '12': 'aveyron',
-  '13': 'bouches-du-rhone', '14': 'calvados', '15': 'cantal', '16': 'charente',
-  '17': 'charente-maritime', '18': 'cher', '19': 'correze', '2A': 'corse-du-sud',
-  '2B': 'haute-corse', '21': 'cote-dor', '22': 'cotes-darmor', '23': 'creuse',
-  '24': 'dordogne', '25': 'doubs', '26': 'drome', '27': 'eure',
-  '28': 'eure-et-loir', '29': 'finistere', '30': 'gard', '31': 'haute-garonne',
-  '32': 'gers', '33': 'gironde', '34': 'herault', '35': 'ille-et-vilaine',
-  '36': 'indre', '37': 'indre-et-loire', '38': 'isere', '39': 'jura',
-  '40': 'landes', '41': 'loir-et-cher', '42': 'loire', '43': 'haute-loire',
-  '44': 'loire-atlantique', '45': 'loiret', '46': 'lot', '47': 'lot-et-garonne',
-  '48': 'lozere', '49': 'maine-et-loire', '50': 'manche', '51': 'marne',
-  '52': 'haute-marne', '53': 'mayenne', '54': 'meurthe-et-moselle', '55': 'meuse',
-  '56': 'morbihan', '57': 'moselle', '58': 'nievre', '59': 'nord',
-  '60': 'oise', '61': 'orne', '62': 'pas-de-calais', '63': 'puy-de-dome',
-  '64': 'pyrenees-atlantiques', '65': 'hautes-pyrenees', '66': 'pyrenees-orientales',
-  '67': 'bas-rhin', '68': 'haut-rhin', '69': 'rhone', '70': 'haute-saone',
-  '71': 'saone-et-loire', '72': 'sarthe', '73': 'savoie', '74': 'haute-savoie',
-  '75': 'paris', '76': 'seine-maritime', '77': 'seine-et-marne', '78': 'yvelines',
-  '79': 'deux-sevres', '80': 'somme', '81': 'tarn', '82': 'tarn-et-garonne',
-  '83': 'var', '84': 'vaucluse', '85': 'vendee', '86': 'vienne',
-  '87': 'haute-vienne', '88': 'vosges', '89': 'yonne', '90': 'territoire-de-belfort',
-  '91': 'essonne', '92': 'hauts-de-seine', '93': 'seine-saint-denis', '94': 'val-de-marne',
-  '95': 'val-doise', '971': 'guadeloupe', '972': 'martinique', '973': 'guyane',
-  '974': 'la-reunion', '976': 'mayotte',
+  '01': 'ain',
+  '02': 'aisne',
+  '03': 'allier',
+  '04': 'alpes-de-haute-provence',
+  '05': 'hautes-alpes',
+  '06': 'alpes-maritimes',
+  '07': 'ardeche',
+  '08': 'ardennes',
+  '09': 'ariege',
+  '10': 'aube',
+  '11': 'aude',
+  '12': 'aveyron',
+  '13': 'bouches-du-rhone',
+  '14': 'calvados',
+  '15': 'cantal',
+  '16': 'charente',
+  '17': 'charente-maritime',
+  '18': 'cher',
+  '19': 'correze',
+  '2A': 'corse-du-sud',
+  '2B': 'haute-corse',
+  '21': 'cote-dor',
+  '22': 'cotes-darmor',
+  '23': 'creuse',
+  '24': 'dordogne',
+  '25': 'doubs',
+  '26': 'drome',
+  '27': 'eure',
+  '28': 'eure-et-loir',
+  '29': 'finistere',
+  '30': 'gard',
+  '31': 'haute-garonne',
+  '32': 'gers',
+  '33': 'gironde',
+  '34': 'herault',
+  '35': 'ille-et-vilaine',
+  '36': 'indre',
+  '37': 'indre-et-loire',
+  '38': 'isere',
+  '39': 'jura',
+  '40': 'landes',
+  '41': 'loir-et-cher',
+  '42': 'loire',
+  '43': 'haute-loire',
+  '44': 'loire-atlantique',
+  '45': 'loiret',
+  '46': 'lot',
+  '47': 'lot-et-garonne',
+  '48': 'lozere',
+  '49': 'maine-et-loire',
+  '50': 'manche',
+  '51': 'marne',
+  '52': 'haute-marne',
+  '53': 'mayenne',
+  '54': 'meurthe-et-moselle',
+  '55': 'meuse',
+  '56': 'morbihan',
+  '57': 'moselle',
+  '58': 'nievre',
+  '59': 'nord',
+  '60': 'oise',
+  '61': 'orne',
+  '62': 'pas-de-calais',
+  '63': 'puy-de-dome',
+  '64': 'pyrenees-atlantiques',
+  '65': 'hautes-pyrenees',
+  '66': 'pyrenees-orientales',
+  '67': 'bas-rhin',
+  '68': 'haut-rhin',
+  '69': 'rhone',
+  '70': 'haute-saone',
+  '71': 'saone-et-loire',
+  '72': 'sarthe',
+  '73': 'savoie',
+  '74': 'haute-savoie',
+  '75': 'paris',
+  '76': 'seine-maritime',
+  '77': 'seine-et-marne',
+  '78': 'yvelines',
+  '79': 'deux-sevres',
+  '80': 'somme',
+  '81': 'tarn',
+  '82': 'tarn-et-garonne',
+  '83': 'var',
+  '84': 'vaucluse',
+  '85': 'vendee',
+  '86': 'vienne',
+  '87': 'haute-vienne',
+  '88': 'vosges',
+  '89': 'yonne',
+  '90': 'territoire-de-belfort',
+  '91': 'essonne',
+  '92': 'hauts-de-seine',
+  '93': 'seine-saint-denis',
+  '94': 'val-de-marne',
+  '95': 'val-doise',
+  '971': 'guadeloupe',
+  '972': 'martinique',
+  '973': 'guyane',
+  '974': 'la-reunion',
+  '976': 'mayotte',
 }
 
 const VALID_CERT_TYPES: ReadonlySet<CertificationType> = new Set<CertificationType>([
-  'DPE', 'AMIANTE', 'PLOMB', 'GAZ', 'ELECTRICITE', 'TERMITES', 'CARREZ', 'ERP',
+  'DPE',
+  'AMIANTE',
+  'PLOMB',
+  'GAZ',
+  'ELECTRICITE',
+  'TERMITES',
+  'CARREZ',
+  'ERP',
 ])
 
 // ────────────────────────────────────────────────────────────
@@ -162,19 +244,17 @@ async function computeDhupSourceId(
   lastName: string,
   departmentCode: string,
 ): Promise<string> {
-  const key = siret && siret.length === 14
-    ? `siret:${siret}`
-    : `name:${normalize(lastName)}|${normalize(firstName)}|${departmentCode}`
+  const key =
+    siret && siret.length === 14
+      ? `siret:${siret}`
+      : `name:${normalize(lastName)}|${normalize(firstName)}|${departmentCode}`
   const hash = await sha256Hex(key)
   return `dhup_${hash.substring(0, 24)}`
 }
 
 /** Normalise un libelle certification DHUP vers nos types canoniques. */
 function normalizeCertificationType(label: string): CertificationType | null {
-  const up = label
-    .toUpperCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+  const up = label.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
   if (up.includes('DPE') || up.includes('PERFORMANCE')) return 'DPE'
   if (up.includes('AMIANTE')) return 'AMIANTE'
   if (up.includes('PLOMB') || up.includes('CREP')) return 'PLOMB'
@@ -293,33 +373,31 @@ function buildHeader(headerLine: string): CsvHeader {
  * (1 ligne par certification dans certaines versions du CSV DHUP).
  * Le dedoublonnage se fait par dhup_source_id en aval (Map).
  */
-async function parseDhupLine(
-  line: string,
-  header: CsvHeader,
-): Promise<DhupRow | null> {
+async function parseDhupLine(line: string, header: CsvHeader): Promise<DhupRow | null> {
   const cells = parseCsvCells(line, header.separator).map((c) => c.replace(/^"|"$/g, '').trim())
   const idx = header.index
 
-  const lastName = idx.nom !== -1 ? cells[idx.nom] ?? '' : ''
-  const firstName = idx.prenom !== -1 ? cells[idx.prenom] ?? '' : ''
-  const city = idx.ville !== -1 ? cells[idx.ville] ?? '' : ''
+  const lastName = idx.nom !== -1 ? (cells[idx.nom] ?? '') : ''
+  const firstName = idx.prenom !== -1 ? (cells[idx.prenom] ?? '') : ''
+  const city = idx.ville !== -1 ? (cells[idx.ville] ?? '') : ''
   if (!lastName || !firstName || !city) return null
 
   const postalCode = idx.cp !== -1 ? cells[idx.cp] || null : null
-  const departmentCode = idx.dept !== -1
-    ? cells[idx.dept] || (postalCode ? postalCode.substring(0, 2) : '')
-    : postalCode
-      ? postalCode.substring(0, 2)
-      : ''
+  const departmentCode =
+    idx.dept !== -1
+      ? cells[idx.dept] || (postalCode ? postalCode.substring(0, 2) : '')
+      : postalCode
+        ? postalCode.substring(0, 2)
+        : ''
   if (!departmentCode) return null
 
-  const rawSiret = idx.siret !== -1 ? cells[idx.siret] ?? '' : ''
+  const rawSiret = idx.siret !== -1 ? (cells[idx.siret] ?? '') : ''
   const siret = rawSiret.replace(/\s+/g, '').match(/^\d{14}$/) ? rawSiret.replace(/\s+/g, '') : null
 
-  const certifRaw = idx.certif !== -1 ? cells[idx.certif] ?? '' : ''
-  const organism = idx.organism !== -1 ? cells[idx.organism] ?? '' : ''
-  const number = idx.numero !== -1 ? cells[idx.numero] ?? '' : ''
-  const validUntilRaw = idx.validite !== -1 ? cells[idx.validite] ?? '' : ''
+  const certifRaw = idx.certif !== -1 ? (cells[idx.certif] ?? '') : ''
+  const organism = idx.organism !== -1 ? (cells[idx.organism] ?? '') : ''
+  const number = idx.numero !== -1 ? (cells[idx.numero] ?? '') : ''
+  const validUntilRaw = idx.validite !== -1 ? (cells[idx.validite] ?? '') : ''
 
   const certifications: DhupCertification[] = certifRaw
     .split(/[,;|/]/)
@@ -341,9 +419,9 @@ async function parseDhupLine(
     city,
     postalCode,
     departmentCode,
-    officialEmail: idx.email !== -1 ? (cells[idx.email] || null) : null,
-    officialPhone: idx.telephone !== -1 ? (cells[idx.telephone] || null) : null,
-    officialCompanyName: idx.raisonSociale !== -1 ? (cells[idx.raisonSociale] || null) : null,
+    officialEmail: idx.email !== -1 ? cells[idx.email] || null : null,
+    officialPhone: idx.telephone !== -1 ? cells[idx.telephone] || null : null,
+    officialCompanyName: idx.raisonSociale !== -1 ? cells[idx.raisonSociale] || null : null,
     siret,
     certifications,
   }
@@ -373,7 +451,9 @@ async function parseCsvStream(csvText: string): Promise<DhupRow[]> {
     const existing = byId.get(parsed.dhupSourceId)
     if (existing) {
       // Fusion : on accumule les certifications (dedoublonnage cote DB via UNIQUE)
-      const seen = new Set(existing.certifications.map((c) => `${c.type}|${c.organism}|${c.number}`))
+      const seen = new Set(
+        existing.certifications.map((c) => `${c.type}|${c.organism}|${c.number}`),
+      )
       for (const cert of parsed.certifications) {
         const key = `${cert.type}|${cert.organism}|${cert.number}`
         if (!seen.has(key)) {
@@ -424,14 +504,11 @@ async function upsertDiagnostician(
   // Slug : on conserve si existant, sinon on en genere un nouveau via RPC
   let slug = existing?.slug ?? null
   if (!slug) {
-    const { data: slugData, error: slugErr } = await supabase.rpc(
-      'generate_unique_diag_slug',
-      {
-        p_first: row.firstName,
-        p_last: row.lastName,
-        p_postal: row.postalCode ?? row.departmentCode,
-      },
-    )
+    const { data: slugData, error: slugErr } = await supabase.rpc('generate_unique_diag_slug', {
+      p_first: row.firstName,
+      p_last: row.lastName,
+      p_postal: row.postalCode ?? row.departmentCode,
+    })
     if (slugErr) {
       console.error(`[absorb-dhup] slug rpc failed for ${row.dhupSourceId}: ${slugErr.message}`)
       return null
@@ -450,29 +527,31 @@ async function upsertDiagnostician(
     status: 'valid' as const,
   }))
 
+  // NB: postal_code/official_email/official_phone/official_company_name/slug_dept
+  // n'existent pas sur la table `diagnosticians`. Mapping canonique :
+  //   postal_code → postcode, official_email → email, official_phone → phone.
+  // `official_company_name` et `slug_dept` n'ont pas d'equivalent : on les omet.
+  // `full_name` est reconstruit a partir de first_name + last_name pour les
+  // lookups annuaire (cf. trigger DB ou compute applicatif aval).
   const payload = {
     dhup_source_id: row.dhupSourceId,
     first_name: row.firstName,
     last_name: row.lastName,
+    full_name: `${row.firstName} ${row.lastName}`.trim(),
     city: row.city,
-    postal_code: row.postalCode,
+    postcode: row.postalCode,
     department_code: row.departmentCode,
     certifications: certifJson,
-    official_email: row.officialEmail,
-    official_phone: row.officialPhone,
-    official_company_name: row.officialCompanyName,
+    email: row.officialEmail,
+    phone: row.officialPhone,
     sirene_siret: row.siret,
     slug,
     slug_city: slugify(row.city),
-    slug_dept: departmentSlug(row.departmentCode),
     dhup_last_synced_at: new Date().toISOString(),
   }
 
   if (existing) {
-    const { error } = await supabase
-      .from('diagnosticians')
-      .update(payload)
-      .eq('id', existing.id)
+    const { error } = await supabase.from('diagnosticians').update(payload).eq('id', existing.id)
     if (error) {
       console.error(`[absorb-dhup] update failed for ${row.dhupSourceId}: ${error.message}`)
       return null
@@ -516,12 +595,10 @@ async function upsertCertifications(
     source: 'DHUP' as const,
     last_verified_at: now,
   }))
-  const { error } = await supabase
-    .from('diagnostician_certifications')
-    .upsert(rows, {
-      onConflict: 'diagnostician_id,certification_type,organism,certification_number',
-      ignoreDuplicates: false,
-    })
+  const { error } = await supabase.from('diagnostician_certifications').upsert(rows, {
+    onConflict: 'diagnostician_id,certification_type,organism,certification_number',
+    ignoreDuplicates: false,
+  })
   if (error) {
     console.error(`[absorb-dhup] cert upsert failed for ${diagnosticianId}: ${error.message}`)
     return 0
@@ -587,9 +664,7 @@ async function logBatchPerNewDiagnostician(
   const chunkSize = 500
   for (let i = 0; i < rows.length; i += chunkSize) {
     const slice = rows.slice(i, i + chunkSize)
-    const { error } = await supabase
-      .from('diagnostician_cross_validation_logs')
-      .insert(slice)
+    const { error } = await supabase.from('diagnostician_cross_validation_logs').insert(slice)
     if (error) {
       console.error(`[absorb-dhup] log insert chunk ${i} failed: ${error.message}`)
     }
@@ -625,10 +700,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     // ─── Auth ───
     if (!isAuthorized(req)) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'unauthorized' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } },
-      )
+      return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     // ─── Supabase admin client ───
@@ -752,7 +827,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
         } else {
           updated++
         }
-        certificationsUpserted += await upsertCertifications(supabase, result.id, row.certifications)
+        certificationsUpserted += await upsertCertifications(
+          supabase,
+          result.id,
+          row.certifications,
+        )
       } catch (err) {
         errorCount++
         const message = err instanceof Error ? err.message : String(err)

@@ -30,9 +30,9 @@ const Deno = globalThis.Deno as {
 
 interface DiagRow {
   id: string
-  display_name: string
+  full_name: string
   city: string | null
-  official_email: string | null
+  email: string | null
   ghost_status: string
   ghost_status_updated_at: string | null
   ghost_notification_sent_at: string | null
@@ -103,18 +103,18 @@ Deno.serve(async (req: Request) => {
   const { data: candidatesRaw, error: fetchErr } = await admin
     .from('diagnosticians')
     .select(
-      'id, display_name, city, official_email, ghost_status, ghost_status_updated_at, ghost_notification_sent_at, consecutive_ignored_leads',
+      'id, full_name, city, email, ghost_status, ghost_status_updated_at, ghost_notification_sent_at, consecutive_ignored_leads',
     )
     .in('ghost_status', ['warned', 'demoted', 'soft_disabled'])
-    .not('official_email', 'is', null)
+    .not('email', 'is', null)
     .limit(500)
 
   if (fetchErr) {
     console.error('[ghost-lifecycle-cron] fetch candidates failed', fetchErr)
-    return new Response(
-      JSON.stringify({ error: 'fetch failed', details: fetchErr.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ error: 'fetch failed', details: fetchErr.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   const candidates = ((candidatesRaw ?? []) as DiagRow[]).filter((d) => {

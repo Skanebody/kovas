@@ -32,14 +32,13 @@
 
 /// <reference lib="deno.ns" />
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
 
 // ────────────────────────────────────────────────────────────
 // Configuration
 // ────────────────────────────────────────────────────────────
 
-const BAN_API_BASE_URL =
-  Deno.env.get('BAN_API_BASE_URL') ?? 'https://api-adresse.data.gouv.fr'
+const BAN_API_BASE_URL = Deno.env.get('BAN_API_BASE_URL') ?? 'https://api-adresse.data.gouv.fr'
 
 /** Score minimum BAN pour considerer un match exploitable. */
 const MIN_BAN_SCORE = 0.5
@@ -88,7 +87,7 @@ interface BanResponse {
 interface DiagnosticianGeoCandidate {
   id: string
   city: string
-  postal_code: string | null
+  postcode: string | null
   department_code: string
 }
 
@@ -128,13 +127,13 @@ function sleep(ms: number): Promise<void> {
 
 /**
  * Construit la query BAN a partir des champs disponibles.
- * Strategie : preferer (postal_code + city) — le plus precis sans rue.
- * Fallback : (department_code + city) si postal_code absent.
+ * Strategie : preferer (postcode + city) — le plus precis sans rue.
+ * Fallback : (department_code + city) si postcode absent.
  */
 function buildBanQuery(diag: DiagnosticianGeoCandidate): string {
   const parts: string[] = []
   if (diag.city) parts.push(diag.city)
-  if (diag.postal_code) parts.push(diag.postal_code)
+  if (diag.postcode) parts.push(diag.postcode)
   else if (diag.department_code) parts.push(diag.department_code)
   return parts.join(' ').trim()
 }
@@ -157,7 +156,7 @@ async function callBan(query: string): Promise<BanFeature | null> {
       if (res.status === 429 || res.status === 503) {
         lastError = `HTTP ${res.status}`
         if (attempt < MAX_RETRIES) {
-          await sleep(RETRY_BASE_DELAY_MS * Math.pow(2, attempt) + Math.random() * 200)
+          await sleep(RETRY_BASE_DELAY_MS * 2 ** attempt + Math.random() * 200)
           continue
         }
         throw new Error(lastError)
@@ -170,7 +169,7 @@ async function callBan(query: string): Promise<BanFeature | null> {
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err)
       if (attempt >= MAX_RETRIES) throw new Error(lastError)
-      await sleep(RETRY_BASE_DELAY_MS * Math.pow(2, attempt))
+      await sleep(RETRY_BASE_DELAY_MS * 2 ** attempt)
     }
   }
   throw new Error(lastError ?? 'unknown BAN error')
@@ -215,7 +214,7 @@ async function geocodeOne(
       diagnostician_id: diag.id,
       source: 'BAN',
       outcome: 'not_found',
-      payload: { reason: 'empty_query', city: diag.city, postal_code: diag.postal_code },
+      payload: { reason: 'empty_query', city: diag.city, postcode: diag.postcode },
       error_message: null,
       latency_ms: Date.now() - tStart,
     })
@@ -351,7 +350,7 @@ async function selectBatchCandidates(
   // 1) Fiches sans coords du tout
   const { data: noGeo, error: noGeoErr } = await supabase
     .from('diagnosticians')
-    .select('id, city, postal_code, department_code')
+    .select('id, city, postcode, department_code')
     .is('geo_lat', null)
     .limit(limit)
   if (noGeoErr) {
@@ -365,7 +364,7 @@ async function selectBatchCandidates(
   const remaining = limit - noGeoRows.length
   const { data: stale, error: staleErr } = await supabase
     .from('diagnosticians')
-    .select('id, city, postal_code, department_code')
+    .select('id, city, postcode, department_code')
     .not('geo_lat', 'is', null)
     .or(`ban_last_synced_at.is.null,ban_last_synced_at.lt.${ttlCutoff}`)
     .limit(remaining)
@@ -384,7 +383,7 @@ async function selectSingleCandidate(
 ): Promise<DiagnosticianGeoCandidate | null> {
   const { data, error } = await supabase
     .from('diagnosticians')
-    .select('id, city, postal_code, department_code')
+    .select('id, city, postcode, department_code')
     .eq('id', diagnosticianId)
     .maybeSingle<DiagnosticianGeoCandidate>()
   if (error) {
@@ -421,10 +420,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   try {
     if (!isAuthorized(req)) {
-      return new Response(
-        JSON.stringify({ ok: false, error: 'unauthorized' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } },
-      )
+      return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
@@ -452,7 +451,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     let body: GeocodeRequestBody = {}
     try {
       const text = await req.text()
-      if (text && text.trim()) {
+      if (text?.trim()) {
         body = JSON.parse(text) as GeocodeRequestBody
       }
     } catch {
@@ -483,9 +482,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const single = await selectSingleCandidate(supabase, body.diagnostician_id)
       if (single) candidates = [single]
     } else {
-      const limit = typeof body.limit === 'number' && body.limit > 0
-        ? Math.min(body.limit, 2000)
-        : DEFAULT_BATCH_LIMIT
+      const limit =
+        typeof body.limit === 'number' && body.limit > 0
+          ? Math.min(body.limit, 2000)
+          : DEFAULT_BATCH_LIMIT
       candidates = await selectBatchCandidates(supabase, limit)
     }
 

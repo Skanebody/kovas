@@ -34,7 +34,7 @@ const FROM_EMAIL = 'KOVAS 360 <contact@kovas.fr>'
 
 interface DiagRow {
   id: string
-  contact_email: string | null
+  email: string | null
   created_at: string
   verification: {
     overall_status: 'pending' | 'verified' | 'rejected' | 'expired'
@@ -152,14 +152,14 @@ Deno.serve(async (req: Request) => {
 
     const { data: diag } = await supa
       .from('diagnosticians')
-      .select('contact_email')
+      .select('email')
       .eq('id', row.diagnostician_id)
       .maybeSingle()
-    if (!diag?.contact_email) continue
+    if (!diag?.email) continue
 
     try {
       const tpl = emailT12h()
-      await sendEmail(diag.contact_email, tpl.subject, tpl.html)
+      await sendEmail(diag.email, tpl.subject, tpl.html)
       await supa.from('verification_checks_log').insert({
         diagnostician_id: row.diagnostician_id,
         check_type: 'onboarding_followup_12h',
@@ -194,14 +194,14 @@ Deno.serve(async (req: Request) => {
 
     const { data: diag } = await supa
       .from('diagnosticians')
-      .select('contact_email')
+      .select('email')
       .eq('id', row.diagnostician_id)
       .maybeSingle()
-    if (!diag?.contact_email) continue
+    if (!diag?.email) continue
 
     const tpl = row.overall_status === 'verified' ? emailT48hValidated() : emailT48hAdditionalDoc()
     try {
-      await sendEmail(diag.contact_email, tpl.subject, tpl.html)
+      await sendEmail(diag.email, tpl.subject, tpl.html)
       await supa.from('verification_checks_log').insert({
         diagnostician_id: row.diagnostician_id,
         check_type: 'onboarding_followup_48h',

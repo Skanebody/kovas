@@ -22,7 +22,7 @@ const CONVERSION_RATE_POTENTIAL = 0.3
 interface UnclaimedDiagWithLeads {
   id: string
   slug: string
-  display_name: string | null
+  full_name: string | null
   email: string | null
   leads_received_count: number
   last_lead_received_at: string | null
@@ -39,7 +39,7 @@ Deno.serve(async (_req) => {
 
   const { data: diags, error } = await supabase
     .from('diagnosticians')
-    .select('id, slug, display_name, email, leads_received_count, last_lead_received_at')
+    .select('id, slug, full_name, email, leads_received_count, last_lead_received_at')
     .eq('claim_status', 'unclaimed')
     .gte('last_lead_received_at', thirtyDaysAgo)
     .gt('leads_received_count', 0)
@@ -80,7 +80,7 @@ Deno.serve(async (_req) => {
     const estimatedMissedRevenue = Math.round(
       pending * AVG_QUOTE_VALUE_EUR * CONVERSION_RATE_POTENTIAL,
     )
-    const firstName = (diag.display_name ?? '').split(' ')[0] || 'à vous'
+    const firstName = (diag.full_name ?? '').split(' ')[0] || 'à vous'
     const claimUrl = `${baseUrl}/reclamer-ma-fiche/${diag.id}?utm_source=weekly_digest`
     const pendingUrl = `${baseUrl}/diagnostiqueurs/${diag.id}/leads-en-attente`
 

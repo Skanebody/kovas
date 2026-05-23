@@ -78,36 +78,118 @@ interface ImportStats {
 // sinon fallback table statique courte. La table complete est mise a jour V1.5.
 // ============================================
 const DEPT_SLUGS: Record<string, string> = {
-  '01': 'ain', '02': 'aisne', '03': 'allier', '04': 'alpes-de-haute-provence',
-  '05': 'hautes-alpes', '06': 'alpes-maritimes', '07': 'ardeche', '08': 'ardennes',
-  '09': 'ariege', '10': 'aube', '11': 'aude', '12': 'aveyron',
-  '13': 'bouches-du-rhone', '14': 'calvados', '15': 'cantal', '16': 'charente',
-  '17': 'charente-maritime', '18': 'cher', '19': 'correze', '2A': 'corse-du-sud',
-  '2B': 'haute-corse', '21': 'cote-dor', '22': 'cotes-darmor', '23': 'creuse',
-  '24': 'dordogne', '25': 'doubs', '26': 'drome', '27': 'eure',
-  '28': 'eure-et-loir', '29': 'finistere', '30': 'gard', '31': 'haute-garonne',
-  '32': 'gers', '33': 'gironde', '34': 'herault', '35': 'ille-et-vilaine',
-  '36': 'indre', '37': 'indre-et-loire', '38': 'isere', '39': 'jura',
-  '40': 'landes', '41': 'loir-et-cher', '42': 'loire', '43': 'haute-loire',
-  '44': 'loire-atlantique', '45': 'loiret', '46': 'lot', '47': 'lot-et-garonne',
-  '48': 'lozere', '49': 'maine-et-loire', '50': 'manche', '51': 'marne',
-  '52': 'haute-marne', '53': 'mayenne', '54': 'meurthe-et-moselle', '55': 'meuse',
-  '56': 'morbihan', '57': 'moselle', '58': 'nievre', '59': 'nord',
-  '60': 'oise', '61': 'orne', '62': 'pas-de-calais', '63': 'puy-de-dome',
-  '64': 'pyrenees-atlantiques', '65': 'hautes-pyrenees', '66': 'pyrenees-orientales',
-  '67': 'bas-rhin', '68': 'haut-rhin', '69': 'rhone', '70': 'haute-saone',
-  '71': 'saone-et-loire', '72': 'sarthe', '73': 'savoie', '74': 'haute-savoie',
-  '75': 'paris', '76': 'seine-maritime', '77': 'seine-et-marne', '78': 'yvelines',
-  '79': 'deux-sevres', '80': 'somme', '81': 'tarn', '82': 'tarn-et-garonne',
-  '83': 'var', '84': 'vaucluse', '85': 'vendee', '86': 'vienne',
-  '87': 'haute-vienne', '88': 'vosges', '89': 'yonne', '90': 'territoire-de-belfort',
-  '91': 'essonne', '92': 'hauts-de-seine', '93': 'seine-saint-denis', '94': 'val-de-marne',
-  '95': 'val-doise', '971': 'guadeloupe', '972': 'martinique', '973': 'guyane',
-  '974': 'la-reunion', '976': 'mayotte',
+  '01': 'ain',
+  '02': 'aisne',
+  '03': 'allier',
+  '04': 'alpes-de-haute-provence',
+  '05': 'hautes-alpes',
+  '06': 'alpes-maritimes',
+  '07': 'ardeche',
+  '08': 'ardennes',
+  '09': 'ariege',
+  '10': 'aube',
+  '11': 'aude',
+  '12': 'aveyron',
+  '13': 'bouches-du-rhone',
+  '14': 'calvados',
+  '15': 'cantal',
+  '16': 'charente',
+  '17': 'charente-maritime',
+  '18': 'cher',
+  '19': 'correze',
+  '2A': 'corse-du-sud',
+  '2B': 'haute-corse',
+  '21': 'cote-dor',
+  '22': 'cotes-darmor',
+  '23': 'creuse',
+  '24': 'dordogne',
+  '25': 'doubs',
+  '26': 'drome',
+  '27': 'eure',
+  '28': 'eure-et-loir',
+  '29': 'finistere',
+  '30': 'gard',
+  '31': 'haute-garonne',
+  '32': 'gers',
+  '33': 'gironde',
+  '34': 'herault',
+  '35': 'ille-et-vilaine',
+  '36': 'indre',
+  '37': 'indre-et-loire',
+  '38': 'isere',
+  '39': 'jura',
+  '40': 'landes',
+  '41': 'loir-et-cher',
+  '42': 'loire',
+  '43': 'haute-loire',
+  '44': 'loire-atlantique',
+  '45': 'loiret',
+  '46': 'lot',
+  '47': 'lot-et-garonne',
+  '48': 'lozere',
+  '49': 'maine-et-loire',
+  '50': 'manche',
+  '51': 'marne',
+  '52': 'haute-marne',
+  '53': 'mayenne',
+  '54': 'meurthe-et-moselle',
+  '55': 'meuse',
+  '56': 'morbihan',
+  '57': 'moselle',
+  '58': 'nievre',
+  '59': 'nord',
+  '60': 'oise',
+  '61': 'orne',
+  '62': 'pas-de-calais',
+  '63': 'puy-de-dome',
+  '64': 'pyrenees-atlantiques',
+  '65': 'hautes-pyrenees',
+  '66': 'pyrenees-orientales',
+  '67': 'bas-rhin',
+  '68': 'haut-rhin',
+  '69': 'rhone',
+  '70': 'haute-saone',
+  '71': 'saone-et-loire',
+  '72': 'sarthe',
+  '73': 'savoie',
+  '74': 'haute-savoie',
+  '75': 'paris',
+  '76': 'seine-maritime',
+  '77': 'seine-et-marne',
+  '78': 'yvelines',
+  '79': 'deux-sevres',
+  '80': 'somme',
+  '81': 'tarn',
+  '82': 'tarn-et-garonne',
+  '83': 'var',
+  '84': 'vaucluse',
+  '85': 'vendee',
+  '86': 'vienne',
+  '87': 'haute-vienne',
+  '88': 'vosges',
+  '89': 'yonne',
+  '90': 'territoire-de-belfort',
+  '91': 'essonne',
+  '92': 'hauts-de-seine',
+  '93': 'seine-saint-denis',
+  '94': 'val-de-marne',
+  '95': 'val-doise',
+  '971': 'guadeloupe',
+  '972': 'martinique',
+  '973': 'guyane',
+  '974': 'la-reunion',
+  '976': 'mayotte',
 }
 
 const VALID_CERT_TYPES = new Set([
-  'DPE', 'AMIANTE', 'PLOMB', 'GAZ', 'ELECTRICITE', 'TERMITES', 'CARREZ', 'ERP',
+  'DPE',
+  'AMIANTE',
+  'PLOMB',
+  'GAZ',
+  'ELECTRICITE',
+  'TERMITES',
+  'CARREZ',
+  'ERP',
 ])
 
 // ============================================
@@ -174,7 +256,9 @@ function parseDhupCsv(csvText: string): DhupRow[] {
   // Parse header (separateur , ou ; — DHUP varie selon export)
   const firstLine = lines[0] ?? ''
   const separator = firstLine.includes(';') ? ';' : ','
-  const headers = firstLine.split(separator).map((h) => h.replace(/^"|"$/g, '').trim().toLowerCase())
+  const headers = firstLine
+    .split(separator)
+    .map((h) => h.replace(/^"|"$/g, '').trim().toLowerCase())
 
   const colIdx = (...names: string[]): number => {
     for (const name of names) {
@@ -206,27 +290,26 @@ function parseDhupCsv(csvText: string): DhupRow[] {
   for (let lineIdx = 1; lineIdx < lines.length; lineIdx++) {
     const line = lines[lineIdx]
     if (!line) continue
-    const cells = line
-      .split(separator)
-      .map((c) => c.replace(/^"|"$/g, '').trim())
+    const cells = line.split(separator).map((c) => c.replace(/^"|"$/g, '').trim())
 
     const last_name = cells[iNom] ?? ''
     const first_name = cells[iPrenom] ?? ''
     const city = cells[iVille] ?? ''
     if (!last_name || !first_name || !city) continue
 
-    const postal = iCP !== -1 ? cells[iCP] ?? null : null
-    const dept = iDept !== -1
-      ? cells[iDept] ?? (postal ? postal.substring(0, 2) : '')
-      : postal
-        ? postal.substring(0, 2)
-        : ''
+    const postal = iCP !== -1 ? (cells[iCP] ?? null) : null
+    const dept =
+      iDept !== -1
+        ? (cells[iDept] ?? (postal ? postal.substring(0, 2) : ''))
+        : postal
+          ? postal.substring(0, 2)
+          : ''
     if (!dept) continue
 
-    const certifRaw = iCertif !== -1 ? cells[iCertif] ?? '' : ''
-    const organism = iOrganisme !== -1 ? cells[iOrganisme] ?? null : null
-    const number = iNumero !== -1 ? cells[iNumero] ?? null : null
-    const validUntil = iValid !== -1 ? cells[iValid] ?? null : null
+    const certifRaw = iCertif !== -1 ? (cells[iCertif] ?? '') : ''
+    const organism = iOrganisme !== -1 ? (cells[iOrganisme] ?? null) : null
+    const number = iNumero !== -1 ? (cells[iNumero] ?? null) : null
+    const validUntil = iValid !== -1 ? (cells[iValid] ?? null) : null
 
     const certifications = certifRaw
       .split(/[,;|/]/)
@@ -249,9 +332,9 @@ function parseDhupCsv(csvText: string): DhupRow[] {
       city,
       postal_code: postal,
       department_code: dept,
-      official_email: iEmail !== -1 ? cells[iEmail] ?? null : null,
-      official_phone: iTel !== -1 ? cells[iTel] ?? null : null,
-      official_company_name: iRaison !== -1 ? cells[iRaison] ?? null : null,
+      official_email: iEmail !== -1 ? (cells[iEmail] ?? null) : null,
+      official_phone: iTel !== -1 ? (cells[iTel] ?? null) : null,
+      official_company_name: iRaison !== -1 ? (cells[iRaison] ?? null) : null,
       certifications,
     })
   }
@@ -390,14 +473,11 @@ Deno.serve(async (req) => {
       if (existing?.slug) {
         slug = existing.slug
       } else {
-        const { data: slugData, error: slugErr } = await supabase.rpc(
-          'generate_unique_diag_slug',
-          {
-            p_first: row.first_name,
-            p_last: row.last_name,
-            p_postal: row.postal_code ?? row.department_code,
-          },
-        )
+        const { data: slugData, error: slugErr } = await supabase.rpc('generate_unique_diag_slug', {
+          p_first: row.first_name,
+          p_last: row.last_name,
+          p_postal: row.postal_code ?? row.department_code,
+        })
         if (slugErr) {
           stats.errors.push(`slug rpc ${row.dhup_source_id}: ${slugErr.message}`)
           stats.rows_skipped++
@@ -409,24 +489,29 @@ Deno.serve(async (req) => {
       const slugCity = slugify(row.city)
       const slugDept = departmentSlug(row.department_code)
 
+      // NB: postal_code/official_email/official_phone/official_company_name/slug_dept
+      // n'existent pas sur la table `diagnosticians`. Mapping canonique :
+      //   postal_code → postcode, official_email → email, official_phone → phone.
+      // `official_company_name` et `slug_dept` n'ont pas d'equivalent : on les omet.
       const payload = {
         dhup_source_id: row.dhup_source_id,
         first_name: row.first_name,
         last_name: row.last_name,
+        full_name: `${row.first_name} ${row.last_name}`.trim(),
         city: row.city,
-        postal_code: row.postal_code,
+        postcode: row.postal_code,
         department_code: row.department_code,
         geo_lat: geo?.lat ?? null,
         geo_lng: geo?.lng ?? null,
         certifications: row.certifications,
-        official_email: row.official_email,
-        official_phone: row.official_phone,
-        official_company_name: row.official_company_name,
+        email: row.official_email,
+        phone: row.official_phone,
         slug,
         slug_city: slugCity,
-        slug_dept: slugDept,
         dhup_last_synced_at: new Date().toISOString(),
       }
+      // slugDept est conserve comme variable mais non persiste (pas de colonne dediee).
+      void slugDept
 
       if (existing) {
         const { error } = await supabase
