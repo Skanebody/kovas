@@ -45,6 +45,9 @@ export async function POST(req: Request) {
     )
   }
 
+  // Le schéma garde `token_encrypted` (legacy NOT NULL) ET les colonnes OAuth
+  // ajoutées en DEPLOY-4. Pour Tiime (flow OAuth), on alimente les deux avec la
+  // même valeur jusqu'à ce que la colonne legacy puisse être déposée.
   const { error } = await supabase.from('accounting_connectors').upsert(
     {
       organization_id: orgId,
@@ -52,6 +55,7 @@ export async function POST(req: Request) {
       status: 'active',
       workspace_id: workspaceId,
       oauth_access_token_encrypted: accessToken,
+      token_encrypted: accessToken,
       last_error: null,
       last_error_at: null,
     },

@@ -39,10 +39,19 @@ interface PerfMetricRow {
 }
 
 // Builder typé pour bypass des tables hors types générés.
+// On passe `table` sous forme `keyof Tables` pour satisfaire la signature
+// `.from()` du client typé Supabase ; le bypass `unknown` qui suit reste
+// nécessaire pour les tables réellement absentes du schéma régénéré
+// (`email_events`, `perf_metrics`, `user_admin_tags` — alimentées hors
+// migrations versionnées V1).
+type PublicTable = keyof Database['public']['Tables']
 function rawTable<T>(supabase: SupabaseClient<Database>, table: string) {
-  return supabase.from(table) as unknown as {
+  return supabase.from(table as PublicTable) as unknown as {
     select: (columns: string) => {
-      gte: (column: string, value: string) => {
+      gte: (
+        column: string,
+        value: string,
+      ) => {
         order: (
           column: string,
           opts?: { ascending: boolean },
@@ -211,7 +220,11 @@ export async function getEmailHealth(
   const bounceMap = new Map<string, { count: number; lastAt: string; lastEvent: string }>()
   for (const e of events) {
     if (e.event_type !== 'bounced' && e.event_type !== 'soft_bounced') continue
-    const entry = bounceMap.get(e.recipient) ?? { count: 0, lastAt: e.created_at, lastEvent: e.event_type }
+    const entry = bounceMap.get(e.recipient) ?? {
+      count: 0,
+      lastAt: e.created_at,
+      lastEvent: e.event_type,
+    }
     entry.count += 1
     if (e.created_at > entry.lastAt) {
       entry.lastAt = e.created_at
@@ -299,9 +312,7 @@ interface AiUsageRowLite {
   created_at: string
 }
 
-export async function getPerfSnapshot(
-  supabase: SupabaseClient<Database>,
-): Promise<PerfSnapshot> {
+export async function getPerfSnapshot(supabase: SupabaseClient<Database>): Promise<PerfSnapshot> {
   const since7d = daysAgoIso(7)
   const since24h = hoursAgoIso(24)
 
@@ -525,10 +536,7 @@ export async function getChurnRiskUsers(
   const orgIds = subsList.map((s) => s.organization_id)
 
   // 2. Organisations
-  const { data: orgs } = await supabase
-    .from('organizations')
-    .select('id, name')
-    .in('id', orgIds)
+  const { data: orgs } = await supabase.from('organizations').select('id, name').in('id', orgIds)
   const orgMap = new Map<string, string>()
   for (const o of (orgs ?? []) as OrgRow[]) {
     orgMap.set(o.id, o.name)
@@ -610,7 +618,7 @@ export async function getChurnRiskUsers(
     // Signal déclencheur
     let triggerSignal: string | null = null
     if (sub.status === 'past_due') triggerSignal = 'Facture impayée (Stripe past_due)'
-    else if (sub.status === 'trialing' && (lastMissionDays ?? Infinity) >= 7)
+    else if (sub.status === 'trialing' && (lastMissionDays ?? Number.POSITIVE_INFINITY) >= 7)
       triggerSignal = 'Essai sans activité depuis 7 jours'
 
     results.push({

@@ -25,31 +25,27 @@ import { useRef, useState, useTransition } from 'react'
 import { deleteDiagnosticScanAction, rejectDiagnosticScanAction } from './actions'
 import { ScanProposalDialog } from './scan-proposal-dialog'
 
+// Les valeurs des champs typés littéralement sont garanties par les CHECK constraints
+// côté DB (cf. migration `20260519000000_diagnostic_scans.sql`). Côté TypeScript on
+// reflète le type DB brut (`string | null`) pour rester compatible avec les types
+// régénérés Supabase ; les composants consommateurs valident/narrowent au besoin
+// (cf. `scan.diagnostic_type as DiagnosticType` plus bas).
 interface ScanRow {
   id: string
   original_name: string | null
   mime_type: string | null
   size_bytes: number | null
-  diagnostic_type:
-    | 'dpe'
-    | 'amiante'
-    | 'plomb'
-    | 'gaz'
-    | 'electricite'
-    | 'termites'
-    | 'carrez'
-    | 'erp'
-    | null
+  diagnostic_type: string | null
   date_emission: string | null
   date_expiration: string | null
   adresse: string | null
   proprietaire: string | null
   ademe_number: string | null
-  energy_class: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | null
+  energy_class: string | null
   result_positive: boolean | null
-  usage_context: 'vente' | 'location' | 'unknown' | null
+  usage_context: string | null
   ai_confidence: number | null
-  status: 'pending' | 'analyzing' | 'analyzed' | 'confirmed' | 'rejected' | 'failed'
+  status: string
   client_id: string | null
   property_id: string | null
   created_at: string

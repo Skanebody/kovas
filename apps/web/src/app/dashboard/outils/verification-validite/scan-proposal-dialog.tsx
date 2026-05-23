@@ -23,18 +23,21 @@ import { Loader2, Sparkles } from 'lucide-react'
 import { useMemo, useState, useTransition } from 'react'
 import { confirmDiagnosticScanAction } from './actions'
 
+// Reflète le type DB brut (`string | null`) côté champs sous CHECK constraint.
+// Le narrowing vers DiagnosticType / Usage / EnergyClass est fait dans les
+// initialisations d'état ci-dessous.
 interface ScanRow {
   id: string
   original_name: string | null
-  diagnostic_type: DiagnosticType | null
+  diagnostic_type: string | null
   date_emission: string | null
   date_expiration: string | null
   adresse: string | null
   proprietaire: string | null
   ademe_number: string | null
-  energy_class: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | null
+  energy_class: string | null
   result_positive: boolean | null
-  usage_context: 'vente' | 'location' | 'unknown' | null
+  usage_context: string | null
   ai_confidence: number | null
   client_id: string | null
   property_id: string | null
@@ -77,7 +80,7 @@ export function ScanProposalDialog({
   onClose,
 }: ScanProposalDialogProps) {
   const [diagnosticType, setDiagnosticType] = useState<DiagnosticType>(
-    scan.diagnostic_type ?? 'dpe',
+    (scan.diagnostic_type as DiagnosticType | null) ?? 'dpe',
   )
   const [dateEmission, setDateEmission] = useState<string>(scan.date_emission ?? '')
   const [usage, setUsage] = useState<Usage>((scan.usage_context as Usage | null) ?? 'vente')

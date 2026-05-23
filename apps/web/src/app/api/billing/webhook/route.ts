@@ -1,16 +1,16 @@
-import type Stripe from 'stripe'
-import { NextResponse } from 'next/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import type { Database } from '@kovas/database/types'
-import { getStripe, isStripeConfigured } from '@/lib/stripe'
-import { getTier } from '@/lib/stripe-config'
 import {
-  sendTrialEndingReminder,
-  sendTrialConvertedReceipt,
   sendPaymentFailedNotice,
   sendSubscriptionCanceledNotice,
+  sendTrialConvertedReceipt,
+  sendTrialEndingReminder,
 } from '@/lib/email/billing'
 import { onFirstInvoicePaid } from '@/lib/referral/referral-engine'
+import { getStripe, isStripeConfigured } from '@/lib/stripe'
+import { getTier } from '@/lib/stripe-config'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
+import type Stripe from 'stripe'
 
 /**
  * Webhook Stripe : sync les états subscription/customer dans `subscriptions`.
@@ -39,11 +39,14 @@ export async function POST(request: Request) {
     )
   }
 
-  const admin = createAdminClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  )
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return NextResponse.json({ ok: false, error: 'supabase_admin_not_configured' }, { status: 503 })
+  }
+  const admin = createAdminClient<Database>(supabaseUrl, supabaseServiceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
 
   try {
     switch (event.type) {
@@ -60,7 +63,7 @@ export async function POST(request: Request) {
         const stripeSubId =
           typeof session.subscription === 'string'
             ? session.subscription
-            : session.subscription?.id ?? null
+            : (session.subscription?.id ?? null)
 
         let trialStart: string | null = null
         let trialEnd: string | null = null
@@ -76,19 +79,22 @@ export async function POST(request: Request) {
           }
         }
 
+        // Note: `subscriptions.trial_started_at` existe en DB mais n'est pas encore
+        // exposé dans les types régénérés. On stocke uniquement `trial_ends_at`
+        // (suffisant car `is_in_trial` est une colonne générée basée dessus).
+        // Le webhook `customer.subscription.created` ré-écrira ces champs si besoin.
         await admin.from('subscriptions').upsert(
           {
             organization_id: orgId,
             stripe_customer_id:
               typeof session.customer === 'string'
                 ? session.customer
-                : session.customer?.id ?? null,
+                : (session.customer?.id ?? null),
             stripe_subscription_id: stripeSubId,
             status,
             tier: tier.id,
             missions_included: tier.missionsIncluded,
             overage_price_cents: tier.overagePriceCents,
-            trial_started_at: trialStart,
             trial_ends_at: trialEnd,
           },
           { onConflict: 'organization_id' },
@@ -114,6 +120,7 @@ export async function POST(request: Request) {
           .maybeSingle()
         const prevStatus = wasTrialing.data?.status
 
+        // Cf. note sur trial_started_at dans `checkout.session.completed` ci-dessus.
         await admin
           .from('subscriptions')
           .update({
@@ -125,12 +132,7 @@ export async function POST(request: Request) {
             current_period_end: sub.items?.data[0]?.current_period_end
               ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
               : null,
-            trial_started_at: sub.trial_start
-              ? new Date(sub.trial_start * 1000).toISOString()
-              : null,
-            trial_ends_at: sub.trial_end
-              ? new Date(sub.trial_end * 1000).toISOString()
-              : null,
+            trial_ends_at: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
           })
           .eq('organization_id', orgId)
 
@@ -204,8 +206,8 @@ export async function POST(request: Request) {
         // Le SDK Stripe v22+ référence la subscription via plusieurs chemins
         // selon le contexte de l'invoice — on tente prudemment.
         const subRef =
-          (invoice as unknown as { subscription?: string | { id: string } | null })
-            .subscription ?? null
+          (invoice as unknown as { subscription?: string | { id: string } | null }).subscription ??
+          null
         if (!orgId && subRef) {
           const subId = typeof subRef === 'string' ? subRef : subRef.id
           try {
