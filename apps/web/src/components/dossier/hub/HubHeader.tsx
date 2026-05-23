@@ -42,7 +42,7 @@ export function HubHeader({
       <div className="flex h-auto min-h-[80px] flex-wrap items-center justify-between gap-3 py-3">
         <div className="flex items-center gap-3 min-w-0">
           <Button variant="ghost" size="icon" asChild aria-label="Retour aux dossiers">
-            <Link href="/app/dossiers">
+            <Link href="/dashboard/dossiers">
               <ArrowLeft className="size-4" />
             </Link>
           </Button>

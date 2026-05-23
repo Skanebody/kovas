@@ -158,10 +158,14 @@ export interface VisibleSections {
   billing: boolean
   followup: boolean
   notes: boolean
+  /** Chantier B (FIX-KK §B) — scans documents anciens du bien. Toujours dispo. */
+  historicalDocs: boolean
+  /** Chantier E (FIX-KK §E) — timeline activité dossier. Toujours dispo. */
+  activityLog: boolean
 }
 
 export function getVisibleSections(state: DossierState): VisibleSections {
-  // Identity + notes toujours visibles
+  // Identity + notes + historicalDocs + activityLog toujours visibles
   const base: VisibleSections = {
     identity: true,
     capture: false,
@@ -172,6 +176,8 @@ export function getVisibleSections(state: DossierState): VisibleSections {
     billing: false,
     followup: false,
     notes: true,
+    historicalDocs: true,
+    activityLog: true,
   }
 
   switch (state) {
@@ -189,7 +195,14 @@ export function getVisibleSections(state: DossierState): VisibleSections {
       return { ...base, capture: true, dataQuality: true, preExport: true, exports: true }
     case 'valide':
     case 'exporte':
-      return { ...base, capture: true, dataQuality: true, preExport: true, exports: true, communication: true }
+      return {
+        ...base,
+        capture: true,
+        dataQuality: true,
+        preExport: true,
+        exports: true,
+        communication: true,
+      }
     case 'envoye':
     case 'en_attente_paiement':
       return {
@@ -246,14 +259,14 @@ export function getPrimaryActionForState(state: DossierState, dossierId: string)
       return { label: 'Préparer la mission', actionId: 'prepare', variant: 'accent' }
     case 'en_preparation':
       return {
-        label: 'Démarrer la mission',
-        href: `/app/dossiers/${dossierId}?mode=mission`,
+        label: 'Commencer la mission',
+        actionId: 'start_mission',
         variant: 'accent',
       }
     case 'en_mission':
       return {
         label: 'Reprendre la mission',
-        href: `/app/dossiers/${dossierId}?mode=mission`,
+        href: `/dashboard/dossiers/${dossierId}/mission/tchat`,
         variant: 'accent',
       }
     case 'a_synchroniser':
@@ -263,7 +276,7 @@ export function getPrimaryActionForState(state: DossierState, dossierId: string)
     case 'a_valider':
       return {
         label: 'Valider le dossier',
-        href: `/app/dossiers/${dossierId}#data-quality`,
+        href: `/dashboard/dossiers/${dossierId}#data-quality`,
         variant: 'accent',
       }
     case 'valide':
