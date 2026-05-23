@@ -142,11 +142,23 @@ export default async function ArchivePage({ searchParams }: ArchivePageProps) {
       .limit(500),
   ])
 
-  const totalBytes = globalAggregation.files.reduce(
-    (acc, f) => acc + (f.file_size_bytes ?? 0),
-    0,
-  )
+  const totalBytes = globalAggregation.files.reduce((acc, f) => acc + (f.file_size_bytes ?? 0), 0)
   const lastFileAt = globalAggregation.files[0]?.created_at ?? null
+
+  // Compteurs par type pour KPI dominant
+  const kindCounts = globalAggregation.files.reduce<Record<string, number>>((acc, f) => {
+    acc[f.kind] = (acc[f.kind] ?? 0) + 1
+    return acc
+  }, {})
+  const topKindEntry = Object.entries(kindCounts).sort((a, b) => b[1] - a[1])[0] ?? null
+  const KIND_LABEL_FR: Record<string, string> = {
+    photo: 'Photos',
+    audio: 'Audio',
+    document: 'Documents',
+    export: 'Exports',
+  }
+  const topKindLabel = topKindEntry ? (KIND_LABEL_FR[topKindEntry[0]] ?? topKindEntry[0]) : '—'
+  const topKindCount = topKindEntry ? topKindEntry[1] : 0
 
   const clients = (clientsResult.data ?? []) as Array<{ id: string; display_name: string }>
 
@@ -180,22 +192,29 @@ export default async function ArchivePage({ searchParams }: ArchivePageProps) {
         </div>
       </header>
 
-      {/* Stats hero — toujours globales (pas filtrées) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Stats hero — 4 KPI cards alignés sur pattern fiche client */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiHero
           value={globalAggregation.total.toLocaleString('fr-FR')}
           label="Fichiers"
-          hint="Photos, audio, documents et exports cumulés"
+          hint="Tous types cumulés"
         />
         <KpiHero
           value={formatBytesShort(totalBytes)}
           label="Volume utilisé"
-          hint="Calculé sur les 200 fichiers les plus récents"
+          hint="200 fichiers récents"
+        />
+        <KpiHero
+          value={topKindLabel}
+          label="Type dominant"
+          hint={
+            topKindEntry ? `${topKindCount} fichier${topKindCount > 1 ? 's' : ''}` : 'Aucune donnée'
+          }
         />
         <KpiHero
           value={formatRelative(lastFileAt)}
           label="Dernier ajout"
-          hint={lastFileAt ? 'Photo, doc ou audio uploadé' : 'Aucun fichier pour le moment'}
+          hint={lastFileAt ? 'Date du fichier le plus récent' : 'Aucun fichier'}
         />
       </div>
 
