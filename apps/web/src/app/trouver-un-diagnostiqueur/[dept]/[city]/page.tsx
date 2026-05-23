@@ -96,15 +96,16 @@ type SeoGeoPageRow = {
 
 type DiagnosticianCard = {
   id: string
-  slug_full: string
-  display_name: string
-  company_name: string | null
-  address_line: string | null
-  phone_e164: string | null
-  rating_avg: number | null
-  reviews_count: number | null
-  certifications: string[] | null
-  years_experience: number | null
+  /** Schéma canonique unifié. Alias des anciens noms pour compat templates. */
+  slug: string
+  full_name: string
+  city: string | null
+  address: string | null
+  phone: string | null
+  gmb_rating: number | null
+  gmb_review_count: number | null
+  certifications: unknown
+  years_active: number | null
 }
 
 async function loadCityPage(citySlug: string): Promise<SeoGeoPageRow | null> {
@@ -130,38 +131,47 @@ async function loadDiagnosticiansForCity(
   deptCode: string,
   limit = 12,
 ): Promise<{ rows: DiagnosticianCard[]; widenedToDept: boolean }> {
+  // Schéma canonique prod (post-réconciliation FIX-AA) : slug / full_name /
+  // city_slug / department_code (alias dept_code) / gmb_rating / etc.
+  // Les anciens alias display_name / slug_full / address_line / phone_e164 /
+  // rating_avg / reviews_count / years_experience ont disparu → query échouait
+  // silencieusement, d'où "aucun diagnostiqueur" sur les pages city alors que
+  // 50 fixtures sont en base. Fix 2026-05-23.
+  const SELECT_FIELDS =
+    'id, slug, full_name, city, address, phone, gmb_rating, gmb_review_count, certifications, years_active'
+
   try {
     const supabase = await createClient()
-    // biome-ignore lint/suspicious/noExplicitAny: diagnosticians cohabitation
-    const { data, error } = await (supabase as any)
+    // biome-ignore lint/suspicious/noExplicitAny: types Database à régénérer post-FIX-AA
+    const client = supabase as any
+
+    const { data: cityData, error: cityError } = await client
       .from('diagnosticians')
-      .select(
-        'id, slug_full, display_name, company_name, address_line, phone_e164, rating_avg, reviews_count, certifications, years_experience',
-      )
-      .eq('slug_city', citySlug)
+      .select(SELECT_FIELDS)
+      .eq('city_slug', citySlug)
       .eq('is_published', true)
-      .order('rating_avg', { ascending: false, nullsFirst: false })
+      .order('gmb_rating', { ascending: false, nullsFirst: false })
       .limit(limit)
 
-    const cityRows = !error && data ? (data as DiagnosticianCard[]) : []
+    const cityRows = !cityError && cityData ? (cityData as DiagnosticianCard[]) : []
     if (cityRows.length >= 3) {
       return { rows: cityRows, widenedToDept: false }
     }
 
-    // Si <3 diags locaux : élargir au département voisin pour respecter "3+
-    // diagnostiqueurs réels par page" (Core Update mai 2026).
-    // biome-ignore lint/suspicious/noExplicitAny: cohabitation
-    const { data: deptData, error: deptError } = await (supabase as any)
+    // <3 diags locaux : on élargit au département pour respecter "3+
+    // diagnostiqueurs réels par page" (Core Update mai 2026 helpful content).
+    // Cherche sur department_code OU dept_code (cohabitation legacy/canonique).
+    const { data: deptData, error: deptError } = await client
       .from('diagnosticians')
-      .select(
-        'id, slug_full, display_name, company_name, address_line, phone_e164, rating_avg, reviews_count, certifications, years_experience',
-      )
-      .eq('dept_code', deptCode)
+      .select(SELECT_FIELDS)
+      .or(`department_code.eq.${deptCode},dept_code.eq.${deptCode}`)
       .eq('is_published', true)
-      .order('rating_avg', { ascending: false, nullsFirst: false })
+      .order('gmb_rating', { ascending: false, nullsFirst: false })
       .limit(limit)
 
-    if (deptError || !deptData) return { rows: cityRows, widenedToDept: false }
+    if (deptError || !deptData) {
+      return { rows: cityRows, widenedToDept: false }
+    }
 
     return { rows: deptData as DiagnosticianCard[], widenedToDept: true }
   } catch {
@@ -342,21 +352,21 @@ function buildLocalBusinessListJsonLd(
       position: idx + 1,
       item: {
         '@type': 'LocalBusiness',
-        '@id': `${SITE_URL}/trouver-un-diagnostiqueur/diag/${d.slug_full}`,
-        name: d.display_name,
+        '@id': `${SITE_URL}/trouver-un-diagnostiqueur/diag/${d.slug}`,
+        name: d.full_name,
         address: {
           '@type': 'PostalAddress',
-          streetAddress: d.address_line ?? undefined,
+          streetAddress: d.address ?? undefined,
           addressLocality: cityName,
           addressRegion: regionName ?? undefined,
           addressCountry: 'FR',
         },
-        telephone: d.phone_e164 ?? undefined,
-        aggregateRating: d.rating_avg
+        telephone: d.phone ?? undefined,
+        aggregateRating: d.gmb_rating
           ? {
               '@type': 'AggregateRating',
-              ratingValue: d.rating_avg,
-              reviewCount: d.reviews_count ?? 0,
+              ratingValue: d.gmb_rating,
+              reviewCount: d.gmb_review_count ?? 0,
               bestRating: 5,
               worstRating: 1,
             }
@@ -777,45 +787,59 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
               {diagnosticians.map((d) => (
                 <Link
                   key={d.id}
-                  href={`/trouver-un-diagnostiqueur/${dept}/${city}/${d.slug_full}`}
+                  href={`/trouver-un-diagnostiqueur/${dept}/${city}/${d.slug}`}
                   className="block"
                 >
                   <Card className="p-5 hover:shadow-glass transition-shadow h-full">
-                    <h3 className="font-semibold text-ink text-base">{d.display_name}</h3>
-                    {d.company_name ? (
-                      <p className="text-xs text-ink-mute mt-0.5">{d.company_name}</p>
-                    ) : null}
-                    {d.years_experience ? (
+                    <h3 className="font-semibold text-ink text-base">{d.full_name}</h3>
+                    {d.city ? <p className="text-xs text-ink-mute mt-0.5">{d.city}</p> : null}
+                    {d.years_active ? (
                       <p className="text-xs text-ink-mute mt-0.5">
-                        {d.years_experience} ans d'expérience
+                        {d.years_active} ans d&apos;expérience
                       </p>
                     ) : null}
-                    {d.address_line ? (
+                    {d.address ? (
                       <p className="text-sm text-ink-soft mt-2 flex items-start gap-1.5">
                         <MapPin className="size-3.5 text-ink-mute mt-0.5 shrink-0" />
-                        <span>{d.address_line}</span>
+                        <span>{d.address}</span>
                       </p>
                     ) : null}
-                    {d.phone_e164 ? (
+                    {d.phone ? (
                       <p className="text-sm text-ink-soft mt-1 flex items-center gap-1.5 font-mono">
                         <Phone className="size-3.5 text-ink-mute" />
-                        {d.phone_e164}
+                        {d.phone}
                       </p>
                     ) : null}
-                    {d.rating_avg ? (
+                    {d.gmb_rating ? (
                       <p className="text-xs text-ink-mute mt-2">
-                        Note {d.rating_avg.toFixed(1)}/5 ({d.reviews_count ?? 0} avis)
+                        Note {d.gmb_rating.toFixed(1)}/5 ({d.gmb_review_count ?? 0} avis)
                       </p>
                     ) : null}
-                    {d.certifications && d.certifications.length > 0 ? (
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {d.certifications.slice(0, 3).map((c) => (
-                          <Badge key={c} variant="muted" className="text-[10px]">
-                            {c}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : null}
+                    {(() => {
+                      // Certifications stockées comme jsonb objet riche
+                      // [{type:'DPE',status:'valid',...}] ou legacy string[].
+                      const certs = Array.isArray(d.certifications) ? d.certifications : []
+                      const codes = certs
+                        .map((c: unknown) => {
+                          if (typeof c === 'string') return c
+                          if (c && typeof c === 'object' && 'type' in c) {
+                            const t = (c as { type?: unknown }).type
+                            return typeof t === 'string' ? t : null
+                          }
+                          return null
+                        })
+                        .filter((c): c is string => Boolean(c))
+                      if (codes.length === 0) return null
+                      return (
+                        <div className="flex flex-wrap gap-1 mt-3">
+                          {codes.slice(0, 3).map((c) => (
+                            <Badge key={c} variant="muted" className="text-[10px]">
+                              {c}
+                            </Badge>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </Card>
                 </Link>
               ))}
