@@ -57,12 +57,18 @@ import { StartTrialButton } from './start-trial-button'
 
 type TabKey = 'profil' | 'securite' | 'abonnement' | 'cabinet' | 'facturation'
 
+/**
+ * Tab "facturation" = Abonnement KOVAS (factures que KOVAS émet AU diagnostiqueur
+ * pour son abonnement SaaS). À ne PAS confondre avec /dashboard/facturation qui
+ * regroupe les factures que LE diagnostiqueur émet à ses propres clients (revenus).
+ * Le libellé visible utilise "Factures KOVAS" pour lever toute ambiguïté.
+ */
 const TABS: ReadonlyArray<{ key: TabKey; label: string; icon: LucideIcon }> = [
   { key: 'profil', label: 'Profil', icon: UserIcon },
   { key: 'securite', label: 'Sécurité', icon: Shield },
   { key: 'abonnement', label: 'Abonnement', icon: CreditCard },
   { key: 'cabinet', label: 'Cabinet', icon: Building2 },
-  { key: 'facturation', label: 'Facturation', icon: Receipt },
+  { key: 'facturation', label: 'Factures KOVAS', icon: Receipt },
 ]
 
 interface AccountSettingsClientProps {
@@ -308,6 +314,15 @@ function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
 
   return (
     <div className="space-y-5">
+      {/* Ribbon de distinction "Abonnement KOVAS" (dépenses) */}
+      <div
+        className="inline-flex items-center gap-2 rounded-pill border border-[#0F1419]/15 bg-[#0F1419]/[0.06] px-3 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-[#0F1419]"
+        aria-label="Cette section concerne votre abonnement KOVAS"
+      >
+        <span aria-hidden className="size-1.5 rounded-full bg-[#0F1419]" />
+        Votre abonnement KOVAS · vos dépenses
+      </div>
+
       <Card variant="opaque" padding="default" className="overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div className="space-y-3">
@@ -382,9 +397,14 @@ function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 mt-5 pt-5 border-t border-[#0F1419]/[0.08]">
+          {/*
+            Bouton "Factures KOVAS" → tab #facturation de la page Compte
+            (= factures que KOVAS m'émet pour mon abonnement). À ne PAS confondre
+            avec /dashboard/facturation (factures que J'émets à MES clients).
+          */}
           <Button asChild variant="outline" size="default" className="flex-1">
-            <Link href="/dashboard/facturation">
-              <CreditCard className="size-4" /> Mes factures
+            <Link href="/dashboard/account?tab=facturation">
+              <Receipt className="size-4" /> Mes factures KOVAS
             </Link>
           </Button>
           {isActive && (
@@ -530,27 +550,53 @@ function CabinetTab({ props }: { props: AccountSettingsClientProps }) {
   )
 }
 
-/* ============== TAB 5 — FACTURATION ============== */
+/* ============== TAB 5 — FACTURES KOVAS (abonnement SaaS) ============== */
 
+/**
+ * Tab "Factures KOVAS" = les factures que KOVAS émet AU diagnostiqueur pour son
+ * abonnement SaaS (prélèvement mensuel + dépassements éventuels). Source =
+ * Stripe via /api/billing/invoices. À ne PAS confondre avec /dashboard/facturation
+ * qui liste les factures que LE diagnostiqueur émet à SES propres clients.
+ */
 function FacturationTab({ props }: { props: AccountSettingsClientProps }) {
   return (
     <div className="space-y-5">
+      {/* Ribbon de distinction visuelle — navy pour identifier "dépenses KOVAS" */}
+      <div
+        className="inline-flex items-center gap-2 rounded-pill border border-[#0F1419]/15 bg-[#0F1419]/[0.06] px-3 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-[#0F1419]"
+        aria-label="Cette section concerne votre abonnement KOVAS, pas les factures émises à vos clients"
+      >
+        <span aria-hidden className="size-1.5 rounded-full bg-[#0F1419]" />
+        Votre abonnement KOVAS · factures payées par vous à KOVAS
+      </div>
+
       <Card variant="opaque" padding="default" className="space-y-4">
-        <SectionTitle icon={Receipt} title="Historique de facturation" iconColor="#0F1419" />
+        <SectionTitle icon={Receipt} title="Historique des factures KOVAS" iconColor="#0F1419" />
         <p className="text-[13px] text-[#0F1419]/65 leading-relaxed">
-          Toutes vos factures KOVAS (abonnement + dépassements) sont disponibles en téléchargement
-          PDF. TVA 20% en sus, déductible si vous êtes assujetti. Conservation 10 ans (obligation
-          comptable L.123-22).
+          Factures émises par <strong>SASU Nexus 1993</strong> (éditeur KOVAS) pour votre abonnement
+          SaaS et les éventuels dépassements de quota. TVA 20% en sus, déductible si vous êtes
+          assujetti. Conservation 10 ans (obligation comptable L.123-22).
         </p>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <KovasInvoicesEmbedded />
+        <p className="text-[11px] text-[#0F1419]/50 leading-snug">
+          Pour vos propres factures clients (revenus), rendez-vous sur la page{' '}
+          <Link
+            href="/dashboard/facturation"
+            className="underline underline-offset-2 hover:text-[#0F1419]"
+          >
+            Facturation
+          </Link>
+          .
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#0F1419]/[0.08]">
           <Button asChild variant="default" size="default">
-            <Link href="/dashboard/facturation">
-              <Receipt className="size-4" /> Accéder à mes factures
+            <Link href="/api/billing/portal" prefetch={false}>
+              <CreditCard className="size-4" /> Gérer mon abonnement (Stripe)
             </Link>
           </Button>
           <Button asChild variant="outline" size="default">
             <Link href="/pricing">
-              <ArrowRight className="size-4" /> Comparer les forfaits
+              <ArrowRight className="size-4" /> Changer de plan
             </Link>
           </Button>
         </div>
@@ -576,6 +622,186 @@ function FacturationTab({ props }: { props: AccountSettingsClientProps }) {
         <CalendarSyncExport httpsUrl={props.calendarHttpsUrl} webcalUrl={props.calendarWebcalUrl} />
       </Card>
     </div>
+  )
+}
+
+/* ============== KovasInvoicesEmbedded ============== */
+
+interface StripeInvoiceSummary {
+  id: string
+  number: string | null
+  status: string | null
+  amount_paid: number
+  amount_due: number
+  currency: string
+  created: number
+  period_start: number
+  period_end: number
+  invoice_pdf: string | null
+  hosted_invoice_url: string | null
+}
+
+/**
+ * Liste embedded des factures Stripe KOVAS pour l'utilisateur courant.
+ * Charge depuis /api/billing/invoices (route déjà sécurisée par session).
+ * Responsive : sur mobile, montre uniquement Date + Montant + bouton PDF ;
+ * sur desktop, ajoute Numéro / Période / Statut.
+ */
+function KovasInvoicesEmbedded() {
+  const [state, setState] = useState<
+    | { kind: 'loading' }
+    | { kind: 'empty' }
+    | { kind: 'ready'; items: StripeInvoiceSummary[] }
+    | { kind: 'error'; message: string }
+  >({ kind: 'loading' })
+
+  useEffect(() => {
+    let alive = true
+    fetch('/api/billing/invoices', { cache: 'no-store' })
+      .then(async (res) => {
+        if (!alive) return
+        if (res.status === 503) {
+          setState({ kind: 'empty' })
+          return
+        }
+        if (!res.ok) {
+          setState({ kind: 'error', message: `HTTP ${res.status}` })
+          return
+        }
+        const body = (await res.json()) as { invoices?: StripeInvoiceSummary[] }
+        const items = body.invoices ?? []
+        if (items.length === 0) {
+          setState({ kind: 'empty' })
+          return
+        }
+        setState({ kind: 'ready', items })
+      })
+      .catch((err: unknown) => {
+        if (!alive) return
+        const message = err instanceof Error ? err.message : 'Erreur inconnue'
+        setState({ kind: 'error', message })
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  if (state.kind === 'loading') {
+    return (
+      <div className="rounded-[12px] border border-[#0F1419]/[0.08] bg-[#F5F7F4] px-4 py-6 text-center text-[12px] text-[#0F1419]/55">
+        Chargement de votre historique Stripe…
+      </div>
+    )
+  }
+  if (state.kind === 'error') {
+    return (
+      <div className="rounded-[12px] border border-[#DC2626]/30 bg-[#DC2626]/[0.06] px-4 py-3 text-[12px] text-[#DC2626]">
+        Impossible de charger l'historique : {state.message}
+      </div>
+    )
+  }
+  if (state.kind === 'empty') {
+    return (
+      <div className="rounded-[12px] border border-[#0F1419]/[0.08] bg-[#F5F7F4] px-4 py-6 text-center text-[12px] text-[#0F1419]/55">
+        Aucune facture KOVAS pour l'instant. Vos factures apparaîtront ici après le premier
+        prélèvement automatique.
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-[12px] border border-[#0F1419]/[0.08] overflow-hidden bg-white">
+      <div className="overflow-x-auto">
+        <table className="w-full text-[13px] min-w-[320px]">
+          <thead className="bg-[#F5F7F4] text-[#0F1419]/55 text-[10px] font-mono uppercase tracking-[0.1em]">
+            <tr>
+              <th className="text-left px-3 py-2.5">Date</th>
+              <th className="text-left px-3 py-2.5 hidden md:table-cell">Numéro</th>
+              <th className="text-left px-3 py-2.5 hidden lg:table-cell">Période</th>
+              <th className="text-left px-3 py-2.5 hidden sm:table-cell">Statut</th>
+              <th className="text-right px-3 py-2.5">Total TTC</th>
+              <th className="text-right px-3 py-2.5">PDF</th>
+            </tr>
+          </thead>
+          <tbody>
+            {state.items.map((inv) => (
+              <KovasInvoiceRow key={inv.id} invoice={inv} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function KovasInvoiceRow({ invoice }: { invoice: StripeInvoiceSummary }) {
+  const status = invoice.status ?? 'draft'
+  const STATUS_LABEL: Record<string, string> = {
+    paid: 'Payée',
+    open: 'En attente',
+    draft: 'Brouillon',
+    uncollectible: 'Échec',
+    void: 'Annulée',
+  }
+  const STATUS_VARIANT: Record<string, 'green' | 'orange' | 'red' | 'muted' | 'blue'> = {
+    paid: 'green',
+    open: 'orange',
+    draft: 'muted',
+    uncollectible: 'red',
+    void: 'muted',
+  }
+  const amount = status === 'paid' ? invoice.amount_paid : invoice.amount_due
+  const dateFmt = new Intl.DateTimeFormat('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+  const date = invoice.created ? dateFmt.format(new Date(invoice.created * 1000)) : '—'
+  const periodStart = invoice.period_start
+    ? dateFmt.format(new Date(invoice.period_start * 1000))
+    : '—'
+  const periodEnd = invoice.period_end ? dateFmt.format(new Date(invoice.period_end * 1000)) : '—'
+  const amountFmt = new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: (invoice.currency ?? 'EUR').toUpperCase(),
+    minimumFractionDigits: 2,
+  }).format(amount / 100)
+
+  return (
+    <tr className="border-t border-[#0F1419]/[0.06] hover:bg-[#F5F7F4]/50 transition-colors">
+      <td className="px-3 py-2.5 whitespace-nowrap text-[#0F1419]">{date}</td>
+      <td className="px-3 py-2.5 hidden md:table-cell font-mono text-[12px] text-[#0F1419]/65">
+        {invoice.number ?? '—'}
+      </td>
+      <td className="px-3 py-2.5 hidden lg:table-cell text-[#0F1419]/65 whitespace-nowrap">
+        {periodStart} → {periodEnd}
+      </td>
+      <td className="px-3 py-2.5 hidden sm:table-cell">
+        <Badge variant={STATUS_VARIANT[status] ?? 'muted'} className="text-[10px]">
+          {STATUS_LABEL[status] ?? status}
+        </Badge>
+      </td>
+      <td className="px-3 py-2.5 text-right tabular-nums font-medium text-[#0F1419]">
+        {amountFmt}
+      </td>
+      <td className="px-3 py-2.5 text-right">
+        {invoice.invoice_pdf ? (
+          <Button asChild size="sm" variant="outline">
+            <a
+              href={invoice.invoice_pdf}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Télécharger la facture KOVAS ${invoice.number ?? invoice.id} en PDF`}
+            >
+              <Download className="size-3.5" />
+              <span className="hidden sm:inline">PDF</span>
+            </a>
+          </Button>
+        ) : (
+          <span className="text-[#0F1419]/35 text-[11px]">—</span>
+        )}
+      </td>
+    </tr>
   )
 }
 

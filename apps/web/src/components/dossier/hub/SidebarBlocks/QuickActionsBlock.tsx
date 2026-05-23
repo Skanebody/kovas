@@ -24,45 +24,50 @@ interface QuickActionsBlockProps {
 /**
  * Bloc sidebar — Actions rapides (6 boutons icônes carrés ~80px).
  *
- * Branchements (post-2026-05-23) :
- * - Mic     : ancre `#capture` (scroll vers section voice-recorder)
- * - Camera  : ancre `#capture` (scroll vers section photo-capture)
+ * Branchements (refonte 2026-05-23 — 3e tentative, root cause :
+ * les ancres `#capture` / `#exports` pointaient vers des sections cachées par
+ * `getVisibleSections(state)` quand le dossier était en `brouillon`/`confirme`/
+ * `paye`/`archive`. Donc cliquer ne faisait rien). On route maintenant vers des
+ * pages dédiées qui existent TOUJOURS quel que soit l'état du dossier :
+ *
+ * - Mic     : `/dashboard/dossiers/[id]/mission` (mode terrain capture-first
+ *             voice + photos + scans, ALWAYS rendered)
+ * - Camera  : idem mission (sub-route dédiée capture)
  * - Mail    : `mailto:` si email client présent, sinon toast d'info
  * - Phone   : `tel:` si téléphone client présent, sinon toast d'info
  * - Share   : ouvre Dialog "Partager le dossier" (3 modes : lien copiable,
  *             email pré-rempli, téléchargement ZIP)
- * - Download: téléchargement direct ZIP exports dossier
+ * - Download: `/dashboard/dossiers/[id]/prevalidation` (export/validation
+ *             ADEME + génération PDF — ALWAYS rendered)
  */
-export function QuickActionsBlock({
-  dossierId,
-  clientPhone,
-  clientEmail,
-}: QuickActionsBlockProps) {
+export function QuickActionsBlock({ dossierId, clientPhone, clientEmail }: QuickActionsBlockProps) {
+  const missionUrl = `/dashboard/dossiers/${dossierId}/mission`
+  const prevalidationUrl = `/dashboard/dossiers/${dossierId}/prevalidation`
   return (
     <Card variant="flat" padding="sm" className="space-y-3">
       <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
         Actions rapides
       </p>
       <div className="grid grid-cols-3 gap-2">
-        <ActionAnchor href="#capture" label="Notes vocales" icon={Mic} />
-        <ActionAnchor href="#capture" label="Photos" icon={Camera} />
+        <ActionLink href={missionUrl} label="Notes vocales" icon={Mic} />
+        <ActionLink href={missionUrl} label="Photos" icon={Camera} />
         <ActionMail clientEmail={clientEmail} dossierId={dossierId} />
         <ActionPhone clientPhone={clientPhone} />
         <ActionShare dossierId={dossierId} clientEmail={clientEmail} />
-        <ActionAnchor href="#exports" label="Exporter" icon={Download} />
+        <ActionLink href={prevalidationUrl} label="Exporter" icon={Download} />
       </div>
     </Card>
   )
 }
 
 const BASE_CLASS =
-  'flex aspect-square flex-col items-center justify-center rounded-md border border-rule/60 bg-paper hover:border-ink/30 transition-all duration-fast'
+  'flex aspect-square flex-col items-center justify-center rounded-md border border-rule/60 bg-paper hover:border-ink/30 hover:bg-cream-deep/30 transition-all duration-fast cursor-pointer'
 
 interface IconProps {
   className?: string
 }
 
-function ActionAnchor({
+function ActionLink({
   href,
   label,
   icon: Icon,
@@ -71,20 +76,8 @@ function ActionAnchor({
   label: string
   icon: ComponentType<IconProps>
 }) {
-  // Anchor scroll local : on évite `next/link` quand href commence par `#`
-  // pour préserver le comportement natif du scroll.
-  if (href.startsWith('#')) {
-    return (
-      <a href={href} className={BASE_CLASS} aria-label={label}>
-        <Icon className="size-4 text-ink" />
-        <span className="text-[10px] font-medium text-ink-soft mt-1.5 leading-tight text-center">
-          {label}
-        </span>
-      </a>
-    )
-  }
   return (
-    <Link href={href} className={BASE_CLASS} aria-label={label}>
+    <Link href={href} prefetch={false} className={BASE_CLASS} aria-label={label}>
       <Icon className="size-4 text-ink" />
       <span className="text-[10px] font-medium text-ink-soft mt-1.5 leading-tight text-center">
         {label}
@@ -120,8 +113,7 @@ function ActionMail({
       className={BASE_CLASS}
       onClick={() =>
         toast.info('Aucun email client', {
-          description:
-            'Ajoutez une adresse email au client pour activer ce raccourci.',
+          description: 'Ajoutez une adresse email au client pour activer ce raccourci.',
         })
       }
     >
@@ -136,11 +128,7 @@ function ActionMail({
 function ActionPhone({ clientPhone }: { clientPhone: string | null }) {
   if (clientPhone) {
     return (
-      <a
-        href={`tel:${clientPhone}`}
-        className={BASE_CLASS}
-        aria-label={`Appeler ${clientPhone}`}
-      >
+      <a href={`tel:${clientPhone}`} className={BASE_CLASS} aria-label={`Appeler ${clientPhone}`}>
         <Phone className="size-4 text-ink" />
         <span className="text-[10px] font-medium text-ink-soft mt-1.5 leading-tight text-center">
           Appeler
@@ -154,8 +142,7 @@ function ActionPhone({ clientPhone }: { clientPhone: string | null }) {
       className={BASE_CLASS}
       onClick={() =>
         toast.info('Aucun téléphone client', {
-          description:
-            'Ajoutez un numéro au client pour activer ce raccourci.',
+          description: 'Ajoutez un numéro au client pour activer ce raccourci.',
         })
       }
     >
@@ -191,7 +178,7 @@ function ActionShare({
       setOpen(false)
     } catch (_e) {
       toast.error('Copie impossible', {
-        description: 'Votre navigateur a refusé l\'accès au presse-papiers.',
+        description: "Votre navigateur a refusé l'accès au presse-papiers.",
       })
     }
   }
@@ -199,11 +186,7 @@ function ActionShare({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button
-          type="button"
-          className={BASE_CLASS}
-          aria-label="Partager le dossier"
-        >
+        <button type="button" className={BASE_CLASS} aria-label="Partager le dossier">
           <Share2 className="size-4 text-ink" />
           <span className="text-[10px] font-medium text-ink-soft mt-1.5 leading-tight text-center">
             Partager
@@ -214,8 +197,8 @@ function ActionShare({
         <DialogHeader>
           <DialogTitle>Partager le dossier</DialogTitle>
           <DialogDescription>
-            Trois modes de partage. Le lien envoyé renvoie vers votre espace
-            KOVAS — accessible uniquement aux comptes autorisés.
+            Trois modes de partage. Le lien envoyé renvoie vers votre espace KOVAS — accessible
+            uniquement aux comptes autorisés.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
@@ -242,14 +225,12 @@ function ActionShare({
                 <Mail className="size-4 text-ink-mute" />
                 Envoyer par email au client
               </span>
-              <span className="font-mono text-[10px] text-ink-faint">
-                {clientEmail}
-              </span>
+              <span className="font-mono text-[10px] text-ink-faint">{clientEmail}</span>
             </a>
           ) : (
             <div className="w-full rounded-md border border-dashed border-rule/60 bg-paper/60 px-3 py-2.5 text-[12px] text-ink-faint">
-              Aucun email client renseigné — ajoutez-en un dans la fiche
-              client pour activer l\'envoi direct.
+              Aucun email client renseigné — ajoutez-en un dans la fiche client pour activer
+              l&apos;envoi direct.
             </div>
           )}
           <a

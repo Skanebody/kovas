@@ -1,13 +1,13 @@
 import { AppPageHeader } from '@/components/app-page-header'
 import { DevisSectionLive } from '@/components/facturation/devis-section'
-import { FacturesSectionLive } from '@/components/facturation/factures-section'
 import { FacturationSearchBar } from '@/components/facturation/facturation-search-bar'
 import { FacturationTabs } from '@/components/facturation/facturation-tabs'
+import { FacturesSectionLive } from '@/components/facturation/factures-section'
+import { filterTarifs } from '@/components/facturation/filter'
+import { MOCK_TARIFS } from '@/components/facturation/mock-data'
+import { NewDocumentButton } from '@/components/facturation/new-document-button'
 import { TarifsMobileCard } from '@/components/facturation/tarifs-mobile-card'
 import { TarifsTable } from '@/components/facturation/tarifs-table'
-import { MOCK_TARIFS } from '@/components/facturation/mock-data'
-import { filterTarifs } from '@/components/facturation/filter'
-import { NewDocumentButton } from '@/components/facturation/new-document-button'
 import { type FacturationTab, isFacturationTab } from '@/components/facturation/types'
 import { EmptyState } from '@/components/ui/empty-state'
 import { FileSpreadsheet, Package } from 'lucide-react'
@@ -50,13 +50,25 @@ export default async function FacturationPage({ searchParams }: FacturationPageP
 
   const headerCopy =
     current === 'devis'
-      ? 'Pipeline de devis par ordre d\'urgence — à envoyer, en attente de signature, à archiver.'
+      ? "Pipeline de devis par ordre d'urgence — à envoyer, en attente de signature, à archiver."
       : current === 'factures'
-        ? 'Pipeline de facturation par ordre d\'urgence — en retard, à échéance, payées.'
+        ? "Pipeline de facturation par ordre d'urgence — en retard, à échéance, payées."
         : 'Catalogue de produits et services réutilisables dans vos devis et factures.'
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto w-full">
+      {/* ============================================
+          Ribbon "Vos revenus" — distinction visuelle vs abonnement KOVAS.
+          Pattern chartreuse pour identifier la catégorie "argent qui rentre".
+          ============================================ */}
+      <div
+        className="inline-flex items-center gap-2 rounded-pill border border-[#D4F542]/60 bg-[#D4F542]/15 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-[#0F1419]"
+        aria-label="Cette page concerne vos revenus, pas votre abonnement KOVAS"
+      >
+        <span aria-hidden className="size-1.5 rounded-full bg-[#0F1419]" />
+        Vos revenus · factures émises à vos clients
+      </div>
+
       <AppPageHeader
         title="Votre"
         accent="facturation"
@@ -71,9 +83,7 @@ export default async function FacturationPage({ searchParams }: FacturationPageP
 
       {current === 'devis' && <DevisSectionLive />}
       {current === 'factures' && <FacturesSectionLive />}
-      {current === 'tarifs' && (
-        <TarifsSection rows={tarifsRows} hasQuery={Boolean(query)} />
-      )}
+      {current === 'tarifs' && <TarifsSection rows={tarifsRows} hasQuery={Boolean(query)} />}
     </div>
   )
 }

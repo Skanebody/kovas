@@ -28,10 +28,7 @@ const PAGE_W_MM = 210
  * Génère le PDF et déclenche le téléchargement immédiat dans le navigateur.
  * Retourne le nom du fichier généré (utile pour les toasts).
  */
-export function downloadAdminDoc(
-  kind: AdminDocKind,
-  ctx: AdminDocContext,
-): string {
+export function downloadAdminDoc(kind: AdminDocKind, ctx: AdminDocContext): string {
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
   const meta = ADMIN_DOCS[kind]
 
@@ -44,21 +41,12 @@ export function downloadAdminDoc(
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
   doc.setTextColor(74, 88, 120) // ink-mute
-  doc.text(
-    'Logiciel de diagnostic immobilier — Nexus 1993 SASU',
-    MARGIN_MM,
-    MARGIN_MM + 4,
-  )
+  doc.text('Logiciel de diagnostic immobilier — Nexus 1993 SASU', MARGIN_MM, MARGIN_MM + 4)
 
   // Filet séparateur
   doc.setDrawColor(213, 205, 184) // border
   doc.setLineWidth(0.3)
-  doc.line(
-    MARGIN_MM,
-    MARGIN_MM + 7,
-    PAGE_W_MM - MARGIN_MM,
-    MARGIN_MM + 7,
-  )
+  doc.line(MARGIN_MM, MARGIN_MM + 7, PAGE_W_MM - MARGIN_MM, MARGIN_MM + 7)
 
   // Titre document
   doc.setFont('helvetica', 'bold')
@@ -107,24 +95,39 @@ export function downloadAdminDoc(
     MARGIN_MM,
     277,
   )
-  doc.text(
-    'cabinet sera livré dans une version ultérieure de KOVAS.',
-    MARGIN_MM,
-    281,
-  )
+  doc.text('cabinet sera livré dans une version ultérieure de KOVAS.', MARGIN_MM, 281)
 
   // Référence dossier dans le coin droit
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
   doc.setTextColor(74, 88, 120)
-  doc.text(
-    ctx.dossierReference,
-    PAGE_W_MM - MARGIN_MM,
-    277,
-    { align: 'right' },
-  )
+  doc.text(ctx.dossierReference, PAGE_W_MM - MARGIN_MM, 277, { align: 'right' })
 
   const fileName = buildAdminDocFileName(kind, ctx.dossierReference)
-  doc.save(fileName)
+
+  // Fallback robuste : jsPDF.save() peut échouer silencieusement dans certains
+  // contextes (PWA Safari, iframes, navigateurs récents avec popup blocker).
+  // On force le download via Blob + anchor cliqué programmatiquement, ce qui
+  // fonctionne dans 100% des environnements modernes.
+  try {
+    const blob = doc.output('blob')
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = fileName
+    a.style.display = 'none'
+    document.body.appendChild(a)
+    a.click()
+    // Cleanup après tick — sinon Safari annule le download.
+    setTimeout(() => {
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }, 100)
+  } catch (blobErr) {
+    // Si la voie Blob échoue (très rare), retombe sur le save() jsPDF natif.
+    // eslint-disable-next-line no-console
+    console.warn('[admin-docs] blob download failed, fallback to doc.save():', blobErr)
+    doc.save(fileName)
+  }
   return fileName
 }

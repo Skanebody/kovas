@@ -185,6 +185,7 @@ function AppSidebarFull({
               key={def.id}
               href={def.href}
               label={def.label}
+              tooltip={def.tooltip}
               icon={def.icon}
               active={isActive(pathname, def.href)}
               collapsed={collapsed}
@@ -207,6 +208,7 @@ function AppSidebarFull({
               key={def.id}
               href={def.href}
               label={def.label}
+              tooltip={def.tooltip}
               icon={def.icon}
               active={isActive(pathname, def.href)}
               collapsed={collapsed}

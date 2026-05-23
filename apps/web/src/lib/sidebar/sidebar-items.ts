@@ -68,6 +68,13 @@ export interface SidebarItemDef {
   href: string
   /** Label affiché (FR). */
   label: string
+  /**
+   * Tooltip optionnel (hover natif via `title=`).
+   * Sert à lever toute ambiguïté entre deux items proches sémantiquement
+   * — par ex. distinguer "Facturation" (revenus diagnostiqueur) de
+   * "Compte > Factures KOVAS" (abonnement payé à KOVAS).
+   */
+  tooltip?: string
   /** Icône Lucide React. */
   icon: LucideIcon
   /** Zone par défaut (avant personnalisation user). */
@@ -147,6 +154,10 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     id: 'facturation',
     href: '/dashboard/facturation',
     label: 'Facturation',
+    // Note : tooltip explicite pour lever toute ambiguïté entre cette page
+    // (= revenus du diagnostiqueur, factures émises à SES clients) et
+    // /dashboard/account?tab=facturation (= factures KOVAS pour son abonnement).
+    tooltip: 'Vos devis et factures émises à vos clients (revenus)',
     icon: Receipt,
     defaultZone: 'main',
     defaultPosition: 5,

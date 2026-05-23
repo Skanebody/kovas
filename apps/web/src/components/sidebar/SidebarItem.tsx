@@ -24,6 +24,13 @@ interface SidebarItemProps {
   notificationStyle?: SidebarNotificationStyle
   /** Style accent chartreuse subtil (item Capture). */
   accent?: boolean
+  /**
+   * Tooltip explicite (sert au hover natif via `title=`).
+   * Si fourni, prime sur `label` en mode étendu pour clarifier des libellés
+   * potentiellement ambigus (ex. "Facturation" → "Vos revenus, pas votre
+   * abonnement KOVAS"). En mode collapsed, le label seul reste affiché.
+   */
+  tooltip?: string
   /** Élément additionnel à droite (chevron, etc.). */
   trailing?: React.ReactNode
   /** Si fourni, override le <Link> et utilise un <button>. */
@@ -48,6 +55,7 @@ export function SidebarItem({
   badgeCount,
   notificationStyle = 'count',
   accent = false,
+  tooltip,
   trailing,
   onClick,
   ariaLabel,
@@ -55,6 +63,10 @@ export function SidebarItem({
   ariaHasPopup,
   ariaExpanded,
 }: SidebarItemProps) {
+  // `titleAttr` est utilisé pour le hover natif (browser tooltip).
+  // En mode collapsed → label (visible nulle part ailleurs).
+  // En mode étendu → tooltip si fourni (clarification), sinon undefined.
+  const titleAttr = collapsed ? label : (tooltip ?? undefined)
   const hasBadge = typeof badgeCount === 'number' && badgeCount > 0
   const showCount = hasBadge && notificationStyle === 'count'
   const showDot = hasBadge && notificationStyle === 'dot'
@@ -160,7 +172,7 @@ export function SidebarItem({
       <button
         type="button"
         onClick={onClick}
-        title={collapsed ? label : undefined}
+        title={titleAttr}
         aria-label={ariaLabel ?? label}
         aria-current={ariaCurrent}
         aria-haspopup={ariaHasPopup}
@@ -176,7 +188,7 @@ export function SidebarItem({
   return (
     <Link
       href={href}
-      title={collapsed ? label : undefined}
+      title={titleAttr}
       aria-label={ariaLabel ?? label}
       aria-current={active ? 'page' : undefined}
       className={commonClasses}
