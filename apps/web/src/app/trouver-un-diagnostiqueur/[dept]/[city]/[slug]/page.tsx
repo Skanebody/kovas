@@ -1,4 +1,5 @@
 import { JsonLd } from '@/components/seo/JsonLd'
+import { getDiagDisplayName } from '@/lib/diag-certifications'
 import {
   type DiagnosticianForSchema,
   buildBreadcrumbList,
@@ -108,14 +109,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
-  const fullName = [diag.first_name, diag.last_name].filter(Boolean).join(' ').trim()
+  const rawFullName =
+    (typeof diag.full_name === 'string' && diag.full_name.trim()) ||
+    [diag.first_name, diag.last_name].filter(Boolean).join(' ').trim()
+  // FIX-RR — Title SEO prefere la raison sociale (DHUP "Societe").
+  const displayName =
+    getDiagDisplayName({
+      company_name: typeof diag.company_name === 'string' ? diag.company_name : null,
+      full_name: rawFullName,
+    }) || rawFullName
   const cityLabel = decodeURIComponent(city)
-  const title = `${fullName} — Diagnostiqueur immobilier à ${cityLabel}`
+  const title = `${displayName} — Diagnostiqueur immobilier à ${cityLabel}`
   const certTypes: string[] = Array.isArray(diag.certifications)
     ? diag.certifications.map((c: { type?: string }) => c.type).filter(Boolean)
     : []
-  const certSentence = certTypes.length ? ` Certifié ${certTypes.slice(0, 4).join(', ')}.` : ''
-  const description = `${fullName}, diagnostiqueur immobilier indépendant à ${cityLabel}.${certSentence} Devis gratuit sous 24h.`
+  // FIX-RR — Description : mention "audit energetique avec mention" si applicable.
+  const hasMention = certTypes.includes('DPE_MENTION')
+  const otherCerts = certTypes.filter((c) => c !== 'DPE_MENTION')
+  const certSentence = otherCerts.length ? ` Certifié ${otherCerts.slice(0, 4).join(', ')}.` : ''
+  const mentionSentence = hasMention
+    ? ' Habilité audit énergétique réglementaire (passoires F/G).'
+    : ''
+  const description = `${displayName}, diagnostiqueur immobilier à ${cityLabel}.${certSentence}${mentionSentence} Devis gratuit sous 24h.`
   const canonical = `${SITE_URL}/trouver-un-diagnostiqueur/${dept}/${city}/${slug}`
 
   return {
@@ -160,7 +175,17 @@ export default async function DiagnosticianPage({ params }: PageProps) {
   ])
 
   // Schema.org JSON-LD Person
-  const fullName = [diag.first_name, diag.last_name].filter(Boolean).join(' ').trim()
+  const rawFullName =
+    (typeof diag.full_name === 'string' && diag.full_name.trim()) ||
+    [diag.first_name, diag.last_name].filter(Boolean).join(' ').trim()
+  // FIX-RR — nom commercial public (raison sociale > nom du gerant).
+  const displayName =
+    getDiagDisplayName({
+      company_name: typeof diag.company_name === 'string' ? diag.company_name : null,
+      full_name: rawFullName,
+    }) || rawFullName
+  // `fullName` conserve la valeur "gerant" pour le JSON-LD Person (`name` = personne physique).
+  const fullName = rawFullName
   const credentials: Array<{ type?: string; valid_until?: string | null }> = Array.isArray(
     diag.certifications,
   )
@@ -239,7 +264,8 @@ export default async function DiagnosticianPage({ params }: PageProps) {
     .filter((c) => c.type !== '')
 
   const diagSchemaInput: DiagnosticianForSchema = {
-    fullName,
+    // FIX-RR — LocalBusiness.name = raison sociale en priorite (nom commercial Google).
+    fullName: displayName,
     slug: String(diag.slug ?? slug),
     city: String(diag.city ?? decodeURIComponent(city)),
     postalCode: postcodeCanonical ?? undefined,
@@ -283,7 +309,8 @@ export default async function DiagnosticianPage({ params }: PageProps) {
               path: `/trouver-un-diagnostiqueur/${slugDept}/${slugCity}`,
             },
             {
-              name: fullName,
+              // FIX-RR — Breadcrumb terminal = raison sociale (nom commercial public).
+              name: displayName,
               path: `/trouver-un-diagnostiqueur/${slugDept}/${slugCity}/${slugProfile}`,
             },
           ]),
@@ -323,6 +350,9 @@ function sanitizeDiagPublic(diag: any): any {
     id: diag.id,
     slug: diag.slug,
     full_name: diag.full_name,
+    // FIX-RR — company_name (raison sociale DHUP "Societe") whitelistee
+    // pour l'UI publique. Si NULL, l'UI fallback sur full_name.
+    company_name: diag.company_name,
     first_name: diag.first_name,
     last_name: diag.last_name,
     bio: diag.bio,

@@ -1,6 +1,22 @@
 import { BadgeVerified } from '@/components/diagnostician/BadgeVerified'
+import {
+  DIAG_CERT_BY_CODE,
+  formatFullName,
+  getDiagDisplayName,
+  hasMentionAudit,
+} from '@/lib/diag-certifications'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
-import { ChevronRight, FileText, Flag, Mail, MapPin, Search, ShieldCheck, Star } from 'lucide-react'
+import {
+  ChevronRight,
+  FileText,
+  Flag,
+  Mail,
+  MapPin,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Star,
+} from 'lucide-react'
 import Link from 'next/link'
 import { CertCard } from './cert-card'
 import { ClaimBanner } from './claim-banner'
@@ -44,9 +60,22 @@ export function DiagnosticianPageContent({
   // AUDIT-A — Mapping schéma canonique (post-consolidation FIX-AA) :
   //   full_name canonique (fallback first_name+last_name), postal_code → postcode,
   //   official_phone → phone, geo_lat/geo_lng → latitude/longitude (fallback geo_*),
-  //   years_experience → years_active, company_name supprimée (n'existe plus en DB).
-  const fullName: string =
+  //   years_experience → years_active.
+  // FIX-RR — company_name reintroduite (migration 20260524410000) pour afficher
+  // la raison sociale du cabinet plutot que le nom du gerant.
+  const rawFullName: string =
     (typeof d.full_name === 'string' && d.full_name.trim()) || formatName(d.first_name, d.last_name)
+  const formattedGerant = formatFullName(rawFullName)
+  const companyName: string = typeof d.company_name === 'string' ? d.company_name.trim() : ''
+  // Nom d'affichage public (preference societe > gerant).
+  const displayName: string =
+    getDiagDisplayName({
+      company_name: companyName || null,
+      full_name: rawFullName,
+    }) || rawFullName
+  const subtitleGerant: string | null = companyName && formattedGerant ? formattedGerant : null
+  // Conserve l'alias `fullName` (gerant capitalise) pour le breadcrumb/initiales legacy.
+  const fullName = formattedGerant || rawFullName
   const deptLabel = decodeURIComponent(dept)
   const cityLabel = decodeURIComponent(city)
   const isUnclaimed = d.claim_status === 'unclaimed'
@@ -57,6 +86,8 @@ export function DiagnosticianPageContent({
     valid_until: string | null
     status?: 'active' | 'expired' | 'pending' | null
   }> = Array.isArray(d.certifications) ? d.certifications : []
+  // FIX-RR — flag premium audit energetique avec mention (DPE_MENTION).
+  const isMentionAudit = hasMentionAudit(certifications)
   const services: string[] = Array.isArray(d.services) ? d.services : []
   const serviceCards = services.length
     ? SERVICE_TYPES.filter((s) => services.includes(s.code))
@@ -133,7 +164,7 @@ export function DiagnosticianPageContent({
             </Link>
           </li>
           <ChevronRight className="h-3.5 w-3.5 text-black/30" aria-hidden />
-          <li className="text-[#0B1D33] font-medium">{fullName}</li>
+          <li className="text-[#0B1D33] font-medium">{displayName}</li>
         </ol>
       </nav>
 
@@ -142,6 +173,8 @@ export function DiagnosticianPageContent({
         <section className="border-b border-black/5">
           <div className="mx-auto max-w-6xl px-6 py-10 md:py-14">
             <div className="grid gap-8 md:grid-cols-[160px_1fr_auto] md:items-start">
+              {/* FIX-RR — Avatar : initiales calculees sur le nom d'affichage public
+                   (raison sociale > nom gerant), pas sur le first/last name brut. */}
               <AvatarBlock
                 photoUrl={d.photo_url ?? null}
                 firstName={initialFirst}
@@ -152,24 +185,47 @@ export function DiagnosticianPageContent({
                 <p className="text-xs font-mono uppercase tracking-[0.12em] text-black/50">
                   Diagnostiqueur immobilier · {cityLabel}
                 </p>
-                <h1 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">{fullName}</h1>
-
-                {badgeLevel !== 'unverified' ? (
-                  <div className="mt-3">
-                    <BadgeVerified level={badgeLevel} size="md" />
-                  </div>
+                <h1 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">{displayName}</h1>
+                {subtitleGerant ? (
+                  <p className="mt-2 text-sm text-black/55">
+                    Représenté par <span className="font-medium text-black/75">{subtitleGerant}</span>
+                  </p>
                 ) : null}
 
-                <div className="mt-5 flex flex-wrap items-center gap-2">
-                  {certifications.slice(0, 4).map((c) => (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {badgeLevel !== 'unverified' ? (
+                    <BadgeVerified level={badgeLevel} size="md" />
+                  ) : null}
+                  {/* FIX-RR — Badge premium audit énergétique avec mention (DPE_MENTION) */}
+                  {isMentionAudit ? (
                     <span
-                      key={`${c.type}-${c.number ?? c.organism}`}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-[#0B1D33]/5 px-3 py-1 text-xs font-medium text-[#0B1D33]"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[#D4F542] px-3 py-1 text-xs font-semibold text-[#0B1D33] shadow-sm"
+                      title="Habilité audit énergétique réglementaire (passoires F/G — loi Climat & Résilience 2023)"
                     >
-                      <ShieldCheck className="h-3 w-3" aria-hidden />
-                      {c.type}
+                      <Sparkles className="h-3 w-3" aria-hidden />
+                      Audit énergétique avec mention
                     </span>
-                  ))}
+                  ) : null}
+                </div>
+
+                <div className="mt-5 flex flex-wrap items-center gap-2">
+                  {certifications
+                    .filter((c) => c.type !== 'DPE_MENTION')
+                    .slice(0, 4)
+                    .map((c) => {
+                      const def = DIAG_CERT_BY_CODE[c.type]
+                      const label = def?.short ?? c.type
+                      return (
+                        <span
+                          key={`${c.type}-${c.number ?? c.organism}`}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-[#0B1D33]/5 px-3 py-1 text-xs font-medium text-[#0B1D33]"
+                          title={def?.description}
+                        >
+                          <ShieldCheck className="h-3 w-3" aria-hidden />
+                          {label}
+                        </span>
+                      )
+                    })}
                 </div>
 
                 <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm">
@@ -352,7 +408,7 @@ export function DiagnosticianPageContent({
                   Demande de devis
                 </p>
                 <h2 className="mt-1 text-xl font-bold text-[#0B1D33]">
-                  Contacter {initialFirst || fullName}
+                  Contacter {companyName || initialFirst || fullName}
                 </h2>
                 <p className="mt-2 text-sm text-black/65">
                   Décrivez votre projet, recevez un devis sous 24 heures ouvrées. Sans engagement.
@@ -526,13 +582,23 @@ function RelatedCard({
   dept: string
   city: string
 }) {
-  // AUDIT-A — Schema canonique : full_name + city (company_name supprimée du schéma).
-  const fullName: string =
+  // FIX-RR — Preference d'affichage : raison sociale > nom du gerant.
+  const rawFullName: string =
     (typeof r.full_name === 'string' && r.full_name.trim()) || formatName(r.first_name, r.last_name)
+  const formattedGerant = formatFullName(rawFullName)
+  const companyTrim =
+    typeof r.company_name === 'string' ? r.company_name.trim() : ''
+  const displayName =
+    getDiagDisplayName({
+      company_name: companyTrim || null,
+      full_name: rawFullName,
+    }) || rawFullName
+  const subtitleGerant = companyTrim && formattedGerant ? formattedGerant : null
   const certs: Array<{ type: string }> = Array.isArray(r.certifications) ? r.certifications : []
+  const isMention = hasMentionAudit(certs)
   const slug = r.slug ?? ''
   const cityLabel: string = (typeof r.city === 'string' && r.city) || ''
-  const parts = fullName.split(/\s+/).filter(Boolean)
+  const parts = displayName.split(/\s+/).filter(Boolean)
   const init1 = (parts[0]?.[0] ?? '').toUpperCase()
   const init2 = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '').toUpperCase() : ''
 
@@ -550,20 +616,41 @@ function RelatedCard({
         </div>
         <div className="min-w-0">
           <h3 className="font-semibold text-[#0B1D33] truncate group-hover:underline underline-offset-2">
-            {fullName}
+            {displayName}
           </h3>
+          {subtitleGerant ? (
+            <p className="text-[10px] text-black/45 truncate">Représenté par {subtitleGerant}</p>
+          ) : null}
           {cityLabel ? <p className="text-xs text-black/55 truncate">{cityLabel}</p> : null}
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap gap-1.5">
-        {certs.slice(0, 3).map((c) => (
+      {isMention ? (
+        <div className="mt-3">
           <span
-            key={c.type}
-            className="rounded-full bg-[#0B1D33]/[0.06] px-2 py-0.5 text-[10px] font-medium text-[#0B1D33]"
+            className="inline-flex items-center gap-1 rounded-full bg-[#D4F542] px-2 py-0.5 text-[10px] font-semibold text-[#0B1D33]"
+            title="Audit énergétique avec mention"
           >
-            {c.type}
+            <Sparkles className="h-2.5 w-2.5" aria-hidden />
+            Audit énergétique
           </span>
-        ))}
+        </div>
+      ) : null}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {certs
+          .filter((c) => c.type !== 'DPE_MENTION')
+          .slice(0, 3)
+          .map((c) => {
+            const def = DIAG_CERT_BY_CODE[c.type]
+            const label = def?.short ?? c.type
+            return (
+              <span
+                key={c.type}
+                className="rounded-full bg-[#0B1D33]/[0.06] px-2 py-0.5 text-[10px] font-medium text-[#0B1D33]"
+              >
+                {label}
+              </span>
+            )
+          })}
       </div>
     </Link>
   )

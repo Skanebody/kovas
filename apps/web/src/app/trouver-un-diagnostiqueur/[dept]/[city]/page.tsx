@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { CITIES } from '@/lib/cities/registry'
 import { findCityAnywhere, getAllTop5000Slugs } from '@/lib/cities/top-5000'
+import { formatFullName, getDiagDisplayName, hasMentionAudit } from '@/lib/diag-certifications'
 import {
   DIAGNOSTIC_TYPES_INTERNAL_LINKS,
   buildCityContentAmandine,
@@ -25,6 +26,7 @@ import {
   Info,
   MapPin,
   ShieldAlert,
+  Sparkles,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
@@ -99,6 +101,8 @@ type DiagnosticianCard = {
   /** Schéma canonique unifié. Alias des anciens noms pour compat templates. */
   slug: string
   full_name: string
+  /** FIX-RR — Raison sociale (DHUP "Societe"). Prefere a full_name en UI. */
+  company_name: string | null
   city: string | null
   address: string | null
   /**
@@ -166,8 +170,10 @@ async function loadDiagnosticiansForCity(
   // FIX-PP — `phone` VOLONTAIREMENT OMIS du SELECT. Tout ce qui est sélectionné
   // ici est sérialisé dans le HTML RSC pour hydratation client → toute fuite
   // de téléphone ici contournerait le funnel de demande de devis monétisé.
+  // FIX-RR — `company_name` ajoute pour afficher la raison sociale en titre
+  // de card (plus professionnel et reconnaissable Google que "Raoul Chipot").
   const SELECT_FIELDS =
-    'id, slug, full_name, city, address, gmb_rating, gmb_review_count, certifications, years_active'
+    'id, slug, full_name, company_name, city, address, gmb_rating, gmb_review_count, certifications, years_active'
 
   try {
     const { createAdminClient } = await import('@/lib/supabase/admin')
@@ -383,7 +389,9 @@ function buildLocalBusinessListJsonLd(
       item: {
         '@type': 'LocalBusiness',
         '@id': `${SITE_URL}/trouver-un-diagnostiqueur/diag/${d.slug}`,
-        name: d.full_name,
+        // FIX-RR — Schema.org `name` = nom commercial public (raison sociale)
+        // si dispo, sinon nom du gerant. Cf. Google guidelines LocalBusiness.
+        name: getDiagDisplayName(d) || d.full_name,
         address: {
           '@type': 'PostalAddress',
           streetAddress: d.address ?? undefined,
@@ -815,65 +823,88 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
             </Card>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {diagnosticians.map((d) => (
-                <Link
-                  key={d.id}
-                  href={`/trouver-un-diagnostiqueur/${dept}/${city}/${d.slug}`}
-                  className="block"
-                >
-                  <Card className="p-5 hover:shadow-glass transition-shadow h-full">
-                    <h3 className="font-semibold text-ink text-base">{d.full_name}</h3>
-                    {d.city ? <p className="text-xs text-ink-mute mt-0.5">{d.city}</p> : null}
-                    {d.years_active ? (
-                      <p className="text-xs text-ink-mute mt-0.5">
-                        {d.years_active} ans d&apos;expérience
-                      </p>
-                    ) : null}
-                    {d.address ? (
-                      <p className="text-sm text-ink-soft mt-2 flex items-start gap-1.5">
-                        <MapPin className="size-3.5 text-ink-mute mt-0.5 shrink-0" />
-                        <span>{d.address}</span>
-                      </p>
-                    ) : null}
-                    {/* FIX-PP — pas d'affichage du téléphone. CTA devis discret en bas de card. */}
-                    {d.gmb_rating ? (
-                      <p className="text-xs text-ink-mute mt-2">
-                        Note {d.gmb_rating.toFixed(1)}/5 ({d.gmb_review_count ?? 0} avis)
-                      </p>
-                    ) : null}
-                    {(() => {
-                      // Certifications stockées comme jsonb objet riche
-                      // [{type:'DPE',status:'valid',...}] ou legacy string[].
-                      const certs = Array.isArray(d.certifications) ? d.certifications : []
-                      const codes = certs
-                        .map((c: unknown) => {
-                          if (typeof c === 'string') return c
-                          if (c && typeof c === 'object' && 'type' in c) {
-                            const t = (c as { type?: unknown }).type
-                            return typeof t === 'string' ? t : null
-                          }
-                          return null
-                        })
-                        .filter((c): c is string => Boolean(c))
-                      if (codes.length === 0) return null
-                      return (
+              {diagnosticians.map((d) => {
+                // FIX-RR — preference d'affichage : raison sociale > nom du gerant.
+                const displayName = getDiagDisplayName(d)
+                const formattedGerant = formatFullName(d.full_name)
+                const companyTrim = (d.company_name ?? '').trim()
+                const subtitleGerant = companyTrim && formattedGerant ? formattedGerant : null
+                // FIX-RR — extraction des codes certifications + flag DPE_MENTION.
+                const certs = Array.isArray(d.certifications) ? d.certifications : []
+                const codes = certs
+                  .map((c: unknown) => {
+                    if (typeof c === 'string') return c
+                    if (c && typeof c === 'object' && 'type' in c) {
+                      const t = (c as { type?: unknown }).type
+                      return typeof t === 'string' ? t : null
+                    }
+                    return null
+                  })
+                  .filter((c): c is string => Boolean(c))
+                const isMention = hasMentionAudit(certs)
+                const codesNonPremium = codes.filter((c) => c !== 'DPE_MENTION')
+                return (
+                  <Link
+                    key={d.id}
+                    href={`/trouver-un-diagnostiqueur/${dept}/${city}/${d.slug}`}
+                    className="block"
+                  >
+                    <Card className="p-5 hover:shadow-glass transition-shadow h-full">
+                      <h3 className="font-semibold text-ink text-base">{displayName}</h3>
+                      {subtitleGerant ? (
+                        <p className="text-[11px] text-ink-faint mt-0.5">
+                          Représenté par {subtitleGerant}
+                        </p>
+                      ) : null}
+                      {d.city ? <p className="text-xs text-ink-mute mt-1">{d.city}</p> : null}
+                      {d.years_active ? (
+                        <p className="text-xs text-ink-mute mt-0.5">
+                          {d.years_active} ans d&apos;expérience
+                        </p>
+                      ) : null}
+                      {d.address ? (
+                        <p className="text-sm text-ink-soft mt-2 flex items-start gap-1.5">
+                          <MapPin className="size-3.5 text-ink-mute mt-0.5 shrink-0" />
+                          <span>{d.address}</span>
+                        </p>
+                      ) : null}
+                      {/* FIX-PP — pas d'affichage du téléphone. CTA devis discret en bas de card. */}
+                      {d.gmb_rating ? (
+                        <p className="text-xs text-ink-mute mt-2">
+                          Note {d.gmb_rating.toFixed(1)}/5 ({d.gmb_review_count ?? 0} avis)
+                        </p>
+                      ) : null}
+                      {/* FIX-RR — Badge premium DPE_MENTION (audit énergétique) au-dessus des autres */}
+                      {isMention ? (
+                        <div className="mt-3">
+                          <Badge
+                            variant="amber"
+                            className="gap-1.5 text-[10px] font-medium"
+                            title="Habilité audit énergétique réglementaire (passoires F/G — loi Climat & Résilience 2023)"
+                          >
+                            <Sparkles className="size-3" aria-hidden />
+                            Audit énergétique avec mention
+                          </Badge>
+                        </div>
+                      ) : null}
+                      {codesNonPremium.length > 0 ? (
                         <div className="flex flex-wrap gap-1 mt-3">
-                          {codes.slice(0, 3).map((c) => (
+                          {codesNonPremium.slice(0, 3).map((c) => (
                             <Badge key={c} variant="muted" className="text-[10px]">
                               {c}
                             </Badge>
                           ))}
                         </div>
-                      )
-                    })()}
-                    {/* FIX-PP — micro-CTA devis. Le lien parent reste actif, le span est purement visuel. */}
-                    <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-ink-soft">
-                      <FileText className="size-3.5" aria-hidden />
-                      Demander un devis sous 24h
-                    </p>
-                  </Card>
-                </Link>
-              ))}
+                      ) : null}
+                      {/* FIX-PP — micro-CTA devis. Le lien parent reste actif, le span est purement visuel. */}
+                      <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-ink-soft">
+                        <FileText className="size-3.5" aria-hidden />
+                        Demander un devis sous 24h
+                      </p>
+                    </Card>
+                  </Link>
+                )
+              })}
             </div>
           )}
         </section>

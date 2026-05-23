@@ -32,10 +32,15 @@ interface DiagRow {
   id: string
   slug: string | null
   full_name: string | null
+  /** FIX-RR — Raison sociale (DHUP "Societe"). NULL pour les EI/EURL nom propre. */
+  company_name: string | null
   city: string | null
   city_slug: string | null
   department_code: string | null
+  /** Codes canoniques uppercase (DPE, DPE_MENTION, AMIANTE, ...). */
   certifications: string[] | null
+  /** FIX-RR — True si certif DPE_MENTION (audit energetique avec mention). */
+  has_mention_audit: boolean
   gmb_rating: number | null
   gmb_review_count: number | null
   claim_status: string | null
@@ -186,8 +191,10 @@ export default async function DiagnostiqueursPage({ searchParams }: PageProps) {
                         deptCode={row.department_code ?? '00'}
                         citySlug={row.city_slug ?? 'inconnu'}
                         fullName={row.full_name ?? 'Diagnostiqueur'}
+                        companyName={row.company_name}
                         city={row.city}
                         certifications={row.certifications ?? []}
+                        hasMentionAudit={row.has_mention_audit}
                         gmbRating={row.gmb_rating}
                         gmbReviewCount={row.gmb_review_count}
                         claimStatus={row.claim_status}
@@ -244,6 +251,8 @@ interface RpcDiagRow {
   id: string
   slug: string | null
   full_name: string | null
+  /** FIX-RR — Raison sociale. La RPC SQL existante peut ne pas la retourner. */
+  company_name?: string | null
   city: string | null
   city_slug: string | null
   department_code: string | null
@@ -334,22 +343,29 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
     const approxCount =
       rpcRows.length === PAGE_SIZE ? offset + PAGE_SIZE + 1 : offset + rpcRows.length
 
-    const rows: DiagRow[] = rpcRows.map((r) => ({
-      id: r.id,
-      slug: r.slug,
-      full_name: r.full_name,
-      city: r.city,
-      city_slug: r.city_slug,
-      department_code: r.department_code,
-      certifications: extractCertCodes(r.certifications),
-      gmb_rating: r.gmb_rating,
-      gmb_review_count: r.gmb_review_count,
-      claim_status: r.claim_status,
-      photo_url: r.photo_url,
-      latitude: r.latitude,
-      longitude: r.longitude,
-      created_at: r.created_at,
-    }))
+    const rows: DiagRow[] = rpcRows.map((r) => {
+      const certCodes = extractCertCodes(r.certifications)
+      return {
+        id: r.id,
+        slug: r.slug,
+        full_name: r.full_name,
+        // FIX-RR — RPC `search_diagnosticians` peut ne pas exposer company_name
+        // (signature SQL pre-migration 20260524410000). Safe-read avec fallback null.
+        company_name: r.company_name ?? null,
+        city: r.city,
+        city_slug: r.city_slug,
+        department_code: r.department_code,
+        certifications: certCodes,
+        has_mention_audit: certCodes.includes('DPE_MENTION'),
+        gmb_rating: r.gmb_rating,
+        gmb_review_count: r.gmb_review_count,
+        claim_status: r.claim_status,
+        photo_url: r.photo_url,
+        latitude: r.latitude,
+        longitude: r.longitude,
+        created_at: r.created_at,
+      }
+    })
 
     return { rows, count: approxCount, error: null }
   } catch (e) {
@@ -376,7 +392,7 @@ async function fallbackTableQuery(
     let query = client
       .from('diagnosticians')
       .select(
-        'id, slug, full_name, city, city_slug, department_code, dept_code, certifications, gmb_rating, gmb_review_count, claim_status, photo_url, latitude, longitude, geo_lat, geo_lng, created_at',
+        'id, slug, full_name, company_name, city, city_slug, department_code, dept_code, certifications, gmb_rating, gmb_review_count, claim_status, photo_url, latitude, longitude, geo_lat, geo_lng, created_at',
         { count: 'exact' },
       )
 
@@ -385,7 +401,12 @@ async function fallbackTableQuery(
     }
     if (args.q) {
       const safe = args.q.replace(/[%_,]/g, '\\$&')
-      query = query.or(`full_name.ilike.%${safe}%,city.ilike.%${safe}%`)
+      // FIX-RR — recherche etendue a company_name (raison sociale).
+      // Le particulier connait souvent le cabinet ("Cabinet Diag Pro 75")
+      // plus que le gerant ("Raoul Chipot").
+      query = query.or(
+        `full_name.ilike.%${safe}%,company_name.ilike.%${safe}%,city.ilike.%${safe}%`,
+      )
     }
 
     query = query
@@ -409,23 +430,28 @@ async function fallbackTableQuery(
     }
 
     const rows: DiagRow[] = ((data ?? []) as unknown as Array<Record<string, unknown>>).map(
-      (r) => ({
-        id: String(r.id),
-        slug: (r.slug as string | null) ?? null,
-        full_name: (r.full_name as string | null) ?? null,
-        city: (r.city as string | null) ?? null,
-        city_slug: (r.city_slug as string | null) ?? null,
-        department_code:
-          (r.department_code as string | null) ?? (r.dept_code as string | null) ?? null,
-        certifications: extractCertCodes(r.certifications),
-        gmb_rating: (r.gmb_rating as number | null) ?? null,
-        gmb_review_count: (r.gmb_review_count as number | null) ?? null,
-        claim_status: (r.claim_status as string | null) ?? null,
-        photo_url: (r.photo_url as string | null) ?? null,
-        latitude: (r.latitude as number | null) ?? (r.geo_lat as number | null) ?? null,
-        longitude: (r.longitude as number | null) ?? (r.geo_lng as number | null) ?? null,
-        created_at: (r.created_at as string | null) ?? null,
-      }),
+      (r) => {
+        const certCodes = extractCertCodes(r.certifications)
+        return {
+          id: String(r.id),
+          slug: (r.slug as string | null) ?? null,
+          full_name: (r.full_name as string | null) ?? null,
+          company_name: (r.company_name as string | null) ?? null,
+          city: (r.city as string | null) ?? null,
+          city_slug: (r.city_slug as string | null) ?? null,
+          department_code:
+            (r.department_code as string | null) ?? (r.dept_code as string | null) ?? null,
+          certifications: certCodes,
+          has_mention_audit: certCodes.includes('DPE_MENTION'),
+          gmb_rating: (r.gmb_rating as number | null) ?? null,
+          gmb_review_count: (r.gmb_review_count as number | null) ?? null,
+          claim_status: (r.claim_status as string | null) ?? null,
+          photo_url: (r.photo_url as string | null) ?? null,
+          latitude: (r.latitude as number | null) ?? (r.geo_lat as number | null) ?? null,
+          longitude: (r.longitude as number | null) ?? (r.geo_lng as number | null) ?? null,
+          created_at: (r.created_at as string | null) ?? null,
+        }
+      },
     )
 
     return { rows, count: count ?? 0, error: null }
@@ -548,7 +574,9 @@ function ItemListJsonLd({ rows }: { rows: DiagRow[] }) {
     position: idx + 1,
     item: {
       '@type': 'LocalBusiness',
-      name: row.full_name ?? 'Diagnostiqueur',
+      // FIX-RR — JSON-LD prefere la raison sociale au nom du gerant
+      // (cf. Google guidelines LocalBusiness : `name` = nom commercial public).
+      name: row.company_name?.trim() || row.full_name || 'Diagnostiqueur',
       address: row.city
         ? {
             '@type': 'PostalAddress',
