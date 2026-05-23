@@ -55,7 +55,9 @@ export async function GET(_request: Request, ctx: RouteContext): Promise<Respons
   }
 
   const admin = createAdminClient<Database>(
+    // biome-ignore lint/style/noNonNullAssertion: env vars validated at boot
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    // biome-ignore lint/style/noNonNullAssertion: env vars validated at boot
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
@@ -89,9 +91,7 @@ export async function GET(_request: Request, ctx: RouteContext): Promise<Respons
   // biome-ignore lint/suspicious/noExplicitAny: dynamic table
   const { data: recipRows } = await (admin as any)
     .from('quote_request_recipients')
-    .select(
-      'id, diagnostician_id, recipient_tier, status, sent_at, opened_at, responded_at',
-    )
+    .select('id, diagnostician_id, recipient_tier, status, sent_at, opened_at, responded_at')
     .eq('quote_request_id', request.id)
     .order('sent_at', { ascending: true })
 
@@ -106,33 +106,32 @@ export async function GET(_request: Request, ctx: RouteContext): Promise<Respons
   }>
 
   // 3. Récupère les fiches diag (pour affichage nom/ville/lien)
+  // FIX-AUDIT-D : colonnes consolidées (full_name/email/phone au lieu de display_name/official_email/official_phone)
   const diagIds = recipients.map((r) => r.diagnostician_id)
   // biome-ignore lint/suspicious/noExplicitAny: dynamic table
   const { data: diagRows } = await (admin as any)
     .from('diagnosticians')
-    .select(
-      'id, display_name, city, public_page_url, official_email, official_phone',
-    )
+    .select('id, full_name, city, public_page_url, email, phone')
     .in('id', diagIds.length > 0 ? diagIds : ['00000000-0000-0000-0000-000000000000'])
 
   const diagMap = new Map<
     string,
     {
       id: string
-      display_name: string
+      full_name: string
       city: string | null
       public_page_url: string | null
-      official_email: string | null
-      official_phone: string | null
+      email: string | null
+      phone: string | null
     }
   >()
   for (const d of (diagRows ?? []) as Array<{
     id: string
-    display_name: string
+    full_name: string
     city: string | null
     public_page_url: string | null
-    official_email: string | null
-    official_phone: string | null
+    email: string | null
+    phone: string | null
   }>) {
     diagMap.set(d.id, d)
   }
@@ -144,12 +143,12 @@ export async function GET(_request: Request, ctx: RouteContext): Promise<Respons
       id: r.id,
       diagnostician: {
         id: r.diagnostician_id,
-        display_name: diag?.display_name ?? 'Diagnostiqueur',
+        display_name: diag?.full_name ?? 'Diagnostiqueur',
         city: diag?.city ?? null,
         public_url: diag?.public_page_url ?? null,
         has_response: hasResponse,
-        contact_email: hasResponse ? diag?.official_email ?? null : null,
-        contact_phone: hasResponse ? diag?.official_phone ?? null : null,
+        contact_email: hasResponse ? (diag?.email ?? null) : null,
+        contact_phone: hasResponse ? (diag?.phone ?? null) : null,
       },
       status: r.status,
       sent_at: r.sent_at,

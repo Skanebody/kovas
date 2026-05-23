@@ -9,16 +9,16 @@
  * L'edge function n'a pas accès au fs Next.js → on délègue ici.
  */
 
-import type { Database } from '@kovas/database/types'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
 import {
   renderGhostDemotedEmail,
   renderGhostSoftDisabledEmail,
   renderGhostWarnedEmail,
 } from '@/emails/quote-request/ghost-lifecycle'
 import { sendEmail } from '@/lib/email/send'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 export const runtime = 'nodejs'
 export const maxDuration = 15
@@ -30,9 +30,9 @@ const bodySchema = z.object({
 
 interface DiagRow {
   id: string
-  display_name: string
+  full_name: string
   city: string | null
-  official_email: string | null
+  email: string | null
   consecutive_ignored_leads: number | null
 }
 
@@ -42,10 +42,7 @@ export async function POST(request: Request): Promise<Response> {
   const cronSecret = process.env.CRON_SECRET
   const internalSecret = process.env.INTERNAL_CRON_SECRET ?? cronSecret
   if (!internalSecret) {
-    return NextResponse.json(
-      { error: 'INTERNAL_CRON_SECRET not configured' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'INTERNAL_CRON_SECRET not configured' }, { status: 500 })
   }
   if (authHeader !== `Bearer ${internalSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -68,15 +65,18 @@ export async function POST(request: Request): Promise<Response> {
   const { diagnosticianId, status } = parsed.data
 
   const admin = createAdminClient<Database>(
+    // biome-ignore lint/style/noNonNullAssertion: env vars validated at boot
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    // biome-ignore lint/style/noNonNullAssertion: env vars validated at boot
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
-  // biome-ignore lint/suspicious/noExplicitAny: A1 table
+  // FIX-AUDIT-D : colonnes consolidées (full_name/email au lieu de display_name/official_email)
+  // biome-ignore lint/suspicious/noExplicitAny: A1 table not in generated types
   const { data: row, error } = await (admin as any)
     .from('diagnosticians')
-    .select('id, display_name, city, official_email, consecutive_ignored_leads')
+    .select('id, full_name, city, email, consecutive_ignored_leads')
     .eq('id', diagnosticianId)
     .maybeSingle()
 
@@ -84,11 +84,8 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: 'Diagnostician not found' }, { status: 404 })
   }
   const diag = row as DiagRow
-  if (!diag.official_email) {
-    return NextResponse.json(
-      { error: 'No email available for diagnostician' },
-      { status: 422 },
-    )
+  if (!diag.email) {
+    return NextResponse.json({ error: 'No email available for diagnostician' }, { status: 422 })
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kovas.fr'
@@ -99,7 +96,7 @@ export async function POST(request: Request): Promise<Response> {
   const ignoredCount = Math.max(diag.consecutive_ignored_leads ?? 0, 1)
 
   const params = {
-    display_name: diag.display_name,
+    display_name: diag.full_name,
     city: diag.city,
     ignored_count: ignoredCount,
     window_days: windowDays,
@@ -115,7 +112,7 @@ export async function POST(request: Request): Promise<Response> {
         : renderGhostSoftDisabledEmail(params)
 
   const result = await sendEmail({
-    to: diag.official_email,
+    to: diag.email,
     subject: rendered.subject,
     html: rendered.html,
     text: rendered.text,
@@ -127,10 +124,7 @@ export async function POST(request: Request): Promise<Response> {
   })
 
   if (!result.success) {
-    return NextResponse.json(
-      { error: 'Email send failed', details: result.error },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Email send failed', details: result.error }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true, status, diagnosticianId, stub: result.stub })

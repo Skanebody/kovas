@@ -16,9 +16,11 @@
  * (route /api/quote-requests/verify-email).
  */
 
-import type { Database } from '@kovas/database/types'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
+import {
+  generateVerificationCode,
+  getCodeExpirationDate,
+  sendVerificationEmail,
+} from '@/lib/anti-spam/email-verification'
 import {
   checkAllRateLimits,
   emailDiagKey,
@@ -26,24 +28,22 @@ import {
   ipKey,
   recordRateLimitHit,
 } from '@/lib/anti-spam/rate-limits'
-import {
-  generateVerificationCode,
-  getCodeExpirationDate,
-  sendVerificationEmail,
-} from '@/lib/anti-spam/email-verification'
 import { verifyRecaptchaToken } from '@/lib/anti-spam/recaptcha'
 import { quoteRequestPayloadSchema } from '@/lib/quote-request/schema'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
 interface DiagnosticianRow {
   id: string
-  display_name: string
-  first_name: string
-  last_name: string
-  city: string
-  postal_code: string | null
+  full_name: string | null
+  first_name: string | null
+  last_name: string | null
+  city: string | null
+  postcode: string | null
   is_published: boolean
   withdrawal_requested: boolean
   ghost_status: string | null
@@ -89,11 +89,7 @@ export async function POST(request: Request, ctx: RouteContext): Promise<Respons
   const honeypotFilled = (payload.honeypot ?? '').length > 0
 
   // 3. reCAPTCHA v3 — bloque si score < 0.5
-  const recaptcha = await verifyRecaptchaToken(
-    payload.recaptcha_token,
-    'quote_request_submit',
-    0.5,
-  )
+  const recaptcha = await verifyRecaptchaToken(payload.recaptcha_token, 'quote_request_submit', 0.5)
   if (!recaptcha.valid && !recaptcha.bypassed) {
     // On retourne un 403 — bot probable. Pas de "Validation failed" détaillé.
     return NextResponse.json(
@@ -104,17 +100,20 @@ export async function POST(request: Request, ctx: RouteContext): Promise<Respons
 
   // 4. Admin client
   const admin = createAdminClient<Database>(
+    // biome-ignore lint/style/noNonNullAssertion: env vars validated at boot
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    // biome-ignore lint/style/noNonNullAssertion: env vars validated at boot
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
-  // 5. Récupérer le diag d'origine (pour validation existence + city/postal pour routing)
+  // 5. Récupérer le diag d'origine (pour validation existence + city/postcode pour routing)
+  // FIX-AUDIT-D : colonnes consolidées (full_name/postcode au lieu de display_name/postal_code)
   // biome-ignore lint/suspicious/noExplicitAny: A1 table not in generated types
   const diagResp = await (admin as any)
     .from('diagnosticians')
     .select(
-      'id, display_name, first_name, last_name, city, postal_code, is_published, withdrawal_requested, ghost_status, manual_pause_until',
+      'id, full_name, first_name, last_name, city, postcode, is_published, withdrawal_requested, ghost_status, manual_pause_until',
     )
     .eq('id', diagnosticianId)
     .maybeSingle()
@@ -240,8 +239,7 @@ export async function POST(request: Request, ctx: RouteContext): Promise<Respons
 
   // 9. Envoi email de vérification
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (request.headers.get('origin') ?? 'https://kovas.fr')
+    process.env.NEXT_PUBLIC_SITE_URL ?? request.headers.get('origin') ?? 'https://kovas.fr'
 
   try {
     await sendVerificationEmail(admin, {

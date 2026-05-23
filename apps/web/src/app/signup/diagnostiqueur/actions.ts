@@ -57,11 +57,12 @@ async function getOrCreateDiagnosticianForUser(userId: string, email: string) {
 
   if (existing?.id) return existing.id as string
 
+  // FIX-AUDIT-D : colonne consolidée (`email` au lieu de `contact_email`)
   const { data: created, error } = await admin
     .from('diagnosticians')
     .insert({
       claimed_by_user_id: userId,
-      contact_email: email,
+      email,
       data_source: 'self_signup',
       validation_status: 'pending',
     })
