@@ -92,18 +92,16 @@ export async function applyCreditsToInvoice(params: {
   const newBalance = current.balanceEurCents - deducted
   const nowIso = new Date().toISOString()
 
-  await supabase
-    .from('user_credits')
-    .upsert(
-      {
-        user_id: userId,
-        balance_eur_cents: newBalance,
-        total_earned_eur_cents: current.totalEarnedEurCents,
-        total_spent_eur_cents: current.totalSpentEurCents + deducted,
-        last_updated_at: nowIso,
-      },
-      { onConflict: 'user_id' },
-    )
+  await supabase.from('user_credits').upsert(
+    {
+      user_id: userId,
+      balance_eur_cents: newBalance,
+      total_earned_eur_cents: current.totalEarnedEurCents,
+      total_spent_eur_cents: current.totalSpentEurCents + deducted,
+      last_updated_at: nowIso,
+    },
+    { onConflict: 'user_id' },
+  )
 
   await supabase.from('credit_transactions').insert({
     user_id: userId,

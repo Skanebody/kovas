@@ -9,10 +9,18 @@ export type ReferralActionState =
   | undefined
 
 /**
- * Assure que l'utilisateur courant dispose d'un code de parrainage.
- * Idempotent. À appeler depuis la page parrainage (au mount ou via bouton).
+ * Génère (ou retourne) le code de parrainage de l'utilisateur courant.
+ *
+ * Idempotent : si un code existe déjà → retourné sans création.
+ * Sinon → INSERT en DB avec retry sur collision UNIQUE.
+ *
+ * Cette server action est appelée :
+ *   - automatiquement au chargement de la page parrainage (via la page server
+ *     component qui invoque `ensureReferralCode` au render)
+ *   - manuellement via formulaire fallback si la génération auto a échoué
+ *     (par ex. cookies tiers désactivés cassant le user JWT)
  */
-export async function ensureMyReferralCodeAction(
+export async function generateReferralCode(
   _prev: ReferralActionState,
   _formData: FormData,
 ): Promise<ReferralActionState> {
@@ -25,7 +33,15 @@ export async function ensureMyReferralCodeAction(
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : 'Génération impossible',
+      error: err instanceof Error ? err.message : 'Génération du code impossible',
     }
   }
 }
+
+/**
+ * Alias historique — conservé pour la rétro-compatibilité (formulaires
+ * existants qui pourraient encore référencer `ensureMyReferralCodeAction`).
+ *
+ * @deprecated Préférer `generateReferralCode`.
+ */
+export const ensureMyReferralCodeAction = generateReferralCode

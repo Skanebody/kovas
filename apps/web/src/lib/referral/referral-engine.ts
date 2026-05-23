@@ -184,18 +184,16 @@ export async function onFirstInvoicePaid(params: {
     total_spent_eur_cents: number
   } | null
 
-  await supabase
-    .from('user_credits')
-    .upsert(
-      {
-        user_id: r.referrer_id,
-        balance_eur_cents: (cc?.balance_eur_cents ?? 0) + REFERRAL_REWARD_EUR_CENTS,
-        total_earned_eur_cents: (cc?.total_earned_eur_cents ?? 0) + REFERRAL_REWARD_EUR_CENTS,
-        total_spent_eur_cents: cc?.total_spent_eur_cents ?? 0,
-        last_updated_at: nowIso,
-      },
-      { onConflict: 'user_id' },
-    )
+  await supabase.from('user_credits').upsert(
+    {
+      user_id: r.referrer_id,
+      balance_eur_cents: (cc?.balance_eur_cents ?? 0) + REFERRAL_REWARD_EUR_CENTS,
+      total_earned_eur_cents: (cc?.total_earned_eur_cents ?? 0) + REFERRAL_REWARD_EUR_CENTS,
+      total_spent_eur_cents: cc?.total_spent_eur_cents ?? 0,
+      last_updated_at: nowIso,
+    },
+    { onConflict: 'user_id' },
+  )
 }
 
 /**

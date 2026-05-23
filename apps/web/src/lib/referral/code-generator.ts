@@ -57,8 +57,11 @@ export function normalizeReferralCode(input: string): string {
  * - Si un code existe déjà → retourné en l'état (idempotent).
  * - Sinon → boucle de retry max 5 fois sur collision UNIQUE (extrêmement rare).
  *
- * Server-only. Le client Supabase doit avoir les droits d'écriture sur
- * `referral_codes` (service_role ou RLS adaptée).
+ * Server-only. La policy RLS "referral_codes: owner insert"
+ * (migration 20260524210000) doit être en place sur la base.
+ *
+ * Résilient : si l'INSERT échoue pour cause de course condition (un autre
+ * onglet a inséré entre-temps), on relit le code existant au lieu de throw.
  */
 export async function ensureReferralCode(
   supabase: SupabaseClient,
@@ -84,8 +87,22 @@ export async function ensureReferralCode(
     if (!error) return code
 
     lastError = error.message
-    // Code 23505 = unique_violation Postgres
-    if (!error.message.toLowerCase().includes('duplicate') && !error.message.includes('23505')) {
+    const msg = error.message.toLowerCase()
+
+    // Race condition : un autre tab a déjà créé le code pour ce user
+    // (UNIQUE (user_id) violation). On relit et on retourne.
+    if (msg.includes('user_id') || msg.includes('referral_codes_user_id')) {
+      const { data: retry } = await supabase
+        .from('referral_codes')
+        .select('code')
+        .eq('user_id', userId)
+        .maybeSingle()
+      if (retry?.code) return retry.code as string
+    }
+
+    // Code 23505 = unique_violation Postgres — soit user_id (cf. ci-dessus),
+    // soit code (très rare, on retry avec un nouveau code).
+    if (!msg.includes('duplicate') && !error.message.includes('23505')) {
       throw new Error(`Création code parrainage impossible : ${error.message}`)
     }
   }
