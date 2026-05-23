@@ -86,6 +86,10 @@ export function VoiceMessageButton({
   const pointerIdRef = useRef<number | null>(null)
   // True si le pointerup a confirmé le mode tap-toggle (on ne fait rien au release).
   const tapToggleCommittedRef = useRef<boolean>(false)
+  // Anti double-trigger : après un pointerup qui bascule en tap-toggle, le
+  // browser fire un événement click automatique → on doit l'ignorer sinon
+  // handleClick commit immédiatement et l'enregistrement ne reste pas actif.
+  const ignoreNextClickRef = useRef<boolean>(false)
   // Cache la dernière valeur pour cleanup au unmount sans dépendance instable.
   const modeRef = useRef<VoiceButtonMode>(mode)
   useEffect(() => {
@@ -182,8 +186,13 @@ export function VoiceMessageButton({
       const absDelta = Math.abs(deltaX)
 
       // Cas A : tap court + stable → bascule en mode tap-toggle (reste en enregistrement)
+      // IMPORTANT : on flag ignoreNextClickRef car le browser fire un événement
+      // click synthétique APRÈS ce pointerup → sans flag, handleClick voit
+      // mode==='tap-toggle' et commit immédiatement (bug : enregistrement
+      // s'arrête tout seul, et le tap suivant relance un nouveau recording).
       if (heldMs < HOLD_THRESHOLD_MS && absDelta < MOVE_THRESHOLD_PX) {
         tapToggleCommittedRef.current = true
+        ignoreNextClickRef.current = true
         onModeChange('tap-toggle')
         return
       }
@@ -222,8 +231,15 @@ export function VoiceMessageButton({
   // ── Click : géré uniquement pour le cas "send text" et "stop tap-toggle" ─
   const handleClick = useCallback(() => {
     if (disabled) return
+    // Ignore le click synthétique qui suit immédiatement un pointerup
+    // ayant basculé en tap-toggle (sinon on commit instantanément).
+    if (ignoreNextClickRef.current) {
+      ignoreNextClickRef.current = false
+      return
+    }
     if (isRecording && modeRef.current === 'tap-toggle') {
-      // Stop + envoi
+      // Stop + envoi (clic réel sur le bouton stop après que l'utilisateur
+      // ait relâché son tap initial — c'est ici qu'on commit pour de vrai).
       onRecordCommit()
       onModeChange('idle')
       return

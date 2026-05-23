@@ -16,11 +16,17 @@ export interface AudioRecording {
   durationSeconds: number
 }
 
+// Ordre de préférence : on privilégie webm/opus (Chrome/Firefox/Edge) qui
+// produit un blob lisible directement via <audio src="blob:...">. Le mp4
+// n'est utilisé qu'en dernier recours (Safari) car le decoder Safari a des
+// bugs intermittents avec les blobs MediaRecorder→<audio> (NotSupportedError).
+// mp4-faststart (a-faststart=1) n'est pas non plus accessible côté browser.
 const PREFERRED_MIMETYPES = [
   'audio/webm;codecs=opus',
   'audio/webm',
-  'audio/mp4',
   'audio/ogg;codecs=opus',
+  'audio/mp4;codecs=mp4a.40.2', // AAC-LC explicite (Safari)
+  'audio/mp4',
 ]
 
 function pickMimeType(): string {
