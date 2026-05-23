@@ -90,7 +90,7 @@ export async function POST(request: Request, { params }: RouteParams) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: process.env.RESEND_FROM ?? 'KOVAS <noreply@kovas.fr>',
+          from: process.env.RESEND_FROM ?? 'KOVAS <contact@kovas.fr>',
           to: [profile.email],
           subject,
           text: emailBody,

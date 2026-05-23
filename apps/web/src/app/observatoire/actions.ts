@@ -23,7 +23,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
-const RESEND_FROM_DEFAULT = process.env.RESEND_FROM ?? 'KOVAS <hello@kovas.fr>'
+const RESEND_FROM_DEFAULT = process.env.RESEND_FROM ?? 'KOVAS <contact@kovas.fr>'
 
 const RequestSchema = z.object({
   email: z.string().email("Adresse email invalide").max(254),

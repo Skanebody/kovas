@@ -11,6 +11,14 @@ import type {
   SchedulingOwnership,
   SchedulingPropertyType,
 } from '@/lib/scheduling/duration-schemas'
+// Helpers timezone Europe/Paris extraits vers @/lib/scheduling/paris-tz pour
+// pouvoir être importés depuis des Server Components / routes API (pattern
+// parsePropertyLocation, 2026-05-23). Re-exportés ci-dessous pour back-compat.
+import {
+  makeIsoFromYmdHm,
+  toParisHm,
+  toParisYmd,
+} from '@/lib/scheduling/paris-tz'
 import { cn } from '@/lib/utils'
 import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
@@ -130,39 +138,9 @@ const DIAG_VALUE_TO_TYPE: Record<string, string> = {
 
 const DPE_VALUES = new Set(['dpe_vente', 'dpe_location', 'copropriete'])
 
-export function makeIsoFromYmdHm(ymd: string, hm: string): string | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd) || !/^\d{2}:\d{2}$/.test(hm)) return null
-  const probe = new Date(`${ymd}T12:00:00Z`)
-  if (Number.isNaN(probe.getTime())) return null
-  const offsetParts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/Paris',
-    timeZoneName: 'longOffset',
-  }).formatToParts(probe)
-  const raw = offsetParts.find((p) => p.type === 'timeZoneName')?.value ?? ''
-  const m = raw.match(/([+-])(\d{1,2})(?::(\d{2}))?/)
-  const sign = m?.[1] ?? '+'
-  const hh = (m?.[2] ?? '01').padStart(2, '0')
-  const mm = (m?.[3] ?? '00').padStart(2, '0')
-  return new Date(`${ymd}T${hm}:00${sign}${hh}:${mm}`).toISOString()
-}
-
-export function toParisYmd(date: Date): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Paris',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date)
-}
-
-export function toParisHm(date: Date): string {
-  return new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/Paris',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(date)
-}
+// Re-export back-compat pour les modules historiques qui importent ces
+// helpers depuis ce fichier (source de vérité : @/lib/scheduling/paris-tz).
+export { makeIsoFromYmdHm, toParisYmd, toParisHm }
 
 // ============================================================
 // Wizard component — state machine 3 étapes

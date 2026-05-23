@@ -75,8 +75,8 @@ const KOVAS_LEGAL = {
   address: `${COMPANY_IDENTITY.address.line1}, ${COMPANY_IDENTITY.address.postalCode} ${COMPANY_IDENTITY.address.city}`,
   siret: COMPANY_IDENTITY.siretFormatted,
   siren: COMPANY_IDENTITY.sirenFormatted,
-  fromEmail: 'KOVAS · Benjamin Bel <benjamin@kovas.fr>',
-  replyTo: 'benjamin@kovas.fr',
+  fromEmail: 'KOVAS · Benjamin Bel <contact@kovas.fr>',
+  replyTo: 'contact@kovas.fr',
 } as const
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kovas.fr'

@@ -13,8 +13,12 @@ import { AdminShortcutsBlock } from './SidebarBlocks/AdminShortcutsBlock'
 
 interface SidebarProps {
   dossierId: string
+  dossierReference: string
+  clientName: string | null
   clientPhone: string | null
   clientEmail: string | null
+  clientAddress: string | null
+  propertyAddress: string | null
   calendarEntries: ReadonlyArray<CalendarEntry>
   propertyHistory: ReadonlyArray<PropertyHistoryItem>
   otherDossiers: ReadonlyArray<OtherDossier>
@@ -29,8 +33,12 @@ interface SidebarProps {
  */
 export function Sidebar({
   dossierId,
+  dossierReference,
+  clientName,
   clientPhone,
   clientEmail,
+  clientAddress,
+  propertyAddress,
   calendarEntries,
   propertyHistory,
   otherDossiers,
@@ -49,7 +57,13 @@ export function Sidebar({
       <OtherDossiersBlock dossiers={otherDossiers} />
       <OpportunitiesBlock opportunities={opportunities} />
       <VigilanceBlock signals={vigilanceSignals} />
-      <AdminShortcutsBlock dossierId={dossierId} />
+      <AdminShortcutsBlock
+        dossierId={dossierId}
+        dossierReference={dossierReference}
+        clientName={clientName}
+        clientAddress={clientAddress}
+        propertyAddress={propertyAddress}
+      />
     </aside>
   )
 }

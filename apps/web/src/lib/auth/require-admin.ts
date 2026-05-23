@@ -5,7 +5,10 @@ import { redirect } from 'next/navigation'
  * Liste des emails admin KOVAS (founders + advisor diagnostiqueur futur).
  *
  * Source de vérité V1 :
- * - benjamin@kovas.fr        (founder)
+ * - contact@kovas.fr         (founder, mailbox officielle unique du site)
+ * - benjamin@kovas.fr        (founder, alias historique conservé pour ne pas
+ *                            casser l'auth si la mailbox role-based n'est pas
+ *                            encore migrée vers `contact@`)
  * - benjaminbel@outlook.fr   (founder personal)
  *
  * V1.1+ : migration vers colonne `profiles.is_admin boolean` (cf. docs/SECURITY.md
@@ -14,6 +17,7 @@ import { redirect } from 'next/navigation'
  * injection sur la table profiles).
  */
 const ADMIN_EMAIL_ALLOWLIST: ReadonlySet<string> = new Set([
+  'contact@kovas.fr',
   'benjamin@kovas.fr',
   'benjaminbel@outlook.fr',
 ])

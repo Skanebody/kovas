@@ -362,8 +362,12 @@ export default async function DossierDetailPage({
       sidebar={
         <Sidebar
           dossierId={dossier.id}
+          dossierReference={dossier.reference}
+          clientName={client.display_name}
           clientPhone={client.phone}
           clientEmail={client.email}
+          clientAddress={null}
+          propertyAddress={fullAddress || null}
           calendarEntries={calendarEntries}
           propertyHistory={propertyHistory}
           otherDossiers={otherDossiers}

@@ -126,7 +126,7 @@ export function getOrganizationSchema(): WithContext<Organization> {
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
-      email: 'support@kovas.fr',
+      email: 'contact@kovas.fr',
       availableLanguage: ['French'],
     },
     sameAs: ['https://www.linkedin.com/company/kovas-app'],

@@ -137,7 +137,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   // 5. Envoi Brevo
   const brevoApiKey = process.env.BREVO_API_KEY
-  const brevoFromEmail = process.env.BREVO_FROM_EMAIL ?? 'noreply@kovas.fr'
+  const brevoFromEmail = process.env.BREVO_FROM_EMAIL ?? 'contact@kovas.fr'
   const brevoFromName = process.env.BREVO_FROM_NAME ?? 'KOVAS'
   const brevoReplyTo = process.env.BREVO_REPLY_TO ?? 'contact@kovas.fr'
 

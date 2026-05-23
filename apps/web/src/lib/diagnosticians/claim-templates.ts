@@ -29,7 +29,7 @@ Si vous n'êtes pas à l'origine de cette demande, ignorez ce message. Aucune ac
 
 Cordialement,
 L'équipe KOVAS
-benjamin@kovas.fr
+contact@kovas.fr
 `
 
   const html = `<!DOCTYPE html>
