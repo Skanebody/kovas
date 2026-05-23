@@ -1,0 +1,361 @@
+'use server'
+
+/**
+ * KOVAS — Server actions de la page Validation mission (MISSION-D).
+ *
+ * - triggerProcessMissionPayloadAction : déclenche l'Edge Function de sync background.
+ * - updateRoom3CLDataAction : MAJ inline d'un champ 3CL (passe en source='user_corrected').
+ * - exportToLicielAction : génère le XML 3CL + crée dossier_exports + retourne URL/blob.
+ *
+ * Authority : CLAUDE.md §3 feature 9 (export multi-format).
+ *
+ * Note: les nouvelles tables (mission_rooms_3cl_data, vision_analysis_cache) ne sont
+ * pas encore régénérées dans `@kovas/database/types` — utilisation de casts ciblés
+ * `(... as unknown as { ... })` localement, le temps de la régen DEPLOY-4.
+ */
+
+import { type BuildingGlobals3CL, type Room3CLData, buildXml3CL } from '@/lib/3cl/xml-3cl-builder'
+import { getCurrentUser } from '@/lib/auth/current-user'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
+
+// Client admin non typé — utilisé pour accéder aux nouvelles tables non encore
+// présentes dans `@kovas/database/types` (régen DEPLOY-4).
+function adminClient() {
+  return createAdminClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+}
+
+interface MissionSessionRow {
+  id: string
+  dossier_id: string
+  organization_id: string
+  created_by: string | null
+  dossiers?: {
+    reference: string
+    properties?: {
+      year_built: number | null
+      surface_total: number | null
+      surface_carrez: number | null
+      property_type: string | null
+      address: string | null
+      postal_code: string | null
+      city: string | null
+    } | null
+  } | null
+}
+
+// ============================================
+// 1. triggerProcessMissionPayloadAction
+// ============================================
+
+export async function triggerProcessMissionPayloadAction(
+  missionSessionId: string,
+): Promise<{ ok: true } | { error: string }> {
+  const { orgId } = await getCurrentUser()
+  const admin = adminClient()
+
+  const { data: sessionRaw } = await (
+    admin.from('mission_sessions') as unknown as {
+      select: (q: string) => {
+        eq: (k: string, v: string) => { single: () => Promise<{ data: MissionSessionRow | null }> }
+      }
+    }
+  )
+    .select('id, organization_id, dossier_id')
+    .eq('id', missionSessionId)
+    .single()
+  const session = sessionRaw as MissionSessionRow | null
+
+  if (!session || session.organization_id !== orgId) {
+    return { error: 'Session introuvable ou accès refusé' }
+  }
+
+  // Charger les photos pour les passer en payload
+  const photosTable = admin.from('photos') as unknown as {
+    select: (q: string) => {
+      eq: (
+        k: string,
+        v: string,
+      ) => {
+        limit: (n: number) => Promise<{
+          data: Array<{
+            id: string
+            storage_path: string
+            room_id: string | null
+            perceptual_hash: string | null
+          }> | null
+        }>
+      }
+    }
+  }
+  const { data: photos } = await photosTable
+    .select('id, storage_path, room_id, perceptual_hash')
+    .eq('dossier_id', session.dossier_id)
+    .limit(200)
+
+  const voiceTable = admin.from('voice_notes') as unknown as {
+    select: (q: string) => {
+      eq: (
+        k: string,
+        v: string,
+      ) => {
+        limit: (
+          n: number,
+        ) => Promise<{ data: Array<{ id: string; transcript_text: string | null }> | null }>
+      }
+    }
+  }
+  const { data: voiceNotes } = await voiceTable
+    .select('id, transcript_text')
+    .eq('dossier_id', session.dossier_id)
+    .limit(50)
+
+  // Mark queued
+  await (
+    admin.from('mission_sessions') as unknown as {
+      update: (p: Record<string, unknown>) => { eq: (k: string, v: string) => Promise<unknown> }
+    }
+  )
+    .update({ sync_status: 'queued', last_sync_attempt: new Date().toISOString() })
+    .eq('id', missionSessionId)
+
+  const transcriptText = (voiceNotes ?? [])
+    .map((v) => v.transcript_text ?? '')
+    .filter(Boolean)
+    .join('\n')
+
+  const url = `${SUPABASE_URL}/functions/v1/process-mission-payload`
+  void fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+    },
+    body: JSON.stringify({
+      mission_session_id: missionSessionId,
+      transcript_text: transcriptText,
+      vocal_audio_urls: [],
+      photos: (photos ?? []).map((p) => ({
+        id: p.id,
+        storage_path: p.storage_path,
+        room_id: p.room_id,
+        perceptual_hash: p.perceptual_hash,
+      })),
+      rooms_state: {},
+      checklist_3cl_state: {},
+    }),
+  }).catch((err: unknown) => {
+    console.error('process-mission-payload trigger failed', err)
+  })
+
+  revalidatePath(`/dashboard/dossiers/${session.dossier_id}`)
+  return { ok: true }
+}
+
+// ============================================
+// 2. updateRoom3CLDataAction
+// ============================================
+
+const updateRoom3CLSchema = z.object({
+  rowId: z.string().uuid(),
+  patch: z.record(z.unknown()),
+})
+
+export async function updateRoom3CLDataAction(
+  rowId: string,
+  patch: Record<string, unknown>,
+): Promise<{ ok: true } | { error: string }> {
+  const parsed = updateRoom3CLSchema.safeParse({ rowId, patch })
+  if (!parsed.success) return { error: 'Input invalide' }
+
+  const { user } = await getCurrentUser()
+  const admin = adminClient()
+
+  const tbl = admin.from('mission_rooms_3cl_data') as unknown as {
+    select: (q: string) => {
+      eq: (
+        k: string,
+        v: string,
+      ) => {
+        single: () => Promise<{
+          data: { id: string; data_3cl: Record<string, unknown>; mission_session_id: string } | null
+        }>
+      }
+    }
+    update: (p: Record<string, unknown>) => {
+      eq: (k: string, v: string) => Promise<{ error: { message: string } | null }>
+    }
+  }
+
+  const { data: existing } = await tbl
+    .select('id, data_3cl, mission_session_id')
+    .eq('id', rowId)
+    .single()
+  if (!existing) return { error: 'Pièce introuvable' }
+
+  const mergedData = {
+    ...(existing.data_3cl ?? {}),
+    ...patch,
+  }
+
+  const { error } = await tbl
+    .update({
+      data_3cl: mergedData,
+      source: 'user_corrected',
+      validated_by_user: true,
+      validated_at: new Date().toISOString(),
+      validated_by: user.id,
+    })
+    .eq('id', rowId)
+
+  if (error) return { error: error.message }
+
+  return { ok: true }
+}
+
+// ============================================
+// 3. exportToLicielAction (génère XML 3CL + dossier_exports)
+// ============================================
+
+export async function exportToLicielAction(
+  missionSessionId: string,
+): Promise<
+  { ok: true; exportId: string; storagePath: string; warnings: string[] } | { error: string }
+> {
+  const { orgId, user } = await getCurrentUser()
+  const admin = adminClient()
+
+  const sessTable = admin.from('mission_sessions') as unknown as {
+    select: (q: string) => {
+      eq: (k: string, v: string) => { single: () => Promise<{ data: MissionSessionRow | null }> }
+    }
+  }
+
+  const { data: session } = await sessTable
+    .select(
+      'id, dossier_id, organization_id, dossiers(reference, properties(year_built, surface_total, surface_carrez, property_type, address, postal_code, city))',
+    )
+    .eq('id', missionSessionId)
+    .single()
+
+  if (!session || session.organization_id !== orgId) {
+    return { error: 'Session introuvable ou accès refusé' }
+  }
+
+  const dossier = Array.isArray((session as MissionSessionRow).dossiers)
+    ? (session as unknown as { dossiers: MissionSessionRow['dossiers'][] }).dossiers[0]
+    : session.dossiers
+  const propsField = dossier?.properties
+  const prop = Array.isArray(propsField) ? propsField[0] : propsField
+
+  const roomsTbl = admin.from('mission_rooms_3cl_data') as unknown as {
+    select: (q: string) => {
+      eq: (
+        k: string,
+        v: string,
+      ) => Promise<{
+        data: Array<{
+          room_name: string
+          room_type: string | null
+          surface_sqm: number | null
+          ceiling_height_m: number | null
+          orientation: string | null
+          data_3cl: Record<string, unknown>
+          ai_confidence_score: number | null
+          source: string
+          validated_by_user: boolean
+        }> | null
+      }>
+    }
+  }
+
+  const { data: roomsRows } = await roomsTbl
+    .select(
+      'room_name, room_type, surface_sqm, ceiling_height_m, orientation, data_3cl, ai_confidence_score, source, validated_by_user',
+    )
+    .eq('mission_session_id', missionSessionId)
+
+  const rooms: Room3CLData[] = (roomsRows ?? []).map((r) => ({
+    room_name: r.room_name,
+    room_type: r.room_type,
+    surface_sqm: r.surface_sqm,
+    ceiling_height_m: r.ceiling_height_m,
+    orientation: r.orientation,
+    data_3cl: r.data_3cl as Room3CLData['data_3cl'],
+    ai_confidence_score: r.ai_confidence_score,
+    source: r.source as Room3CLData['source'],
+    validated_by_user: r.validated_by_user,
+  }))
+
+  const globals: BuildingGlobals3CL = {
+    reference: dossier?.reference ?? `MS-${missionSessionId.slice(0, 8)}`,
+    type_mission: 'vente',
+    date_visite: new Date().toISOString(),
+    annee_construction: prop?.year_built ?? null,
+    surface_habitable: prop?.surface_total ?? null,
+    surface_carrez: prop?.surface_carrez ?? null,
+    property_type: prop?.property_type ?? null,
+    postal_code: prop?.postal_code ?? null,
+    city: prop?.city ?? null,
+    address: prop?.address ?? null,
+    heating_system_main: null,
+    heating_system_secondary: null,
+    ecs_system: null,
+    ventilation_global: null,
+  }
+
+  const { xml, warnings } = buildXml3CL(globals, rooms)
+
+  const storagePath = `${session.organization_id}/${session.dossier_id}/mission-${missionSessionId}-3cl-${Date.now()}.xml`
+  const { error: uploadErr } = await admin.storage
+    .from('dossier-exports')
+    .upload(storagePath, new Blob([xml], { type: 'application/xml' }), {
+      upsert: true,
+      contentType: 'application/xml',
+    })
+
+  if (uploadErr) {
+    console.warn('storage upload failed (bucket might not exist)', uploadErr.message)
+  }
+
+  const expTable = admin.from('dossier_exports') as unknown as {
+    insert: (p: Record<string, unknown>) => {
+      select: (q: string) => {
+        single: () => Promise<{ data: { id: string } | null; error: { message: string } | null }>
+      }
+    }
+  }
+
+  const { data: exportRow, error: exportErr } = await expTable
+    .insert({
+      organization_id: session.organization_id,
+      dossier_id: session.dossier_id,
+      destination: 'liciel_zip',
+      was_complete: warnings.length === 0,
+      missing_fields_count: warnings.length,
+      missing_fields_snapshot: { warnings },
+      storage_path: storagePath,
+      created_by: user.id,
+    })
+    .select('id')
+    .single()
+
+  if (exportErr || !exportRow) {
+    return { error: exportErr?.message ?? 'Insert dossier_exports échoué' }
+  }
+
+  revalidatePath(`/dashboard/dossiers/${session.dossier_id}`)
+
+  return {
+    ok: true,
+    exportId: exportRow.id,
+    storagePath,
+    warnings,
+  }
+}
