@@ -245,6 +245,10 @@ ALTER TABLE diagnosticians
 ALTER TABLE diagnosticians
   ADD COLUMN IF NOT EXISTS manual_pause_until timestamptz;
 
+-- Patch idempotent : intervention_radius_km manquait sur prod, l'ajouter
+ALTER TABLE diagnosticians
+  ADD COLUMN IF NOT EXISTS intervention_radius_km int DEFAULT 30;
+
 CREATE INDEX IF NOT EXISTS idx_diag_ghost_status
   ON diagnosticians(ghost_status, ghost_status_updated_at)
   WHERE ghost_status <> 'active';
@@ -267,7 +271,7 @@ SELECT
   d.slug,
   d.city,
   d.department_code,
-  d.postal_code,
+  d.postcode AS postal_code,
   d.geo_lat,
   d.geo_lng,
   d.intervention_radius_km,

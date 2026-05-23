@@ -28,6 +28,8 @@ DROP POLICY IF EXISTS "public read published" ON diagnosticians;
 DROP POLICY IF EXISTS "diagnosticians: public read" ON diagnosticians;
 
 -- ─── Nouvelle policy : public ne lit QUE les diagnostiqueurs verified ──────
+-- Patch idempotent : DROP avant CREATE (policy déjà appliquée en prod partiellement)
+DROP POLICY IF EXISTS "diag_public_read_verified_only" ON diagnosticians;
 CREATE POLICY "diag_public_read_verified_only" ON diagnosticians
   FOR SELECT
   TO anon, authenticated

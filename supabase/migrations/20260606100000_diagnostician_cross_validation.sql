@@ -246,9 +246,11 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_constraint WHERE conname = 'diag_xval_source_check'
   ) THEN
+    -- Patch idempotent : étend la liste pour inclure les sources legacy
+    -- (VERIFY_DAILY déjà présent en prod via cron pré-existant)
     ALTER TABLE diagnostician_cross_validation_logs
       ADD CONSTRAINT diag_xval_source_check
-      CHECK (source IN ('SIRENE', 'INPI', 'BAN', 'ADEME', 'DHUP'));
+      CHECK (source IN ('SIRENE', 'INPI', 'BAN', 'ADEME', 'DHUP', 'VERIFY_DAILY', 'MANUAL'));
   END IF;
 
   IF NOT EXISTS (

@@ -144,7 +144,7 @@ VALUES
    '{"type":"mrr_milestone","levels":[1000,5000,10000,25000]}'::jsonb,
    NULL,
    'info',
-   NULL,
+   1440, -- 24h cooldown : un MRR milestone est franchi une fois, pas de spam
    true,
    'alerts'),
   ('Signups daily > avg+2σ',

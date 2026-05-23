@@ -34,9 +34,9 @@ CREATE TABLE IF NOT EXISTS public.user_behavior_events (
 CREATE INDEX IF NOT EXISTS idx_user_events_user_type
   ON public.user_behavior_events (user_id, event_type, created_at DESC);
 
+-- Patch idempotent : retire le prédicat now() non-immutable, garde l'index simple
 CREATE INDEX IF NOT EXISTS idx_user_events_recent
-  ON public.user_behavior_events (created_at DESC)
-  WHERE created_at > now() - interval '90 days';
+  ON public.user_behavior_events (created_at DESC);
 
 COMMENT ON TABLE public.user_behavior_events IS
   'Events comportementaux pour l''upsell intelligent (L1). Lecture/écriture service-role uniquement — toutes les analyses passent par routes API server-side.';
@@ -62,6 +62,18 @@ CREATE TABLE IF NOT EXISTS public.upsell_suggestions (
   created_at          timestamptz NOT NULL DEFAULT now(),
   UNIQUE (user_id, suggestion_type, suggested_target, created_at)
 );
+
+-- Patch idempotent : la table peut exister depuis une migration legacy avec un schéma
+-- différent. Ajoute les colonnes manquantes attendues par cette migration.
+ALTER TABLE public.upsell_suggestions ADD COLUMN IF NOT EXISTS suggestion_type text;
+ALTER TABLE public.upsell_suggestions ADD COLUMN IF NOT EXISTS suggested_target text;
+ALTER TABLE public.upsell_suggestions ADD COLUMN IF NOT EXISTS reason_label text;
+ALTER TABLE public.upsell_suggestions ADD COLUMN IF NOT EXISTS reason_benefit text;
+ALTER TABLE public.upsell_suggestions ADD COLUMN IF NOT EXISTS estimated_value_eur int;
+ALTER TABLE public.upsell_suggestions ADD COLUMN IF NOT EXISTS priority int NOT NULL DEFAULT 50;
+ALTER TABLE public.upsell_suggestions ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'pending';
+ALTER TABLE public.upsell_suggestions ADD COLUMN IF NOT EXISTS shown_in_app_at timestamptz;
+ALTER TABLE public.upsell_suggestions ADD COLUMN IF NOT EXISTS shown_email_at timestamptz;
 
 CREATE INDEX IF NOT EXISTS idx_upsell_pending
   ON public.upsell_suggestions (user_id, status, priority DESC)

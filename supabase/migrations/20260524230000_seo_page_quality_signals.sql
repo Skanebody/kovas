@@ -67,7 +67,8 @@ CREATE TRIGGER seo_pq_updated_at_trigger
 -- RLS : admin uniquement (gérée via policy admin_only)
 ALTER TABLE seo_page_quality_signals ENABLE ROW LEVEL SECURITY;
 
--- Policy lecture admin
+-- Policy lecture admin (DROP préalable pour idempotence)
+DROP POLICY IF EXISTS seo_pq_admin_read ON seo_page_quality_signals;
 CREATE POLICY seo_pq_admin_read
   ON seo_page_quality_signals FOR SELECT
   USING (
@@ -78,7 +79,8 @@ CREATE POLICY seo_pq_admin_read
     )
   );
 
--- Policy écriture admin
+-- Policy écriture admin (DROP préalable pour idempotence)
+DROP POLICY IF EXISTS seo_pq_admin_write ON seo_page_quality_signals;
 CREATE POLICY seo_pq_admin_write
   ON seo_page_quality_signals FOR ALL
   USING (

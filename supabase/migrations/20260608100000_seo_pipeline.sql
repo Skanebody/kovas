@@ -32,47 +32,53 @@ CREATE EXTENSION IF NOT EXISTS "unaccent";
 -- la colonne profiles.is_admin n'existe pas encore, retourne false (à activer
 -- ultérieurement via une migration dédiée qui ajoute la colonne).
 -- ----------------------------------------------------------------------------
+-- Patch idempotent : la fonction is_admin(uuid) existe déjà en prod avec un
+-- paramètre nommé "p_user_id" (depuis migration legacy). Drop impossible
+-- (policies dépendantes). On skip le CREATE OR REPLACE : la fonction est
+-- déjà fonctionnelle et son nom de paramètre n'a pas d'impact sur les RLS.
+-- Si elle n'existe pas, on la crée.
 DO $$
 BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'profiles'
-      AND column_name = 'is_admin'
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.proname = 'is_admin'
   ) THEN
-    -- Variante : profiles.is_admin existe → check réel
-    EXECUTE $f$
-      CREATE OR REPLACE FUNCTION public.is_admin(uid uuid)
-      RETURNS boolean
-      LANGUAGE sql
-      SECURITY DEFINER
-      STABLE
-      SET search_path = public
-      AS $body$
-        SELECT EXISTS (
-          SELECT 1 FROM public.profiles WHERE id = uid AND is_admin = true
-        );
-      $body$;
-    $f$;
-  ELSE
-    -- Fallback : profiles.is_admin n'existe pas encore → toujours false.
-    -- À mettre à jour quand la colonne sera ajoutée (migration dédiée).
-    EXECUTE $f$
-      CREATE OR REPLACE FUNCTION public.is_admin(uid uuid)
-      RETURNS boolean
-      LANGUAGE sql
-      SECURITY DEFINER
-      STABLE
-      SET search_path = public
-      AS $body$
-        SELECT false;
-      $body$;
-    $f$;
+    IF EXISTS (
+      SELECT 1
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'profiles'
+        AND column_name = 'is_admin'
+    ) THEN
+      EXECUTE $f$
+        CREATE FUNCTION public.is_admin(uid uuid)
+        RETURNS boolean
+        LANGUAGE sql
+        SECURITY DEFINER
+        STABLE
+        SET search_path = public
+        AS $body$
+          SELECT EXISTS (
+            SELECT 1 FROM public.profiles WHERE id = uid AND is_admin = true
+          );
+        $body$;
+      $f$;
+    ELSE
+      EXECUTE $f$
+        CREATE FUNCTION public.is_admin(uid uuid)
+        RETURNS boolean
+        LANGUAGE sql
+        SECURITY DEFINER
+        STABLE
+        SET search_path = public
+        AS $body$
+          SELECT false;
+        $body$;
+      $f$;
+    END IF;
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.is_admin(uuid) TO authenticated, service_role';
   END IF;
 END $$;
-
-GRANT EXECUTE ON FUNCTION public.is_admin(uuid) TO authenticated, service_role;
 
 -- ============================================================================
 -- 1. Table seo_sources — catalogue des sources d'ingestion

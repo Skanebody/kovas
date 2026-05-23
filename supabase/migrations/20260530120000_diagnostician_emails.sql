@@ -24,6 +24,15 @@
 -- sans toucher au schéma de `diagnosticians` (responsabilité Agent A1).
 -- ============================================
 
+-- Patch idempotent : ajoute les colonnes manquantes sur diagnosticians si elles
+-- n'existent pas (la migration A1 originale ne les avait pas en prod).
+ALTER TABLE diagnosticians ADD COLUMN IF NOT EXISTS unsubscribed boolean NOT NULL DEFAULT false;
+ALTER TABLE diagnosticians ADD COLUMN IF NOT EXISTS unsubscribed_at timestamptz;
+ALTER TABLE diagnosticians ADD COLUMN IF NOT EXISTS withdrawal_requested_at timestamptz;
+ALTER TABLE diagnosticians ADD COLUMN IF NOT EXISTS pre_notification_email_1_sent_at timestamptz;
+ALTER TABLE diagnosticians ADD COLUMN IF NOT EXISTS pre_notification_email_2_sent_at timestamptz;
+ALTER TABLE diagnosticians ADD COLUMN IF NOT EXISTS pre_notification_email_3_sent_at timestamptz;
+
 -- ============================================
 -- 1. Table events emails (tracking Resend webhook)
 -- ============================================

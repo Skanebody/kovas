@@ -74,7 +74,9 @@ CREATE INDEX IF NOT EXISTS idx_quote_requests_source
   ON public.quote_requests (source, created_at DESC);
 
 -- 6. Mettre à jour la vue `leads` pour exposer les nouvelles colonnes
-CREATE OR REPLACE VIEW public.leads AS
+-- DROP préalable car CREATE OR REPLACE refuse les renames/reorders de colonnes
+DROP VIEW IF EXISTS public.leads CASCADE;
+CREATE VIEW public.leads AS
 SELECT
   id,
   created_at,

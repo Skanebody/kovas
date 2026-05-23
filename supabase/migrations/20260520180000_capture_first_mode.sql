@@ -156,9 +156,10 @@ CREATE TABLE IF NOT EXISTS vision_cache (
   expires_at             timestamptz NOT NULL DEFAULT (now() + interval '180 days')
 );
 
+-- NB : pas de WHERE expires_at > now() — now() est STABLE, pas IMMUTABLE,
+-- donc interdit en index predicate. L'index complet est suffisamment sélectif.
 CREATE INDEX IF NOT EXISTS idx_vision_cache_lookup
-  ON vision_cache (perceptual_hash_prefix, diagnostics_signature)
-  WHERE expires_at > now();
+  ON vision_cache (perceptual_hash_prefix, diagnostics_signature, expires_at);
 
 -- ============================================
 -- F. user_preferences (vérifie d'abord si n'existe pas)
