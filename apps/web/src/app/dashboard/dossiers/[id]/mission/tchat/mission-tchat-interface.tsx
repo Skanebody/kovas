@@ -1,23 +1,27 @@
 'use client'
 
 /**
- * KOVAS — Interface conversationnelle pleine écran du mode mission tchat IA.
+ * KOVAS — Interface conversationnelle mode mission tchat IA (refonte FIX-MM).
  *
- * Vue style WhatsApp/iMessage : le bot IA pose les questions une par une et
- * structure les réponses du diagnostiqueur en données diagnostic exploitables.
+ * UI inspirée ChatGPT/WhatsApp/Claude :
+ *  - Bulles asymétriques (user droite chartreuse, assistant gauche paper)
+ *  - Streaming SSE Claude Haiku 4.5 (caractères qui apparaissent progressivement)
+ *  - Markdown rendu inline (gras, italique, listes, code, links)
+ *  - Indicateur typing 3 dots animé avant le 1er token
+ *  - Quick replies contextuelles (3-4 boutons qui changent selon contexte)
+ *  - Web Speech API pour dictée (Chrome/Edge)
+ *  - Capture photo via input file capture=environment
+ *  - Auto-scroll bottom + bouton "voir nouveau message" si scrolled up
+ *  - Header sticky avec stats + bouton pause + menu
  *
- * Stack :
- *   - Web Speech API (SpeechRecognition) pour la dictée vocale terrain
- *   - MediaRecorder fallback si SpeechRecognition indisponible
- *   - IndexedDB (Dexie via existing /lib/mission/local-storage-queue) pour le
- *     buffer offline des réponses et photos
- *   - Sauvegarde auto toutes les 10s en localStorage (clé namespacée par session)
- *   - Sync Supabase au retour réseau via captureSyncManager existant
+ * Branchement IA :
+ *  - POST /api/mission/[dossierId]/chat/stream
+ *  - Body { sessionId, message }
+ *  - SSE events: delta / done / error
+ *  - Persistence: messages stockés en DB mission_chat_messages
+ *  - Captures: [CAPTURE: ...] parsés côté serveur, stockés mission_session_captures
  *
- * Authority : CLAUDE.md §3 features 1 (saisie vocale terrain) + 10 (offline).
- *
- * NB : ce composant volontairement autonome (pas de Card / AppShell) pour
- * conserver le mode full-screen layout (cf. layout.tsx).
+ * Authority : CLAUDE.md §3 features 1 + DISCOVERY tchat IA + FIX-MM.
  */
 
 import { Button } from '@/components/ui/button'
@@ -27,18 +31,18 @@ import {
   createSpeechRecognition,
 } from '@/lib/voice/speech-recognition'
 import {
+  ArrowDown,
   ArrowLeft,
   Camera,
   CheckCircle2,
   Loader2,
   Mic,
   MicOff,
+  MoreVertical,
   Pause,
-  Save,
   Send,
   Sparkles,
   WifiOff,
-  X,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -55,6 +59,13 @@ interface ExistingRoom {
   surfaceM2: number | null
 }
 
+interface InitialChatMessage {
+  id: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  createdAt: string
+}
+
 interface MissionTchatInterfaceProps {
   dossierId: string
   reference: string
@@ -66,113 +77,247 @@ interface MissionTchatInterfaceProps {
   existingRooms: ExistingRoom[]
   initialStats: { photos: number; voiceNotes: number }
   propertyMeta: { surface: number | null; yearBuilt: number | null } | null
+  initialChatHistory: InitialChatMessage[]
 }
 
 interface ChatMessage {
   id: string
-  role: 'bot' | 'user' | 'system'
-  text: string
-  timestamp: number
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  createdAt: number
   /** Si la réponse user a été transcrite via Web Speech API. */
   isVoice?: boolean
   /** Photo URL temporaire (objectURL) si message est une photo. */
   photoUrl?: string
+  /** Indique si ce message assistant est encore en cours de streaming. */
+  streaming?: boolean
 }
 
-interface MissionStep {
-  id: string
-  question: string
-  hint?: string
-  /** Validation custom (returns null = OK, string = erreur). */
-  validate?: (input: string) => string | null
-  /** Catégorie pour structuration. */
-  category: 'room' | 'surface' | 'equipment' | 'meta' | 'closing'
-}
-
-// Étapes de base — questionnaire conversationnel pour 1 pièce.
-// Itération 1 : flux statique. Itération 2 : adapt selon type diag (DPE/amiante).
-const BASE_STEPS: ReadonlyArray<MissionStep> = [
-  {
-    id: 'room_name',
-    question: 'Quelle est la première pièce que vous souhaitez saisir ?',
-    hint: 'Exemple : Salon, Chambre 1, Cuisine, Salle de bain…',
-    category: 'room',
-  },
-  {
-    id: 'room_surface',
-    question: 'Quelle est la surface au sol de cette pièce ?',
-    hint: 'Exprimée en m² (ex : 18,5 ou « dix-huit virgule cinq »)',
-    category: 'surface',
-    validate: (input) => {
-      const num = Number.parseFloat(input.replace(',', '.').replace(/[^\d.]/g, ''))
-      if (Number.isNaN(num) || num <= 0) return 'Surface invalide — saisissez un nombre en m².'
-      if (num > 500) return 'Surface > 500 m² — confirmer ?'
-      return null
-    },
-  },
-  {
-    id: 'room_height',
-    question: 'Hauteur sous plafond ?',
-    hint: 'En mètres (ex : 2,5). Tapez « passer » si non applicable.',
-    category: 'surface',
-  },
-  {
-    id: 'room_equipment',
-    question: 'Y a-t-il des équipements à signaler dans cette pièce ?',
-    hint: 'Radiateur, VMC, prises électriques, chaudière… (ou « aucun »)',
-    category: 'equipment',
-  },
-  {
-    id: 'room_photo',
-    question: 'Souhaitez-vous prendre une photo de cette pièce ?',
-    hint: 'Touchez « Prendre une photo » pour ouvrir la caméra, ou « passer ».',
-    category: 'meta',
-  },
-  {
-    id: 'next_room',
-    question: 'Souhaitez-vous saisir une autre pièce ?',
-    hint: 'Répondez « oui » pour continuer ou « terminer » pour finaliser.',
-    category: 'closing',
-  },
-]
+type ConversationPhase = 'start' | 'mid' | 'end'
 
 // -----------------------------------------------------------------------------
-// localStorage save helpers — auto-save toutes les 10s
+// Markdown renderer ultra-light (pas de dépendance externe)
 // -----------------------------------------------------------------------------
 
-const STORAGE_KEY_PREFIX = 'kovas:mission-tchat:'
-
-interface SavedState {
-  sessionId: string
-  messages: ChatMessage[]
-  currentStepIndex: number
-  answers: Record<string, string>
-  savedAt: number
+interface MarkdownInlineProps {
+  text: string
 }
 
-function saveToLocal(sessionId: string, state: Omit<SavedState, 'sessionId' | 'savedAt'>): void {
-  if (typeof window === 'undefined') return
-  try {
-    const payload: SavedState = {
-      sessionId,
-      ...state,
-      savedAt: Date.now(),
+/**
+ * Mini parser markdown inline : **gras**, *italique*, `code`, [lien](url).
+ * Suffisant pour les réponses IA terrain.
+ */
+function MarkdownInline({ text }: MarkdownInlineProps): React.ReactElement {
+  // On utilise un parser regex en plusieurs passes pour produire un array
+  // de nodes React. C'est volontairement simple — pas de tables, pas
+  // d'images, pas de HTML inline. Robuste pour les réponses IA terrain.
+  type Node = { type: 'text' | 'bold' | 'italic' | 'code' | 'link'; value: string; href?: string }
+  const nodes: Node[] = []
+  const remaining = text
+  const re = /(\*\*[^*]+\*\*)|(\*[^*]+\*)|(`[^`]+`)|(\[[^\]]+\]\([^)]+\))/g
+  let lastIdx = 0
+  let m: RegExpExecArray | null
+  // biome-ignore lint/suspicious/noAssignInExpressions: idiomatic regex loop
+  while ((m = re.exec(remaining)) !== null) {
+    if (m.index > lastIdx) {
+      nodes.push({ type: 'text', value: remaining.slice(lastIdx, m.index) })
     }
-    window.localStorage.setItem(`${STORAGE_KEY_PREFIX}${sessionId}`, JSON.stringify(payload))
-  } catch {
-    // QuotaExceeded ou private mode — silencieux, on continue.
+    const matched = m[0]
+    if (matched.startsWith('**') && matched.endsWith('**')) {
+      nodes.push({ type: 'bold', value: matched.slice(2, -2) })
+    } else if (matched.startsWith('*') && matched.endsWith('*')) {
+      nodes.push({ type: 'italic', value: matched.slice(1, -1) })
+    } else if (matched.startsWith('`') && matched.endsWith('`')) {
+      nodes.push({ type: 'code', value: matched.slice(1, -1) })
+    } else if (matched.startsWith('[')) {
+      const closeBracket = matched.indexOf(']')
+      const openParen = matched.indexOf('(', closeBracket)
+      const closeParen = matched.lastIndexOf(')')
+      const label = matched.slice(1, closeBracket)
+      const href = matched.slice(openParen + 1, closeParen)
+      nodes.push({ type: 'link', value: label, href })
+    }
+    lastIdx = m.index + matched.length
   }
+  if (lastIdx < remaining.length) {
+    nodes.push({ type: 'text', value: remaining.slice(lastIdx) })
+  }
+
+  return (
+    <>
+      {nodes.map((n, i) => {
+        const key = `${n.type}-${i}`
+        if (n.type === 'bold') return <strong key={key}>{n.value}</strong>
+        if (n.type === 'italic') return <em key={key}>{n.value}</em>
+        if (n.type === 'code') {
+          return (
+            <code
+              key={key}
+              className="font-mono text-[0.9em] bg-ink/10 px-1.5 py-0.5 rounded text-ink"
+            >
+              {n.value}
+            </code>
+          )
+        }
+        if (n.type === 'link' && n.href) {
+          return (
+            <a
+              key={key}
+              href={n.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-chartreuse-deep underline underline-offset-2 hover:text-chartreuse"
+            >
+              {n.value}
+            </a>
+          )
+        }
+        return <span key={key}>{n.value}</span>
+      })}
+    </>
+  )
 }
 
-function loadFromLocal(sessionId: string): SavedState | null {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = window.localStorage.getItem(`${STORAGE_KEY_PREFIX}${sessionId}`)
-    if (!raw) return null
-    return JSON.parse(raw) as SavedState
-  } catch {
-    return null
+/**
+ * Découpe le markdown en lignes + détecte les blocs liste / paragraphes.
+ * Très basique mais lisible pour les réponses Claude métier.
+ */
+function MarkdownBlock({ content }: { content: string }): React.ReactElement {
+  const lines = content.split('\n')
+  const blocks: React.ReactElement[] = []
+  let i = 0
+  let key = 0
+
+  while (i < lines.length) {
+    const line = lines[i]
+    if (line.trim() === '') {
+      i += 1
+      continue
+    }
+
+    // Liste à puces
+    if (/^\s*[-*]\s+/.test(line)) {
+      const items: string[] = []
+      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*[-*]\s+/, ''))
+        i += 1
+      }
+      blocks.push(
+        <ul key={`ul-${key++}`} className="my-1.5 ml-4 list-disc space-y-1">
+          {items.map((it) => (
+            <li key={`li-${it.slice(0, 20)}`}>
+              <MarkdownInline text={it} />
+            </li>
+          ))}
+        </ul>,
+      )
+      continue
+    }
+
+    // Liste numérotée
+    if (/^\s*\d+\.\s+/.test(line)) {
+      const items: string[] = []
+      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*\d+\.\s+/, ''))
+        i += 1
+      }
+      blocks.push(
+        <ol key={`ol-${key++}`} className="my-1.5 ml-5 list-decimal space-y-1">
+          {items.map((it) => (
+            <li key={`oli-${it.slice(0, 20)}`}>
+              <MarkdownInline text={it} />
+            </li>
+          ))}
+        </ol>,
+      )
+      continue
+    }
+
+    // Header H3
+    if (/^###\s+/.test(line)) {
+      blocks.push(
+        <h4 key={`h-${key++}`} className="mt-2 mb-1 text-[14px] font-semibold text-ink">
+          <MarkdownInline text={line.replace(/^###\s+/, '')} />
+        </h4>,
+      )
+      i += 1
+      continue
+    }
+
+    // Paragraphe — agrège lignes consécutives
+    const paragraph: string[] = []
+    while (
+      i < lines.length &&
+      lines[i].trim() !== '' &&
+      !/^\s*[-*]\s+/.test(lines[i]) &&
+      !/^\s*\d+\.\s+/.test(lines[i]) &&
+      !/^###\s+/.test(lines[i])
+    ) {
+      paragraph.push(lines[i])
+      i += 1
+    }
+    if (paragraph.length > 0) {
+      blocks.push(
+        <p key={`p-${key++}`} className="my-1 leading-relaxed">
+          <MarkdownInline text={paragraph.join(' ')} />
+        </p>,
+      )
+    }
   }
+
+  return <>{blocks}</>
+}
+
+// -----------------------------------------------------------------------------
+// Quick replies contextuelles
+// -----------------------------------------------------------------------------
+
+interface QuickReply {
+  label: string
+  message: string
+}
+
+function getQuickReplies(phase: ConversationPhase, lastAssistantText: string): QuickReply[] {
+  // Phase début (peu de captures) — questions méthodo
+  if (phase === 'start') {
+    return [
+      { label: 'Par où commencer ?', message: 'Par où dois-je commencer le travail ?' },
+      {
+        label: 'Ordre des pièces',
+        message: 'Quel ordre optimal pour parcourir les pièces ?',
+      },
+      { label: 'Combien de temps ?', message: 'Combien de temps prévoir pour ce diagnostic ?' },
+      {
+        label: 'Points de vigilance',
+        message: 'Quels sont les points de vigilance principaux sur ce bien ?',
+      },
+    ]
+  }
+  // Phase fin — wrap-up
+  if (phase === 'end') {
+    return [
+      { label: 'Récapitulatif', message: 'Faites-moi un récapitulatif des pièces saisies.' },
+      { label: 'Manque-t-il quelque chose ?', message: 'Manque-t-il des données importantes ?' },
+      { label: 'Préparer export', message: "Comment préparer l'export pour Liciel ?" },
+      { label: 'Vérifier la cohérence', message: 'Vérifiez la cohérence des données saisies.' },
+    ]
+  }
+  // Phase mid — actions contextuelles
+  const lower = lastAssistantText.toLowerCase()
+  if (lower.includes('pièce') || lower.includes('salon') || lower.includes('cuisine')) {
+    return [
+      { label: 'Photo de cette pièce', message: 'Je viens de prendre une photo de cette pièce.' },
+      { label: 'Pièce suivante', message: 'Passons à la pièce suivante.' },
+      { label: 'Vérifier surface', message: 'Comment vérifier la surface au sol précisément ?' },
+      { label: 'Ajouter équipement', message: 'Comment renseigner les équipements de la pièce ?' },
+    ]
+  }
+  return [
+    { label: 'Continuer', message: 'On continue, pièce suivante.' },
+    { label: 'Pause méthodo', message: 'Rappelle-moi la méthode pour ce type de mesure.' },
+    { label: 'Photo prise', message: "J'ai pris une photo." },
+    { label: 'Récap en cours', message: "Récapitule ce qu'on a déjà saisi." },
+  ]
 }
 
 // -----------------------------------------------------------------------------
@@ -190,71 +335,47 @@ export function MissionTchatInterface({
   existingRooms,
   initialStats,
   propertyMeta: _propertyMeta,
+  initialChatHistory,
 }: MissionTchatInterfaceProps) {
   const router = useRouter()
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<SpeechRecognitionController | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // ----- State principal -----
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
-  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    if (initialChatHistory.length > 0) {
+      return initialChatHistory.map((m) => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+        createdAt: new Date(m.createdAt).getTime(),
+      }))
+    }
+    // Message d'accueil bootstrap
+    return [
+      {
+        id: `welcome-${Date.now()}`,
+        role: 'assistant' as const,
+        content:
+          existingRooms.length > 0
+            ? `Bonjour. ${existingRooms.length} pièce${existingRooms.length > 1 ? 's' : ''} déjà saisie${existingRooms.length > 1 ? 's' : ''} dans ce dossier. On peut reprendre où vous en étiez, ou attaquer une nouvelle pièce. **Que souhaitez-vous faire ?**`
+            : `Bonjour Benjamin. Je suis votre assistant terrain pour cette mission chez **${clientName}**. Je peux vous **guider pas à pas**, **répondre à vos questions métier** (méthodo, réglementation, particularités du bien), et **enregistrer vos données** au fur et à mesure.\n\nDites-moi simplement par où vous voulez commencer, ou posez-moi une question.`,
+        createdAt: Date.now(),
+      },
+    ]
+  })
   const [input, setInput] = useState<string>('')
   const [isListening, setIsListening] = useState<boolean>(false)
   const [isOnline, setIsOnline] = useState<boolean>(true)
   const [isPaused, setIsPaused] = useState<boolean>(false)
-  const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [stats, setStats] = useState(initialStats)
   const [roomsSaved, setRoomsSaved] = useState<number>(existingRooms.length)
-  const [validationError, setValidationError] = useState<string | null>(null)
-
-  const currentStep = useMemo(() => BASE_STEPS[currentStepIndex] ?? null, [currentStepIndex])
-
-  const totalSteps = BASE_STEPS.length
-
-  // ----- Init : hydrate depuis localStorage ou pose la 1ère question -----
-  useEffect(() => {
-    const saved = loadFromLocal(sessionId)
-    if (saved && saved.messages.length > 0) {
-      setMessages(saved.messages)
-      setCurrentStepIndex(saved.currentStepIndex)
-      setAnswers(saved.answers)
-      return
-    }
-    // Bootstrap : message d'accueil + 1ère question.
-    const welcomeMsg: ChatMessage = {
-      id: `bot-welcome-${Date.now()}`,
-      role: 'bot',
-      text:
-        existingRooms.length > 0
-          ? `Bonjour. ${existingRooms.length} pièce${
-              existingRooms.length > 1 ? 's' : ''
-            } déjà saisie${existingRooms.length > 1 ? 's' : ''}. On continue ?`
-          : `Bonjour Benjamin. Je suis votre assistant terrain. Je vais vous guider pour saisir les pièces de ${clientName}. Vous pouvez répondre vocalement (icône micro) ou taper directement.`,
-      timestamp: Date.now(),
-    }
-    const firstQuestion: ChatMessage = {
-      id: `bot-q-${Date.now()}-0`,
-      role: 'bot',
-      text: BASE_STEPS[0]?.question ?? 'Quelle pièce souhaitez-vous saisir ?',
-      timestamp: Date.now() + 1,
-    }
-    setMessages([welcomeMsg, firstQuestion])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId])
-
-  // ----- Auto-save toutes les 10s en localStorage -----
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (messages.length === 0) return
-      setSavedStatus('saving')
-      saveToLocal(sessionId, { messages, currentStepIndex, answers })
-      setSavedStatus('saved')
-      setTimeout(() => setSavedStatus('idle'), 1500)
-    }, 10_000)
-    return () => clearInterval(interval)
-  }, [sessionId, messages, currentStepIndex, answers])
+  const [isStreaming, setIsStreaming] = useState<boolean>(false)
+  const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   // ----- Online / offline -----
   useEffect(() => {
@@ -269,38 +390,63 @@ export function MissionTchatInterface({
     }
   }, [])
 
-  // ----- Scroll auto en bas -----
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [messages])
+  // ----- Auto-scroll bottom (mais pas si user a scroll up volontairement) -----
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' })
+  }, [])
 
-  // ----- Speech Recognition setup -----
-  const startListening = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.abort()
+  useEffect(() => {
+    // Auto-scroll uniquement si proche du bas
+    const container = messagesContainerRef.current
+    if (!container) return
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
+    if (distanceFromBottom < 200) {
+      scrollToBottom('smooth')
+    } else {
+      setShowScrollToBottom(true)
     }
+  }, [scrollToBottom])
+
+  useEffect(() => {
+    const container = messagesContainerRef.current
+    if (!container) return
+    const onScroll = (): void => {
+      const distance = container.scrollHeight - container.scrollTop - container.clientHeight
+      setShowScrollToBottom(distance > 200)
+    }
+    container.addEventListener('scroll', onScroll, { passive: true })
+    return () => container.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // ----- Auto-resize textarea -----
+  useEffect(() => {
+    const ta = textareaRef.current
+    if (!ta) return
+    ta.style.height = 'auto'
+    const newHeight = Math.min(ta.scrollHeight, 180) // max 180px ~ 6 lignes
+    ta.style.height = `${newHeight}px`
+  }, [])
+
+  // ----- Speech Recognition -----
+  const startListening = useCallback(() => {
+    if (recognitionRef.current) recognitionRef.current.abort()
     const ctrl = createSpeechRecognition({
       lang: 'fr-FR',
       continuous: false,
       interimResults: true,
       onResult: ({ interim, final }) => {
-        // On préfère le transcript final s'il existe, sinon l'interim.
         setInput(final.length > 0 ? final : interim)
       },
       onError: (err) => {
         setIsListening(false)
         if (err === 'not-allowed') {
-          setValidationError(
-            "Autorisez l'accès au micro dans les réglages du navigateur pour la dictée.",
-          )
+          setErrorMsg("Autorisez l'accès au micro dans les réglages du navigateur pour la dictée.")
         }
       },
-      onEnd: () => {
-        setIsListening(false)
-      },
+      onEnd: () => setIsListening(false),
     })
     if (!ctrl.isSupported) {
-      setValidationError(
+      setErrorMsg(
         'Reconnaissance vocale non supportée par ce navigateur — utilisez Chrome/Edge ou tapez votre réponse.',
       )
       return
@@ -311,281 +457,328 @@ export function MissionTchatInterface({
   }, [])
 
   const stopListening = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop()
-    }
+    if (recognitionRef.current) recognitionRef.current.stop()
     setIsListening(false)
   }, [])
 
-  // ----- Submit user message -----
-  const handleSubmit = useCallback(() => {
-    const trimmed = input.trim()
-    if (!trimmed || !currentStep) return
+  // ----- Streaming IA -----
+  const sendMessage = useCallback(
+    async (rawText: string) => {
+      const text = rawText.trim()
+      if (!text || isStreaming) return
 
-    // Validation step.
-    if (currentStep.validate) {
-      const err = currentStep.validate(trimmed)
-      if (err) {
-        setValidationError(err)
-        return
+      setErrorMsg(null)
+
+      // Insère le user message immédiatement
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: text,
+        createdAt: Date.now(),
+        isVoice: isListening,
       }
-    }
-    setValidationError(null)
 
-    const userMsg: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      text: trimmed,
-      timestamp: Date.now(),
-      isVoice: isListening,
-    }
+      // Prépare un placeholder assistant streaming
+      const assistantId = `assistant-${Date.now() + 1}`
+      const assistantPlaceholder: ChatMessage = {
+        id: assistantId,
+        role: 'assistant',
+        content: '',
+        createdAt: Date.now() + 1,
+        streaming: true,
+      }
 
-    const nextAnswers = { ...answers, [currentStep.id]: trimmed }
-    setAnswers(nextAnswers)
+      setMessages((prev) => [...prev, userMsg, assistantPlaceholder])
+      setInput('')
+      setIsStreaming(true)
 
-    // Détermine la prochaine étape ou clôture.
-    const isLastStep = currentStepIndex >= BASE_STEPS.length - 1
-    const userWantsToFinish =
-      currentStep.id === 'next_room' && /termin|fini|non|stop/i.test(trimmed)
-
-    const nextMessages: ChatMessage[] = [...messages, userMsg]
-    let nextStepIndex = currentStepIndex + 1
-
-    if (currentStep.id === 'next_room' && !userWantsToFinish) {
-      // Boucle : revient au début pour saisir une nouvelle pièce.
-      nextStepIndex = 0
-      setRoomsSaved((prev) => prev + 1)
-      nextMessages.push({
-        id: `bot-confirm-${Date.now()}`,
-        role: 'bot',
-        text: `Pièce enregistrée. ${roomsSaved + 1} pièce${
-          roomsSaved + 1 > 1 ? 's' : ''
-        } saisie${roomsSaved + 1 > 1 ? 's' : ''} jusqu'ici.`,
-        timestamp: Date.now() + 1,
-      })
-      nextMessages.push({
-        id: `bot-next-${Date.now()}`,
-        role: 'bot',
-        text: BASE_STEPS[0]?.question ?? '',
-        timestamp: Date.now() + 2,
-      })
-    } else if (isLastStep || userWantsToFinish) {
-      // Clôture.
-      nextStepIndex = BASE_STEPS.length
-      setRoomsSaved((prev) => prev + 1)
-      nextMessages.push({
-        id: `bot-done-${Date.now()}`,
-        role: 'bot',
-        text: `Mission saisie. ${roomsSaved + 1} pièce${
-          roomsSaved + 1 > 1 ? 's' : ''
-        } enregistrée${roomsSaved + 1 > 1 ? 's' : ''}. Touchez "Terminer la mission" en bas pour finaliser.`,
-        timestamp: Date.now() + 1,
-      })
-    } else {
-      // Étape suivante.
-      const nextStep = BASE_STEPS[nextStepIndex]
-      if (nextStep) {
-        nextMessages.push({
-          id: `bot-q-${Date.now()}-${nextStepIndex}`,
-          role: 'bot',
-          text: nextStep.question,
-          timestamp: Date.now() + 1,
+      try {
+        const res = await fetch(`/api/mission/${dossierId}/chat/stream`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ sessionId, message: text }),
         })
-      }
-    }
+        if (!res.ok || !res.body) {
+          throw new Error(`HTTP ${res.status}`)
+        }
 
-    setMessages(nextMessages)
-    setCurrentStepIndex(nextStepIndex)
-    setInput('')
-  }, [input, currentStep, currentStepIndex, answers, messages, roomsSaved, isListening])
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        let accumulated = ''
+        let capturesCount = 0
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+
+          // Découpe SSE par lignes "data: ...\n\n"
+          const lines = buffer.split('\n\n')
+          buffer = lines.pop() ?? ''
+
+          for (const line of lines) {
+            const trimmed = line.trim()
+            if (!trimmed.startsWith('data:')) continue
+            const jsonStr = trimmed.slice(5).trim()
+            try {
+              const payload = JSON.parse(jsonStr) as {
+                type: string
+                text?: string
+                error?: string
+                captures?: Array<{ type: string }>
+              }
+              if (payload.type === 'delta' && typeof payload.text === 'string') {
+                // On filtre les fragments [CAPTURE: ...] côté client (ils peuvent
+                // arriver progressivement et ne doivent pas s'afficher).
+                accumulated += payload.text
+                const cleaned = accumulated.replace(/\[CAPTURE:[^\]]*\]?/gi, '')
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId ? { ...m, content: cleaned, streaming: true } : m,
+                  ),
+                )
+              } else if (payload.type === 'done') {
+                capturesCount = payload.captures?.length ?? 0
+                // Le contenu final est déjà nettoyé côté serveur dans le content
+                // de mission_chat_messages. On retire les éventuels [CAPTURE: …]
+                // restants côté client (si streaming partiel).
+                const finalClean = accumulated.replace(/\[CAPTURE:[^\]]*\]/gi, '').trim()
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantId ? { ...m, content: finalClean, streaming: false } : m,
+                  ),
+                )
+                if (capturesCount > 0) {
+                  // Incrémente le compteur de rooms si une capture room est arrivée
+                  const hasRoom = payload.captures?.some((c) => c.type === 'room')
+                  if (hasRoom) setRoomsSaved((r) => r + 1)
+                  const hasPhoto = payload.captures?.some((c) => c.type === 'photo_taken')
+                  if (hasPhoto) setStats((s) => ({ ...s, photos: s.photos + 1 }))
+                }
+              } else if (payload.type === 'error') {
+                setErrorMsg(payload.error ?? 'Erreur de streaming')
+                setMessages((prev) => prev.filter((m) => m.id !== assistantId))
+              }
+            } catch {
+              // ligne SSE corrompue — on ignore
+            }
+          }
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Erreur réseau'
+        setErrorMsg(msg)
+        setMessages((prev) => prev.filter((m) => m.id !== assistantId))
+      } finally {
+        setIsStreaming(false)
+        scrollToBottom('smooth')
+      }
+    },
+    [dossierId, sessionId, isListening, isStreaming, scrollToBottom],
+  )
+
+  // ----- Submit -----
+  const handleSubmit = useCallback(() => {
+    if (!input.trim()) return
+    void sendMessage(input)
+  }, [input, sendMessage])
 
   // ----- Photo -----
   const handlePhotoClick = useCallback(() => {
     fileInputRef.current?.click()
   }, [])
 
-  const handlePhotoCapture = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const url = URL.createObjectURL(file)
-    const msg: ChatMessage = {
-      id: `photo-${Date.now()}`,
-      role: 'user',
-      text: 'Photo prise',
-      timestamp: Date.now(),
-      photoUrl: url,
-    }
-    setMessages((prev) => [
-      ...prev,
-      msg,
-      {
-        id: `bot-photo-ack-${Date.now()}`,
-        role: 'bot',
-        text: 'Photo enregistrée — elle sera analysée par Vision IA en arrière-plan.',
-        timestamp: Date.now() + 1,
-      },
-    ])
-    setStats((prev) => ({ ...prev, photos: prev.photos + 1 }))
-    // Sync upload via captureSyncManager — branchement existant déjà testé.
-    // (laissé en TODO production : la file upload via API serait câblée ici)
-    e.target.value = '' // reset input pour permettre re-capture
-  }, [])
+  const handlePhotoCapture = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file) return
+      const url = URL.createObjectURL(file)
+      const msg: ChatMessage = {
+        id: `photo-${Date.now()}`,
+        role: 'user',
+        content: 'Photo prise',
+        createdAt: Date.now(),
+        photoUrl: url,
+      }
+      setMessages((prev) => [...prev, msg])
+      setStats((s) => ({ ...s, photos: s.photos + 1 }))
+      // Envoie un message à l'IA pour la prévenir
+      void sendMessage(
+        'Je viens de prendre une photo. Quels angles complémentaires conseillez-vous ?',
+      )
+      e.target.value = ''
+    },
+    [sendMessage],
+  )
 
-  // ----- Pause / Sauvegarder -----
+  // ----- Pause -----
   const handlePause = useCallback(async () => {
     setIsPaused(true)
-    saveToLocal(sessionId, { messages, currentStepIndex, answers })
     try {
       await fetch(`/api/dossiers/${dossierId}/actions/pause_mission`, { method: 'POST' })
     } catch {
-      // Offline OK — la pause sera synchronisée plus tard
+      // Offline — sera sync plus tard
     }
-  }, [sessionId, messages, currentStepIndex, answers, dossierId])
+  }, [dossierId])
 
-  // ----- Terminer la mission -----
-  const handleFinish = useCallback(async () => {
-    saveToLocal(sessionId, { messages, currentStepIndex, answers })
-    try {
-      const res = await fetch(`/api/dossiers/${dossierId}/actions/cancel_mission`, {
-        method: 'POST',
-      })
-      // cancel ferme la session ; en V2 on aura un endpoint "end_session" dédié
-      if (res.ok) {
-        router.push(`/dashboard/dossiers/${dossierId}`)
-      }
-    } catch {
-      router.push(`/dashboard/dossiers/${dossierId}`)
-    }
-  }, [sessionId, messages, currentStepIndex, answers, dossierId, router])
+  // ----- Phase conversation pour quick replies -----
+  const phase: ConversationPhase = useMemo(() => {
+    if (roomsSaved === 0 && messages.filter((m) => m.role === 'user').length < 2) return 'start'
+    if (roomsSaved >= 4) return 'end'
+    return 'mid'
+  }, [roomsSaved, messages])
+
+  const quickReplies = useMemo(() => {
+    const lastAssistant = messages.filter((m) => m.role === 'assistant').slice(-1)[0]
+    return getQuickReplies(phase, lastAssistant?.content ?? '')
+  }, [phase, messages])
 
   // ----- Render -----
-  const progressPct = useMemo(() => {
-    if (totalSteps === 0) return 0
-    return Math.min(100, Math.round((currentStepIndex / totalSteps) * 100))
-  }, [currentStepIndex, totalSteps])
-
   return (
     <>
-      {/* Header minimal sticky */}
-      <header className="flex items-center justify-between gap-3 border-b border-rule/70 bg-paper/95 px-4 py-3 backdrop-blur-md">
-        <div className="flex min-w-0 items-center gap-2">
+      {/* Header sticky 56px */}
+      <header className="relative flex h-14 items-center justify-between gap-3 border-b border-rule/70 bg-paper/95 px-3 sm:px-5 backdrop-blur-md shrink-0 z-10">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Button
             variant="ghost"
             size="icon"
             asChild
             aria-label="Quitter le mode mission"
-            className="shrink-0"
+            className="shrink-0 size-9"
           >
             <Link href={`/dashboard/dossiers/${dossierId}`}>
               <ArrowLeft className="size-4" />
             </Link>
           </Button>
-          {/* Logo KOVAS (text-only, sobre) */}
-          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink shrink-0">
-            KOVAS
-          </span>
-          <div className="ml-3 min-w-0 hidden sm:block">
-            <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute">
-              {reference}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
+              <span>{reference}</span>
+            </div>
+            <p className="text-[13px] font-semibold text-ink truncate leading-tight">
+              {clientName}
+              <span className="hidden sm:inline ml-2 font-normal text-ink-mute">
+                · {fullAddress}
+              </span>
             </p>
-            <p className="text-[13px] font-medium text-ink truncate">{clientName}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-3 font-mono text-[11px] text-ink-mute">
+          <span>
+            {roomsSaved} pièce{roomsSaved > 1 ? 's' : ''} saisie{roomsSaved > 1 ? 's' : ''}
+          </span>
+          <span className="size-1 rounded-full bg-ink-mute/40" aria-hidden />
+          <span>
+            {stats.photos} photo{stats.photos > 1 ? 's' : ''}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
           {!isOnline ? (
             <span
-              className="inline-flex items-center gap-1 rounded-pill bg-accent-warm-soft px-2 py-1 text-[11px] text-accent-warm"
-              title="Hors ligne — vos saisies sont mises en file d'attente"
+              className="inline-flex items-center gap-1 rounded-pill bg-accent-warm-soft px-2 py-1 text-[10px] font-mono uppercase tracking-wide text-accent-warm"
+              title="Hors ligne — messages mis en file d'attente"
             >
               <WifiOff className="size-3" />
-              Hors ligne
-            </span>
-          ) : null}
-          {savedStatus === 'saving' ? (
-            <span className="inline-flex items-center gap-1 text-[11px] text-ink-mute">
-              <Loader2 className="size-3 animate-spin" />
-              Sauvegarde…
-            </span>
-          ) : savedStatus === 'saved' ? (
-            <span className="inline-flex items-center gap-1 text-[11px] text-accent-green">
-              <CheckCircle2 className="size-3" />
-              Sauvegardé
+              <span className="hidden sm:inline">Hors ligne</span>
             </span>
           ) : null}
           <Button
             type="button"
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            size="icon"
             onClick={handlePause}
             disabled={isPaused}
-            className="gap-1"
+            aria-label="Mettre en pause"
+            className="size-9"
           >
-            <Pause className="size-3.5" />
-            <span className="hidden sm:inline">Pause</span>
+            <Pause className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label="Menu mission"
+            className="size-9"
+          >
+            <MoreVertical className="size-4" />
           </Button>
         </div>
       </header>
 
-      {/* Bandeau adresse (mobile only — tient les infos essentielles) */}
-      <div className="sm:hidden border-b border-rule/60 bg-paper/80 px-4 py-2">
-        <p className="text-[12px] text-ink-soft truncate">{fullAddress}</p>
+      {/* Bandeau mobile adresse */}
+      <div className="md:hidden border-b border-rule/40 bg-paper/80 px-4 py-1.5 shrink-0">
+        <p className="text-[11px] text-ink-mute truncate">
+          {roomsSaved} pièce{roomsSaved > 1 ? 's' : ''} · {stats.photos} photo
+          {stats.photos > 1 ? 's' : ''} · {fullAddress}
+        </p>
       </div>
 
-      {/* Bandeau progression — Pièce X/Y + progress bar globale */}
-      <div className="border-b border-rule/40 bg-paper/60 px-4 py-2">
-        <div className="flex items-center justify-between text-[11px] font-mono text-ink-mute mb-1">
-          <span>
-            Étape {Math.min(currentStepIndex + 1, totalSteps)}/{totalSteps}
-          </span>
-          <span>
-            {roomsSaved} pièce{roomsSaved > 1 ? 's' : ''} saisie{roomsSaved > 1 ? 's' : ''}
-          </span>
-        </div>
-        <div className="h-1 w-full overflow-hidden rounded-full bg-sage-alt">
-          <div
-            className="h-full bg-chartreuse transition-all duration-base"
-            style={{ width: `${progressPct}%` }}
-            aria-valuenow={progressPct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            role="progressbar"
-            tabIndex={-1}
-          />
-        </div>
-      </div>
-
-      {/* Conversation (scrollable) */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-6">
-        <div className="mx-auto max-w-2xl space-y-3">
+      {/* Zone messages scrollable */}
+      <div
+        ref={messagesContainerRef}
+        className="relative flex-1 overflow-y-auto bg-sage scroll-smooth"
+        aria-live="polite"
+        aria-relevant="additions"
+      >
+        <div className="mx-auto max-w-3xl px-3 sm:px-6 py-4 pb-6 space-y-3">
           {messages.map((msg) => (
             <MessageBubble key={msg.id} message={msg} />
           ))}
-          {validationError ? (
-            <div className="rounded-lg border border-accent-red/30 bg-accent-red/5 px-3 py-2 text-[13px] text-accent-red">
-              {validationError}
+          {errorMsg ? (
+            <div className="mx-auto max-w-md rounded-lg border border-accent-red/30 bg-accent-red/5 px-3 py-2 text-[13px] text-accent-red">
+              {errorMsg}
             </div>
           ) : null}
-          <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} className="h-1" />
+        </div>
+
+        {showScrollToBottom ? (
+          <button
+            type="button"
+            onClick={() => scrollToBottom('smooth')}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-pill border border-rule bg-paper px-3 py-1.5 text-[12px] font-medium text-ink shadow-glass-sm hover:bg-sage-alt transition-colors"
+            aria-label="Voir les nouveaux messages"
+          >
+            <ArrowDown className="size-3.5" />
+            Nouveaux messages
+          </button>
+        ) : null}
+      </div>
+
+      {/* Quick replies contextuelles */}
+      <div className="border-t border-rule/40 bg-paper/60 px-3 sm:px-6 py-2 shrink-0 overflow-x-auto">
+        <div className="mx-auto max-w-3xl flex items-center gap-2 min-w-fit">
+          {quickReplies.map((qr) => (
+            <button
+              key={qr.label}
+              type="button"
+              onClick={() => void sendMessage(qr.message)}
+              disabled={isStreaming || isPaused}
+              className={cn(
+                'shrink-0 rounded-pill border border-rule bg-paper px-3 py-1.5',
+                'text-[12px] font-medium text-ink',
+                'hover:bg-sage-alt hover:border-ink/30 transition-colors',
+                'disabled:opacity-40 disabled:cursor-not-allowed',
+              )}
+            >
+              {qr.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Quick suggestions (juste au-dessus de l'input) */}
-      {currentStep?.hint ? (
-        <div className="border-t border-rule/40 bg-paper/60 px-4 py-2">
-          <p className="mx-auto max-w-2xl text-[12px] text-ink-mute italic">{currentStep.hint}</p>
-        </div>
-      ) : null}
-
-      {/* Composer (input + boutons) */}
-      <div className="border-t border-rule/70 bg-paper px-3 py-3 sm:px-6">
-        <div className="mx-auto flex max-w-2xl items-end gap-2">
+      {/* Input bar sticky bottom */}
+      <div className="border-t border-rule/70 bg-paper px-3 sm:px-5 py-3 shrink-0">
+        <div className="mx-auto flex max-w-3xl items-end gap-2">
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="icon"
             onClick={handlePhotoClick}
             aria-label="Prendre une photo"
-            className="shrink-0"
+            className="shrink-0 size-10 rounded-full"
+            disabled={isPaused}
           >
             <Camera className="size-4" />
           </Button>
@@ -596,44 +789,56 @@ export function MissionTchatInterface({
             capture="environment"
             onChange={handlePhotoCapture}
             className="hidden"
+            aria-hidden
           />
 
           <Button
             type="button"
-            variant={isListening ? 'accent' : 'outline'}
+            variant={isListening ? 'accent' : 'ghost'}
             size="icon"
             onClick={isListening ? stopListening : startListening}
             aria-label={isListening ? 'Arrêter la dictée' : 'Démarrer la dictée vocale'}
-            className="shrink-0"
+            className="shrink-0 size-10 rounded-full"
+            disabled={isPaused || isStreaming}
           >
             {isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
           </Button>
 
           <textarea
+            ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value)
+              // Auto-resize
+              const ta = e.currentTarget
+              ta.style.height = 'auto'
+              ta.style.height = `${Math.min(ta.scrollHeight, 180)}px`
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
                 handleSubmit()
+              } else if (e.key === 'Escape') {
+                setInput('')
               }
             }}
             placeholder={
               isListening
                 ? 'Parlez maintenant…'
-                : currentStep
-                  ? 'Tapez votre réponse'
-                  : 'Mission terminée'
+                : isStreaming
+                  ? "L'assistant rédige sa réponse…"
+                  : 'Tapez votre message — ou utilisez le micro'
             }
-            disabled={!currentStep || isPaused}
+            disabled={isStreaming || isPaused}
             rows={1}
             className={cn(
-              'flex-1 resize-none rounded-lg border border-rule bg-paper px-3 py-2',
+              'flex-1 resize-none rounded-2xl border border-rule bg-sage-alt/40 px-4 py-2.5',
               'text-[14px] text-ink placeholder:text-ink-mute',
-              'focus:outline-none focus:ring-2 focus:ring-chartreuse/40',
-              'disabled:opacity-50',
+              'focus:outline-none focus:ring-2 focus:ring-chartreuse/40 focus:border-chartreuse/50',
+              'disabled:opacity-50 transition-colors',
+              'min-h-[40px] max-h-[180px]',
             )}
-            aria-label="Votre réponse"
+            aria-label="Votre message"
           />
 
           <Button
@@ -641,96 +846,121 @@ export function MissionTchatInterface({
             variant="accent"
             size="icon"
             onClick={handleSubmit}
-            disabled={!input.trim() || !currentStep || isPaused}
+            disabled={!input.trim() || isStreaming || isPaused}
             aria-label="Envoyer"
-            className="shrink-0"
+            className="shrink-0 size-10 rounded-full"
           >
-            <Send className="size-4" />
+            {isStreaming ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4" />
+            )}
+          </Button>
+        </div>
+        <div className="mx-auto max-w-3xl mt-1.5 flex items-center justify-between text-[10px] font-mono text-ink-mute">
+          <span>Entrée pour envoyer · Maj+Entrée pour saut de ligne</span>
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            onClick={() => router.push(`/dashboard/dossiers/${dossierId}`)}
+            className="text-[10px] font-mono text-ink-mute hover:text-ink h-auto p-0"
+          >
+            Quitter la mission
           </Button>
         </div>
       </div>
-
-      {/* Footer : stats + Terminer */}
-      <footer className="border-t border-rule/70 bg-sage-alt/30 px-3 py-2 sm:px-6">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
-          <div className="flex items-center gap-3 sm:gap-5 text-[11px] font-mono text-ink-mute">
-            <span title="Photos prises">
-              <Camera className="inline size-3 mr-1" />
-              {stats.photos}
-            </span>
-            <span title="Notes vocales">
-              <Mic className="inline size-3 mr-1" />
-              {stats.voiceNotes}
-            </span>
-            <span title="Pièces saisies">
-              <Sparkles className="inline size-3 mr-1" />
-              {roomsSaved}
-            </span>
-            <span className="hidden sm:inline" title="Réponses validées">
-              <CheckCircle2 className="inline size-3 mr-1" />
-              {Object.keys(answers).length}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => saveToLocal(sessionId, { messages, currentStepIndex, answers })}
-              className="gap-1"
-            >
-              <Save className="size-3.5" />
-              <span className="hidden sm:inline">Sauvegarder</span>
-            </Button>
-            <Button
-              type="button"
-              variant="accent"
-              size="sm"
-              onClick={handleFinish}
-              className="gap-1"
-            >
-              <CheckCircle2 className="size-3.5" />
-              Terminer
-            </Button>
-          </div>
-        </div>
-      </footer>
     </>
   )
 }
 
 // -----------------------------------------------------------------------------
-// Bulle de message
+// MessageBubble
 // -----------------------------------------------------------------------------
 
-function MessageBubble({ message }: { message: ChatMessage }) {
-  const isBot = message.role === 'bot'
+function MessageBubble({ message }: { message: ChatMessage }): React.ReactElement {
+  const isAssistant = message.role === 'assistant'
   const isUser = message.role === 'user'
+  const isSystem = message.role === 'system'
+
+  if (isSystem) {
+    return (
+      <div className="my-2 flex items-center justify-center gap-1.5">
+        <CheckCircle2 className="size-3 text-chartreuse-deep" />
+        <span className="text-[11px] font-mono text-ink-faint">{message.content}</span>
+      </div>
+    )
+  }
+
   return (
-    <div className={cn('flex', isBot ? 'justify-start' : 'justify-end')}>
+    <div
+      className={cn(
+        'flex animate-fade-in-up',
+        isAssistant ? 'justify-start' : 'justify-end',
+        'gap-2',
+      )}
+    >
+      {/* Avatar IA (gauche) */}
+      {isAssistant ? (
+        <div
+          className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-ink shadow-glass-sm"
+          aria-hidden
+        >
+          <Sparkles className="size-4 text-chartreuse" />
+        </div>
+      ) : null}
+
       <div
         className={cn(
-          'max-w-[85%] rounded-2xl px-4 py-2 shadow-sm',
-          isBot && 'bg-paper border border-rule/60 text-ink',
-          isUser && 'bg-chartreuse/80 text-ink',
-          message.role === 'system' && 'bg-sage-alt text-ink-mute italic',
+          'max-w-[78%] sm:max-w-[72%] px-4 py-2.5',
+          isAssistant &&
+            'bg-paper border border-rule/60 text-ink rounded-2xl rounded-bl-md shadow-glass-sm',
+          isUser && 'bg-chartreuse text-ink rounded-2xl rounded-br-md',
         )}
       >
         {message.photoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={message.photoUrl}
             alt="Aperçu pris durant la mission"
             className="mb-2 max-h-48 rounded-lg object-cover"
           />
         ) : null}
-        <p className="text-[14px] leading-relaxed whitespace-pre-wrap">{message.text}</p>
-        <div className="flex items-center gap-1.5 mt-1">
-          {message.isVoice ? (
-            <Mic className="size-3 text-ink-mute" aria-label="Réponse vocale" />
-          ) : null}
-          <span className="text-[10px] font-mono text-ink-mute">
-            {new Date(message.timestamp).toLocaleTimeString('fr-FR', {
+
+        <div
+          className={cn(
+            'text-[14px] leading-relaxed',
+            isUser && 'whitespace-pre-wrap',
+            isAssistant && 'prose-tchat',
+          )}
+        >
+          {isAssistant ? (
+            <>
+              <MarkdownBlock content={message.content} />
+              {message.streaming && message.content.length === 0 ? (
+                <TypingDots />
+              ) : message.streaming ? (
+                <span
+                  className="ml-0.5 inline-block w-[3px] h-[14px] bg-chartreuse-deep align-middle animate-pulse"
+                  aria-hidden
+                />
+              ) : null}
+            </>
+          ) : (
+            <span>{message.content}</span>
+          )}
+        </div>
+
+        <div
+          className={cn(
+            'mt-1 flex items-center gap-1.5 text-[10px] font-mono',
+            isAssistant ? 'text-ink-mute' : 'text-ink/60',
+            isUser && 'justify-end',
+          )}
+        >
+          {message.isVoice ? <Mic className="size-2.5" aria-label="Réponse vocale" /> : null}
+          <span>
+            {new Date(message.createdAt).toLocaleTimeString('fr-FR', {
               hour: '2-digit',
               minute: '2-digit',
             })}
@@ -741,5 +971,22 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   )
 }
 
-// X helper export (utilisé par le layout pour cohérence visuel, optionnel)
-export const _CloseIcon = X
+// -----------------------------------------------------------------------------
+// TypingDots — 3 dots animés style WhatsApp pendant que Claude réfléchit
+// -----------------------------------------------------------------------------
+
+function TypingDots(): React.ReactElement {
+  return (
+    <span className="inline-flex items-center gap-1 py-1" aria-label="L'assistant réfléchit">
+      <span className="size-1.5 rounded-full bg-ink-mute animate-typing-dot" />
+      <span
+        className="size-1.5 rounded-full bg-ink-mute animate-typing-dot"
+        style={{ animationDelay: '0.2s' }}
+      />
+      <span
+        className="size-1.5 rounded-full bg-ink-mute animate-typing-dot"
+        style={{ animationDelay: '0.4s' }}
+      />
+    </span>
+  )
+}

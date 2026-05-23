@@ -143,6 +143,16 @@ export default async function MissionTchatPage({
     .eq('organization_id', orgId)
     .order('position', { ascending: true })
 
+  // Charge l'historique conversation pour reprise au refresh.
+  type ChatRow = { id: string; role: string; content: string; created_at: string }
+  const { data: chatRaw } = await supabase
+    .from('mission_chat_messages' as never)
+    .select('id, role, content, created_at')
+    .eq('session_id', session.id)
+    .order('created_at', { ascending: true })
+    .limit(60)
+  const chatHistory: ChatRow[] = Array.isArray(chatRaw) ? (chatRaw as unknown as ChatRow[]) : []
+
   // Charge nb photos + nb notes vocales pour la footer "stats".
   const [{ count: photosCount }, { count: voiceCount }] = await Promise.all([
     supabase
@@ -184,6 +194,14 @@ export default async function MissionTchatPage({
             }
           : null
       }
+      initialChatHistory={chatHistory.map((c) => ({
+        id: c.id,
+        role: (c.role === 'user' || c.role === 'assistant' || c.role === 'system'
+          ? c.role
+          : 'assistant') as 'user' | 'assistant' | 'system',
+        content: c.content,
+        createdAt: c.created_at,
+      }))}
     />
   )
 }

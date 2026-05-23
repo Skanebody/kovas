@@ -144,7 +144,10 @@ const config: Config = {
         },
       },
       fontSize: {
-        'display-xl': ['154px', { lineHeight: '0.9', letterSpacing: '-0.045em', fontWeight: '200' }],
+        'display-xl': [
+          '154px',
+          { lineHeight: '0.9', letterSpacing: '-0.045em', fontWeight: '200' },
+        ],
         'display-l': ['84px', { lineHeight: '0.94', letterSpacing: '-0.035em', fontWeight: '300' }],
         'display-m': ['54px', { lineHeight: '1', letterSpacing: '-0.028em', fontWeight: '300' }],
         'display-s': ['34px', { lineHeight: '1.05', letterSpacing: '-0.02em', fontWeight: '400' }],
@@ -165,7 +168,8 @@ const config: Config = {
         sm: '0 3px 10px rgba(22, 49, 68, 0.06)',
         md: '0 8px 22px rgba(22, 49, 68, 0.08)',
         lg: '0 20px 50px rgba(22, 49, 68, 0.1)',
-        glass: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 36px rgba(22,49,68,0.10), 0 4px 12px rgba(22,49,68,0.06)',
+        glass:
+          'inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 36px rgba(22,49,68,0.10), 0 4px 12px rgba(22,49,68,0.06)',
         'glass-sm': '0 3px 10px rgba(22, 49, 68, 0.06)',
         'glass-hover': '0 12px 28px rgba(22, 49, 68, 0.10), 0 2px 6px rgba(22, 49, 68, 0.04)',
         cta: '0 6px 20px rgba(22, 49, 68, 0.18)',
@@ -197,12 +201,23 @@ const config: Config = {
           '0%': { backgroundPosition: '0 0' },
           '100%': { backgroundPosition: '24px 0' },
         },
+        /* Mission tchat IA (FIX-MM) — apparition message + dots typing */
+        'fade-in-up': {
+          '0%': { opacity: '0', transform: 'translateY(6px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'typing-dot': {
+          '0%, 60%, 100%': { opacity: '0.3', transform: 'scale(0.85)' },
+          '30%': { opacity: '1', transform: 'scale(1)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 200ms ease-out',
         'slide-up': 'slide-up 300ms ease-out',
         'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
         'progress-stripe': 'progress-stripe 1.2s linear infinite',
+        'fade-in-up': 'fade-in-up 220ms ease-out',
+        'typing-dot': 'typing-dot 1.2s ease-in-out infinite',
       },
     },
   },
