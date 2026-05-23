@@ -163,8 +163,11 @@ async function loadDiagnosticiansForCity(
   // silencieusement, d'où "aucun diagnostiqueur" sur les pages city alors que
   // 50 fixtures sont en base. Fix 2026-05-23.
   // ────────────────────────────────────────────────────────────────────────
+  // FIX-PP — `phone` VOLONTAIREMENT OMIS du SELECT. Tout ce qui est sélectionné
+  // ici est sérialisé dans le HTML RSC pour hydratation client → toute fuite
+  // de téléphone ici contournerait le funnel de demande de devis monétisé.
   const SELECT_FIELDS =
-    'id, slug, full_name, city, address, phone, gmb_rating, gmb_review_count, certifications, years_active'
+    'id, slug, full_name, city, address, gmb_rating, gmb_review_count, certifications, years_active'
 
   try {
     const { createAdminClient } = await import('@/lib/supabase/admin')

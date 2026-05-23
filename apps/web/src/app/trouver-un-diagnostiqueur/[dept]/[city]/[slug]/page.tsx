@@ -290,14 +290,69 @@ export default async function DiagnosticianPage({ params }: PageProps) {
         ]}
       />
       <DiagnosticianPageContent
-        diagnostician={diag}
-        related={related}
+        diagnostician={sanitizeDiagPublic(diag)}
+        related={related.map(sanitizeDiagPublic)}
         dept={dept}
         city={city}
         badgeLevel={verification.badgeLevel}
       />
     </>
   )
+}
+
+/**
+ * Retire les champs sensibles (phone, email, claim tokens, etc.) avant
+ * sérialisation RSC vers les Client Components.
+ *
+ * FIX-PP — bug critique de fuite : Next.js sérialise l'intégralité des
+ * props passées aux RSC dans `__next_f` du HTML pour l'hydratation. Si on
+ * passe `diag` complet (qui contient `phone`, `email` lus depuis la table
+ * `diagnosticians`), ces données apparaissent en clair dans le HTML rendu
+ * — même si elles ne sont pas affichées visuellement. Conséquence : un
+ * particulier qui inspecte la source ou consulte le cache Google trouve
+ * le téléphone du diag → contact direct → KOVAS ne touche pas la
+ * commission du lead.
+ *
+ * Whitelist des champs publics SEULEMENT. Tout nouveau champ DB doit être
+ * explicitement ajouté ici si on veut le rendre visible côté client public.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: DiagnosticianRow = any (types DB pas régénérés)
+function sanitizeDiagPublic(diag: any): any {
+  if (!diag || typeof diag !== 'object') return diag
+  return {
+    id: diag.id,
+    slug: diag.slug,
+    full_name: diag.full_name,
+    first_name: diag.first_name,
+    last_name: diag.last_name,
+    bio: diag.bio,
+    photo_url: diag.photo_url,
+    city: diag.city,
+    city_slug: diag.city_slug,
+    postcode: diag.postcode,
+    address: diag.address, // adresse postale — publique (annuaire SEO)
+    department_code: diag.department_code,
+    dept_code: diag.dept_code,
+    region_code: diag.region_code,
+    region_name: diag.region_name,
+    latitude: diag.latitude,
+    longitude: diag.longitude,
+    geo_lat: diag.geo_lat,
+    geo_lng: diag.geo_lng,
+    certifications: diag.certifications,
+    years_active: diag.years_active,
+    years_experience: diag.years_experience, // alias legacy, lecture safe
+    gmb_rating: diag.gmb_rating,
+    gmb_review_count: diag.gmb_review_count,
+    claim_status: diag.claim_status,
+    is_published: diag.is_published,
+    withdrawal_requested: diag.withdrawal_requested,
+    created_at: diag.created_at,
+    // VOLONTAIREMENT OMIS — données sensibles non-publiques :
+    //   phone, email, official_phone, official_email, phone_e164,
+    //   contact_email, sirene_siret, dhup_source_id, claimed_by_user_id,
+    //   fraud_flags, validation_status_reason, etc.
+  }
 }
 
 /** Convertit un slug ("seine-maritime") en label humain ("Seine Maritime"). */
