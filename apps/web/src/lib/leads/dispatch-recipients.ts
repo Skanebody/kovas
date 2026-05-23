@@ -6,7 +6,6 @@
  * (template adapté selon claimed/unclaimed) + email récap au requester.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { renderEmailToDiagnostician } from '@/emails/quote-request/render'
 import { renderQuoteSentToMultipleEmail } from '@/emails/quote-request/verification-code'
 import { sendEmail } from '@/lib/email/send'
@@ -16,6 +15,7 @@ import {
   selectRecipientsForRequest,
 } from '@/lib/leads/multi-recipient-router'
 import { DIAGNOSTIC_LABEL, type DiagnosticCode } from '@/lib/quote-request/diagnostics'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 interface QuoteRequestRow {
   id: string
@@ -40,9 +40,11 @@ interface QuoteRequestRow {
 
 interface DiagInfoRow {
   id: string
-  display_name: string
+  /** Lu depuis `diagnosticians.full_name` (colonne canonique post-FIX-AA). */
+  full_name: string
   city: string | null
-  official_email: string | null
+  /** Lu depuis `diagnosticians.email` (colonne canonique post-FIX-AA). */
+  email: string | null
   claimed_by_user_id: string | null
 }
 
@@ -99,11 +101,12 @@ export async function dispatchRecipients(
   }
 
   // 4. Récupère les infos diag (email + claimed_by) pour envoi
+  // Colonnes canoniques diagnosticians : full_name (PAS display_name post-FIX-AA).
   const diagIds = inserted.map((r) => r.diagnostician_id)
   // biome-ignore lint/suspicious/noExplicitAny: A1 table
   const { data: diagRows, error: diagErr } = await (supabase as any)
     .from('diagnosticians')
-    .select('id, display_name, city, official_email, claimed_by_user_id')
+    .select('id, full_name, city, email, claimed_by_user_id')
     .in('id', diagIds)
 
   if (diagErr) {
@@ -120,11 +123,12 @@ export async function dispatchRecipients(
   const notified: string[] = []
   for (const recipient of inserted) {
     const diag = diagMap.get(recipient.diagnostician_id)
-    if (!diag || !diag.official_email) continue
+    if (!diag || !diag.email) continue
 
     const { subject, html, text } = renderEmailToDiagnostician(
       {
-        display_name: diag.display_name,
+        // Map full_name (DB canonique) → display_name (contract template email).
+        display_name: diag.full_name,
         city: diag.city ?? '',
         base_url: baseUrl,
         request_id: request.id,
@@ -147,7 +151,7 @@ export async function dispatchRecipients(
     )
 
     const result = await sendEmail({
-      to: diag.official_email,
+      to: diag.email,
       subject,
       html,
       text,
