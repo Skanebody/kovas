@@ -1,6 +1,6 @@
 import { BadgeVerified } from '@/components/diagnostician/BadgeVerified'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
-import { ChevronRight, Flag, Mail, MapPin, Phone, Search, ShieldCheck, Star } from 'lucide-react'
+import { ChevronRight, FileText, Flag, Mail, MapPin, Search, ShieldCheck, Star } from 'lucide-react'
 import Link from 'next/link'
 import { CertCard } from './cert-card'
 import { ClaimBanner } from './claim-banner'
@@ -74,10 +74,11 @@ export function DiagnosticianPageContent({
     (typeof d.postcode === 'string' && d.postcode) ||
     (typeof d.postal_code === 'string' && d.postal_code) ||
     null
-  const phoneCanonical: string | null =
-    (typeof d.phone === 'string' && d.phone) ||
-    (typeof d.official_phone === 'string' && d.official_phone) ||
-    null
+  // PII MASQUÉE : Le téléphone n'est JAMAIS affiché publiquement (modèle Doctolib).
+  // KOVAS monétise la mise en relation via le funnel `/devis/[slug]`. Donner le
+  // numéro direct ferait perdre la commission lead. La colonne reste en DB,
+  // visible côté dashboard /dashboard/leads/incoming pour le diag claimé.
+  const diagSlug: string = (typeof d.slug === 'string' && d.slug) || String(d.id)
   const yearsActive: number | null =
     typeof d.years_active === 'number'
       ? d.years_active
@@ -204,22 +205,17 @@ export function DiagnosticianPageContent({
                 </dl>
               </div>
 
-              <div className="flex flex-col gap-2.5 md:items-end md:min-w-[200px]">
-                <a
-                  href="#quote-form"
-                  className="inline-flex items-center justify-center rounded-full bg-[#0B1D33] text-white px-6 py-3 text-sm font-semibold hover:bg-[#08152a] transition-colors shadow-sm w-full md:w-auto"
+              <div className="flex flex-col gap-2.5 md:items-end md:min-w-[220px]">
+                <Link
+                  href={`/devis/${diagSlug}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#D4F542] text-[#0B1D33] px-6 py-3 text-sm font-semibold hover:bg-[#c4e636] transition-colors shadow-sm w-full md:w-auto"
                 >
-                  Demander un devis
-                </a>
-                {phoneCanonical ? (
-                  <a
-                    href={`tel:${phoneCanonical}`}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-black/15 px-6 py-3 text-sm font-medium hover:bg-black/[0.03] transition-colors w-full md:w-auto"
-                  >
-                    <Phone className="h-4 w-4" aria-hidden />
-                    {formatPhone(phoneCanonical)}
-                  </a>
-                ) : null}
+                  <FileText className="h-4 w-4" aria-hidden />
+                  Demander un devis gratuit
+                </Link>
+                <p className="text-[11px] text-black/45 md:text-right max-w-[220px]">
+                  Réponse sous 24h ouvrées. Sans engagement.
+                </p>
               </div>
             </div>
           </div>
@@ -344,7 +340,7 @@ export function DiagnosticianPageContent({
               ) : null}
             </div>
 
-            {/* Sidebar sticky — quote form placeholder (B2 fill) */}
+            {/* Sidebar sticky — CTA devis (le formulaire est sur /devis/[slug]) */}
             <aside className="lg:sticky lg:top-24 lg:self-start">
               <div
                 id="quote-form"
@@ -359,12 +355,38 @@ export function DiagnosticianPageContent({
                   Contacter {initialFirst || fullName}
                 </h2>
                 <p className="mt-2 text-sm text-black/65">
-                  Décrivez votre projet, recevez un devis sous 24h. Sans engagement.
+                  Décrivez votre projet, recevez un devis sous 24 heures ouvrées. Sans engagement.
                 </p>
-                {/* Placeholder — Agent B2 remplace ce bloc par <QuoteRequestForm /> */}
-                <div className="mt-5 rounded-xl border border-dashed border-black/15 p-4 text-xs text-black/45 text-center">
-                  Formulaire de devis (composant client B2)
-                </div>
+                <Link
+                  href={`/devis/${diagSlug}`}
+                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#D4F542] text-[#0B1D33] px-6 py-3 text-sm font-semibold hover:bg-[#c4e636] transition-colors shadow-sm"
+                >
+                  <FileText className="h-4 w-4" aria-hidden />
+                  Demander un devis gratuit
+                </Link>
+                <ul className="mt-5 space-y-2 text-xs text-black/55">
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck
+                      className="h-3.5 w-3.5 text-black/45 mt-0.5 shrink-0"
+                      aria-hidden
+                    />
+                    <span>Vos coordonnées transmises uniquement au diagnostiqueur</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck
+                      className="h-3.5 w-3.5 text-black/45 mt-0.5 shrink-0"
+                      aria-hidden
+                    />
+                    <span>Pas de démarchage tiers, RGPD respecté</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ShieldCheck
+                      className="h-3.5 w-3.5 text-black/45 mt-0.5 shrink-0"
+                      aria-hidden
+                    />
+                    <span>Devis détaillé sous 24 heures ouvrées</span>
+                  </li>
+                </ul>
               </div>
             </aside>
           </div>
@@ -650,17 +672,4 @@ function DarkFooter() {
 
 function formatName(first?: string | null, last?: string | null): string {
   return [first, last].filter(Boolean).join(' ').trim() || '—'
-}
-
-function formatPhone(raw: string): string {
-  // E.164 +33612345678 → 06 12 34 56 78
-  const digits = raw.replace(/\D/g, '')
-  if (digits.startsWith('33') && digits.length === 11) {
-    const local = `0${digits.slice(2)}`
-    return local.replace(/(\d{2})(?=\d)/g, '$1 ').trim()
-  }
-  if (digits.length === 10) {
-    return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim()
-  }
-  return raw
 }

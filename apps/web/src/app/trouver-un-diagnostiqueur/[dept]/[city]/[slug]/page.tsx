@@ -172,14 +172,10 @@ export default async function DiagnosticianPage({ params }: PageProps) {
   //   street_address → address, slug_dept → department_code/dept_code,
   //   geo_lat/geo_lng → latitude/longitude (fallback geo_lat/lng),
   //   company_name → supprimée (n'existe plus en DB ; on dérive label cabinet via SIRET ailleurs).
-  const phoneCanonical: string | null =
-    (typeof diag.phone === 'string' && diag.phone) ||
-    (typeof diag.official_phone === 'string' && diag.official_phone) ||
-    null
-  const emailCanonical: string | null =
-    (typeof diag.email === 'string' && diag.email) ||
-    (typeof diag.official_email === 'string' && diag.official_email) ||
-    null
+  // FIX-PP — `phoneCanonical` ET `emailCanonical` ne sont JAMAIS exposés publiquement
+  // (Schema.org `telephone`/`email` exclus, pas de `<a href="tel:|mailto:">`).
+  // KOVAS monétise les leads via /devis/[slug]. Le téléphone/email restent en DB,
+  // visibles côté dashboard interne via /dashboard/leads/incoming pour le diag claimé.
   const postcodeCanonical: string | null =
     (typeof diag.postcode === 'string' && diag.postcode) ||
     (typeof diag.postal_code === 'string' && diag.postal_code) ||
@@ -211,8 +207,8 @@ export default async function DiagnosticianPage({ params }: PageProps) {
     name: fullName,
     jobTitle: 'Diagnostiqueur immobilier',
     image: diag.photo_url ?? undefined,
-    telephone: phoneCanonical ?? undefined,
-    email: emailCanonical ?? undefined,
+    // FIX-PP — `telephone` et `email` volontairement OMIS du JSON-LD public.
+    // Modèle Doctolib : pas d'exposition direct du numéro ni de l'email côté SERP/SEO.
     address: {
       '@type': 'PostalAddress',
       addressLocality: diag.city ?? undefined,
@@ -252,8 +248,8 @@ export default async function DiagnosticianPage({ params }: PageProps) {
     geoLat: latCanonical ?? undefined,
     geoLng: lngCanonical ?? undefined,
     certifications: certForSchema.length ? certForSchema : undefined,
-    phone: phoneCanonical ?? undefined,
-    email: emailCanonical ?? undefined,
+    // FIX-PP — phone ET email OMIS du LocalBusiness Schema.org.
+    // Tout lead doit passer par /devis/[slug] (monétisation + RGPD).
     photoUrl: typeof diag.photo_url === 'string' ? diag.photo_url : undefined,
     bio: typeof diag.bio === 'string' ? diag.bio : undefined,
     rating: typeof diag.gmb_rating === 'number' ? diag.gmb_rating : undefined,

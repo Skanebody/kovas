@@ -20,10 +20,10 @@ import {
   CalendarClock,
   CheckCircle2,
   ChevronRight,
+  FileText,
   Flame,
   Info,
   MapPin,
-  Phone,
   ShieldAlert,
   TrendingDown,
   TrendingUp,
@@ -101,6 +101,11 @@ type DiagnosticianCard = {
   full_name: string
   city: string | null
   address: string | null
+  /**
+   * FIX-PP — Le téléphone est conservé en DB mais JAMAIS affiché publiquement.
+   * Le champ est gardé dans le type uniquement pour ne pas casser le mapping
+   * select(); la valeur n'est ni rendue côté UI, ni exposée dans le JSON-LD.
+   */
   phone: string | null
   gmb_rating: number | null
   gmb_review_count: number | null
@@ -383,7 +388,8 @@ function buildLocalBusinessListJsonLd(
           addressRegion: regionName ?? undefined,
           addressCountry: 'FR',
         },
-        telephone: d.phone ?? undefined,
+        // FIX-PP — telephone JAMAIS exposé dans le JSON-LD (modèle Doctolib).
+        // telephone: omitted intentionally — leads monétisés via /devis/[slug].
         aggregateRating: d.gmb_rating
           ? {
               '@type': 'AggregateRating',
@@ -826,12 +832,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
                         <span>{d.address}</span>
                       </p>
                     ) : null}
-                    {d.phone ? (
-                      <p className="text-sm text-ink-soft mt-1 flex items-center gap-1.5 font-mono">
-                        <Phone className="size-3.5 text-ink-mute" />
-                        {d.phone}
-                      </p>
-                    ) : null}
+                    {/* FIX-PP — pas d'affichage du téléphone. CTA devis discret en bas de card. */}
                     {d.gmb_rating ? (
                       <p className="text-xs text-ink-mute mt-2">
                         Note {d.gmb_rating.toFixed(1)}/5 ({d.gmb_review_count ?? 0} avis)
@@ -862,6 +863,11 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
                         </div>
                       )
                     })()}
+                    {/* FIX-PP — micro-CTA devis. Le lien parent reste actif, le span est purement visuel. */}
+                    <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-ink-soft">
+                      <FileText className="size-3.5" aria-hidden />
+                      Demander un devis sous 24h
+                    </p>
                   </Card>
                 </Link>
               ))}
