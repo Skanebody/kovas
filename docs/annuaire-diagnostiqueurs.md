@@ -1,7 +1,7 @@
 # Annuaire diagnostiqueurs — Méthode de croisement données
 
-> **Statut** : V1 — schéma unifié post-FIX-D (migration `20260524110000_diagnosticians_unified.sql`)
-> **Dernière mise à jour** : 2026-05-24
+> **Statut** : V1 — schéma unifié post-FIX-D + pipeline `verify-diagnosticians-daily` (FIX-BB)
+> **Dernière mise à jour** : 2026-05-24 (FIX-BB)
 
 ## 1. Vue d'ensemble
 
@@ -224,7 +224,162 @@ supabase db reset --linked  # ou
 psql "$DATABASE_URL" -f supabase/seed/diagnosticians-fixtures.sql
 ```
 
-## 8. Roadmap V2
+## 8. Pipeline `verify-diagnosticians-daily` (FIX-BB)
+
+### Objectif
+
+Chaque diagnostiqueur est **revérifié quotidiennement** en croisant 3 sources externes
++ recalcul d'un `activity_score` ∈ [0, 1]. Sous le seuil `0.5`, la fiche est
+**masquée du public** (RLS) et signalée dans `fraud_flags`.
+
+### Algorithme de score
+
+```
+score = (dhup_active     ? 0.40 : 0)   # DHUP sync < 60 jours
+      + (sirene_active   ? 0.30 : 0)   # SIRET état='A' (ou bénéfice du doute si Sirene skipped)
+      + (gmb_rating > 0  ? 0.20 : 0)   # Google My Business présent
+      + (has_valid_cert  ? 0.10 : 0)   # ≥ 1 certif non expirée
+
+Si score < 0.5  → fraud_flags non vide + visibilité publique = false
+```
+
+### Edge Function : `supabase/functions/verify-diagnosticians-daily/`
+
+**Trigger** :
+1. `pg_cron` quotidien `kovas-verify-diagnosticians-daily` (03:00 UTC)
+2. Manuel via `/admin/diagnostiqueurs/audit` → bouton "Lancer vérif manuelle"
+3. Manuel via `POST /api/admin/diagnosticians/run-verify-daily`
+
+**Batch** : 500 diagnostiqueurs par run, ordre LRU `activity_score_computed_at`.
+Couverture : 13k / 500 = **~26 jours** pour parcourir tout l'annuaire.
+
+**Graceful degradation** : si `INSEE_CLIENT_ID` ou `GOOGLE_PLACES_API_KEY` absent,
+la fonction skip cette source sans erreur (log warning + champ `notes` dans réponse).
+
+### Fraud signals détectés
+
+| Type | Sévérité | Trigger |
+|---|---|---|
+| `dhup_absent` | high | Hash DHUP absent du dernier import (> 60 jours) |
+| `sirene_inactive` | high | SIRET radié ou inconnu côté INSEE |
+| `no_valid_certification` | medium | Aucune certif non expirée |
+
+### Cron pg_cron
+
+Migration : `supabase/migrations/20260524190000_verify_diagnosticians_daily_cron.sql`
+
+```sql
+SELECT cron.schedule(
+  'kovas-verify-diagnosticians-daily',
+  '0 3 * * *',
+  $$
+  SELECT public.invoke_edge_function(
+    'verify-diagnosticians-daily',
+    jsonb_build_object('mode', 'batch', 'limit', 500)
+  );
+  $$
+);
+```
+
+Pour doubler la fréquence : modifier `limit` à 1000 OU ajouter un second job à 04:00 UTC.
+
+## 9. Page admin `/admin/diagnostiqueurs/audit`
+
+**URL** : `/admin/diagnostiqueurs/audit`
+**Code** : `apps/web/src/app/admin/(gated)/diagnostiqueurs/audit/page.tsx`
+
+Tableau de bord :
+- Métriques globales (total, vérifiés, en attente, suspendus, radiés, flaggés)
+- Stats dernière exécution cron (timestamp, statut, logs 24h, fraud_flags 24h)
+- Top 10 départements (total / vérifiés / sous seuil)
+- Liste des 50 diagnostiqueurs les plus flaggés (`activity_score < 0.5`)
+- Bouton "Lancer vérif manuelle" avec choix taille batch (50-2000)
+
+### Vues SQL alimentant la page
+
+| Vue | Description |
+|---|---|
+| `diagnosticians_verify_health` | KPIs globaux (counts, score moyen, dernière cron) |
+| `diagnosticians_top_departments` | Top 20 dept par volume |
+
+Les deux vues sont créées avec `WITH (security_invoker = on)` + `GRANT SELECT TO service_role`.
+
+## 10. Variables d'environnement requises
+
+### Vercel (Next.js)
+
+| Variable | Source | Usage |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Settings → API | Frontend + routes API admin |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Settings → API | Routes API admin → Edge Functions |
+| `ADMIN_EMAILS` | KOVAS config | Liste séparée par virgules des emails admin |
+
+### Supabase Edge Functions (Dashboard → Functions → Secrets)
+
+| Variable | Optionnelle ? | Description |
+|---|---|---|
+| `SUPABASE_URL` | non (auto) | URL projet |
+| `SUPABASE_SERVICE_ROLE_KEY` | non (auto) | Auth interne |
+| `DHUP_DATASET_RESOURCE_URL` | **requis pour absorb-dhup-directory** | URL stable du CSV data.gouv.fr |
+| `INSEE_CLIENT_ID` | optionnelle | Identifiant OAuth2 INSEE Sirene |
+| `INSEE_CLIENT_SECRET` | optionnelle | Secret OAuth2 INSEE Sirene |
+| `GOOGLE_PLACES_API_KEY` | optionnelle | Clé API Google Places (Maps Platform) |
+| `INSEE_THROTTLE_MS` | défaut 1500 | Pause inter-requêtes INSEE |
+| `GMB_THROTTLE_MS` | défaut 200 | Pause inter-requêtes Google Places |
+| `DHUP_FRESHNESS_DAYS` | défaut 60 | Seuil au-delà duquel `dhup_active=false` |
+| `CRON_SECRET` | optionnelle | Auth alternative pour pg_cron (header `x-cron-secret`) |
+
+### Supabase Vault (extension `supabase_vault`)
+
+Pour que pg_cron puisse invoquer les Edge Functions via `public.invoke_edge_function` :
+
+```sql
+SELECT vault.create_secret('https://jlizdkffwjdiokvmhcwg.supabase.co', 'project_url',
+  'URL du projet Supabase pour invocations cron');
+SELECT vault.create_secret('<service_role_jwt>', 'service_role_token',
+  'Service role JWT pour cron internes');
+```
+
+Voir `docs/SUPABASE-MANUAL-FIXES.md` pour la procédure complète.
+
+## 11. Plan de bascule fixtures → DHUP réel
+
+1. **Configurer `DHUP_DATASET_RESOURCE_URL`** dans Supabase Functions Secrets
+2. **(Optionnel)** Configurer INSEE + GMB pour cross-validation enrichie
+3. **Configurer Vault** (`project_url` + `service_role_token`) pour activer les crons
+4. **Lancer la première run** : `./scripts/run-first-dhup-import.sh`
+5. **Purger les fixtures** une fois le DHUP importé :
+   ```sql
+   DELETE FROM diagnosticians WHERE dhup_source_id LIKE 'fix_%';
+   ```
+6. **Vérifier** : `/admin/diagnostiqueurs/audit` doit afficher ~13k fiches
+7. **Laisser tourner le cron** quotidien pendant 26 jours pour 1 rotation complète
+
+## 12. Comment ajouter une nouvelle source de croisement
+
+Pour ajouter une 4e source (ex : PagesJaunes V2) dans `verify-diagnosticians-daily` :
+
+1. Créer un module helper `checkXxx(diag)` retournant `{ value, skipped }`
+   - Lire l'env var via `Deno.env.get('XXX_API_KEY')` ; si absent → `skipped: true`
+2. Ajouter le call dans `processOne()` avec throttle adapté
+3. Ajuster la formule `computeScore()` (rebalance les pondérations à 1.0 total)
+4. Ajouter un signal `fraud_flag` dédié si nécessaire
+5. Logger côté `diagnostician_cross_validation_logs` (source = 'XXX')
+6. Documenter ici + dans le commentaire d'en-tête de l'Edge Function
+
+## 13. Monitoring qualité
+
+| Métrique | Cible saine | Alerte si... |
+|---|---|---|
+| `avg_activity_score` | > 0.7 | < 0.5 (signal incident massif) |
+| `total_fraud_flagged / total` | < 5 % | > 15 % (revue manuelle requise) |
+| `overdue_30d` | < 500 | > 2000 (cron freezé ?) |
+| `logs_24h` | ~500 (= batch quotidien) | 0 (cron cassé) |
+| `fraud_flags_24h` | < 50 | > 200 (signal anomalie source DHUP) |
+
+Consultable via `/admin/diagnostiqueurs/audit`.
+
+## 14. Roadmap V2
 
 - [ ] Source 4 PagesJaunes worker Railway (vérif adresse opérationnelle)
 - [ ] Bandit Thompson sampling pour ranking dans pages city (déjà migration #149)
@@ -232,3 +387,5 @@ psql "$DATABASE_URL" -f supabase/seed/diagnosticians-fixtures.sql
 - [ ] Régénération types Database (`pnpm gen:types`) → suppression des `as any`
 - [ ] Génération automatique des slugs lors de l'import (helper RPC
       `generate_unique_diag_slug` existe déjà côté DB)
+- [ ] RLS publique stricte : ne montrer que `activity_score >= 0.5 AND sirene_active = true`
+      AND `dhup_last_synced_at >= now() - 60 days` (à activer une fois DHUP en prod)

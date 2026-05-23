@@ -88,6 +88,15 @@ export default async function AdminDhupImportPage() {
           via <code>.github/workflows/cron-dhup-weekly.yml</code>. Cette page est destinée aux
           imports d'urgence ou aux toutes premières synchronisations.
         </p>
+        <p className="text-[12px] text-ink-faint">
+          Voir aussi :{' '}
+          <a
+            href="/admin/diagnostiqueurs/audit"
+            className="font-medium text-cta underline underline-offset-2 hover:text-cta-hover"
+          >
+            Audit pipeline (DHUP + Sirene + GMB) → /admin/diagnostiqueurs/audit
+          </a>
+        </p>
       </header>
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-5">
