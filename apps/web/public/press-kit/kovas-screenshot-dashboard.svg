@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" role="img" aria-label="KOVAS Dashboard — capture d'ecran 1920x1080">
+  <title>KOVAS Dashboard</title>
+  <desc>Visuel placeholder du tableau de bord KOVAS, fond sage gradient + logo.</desc>
+  <defs>
+    <linearGradient id="sageBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F5F7F4" />
+      <stop offset="1" stop-color="#E8EEE3" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sageBg)" />
+  <!-- Sidebar icon-only 80px -->
+  <rect x="0" y="0" width="80" height="1080" fill="#0F1419" />
+  <circle cx="40" cy="60" r="12" fill="#D4F542" />
+  <!-- Header content -->
+  <g transform="translate(120, 80)">
+    <text x="0" y="80" fill="#0F1419" font-family="'Urbanist', sans-serif" font-weight="800" font-size="56" letter-spacing="-1.5">KOVAS Dashboard</text>
+    <text x="0" y="140" fill="#5A6068" font-family="'Manrope', sans-serif" font-weight="400" font-size="22">Diagnostic immobilier — Aujourd'hui</text>
+  </g>
+  <!-- 3 KPI cards mockup -->
+  <g transform="translate(120, 280)">
+    <rect width="380" height="180" rx="16" fill="#FFFFFF" stroke="#D5D9D3" />
+    <text x="32" y="60" fill="#5A6068" font-family="'JetBrains Mono', monospace" font-size="14" letter-spacing="2">MISSIONS AUJOURD'HUI</text>
+    <text x="32" y="130" fill="#0F1419" font-family="'Instrument Serif', serif" font-style="italic" font-size="80">04</text>
+  </g>
+  <g transform="translate(540, 280)">
+    <rect width="380" height="180" rx="16" fill="#FFFFFF" stroke="#D5D9D3" />
+    <text x="32" y="60" fill="#5A6068" font-family="'JetBrains Mono', monospace" font-size="14" letter-spacing="2">CA MOIS HT</text>
+    <text x="32" y="130" fill="#0F1419" font-family="'Instrument Serif', serif" font-style="italic" font-size="80">8 240 €</text>
+  </g>
+  <g transform="translate(960, 280)">
+    <rect width="380" height="180" rx="16" fill="#FFFFFF" stroke="#D5D9D3" />
+    <text x="32" y="60" fill="#5A6068" font-family="'JetBrains Mono', monospace" font-size="14" letter-spacing="2">DEVIS EN ATTENTE</text>
+    <text x="32" y="130" fill="#0F1419" font-family="'Instrument Serif', serif" font-style="italic" font-size="80">12</text>
+  </g>
+  <!-- Bottom mention -->
+  <text x="960" y="980" text-anchor="middle" fill="#7A8088" font-family="'Manrope', sans-serif" font-size="14">kovas.fr — Capture indicative — DS v5 sage productivite B2B</text>
+</svg>

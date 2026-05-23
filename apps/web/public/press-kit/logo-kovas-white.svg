@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80" role="img" aria-label="KOVAS — Logo blanc sur fond transparent dark">
+  <title>KOVAS</title>
+  <desc>Logo KOVAS, marque deposee SASU Nexus 1993, version blanche sur fond transparent dark.</desc>
+  <g fill="#FFFFFF" font-family="'Urbanist', 'Manrope', system-ui, sans-serif" font-weight="800" letter-spacing="-1.5">
+    <text x="0" y="58" font-size="64">KOVAS</text>
+  </g>
+  <circle cx="298" cy="48" r="6" fill="#D4F542" />
+</svg>

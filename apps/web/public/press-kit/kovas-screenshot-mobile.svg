@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" role="img" aria-label="KOVAS Mobile PWA — capture 390x844">
+  <title>KOVAS Mobile</title>
+  <desc>Visuel placeholder PWA mobile KOVAS, fond sage + dock bottom.</desc>
+  <defs>
+    <linearGradient id="sageMobileBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F5F7F4" />
+      <stop offset="1" stop-color="#E8EEE3" />
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="url(#sageMobileBg)" />
+  <!-- Statusbar -->
+  <rect width="390" height="48" fill="#F5F7F4" />
+  <text x="20" y="32" fill="#0F1419" font-family="'JetBrains Mono', monospace" font-size="14">9:30</text>
+  <!-- Hero -->
+  <text x="20" y="120" fill="#0F1419" font-family="'Urbanist', sans-serif" font-weight="800" font-size="32" letter-spacing="-1">Aujourd'hui</text>
+  <text x="20" y="160" fill="#5A6068" font-family="'Manrope', sans-serif" font-size="16">4 missions planifiees</text>
+  <!-- Card 1 -->
+  <rect x="16" y="200" width="358" height="100" rx="16" fill="#FFFFFF" stroke="#D5D9D3" />
+  <text x="32" y="232" fill="#0F1419" font-family="'JetBrains Mono', monospace" font-size="20" font-weight="600">09:30</text>
+  <text x="32" y="262" fill="#0F1419" font-family="'Manrope', sans-serif" font-weight="600" font-size="16">M. Dupont — DPE Vente</text>
+  <text x="32" y="284" fill="#5A6068" font-family="'Manrope', sans-serif" font-size="13">12 rue de la Republique, 75003</text>
+  <!-- Card 2 -->
+  <rect x="16" y="320" width="358" height="100" rx="16" fill="#FFFFFF" stroke="#D5D9D3" />
+  <text x="32" y="352" fill="#0F1419" font-family="'JetBrains Mono', monospace" font-size="20" font-weight="600">11:00</text>
+  <text x="32" y="382" fill="#0F1419" font-family="'Manrope', sans-serif" font-weight="600" font-size="16">Mme Martin — Amiante + DPE</text>
+  <text x="32" y="404" fill="#5A6068" font-family="'Manrope', sans-serif" font-size="13">8 av. Mozart, 75016</text>
+  <!-- Bottom dock 5 tabs -->
+  <rect x="0" y="780" width="390" height="64" fill="#0F1419" />
+  <circle cx="78" cy="812" r="6" fill="#D4F542" />
+  <text x="195" y="826" fill="#FFFFFF" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10">DASHBOARD · MISSIONS · CLIENTS · BIENS · PLUS</text>
+</svg>
