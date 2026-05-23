@@ -17,15 +17,17 @@ import {
   type PropertyPhoto,
 } from '@/components/property/v5simp/PropertyGallerieSection'
 import { PropertyIdentitySection } from '@/components/property/v5simp/PropertyIdentitySection'
-import { parsePropertyLocation } from '@/lib/property/location'
 import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { fetchPublicLocalStats } from '@/lib/external/public-stats'
 import { formatPropertyAddress } from '@/lib/property-display'
+import { parsePropertyLocation } from '@/lib/property/location'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import type { PropertyRelationshipRole } from './stakeholders-actions'
+import { PropertyStakeholdersSection, type StakeholderRelationship } from './stakeholders-section'
 
 export const metadata: Metadata = { title: 'Détail bien' }
 
@@ -36,6 +38,8 @@ export default async function PropertyDetailPage({
 }) {
   const { id } = await params
   const { supabase, orgId } = await getCurrentUser()
+  // biome-ignore lint/suspicious/noExplicitAny: types DB pas encore regénérés post-migration FIX-KK.
+  const sb = supabase as any
 
   const { data: property } = await supabase
     .from('properties')
@@ -104,6 +108,92 @@ export default async function PropertyDetailPage({
       .limit(48)
     photoRows = photos ?? []
   }
+
+  // 4.5 Chantier C + D (FIX-KK §C, §D) — relations bien ↔ clients +
+  //                                       historique ownership + clients liste
+  const [stakeholdersRes, ownershipHistoryRes, allClientsRes] = await Promise.all([
+    sb
+      .from('property_client_relationships')
+      .select(
+        'id, client_id, role, is_current, started_at, ended_at, ownership_share, clients(display_name)',
+      )
+      .eq('property_id', id)
+      .eq('organization_id', orgId)
+      .order('is_current', { ascending: false })
+      .order('started_at', { ascending: false }),
+    sb
+      .from('property_ownership_history')
+      .select(
+        'id, transaction_date, previous_owner_client_id, new_owner_client_id, transaction_amount_eur, prev:clients!previous_owner_client_id(display_name), next:clients!new_owner_client_id(display_name)',
+      )
+      .eq('property_id', id)
+      .eq('organization_id', orgId)
+      .order('transaction_date', { ascending: false }),
+    supabase
+      .from('clients')
+      .select('id, display_name')
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .order('display_name', { ascending: true })
+      .limit(500),
+  ])
+
+  const stakeholders: StakeholderRelationship[] = (
+    (stakeholdersRes.data ?? []) as Array<{
+      id: string
+      client_id: string
+      role: PropertyRelationshipRole
+      is_current: boolean
+      started_at: string
+      ended_at: string | null
+      ownership_share: number | string | null
+      clients?: { display_name?: string | null } | { display_name?: string | null }[] | null
+    }>
+  ).map((r) => {
+    const clientRow = Array.isArray(r.clients) ? r.clients[0] : r.clients
+    const share =
+      r.ownership_share === null || r.ownership_share === undefined
+        ? null
+        : Number(r.ownership_share)
+    return {
+      id: r.id,
+      client_id: r.client_id,
+      client_name: clientRow?.display_name ?? null,
+      role: r.role,
+      is_current: r.is_current,
+      started_at: r.started_at,
+      ended_at: r.ended_at,
+      ownership_share: share,
+    }
+  })
+
+  const ownershipHistory = (
+    (ownershipHistoryRes.data ?? []) as Array<{
+      id: string
+      transaction_date: string
+      previous_owner_client_id: string | null
+      new_owner_client_id: string | null
+      transaction_amount_eur: number | string | null
+      prev?: { display_name?: string | null } | { display_name?: string | null }[] | null
+      next?: { display_name?: string | null } | { display_name?: string | null }[] | null
+    }>
+  ).map((h) => {
+    const prev = Array.isArray(h.prev) ? h.prev[0] : h.prev
+    const next = Array.isArray(h.next) ? h.next[0] : h.next
+    const amount =
+      h.transaction_amount_eur === null || h.transaction_amount_eur === undefined
+        ? null
+        : Number(h.transaction_amount_eur)
+    return {
+      id: h.id,
+      transaction_date: h.transaction_date,
+      previous_owner_name: prev?.display_name ?? null,
+      new_owner_name: next?.display_name ?? null,
+      transaction_amount_eur: amount,
+    }
+  })
+
+  const allClients = (allClientsRes.data ?? []) as Array<{ id: string; display_name: string }>
 
   // 5. Dérive dernier DPE et dernier amiante (pour Caractéristiques)
   let lastDpeIso: string | null = null
@@ -264,6 +354,13 @@ export default async function PropertyDetailPage({
         />
 
         <PropertyCaracteristiquesSection essential={essential} technical={technical} />
+
+        <PropertyStakeholdersSection
+          propertyId={property.id}
+          relationships={stakeholders}
+          clients={allClients}
+          ownershipHistory={ownershipHistory}
+        />
 
         <PropertyDossiersSection dossiers={dossierItems} ademeDpeCount={0} />
 
