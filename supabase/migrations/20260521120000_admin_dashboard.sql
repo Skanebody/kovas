@@ -163,9 +163,9 @@ CREATE POLICY "2fa_attempts_self" ON admin_2fa_attempts
 -- 7. Activation manuelle Benjamin (super_admin)
 -- ============================================
 -- À exécuter MANUELLEMENT après signup :
--- 1. Benjamin signup via /signup avec son email (ex: benjamin@kovas.fr)
+-- 1. Benjamin signup via /signup avec son email (ex: contact@kovas.fr)
 -- 2. Récupérer son user_id :
---    SELECT id FROM auth.users WHERE email = 'benjamin@kovas.fr';
+--    SELECT id FROM auth.users WHERE email = 'contact@kovas.fr';
 -- 3. Exécuter :
 --    INSERT INTO admin_users (user_id, role, telegram_chat_id, notes)
 --    VALUES ('<USER_ID>', 'super_admin', '<TELEGRAM_CHAT_ID_OR_NULL>', 'Founder');

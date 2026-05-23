@@ -84,7 +84,16 @@ function renderEmailHtml(args: {
   suggestions: SuggestionRow[]
   baseUrl: string
 }): string {
-  const { recipientFirstName, monthLabel, missionsCount, invoicesCount, leadsCount, hoursSavedEstimate, suggestions, baseUrl } = args
+  const {
+    recipientFirstName,
+    monthLabel,
+    missionsCount,
+    invoicesCount,
+    leadsCount,
+    hoursSavedEstimate,
+    suggestions,
+    baseUrl,
+  } = args
   const suggestionsHtml = suggestions
     .map((s) => {
       const title = TITLES[s.suggested_target] ?? s.suggested_target
@@ -199,45 +208,50 @@ Deno.serve(async (req) => {
       .select('monthly_report_email_enabled')
       .eq('user_id', ownerId)
       .maybeSingle()
-    const optedIn = ((prefs as { monthly_report_email_enabled?: boolean } | null)?.monthly_report_email_enabled ?? true) !== false
+    const optedIn =
+      ((prefs as { monthly_report_email_enabled?: boolean } | null)?.monthly_report_email_enabled ??
+        true) !== false
     if (!optedIn) {
       skipped++
       continue
     }
 
     // Stats prev month
-    const [{ count: missionsCount }, { count: invoicesCount }, { count: leadsCount }] = await Promise.all([
-      supabase
-        .from('missions')
-        .select('id', { count: 'exact', head: true })
-        .eq('organization_id', sub.organization_id)
-        .is('deleted_at', null)
-        .gte('created_at', prevMonth.toISOString())
-        .lt('created_at', prevMonthEnd.toISOString()),
-      supabase
-        .from('invoices')
-        .select('id', { count: 'exact', head: true })
-        .eq('organization_id', sub.organization_id)
-        .gte('created_at', prevMonth.toISOString())
-        .lt('created_at', prevMonthEnd.toISOString()),
-      supabase
-        .from('user_behavior_events')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', ownerId)
-        .eq('event_type', 'lead_received')
-        .gte('created_at', prevMonth.toISOString())
-        .lt('created_at', prevMonthEnd.toISOString()),
-    ])
+    const [{ count: missionsCount }, { count: invoicesCount }, { count: leadsCount }] =
+      await Promise.all([
+        supabase
+          .from('missions')
+          .select('id', { count: 'exact', head: true })
+          .eq('organization_id', sub.organization_id)
+          .is('deleted_at', null)
+          .gte('created_at', prevMonth.toISOString())
+          .lt('created_at', prevMonthEnd.toISOString()),
+        supabase
+          .from('invoices')
+          .select('id', { count: 'exact', head: true })
+          .eq('organization_id', sub.organization_id)
+          .gte('created_at', prevMonth.toISOString())
+          .lt('created_at', prevMonthEnd.toISOString()),
+        supabase
+          .from('user_behavior_events')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', ownerId)
+          .eq('event_type', 'lead_received')
+          .gte('created_at', prevMonth.toISOString())
+          .lt('created_at', prevMonthEnd.toISOString()),
+      ])
 
     const missions = missionsCount ?? 0
     const invoices = invoicesCount ?? 0
     const leads = leadsCount ?? 0
-    const hoursSavedEstimate = Math.round((missions * 1.5) * 10) / 10 // 1h30/mission
+    const hoursSavedEstimate = Math.round(missions * 1.5 * 10) / 10 // 1h30/mission
 
     // Top 1-2 suggestions pending non encore shown_email
     const { data: suggestionsRaw } = await supabase
       .from('upsell_suggestions')
-      .select('id, suggestion_type, suggested_target, reason_label, reason_benefit, estimated_value_eur, priority')
+      .select(
+        'id, suggestion_type, suggested_target, reason_label, reason_benefit, estimated_value_eur, priority',
+      )
       .eq('user_id', ownerId)
       .in('status', ['pending', 'shown_in_app'])
       .is('shown_email_at', null)
@@ -273,7 +287,7 @@ Deno.serve(async (req) => {
             'content-type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'KOVAS <hello@kovas.fr>',
+            from: 'KOVAS <contact@kovas.fr>',
             to: [email],
             subject: `Votre activité — ${prevMonthLabel}`,
             html,

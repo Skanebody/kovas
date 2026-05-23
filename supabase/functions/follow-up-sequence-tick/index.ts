@@ -180,14 +180,17 @@ function composeForTemplate(args: {
     'N/A'
   const amount = Number(args.contextData.amountEur ?? 0)
   const viewUrl = (args.contextData.viewUrl as string | undefined) ?? args.contextData.appUrl ?? '#'
-  const paymentUrl =
-    (args.contextData.paymentUrl as string | undefined) ?? (viewUrl as string)
-  const propertyAddress =
-    (args.contextData.propertyAddress as string | undefined) ?? 'votre bien'
+  const paymentUrl = (args.contextData.paymentUrl as string | undefined) ?? (viewUrl as string)
+  const propertyAddress = (args.contextData.propertyAddress as string | undefined) ?? 'votre bien'
   const dpeClass = (args.contextData.dpeClass as string | undefined) ?? 'F'
   const reviewUrl = (args.contextData.reviewUrl as string | undefined) ?? '#'
 
-  const wrap = (subject: string, lines: string[], buttonLabel?: string, buttonUrl?: string): ComposedContent => {
+  const wrap = (
+    subject: string,
+    lines: string[],
+    buttonLabel?: string,
+    buttonUrl?: string,
+  ): ComposedContent => {
     const bodyTxt = `${greeting}\n\n${lines.join('\n\n')}\n\nSe désinscrire : ${args.unsubscribeUrl}`
     const bodyHtml =
       paragraph(greeting) +
@@ -211,7 +214,7 @@ function composeForTemplate(args: {
           `Votre devis ${ref} — un point rapide ?`,
           [
             `Je reviens vers vous concernant le devis ${ref} (${amount.toFixed(0)} €).`,
-            `Avez-vous pu en prendre connaissance ? Je reste disponible pour répondre à vos questions ou ajuster la prestation.`,
+            'Avez-vous pu en prendre connaissance ? Je reste disponible pour répondre à vos questions ou ajuster la prestation.',
           ],
           'Consulter le devis',
           viewUrl,
@@ -222,7 +225,7 @@ function composeForTemplate(args: {
           `Devis ${ref} — toujours d'actualité ?`,
           [
             `Je n'ai pas eu de retour concernant le devis ${ref} (${amount.toFixed(0)} €).`,
-            `Si votre projet a évolué (report, annulation, ajustement de périmètre), faites-le moi savoir.`,
+            'Si votre projet a évolué (report, annulation, ajustement de périmètre), faites-le moi savoir.',
           ],
           'Voir le devis',
           viewUrl,
@@ -230,7 +233,7 @@ function composeForTemplate(args: {
       }
       return wrap(`Devis ${ref} — dernière relance`, [
         `Sans retour de votre part dans les prochains jours, je clôturerai le devis ${ref}.`,
-        `Vous pouvez bien sûr revenir vers moi à tout moment pour relancer le projet.`,
+        'Vous pouvez bien sûr revenir vers moi à tout moment pour relancer le projet.',
       ])
 
     case 'invoice_unpaid':
@@ -251,7 +254,7 @@ function composeForTemplate(args: {
           [
             `Sans nouvelle de votre part, la facture ${ref} (${amount.toFixed(2)} €) reste impayée.`,
             `Les pénalités de retard s'appliquent à compter du 31e jour suivant l'échéance (taux d'intérêt légal + 10 € forfaitaires).`,
-            `Contactez-moi si vous rencontrez une difficulté ponctuelle.`,
+            'Contactez-moi si vous rencontrez une difficulté ponctuelle.',
           ],
           'Régler en ligne',
           paymentUrl as string,
@@ -269,14 +272,11 @@ function composeForTemplate(args: {
 
     case 'post_dpe_fg':
       if (args.step === 0) {
-        return wrap(
-          `Diagnostic ${ref} — pistes d'amélioration énergétique`,
-          [
-            `Suite au diagnostic réalisé sur le bien situé ${propertyAddress}, votre logement a été classé ${dpeClass}.`,
-            `Les biens F et G entrent progressivement dans le calendrier d'interdiction de location (loi Climat et Résilience).`,
-            `Si vous envisagez des travaux, je peux vous orienter vers les dispositifs d'aide disponibles (MaPrimeRénov', CEE, Éco-PTZ).`,
-          ],
-        )
+        return wrap(`Diagnostic ${ref} — pistes d'amélioration énergétique`, [
+          `Suite au diagnostic réalisé sur le bien situé ${propertyAddress}, votre logement a été classé ${dpeClass}.`,
+          `Les biens F et G entrent progressivement dans le calendrier d'interdiction de location (loi Climat et Résilience).`,
+          `Si vous envisagez des travaux, je peux vous orienter vers les dispositifs d'aide disponibles (MaPrimeRénov', CEE, Éco-PTZ).`,
+        ])
       }
       return wrap(`Vos travaux d'amélioration énergétique — point d'étape ?`, [
         `Trois mois se sont écoulés depuis votre diagnostic ${ref} (étiquette ${dpeClass}).`,
@@ -284,9 +284,9 @@ function composeForTemplate(args: {
       ])
 
     case 'prescriber_silent':
-      return wrap(`Un point rapide`, [
-        `Je profite de cet email pour reprendre contact.`,
-        `Si vous avez des biens nécessitant un diagnostic prochainement, je peux intervenir rapidement et vous transmettre devis et planning sous 24 h.`,
+      return wrap('Un point rapide', [
+        'Je profite de cet email pour reprendre contact.',
+        'Si vous avez des biens nécessitant un diagnostic prochainement, je peux intervenir rapidement et vous transmettre devis et planning sous 24 h.',
       ])
 
     case 'review_request':
@@ -294,7 +294,7 @@ function composeForTemplate(args: {
         `Votre avis sur le diagnostic ${ref}`,
         [
           `J'espère que mon intervention pour le diagnostic ${ref} s'est déroulée à votre satisfaction.`,
-          `Si vous avez quelques minutes, votre retour me serait précieux.`,
+          'Si vous avez quelques minutes, votre retour me serait précieux.',
         ],
         'Laisser un avis',
         reviewUrl,
@@ -397,7 +397,8 @@ async function loadRecipientContact(
     return {
       email: (data as { email: string | null }).email ?? null,
       phone: (data as { phone: string | null }).phone ?? null,
-      firstName: ((data as { display_name: string | null }).display_name ?? '').split(' ')[0] ?? null,
+      firstName:
+        ((data as { display_name: string | null }).display_name ?? '').split(' ')[0] ?? null,
       companyName: (data as { company_name: string | null }).company_name ?? null,
     }
   }
@@ -442,7 +443,7 @@ async function loadDiagnostician(
   supabase: ReturnType<typeof createClient>,
   userId: string | null,
 ): Promise<{ name: string; email: string }> {
-  if (!userId) return { name: 'KOVAS', email: 'noreply@kovas.fr' }
+  if (!userId) return { name: 'KOVAS', email: 'contact@kovas.fr' }
   const { data } = await supabase
     .from('profiles')
     .select('full_name, email')
@@ -450,7 +451,7 @@ async function loadDiagnostician(
     .maybeSingle()
   return {
     name: (data as { full_name: string | null } | null)?.full_name ?? 'KOVAS',
-    email: (data as { email: string | null } | null)?.email ?? 'noreply@kovas.fr',
+    email: (data as { email: string | null } | null)?.email ?? 'contact@kovas.fr',
   }
 }
 
@@ -568,20 +569,18 @@ async function processSequence(
   const optOut = await isOptedOut(supabase, seq.user_id)
   const channel = step.channel
   if (channel === 'email' && optOut.email) {
-    await supabase
-      .from('outgoing_message_log')
-      .insert({
-        organization_id: seq.organization_id,
-        user_id: seq.user_id,
-        channel: 'email',
-        category: mapTemplateToCategory(seq.sequence_template),
-        recipient_to: recipient.email ?? 'unknown',
-        sequence_id: seq.id,
-        sequence_step: seq.current_step,
-        target_entity_type: seq.target_entity_type,
-        target_entity_id: seq.target_entity_id,
-        status: 'skipped_optout',
-      })
+    await supabase.from('outgoing_message_log').insert({
+      organization_id: seq.organization_id,
+      user_id: seq.user_id,
+      channel: 'email',
+      category: mapTemplateToCategory(seq.sequence_template),
+      recipient_to: recipient.email ?? 'unknown',
+      sequence_id: seq.id,
+      sequence_step: seq.current_step,
+      target_entity_type: seq.target_entity_type,
+      target_entity_id: seq.target_entity_id,
+      status: 'skipped_optout',
+    })
     // On marque la séquence completed plutôt que continuer à boucler
     await supabase
       .from('follow_up_sequences')
@@ -595,22 +594,20 @@ async function processSequence(
   }
 
   // 3. Rate limit (anti-spam : max 1 envoi / 6 h vers même destinataire)
-  const recipientKey = channel === 'sms' ? recipient.phone ?? '' : recipient.email ?? ''
+  const recipientKey = channel === 'sms' ? (recipient.phone ?? '') : (recipient.email ?? '')
   if (recipientKey && (await hasRecentSend(supabase, recipientKey, RATE_LIMIT_HOURS))) {
-    await supabase
-      .from('outgoing_message_log')
-      .insert({
-        organization_id: seq.organization_id,
-        user_id: seq.user_id,
-        channel,
-        category: mapTemplateToCategory(seq.sequence_template),
-        recipient_to: recipientKey,
-        sequence_id: seq.id,
-        sequence_step: seq.current_step,
-        target_entity_type: seq.target_entity_type,
-        target_entity_id: seq.target_entity_id,
-        status: 'skipped_rate_limit',
-      })
+    await supabase.from('outgoing_message_log').insert({
+      organization_id: seq.organization_id,
+      user_id: seq.user_id,
+      channel,
+      category: mapTemplateToCategory(seq.sequence_template),
+      recipient_to: recipientKey,
+      sequence_id: seq.id,
+      sequence_step: seq.current_step,
+      target_entity_type: seq.target_entity_type,
+      target_entity_id: seq.target_entity_id,
+      status: 'skipped_rate_limit',
+    })
     // Reporte de RATE_LIMIT_HOURS
     await supabase
       .from('follow_up_sequences')
@@ -744,7 +741,7 @@ Deno.serve(async (req: Request) => {
   const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const cronSecret = Deno.env.get('CRON_SECRET')
   const resendApiKey = Deno.env.get('RESEND_API_KEY') ?? null
-  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <noreply@kovas.fr>'
+  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <contact@kovas.fr>'
   const brevoApiKey = Deno.env.get('BREVO_API_KEY') ?? null
   const brevoSender = Deno.env.get('BREVO_SMS_SENDER') ?? 'KOVAS'
   const appUrl = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://kovas.fr'

@@ -115,7 +115,11 @@ function computePenalties(unpaidAmount: number, daysLate: number) {
   }
 }
 
-function wrapHtml(args: { bodyHtml: string; diagnosticianName: string; diagnosticianEmail: string }): string {
+function wrapHtml(args: {
+  bodyHtml: string
+  diagnosticianName: string
+  diagnosticianEmail: string
+}): string {
   return `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8"><title>KOVAS</title></head>
 <body style="margin:0;padding:0;background:#F5F7F4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#0F1419;">
@@ -155,13 +159,21 @@ function ibanBlock(org: OrgRow, reference: string): string {
 
 // ─── Templates par niveau de relance ───
 
-function buildJ7Email(args: { firstName: string | null; ref: string; ttc: number; unpaid: number; dueDate: string | null; paymentLink: string | null; org: OrgRow }) {
+function buildJ7Email(args: {
+  firstName: string | null
+  ref: string
+  ttc: number
+  unpaid: number
+  dueDate: string | null
+  paymentLink: string | null
+  org: OrgRow
+}) {
   const greeting = args.firstName ? `Bonjour ${args.firstName},` : 'Bonjour,'
   const lines = [
     greeting,
     `Petit rappel concernant la facture ${args.ref} (${formatEur(args.unpaid)}) arrivée à échéance le ${formatDateFr(args.dueDate)}.`,
     `Si le règlement est déjà en cours, merci d'ignorer ce message.`,
-    `Sinon vous pouvez procéder au paiement en quelques clics ci-dessous.`,
+    'Sinon vous pouvez procéder au paiement en quelques clics ci-dessous.',
   ]
   const cta = args.paymentLink ? buttonHtml('Régler la facture', args.paymentLink) : ''
   const iban = ibanBlock(args.org, args.ref)
@@ -172,7 +184,16 @@ function buildJ7Email(args: { firstName: string | null; ref: string; ttc: number
   }
 }
 
-function buildJ15Email(args: { firstName: string | null; ref: string; ttc: number; unpaid: number; daysLate: number; dueDate: string | null; paymentLink: string | null; org: OrgRow }) {
+function buildJ15Email(args: {
+  firstName: string | null
+  ref: string
+  ttc: number
+  unpaid: number
+  daysLate: number
+  dueDate: string | null
+  paymentLink: string | null
+  org: OrgRow
+}) {
   const greeting = args.firstName ? `Bonjour ${args.firstName},` : 'Bonjour,'
   const lines = [
     greeting,
@@ -189,7 +210,16 @@ function buildJ15Email(args: { firstName: string | null; ref: string; ttc: numbe
   }
 }
 
-function buildJ30Email(args: { firstName: string | null; ref: string; ttc: number; unpaid: number; daysLate: number; dueDate: string | null; paymentLink: string | null; org: OrgRow }) {
+function buildJ30Email(args: {
+  firstName: string | null
+  ref: string
+  ttc: number
+  unpaid: number
+  daysLate: number
+  dueDate: string | null
+  paymentLink: string | null
+  org: OrgRow
+}) {
   const greeting = args.firstName ? `Bonjour ${args.firstName},` : 'Bonjour,'
   const pen = computePenalties(args.unpaid, args.daysLate)
   const lines = [
@@ -260,7 +290,7 @@ Deno.serve(async (req: Request) => {
   const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const cronSecret = Deno.env.get('CRON_SECRET')
   const resendApiKey = Deno.env.get('RESEND_API_KEY') ?? null
-  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <noreply@kovas.fr>'
+  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <contact@kovas.fr>'
 
   if (!supabaseUrl || !serviceRole || !cronSecret) {
     return jsonResponse({ error: 'missing_environment' }, 500)
@@ -308,9 +338,7 @@ Deno.serve(async (req: Request) => {
       const dueDateObj = new Date(inv.due_date)
       if (Number.isNaN(dueDateObj.getTime())) continue
 
-      const daysLate = Math.floor(
-        (Date.now() - dueDateObj.getTime()) / (1000 * 60 * 60 * 24),
-      )
+      const daysLate = Math.floor((Date.now() - dueDateObj.getTime()) / (1000 * 60 * 60 * 24))
       if (daysLate < 7) continue
 
       // Détermine le niveau à envoyer
@@ -336,7 +364,7 @@ Deno.serve(async (req: Request) => {
         .maybeSingle()
       const org = (orgData ?? { name: 'KOVAS', iban: null, bic: null, bank_name: null }) as OrgRow
 
-      let profile: ProfileRow = { full_name: 'KOVAS', email: 'noreply@kovas.fr' }
+      let profile: ProfileRow = { full_name: 'KOVAS', email: 'contact@kovas.fr' }
       if (inv.user_id) {
         const { data: profileData } = await supabase
           .from('profiles')
@@ -367,17 +395,9 @@ Deno.serve(async (req: Request) => {
       else template = buildJ30Email(baseArgs)
 
       const diagnosticianName = profile.full_name ?? org.name
-      const diagnosticianEmail = profile.email ?? 'noreply@kovas.fr'
+      const diagnosticianEmail = profile.email ?? 'contact@kovas.fr'
 
-      if (!resendApiKey) {
-        // Mode dev sans clé Resend — stub log
-        console.log('[invoice-reminders:stub]', {
-          to: recipientEmail,
-          subject: template.subject,
-          level,
-          invoiceId: inv.id,
-        })
-      } else {
+      if (resendApiKey) {
         const fullHtml = wrapHtml({
           bodyHtml: template.html,
           diagnosticianName,

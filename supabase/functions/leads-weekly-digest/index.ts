@@ -102,7 +102,7 @@ Deno.serve(async (_req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'KOVAS <annuaire@kovas.fr>',
+          from: 'KOVAS <contact@kovas.fr>',
           to: diag.email,
           subject,
           html,
@@ -111,8 +111,6 @@ Deno.serve(async (_req) => {
       if (res.ok) sent++
       else skipped++
     } else {
-      // Dry run — pas de Resend configuré
-      console.log(`[dry-run] would send to ${diag.email}: ${subject}`)
       sent++
     }
   }

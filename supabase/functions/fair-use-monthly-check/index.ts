@@ -54,12 +54,6 @@ interface AlertRow {
   email_sent_at: string | null
 }
 
-interface OrgEmailRecipient {
-  organization_id: string
-  email: string
-  name: string
-}
-
 const TIERS_ORDER = ['essential', 'decouverte', 'pro', 'all_inclusive', 'cabinet'] as const
 const TIER_CAPS: Record<string, number> = {
   essential: 50,
@@ -208,7 +202,9 @@ Deno.serve(async (req: Request) => {
   // 2) Pour chaque alert >= 3 mois consécutifs ET email_sent_at IS NULL → envoi email
   const { data: pendingAlerts } = await supabase
     .from('fair_use_alerts')
-    .select('organization_id, month_iso, missions_count, cap_threshold, consecutive_months_over, email_sent_at')
+    .select(
+      'organization_id, month_iso, missions_count, cap_threshold, consecutive_months_over, email_sent_at',
+    )
     .gte('consecutive_months_over', 3)
     .is('email_sent_at', null)
 
@@ -285,7 +281,7 @@ Deno.serve(async (req: Request) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'KOVAS <hello@kovas.fr>',
+            from: 'KOVAS <contact@kovas.fr>',
             to: [email],
             subject,
             html,

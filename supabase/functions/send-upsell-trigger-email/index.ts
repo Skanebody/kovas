@@ -18,7 +18,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 // Deno globals are unknown to Node's tsc — declare minimally for typecheck.
-declare const Deno: { env: { get(key: string): string | undefined }; serve(handler: (req: Request) => Promise<Response>): void }
+declare const Deno: {
+  env: { get(key: string): string | undefined }
+  serve(handler: (req: Request) => Promise<Response>): void
+}
 
 interface SuggestionRow {
   id: string
@@ -100,7 +103,7 @@ const TRIGGER_EMAIL_MAPPING: TriggerEmailMapping[] = [
     triggerCode: 'R6',
     targetCode: 'addon_signatures_eidas',
     templateSlug: 'upsell-r6-signatures-eidas',
-    subject: 'Signez vos devis en un clic avec l\'add-on eIDAS',
+    subject: "Signez vos devis en un clic avec l'add-on eIDAS",
     ctaPath: '/dashboard/upgrade/addons',
     productLine: 'addon',
     senderName: 'KOVAS 360',
@@ -199,12 +202,12 @@ function buildInlineHtml(
     R2: `Votre cabinet n'apparaît pas encore sur KOVAS Annuaire. Activer la fiche Annuaire Pro vous donne une visibilité immédiate auprès des particuliers de votre zone.`,
     R3: `Vous recevez régulièrement des leads via l'Annuaire. KOVAS 360 Starter vous accompagne sur la production des diagnostics (saisie vocale, exports, conformité).`,
     R4: `Vous êtes abonné aux deux produits séparément. Un bundle vous fait économiser ${savings} €/mois pour les mêmes fonctionnalités.`,
-    R5: `Votre ville présente une densité de demandes suffisante pour un slot sponsorisé. Cela vous garantit la visibilité prioritaire.`,
+    R5: 'Votre ville présente une densité de demandes suffisante pour un slot sponsorisé. Cela vous garantit la visibilité prioritaire.',
     R6: `Vous émettez régulièrement des devis. L'add-on signatures eIDAS rend ce cycle conforme et plus rapide.`,
-    R7: `Vous émettez régulièrement des factures. La synchronisation Pennylane vous fait gagner du temps comptable chaque mois.`,
-    R8: `Vous gérez un volume de RDV important. Les SMS rappel J-1 réduisent les no-shows de 35 %.`,
-    R9: `Vous utilisez KOVAS depuis plus de six mois. Rejoindre la Communauté Pro vous donne accès au forum et aux masterclass mensuelles.`,
-    R10: `Votre compte est en pause depuis trente jours. Vos missions et clients sont conservés — la réactivation prend une minute.`,
+    R7: 'Vous émettez régulièrement des factures. La synchronisation Pennylane vous fait gagner du temps comptable chaque mois.',
+    R8: 'Vous gérez un volume de RDV important. Les SMS rappel J-1 réduisent les no-shows de 35 %.',
+    R9: 'Vous utilisez KOVAS depuis plus de six mois. Rejoindre la Communauté Pro vous donne accès au forum et aux masterclass mensuelles.',
+    R10: 'Votre compte est en pause depuis trente jours. Vos missions et clients sont conservés — la réactivation prend une minute.',
   }
   const intro = introByRule[mapping.triggerCode] ?? ''
 
@@ -213,11 +216,11 @@ function buildInlineHtml(
     `<p>Bonjour ${firstName},</p>`,
     `<p>${intro}</p>`,
     `<p style="margin:24px 0;">`,
-    `<a href="${ctaUrl}" style="background:#0F1E3D;color:#F8F5EE;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:600;display:inline-block;">→ ${mapping.subject.includes('{{') ? 'Voir l\'offre' : 'Voir l\'offre'}</a>`,
-    `</p>`,
+    `<a href="${ctaUrl}" style="background:#0F1E3D;color:#F8F5EE;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:600;display:inline-block;">→ ${mapping.subject.includes('{{') ? "Voir l'offre" : "Voir l'offre"}</a>`,
+    '</p>',
     `<p>Cordialement,<br/>${signatureName}</p>`,
     buildLegalFooter(),
-    `</div>`,
+    '</div>',
   ].join('')
 }
 
@@ -239,7 +242,11 @@ async function sendOne(
 ): Promise<SendResult> {
   const mapping = mappingFor(suggestion.trigger_code)
   if (!mapping) {
-    return { ok: false, suggestionId: suggestion.id, error: `no-mapping-for-${suggestion.trigger_code}` }
+    return {
+      ok: false,
+      suggestionId: suggestion.id,
+      error: `no-mapping-for-${suggestion.trigger_code}`,
+    }
   }
 
   // Profil destinataire
@@ -282,7 +289,7 @@ async function sendOne(
   if (mapping.brevoTemplateId) {
     body.templateId = mapping.brevoTemplateId
     body.params = params
-    delete body.htmlContent
+    body.htmlContent = undefined
   }
 
   if (dryRun) {
@@ -340,16 +347,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   const brevoApiKey = Deno.env.get('BREVO_API_KEY')
   if (!brevoApiKey) {
-    return new Response(JSON.stringify({ ok: false, error: 'BREVO_API_KEY missing' }), { status: 500 })
+    return new Response(JSON.stringify({ ok: false, error: 'BREVO_API_KEY missing' }), {
+      status: 500,
+    })
   }
-  const brevoFromEmail = getEnv('BREVO_FROM_EMAIL', 'noreply@kovas.fr')
-  const brevoReplyTo = getEnv('BREVO_REPLY_TO', 'support@kovas.fr')
+  const brevoFromEmail = getEnv('BREVO_FROM_EMAIL', 'contact@kovas.fr')
+  const brevoReplyTo = getEnv('BREVO_REPLY_TO', 'contact@kovas.fr')
   const baseUrl = getEnv('KOVAS_BASE_URL', 'https://kovas.fr')
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceKey) {
-    return new Response(JSON.stringify({ ok: false, error: 'supabase env missing' }), { status: 500 })
+    return new Response(JSON.stringify({ ok: false, error: 'supabase env missing' }), {
+      status: 500,
+    })
   }
   const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } })
 
@@ -365,7 +376,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (payload.suggestionId) {
     const { data, error } = await supabase
       .from('upsell_suggestions')
-      .select('id, organization_id, user_id, trigger_code, target_code, current_plan_code, signal_value, status, email_sent_at')
+      .select(
+        'id, organization_id, user_id, trigger_code, target_code, current_plan_code, signal_value, status, email_sent_at',
+      )
       .eq('id', payload.suggestionId)
       .limit(1)
     if (error) {
@@ -376,7 +389,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const limit = Math.min(payload.limit ?? 50, 200)
     const { data, error } = await supabase
       .from('upsell_suggestions')
-      .select('id, organization_id, user_id, trigger_code, target_code, current_plan_code, signal_value, status, email_sent_at')
+      .select(
+        'id, organization_id, user_id, trigger_code, target_code, current_plan_code, signal_value, status, email_sent_at',
+      )
       .eq('status', 'pending')
       .is('email_sent_at', null)
       .order('created_at', { ascending: true })
@@ -386,7 +401,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
     rows = (data ?? []) as SuggestionRow[]
   } else {
-    return new Response(JSON.stringify({ ok: false, error: 'missing suggestionId or batch flag' }), { status: 400 })
+    return new Response(
+      JSON.stringify({ ok: false, error: 'missing suggestionId or batch flag' }),
+      { status: 400 },
+    )
   }
 
   let sent = 0
@@ -394,7 +412,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const failures: Array<{ suggestionId: string; error?: string }> = []
 
   for (const row of rows) {
-    const result = await sendOne(supabase, row, brevoApiKey, brevoFromEmail, brevoReplyTo, baseUrl, dryRun)
+    const result = await sendOne(
+      supabase,
+      row,
+      brevoApiKey,
+      brevoFromEmail,
+      brevoReplyTo,
+      baseUrl,
+      dryRun,
+    )
     if (result.ok) sent += 1
     else {
       failed += 1

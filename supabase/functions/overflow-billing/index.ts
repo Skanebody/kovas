@@ -333,8 +333,9 @@ async function processQuotaRow(
       .eq('status', 'active')
       .limit(1)
       .maybeSingle()
-    const profile =
-      (ownerProfile as { profiles?: { email: string; full_name: string | null } } | null)?.profiles
+    const profile = (
+      ownerProfile as { profiles?: { email: string; full_name: string | null } } | null
+    )?.profiles
     if (profile) {
       const firstName = (profile.full_name ?? profile.email).split(' ')[0] ?? profile.email
       const mail = buildOverflowRecapEmail({
@@ -394,7 +395,7 @@ Deno.serve(async (req: Request) => {
   const cronSecret = Deno.env.get('CRON_SECRET')
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') ?? null
   const resendApiKey = Deno.env.get('RESEND_API_KEY') ?? null
-  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <noreply@kovas.fr>'
+  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <contact@kovas.fr>'
   const appUrl = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://kovas.fr'
   const adminEmail = Deno.env.get('KOVAS_ADMIN_EMAIL') ?? null
 

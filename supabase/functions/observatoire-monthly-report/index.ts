@@ -23,7 +23,7 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY') ?? ''
 const ANTHROPIC_HAIKU_MODEL = Deno.env.get('ANTHROPIC_HAIKU_MODEL') ?? 'claude-haiku-4-5'
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? ''
-const RESEND_FROM = Deno.env.get('RESEND_FROM') ?? 'KOVAS <observatoire@kovas.fr>'
+const RESEND_FROM = Deno.env.get('RESEND_FROM') ?? 'KOVAS <contact@kovas.fr>'
 const NEXTJS_PUBLIC_URL = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://kovas.fr'
 const PDF_ENDPOINT_TOKEN = Deno.env.get('OBSERVATOIRE_PDF_TOKEN') ?? ''
 const USD_TO_EUR = Number.parseFloat(Deno.env.get('USD_TO_EUR_RATE') ?? '0.92')
@@ -91,6 +91,7 @@ async function aggregateMonthStats(
     .lt('imported_at', periodEnd)
 
   // Count quote requests du mois
+  // biome-ignore lint/suspicious/noExplicitAny: schéma souple
   const { count: quoteCount } = await (supabase as any)
     .from('quote_requests')
     .select('id', { count: 'exact', head: true })
@@ -193,8 +194,8 @@ Rédigez maintenant le JSON.`
   const inputTokens = data.usage.input_tokens
   const outputTokens = data.usage.output_tokens
   const costUsd =
-    (inputTokens / 1_000_000) * HAIKU_INPUT_USD_PER_MTOK
-    + (outputTokens / 1_000_000) * HAIKU_OUTPUT_USD_PER_MTOK
+    (inputTokens / 1_000_000) * HAIKU_INPUT_USD_PER_MTOK +
+    (outputTokens / 1_000_000) * HAIKU_OUTPUT_USD_PER_MTOK
   const costEur = Math.round(costUsd * USD_TO_EUR * 10000) / 10000
 
   return { json: parsed, inputTokens, outputTokens, costEur }
@@ -226,9 +227,7 @@ async function generatePdfViaApi(
   return { url: json.url, sizeBytes: json.sizeBytes ?? 0 }
 }
 
-async function fetchSubscribers(
-  supabase: ReturnType<typeof createClient>,
-): Promise<Subscriber[]> {
+async function fetchSubscribers(supabase: ReturnType<typeof createClient>): Promise<Subscriber[]> {
   // biome-ignore lint/suspicious/noExplicitAny: pas dans Database.types
   const { data } = await (supabase as any)
     .from('observatoire_subscribers')
@@ -367,9 +366,10 @@ Deno.serve(async (req: Request) => {
   }
 
   const now = new Date()
-  const target = body.target_year && body.target_month
-    ? { year: body.target_year, month: body.target_month }
-    : previousMonth(now)
+  const target =
+    body.target_year && body.target_month
+      ? { year: body.target_year, month: body.target_month }
+      : previousMonth(now)
   const periodLabel = previousMonthLabel(target.year, target.month)
 
   // Idempotence : check si rapport existe déjà
@@ -450,12 +450,7 @@ Deno.serve(async (req: Request) => {
 
     // Send batch
     const summaryHtml = `<p style="margin:0 0 16px 0;">${summary.executive_summary.split('\n\n').slice(0, 1).join(' ')}</p>`
-    const sendResult = await sendBatchEmail(
-      subscribers,
-      periodLabel,
-      finalPdfUrl,
-      summaryHtml,
-    )
+    const sendResult = await sendBatchEmail(subscribers, periodLabel, finalPdfUrl, summaryHtml)
 
     // Update report status
     // biome-ignore lint/suspicious/noExplicitAny: pas dans Database.types
@@ -478,7 +473,10 @@ Deno.serve(async (req: Request) => {
       await (supabase as any)
         .from('observatoire_subscribers')
         .update({ last_sent_at: new Date().toISOString() })
-        .in('email', subscribers.map((s) => s.email))
+        .in(
+          'email',
+          subscribers.map((s) => s.email),
+        )
     }
 
     return new Response(

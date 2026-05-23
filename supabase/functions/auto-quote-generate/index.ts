@@ -121,12 +121,12 @@ function pickModulation(
 ): number {
   if (!mods) return 1
   const s = surface ?? 0
-  if (s === 0) return mods['appartement'] ?? 1
-  if (s < 30) return mods['studio'] ?? 0.85
-  if (s < 90) return mods['appartement'] ?? 1
-  if (s < 150) return mods['grandAppartement'] ?? mods['maison'] ?? 1.15
-  if (s < 250) return mods['maison'] ?? 1.2
-  return mods['grandeMaison'] ?? 1.4
+  if (s === 0) return mods.appartement ?? 1
+  if (s < 30) return mods.studio ?? 0.85
+  if (s < 90) return mods.appartement ?? 1
+  if (s < 150) return mods.grandAppartement ?? mods.maison ?? 1.15
+  if (s < 250) return mods.maison ?? 1.2
+  return mods.grandeMaison ?? 1.4
 }
 
 interface LineItem {
@@ -248,7 +248,7 @@ Deno.serve(async (req: Request) => {
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
   const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const resendKey = Deno.env.get('RESEND_API_KEY')
-  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'devis@kovas.fr'
+  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'contact@kovas.fr'
   const internalSecret = Deno.env.get('INTERNAL_API_SECRET')
   const tokenSecret = internalSecret ?? serviceRole ?? ''
   const telegramBot = Deno.env.get('TELEGRAM_BOT_TOKEN')
@@ -302,12 +302,12 @@ Deno.serve(async (req: Request) => {
     orgId = data.organization_id
     const snap = data.property_snapshot ?? {}
     extracted = {
-      extracted_address: (snap['extracted_address'] as string) ?? null,
+      extracted_address: (snap.extracted_address as string) ?? null,
       extracted_diagnostic_types: data.diagnostics_requested,
-      extracted_surface: (snap['extracted_surface'] as number) ?? null,
-      extracted_client_name: (snap['extracted_client_name'] as string) ?? null,
-      extracted_client_phone: (snap['extracted_client_phone'] as string) ?? null,
-      extracted_client_email: (snap['extracted_client_email'] as string) ?? null,
+      extracted_surface: (snap.extracted_surface as number) ?? null,
+      extracted_client_name: (snap.extracted_client_name as string) ?? null,
+      extracted_client_phone: (snap.extracted_client_phone as string) ?? null,
+      extracted_client_email: (snap.extracted_client_email as string) ?? null,
     }
   } else if (body.extracted_data && body.organization_id) {
     orgId = body.organization_id
@@ -492,7 +492,7 @@ Deno.serve(async (req: Request) => {
     await notifyTelegram({
       chatId: telegramChatId,
       botToken: telegramBot,
-      text: `*Devis ${quoteRow.reference} généré*\nMontant : ${amountTtc.toFixed(2)} € TTC\n${sentOk ? 'Envoyé au client.' : 'En attente d\'envoi.'}\n[Consulter](${appUrl}/quotes/${quoteRow.id})`,
+      text: `*Devis ${quoteRow.reference} généré*\nMontant : ${amountTtc.toFixed(2)} € TTC\n${sentOk ? 'Envoyé au client.' : "En attente d'envoi."}\n[Consulter](${appUrl}/quotes/${quoteRow.id})`,
     })
   }
 

@@ -352,7 +352,9 @@ async function processTrial(
   const [moduleRes, subRes, profileRes] = await Promise.all([
     supabase
       .from('addon_modules')
-      .select('id, module_code, display_name, price_monthly_cents, stripe_price_id, stripe_product_id')
+      .select(
+        'id, module_code, display_name, price_monthly_cents, stripe_price_id, stripe_product_id',
+      )
       .eq('id', trial.module_id)
       .maybeSingle(),
     supabase
@@ -360,11 +362,7 @@ async function processTrial(
       .select('id, stripe_subscription_id, stripe_customer_id')
       .eq('id', trial.subscription_id)
       .maybeSingle(),
-    supabase
-      .from('profiles')
-      .select('id, email, full_name')
-      .eq('id', trial.user_id)
-      .maybeSingle(),
+    supabase.from('profiles').select('id, email, full_name').eq('id', trial.user_id).maybeSingle(),
   ])
 
   const mod = moduleRes.data as AddonModuleRow | null
@@ -556,7 +554,7 @@ Deno.serve(async (req: Request) => {
   const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const cronSecret = Deno.env.get('CRON_SECRET')
   const resendApiKey = Deno.env.get('RESEND_API_KEY') ?? null
-  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <noreply@kovas.fr>'
+  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <contact@kovas.fr>'
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') ?? null
   const appUrl = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://kovas.fr'
 
@@ -598,11 +596,7 @@ Deno.serve(async (req: Request) => {
 
   for (const trial of trials) {
     try {
-      const r = await processTrial(
-        supabase,
-        { resendApiKey, resendFrom, stripeKey, appUrl },
-        trial,
-      )
+      const r = await processTrial(supabase, { resendApiKey, resendFrom, stripeKey, appUrl }, trial)
       tally[r.action] = (tally[r.action] ?? 0) + 1
     } catch (err) {
       tally.error += 1

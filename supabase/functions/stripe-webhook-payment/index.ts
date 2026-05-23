@@ -181,8 +181,7 @@ async function unlockReportForPaymentIntent(
       .eq('mission_id', mission.id)
       .maybeSingle()
     clientEmail = (clientRow as { email?: string | null } | null)?.email ?? null
-    clientFirstName =
-      (clientRow as { first_name?: string | null } | null)?.first_name ?? null
+    clientFirstName = (clientRow as { first_name?: string | null } | null)?.first_name ?? null
   }
 
   // Trigger emails (best effort — n'échoue jamais le webhook)
@@ -249,12 +248,12 @@ function extractPaymentIntentId(event: Stripe.Event): string | null {
     case 'invoice.payment_succeeded': {
       const inv = event.data.object as Stripe.Invoice
       const pi = inv.payment_intent
-      return typeof pi === 'string' ? pi : pi?.id ?? null
+      return typeof pi === 'string' ? pi : (pi?.id ?? null)
     }
     case 'checkout.session.completed': {
       const sess = event.data.object as Stripe.Checkout.Session
       const pi = sess.payment_intent
-      return typeof pi === 'string' ? pi : pi?.id ?? null
+      return typeof pi === 'string' ? pi : (pi?.id ?? null)
     }
     default:
       return null
@@ -477,7 +476,7 @@ Deno.serve(async (req: Request) => {
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
   const stripeWebhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')
   const resendApiKey = Deno.env.get('RESEND_API_KEY') ?? null
-  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <noreply@kovas.fr>'
+  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <contact@kovas.fr>'
 
   if (!supabaseUrl || !serviceRole || !stripeKey || !stripeWebhookSecret) {
     return jsonResponse({ error: 'missing_environment' }, 500)

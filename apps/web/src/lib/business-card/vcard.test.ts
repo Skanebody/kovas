@@ -6,8 +6,8 @@
  * `node:assert` (stable depuis Node 18). Aucun setup supplémentaire requis.
  */
 
-import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { test } from 'node:test'
 import { buildCertificationNote, buildVCard } from './vcard'
 
 test('buildVCard — payload minimal valide', () => {
@@ -30,7 +30,7 @@ test('buildVCard — payload complet avec tous les champs', () => {
     lastName: 'Bel',
     title: 'Diagnostiqueur immobilier certifié',
     organization: 'Nexus 1993',
-    emailWork: 'benjamin@kovas.fr',
+    emailWork: 'contact@kovas.fr',
     phoneMobile: '+33612345678',
     phoneWork: '+33235123456',
     website: 'https://kovas.fr',
@@ -43,34 +43,30 @@ test('buildVCard — payload complet avec tous les champs', () => {
   assert.ok(out.includes('TITLE:Diagnostiqueur immobilier certifié'))
   assert.ok(out.includes('TEL;TYPE=CELL,VOICE,PREF:+33612345678'))
   assert.ok(out.includes('TEL;TYPE=WORK,VOICE:+33235123456'))
-  assert.ok(out.includes('EMAIL;TYPE=WORK,INTERNET:benjamin@kovas.fr'))
+  assert.ok(out.includes('EMAIL;TYPE=WORK,INTERNET:contact@kovas.fr'))
   assert.ok(out.includes('URL:https://kovas.fr'))
-  assert.ok(
-    out.includes(
-      'ADR;TYPE=WORK:;;12 rue de la République;Dieppe;;76200;France',
-    ),
-  )
+  assert.ok(out.includes('ADR;TYPE=WORK:;;12 rue de la République;Dieppe;;76200;France'))
   assert.ok(out.includes('NOTE:Cert. RGE n° ABC123 · SIRET 12345678900012'))
 })
 
 test('buildVCard — caractères spéciaux échappés (FR + ponctuation)', () => {
   const out = buildVCard({
     firstName: 'Élise',
-    lastName: 'D\'Aubigné, fille',
+    lastName: "D'Aubigné, fille",
     title: 'Experte ; spécialiste',
     organization: 'Cabinet "Étoile"; Paris',
-    addressLine1: '5, place de l\'Opéra',
+    addressLine1: "5, place de l'Opéra",
     city: 'Saint-Étienne',
     postalCode: '42000',
   })
   // Caractères accentués passent en UTF-8 brut (pas de quoted-printable).
-  assert.ok(out.includes('FN:Élise D\'Aubigné\\, fille'))
-  assert.ok(out.includes('N:D\'Aubigné\\, fille;Élise;;;'))
+  assert.ok(out.includes("FN:Élise D'Aubigné\\, fille"))
+  assert.ok(out.includes("N:D'Aubigné\\, fille;Élise;;;"))
   // `;` échappé en `\;`
   assert.ok(out.includes('TITLE:Experte \\; spécialiste'))
   assert.ok(out.includes('ORG:Cabinet "Étoile"\\; Paris'))
   // `,` échappé en `\,`
-  assert.ok(out.includes('ADR;TYPE=WORK:;;5\\, place de l\'Opéra;Saint-Étienne'))
+  assert.ok(out.includes("ADR;TYPE=WORK:;;5\\, place de l'Opéra;Saint-Étienne"))
 })
 
 test('buildVCard — logo embedded PHOTO base64', () => {

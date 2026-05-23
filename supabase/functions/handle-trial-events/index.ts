@@ -42,7 +42,7 @@ const supabase = createClient(
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? ''
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? ''
-const FROM = Deno.env.get('RESEND_FROM') ?? 'KOVAS <hello@kovas.fr>'
+const FROM = Deno.env.get('RESEND_FROM') ?? 'KOVAS <contact@kovas.fr>'
 const APP_URL = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://kovas.fr'
 
 interface OrgContact {
@@ -93,7 +93,7 @@ async function sendEmail(to: string, subject: string, text: string): Promise<voi
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'KOVAS', email: 'hello@kovas.fr' },
+        sender: { name: 'KOVAS', email: 'contact@kovas.fr' },
         to: [{ email: to }],
         subject,
         textContent: text,
@@ -101,7 +101,6 @@ async function sendEmail(to: string, subject: string, text: string): Promise<voi
     })
     return
   }
-  console.log('[handle-trial-events] stub email', { to, subject })
 }
 
 function formatDateFR(seconds: number | null | undefined): string {
@@ -142,7 +141,7 @@ Je reste disponible pour toute question.
 Cordialement,
 Benjamin Bel
 Fondateur KOVAS
-benjamin@kovas.fr`
+contact@kovas.fr`
 
   await sendEmail(contact.email, 'Votre essai KOVAS se termine dans 3 jours', text)
 }
@@ -183,14 +182,13 @@ ${APP_URL}/app/account
 Cordialement,
 Benjamin Bel
 Fondateur KOVAS
-benjamin@kovas.fr`
+contact@kovas.fr`
     await sendEmail(contact.email, 'Confirmation de votre abonnement KOVAS', text)
   }
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
-  const customer =
-    typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id
+  const customer = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id
   if (!customer) return
   const { data: sub } = await supabase
     .from('subscriptions')
@@ -203,8 +201,8 @@ async function handlePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
 
   const attemptText =
     (invoice.attempt_count ?? 1) > 1
-      ? `Stripe va retenter automatiquement le prélèvement dans les prochains jours.`
-      : `Stripe va retenter automatiquement le prélèvement à J+1, J+3 puis J+7.`
+      ? 'Stripe va retenter automatiquement le prélèvement dans les prochains jours.'
+      : 'Stripe va retenter automatiquement le prélèvement à J+1, J+3 puis J+7.'
 
   const text = `Bonjour ${contact.firstName},
 
@@ -220,7 +218,7 @@ En cas de difficulté, répondez simplement à cet email — je vous accompagne 
 Cordialement,
 Benjamin Bel
 Fondateur KOVAS
-benjamin@kovas.fr`
+contact@kovas.fr`
 
   await sendEmail(contact.email, 'Action requise — paiement KOVAS non abouti', text)
 }
@@ -228,10 +226,7 @@ benjamin@kovas.fr`
 async function handleSubscriptionDeleted(sub: Stripe.Subscription): Promise<void> {
   const orgId = sub.metadata?.organization_id
   if (!orgId) return
-  await supabase
-    .from('subscriptions')
-    .update({ status: sub.status })
-    .eq('organization_id', orgId)
+  await supabase.from('subscriptions').update({ status: sub.status }).eq('organization_id', orgId)
 
   const contact = await resolveOrgContact(orgId)
   if (!contact) return

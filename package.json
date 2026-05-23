@@ -4,7 +4,7 @@
   "private": true,
   "description": "KOVAS App — SaaS B2B PWA diagnostic immobilier IA-first",
   "homepage": "https://kovas.fr",
-  "author": "Benjamin Bel <benjamin@kovas.fr>",
+  "author": "Benjamin Bel <contact@kovas.fr>",
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {

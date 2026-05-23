@@ -47,7 +47,7 @@ const DISCOUNT_DURATION_MONTHS = Number.parseInt(
 )
 const APP_URL = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://kovas.fr'
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-const RESEND_FROM = Deno.env.get('RESEND_FROM') ?? 'KOVAS <hello@kovas.fr>'
+const RESEND_FROM = Deno.env.get('RESEND_FROM') ?? 'KOVAS <contact@kovas.fr>'
 
 interface CancellationRow {
   id: string
@@ -120,7 +120,7 @@ Cordialement,
 
 Benjamin Bel
 Fondateur KOVAS
-benjamin@kovas.fr
+contact@kovas.fr
 `
 
   const html = `<!DOCTYPE html>
@@ -140,7 +140,7 @@ benjamin@kovas.fr
             <a href="${escapeHtml(reactivateUrl)}" style="display:inline-block;background:#0F1E3D;color:#F8F5EE;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:600;">Réactiver mon compte</a>
           </p>
           <p style="margin:0 0 16px 0;font-size:13px;color:#7E8AA4;">Pas de pression, pas de relance — ce code expire dans 6 mois et c'est tout.</p>
-          <p style="margin-top:32px;color:#4A5878;">— Benjamin Bel<br/>Fondateur KOVAS<br/><a href="mailto:benjamin@kovas.fr" style="color:#4A5878;">benjamin@kovas.fr</a></p>
+          <p style="margin-top:32px;color:#4A5878;">— Benjamin Bel<br/>Fondateur KOVAS<br/><a href="mailto:contact@kovas.fr" style="color:#4A5878;">contact@kovas.fr</a></p>
         </td></tr>
       </table>
     </td></tr>
@@ -157,10 +157,6 @@ async function sendResendEmail(opts: {
   html: string
 }): Promise<{ ok: boolean; id?: string; error?: string }> {
   if (!RESEND_API_KEY) {
-    console.log('[winback-email-sender] stub — RESEND_API_KEY missing', {
-      to: opts.to,
-      subject: opts.subject,
-    })
     return { ok: true, id: 'stub' }
   }
 

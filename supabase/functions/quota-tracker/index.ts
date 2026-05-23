@@ -224,7 +224,8 @@ async function loadOrgOwnerEmail(
     .eq('status', 'active')
     .limit(1)
     .maybeSingle()
-  const profile = (mship as { profiles?: { email: string; full_name: string | null } } | null)?.profiles
+  const profile = (mship as { profiles?: { email: string; full_name: string | null } } | null)
+    ?.profiles
   if (!profile) return null
   return {
     email: profile.email,
@@ -342,7 +343,7 @@ Deno.serve(async (req: Request) => {
   const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const cronSecret = Deno.env.get('CRON_SECRET')
   const resendApiKey = Deno.env.get('RESEND_API_KEY') ?? null
-  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <noreply@kovas.fr>'
+  const resendFrom = Deno.env.get('RESEND_FROM') ?? 'KOVAS <contact@kovas.fr>'
   const appUrl = Deno.env.get('NEXT_PUBLIC_APP_URL') ?? 'https://kovas.fr'
 
   if (!supabaseUrl || !serviceRole || !cronSecret) {
@@ -490,11 +491,7 @@ Deno.serve(async (req: Request) => {
         .eq('period_month', periodMonth)
     } else {
       // Block + email
-      if (
-        resendApiKey &&
-        ownerInfo &&
-        before.alert_100pct_sent_at === null
-      ) {
+      if (resendApiKey && ownerInfo && before.alert_100pct_sent_at === null) {
         const mail = buildQuotaReachedBlockedEmail({
           firstName: ownerInfo.firstName,
           resourceLabel: map.label,
