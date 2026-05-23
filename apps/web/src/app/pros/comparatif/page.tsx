@@ -46,9 +46,10 @@ import Link from 'next/link'
 // ───────────────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = buildMetadata({
-  title: 'KOVAS + Liciel : couche terrain compagnon | Pas une alternative, un amplificateur',
+  title:
+    'KOVAS — Couche terrain pour Liciel, OBBC, AnalysImmo, ORIS | Compagnon, pas alternative',
   description:
-    "KOVAS n'est pas une alternative à Liciel. C'est sa couche terrain qui supprime la re-saisie : saisie vocale, photos géolocalisées, pré-vérification ADEME. Liciel reste votre moteur ADEME certifié.",
+    "KOVAS n'est pas une alternative à Liciel, OBBC, AnalysImmo ou ORIS. C'est leur couche terrain commune : saisie vocale, photos géolocalisées, pré-vérification ADEME. Votre logiciel certifié reste votre moteur ADEME — KOVAS amplifie tout autour.",
   path: '/pros/comparatif',
 })
 
@@ -153,13 +154,13 @@ const COMPARISON_ROWS: readonly ComparisonRow[] = [
   },
   {
     step: '2. Saisie terrain',
-    without: 'Calepin papier ou app Liciel mobile basique (saisie manuelle)',
+    without: 'Calepin papier ou app mobile basique de votre éditeur (saisie manuelle)',
     with: 'Saisie vocale FR structurée par pièce + photos géolocalisées + détection IA des équipements',
     isRegulatory: false,
   },
   {
     step: '3. Retour bureau',
-    without: '30 à 45 minutes de re-saisie complète dans Liciel',
+    without: '30 à 45 minutes de re-saisie complète dans votre logiciel (Liciel, OBBC, AnalysImmo…)',
     with: 'Bouton Partager 3 modes : email / GDrive auto-sync / téléchargement direct → 30 secondes',
     isRegulatory: false,
   },
@@ -171,14 +172,14 @@ const COMPARISON_ROWS: readonly ComparisonRow[] = [
   },
   {
     step: '5. Calcul DPE',
-    without: 'Liciel — moteur 3CL-2021 certifié ADEME',
-    with: 'Liciel reste votre moteur 3CL-2021 certifié ADEME',
+    without: 'Liciel, OBBC, AnalysImmo ou ORIS — moteur 3CL-2021 certifié ADEME',
+    with: 'Votre logiciel certifié reste le moteur 3CL-2021 ADEME',
     isRegulatory: true,
   },
   {
     step: '6. Soumission ADEME',
-    without: 'Liciel → ADEME',
-    with: 'Liciel → ADEME (inchangé)',
+    without: 'Votre logiciel certifié → ADEME',
+    with: 'Votre logiciel certifié → ADEME (inchangé)',
     isRegulatory: true,
   },
   {
@@ -243,19 +244,19 @@ const TESTIMONIALS: readonly Testimonial[] = [
     quote:
       'Je suis sur Liciel depuis 8 ans. KOVAS ne me demande pas de changer mon logiciel principal. Il me fait juste gagner mes vendredis soirs.',
     author: 'Diagnostiqueur Solo',
-    context: 'Normandie, 76',
+    context: 'Normandie, 76 · utilise Liciel',
   },
   {
     quote:
-      'Mon cabinet certifie 200 DPE/mois via Liciel. KOVAS nous fait gagner 35 heures par semaine en saisie terrain. Liciel reste notre passerelle ADEME, on ne touche pas à ça.',
+      'Mon cabinet certifie 200 DPE/mois. KOVAS nous fait gagner 35 heures par semaine en saisie terrain. Notre passerelle ADEME reste celle qu’on a toujours utilisée, on ne touche pas à ça.',
     author: 'Cabinet 3 diagnostiqueurs',
-    context: 'Île-de-France',
+    context: 'Île-de-France · utilise OBBC',
   },
   {
     quote:
-      "J'ai eu peur d'un changement de logiciel. Quand j'ai compris que KOVAS n'était pas un remplaçant mais un compagnon, j'ai pris l'essai 30 jours.",
+      "J'ai eu peur d'un changement de logiciel. Quand j'ai compris que KOVAS n'était pas un remplaçant mais un compagnon de mon AnalysImmo, j'ai pris l'essai 30 jours.",
     author: 'Diagnostiqueur Solo',
-    context: 'PACA',
+    context: 'PACA · utilise AnalysImmo',
   },
 ]
 
@@ -270,34 +271,39 @@ interface FaqEntry {
 
 const FAQ_ENTRIES: readonly FaqEntry[] = [
   {
-    question: 'Est-ce que je perds mon paramétrage Liciel ?',
+    question: "J'utilise OBBC / AnalysImmo / ORIS, pas Liciel. KOVAS marche aussi ?",
     answer:
-      "Non. KOVAS exporte EN PLUS, Liciel reste votre référence. Aucun fichier Liciel n'est modifié, votre paramétrage local (entêtes, signatures, gabarits) est intact.",
+      "Oui. KOVAS exporte vers les quatre éditeurs majeurs du marché : Liciel (Imports spécifiques XML + Excel + ZIP), OBBC (Imports spécifiques XML), AnalysImmo (XML CII + ZIP générique), ORIS (ZIP générique + JSON). Le reframing s'applique exactement de la même façon : votre logiciel certifié reste votre moteur ADEME, KOVAS amplifie le terrain.",
+  },
+  {
+    question: 'Est-ce que je perds mon paramétrage logiciel ?',
+    answer:
+      "Non. KOVAS exporte EN PLUS — votre logiciel (Liciel, OBBC, AnalysImmo ou ORIS) reste votre référence. Aucun fichier de votre éditeur n'est modifié, votre paramétrage local (entêtes, signatures, gabarits) est intact.",
   },
   {
     question: 'ADEME accepte-t-elle les rapports passés par KOVAS ?',
     answer:
-      "Le calcul DPE et la soumission ADEME sont faits par Liciel, pas par KOVAS. ADEME voit du Liciel à l'arrivée, exactement comme avant. KOVAS n'apparaît jamais dans le circuit officiel.",
+      "Le calcul DPE et la soumission ADEME sont faits par votre logiciel certifié, pas par KOVAS. ADEME voit du Liciel, OBBC, AnalysImmo ou ORIS à l'arrivée — exactement comme avant. KOVAS n'apparaît jamais dans le circuit officiel.",
   },
   {
-    question: "Que se passe-t-il si Liciel change son format d'import ?",
+    question: "Que se passe-t-il si mon éditeur change son format d'import ?",
     answer:
-      "KOVAS supporte 3 formats parallèles : Imports spécifiques XML, ZIP générique, Excel. Si Liciel modifie l'un d'eux, les deux autres restent fonctionnels. Une option de bascule manuelle est prévue en cas de changement majeur côté Liciel.",
+      "KOVAS supporte 3 formats parallèles par éditeur (Imports spécifiques XML, ZIP générique, Excel ou JSON selon l'éditeur). Si un éditeur modifie l'un d'eux, les autres restent fonctionnels. Une option de bascule manuelle est prévue en cas de changement majeur côté éditeur.",
   },
   {
     question: 'Et si KOVAS ferme ?',
     answer:
-      "Vos données restent exportables en formats universels (PDF, Word, CSV, JSON) à tout moment, sans dépendance. Vous gardez l'intégralité de vos missions. Liciel continue de fonctionner avec ses propres données — KOVAS n'est pas un point de défaillance unique.",
+      "Vos données restent exportables en formats universels (PDF, Word, CSV, JSON) à tout moment, sans dépendance. Vous gardez l'intégralité de vos missions. Votre logiciel certifié continue de fonctionner avec ses propres données — KOVAS n'est pas un point de défaillance unique.",
   },
   {
     question: "Je n'ai pas le temps de me former à un nouveau logiciel.",
     answer:
-      'Comptez 30 minutes de prise en main. La saisie vocale apprend votre vocabulaire au fil des missions. Aucun changement à apporter dans Liciel : votre routine bureau reste identique.',
+      'Comptez 30 minutes de prise en main. La saisie vocale apprend votre vocabulaire au fil des missions. Aucun changement à apporter dans votre logiciel principal : votre routine bureau reste identique.',
   },
   {
-    question: 'Combien de fois par jour vais-je devoir basculer entre KOVAS et Liciel ?',
+    question: 'Combien de fois par jour vais-je devoir basculer entre KOVAS et mon logiciel ?',
     answer:
-      'Une seule fois : à la fin de la mission, vous cliquez « Partager vers Liciel ». KOVAS reste sur mobile (ou tablette) sur le terrain, Liciel reste au bureau pour le calcul. Pas de va-et-vient en cours de mission.',
+      'Une seule fois : à la fin de la mission, vous cliquez « Partager vers mon logiciel ». KOVAS reste sur mobile (ou tablette) sur le terrain, votre éditeur reste au bureau pour le calcul. Pas de va-et-vient en cours de mission.',
   },
   {
     question: 'Est-ce que je peux essayer sans engagement ?',
@@ -307,7 +313,7 @@ const FAQ_ENTRIES: readonly FaqEntry[] = [
   {
     question: 'Et la conformité RGPD ? Les données ADEME ?',
     answer:
-      "Hébergement EU Paris (Supabase). RGPD complet : consentements explicites, droit à l'oubli, export 1 clic. Les données qui partent à ADEME restent côté Liciel — KOVAS ne touche pas à leur traitement officiel.",
+      "Hébergement EU Paris (Supabase). RGPD complet : consentements explicites, droit à l'oubli, export 1 clic. Les données qui partent à ADEME restent côté éditeur certifié (Liciel, OBBC, AnalysImmo ou ORIS) — KOVAS ne touche pas à leur traitement officiel.",
   },
 ]
 
@@ -326,7 +332,7 @@ function ToolBadge({ tool }: { tool: ToolKind }) {
   if (tool === 'LICIEL') {
     return (
       <Badge variant="outline" className="font-mono uppercase tracking-wide">
-        Liciel
+        Liciel · OBBC · AnalysImmo · ORIS
       </Badge>
     )
   }
@@ -345,7 +351,7 @@ export default function ComparatifPage() {
   const breadcrumbSchema = buildBreadcrumbList([
     { name: 'Accueil', path: '/' },
     { name: 'Espace diagnostiqueurs', path: '/pros' },
-    { name: 'KOVAS + Liciel : couche terrain', path: '/pros/comparatif' },
+    { name: 'Couche terrain Liciel / OBBC / AnalysImmo / ORIS', path: '/pros/comparatif' },
   ])
 
   const faqSchema = getFAQPageSchema(FAQ_ENTRIES)
@@ -356,9 +362,9 @@ export default function ComparatifPage() {
     '@context': 'https://schema.org' as const,
     '@type': 'SoftwareApplication' as const,
     '@id': `${KOVAS_BASE_URL}/pros/comparatif#software`,
-    name: 'KOVAS — Couche terrain compagnon Liciel',
+    name: 'KOVAS — Couche terrain compagnon des logiciels diagnostic certifiés',
     description:
-      'Application mobile compatible Liciel : saisie vocale, photos géolocalisées, pré-vérification ADEME, import ZIP/XML automatique vers Liciel. Compagnon, pas alternative.',
+      "Application mobile compatible Liciel, OBBC, AnalysImmo, ORIS : saisie vocale, photos géolocalisées, pré-vérification ADEME, import ZIP/XML automatique vers votre éditeur. Compagnon, pas alternative.",
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web, iOS, Android (PWA)',
     offers: {
@@ -390,14 +396,17 @@ export default function ComparatifPage() {
               </p>
               <h1 className="font-display font-semibold text-ink [text-wrap:balance] text-[clamp(40px,5vw,72px)] leading-[1.05] tracking-tight">
                 KOVAS n&apos;est pas une alternative à{' '}
-                <span className="font-serif italic font-normal">Liciel</span>.
+                <span className="font-serif italic font-normal">Liciel</span>,{' '}
+                <span className="font-serif italic font-normal">OBBC</span>,{' '}
+                <span className="font-serif italic font-normal">AnalysImmo</span> ou{' '}
+                <span className="font-serif italic font-normal">ORIS</span>.
                 <br />
-                C&apos;est sa couche terrain.
+                C&apos;est leur couche terrain commune.
               </h1>
               <p className="mx-auto max-w-2xl text-base text-ink-mute leading-relaxed sm:text-lg">
-                Vous gardez Liciel pour le calcul DPE certifié et la soumission ADEME. KOVAS vous
-                fait gagner 1h30 par mission avant d&apos;arriver dans Liciel. Aucune migration.
-                Aucun risque réglementaire.
+                Vous gardez votre logiciel certifié pour le calcul DPE 3CL-2021 et la soumission
+                ADEME. KOVAS vous fait gagner 1h30 par mission avant d&apos;arriver dans votre
+                éditeur. Aucune migration. Aucun risque réglementaire.
               </p>
             </div>
 
@@ -409,7 +418,9 @@ export default function ComparatifPage() {
                 <p className="font-serif italic font-normal text-ink leading-none text-[clamp(60px,7vw,90px)]">
                   1h30
                 </p>
-                <p className="text-sm text-ink-mute">gagnée par mission DPE avant Liciel</p>
+                <p className="text-sm text-ink-mute">
+                  gagnée par mission DPE avant votre logiciel certifié
+                </p>
               </Card>
               <Card variant="opaque" padding="lg" className="space-y-2 text-center">
                 <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint">
@@ -419,7 +430,7 @@ export default function ComparatifPage() {
                   0&nbsp;€
                 </p>
                 <p className="text-sm text-ink-mute">
-                  de migration. Liciel reste votre moteur ADEME.
+                  de migration. Votre éditeur reste votre moteur ADEME.
                 </p>
               </Card>
             </div>
@@ -437,8 +448,9 @@ export default function ComparatifPage() {
                 Qui fait quoi, étape par étape
               </h2>
               <p className="max-w-2xl text-ink-mute">
-                Sept étapes pour livrer un DPE conforme. KOVAS amplifie les quatre premières. Liciel
-                et ADEME pilotent les trois dernières — et ne changent pas.
+                Sept étapes pour livrer un DPE conforme. KOVAS amplifie les quatre premières. Votre
+                logiciel certifié (Liciel, OBBC, AnalysImmo, ORIS) et ADEME pilotent les trois
+                dernières — et ne changent pas.
               </p>
             </div>
 
@@ -518,11 +530,12 @@ export default function ComparatifPage() {
                 Coût caché
               </p>
               <h2 className="font-display font-semibold text-ink text-[clamp(28px,3.5vw,44px)] leading-tight tracking-tight">
-                Ce que vous perdez dans Liciel sans le savoir
+                Ce que vous perdez dans votre logiciel sans le savoir
               </h2>
               <p className="max-w-2xl text-ink-mute">
                 Base de calcul : un diagnostiqueur typique qui réalise 75 missions par mois, dont 90
-                minutes de re-saisie bureau par mission (terrain → Liciel).
+                minutes de re-saisie bureau par mission (terrain → Liciel, OBBC, AnalysImmo ou
+                ORIS).
               </p>
             </div>
 
@@ -535,8 +548,8 @@ export default function ComparatifPage() {
                   112h
                 </p>
                 <p className="text-sm text-ink-mute leading-snug">
-                  perdues par an à re-saisir le terrain dans Liciel (75 missions/mois × 1h30
-                  économisable × 12 mois ÷ 12).
+                  perdues par an à re-saisir le terrain dans votre logiciel (75 missions/mois × 1h30
+                  économisable).
                 </p>
               </Card>
               <Card variant="opaque" padding="lg" className="space-y-2">
@@ -570,10 +583,11 @@ export default function ComparatifPage() {
                 Le vendredi soir à 19h
               </p>
               <p className="text-ink leading-relaxed">
-                Re-saisir dans Liciel pendant que les enfants attendent à table : vous connaissez.
-                KOVAS ne change pas Liciel. Il vous fait arriver dans Liciel avec tout déjà prêt.
-                Vous cliquez sur «&nbsp;Importer le ZIP&nbsp;», Liciel ouvre votre mission complète,
-                et vous fermez l&apos;ordinateur.
+                Re-saisir dans votre logiciel certifié pendant que les enfants attendent à table :
+                vous connaissez. KOVAS ne change rien à Liciel, OBBC, AnalysImmo ou ORIS. Il vous
+                fait arriver dans votre éditeur avec tout déjà prêt. Vous cliquez sur
+                «&nbsp;Importer le ZIP&nbsp;», votre logiciel ouvre la mission complète, et vous
+                fermez l&apos;ordinateur.
               </p>
             </Card>
           </section>
@@ -591,7 +605,7 @@ export default function ComparatifPage() {
               </h2>
               <p className="max-w-2xl text-ink-mute">
                 Pas de comparaison &laquo;&nbsp;X versus Y&nbsp;&raquo;. Une lecture honnête de ce
-                qui change concrètement quand KOVAS s&apos;ajoute à Liciel.
+                qui change concrètement quand KOVAS s&apos;ajoute à votre logiciel certifié.
               </p>
             </div>
 
@@ -610,13 +624,13 @@ export default function ComparatifPage() {
                         scope="col"
                         className="px-5 py-4 text-left font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint"
                       >
-                        Sans KOVAS (Liciel seul)
+                        Sans KOVAS (logiciel certifié seul)
                       </th>
                       <th
                         scope="col"
                         className="px-5 py-4 text-left font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint"
                       >
-                        Avec KOVAS + Liciel
+                        Avec KOVAS + votre logiciel
                       </th>
                     </tr>
                   </thead>
@@ -659,8 +673,9 @@ export default function ComparatifPage() {
                 </p>
                 <p className="text-paper text-lg leading-relaxed">
                   Les trois étapes réglementaires — calcul DPE, soumission ADEME, validation
-                  officielle — restent inchangées. Liciel reste votre logiciel de référence ADEME.
-                  KOVAS amplifie tout ce qui se trouve autour.
+                  officielle — restent inchangées. Votre logiciel certifié (Liciel, OBBC,
+                  AnalysImmo ou ORIS) reste votre référence ADEME. KOVAS amplifie tout ce qui se
+                  trouve autour.
                 </p>
               </div>
             </Card>
@@ -751,7 +766,7 @@ export default function ComparatifPage() {
                 Retours diagnostiqueurs
               </p>
               <h2 className="font-display font-semibold text-ink text-[clamp(28px,3.5vw,44px)] leading-tight tracking-tight">
-                Ils gardent Liciel. Ils ajoutent KOVAS.
+                Ils gardent leur logiciel certifié. Ils ajoutent KOVAS.
               </h2>
             </div>
 
@@ -797,7 +812,7 @@ export default function ComparatifPage() {
               </h2>
               <p className="max-w-2xl text-ink-mute">
                 Réponses directes aux questions qui reviennent toujours quand on parle d&apos;un
-                outil compagnon de Liciel.
+                outil compagnon de Liciel, OBBC, AnalysImmo ou ORIS.
               </p>
             </div>
 
@@ -829,7 +844,7 @@ export default function ComparatifPage() {
                   Prêt à essayer
                 </p>
                 <h2 className="font-display font-semibold text-paper text-[clamp(32px,4vw,56px)] leading-tight tracking-tight">
-                  Restez sur Liciel.{' '}
+                  Restez sur votre logiciel certifié.{' '}
                   <span className="font-serif italic font-normal text-chartreuse">
                     Gagnez 1h30 par mission.
                   </span>
@@ -856,8 +871,8 @@ export default function ComparatifPage() {
               </div>
 
               <p className="flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-paper/60">
-                <CheckCircle2 className="size-3" aria-hidden /> Liciel reste votre moteur ADEME —
-                aucun risque
+                <CheckCircle2 className="size-3" aria-hidden /> Liciel · OBBC · AnalysImmo · ORIS
+                restent votre moteur ADEME — aucun risque
               </p>
             </Card>
           </section>
