@@ -1,45 +1,47 @@
+import { PageTabs } from '@/components/ui/page-tabs'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { DPE_LEGAL_LIMIT, DPE_MISSION_TYPES } from '@/lib/dpe-counter'
 import { parisDayBounds, parisMonthBounds } from '@/lib/paris-dates'
+import { cn } from '@/lib/utils'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { Activity, Award, FileText, LayoutGrid, Mail, TrendingUp } from 'lucide-react'
 import type { Metadata } from 'next'
-import { AdemeSection, type AdemeData } from './categories/ademe-section'
-import { CabinetSection, type CabinetData } from './categories/cabinet-section'
-import { ProductivitySection, type ProductivityData } from './categories/productivity-section'
-import { QualitySection, type QualityData } from './categories/quality-section'
-import { RevenueSection, type RevenueData } from './categories/revenue-section'
-import { FavoritesHeroCard, type FavoriteKpi } from './favorites-hero'
-import { HighlightsCard, type Highlight } from './highlights-card'
-import { PeriodSelector, type Period } from './period-selector'
+import Link from 'next/link'
+import { type AdemeData, AdemeSection } from './categories/ademe-section'
+import { type CabinetData, CabinetSection } from './categories/cabinet-section'
+import { type ProductivityData, ProductivitySection } from './categories/productivity-section'
+import { type QualityData, QualitySection } from './categories/quality-section'
+import { type RevenueData, RevenueSection } from './categories/revenue-section'
+import { type FavoriteKpi, FavoritesHeroCard } from './favorites-hero'
+import { type Highlight, HighlightsCard } from './highlights-card'
+import { type Period, PeriodSelector } from './period-selector'
 import { TrendsLineChart, type TrendsPoint } from './trends-line-chart'
 
-export const metadata: Metadata = { title: 'Performance' }
+export const metadata: Metadata = { title: 'Vos gains' }
 
 /**
- * Page /app/gain — Performance personnelle, refonte Apple Santé "Résumé" tab.
+ * Page /dashboard/gain — Performance personnelle.
  *
- * Hiérarchie :
- *  1. Header sticky : titre + period selector (jour/7j/mois/année)
- *  2. FavoritesHero : 4 KPI hero avec sparklines 30j en background
- *  3. 5 sections catégorielles groupées (Productivité, Revenus, Qualité, Cabinet, ADEME)
- *  4. TrendsLineChart : courbe 12 mois heures + revenus
- *  5. HighlightsCard : 2-3 faits marquants auto-générés (delta > 15%)
- *  6. Footer méthodo
- *
- * Accents catégoriels Apple Santé adaptés DS v5 (cf. category-section.tsx) :
- * vert / bleu / orange / violet / gris — appliqués UNIQUEMENT sur icon
- * background section et border-left 3px subtile sur cards mini.
- *
- * Hypothèses V1 (CLAUDE.md §2) :
- *  - 90 min gagnées par mission terminée (mesure réelle V1.5 via baseline)
- *  - 50 €/h tarif horaire pour valorisation libérée
+ * Refonte 2026-05-23 au pattern fiche client (`/dashboard/clients/[id]`) :
+ *  - Header sticky Qonto pattern (paper/95 + backdrop-blur-xl)
+ *  - 4 KPI cards résumé en haut (heures gagnées, productivité valorisée,
+ *    missions, projection annuelle)
+ *  - PageTabs horizontaux : Résumé / Activité / Évolution / Statuts pros /
+ *    Rapport mensuel
+ *  - Contenu conditionnel selon `?tab=`
+ *  - Max-width respect grille (pas full width)
  *
  * Architecture : server component fetch toutes les data nécessaires en
  * parallèle. Period selector client (?period=…) provoque re-fetch via
  * Next.js searchParams.
+ *
+ * Hypothèses V1 (CLAUDE.md §2) :
+ *  - 90 min gagnées par mission terminée (mesure réelle V1.5 via baseline)
+ *  - 50 €/h tarif horaire pour valorisation libérée
  */
 
 const MINUTES_SAVED_PER_MISSION = 90
+const HOURLY_RATE_EUR = 50
 
 interface MissionRow {
   completed_at: string | null
@@ -58,11 +60,6 @@ interface QuoteRow {
   created_at: string
 }
 
-interface MissionWithClient {
-  client_id: string | null
-  property_id: string | null
-}
-
 // ============================================================
 // Typed Supabase helpers — table-by-table accessors
 // (évite `any`, cf. pattern today-kpi-grid.tsx)
@@ -77,9 +74,18 @@ function invoicesFrom(s: SupabaseClient) {
     s as unknown as {
       from(t: 'invoices'): {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
-            gte: (col: string, val: string) => {
-              lt: (col: string, val: string) => Promise<{
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            gte: (
+              col: string,
+              val: string,
+            ) => {
+              lt: (
+                col: string,
+                val: string,
+              ) => Promise<{
                 data: InvoiceRow[] | null
                 error: { message: string } | null
               }>
@@ -96,8 +102,14 @@ function quotesFrom(s: SupabaseClient) {
     s as unknown as {
       from(t: 'quotes'): {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
-            gte: (col: string, val: string) => Promise<{
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            gte: (
+              col: string,
+              val: string,
+            ) => Promise<{
               data: QuoteRow[] | null
               error: { message: string } | null
             }>
@@ -185,10 +197,7 @@ function deltaPct(current: number, prev: number): number | null {
   return Math.round(((current - prev) / prev) * 100)
 }
 
-function buildMonthlySparkline(
-  missions: MissionRow[],
-  daysBack: number,
-): number[] {
+function buildMonthlySparkline(missions: MissionRow[], daysBack: number): number[] {
   const buckets = new Array(daysBack).fill(0) as number[]
   const now = Date.now()
   for (const m of missions) {
@@ -202,10 +211,7 @@ function buildMonthlySparkline(
   return buckets
 }
 
-function buildLast12MonthsTrend(
-  missions: MissionRow[],
-  invoices: InvoiceRow[],
-): TrendsPoint[] {
+function buildLast12MonthsTrend(missions: MissionRow[], invoices: InvoiceRow[]): TrendsPoint[] {
   const now = new Date()
   const points: TrendsPoint[] = []
   for (let i = 11; i >= 0; i--) {
@@ -243,7 +249,6 @@ function computeStreak(missions: MissionRow[]): number {
     days.add(t.toISOString().slice(0, 10))
   }
   if (days.size === 0) return 0
-  // Cherche le streak en partant d'aujourd'hui
   let streak = 0
   const cursor = new Date()
   for (let i = 0; i < 365; i++) {
@@ -251,7 +256,6 @@ function computeStreak(missions: MissionRow[]): number {
     if (days.has(key)) {
       streak++
     } else if (i > 0) {
-      // Si aujourd'hui pas de mission, accepter (en cours) — mais sinon stop
       break
     }
     cursor.setDate(cursor.getDate() - 1)
@@ -305,35 +309,45 @@ function buildHighlights(opts: {
 }
 
 // ============================================================
+// Tabs typing
+// ============================================================
+
+type TabKey = 'resume' | 'activite' | 'evolution' | 'statuts' | 'rapport'
+const VALID_TABS: readonly TabKey[] = ['resume', 'activite', 'evolution', 'statuts', 'rapport']
+
+function isValidTab(value: string | undefined): value is TabKey {
+  return typeof value === 'string' && (VALID_TABS as readonly string[]).includes(value)
+}
+
+// ============================================================
 // Page principale
 // ============================================================
 
 interface GainPageProps {
-  searchParams: Promise<{ period?: string }>
+  searchParams: Promise<{ period?: string; tab?: string }>
 }
 
 export default async function GainPage({ searchParams }: GainPageProps) {
-  const { period: rawPeriod } = await searchParams
+  const sp = await searchParams
+  const rawPeriod = sp.period
+  const rawTab = sp.tab
   const period: Period =
     rawPeriod === 'day' || rawPeriod === 'week' || rawPeriod === 'year' || rawPeriod === 'custom'
       ? rawPeriod
       : 'month'
+  const activeTab: TabKey = isValidTab(rawTab) ? rawTab : 'resume'
 
   const { supabase, orgId, profile } = await getCurrentUser()
-  const firstName = profile.full_name?.split(' ')[0] ?? 'à vous'
+  const firstName = profile.full_name?.split(' ')[0] ?? null
 
   const current = periodBounds(period)
   const previous = previousPeriodBounds(period)
 
-  // Période 12 mois pour évolution + sparklines (toujours, indépendant de period)
+  // Période 12 mois pour évolution + sparklines
   const twelveMonthsAgo = new Date()
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
   twelveMonthsAgo.setDate(1)
   twelveMonthsAgo.setHours(0, 0, 0, 0)
-
-  // Sparklines 30 derniers jours
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
   // Chargements parallèles
   const [
@@ -403,25 +417,26 @@ export default async function GainPage({ searchParams }: GainPageProps) {
       .not('client_id', 'is', null),
   ])
 
-  const missionsCurrent = ((missionsCurrentRes.data ?? []) as MissionWithClient[])
-  const missionsCurrentRows = ((missionsCurrentRes.data ?? []) as unknown as MissionRow[])
-  const missionsPrevious = ((missionsPreviousRes.data ?? []) as MissionRow[])
-  const missions12m = ((missions12mRes.data ?? []) as MissionRow[])
-  const invoicesCurrent = ((invoicesCurrentRes.data ?? []) as InvoiceRow[])
-  const invoicesPrevious = ((invoicesPreviousRes.data ?? []) as InvoiceRow[])
-  const invoices12m = ((invoices12mRes.data ?? []) as InvoiceRow[])
-  const quotesCurrent = ((quotesCurrentRes.data ?? []) as QuoteRow[])
+  const missionsCurrentRows = (missionsCurrentRes.data ?? []) as unknown as MissionRow[]
+  const missionsPrevious = (missionsPreviousRes.data ?? []) as MissionRow[]
+  const missions12m = (missions12mRes.data ?? []) as MissionRow[]
+  const invoicesCurrent = (invoicesCurrentRes.data ?? []) as InvoiceRow[]
+  const invoicesPrevious = (invoicesPreviousRes.data ?? []) as InvoiceRow[]
+  const invoices12m = (invoices12mRes.data ?? []) as InvoiceRow[]
+  const quotesCurrent = (quotesCurrentRes.data ?? []) as QuoteRow[]
   const dpe12mCount = ((dpe12mRes.data ?? []) as Array<{ completed_at: string | null }>).length
-  const activeClientRows = ((activeClientsRes.data ?? []) as Array<{ client_id: string | null }>)
+  const activeClientRows = (activeClientsRes.data ?? []) as Array<{ client_id: string | null }>
 
   // ============================================================
-  // KPI HERO favoris
+  // KPI HERO favoris + 4 KPI tête de page
   // ============================================================
 
   const missionsCurrentCount = missionsCurrentRows.length
   const minutesSavedCurrent = missionsCurrentCount * MINUTES_SAVED_PER_MISSION
   const hoursSavedCurrent = Math.round(minutesSavedCurrent / 60)
-  const hoursMinutesCurrent = `${Math.floor(minutesSavedCurrent / 60)}h${String(minutesSavedCurrent % 60).padStart(2, '0')}`
+  const hoursMinutesCurrent = `${Math.floor(minutesSavedCurrent / 60)}h${String(
+    minutesSavedCurrent % 60,
+  ).padStart(2, '0')}`
 
   const minutesSavedPrevious = missionsPrevious.length * MINUTES_SAVED_PER_MISSION
   const minutesDeltaPct = deltaPct(minutesSavedCurrent, minutesSavedPrevious)
@@ -433,21 +448,31 @@ export default async function GainPage({ searchParams }: GainPageProps) {
     .filter((inv) => inv.status !== 'draft' && inv.status !== 'cancelled')
     .reduce((sum, inv) => sum + toNumber(inv.amount_ht), 0)
   const caDeltaPct = deltaPct(caCurrent, caPrevious)
-
   const missionsDeltaPct = deltaPct(missionsCurrentCount, missionsPrevious.length)
 
-  // Sparklines 30j depuis missions 12m
+  // Productivité valorisée (€/h × heures économisées)
+  const productivityValueEur = Math.round((minutesSavedCurrent / 60) * HOURLY_RATE_EUR)
+
+  // Projection annuelle missions
+  const now = new Date()
+  const yearStart = new Date(now.getFullYear(), 0, 1)
+  const dayOfYear = Math.max(
+    1,
+    Math.floor((Date.now() - yearStart.getTime()) / (1000 * 60 * 60 * 24)),
+  )
+  const yearlyProjectionMissions = Math.round((missions12m.length / Math.max(dayOfYear, 1)) * 365)
+
+  // Sparklines 30j
   const sparkMissions = buildMonthlySparkline(missions12m, 30)
-  // Pour heures, c'est la même série * 90 mais avec valeurs relatives, sparkline normalisée
   const sparkHours = sparkMissions.map((c) => c * MINUTES_SAVED_PER_MISSION)
   const sparkRevenue = (() => {
     const buckets = new Array(30).fill(0) as number[]
-    const now = Date.now()
+    const t0 = Date.now()
     for (const inv of invoices12m) {
       if (!inv.issued_at) continue
       if (inv.status === 'draft' || inv.status === 'cancelled') continue
       const t = new Date(inv.issued_at).getTime()
-      const daysAgo = Math.floor((now - t) / (24 * 3600 * 1000))
+      const daysAgo = Math.floor((t0 - t) / (24 * 3600 * 1000))
       if (daysAgo >= 0 && daysAgo < 30) {
         buckets[29 - daysAgo] += toNumber(inv.amount_ht)
       }
@@ -455,14 +480,15 @@ export default async function GainPage({ searchParams }: GainPageProps) {
     return buckets
   })()
 
-  // KPI 4 — note moyenne placeholder (table avis pas en V1)
-  // Typage via function pour permettre l'évolution sans dégrader le narrowing TS.
   const avgRating = ((): number | null => null)()
 
   const heroKpis: [FavoriteKpi, FavoriteKpi, FavoriteKpi, FavoriteKpi] = [
     {
       label: 'Heures gagnées',
-      value: hoursSavedCurrent < 100 ? hoursMinutesCurrent : `${hoursSavedCurrent.toLocaleString('fr-FR')}h`,
+      value:
+        hoursSavedCurrent < 100
+          ? hoursMinutesCurrent
+          : `${hoursSavedCurrent.toLocaleString('fr-FR')}h`,
       delta:
         minutesDeltaPct === null
           ? undefined
@@ -532,7 +558,7 @@ export default async function GainPage({ searchParams }: GainPageProps) {
   ]
 
   // ============================================================
-  // Catégories
+  // Catégories — Activité tab
   // ============================================================
 
   const avgMinutesPerMission =
@@ -548,17 +574,13 @@ export default async function GainPage({ searchParams }: GainPageProps) {
     (inv) => inv.status !== 'draft' && inv.status !== 'cancelled',
   )
   const avgInvoiceEur =
-    invoicesCountedCurrent.length > 0
-      ? Math.round(caCurrent / invoicesCountedCurrent.length)
-      : 0
+    invoicesCountedCurrent.length > 0 ? Math.round(caCurrent / invoicesCountedCurrent.length) : 0
   const sentQuotes = quotesCurrent.filter((q) =>
     ['sent', 'accepted', 'refused', 'expired'].includes(q.status),
   )
   const acceptedQuotes = quotesCurrent.filter((q) => q.status === 'accepted')
   const conversionRatePct =
-    sentQuotes.length > 0
-      ? Math.round((acceptedQuotes.length / sentQuotes.length) * 100)
-      : null
+    sentQuotes.length > 0 ? Math.round((acceptedQuotes.length / sentQuotes.length) * 100) : null
   const revenueData: RevenueData = {
     caHt: Math.round(caCurrent),
     deltaCaPct: caDeltaPct,
@@ -566,14 +588,12 @@ export default async function GainPage({ searchParams }: GainPageProps) {
     conversionRatePct,
   }
 
-  // V1.5 placeholders (avis, re-saisie, litiges pas encore trackés)
   const qualityData: QualityData = {
     avgRating: null,
     firstPassRatePct: null,
     litigationCount: 0,
   }
 
-  // Cabinet
   const typeCounts = new Map<string, number>()
   for (const m of missions12m) {
     if (m.type) typeCounts.set(m.type, (typeCounts.get(m.type) ?? 0) + 1)
@@ -585,22 +605,16 @@ export default async function GainPage({ searchParams }: GainPageProps) {
   const cabinetData: CabinetData = {
     diagnosticsByType: [...typeCounts.entries()].map(([type, count]) => ({ type, count })),
     activeClients: uniqueClients.size,
-    activePrescribers: 0, // V1.5 — table prescriber_relationships à connecter
+    activePrescribers: 0,
   }
 
-  // ADEME
-  const yearStart = new Date(new Date().getFullYear(), 0, 1)
-  const dayOfYear = Math.max(
-    1,
-    Math.floor((Date.now() - yearStart.getTime()) / (1000 * 60 * 60 * 24)),
-  )
-  const yearlyProjection = Math.round((dpe12mCount / Math.max(dayOfYear, 1)) * 365)
+  const yearlyProjectionDpe = Math.round((dpe12mCount / Math.max(dayOfYear, 1)) * 365)
   const ademeData: AdemeData = {
     dpeCount12m: dpe12mCount,
     dpeLimit: DPE_LEGAL_LIMIT,
-    yearlyProjection,
-    ratioFG: null, // V1.5 — nécessite tracking étiquettes DPE par mission
-    avgDistanceKm: null, // V1.5 — nécessite geolocation + planning
+    yearlyProjection: yearlyProjectionDpe,
+    ratioFG: null,
+    avgDistanceKm: null,
   }
 
   // ============================================================
@@ -617,10 +631,6 @@ export default async function GainPage({ searchParams }: GainPageProps) {
     productivityHours: minutesSavedCurrent / 60,
   })
 
-  // Variables non utilisées (cible TS strict) — pas de noUnusedLocals levé sans erreur
-  // missionsCurrent contient client_id/property_id mais nous comptons via missionsCurrentRows
-  void missionsCurrent
-
   const lastUpdate = new Date().toLocaleString('fr-FR', {
     day: '2-digit',
     month: 'short',
@@ -629,71 +639,309 @@ export default async function GainPage({ searchParams }: GainPageProps) {
     timeZone: 'Europe/Paris',
   })
 
+  // 4 KPI tête de page — pattern stats-card client
+  const topKpis: KpiTopItem[] = [
+    {
+      label: 'Heures économisées',
+      value: hoursSavedCurrent < 100 ? hoursMinutesCurrent : `${hoursSavedCurrent}h`,
+      hint: current.label,
+      mono: true,
+    },
+    {
+      label: 'Productivité valorisée',
+      value: `${productivityValueEur.toLocaleString('fr-FR')} €`,
+      hint: `base ${HOURLY_RATE_EUR} €/h`,
+      mono: true,
+    },
+    {
+      label: 'Missions terminées',
+      value: String(missionsCurrentCount),
+      hint: current.label,
+      mono: true,
+    },
+    {
+      label: 'Projection annuelle',
+      value: String(yearlyProjectionMissions),
+      hint: 'missions / an',
+      mono: true,
+    },
+  ]
+
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header sticky aligné fiche client : paper/95 + backdrop-blur-xl + shadow-glass-sm */}
-      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="space-y-1 min-w-0">
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
-              {firstName === 'à vous' ? 'Performance' : `${firstName} · Performance`}
-            </p>
-            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
-              Résumé,{' '}
-              <span className="font-serif italic font-normal text-ink-mute">
-                {current.label}.
-              </span>
-            </h1>
+      {/* ============================================
+          Header sticky — Qonto pattern (idem clients/[id])
+          ============================================ */}
+      <section className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 flex-1 space-y-1">
+              <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute">
+                {firstName ? `${firstName} · Performance` : 'Performance'}
+              </p>
+              <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+                Vos <span className="font-serif italic font-normal text-ink-mute">gains</span>
+                <span className="text-ink-mute">.</span>
+              </h1>
+              <p className="text-sm text-ink-mute max-w-xl">
+                Temps libéré, missions exécutées, projection — méthode KOVAS.
+              </p>
+            </div>
+            <PeriodSelector current={period} />
           </div>
-          <PeriodSelector current={period} />
         </div>
-      </header>
+      </section>
 
-      <div className="space-y-8 pb-12">
-        {/* 1. Favoris (4 KPIs hero avec sparklines) */}
-        <FavoritesHeroCard periodLabel={current.label} kpis={heroKpis} />
-
-        {/* 2. Productivité */}
-        <ProductivitySection data={productivityData} />
-
-        {/* 3. Revenus */}
-        <RevenueSection data={revenueData} />
-
-        {/* 4. Qualité */}
-        <QualitySection data={qualityData} />
-
-        {/* 5. Cabinet */}
-        <CabinetSection data={cabinetData} />
-
-        {/* 6. Conformité ADEME */}
-        <AdemeSection data={ademeData} />
-
-        {/* 7. Tendances 12 mois */}
-        <TrendsLineChart data={trendsData} />
-
-        {/* 8. Faits marquants */}
-        <HighlightsCard highlights={highlights} />
-
-        {/* Footer : timestamp + export */}
-        <footer className="flex items-baseline justify-between gap-4 flex-wrap pt-4 border-t border-rule/60">
-          <p className="font-mono text-[10px] text-ink-mute tracking-[0.05em]">
-            Dernière mise à jour · {lastUpdate}
-          </p>
-          <a
-            href="/dashboard/account"
-            className="font-mono text-[11px] text-ink-mute hover:text-ink tracking-[0.05em] transition-colors"
-          >
-            Exporter mes données →
-          </a>
-        </footer>
-
-        {/* Méthodo */}
-        <p className="font-mono text-[10px] text-ink-mute/80 leading-relaxed">
-          Méthodologie · {MINUTES_SAVED_PER_MISSION} min gagnées par mission terminée (référence
-          DPE type, CLAUDE.md §2) · valorisation 50 €/h (productivité libérée). Mesure baseline
-          réelle prévue V1.5 via tracking comparatif avant/après.
-        </p>
+      {/* ============================================
+          4 KPI top — pattern stats-card
+          ============================================ */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {topKpis.map((k) => (
+          <KpiTopCell key={k.label} item={k} />
+        ))}
       </div>
+
+      {/* ============================================
+          Tabs navigation
+          ============================================ */}
+      <PageTabs
+        basePath="/dashboard/gain"
+        active={activeTab}
+        paramName="tab"
+        tabs={[
+          { key: 'resume', label: 'Résumé', icon: LayoutGrid },
+          { key: 'activite', label: 'Activité', icon: Activity },
+          { key: 'evolution', label: 'Évolution', icon: TrendingUp },
+          { key: 'statuts', label: 'Statuts pros', icon: Award },
+          { key: 'rapport', label: 'Rapport mensuel', icon: Mail },
+        ]}
+      />
+
+      {/* ============================================
+          Contenu conditionnel
+          ============================================ */}
+      <div className="space-y-6">
+        {activeTab === 'resume' && (
+          <ResumeTab heroKpis={heroKpis} periodLabel={current.label} highlights={highlights} />
+        )}
+        {activeTab === 'activite' && (
+          <ActiviteTab
+            productivityData={productivityData}
+            revenueData={revenueData}
+            qualityData={qualityData}
+            cabinetData={cabinetData}
+            ademeData={ademeData}
+          />
+        )}
+        {activeTab === 'evolution' && <EvolutionTab data={trendsData} />}
+        {activeTab === 'statuts' && <StatutsProsTab />}
+        {activeTab === 'rapport' && <RapportMensuelTab highlights={highlights} />}
+      </div>
+
+      {/* ============================================
+          Footer méthodologie
+          ============================================ */}
+      <footer className="flex items-baseline justify-between gap-4 flex-wrap pt-4 border-t border-rule/60">
+        <p className="font-mono text-[10px] text-ink-mute tracking-[0.05em]">
+          Dernière mise à jour · {lastUpdate}
+        </p>
+        <Link
+          href="/dashboard/account"
+          className="font-mono text-[11px] text-ink-mute hover:text-ink tracking-[0.05em] transition-colors"
+        >
+          Exporter mes données →
+        </Link>
+      </footer>
+
+      <p className="font-mono text-[10px] text-ink-mute/80 leading-relaxed">
+        Méthodologie · {MINUTES_SAVED_PER_MISSION} min gagnées par mission terminée (référence DPE
+        type, CLAUDE.md §2) · valorisation {HOURLY_RATE_EUR} €/h (productivité libérée). Mesure
+        baseline réelle prévue V1.5 via tracking comparatif avant/après.
+      </p>
+    </div>
+  )
+}
+
+// ============================================================
+// Tab contents
+// ============================================================
+
+function ResumeTab({
+  heroKpis,
+  periodLabel,
+  highlights,
+}: {
+  heroKpis: [FavoriteKpi, FavoriteKpi, FavoriteKpi, FavoriteKpi]
+  periodLabel: string
+  highlights: Highlight[]
+}) {
+  return (
+    <div className="space-y-6">
+      <FavoritesHeroCard periodLabel={periodLabel} kpis={heroKpis} />
+      <HighlightsCard highlights={highlights} />
+    </div>
+  )
+}
+
+function ActiviteTab({
+  productivityData,
+  revenueData,
+  qualityData,
+  cabinetData,
+  ademeData,
+}: {
+  productivityData: ProductivityData
+  revenueData: RevenueData
+  qualityData: QualityData
+  cabinetData: CabinetData
+  ademeData: AdemeData
+}) {
+  return (
+    <div className="space-y-8">
+      <ProductivitySection data={productivityData} />
+      <RevenueSection data={revenueData} />
+      <QualitySection data={qualityData} />
+      <CabinetSection data={cabinetData} />
+      <AdemeSection data={ademeData} />
+    </div>
+  )
+}
+
+function EvolutionTab({ data }: { data: TrendsPoint[] }) {
+  return (
+    <div className="space-y-6">
+      <TrendsLineChart data={data} />
+    </div>
+  )
+}
+
+function StatutsProsTab() {
+  return (
+    <div className="rounded-xl border border-rule/60 bg-paper/85 p-6 sm:p-8 shadow-glass-sm space-y-4">
+      <div className="flex items-start gap-3">
+        <div className="size-10 rounded-full bg-cream-deep flex items-center justify-center shrink-0">
+          <Award className="size-5 text-ink-mute" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute mb-1">
+            Statuts professionnels · V1.5
+          </p>
+          <h2 className="font-sans text-[20px] font-semibold text-ink leading-tight">
+            7 niveaux de progression
+          </h2>
+        </div>
+      </div>
+
+      <p className="text-sm text-ink-mute leading-relaxed max-w-2xl">
+        Le système de statuts professionnels (Pro / Confirmé / Sénior / Premium / Ambassadeur /
+        Fidèle / Expert) sera activé dans le sprint V1.5 post-launch, en même temps que le rapport
+        mensuel email et l'image LinkedIn personnalisée. Ton sobre, format diplôme professionnel —
+        jamais gaming.
+      </p>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          'Utilisateur Pro',
+          'Confirmé',
+          'Sénior',
+          'Premium',
+          'Ambassadeur',
+          'Fidèle',
+          'Expert',
+        ].map((label) => (
+          <div
+            key={label}
+            className="rounded-xl border border-rule/60 bg-paper/85 px-4 py-3 shadow-glass-xs"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute mb-1">
+              Niveau
+            </p>
+            <p className="text-sm font-semibold text-ink">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="pt-4 border-t border-rule/40">
+        <Link
+          href="/dashboard/account/progression"
+          className="inline-flex items-center gap-2 font-mono text-[11px] text-ink-mute hover:text-ink tracking-[0.05em] transition-colors"
+        >
+          Voir ma progression actuelle →
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function RapportMensuelTab({ highlights }: { highlights: Highlight[] }) {
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl border border-rule/60 bg-paper/85 p-6 sm:p-8 shadow-glass-sm space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="size-10 rounded-full bg-cream-deep flex items-center justify-center shrink-0">
+            <FileText className="size-5 text-ink-mute" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute mb-1">
+              Rapport mensuel d'activité
+            </p>
+            <h2 className="font-sans text-[20px] font-semibold text-ink leading-tight">
+              Envoyé chaque 1er du mois · 8h CET
+            </h2>
+          </div>
+        </div>
+
+        <p className="text-sm text-ink-mute leading-relaxed max-w-2xl">
+          Format sobre, 1 page maximum, signature humaine Benjamin. Inclut vos chiffres clés du
+          mois, les faits marquants détectés automatiquement et une image partageable LinkedIn
+          (1080×1080, format business professionnel).
+        </p>
+
+        <div className="pt-4 border-t border-rule/40 flex flex-wrap items-center gap-3">
+          <Link
+            href="/dashboard/account#conformite"
+            className="inline-flex items-center gap-2 rounded-pill border border-rule/60 bg-paper px-4 py-2 text-sm text-ink hover:bg-cream-deep transition-colors"
+          >
+            <Mail className="size-4" /> Gérer mes préférences email
+          </Link>
+        </div>
+      </div>
+
+      <HighlightsCard highlights={highlights} />
+    </div>
+  )
+}
+
+// ============================================================
+// 4 KPI top — sous-composant (pattern stats-card client)
+// ============================================================
+
+interface KpiTopItem {
+  label: string
+  value: string
+  hint?: string
+  mono?: boolean
+}
+
+function KpiTopCell({ item }: { item: KpiTopItem }) {
+  return (
+    <div className="rounded-xl border border-rule/60 bg-paper/85 px-4 py-3 shadow-glass-xs">
+      <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute mb-1">
+        {item.label}
+      </div>
+      <div
+        className={cn(
+          'text-base font-semibold text-ink tabular-nums',
+          item.mono ? 'font-mono' : 'font-sans',
+        )}
+      >
+        {item.value}
+      </div>
+      {item.hint ? (
+        <div className="font-mono text-[10px] text-ink-mute/80 mt-1 tracking-[0.05em]">
+          {item.hint}
+        </div>
+      ) : null}
     </div>
   )
 }

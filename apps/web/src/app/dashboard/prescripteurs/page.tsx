@@ -183,7 +183,7 @@ export default async function PrescribersPage({ searchParams }: PageProps) {
         </div>
       </header>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiHero value={rich.length} label="Prescripteurs actifs" trend={null} />
         <KpiHero value={formatRevenue(totalRevenue)} label="CA total 12m" trend={null} />
         <KpiHero
@@ -202,7 +202,7 @@ export default async function PrescribersPage({ searchParams }: PageProps) {
 
       <form
         method="GET"
-        className="rounded-2xl border border-rule glass-opaque p-4 grid grid-cols-1 sm:grid-cols-4 gap-3"
+        className="rounded-2xl border border-rule/60 bg-paper/85 p-4 shadow-glass-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
       >
         <Select name="tier" defaultValue={tierFilter ?? ''}>
           <option value="">Tous tiers</option>
@@ -248,25 +248,19 @@ export default async function PrescribersPage({ searchParams }: PageProps) {
           }
         />
       ) : (
-        <AppListTable className="min-w-0">
+        <AppListTable>
           <AppListTableHead>
             <tr>
-              <th className="text-left font-medium px-4 py-3 min-w-[180px]">Nom</th>
-              <th className="text-left font-medium px-4 py-3 hidden sm:table-cell w-[110px]">
-                Type
-              </th>
-              <th className="text-left font-medium px-4 py-3 w-[100px]">Tier</th>
-              <th className="text-right font-medium px-4 py-3 hidden md:table-cell w-[90px]">
-                Missions
-              </th>
-              <th className="text-right font-medium px-4 py-3 w-[120px]">CA 12m</th>
-              <th className="text-right font-medium px-4 py-3 hidden lg:table-cell w-[120px]">
+              <th className="text-left font-medium px-4 py-3">Nom</th>
+              <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Type</th>
+              <th className="text-left font-medium px-4 py-3">Tier</th>
+              <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Missions</th>
+              <th className="text-right font-medium px-4 py-3">CA 12m</th>
+              <th className="text-right font-medium px-4 py-3 hidden xl:table-cell">
                 Panier moyen
               </th>
-              <th className="text-left font-medium px-4 py-3 hidden md:table-cell w-[160px]">
-                Dernière
-              </th>
-              <th className="text-left font-medium px-4 py-3 w-[160px]">Actions</th>
+              <th className="text-left font-medium px-4 py-3 hidden lg:table-cell">Dernière</th>
+              <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Actions</th>
             </tr>
           </AppListTableHead>
           <tbody>
@@ -304,10 +298,10 @@ export default async function PrescribersPage({ searchParams }: PageProps) {
                   <AppListTableCell className="text-right font-mono tabular-nums text-ink">
                     {formatRevenue(Number(r.revenue_12m_eur))}
                   </AppListTableCell>
-                  <AppListTableCell className="text-right font-mono tabular-nums hidden lg:table-cell text-ink-mute">
+                  <AppListTableCell className="text-right font-mono tabular-nums hidden xl:table-cell text-ink-mute">
                     {r.avg_basket_eur ? formatRevenue(Number(r.avg_basket_eur)) : '—'}
                   </AppListTableCell>
-                  <AppListTableCell className="hidden md:table-cell text-ink-mute">
+                  <AppListTableCell className="hidden lg:table-cell text-ink-mute">
                     <div className="flex items-center gap-2">
                       <span className={cn(silent && 'text-accent-red font-semibold')}>
                         {formatLastMission(r.last_mission_at)}
@@ -323,8 +317,8 @@ export default async function PrescribersPage({ searchParams }: PageProps) {
                       ) : null}
                     </div>
                   </AppListTableCell>
-                  <AppListTableCell>
-                    <div className="flex items-center gap-1.5">
+                  <AppListTableCell className="hidden md:table-cell">
+                    <div className="flex items-center gap-1.5 justify-end">
                       {r.contact?.phone ? (
                         <Button asChild variant="ghost" size="sm">
                           <a href={`tel:${r.contact.phone}`}>Appeler</a>
