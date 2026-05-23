@@ -32,10 +32,12 @@ CREATE POLICY "diag_public_read_verified_only" ON diagnosticians
   FOR SELECT
   TO anon, authenticated
   USING (
+    -- Suppression des prédicats sirene_active / certif_valid_count : colonnes
+    -- absentes du schéma canonique unifié (cf. consolidate 20260524110000).
+    -- L'équivalent fonctionnel est désormais porté par diagnostician_verification_status
+    -- (verified_plus implique SIRET actif + certif valide via les pipelines verify-*).
     is_published = true
     AND withdrawal_requested = false
-    AND coalesce(sirene_active, true) = true
-    AND coalesce(certif_valid_count, 0) >= 1
     AND EXISTS (
       SELECT 1 FROM diagnostician_verification_status dvs
        WHERE dvs.diagnostician_id = diagnosticians.id
@@ -50,8 +52,8 @@ CREATE POLICY "diag_owner_select_unified" ON diagnosticians
   FOR SELECT
   TO authenticated
   USING (
+    -- Colonne canonique unifiée (claimed_by alias supprimé par consolidate).
     claimed_by_user_id = auth.uid()
-    OR claimed_by = auth.uid()
   );
 
 -- ─── Conserve la policy owner full access (UPDATE/DELETE) ───────────────────
