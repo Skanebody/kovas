@@ -36,6 +36,7 @@ import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supa
 
 type CertificationType =
   | 'DPE'
+  | 'DPE_MENTION'
   | 'AMIANTE'
   | 'PLOMB'
   | 'GAZ'
@@ -194,6 +195,7 @@ const DEPT_SLUGS: Record<string, string> = {
 
 const VALID_CERT_TYPES: ReadonlySet<CertificationType> = new Set<CertificationType>([
   'DPE',
+  'DPE_MENTION',
   'AMIANTE',
   'PLOMB',
   'GAZ',
@@ -260,9 +262,31 @@ async function computeDhupSourceId(
   return `dhup_${hash.substring(0, 24)}`
 }
 
-/** Normalise un libelle certification DHUP vers nos types canoniques. */
+/**
+ * Normalise un libelle certification DHUP vers nos types canoniques.
+ *
+ * Libelles DHUP officiels observes (dataset data.gouv.fr) :
+ *   - "Performance energetique (DPE individuel)"           → DPE
+ *   - "Performance energetique (DPE par immeuble, ...)"    → DPE
+ *   - "Audit energetique"                                  → DPE_MENTION (premium)
+ *   - "Amiante" / "Amiante (missions specifiques**)"       → AMIANTE
+ *   - "Plomb"                                              → PLOMB
+ *   - "Gaz"                                                → GAZ
+ *   - "Electricite"                                        → ELECTRICITE
+ *   - "Termites Metropole" / "Termites OM"                 → TERMITES
+ *
+ * NB : DPE_MENTION = "audit energetique avec mention" — habilite l'audit
+ * reglementaire obligatoire des passoires F/G (loi Climat & Resilience 2023).
+ * Differenciateur premium dans l'annuaire (badge chartreuse Sparkles).
+ *
+ * IMPORTANT : l'ordre des tests compte. "AUDIT" doit etre teste AVANT
+ * "DPE/Performance" car les libelles peuvent contenir "energetique" dans les deux.
+ */
 function normalizeCertificationType(label: string): CertificationType | null {
   const up = label.toUpperCase().normalize('NFD').replace(DIACRITICS_RE, '')
+  // DPE_MENTION (audit energetique avec mention) — teste en premier
+  if (up.includes('AUDIT')) return 'DPE_MENTION'
+  if (up.includes('MENTION')) return 'DPE_MENTION'
   if (up.includes('DPE') || up.includes('PERFORMANCE')) return 'DPE'
   if (up.includes('AMIANTE')) return 'AMIANTE'
   if (up.includes('PLOMB') || up.includes('CREP')) return 'PLOMB'
@@ -590,10 +614,12 @@ async function upsertDiagnostician(
     status: 'valid' as const,
   }))
 
-  // NB: postal_code/official_email/official_phone/official_company_name/slug_dept
-  // n'existent pas sur la table `diagnosticians`. Mapping canonique :
+  // NB: postal_code/official_email/official_phone/slug_dept n'existent pas
+  // sur la table `diagnosticians`. Mapping canonique :
   //   postal_code → postcode, official_email → email, official_phone → phone.
-  // `official_company_name` et `slug_dept` n'ont pas d'equivalent : on les omet.
+  // FIX-RR (migration 20260524410000) : official_company_name → company_name
+  // (raison sociale societe d'exercice DHUP "Societe", visible en UI publique
+  // a la place du nom du gerant). `slug_dept` n'a pas d'equivalent : omis.
   // `full_name` est reconstruit a partir de first_name + last_name pour les
   // lookups annuaire (cf. trigger DB ou compute applicatif aval).
   const payload = {
@@ -601,6 +627,7 @@ async function upsertDiagnostician(
     first_name: row.firstName,
     last_name: row.lastName,
     full_name: `${row.firstName} ${row.lastName}`.trim(),
+    company_name: row.officialCompanyName,
     city: row.city,
     postcode: row.postalCode,
     department_code: row.departmentCode,

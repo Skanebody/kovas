@@ -146,14 +146,15 @@ colonnes entre les 3 schémas historiques concurrents (bandit / A1 / freemium).
 |---|---|---|---|
 | `id` | uuid PK | — | gen_random_uuid() |
 | `slug` | text UNIQUE | DHUP normalisé | URL publique |
-| `full_name` | text | DHUP / manuel | "Prénom Nom" |
+| `full_name` | text | DHUP / manuel | "Prénom Nom" (gérant) |
 | `full_name_normalized` | text GENERATED | dérivé | lower(unaccent) pour ILIKE/trigram |
 | `first_name`, `last_name` | text | DHUP | NULLABLE (compat bandit) |
+| `company_name` | text | DHUP "Societe" | **FIX-RR** — raison sociale cabinet ("Cabinet Diag Pro 75 SARL"). Préféré à `full_name` en affichage public ; NULL pour les indépendants en nom propre (EI/EURL). |
 | `city`, `city_slug`, `postcode` | text | DHUP + BAN | |
 | `dept_code`, `department_code` | text | DHUP | **sync via trigger** |
 | `address` | text | DHUP | |
 | `latitude`, `longitude` | double precision | BAN | **sync avec geo_lat/geo_lng** |
-| `certifications` | jsonb | DHUP | `[{type, organism, number, valid_until, status}]` |
+| `certifications` | jsonb | DHUP | `[{type, organism, number, valid_until, status}]`. **FIX-RR** : types canoniques = `DPE`, `DPE_MENTION` (audit énergétique avec mention, premium), `AMIANTE`, `PLOMB`, `GAZ`, `ELECTRICITE`, `TERMITES`, `CARREZ`, `ERP`. |
 | `certif_valid_count` | int GENERATED | dérivé | nb de certifs `status='valid'` |
 | `sirene_siret` | text | Sirene | E.164 |
 | `sirene_state` | text | Sirene | active / ceased / unknown |
@@ -468,6 +469,124 @@ Pour ajouter une 4e source (ex : PagesJaunes V2) dans `verify-diagnosticians-dai
 | `fraud_flags_24h` | < 50 | > 200 (signal anomalie source DHUP) |
 
 Consultable via `/admin/diagnostiqueurs/audit`.
+
+## 13bis. FIX-RR — Raison sociale + audit énergétique avec mention (2026-05-24)
+
+### Objectif
+
+Afficher la **raison sociale du cabinet** (`company_name`) plutôt que le nom du
+gérant (`full_name`) dans l'annuaire public. Plus professionnel,
+plus reconnaissable Google par le particulier. Ajouter également un badge
+premium chartreuse pour les diagnostiqueurs habilités **audit énergétique
+avec mention** (DPE_MENTION) — certification spécifique au-delà du DPE simple,
+obligatoire pour les audits réglementaires F/G (loi Climat & Résilience 2023).
+
+### Investigation DHUP
+
+Le dataset officiel `data.gouv.fr/r/7987214d-949e-4245-b005-5cc4e7a5df36`
+expose les colonnes suivantes :
+
+```
+"Nom";"Prenom";"Societe";"Adresse";"CP";"Ville";"Tel1";"Tel2";"email";
+"Organisme";"Org Cofrac";"Type de certificat";"N° de certificat";
+"Date début validité";"Date fin validité"
+```
+
+La colonne **`Societe`** est présente sur ~60-70 % des lignes (les indépendants
+en nom propre EI/EURL ne l'ont pas). Exemples observés : `sarl cotri`,
+`spm diagnostic - agenda 40`, `cabinet diag pro 75`.
+
+Les types de certificat distincts observés (avant ce patch) :
+- `Performance énergétique (DPE individuel)` → `DPE`
+- `Performance énergétique (DPE par immeuble, ...)` → `DPE`
+- **`Audit énergétique`** → `DPE_MENTION` *(nouveau type premium FIX-RR)*
+- `Amiante` / `Amiante (missions spécifiques**, ...)` → `AMIANTE`
+- `Plomb` → `PLOMB`
+- `Gaz` → `GAZ`
+- `Electricité` → `ELECTRICITE`
+- `Termites Métropole` / `Termites OM` → `TERMITES`
+
+### Migration
+
+[`supabase/migrations/20260524410000_diagnosticians_company_name.sql`](../supabase/migrations/20260524410000_diagnosticians_company_name.sql) :
+
+```sql
+ALTER TABLE diagnosticians ADD COLUMN IF NOT EXISTS company_name text;
+
+CREATE OR REPLACE FUNCTION public.immutable_unaccent(text)
+  RETURNS text LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT
+  AS $$ SELECT public.unaccent('public.unaccent', $1); $$;
+
+CREATE INDEX idx_diag_company_name ON diagnosticians
+  USING gin ((lower(public.immutable_unaccent(company_name))) gin_trgm_ops)
+  WHERE company_name IS NOT NULL;
+```
+
+Pushed prod via Management API le 2026-05-24. Vérification :
+```sql
+SELECT column_name FROM information_schema.columns
+WHERE table_name='diagnosticians' AND column_name='company_name';
+-- → company_name
+```
+
+### Edge function — `absorb-dhup-directory`
+
+- Type union `CertificationType` étendu avec `DPE_MENTION`.
+- `normalizeCertificationType()` teste **AUDIT/MENTION en priorité** sur DPE
+  (ordre déterministe pour éviter qu'une cert "Audit énergétique" tombe sur
+  le mapping DPE générique).
+- `upsertDiagnostician()` passe désormais `company_name: row.officialCompanyName`
+  dans le payload (ignoré avant ce patch).
+
+### Backfill
+
+[`scripts/backfill-company-name-dhup.ts`](../scripts/backfill-company-name-dhup.ts) :
+- Re-télécharge le CSV DHUP.
+- Reconstruit `dhup_source_id` (SHA-256 hash), match avec la base.
+- Update `company_name` si NULL + injecte `DPE_MENTION` dans `certifications`
+  jsonb si manquant.
+- Idempotent — peut être relancé sans risque.
+
+Usage :
+```bash
+SUPABASE_URL=https://jlizdkffwjdiokvmhcwg.supabase.co \
+SUPABASE_SERVICE_ROLE_KEY=xxx \
+pnpm tsx scripts/backfill-company-name-dhup.ts
+```
+
+### UI
+
+Pattern d'affichage canonique côté annuaire public :
+
+```tsx
+const displayName = getDiagDisplayName(diag) // raison sociale > full_name capitalisé
+const subtitleGerant = diag.company_name && formattedGerant ? formattedGerant : null
+
+<h3>{displayName}</h3>
+{subtitleGerant && <p>Représenté par {subtitleGerant}</p>}
+{hasMentionAudit(diag.certifications) && (
+  <Badge variant="amber">
+    <Sparkles /> Audit énergétique avec mention
+  </Badge>
+)}
+```
+
+Helpers exposés par [`apps/web/src/lib/diag-certifications.ts`](../apps/web/src/lib/diag-certifications.ts) :
+- `formatFullName()` — capitalize avec particules nobiliaires
+- `getDiagDisplayName()` — raison sociale > nom du gérant capitalisé
+- `hasMentionAudit()` — détecte DPE_MENTION dans 3 formats jsonb
+- `DIAG_CERT_BY_CODE` — lookup type → label/description/premium
+
+Pages touchées :
+- `apps/web/src/app/trouver-un-diagnostiqueur/page.tsx` (annuaire racine — SELECT + RPC + mapping + JSON-LD ItemList)
+- `apps/web/src/app/trouver-un-diagnostiqueur/diag-result-card.tsx` (card unitaire)
+- `apps/web/src/app/trouver-un-diagnostiqueur/[dept]/[city]/page.tsx` (page ville — SELECT inline + cards + JSON-LD LocalBusiness ItemList)
+- `apps/web/src/app/trouver-un-diagnostiqueur/[dept]/[city]/[slug]/page.tsx` (metadata SEO + Schema.org + sanitize whitelist)
+- `apps/web/src/app/trouver-un-diagnostiqueur/[dept]/[city]/[slug]/diagnostician-page-content.tsx` (hero + RelatedCard + sidebar contact)
+
+SEO impact : Schema.org `LocalBusiness.name` et title `<h1>` utilisent la
+raison sociale en priorité (cf. Google guidelines : `name` = nom commercial
+public, pas nom du gérant).
 
 ## 14. Roadmap V2
 
