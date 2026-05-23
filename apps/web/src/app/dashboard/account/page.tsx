@@ -1,19 +1,20 @@
 import { ReactivationModal } from '@/components/cancellation/ReactivationModal'
+import { Button } from '@/components/ui/button'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { buildCalendarSubscriptionUrl, buildCalendarWebcalUrl } from '@/lib/calendar-token'
 import { parisMonthBounds } from '@/lib/paris-dates'
-import { PRICING_PLANS, type PricingPlanCode, ADDON_MODULES } from '@/lib/pricing-plans'
+import { ADDON_MODULES, PRICING_PLANS, type PricingPlanCode } from '@/lib/pricing-plans'
 import { getStorageUsage } from '@/lib/storage/quota'
+import { cn } from '@/lib/utils'
+import { LogOut } from 'lucide-react'
 import type { Metadata } from 'next'
+import { logoutAction } from '../actions'
 import { AccountSettingsClient } from './account-settings-client'
 
-export const metadata: Metadata = { title: 'Réglages' }
+export const metadata: Metadata = { title: 'Compte' }
 
-const WINBACK_DISCOUNT_PERCENT = Number.parseInt(
-  process.env.WINBACK_DISCOUNT_PERCENT ?? '50',
-  10,
-)
+const WINBACK_DISCOUNT_PERCENT = Number.parseInt(process.env.WINBACK_DISCOUNT_PERCENT ?? '50', 10)
 const WINBACK_DISCOUNT_DURATION_MONTHS = Number.parseInt(
   process.env.WINBACK_DISCOUNT_DURATION_MONTHS ?? '3',
   10,
@@ -40,15 +41,16 @@ async function loadValidWinbackCode(
   const res = (await (
     admin.from('cancellations') as unknown as {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{ data: WinbackCodeRow | null }>
         }
       }
     }
   )
-    .select(
-      'id, user_id, winback_code_used_at, winback_code_expires_at, confirmed_at',
-    )
+    .select('id, user_id, winback_code_used_at, winback_code_expires_at, confirmed_at')
     .eq('winback_code', rawCode)
     .maybeSingle()) as { data: WinbackCodeRow | null }
 
@@ -65,32 +67,34 @@ async function loadValidWinbackCode(
 
 interface AccountSearchParams {
   reactivate?: string
-  /** ?expired=1 → bannière "Essai expiré, choisissez un forfait" en haut de page. */
   expired?: string
+  tab?: string
+}
+
+const VALID_ACCOUNT_TABS = ['profil', 'securite', 'abonnement', 'cabinet', 'facturation'] as const
+type AccountTabKey = (typeof VALID_ACCOUNT_TABS)[number]
+
+function normalizeTab(value: string | undefined): AccountTabKey {
+  return value && (VALID_ACCOUNT_TABS as readonly string[]).includes(value)
+    ? (value as AccountTabKey)
+    : 'profil'
 }
 
 /**
- * Page "Réglages" /app/account — refonte 2026-05-20 style iOS Settings.
+ * Page Compte /dashboard/account — refonte 2026-05-23 au pattern fiche client
+ * (`/dashboard/clients/[id]`).
  *
- * Architecture :
- *   - Server component pour fetch parallèle (subscription + organization +
- *     profile + storage + ADEME snapshot + user_preferences).
- *   - Délègue toute l'UX d'édition au client `AccountSettingsClient` qui gère
- *     les sheets (drawers iOS-style) par-dessus les rows cliquables.
- *   - Layout single-column `max-w-2xl` (lecture optimale, pas trop large).
- *   - Search bar sticky en haut, filtre client-side les sections par texte.
- *   - Hero card user (avatar dark + chartreuse signature DS v5) → ouvre Profile sheet.
- *   - 8 sections groupées : Abonnement / Identité / Modules / Conformité ADEME /
- *     Préférences notifs+calendrier / Données stockage / Légal RGPD / Zone danger.
- *   - Workflow résiliation /app/account/cancellation PROTÉGÉ (décret 2023-417),
- *     bouton visible en zone danger.
+ * Architecture cohérente avec /dashboard/gain :
+ *  1. Sticky header Qonto (paper/95 + backdrop-blur-xl) :
+ *     breadcrumb + nom + email + bouton "Se déconnecter"
+ *  2. 4 KPI cards (Plan actuel / Missions ce mois / Stockage utilisé / Membre depuis)
+ *  3. PageTabs (client) : Profil / Sécurité / Abonnement / Cabinet / Facturation
+ *  4. Contenu conditionnel via `?tab=` (default profil) — délégué au client
  *
  * Sources de vérité respectées :
- *   - DS v5 (sage `#F5F7F4` / dark `#0F1419` / chartreuse `#D4F542`)
- *   - Icons catégoriels palette iOS Settings (#007AFF, #AF52DE, etc.)
- *   - Server actions inchangées (updateProfileAction, updateOrganizationAction,
- *     updateAdemeSettingsAction, updateMonthlyReportPreferenceAction,
- *     startModuleTrialAction).
+ *  - DS v5 (sage `#F5F7F4` / dark `#0F1419` / chartreuse `#D4F542`)
+ *  - Server actions inchangées
+ *  - Workflow résiliation /dashboard/account/cancellation PROTÉGÉ (décret 2023-417)
  */
 export default async function AccountPage({
   searchParams,
@@ -107,7 +111,10 @@ export default async function AccountPage({
     supabase as unknown as {
       from: (t: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             maybeSingle: () => Promise<{
               data: { monthly_report_email_enabled: boolean } | null
             }>
@@ -128,8 +135,14 @@ export default async function AccountPage({
         supabase as unknown as {
           from: (t: string) => {
             select: (cols: string) => {
-              eq: (col: string, val: string) => {
-                order: (col: string, opts: { ascending: boolean }) => {
+              eq: (
+                col: string,
+                val: string,
+              ) => {
+                order: (
+                  col: string,
+                  opts: { ascending: boolean },
+                ) => {
                   limit: (n: number) => {
                     maybeSingle: () => Promise<{ data: { created_at: string } | null }>
                   }
@@ -187,9 +200,7 @@ export default async function AccountPage({
 
   const linguisticProfile = (profileFull?.linguistic_profile ?? {}) as Record<string, unknown>
   const certificatRge =
-    typeof linguisticProfile.certificat_rge === 'string'
-      ? linguisticProfile.certificat_rge
-      : null
+    typeof linguisticProfile.certificat_rge === 'string' ? linguisticProfile.certificat_rge : null
   const ademeMonitoringEnabled = linguisticProfile.ademe_monitoring_enabled === true
 
   // Mapping legacy tier → plan_code canonique (5 forfaits post-pivot 2026-05-20)
@@ -204,19 +215,18 @@ export default async function AccountPage({
     volume_legacy: 'all_inclusive',
     founder_legacy: 'pro',
   }
-  const resolvedCode = currentTier ? legacyToPlanCode[currentTier] ?? currentTier : null
+  const resolvedCode = currentTier ? (legacyToPlanCode[currentTier] ?? currentTier) : null
   const planCode = (resolvedCode &&
     PRICING_PLANS.find((p) => p.code === resolvedCode)?.code) as PricingPlanCode | null
-  const tier = planCode ? PRICING_PLANS.find((p) => p.code === planCode) ?? null : null
+  const tier = planCode ? (PRICING_PLANS.find((p) => p.code === planCode) ?? null) : null
   const missionsCount = monthMissions ?? 0
   const missionsQuota = subscription?.missions_included ?? 0
   const overage = Math.max(0, missionsCount - missionsQuota)
   const overagePrice = subscription?.overage_price_cents ?? 0
   const overageTotal = (overage * overagePrice) / 100
-  const usagePct =
-    missionsQuota > 0 ? Math.min((missionsCount / missionsQuota) * 100, 100) : 0
+  const usagePct = missionsQuota > 0 ? Math.min((missionsCount / missionsQuota) * 100, 100) : 0
 
-  // Précalcul des modules inclus dans le plan courant (évite calcul client).
+  // Précalcul des modules inclus dans le plan courant.
   const modulesIncludedMap: Record<string, boolean> = {}
   for (const m of ADDON_MODULES) {
     modulesIncludedMap[m.code] = planCode
@@ -232,6 +242,37 @@ export default async function AccountPage({
     : null
 
   const expired = sp.expired === '1'
+
+  // ============================================
+  // 4 KPI top — pattern stats-card client
+  // ============================================
+  const planLabel = tier?.name ?? 'Aucun forfait'
+  const missionsKpi =
+    missionsQuota > 0 ? `${missionsCount} / ${missionsQuota}` : String(missionsCount)
+  const storageKpi = storageProps ? formatBytesShort(storageProps.usedBytes) : '—'
+  const memberSinceKpi = user.created_at ? formatMonthYear(user.created_at) : '—'
+
+  const topKpis: KpiTopItem[] = [
+    { label: 'Plan actuel', value: planLabel, hint: tier?.code ?? undefined, mono: false },
+    {
+      label: 'Missions ce mois',
+      value: missionsKpi,
+      hint: missionsQuota > 0 ? 'quota mensuel' : 'forfait illimité',
+      mono: true,
+    },
+    {
+      label: 'Stockage utilisé',
+      value: storageKpi,
+      hint: storageProps ? `sur ${formatBytesShort(storageProps.quotaBytes)}` : 'indispo',
+      mono: true,
+    },
+    {
+      label: 'Membre depuis',
+      value: memberSinceKpi,
+      hint: user.created_at ? formatDateFr(user.created_at) : undefined,
+      mono: false,
+    },
+  ]
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -253,75 +294,153 @@ export default async function AccountPage({
             Votre essai gratuit est arrivé à échéance.
           </p>
           <p className="mt-1 text-[13px] text-amber-900/85">
-            Pour continuer à utiliser KOVAS 360, choisissez un forfait ci-dessous et
-            enregistrez un moyen de paiement. Vos données sont conservées : la
-            réactivation est immédiate.
+            Pour continuer à utiliser KOVAS 360, choisissez un forfait ci-dessous et enregistrez un
+            moyen de paiement. Vos données sont conservées : la réactivation est immédiate.
           </p>
         </div>
       ) : null}
 
-      {/* Header sticky aligné fiche client : paper/95 + backdrop-blur-xl */}
-      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-1 min-w-0">
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+      {/* ============================================
+          Header sticky — Qonto pattern (idem clients/[id])
+          ============================================ */}
+      <section className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute">
               Compte
             </p>
             <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
-              Vos <span className="font-serif italic font-normal text-ink-mute">réglages</span>
+              {profile.full_name ?? 'Mon'}{' '}
+              <span className="font-serif italic font-normal text-ink-mute">profil</span>
               <span className="text-ink-mute">.</span>
             </h1>
-            <p className="text-sm text-ink-mute max-w-xl">
-              Profil, cabinet, abonnement, modules, conformité ADEME et données.
-            </p>
+            <p className="text-sm text-ink-mute truncate">{profile.email}</p>
           </div>
+          <form action={logoutAction}>
+            <Button type="submit" variant="outline" size="sm" className="shrink-0">
+              <LogOut className="size-4" />
+              Se déconnecter
+            </Button>
+          </form>
         </div>
-      </header>
+      </section>
 
-      <div>
-        <AccountSettingsClient
-          profile={{
-            full_name: profile.full_name,
-            email: profile.email,
-            phone: profile.phone ?? null,
-          }}
-          organization={{
-            name: organization?.name ?? null,
-            siret: organization?.siret ?? null,
-            vat_number: organization?.vat_number ?? null,
-            address: organization?.address ?? null,
-            postal_code: organization?.postal_code ?? null,
-            city: organization?.city ?? null,
-            certification_n: organization?.certification_n ?? null,
-          }}
-          subscription={
-            subscription
-              ? {
-                  status: subscription.status,
-                  cancel_at_period_end: subscription.cancel_at_period_end,
-                  missions_included: subscription.missions_included,
-                  overage_price_cents: subscription.overage_price_cents,
-                  current_period_end: subscription.current_period_end,
-                }
-              : null
-          }
-          planCode={planCode}
-          planName={tier?.name ?? null}
-          missionsCount={missionsCount}
-          missionsQuota={missionsQuota}
-          overage={overage}
-          overageTotal={overageTotal}
-          usagePct={usagePct}
-          certificatRge={certificatRge}
-          ademeMonitoringEnabled={ademeMonitoringEnabled}
-          lastAdemeSyncAt={lastAdemeSync.data?.created_at ?? null}
-          monthlyReportEnabled={monthlyReportEnabled}
-          calendarHttpsUrl={buildCalendarSubscriptionUrl(orgId)}
-          calendarWebcalUrl={buildCalendarWebcalUrl(orgId)}
-          storageUsage={storageProps}
-          modulesIncludedMap={modulesIncludedMap}
-        />
+      {/* ============================================
+          4 KPI top — pattern stats-card
+          ============================================ */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {topKpis.map((k) => (
+          <KpiTopCell key={k.label} item={k} />
+        ))}
       </div>
+
+      {/* ============================================
+          Tabs + contenu (client) — délégué pour state local
+          ============================================ */}
+      <AccountSettingsClient
+        initialTab={normalizeTab(sp.tab)}
+        profile={{
+          full_name: profile.full_name,
+          email: profile.email,
+          phone: profile.phone ?? null,
+        }}
+        organization={{
+          name: organization?.name ?? null,
+          siret: organization?.siret ?? null,
+          vat_number: organization?.vat_number ?? null,
+          address: organization?.address ?? null,
+          postal_code: organization?.postal_code ?? null,
+          city: organization?.city ?? null,
+          certification_n: organization?.certification_n ?? null,
+        }}
+        subscription={
+          subscription
+            ? {
+                status: subscription.status,
+                cancel_at_period_end: subscription.cancel_at_period_end,
+                missions_included: subscription.missions_included,
+                overage_price_cents: subscription.overage_price_cents,
+                current_period_end: subscription.current_period_end,
+              }
+            : null
+        }
+        planCode={planCode}
+        planName={tier?.name ?? null}
+        missionsCount={missionsCount}
+        missionsQuota={missionsQuota}
+        overage={overage}
+        overageTotal={overageTotal}
+        usagePct={usagePct}
+        certificatRge={certificatRge}
+        ademeMonitoringEnabled={ademeMonitoringEnabled}
+        lastAdemeSyncAt={lastAdemeSync.data?.created_at ?? null}
+        monthlyReportEnabled={monthlyReportEnabled}
+        calendarHttpsUrl={buildCalendarSubscriptionUrl(orgId)}
+        calendarWebcalUrl={buildCalendarWebcalUrl(orgId)}
+        storageUsage={storageProps}
+        modulesIncludedMap={modulesIncludedMap}
+      />
     </div>
   )
+}
+
+// ============================================================
+// 4 KPI top — sous-composant (pattern stats-card client)
+// ============================================================
+
+interface KpiTopItem {
+  label: string
+  value: string
+  hint?: string
+  mono?: boolean
+}
+
+function KpiTopCell({ item }: { item: KpiTopItem }) {
+  return (
+    <div className="rounded-xl border border-rule/60 bg-paper/85 px-4 py-3 shadow-glass-xs">
+      <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute mb-1">
+        {item.label}
+      </div>
+      <div
+        className={cn(
+          'text-base font-semibold text-ink tabular-nums truncate',
+          item.mono ? 'font-mono' : 'font-sans',
+        )}
+      >
+        {item.value}
+      </div>
+      {item.hint ? (
+        <div className="font-mono text-[10px] text-ink-mute/80 mt-1 tracking-[0.05em] truncate">
+          {item.hint}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+// ============================================================
+// Helpers de formatage local (mois/année + bytes)
+// ============================================================
+
+function formatMonthYear(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }).replace('.', '')
+}
+
+function formatDateFr(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+}
+
+function formatBytesShort(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 Mo'
+  const units = ['o', 'Ko', 'Mo', 'Go', 'To']
+  let value = bytes
+  let unitIdx = 0
+  while (value >= 1024 && unitIdx < units.length - 1) {
+    value /= 1024
+    unitIdx++
+  }
+  const decimals = value < 10 ? 1 : 0
+  return `${value.toFixed(decimals)} ${units[unitIdx]}`
 }
