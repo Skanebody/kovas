@@ -1,15 +1,15 @@
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { LandingHeader } from '@/components/landing/LandingHeader'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import {
   MARKET_STATS,
   PRESS_CONTACT,
-  PRESS_MENTIONS,
   PRESS_RELEASES,
+  SECTOR_MEDIA,
 } from '@/lib/institutional/press-mentions'
-import { buildMetadata, KOVAS_SITE_URL } from '@/lib/seo/metadata'
-import { ArrowDownToLine, Mail, Phone } from 'lucide-react'
+import { KOVAS_SITE_URL, buildMetadata } from '@/lib/seo/metadata'
+import { ArrowDownToLine, ArrowUpRight, Mail, Phone } from 'lucide-react'
 import Script from 'next/script'
 
 export const metadata = buildMetadata({
@@ -76,8 +76,8 @@ export default function PressePage() {
               <span className="font-serif italic font-normal">Espace</span> presse.
             </h1>
             <p className="mt-8 max-w-2xl text-base sm:text-lg text-[#0F1419]/72 leading-relaxed">
-              Communiqués, kit médias, statistiques marché et contact direct. Tout ce dont vous
-              avez besoin pour parler de KOVAS et du marché du diagnostic immobilier français.
+              Communiqués, kit médias, statistiques marché et contact direct. Tout ce dont vous avez
+              besoin pour parler de KOVAS et du marché du diagnostic immobilier français.
             </p>
           </div>
         </section>
@@ -119,11 +119,7 @@ export default function PressePage() {
                   {release.pdfPath ? (
                     <div>
                       <Button asChild variant="ghost" size="sm">
-                        <a
-                          href={release.pdfPath}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                        >
+                        <a href={release.pdfPath} target="_blank" rel="noreferrer noopener">
                           Télécharger le PDF <ArrowDownToLine className="size-4" />
                         </a>
                       </Button>
@@ -186,9 +182,7 @@ export default function PressePage() {
                   >
                     {stat.value}
                   </p>
-                  <p className="text-sm font-medium text-[#0F1419]/80 leading-snug">
-                    {stat.label}
-                  </p>
+                  <p className="text-sm font-medium text-[#0F1419]/80 leading-snug">{stat.label}</p>
                   <p className="text-[11px] text-[#0F1419]/55 italic">{stat.source}</p>
                 </div>
               ))}
@@ -196,7 +190,7 @@ export default function PressePage() {
           </div>
         </section>
 
-        {/* MENTIONS PRESSE */}
+        {/* MÉDIAS SECTEUR DIAGNOSTIC */}
         <section className="px-5 sm:px-12 py-16 sm:py-20 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]">
           <div className="max-w-[1240px] mx-auto space-y-10">
             <div className="space-y-3 max-w-2xl">
@@ -207,48 +201,45 @@ export default function PressePage() {
                 Ils couvrent l&apos;actualité du diagnostic immobilier.
               </h2>
               <p className="text-sm text-[#0F1419]/55 italic">
-                Liste indicative des médias spécialisés que nous suivons et avec lesquels nous
-                échangeons régulièrement.
+                Six supports spécialisés que nous suivons quotidiennement pour rester en veille
+                réglementaire et métier. Chaque carte renvoie vers le site éditeur.
               </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {PRESS_MENTIONS.map((media) => {
-                const isLink = media.url !== null
-                const content = (
-                  <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {SECTOR_MEDIA.map((media) => (
+                <a
+                  key={media.id}
+                  href={media.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col gap-4 rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-5 hover:border-[#0F1419]/40 hover:shadow-glass-sm transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3">
                     <img
                       src={media.logoPath}
                       alt={`Logo ${media.name}`}
-                      className="h-8 max-w-[140px] object-contain opacity-70 group-hover:opacity-100 transition-opacity"
+                      width={200}
+                      height={80}
+                      className="h-14 w-auto max-w-[200px] object-contain"
                       loading="lazy"
                       decoding="async"
                     />
-                    <span className="sr-only">{media.name}</span>
-                  </>
-                )
-
-                return isLink ? (
-                  <a
-                    key={media.id}
-                    href={media.url ?? '#'}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="group h-20 flex items-center justify-center rounded-lg border border-[#0F1419]/[0.08] bg-paper/70 px-4 hover:border-[#0F1419]/[0.16] transition-colors"
-                  >
-                    {content}
-                  </a>
-                ) : (
-                  <span
-                    key={media.id}
-                    data-status="placeholder"
-                    title="Article à venir"
-                    aria-label={`${media.name} — article à venir`}
-                    className="group h-20 flex items-center justify-center rounded-lg border border-[#0F1419]/[0.08] bg-paper/70 px-4 cursor-help"
-                  >
-                    {content}
-                  </span>
-                )
-              })}
+                    <ArrowUpRight
+                      className="size-4 text-[#0F1419]/40 group-hover:text-[#0F1419] transition-colors mt-1"
+                      aria-hidden
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="font-mono uppercase tracking-wider text-[10px] text-[#0F1419]/55">
+                      {media.frequency}
+                    </p>
+                    <p className="text-sm text-[#0F1419]/72 leading-snug">{media.editorialAngle}</p>
+                  </div>
+                  <p className="mt-auto font-mono text-[10px] text-[#0F1419]/45 break-all">
+                    {new URL(media.url).hostname.replace(/^www\./, '')}
+                  </p>
+                </a>
+              ))}
             </div>
           </div>
         </section>

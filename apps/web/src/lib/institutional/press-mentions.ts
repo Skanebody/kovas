@@ -51,7 +51,7 @@ export const PRESS_RELEASES: PressRelease[] = [
     date: '2027-06-10',
     title: '[placeholder] KOVAS franchit le cap des 1 000 diagnostiqueurs équipés',
     excerpt:
-      "Communiqué prévu lors du passage symbolique des mille diagnostiqueurs payants. La date affichée est une projection basée sur le plan de croissance interne, non un engagement public.",
+      'Communiqué prévu lors du passage symbolique des mille diagnostiqueurs payants. La date affichée est une projection basée sur le plan de croissance interne, non un engagement public.',
     pdfPath: null,
     status: 'placeholder',
   },
@@ -121,6 +121,88 @@ export const PRESS_MENTIONS: PressLogo[] = [
   },
 ] as const
 
+/**
+ * Médias secteur diagnostic immobilier — utilisés sur /presse pour montrer
+ * les supports spécialisés que nous suivons (et avec lesquels nous échangeons).
+ *
+ * FIX-J (2026-05-24) : 6 supports B2B reconnus du secteur diagnostic /
+ * BTP / rénovation énergétique. Logos SVG génériques typographiques navy
+ * sur sage (`/public/press/secteur/{slug}.svg`) avec accent chartreuse —
+ * pas de reproduction de logos officiels.
+ *
+ * Sources externes (légitimes, vérifiables) :
+ *   - Diagactu : webzine quotidien actualité métier (diagactu.fr)
+ *   - Diagnostic-immo.fr : portail B2B référence diagnostiqueurs
+ *   - Batiactu : quotidien BTP avec section diagnostic et rénovation
+ *   - Batiweb : quotidien rénovation énergétique grand public/pro
+ *   - Construction Cayola : groupe média professionnel BTP
+ *   - Magazine Diagnostics : trimestriel pro édité par GTC Médias
+ */
+export interface SectorMedia {
+  readonly id: string
+  readonly name: string
+  readonly logoPath: string
+  readonly url: string
+  readonly frequency: string
+  readonly editorialAngle: string
+}
+
+export const SECTOR_MEDIA: ReadonlyArray<SectorMedia> = [
+  {
+    id: 'diagactu',
+    name: 'Diagactu',
+    logoPath: '/press/secteur/diagactu.svg',
+    url: 'https://www.diagactu.fr/',
+    frequency: 'Webzine quotidien',
+    editorialAngle:
+      'Actualité métier des diagnostiqueurs : réglementation, certifications, agenda profession.',
+  },
+  {
+    id: 'diagnostic-immo',
+    name: 'Diagnostic-immo.fr',
+    logoPath: '/press/secteur/diagnostic-immo.svg',
+    url: 'https://www.diagnostic-immo.fr/',
+    frequency: 'Portail B2B continu',
+    editorialAngle: 'Portail référence des diagnostiqueurs immobiliers indépendants en France.',
+  },
+  {
+    id: 'batiactu',
+    name: 'Batiactu',
+    logoPath: '/press/secteur/batiactu.svg',
+    url: 'https://www.batiactu.com/',
+    frequency: 'Quotidien BTP',
+    editorialAngle:
+      'Quotidien d’information BTP avec rubrique dédiée aux diagnostics et à la rénovation énergétique.',
+  },
+  {
+    id: 'batiweb',
+    name: 'Batiweb',
+    logoPath: '/press/secteur/batiweb.svg',
+    url: 'https://www.batiweb.com/',
+    frequency: 'Quotidien rénovation',
+    editorialAngle:
+      'Média quotidien rénovation énergétique, MaPrimeRénov’ et performance énergétique des logements.',
+  },
+  {
+    id: 'construction-cayola',
+    name: 'Construction Cayola',
+    logoPath: '/press/secteur/construction-cayola.svg',
+    url: 'https://www.constructioncayola.com/',
+    frequency: 'Groupe média BTP',
+    editorialAngle:
+      'Groupe de presse professionnel BTP : routes, équipement, bâtiment et diagnostics techniques.',
+  },
+  {
+    id: 'magazine-diagnostics',
+    name: 'Magazine Diagnostics',
+    logoPath: '/press/secteur/magazine-diagnostics.svg',
+    url: 'https://www.lemagazinedesdiagnostiqueurs.fr/',
+    frequency: 'Trimestriel professionnel',
+    editorialAngle:
+      'Revue spécialisée dédiée aux opérateurs de diagnostic immobilier et à leur écosystème.',
+  },
+] as const
+
 export interface MarketStat {
   id: string
   value: string
@@ -139,7 +221,7 @@ export const MARKET_STATS: MarketStat[] = [
     id: 'dpe-median-price',
     value: '145 €',
     label: 'Prix médian constaté pour un DPE en France',
-    source: "Étude tarifaire UFC-Que Choisir 2023, mise à jour interne 2025",
+    source: 'Étude tarifaire UFC-Que Choisir 2023, mise à jour interne 2025',
   },
   {
     id: 'fg-properties-share',
