@@ -8,10 +8,10 @@
  */
 
 import {
-  FollowUpSequencesManager,
   type FollowUpKind,
+  FollowUpSequencesManager,
 } from '@/components/followup/FollowUpSequencesManager'
-import { Card } from '@/components/ui/card'
+import { KpiHero } from '@/components/ui/kpi-hero'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 
@@ -62,24 +62,27 @@ export function RelancesPageContent({ stats, defaultTab }: RelancesPageContentPr
 
   return (
     <div className="space-y-6">
-      {/* KPI bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
+      {/* KPI bar — alignée sur pattern fiche client (4 KpiHero) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiHero
           value={stats.activeCount}
           label="Séquences actives"
           hint="Tous types confondus"
+          trend={null}
         />
-        <KpiCard
+        <KpiHero
           value={stats.emailsSentThisMonth}
           label="Emails envoyés ce mois"
           hint="Étapes franchies depuis le 1er"
+          trend={null}
         />
-        <KpiCard
+        <KpiHero
           value={stats.conversionsThisMonth}
           label="Conversions ce mois"
           hint="Séquences terminées avec succès"
+          trend={null}
         />
-        <KpiCard
+        <KpiHero
           value={
             stats.averageResponseRate === null
               ? '—'
@@ -87,6 +90,7 @@ export function RelancesPageContent({ stats, defaultTab }: RelancesPageContentPr
           }
           label="Taux d'ouverture"
           hint={stats.averageResponseRate === null ? 'Disponible en V1.5' : '30 derniers jours'}
+          trend={null}
         />
       </div>
 
@@ -107,9 +111,7 @@ export function RelancesPageContent({ stats, defaultTab }: RelancesPageContentPr
               onClick={() => setActiveTab(tab.key)}
               className={cn(
                 'px-3.5 py-1.5 rounded-pill text-[12px] font-medium transition-colors',
-                active
-                  ? 'bg-navy text-paper'
-                  : 'text-ink-mute hover:bg-ink/5 hover:text-ink',
+                active ? 'bg-navy text-paper' : 'text-ink-mute hover:bg-ink/5 hover:text-ink',
               )}
             >
               {tab.label}
@@ -121,25 +123,5 @@ export function RelancesPageContent({ stats, defaultTab }: RelancesPageContentPr
       {/* Manager : tabs internes masqués, kind forcé par le tab parent */}
       <FollowUpSequencesManager hideTabs forceKind={forceKind} />
     </div>
-  )
-}
-
-function KpiCard({
-  value,
-  label,
-  hint,
-}: {
-  value: string | number
-  label: string
-  hint: string
-}) {
-  return (
-    <Card variant="opaque" padding="default" className="rounded-2xl">
-      <p className="font-serif italic font-normal text-4xl md:text-5xl tracking-tight text-ink leading-none">
-        {value}
-      </p>
-      <p className="mt-3 text-[13px] font-semibold text-ink">{label}</p>
-      <p className="mt-1 text-[11px] text-ink-mute">{hint}</p>
-    </Card>
   )
 }
