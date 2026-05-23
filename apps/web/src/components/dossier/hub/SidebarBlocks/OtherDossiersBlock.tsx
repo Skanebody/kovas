@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card'
 import { StatusPill } from '@/components/ui/status-pill'
-import { resolveDossierState, getStatusPillProps } from '@/lib/dossier/states'
+import { getStatusPillProps, resolveDossierState } from '@/lib/dossier/states'
 import { Folder } from 'lucide-react'
 import Link from 'next/link'
 
@@ -13,6 +13,34 @@ export interface OtherDossier {
   completed_at: string | null
   metadata: Record<string, unknown> | null
   address: string | null
+}
+
+/**
+ * Affiche la date + l'heure du RDV planifié au format `12 mai · 09:30`
+ * (date courte + HH:mm Europe/Paris en JetBrains Mono).
+ * - Si seul scheduled_at est non-null avec une heure significative → date + heure.
+ * - Sinon retourne juste la date (created/completed) ou `null` si rien.
+ */
+function formatDossierWhen(d: OtherDossier): string | null {
+  const iso = d.scheduled_at ?? d.completed_at ?? null
+  if (!iso) return null
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return null
+  const dateShort = date.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'Europe/Paris',
+  })
+  // Heure significative uniquement si scheduled_at posé et non 00:00 Europe/Paris.
+  if (d.scheduled_at) {
+    const hhmm = date.toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Paris',
+    })
+    if (hhmm !== '00:00') return `${dateShort} · ${hhmm}`
+  }
+  return dateShort
 }
 
 interface OtherDossiersBlockProps {
@@ -61,6 +89,14 @@ export function OtherDossiersBlock({ dossiers }: OtherDossiersBlockProps) {
                     <p className="font-mono text-[10px] text-ink-faint truncate">{d.reference}</p>
                     <StatusPill variant={pill.variant} label={pill.label} size="sm" />
                   </div>
+                  {(() => {
+                    const when = formatDossierWhen(d)
+                    return when ? (
+                      <p className="font-mono text-[10px] text-ink-mute mt-0.5 tabular-nums">
+                        {when}
+                      </p>
+                    ) : null
+                  })()}
                   {d.address ? (
                     <p className="text-[11px] text-ink-soft mt-0.5 truncate">{d.address}</p>
                   ) : null}

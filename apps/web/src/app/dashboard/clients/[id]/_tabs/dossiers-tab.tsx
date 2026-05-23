@@ -1,5 +1,3 @@
-import { FolderOpen, Plus } from 'lucide-react'
-import Link from 'next/link'
 import {
   AppListTable,
   AppListTableCell,
@@ -11,8 +9,10 @@ import { Button } from '@/components/ui/button'
 import { DiagChip } from '@/components/ui/diag-chip'
 import { createClient } from '@/lib/supabase/server'
 import type { MissionType } from '@kovas/shared'
+import { FolderOpen, Plus } from 'lucide-react'
+import Link from 'next/link'
 import { EmptyTabState } from './empty-tab-state'
-import { formatDate } from './format-helpers'
+import { formatDate, formatTimeHHmm } from './format-helpers'
 
 type Props = {
   clientId: string
@@ -29,10 +29,7 @@ const DOSSIER_STATUS_LABELS: Record<string, string> = {
   cancelled: 'Annulé',
 }
 
-const DOSSIER_STATUS_VARIANT: Record<
-  string,
-  'muted' | 'blue' | 'green' | 'orange' | 'red'
-> = {
+const DOSSIER_STATUS_VARIANT: Record<string, 'muted' | 'blue' | 'green' | 'orange' | 'red'> = {
   draft: 'muted',
   scheduled: 'blue',
   on_site: 'orange',
@@ -129,10 +126,7 @@ export async function ClientDossiersTab({ clientId, orgId }: Props) {
                       <AppListTableCell className="hidden lg:table-cell">
                         <div className="flex flex-wrap gap-1">
                           {missions.slice(0, 3).map((m, i) => (
-                            <DiagChip
-                              key={`${d.id}-${m.type}-${i}`}
-                              type={m.type as MissionType}
-                            />
+                            <DiagChip key={`${d.id}-${m.type}-${i}`} type={m.type as MissionType} />
                           ))}
                           {missions.length > 3 && (
                             <Badge variant="outline" className="text-[10px]">
@@ -142,7 +136,17 @@ export async function ClientDossiersTab({ clientId, orgId }: Props) {
                         </div>
                       </AppListTableCell>
                       <AppListTableCell className="text-ink-mute text-[12px]">
-                        {formatDate(d.scheduled_at ?? d.created_at)}
+                        <span className="flex flex-col leading-tight tabular-nums">
+                          <span>{formatDate(d.scheduled_at ?? d.created_at)}</span>
+                          {(() => {
+                            const t = formatTimeHHmm(d.scheduled_at)
+                            return t ? (
+                              <span className="font-mono text-[11px] text-ink font-medium">
+                                {t}
+                              </span>
+                            ) : null
+                          })()}
+                        </span>
                       </AppListTableCell>
                       <AppListTableCell>
                         <Badge variant={DOSSIER_STATUS_VARIANT[d.status] ?? 'muted'}>
@@ -201,8 +205,14 @@ export async function ClientDossiersTab({ clientId, orgId }: Props) {
                         )}
                       </div>
                     ) : null}
-                    <div className="text-[11px] text-ink-mute">
-                      {formatDate(d.scheduled_at ?? d.created_at)}
+                    <div className="text-[11px] text-ink-mute flex items-center gap-1.5 tabular-nums">
+                      <span>{formatDate(d.scheduled_at ?? d.created_at)}</span>
+                      {(() => {
+                        const t = formatTimeHHmm(d.scheduled_at)
+                        return t ? (
+                          <span className="font-mono text-ink font-medium">· {t}</span>
+                        ) : null
+                      })()}
                     </div>
                   </Link>
                 </li>

@@ -70,6 +70,22 @@ function formatDateShort(iso: string): string {
   return dateFr.format(date)
 }
 
+/**
+ * Heure HH:mm Europe/Paris si scheduled_at significatif (≠ 00:00), sinon null.
+ * Format SOBRE JetBrains Mono côté UI : ne s'affiche que pour les RDV avec heure réelle.
+ */
+function formatTimeHHmm(iso: string | null): string | null {
+  if (!iso) return null
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return null
+  const hhmm = date.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Europe/Paris',
+  })
+  return hhmm === '00:00' ? null : hhmm
+}
+
 interface Props {
   dossiers: ClientDossier[]
 }
@@ -117,8 +133,12 @@ export function ClientDossiersSection({ dossiers }: Props) {
                     isLast ? '' : 'border-b border-rule/30'
                   } hover:bg-foreground/5 transition-colors focus-visible:outline-none focus-visible:bg-foreground/5`}
                 >
-                  <span className="font-mono text-[11px] text-ink-mute w-[96px] shrink-0">
-                    {formatDateShort(dateIso)}
+                  <span className="font-mono text-[11px] text-ink-mute w-[96px] shrink-0 flex flex-col leading-tight tabular-nums">
+                    <span>{formatDateShort(dateIso)}</span>
+                    {(() => {
+                      const t = formatTimeHHmm(d.scheduled_at)
+                      return t ? <span className="text-ink font-medium">{t}</span> : null
+                    })()}
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-medium text-ink truncate">{typeLabel}</p>
