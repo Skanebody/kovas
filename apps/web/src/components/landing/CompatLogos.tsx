@@ -75,15 +75,7 @@ function Wordmark({
       >
         {text}
       </text>
-      {trailingDot && (
-        <circle
-          cx={width - 6}
-          cy={32}
-          r={3.5}
-          fill="#95B11A"
-          aria-hidden
-        />
-      )}
+      {trailingDot && <circle cx={width - 6} cy={32} r={3.5} fill="#95B11A" aria-hidden />}
     </svg>
   )
 }
@@ -94,7 +86,7 @@ function Wordmark({
 export function LicielLogo({ className }: { className?: string }) {
   return (
     <img
-      src="/logos/compat/liciel.svg"
+      src="/logos/compat/liciel-logo.svg"
       alt="LICIEL — logo officiel"
       width={120}
       height={RENDER_HEIGHT}

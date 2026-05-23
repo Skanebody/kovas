@@ -12,7 +12,7 @@ Après évaluation des logos collectés (qualité variable, ambiguïté éditeur
 
 | # | Logiciel | Source utilisée | Format | Implémentation |
 |---|----------|-----------------|--------|----------------|
-| 1 | **LICIEL** | SVG officiel récupéré sur liciel.fr | **SVG natif** | `<img src="/logos/compat/liciel.svg" />` |
+| 1 | **LICIEL** | SVG officiel récupéré sur liciel.fr | **SVG natif** | `<img src="/logos/compat/liciel-logo.svg" />` |
 | 2 | AnalysImmo | Wordmark KOVAS | SVG inline | `<AnalysImmoLogo />` |
 | 3 | WinDiagnostics | Wordmark KOVAS | SVG inline | `<WinDiagnosticsLogo />` |
 | 4 | GestionDiag | Wordmark KOVAS | SVG inline | `<GestionDiagLogo />` |
@@ -57,7 +57,7 @@ Les downloads initialement effectués pour AnalysImmo, WinDiagnostics, GestionDi
 ```
 apps/web/public/logos/compat/
 ├── MANIFEST.md       (ce fichier)
-└── liciel.svg        (logo officiel LICIEL — non modifié)
+└── liciel-logo.svg   (logo officiel LICIEL — non modifié)
 ```
 
 Les 7 autres logos sont des composants React TSX dans `apps/web/src/components/landing/CompatLogos.tsx` — pas de fichier statique requis.
