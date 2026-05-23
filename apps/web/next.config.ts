@@ -30,7 +30,7 @@ const CONTENT_SECURITY_POLICY = [
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.vercel-insights.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
-  "img-src 'self' data: blob: https://*.supabase.co https://*.tile.openstreetmap.org https://unpkg.com https://api.dicebear.com",
+  "img-src 'self' data: blob: https://*.supabase.co https://*.tile.openstreetmap.org https://unpkg.com",
   "connect-src 'self' https://*.supabase.co https://api.anthropic.com https://api.groq.com https://api.stripe.com https://api.brevo.com https://*.vercel-insights.com https://app.dvf.etalab.gouv.fr https://geo.api.gouv.fr https://data.ademe.fr",
   "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
   "object-src 'none'",

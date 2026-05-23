@@ -1,4 +1,3 @@
-import { TestimonialAvatar } from '@/components/public/pros/TestimonialAvatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -247,6 +246,15 @@ const REGIONS_ORDER: Region[] = [
   'Grand Est',
 ]
 
+function buildInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
 export default function TemoignagesPage() {
   return (
     <div className="px-6 py-16">
@@ -304,7 +312,12 @@ export default function TemoignagesPage() {
           {TESTIMONIALS.map((t) => (
             <Card key={t.name} variant="opaque" padding="default" className="space-y-4">
               <div className="flex items-start gap-3">
-                <TestimonialAvatar name={t.name} city={t.city} size={48} />
+                <div
+                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-navy text-sm font-semibold text-paper"
+                  aria-hidden
+                >
+                  {buildInitials(t.name)}
+                </div>
                 <div className="space-y-0.5">
                   <p className="text-sm font-semibold leading-tight">{t.name}</p>
                   <p className="text-xs text-ink-mute">{t.cabinet}</p>
