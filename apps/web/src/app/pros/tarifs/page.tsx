@@ -160,14 +160,23 @@ const FAQ: FaqItem[] = [
 
 export default function TarifsPage() {
   return (
-    <div className="px-6 py-16">
-      <div className="mx-auto max-w-6xl space-y-16">
-        <div className="mx-auto max-w-2xl space-y-3 text-center">
-          <Badge variant="muted">Tarification</Badge>
-          <h1 className="font-display text-display-m font-light tracking-tight text-ink sm:text-display-l">
-            Tarifs <span className="text-display-serif text-chartreuse-deep">transparents</span>
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-8 lg:px-12 py-16">
+      <div className="space-y-16">
+        <div className="mx-auto max-w-3xl space-y-4 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-wide text-ink-mute">
+            Tarification
+          </p>
+          <h1
+            className="font-sans font-medium tracking-tight text-ink leading-[1.05]"
+            style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}
+          >
+            Tarifs{' '}
+            <span className="font-serif italic font-normal text-chartreuse-deep">
+              transparents
+            </span>
+            .
           </h1>
-          <p className="text-ink-mute">
+          <p className="text-ink-mute text-lg">
             Quatre paliers, sans add-on activable. Toutes les fonctionnalités dans tous les tiers.
             La différence : votre volume mensuel.
           </p>

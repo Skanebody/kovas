@@ -1,8 +1,8 @@
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Button } from '@/components/ui/button'
-import { LandingFooter } from '@/components/landing/LandingFooter'
 import { FAQ_CATEGORIES, FAQ_LANDING } from '@/lib/faq-data'
 import { buildMetadata } from '@/lib/seo/metadata'
-import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import Script from 'next/script'
 import { FaqExplorer } from './faq-explorer'
@@ -34,7 +34,7 @@ export default function FaqPage() {
   const jsonLd = buildFaqJsonLd()
 
   return (
-    <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
+    <div className="min-h-dvh flex flex-col bg-background">
       <Script
         id="faq-jsonld"
         type="application/ld+json"
@@ -42,35 +42,24 @@ export default function FaqPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <header className="sticky top-0 z-30 bg-[#F5F7F4]/86 backdrop-blur-xl border-b border-[#0F1419]/[0.08]">
-        <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-          <Link
-            href="/"
-            className="font-semibold tracking-[0.22em] text-[15px] text-[#0F1419]"
-          >
-            KOVAS
-          </Link>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/">
-              <ArrowLeft className="size-4" /> Retour
-            </Link>
-          </Button>
-        </div>
-      </header>
+      <PublicHeader />
 
-      <main className="flex-1 mx-auto max-w-6xl px-6 py-12 w-full">
-        <div className="max-w-2xl mb-12 space-y-3">
-          <p className="text-xs uppercase tracking-wider font-mono text-[#0F1419]/55">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-8 lg:px-12 py-16">
+        <div className="max-w-3xl mb-12 space-y-4">
+          <p className="text-xs uppercase tracking-wider font-mono text-ink-mute">
             Questions fréquentes
           </p>
           <h1
-            className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+            className="font-sans font-medium tracking-tight text-ink leading-[1.05]"
             style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}
           >
             Tout ce que vous voulez savoir sur KOVAS et le{' '}
-            <span className="font-serif italic font-normal">diagnostic immobilier</span>.
+            <span className="font-serif italic font-normal text-chartreuse-deep">
+              diagnostic immobilier
+            </span>
+            .
           </h1>
-          <p className="text-[#0F1419]/72">
+          <p className="text-ink-mute text-lg">
             Filtrez par catégorie pour aller plus vite. Pour les diagnostiqueurs, les
             propriétaires, les vendeurs et les locataires.
           </p>
@@ -78,8 +67,8 @@ export default function FaqPage() {
 
         <FaqExplorer />
 
-        <div className="mt-16 pt-8 border-t border-[#0F1419]/[0.08] text-center space-y-4">
-          <p className="text-sm text-[#0F1419]/72">
+        <div className="mt-16 pt-8 border-t border-rule/60 text-center space-y-4">
+          <p className="text-sm text-ink-mute">
             Pas de réponse à votre question ? Contactez-nous directement.
           </p>
           <Button asChild variant="accent">
@@ -87,7 +76,8 @@ export default function FaqPage() {
           </Button>
         </div>
       </main>
-      <LandingFooter />
+
+      <SiteFooter />
     </div>
   )
 }

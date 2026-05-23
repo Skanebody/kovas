@@ -1,6 +1,6 @@
-import { ProsHeader } from '@/components/public/pros/ProsHeader'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { ProsNav } from '@/components/public/pros/ProsNav'
-import { SiteFooter } from '@/components/site-footer'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 
 export default function ProsLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-sage">
-      <ProsHeader />
+    <div className="flex min-h-dvh flex-col bg-background">
+      <PublicHeader />
       <ProsNav />
       <main className="flex-1">{children}</main>
       <SiteFooter />

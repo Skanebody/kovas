@@ -1,11 +1,12 @@
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
-import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import { parseCertCodes, type DiagCertCode } from '@/lib/diag-certifications'
 import { getDepartmentName } from '@/lib/fr-departments'
-import { ArrowLeft, ArrowRight, Building2, ChevronRight, Inbox } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronRight, Inbox } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { DiagResultCard } from './diag-result-card'
@@ -92,8 +93,8 @@ export default async function DiagnostiqueursPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col bg-cream">
-      <SiteHeader />
+    <div className="min-h-dvh flex flex-col bg-background">
+      <PublicHeader />
       <main className="flex-1">
         {/* Hero header */}
         <section className="px-6 py-12 sm:py-16 border-b border-rule/60">
@@ -201,7 +202,7 @@ export default async function DiagnostiqueursPage({ searchParams }: PageProps) {
           </div>
         </section>
       </main>
-      <AnnuaireFooter />
+      <SiteFooter />
 
       {/* SEO — Schema.org ItemList */}
       <ItemListJsonLd rows={rows} />
@@ -335,44 +336,6 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
 /* Sub-composants                                                            */
 /* ──────────────────────────────────────────────────────────────────────── */
 
-function SiteHeader() {
-  return (
-    <header className="sticky top-0 z-50 glass-header">
-      <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="size-8 rounded-md bg-navy shadow-accent" aria-hidden />
-          <span className="text-base font-bold tracking-tight">KOVAS</span>
-        </Link>
-        <nav className="hidden sm:flex items-center gap-6 text-sm">
-          <Link href="/diagnostiqueurs" className="text-ink font-semibold">
-            Annuaire
-          </Link>
-          <Link
-            href="/#how-it-works"
-            className="text-ink-mute hover:text-ink transition-colors"
-          >
-            Comment ça marche
-          </Link>
-          <Link
-            href="/#features"
-            className="text-ink-mute hover:text-ink transition-colors"
-          >
-            Pour les pros
-          </Link>
-        </nav>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">Se connecter</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link href="/signup">Essai 14j</Link>
-          </Button>
-        </div>
-      </div>
-    </header>
-  )
-}
-
 function Pagination({
   page,
   totalPages,
@@ -472,107 +435,6 @@ function ErrorState() {
   )
 }
 
-function AnnuaireFooter() {
-  return (
-    <footer className="bg-navy text-paper mt-12">
-      <div className="mx-auto max-w-6xl px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
-        <div className="space-y-3 col-span-2 md:col-span-1">
-          <div className="flex items-center gap-2">
-            <div className="size-8 rounded-md bg-paper/10" aria-hidden />
-            <span className="text-base font-bold tracking-tight">KOVAS</span>
-          </div>
-          <p className="text-[12px] text-paper/60 leading-relaxed">
-            L'annuaire de référence des diagnostiqueurs immobiliers en France.
-          </p>
-        </div>
-        <div className="space-y-3">
-          <h4 className="text-[11px] uppercase tracking-wide font-display font-semibold text-paper/70">
-            Particuliers
-          </h4>
-          <ul className="space-y-2 text-[13px]">
-            <li>
-              <Link href="/diagnostiqueurs" className="hover:underline">
-                Annuaire complet
-              </Link>
-            </li>
-            <li>
-              <Link href="/#how-it-works" className="hover:underline">
-                Comment ça marche
-              </Link>
-            </li>
-            <li>
-              <Link href="/faq" className="hover:underline">
-                FAQ
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div className="space-y-3">
-          <h4 className="text-[11px] uppercase tracking-wide font-display font-semibold text-paper/70">
-            Pour les pros
-          </h4>
-          <ul className="space-y-2 text-[13px]">
-            <li>
-              <Link href="/reclamer-ma-fiche" className="hover:underline">
-                Réclamer ma fiche
-              </Link>
-            </li>
-            <li>
-              <Link href="/pricing" className="hover:underline">
-                Tarifs KOVAS App
-              </Link>
-            </li>
-            <li>
-              <Link href="/signup" className="hover:underline">
-                Essai gratuit 14 jours
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div className="space-y-3">
-          <h4 className="text-[11px] uppercase tracking-wide font-display font-semibold text-paper/70">
-            KOVAS
-          </h4>
-          <ul className="space-y-2 text-[13px]">
-            <li>
-              <Link href="/contact" className="hover:underline">
-                Contact
-              </Link>
-            </li>
-            <li>
-              <Link href="/mentions-legales" className="hover:underline">
-                Mentions légales
-              </Link>
-            </li>
-            <li>
-              <Link href="/confidentialite" className="hover:underline">
-                Confidentialité
-              </Link>
-            </li>
-            <li>
-              <Link href="/cgu" className="hover:underline">
-                CGU
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div className="border-t border-paper/10">
-        <div className="mx-auto max-w-6xl px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-paper/50">
-          <p>
-            © 2026 SASU {COMPANY_IDENTITY.legalName} · {COMPANY_IDENTITY.address.line1},{' '}
-            {COMPANY_IDENTITY.address.postalCode} {COMPANY_IDENTITY.address.city} · SIREN{' '}
-            {COMPANY_IDENTITY.sirenFormatted}
-          </p>
-          <p className="flex items-center gap-1.5">
-            <Building2 className="size-3" aria-hidden />
-            Annuaire propulsé par KOVAS
-          </p>
-        </div>
-      </div>
-    </footer>
-  )
-}
 
 function ItemListJsonLd({ rows }: { rows: DiagRow[] }) {
   if (rows.length === 0) return null
