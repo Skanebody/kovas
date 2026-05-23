@@ -12,17 +12,16 @@ import {
   buildCityContentAmandine,
 } from '@/lib/seo-content/city-content-amandine'
 import { buildCityContextAmandine } from '@/lib/seo-content/city-context-amandine'
-import {
-  buildLocalMarketParagraph,
-  buildNeighborLinks,
-  getCityLocalData,
-} from '@/lib/seo-content/local-data'
+import { getCityStats } from '@/lib/seo-content/city-stats'
+import { buildLocalMarketParagraph, buildNeighborLinks } from '@/lib/seo-content/local-data'
 import { createClient } from '@/lib/supabase/server'
 import {
   Banknote,
   CalendarClock,
+  CheckCircle2,
   ChevronRight,
   Flame,
+  Info,
   MapPin,
   Phone,
   ShieldAlert,
@@ -441,8 +440,8 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
     12,
   )
 
-  // Data déterministe locale (méthode Amandine Bart)
-  const localData = registryCity ? getCityLocalData(registryCity) : null
+  // Data : essai DB réelle (ADEME+INSEE+Claude) puis fallback déterministe
+  const localData = registryCity ? await getCityStats(registryCity) : null
   const neighborLinks = registryCity ? buildNeighborLinks(registryCity, CITY_LOOKUP) : []
 
   // Contenu Amandine Bart complet (top5, evol prix, FAQ 12, etc.)
@@ -677,10 +676,49 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
                 <p className="text-[11px] text-ink-faint">médiane locale</p>
               </Card>
             </div>
-            <p className="text-xs text-ink-faint pt-1">
-              Sources : ADEME DPE Open Data, INSEE Code Officiel Géographique 2024, DVF data.gouv
-              (CC-BY). Mise à jour : 24h ISR.
-            </p>
+            {localData.source === 'real' ? (
+              <div className="flex items-start gap-2 rounded-md border border-accent-green/30 bg-accent-green/5 px-3 py-2 text-xs text-ink-soft">
+                <CheckCircle2 className="size-3.5 shrink-0 mt-0.5 text-accent-green" aria-hidden />
+                <div className="flex-1 min-w-0">
+                  <p>
+                    <span className="font-semibold text-ink">Sources vérifiées</span> : ADEME DPE v2
+                    Open Data
+                    {localData.totalDpeCount && localData.totalDpeCount > 0
+                      ? ` (${localData.totalDpeCount.toLocaleString('fr-FR')} DPE 2021-2026)`
+                      : ''}
+                    {localData.sourcesUsed.some((s) => s.name.includes('INSEE'))
+                      ? ' + INSEE Filocom'
+                      : ''}
+                    {localData.aiModel ? ` + contextualisation ${localData.aiModel}` : ''}.
+                    {localData.lastRefreshedAt ? (
+                      <>
+                        {' '}
+                        Données actualisées le{' '}
+                        <time dateTime={localData.lastRefreshedAt}>
+                          {new Date(localData.lastRefreshedAt).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })}
+                        </time>
+                        .
+                      </>
+                    ) : null}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 rounded-md border border-rule bg-cream-deep/40 px-3 py-2 text-xs text-ink-mute">
+                <Info className="size-3.5 shrink-0 mt-0.5 text-ink-mute" aria-hidden />
+                <div className="flex-1 min-w-0">
+                  <p>
+                    <span className="font-semibold text-ink-soft">Estimation</span> basée sur les
+                    moyennes régionales ADEME et INSEE. Données détaillées en cours de mise à jour
+                    dans notre observatoire.
+                  </p>
+                </div>
+              </div>
+            )}
           </section>
         ) : null}
 
