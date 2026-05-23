@@ -1,147 +1,56 @@
 'use client'
 
-import { MobileMoreSheet } from '@/components/mobile-more-sheet'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { DiscoverSidebarButton } from '@/components/upsell/DiscoverSidebarButton'
+/**
+ * KOVAS — AppSidebar (refonte Linear-style 2026-05-23).
+ *
+ * Sidebar 5 zones :
+ *   Z1 — Avatar / identité (toujours visible en haut)
+ *   Z2 — Workflow quotidien (5 items par défaut)
+ *   Z3 — Business (3 items par défaut)
+ *   Z4 — Menu "Plus" (collapsible)
+ *   Z5 — Système (Aide / Paramètres / Personnaliser + toggle collapse)
+ *
+ * Largeurs : 240px étendue / 64px collapsed.
+ * Fond #0F1419 (navy). Active bar chartreuse 3px à gauche.
+ *
+ * L1 dual-track : items filtrés par `track` + `access`. Si `track === 'free'`
+ * ou `track === 'annuaire-only'`, on retombe sur l'ancien rendu minimal pour
+ * ne pas casser ces parcours (le redesign vise le track logiciel/dual).
+ *
+ * Mobile : ce composant ne s'affiche pas (`hidden md:flex`). La nav mobile
+ * est gérée par `AppMobileNav` ci-dessous + `MobileMoreSheet`.
+ */
+
 import { cn } from '@/lib/utils'
-import type { TrackAccess } from '@/lib/access/track-access'
-import type { UserAccess } from '@/lib/upsell/access-control'
-import { hasFeatureAccess } from '@/lib/upsell/access-control'
-import type { PendingUpsellSuggestion } from '@/lib/upsell/load-access'
-import type { AddonCode, PricingPlanCode } from '@/lib/pricing-plans'
-import {
-  Archive,
-  Bell,
-  Briefcase,
-  Building2,
-  CalendarDays,
-  ChartLine,
-  FileText,
-  Home,
-  Inbox,
-  IdCard,
-  Menu,
-  MessageSquare,
-  Radar,
-  Receipt,
-  Send,
-  Settings,
-  Sparkles,
-  TrendingUp,
-  Users,
-  Wrench,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { ChevronLeft, HelpCircle, IdCard, Inbox, LayoutGrid, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
-type NavItem = {
-  href: string
-  label: string
-  icon: LucideIcon
-  requiredTier?: PricingPlanCode
-  requiredAddons?: readonly AddonCode[]
-}
+import { MobileMoreSheet } from '@/components/mobile-more-sheet'
+import { SidebarAvatar } from '@/components/sidebar/SidebarAvatar'
+import { SidebarCustomizer } from '@/components/sidebar/SidebarCustomizer'
+import { SidebarItem } from '@/components/sidebar/SidebarItem'
+import { SidebarKeyboardShortcuts } from '@/components/sidebar/SidebarKeyboardShortcuts'
+import { SidebarMoreMenu } from '@/components/sidebar/SidebarMoreMenu'
+import { DiscoverSidebarButton } from '@/components/upsell/DiscoverSidebarButton'
 
-/**
- * Sitemap V1 + extensions modules 1-9 (2026-05-25), enrichi L1 (upsell
- * intelligent 2026-06-05) avec `requiredTier` / `requiredAddons` par item.
- *
- * Filtrage via `filterNavItemsByAccess` côté layout : un user Essential
- * ne voit pas "Analytics", "Cockpit ADEME", "Communauté", etc. tant qu'il
- * n'a pas le tier ou l'addon nécessaire. Discoverabilité via le bouton
- * "Découvrir" sticky en bas.
- */
-const NAV_MAIN: readonly NavItem[] = [
-  { href: '/dashboard/dashboard', label: "Aujourd'hui", icon: Home },
-  { href: '/dashboard/dossiers', label: 'Dossiers', icon: FileText },
-  { href: '/dashboard/calendar', label: 'Planning', icon: CalendarDays },
-  { href: '/dashboard/clients', label: 'Clients', icon: Users },
-  { href: '/dashboard/properties', label: 'Biens', icon: Building2 },
-  { href: '/dashboard/facturation', label: 'Facturation', icon: Receipt },
-  { href: '/dashboard/relances', label: 'Relances', icon: Send },
-  { href: '/dashboard/gain', label: 'Performance', icon: ChartLine },
-  { href: '/dashboard/cockpit-ademe', label: 'Cockpit ADEME', icon: Radar, requiredTier: 'pro' },
-  { href: '/dashboard/analytics', label: 'Analytics', icon: TrendingUp, requiredTier: 'pro' },
-  { href: '/dashboard/veille', label: 'Veille', icon: Bell, requiredAddons: ['regulatory_watch'] },
-  {
-    href: '/dashboard/communaute',
-    label: 'Communauté',
-    icon: MessageSquare,
-    requiredAddons: ['community_pro'],
-  },
-  { href: '/dashboard/prescripteurs', label: 'Prescripteurs', icon: Briefcase, requiredTier: 'pro' },
-  { href: '/dashboard/archive', label: 'Mes fichiers', icon: Archive },
-  { href: '/dashboard/outils', label: 'Outils', icon: Wrench },
-] as const
+import type { TrackAccess } from '@/lib/access/track-access'
+import type { SidebarBadgeCounts } from '@/lib/sidebar/badge-counts'
+import { useSidebarPreferences } from '@/lib/sidebar/preferences-client'
+import type { SidebarPreferences, SidebarPreferencesItem } from '@/lib/sidebar/preferences-types'
+import {
+  SIDEBAR_ITEMS_BY_ID,
+  SYSTEM_ITEMS,
+  type SidebarItemDef,
+  type SidebarItemId,
+} from '@/lib/sidebar/sidebar-items'
+import { type UserAccess, hasFeatureAccess } from '@/lib/upsell/access-control'
+import type { PendingUpsellSuggestion } from '@/lib/upsell/load-access'
 
-/**
- * Items spécifiques au track Annuaire (B2C lead-gen) — affichés quand
- * l'organisation a une souscription annuaire active (annuaire-only ou dual).
- *
- * Phase C 2026-05-21 : profil annuaire + leads reçus + analytics fiche.
- */
-const NAV_ANNUAIRE: readonly NavItem[] = [
-  { href: '/dashboard/annuaire/profile', label: 'Profil annuaire', icon: IdCard },
-  { href: '/dashboard/annuaire/leads', label: 'Leads reçus', icon: Inbox },
-  { href: '/dashboard/leads/incoming', label: 'Leads à répondre', icon: Inbox },
-  { href: '/dashboard/annuaire/stats', label: 'Stats fiche', icon: TrendingUp },
-] as const
-
-const NAV_BOTTOM: readonly NavItem[] = [
-  { href: '/dashboard/account', label: 'Compte', icon: Settings },
-] as const
-
-interface UpsellCTA {
-  href: string
-  label: string
-}
-
-/**
- * CTA cross-sell sticky en bas de sidebar selon le track de l'user :
- *  - annuaire-only → propose KOVAS 360 (logiciel)
- *  - logiciel-only → propose KOVAS Annuaire (B2C lead-gen)
- *  - free          → propose le Bundle (parcours essai)
- *  - dual          → pas de CTA (déjà tout souscrit)
- */
-function getUpsellCTA(track: TrackAccess): UpsellCTA | null {
-  switch (track) {
-    case 'annuaire-only':
-      return { href: '/dashboard/upgrade/logiciel', label: 'Découvrir KOVAS 360' }
-    case 'logiciel-only':
-      return { href: '/dashboard/upgrade/annuaire', label: 'Découvrir KOVAS Annuaire' }
-    case 'free':
-      return { href: '/dashboard/upgrade/bundle', label: 'Démarrer un essai' }
-    case 'dual':
-    default:
-      return null
-  }
-}
-
-/**
- * Compose la liste d'items principaux selon le track dual :
- *  - free          : Aujourd'hui uniquement (la sidebar reste minimale, CTA push tout en bas)
- *  - annuaire-only : Aujourd'hui + items annuaire (pas de dossiers/devis/factures)
- *  - logiciel-only : items logiciel V1 standards (NAV_MAIN inchangé)
- *  - dual          : mix complet = logiciel + items annuaire spécifiques
- */
-function getMainNavForTrack(track: TrackAccess): readonly NavItem[] {
-  switch (track) {
-    case 'free':
-      return [{ href: '/dashboard/dashboard', label: "Aujourd'hui", icon: Home }]
-    case 'annuaire-only':
-      return [
-        { href: '/dashboard/dashboard', label: "Aujourd'hui", icon: Home },
-        ...NAV_ANNUAIRE,
-      ]
-    case 'dual':
-      return [...NAV_MAIN, ...NAV_ANNUAIRE]
-    case 'logiciel-only':
-    default:
-      return NAV_MAIN
-  }
-}
+const NAVY_INK = '#0F1419'
+const NAVY_DIVIDER = '#2A3038'
+const CHARTREUSE = '#D4F542'
 
 function isActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false
@@ -149,42 +58,283 @@ function isActive(pathname: string | null, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export interface AppSidebarProps {
-  /** UserAccess pré-chargé côté server. */
-  access: UserAccess
-  /** Suggestions pending pour le badge dot chartreuse. */
-  suggestions: readonly PendingUpsellSuggestion[]
-  /** Track dual (annuaire-only / logiciel-only / dual / free). */
-  track: TrackAccess
+/**
+ * Hydrate la préférence (SidebarPreferencesItem) en (SidebarItemDef) + filtre
+ * par accès. Ordonne selon la `position`. Items dont l'accès est manquant
+ * sont silencieusement omis.
+ */
+function hydrate(
+  prefsItems: readonly SidebarPreferencesItem[],
+  access: UserAccess,
+  onlyVisible: boolean,
+): SidebarItemDef[] {
+  const sorted = [...prefsItems].sort((a, b) => a.position - b.position)
+  const result: SidebarItemDef[] = []
+  for (const it of sorted) {
+    if (onlyVisible && !it.visible) continue
+    const def = SIDEBAR_ITEMS_BY_ID.get(it.id as SidebarItemId)
+    if (!def) continue
+    if (!hasFeatureAccess(access, def)) continue
+    result.push(def)
+  }
+  return result
 }
 
 /**
- * AppSidebar v5 — 80px icon-only pattern Synthex.
- * Fond #0F1419 (noir bleuté), icônes 24px blanc 60%, active barre
- * chartreuse 3px à gauche, tooltip natif au hover.
- *
- * L1 (2026-06-05) : items filtrés selon UserAccess. Bouton "Découvrir"
- * (Sparkles) en bas avec dot chartreuse si suggestion pending.
- *
- * Spec : docs/design/KOVAS_UIUX_v5_Final.md §3 + Navigation.
+ * Détermine si on doit utiliser la nouvelle sidebar pleine.
+ * On l'active pour track `logiciel-only` et `dual` ; pour `free`/`annuaire-only`
+ * on rend un fallback minimal style v5 (icon-only 80px) pour ne pas casser
+ * ces parcours qui ont leur propre structure.
  */
-export function AppSidebar({ access, suggestions, track }: AppSidebarProps) {
+function isFullSidebarTrack(track: TrackAccess): boolean {
+  return track === 'logiciel-only' || track === 'dual'
+}
+
+export interface AppSidebarProps {
+  access: UserAccess
+  suggestions: readonly PendingUpsellSuggestion[]
+  track: TrackAccess
+  /** Préférences sidebar chargées server-side (refonte 2026-05-23). */
+  preferences: SidebarPreferences
+  badgeCounts: SidebarBadgeCounts
+  /** Identité user (pour avatar zone 1). */
+  user: {
+    id: string
+    displayName: string
+    email: string
+    avatarUrl?: string | null
+  }
+  /** Server Action de déconnexion. */
+  onLogout: () => Promise<void>
+  /** Server Action de save des préférences. */
+  saveAction: (prefs: SidebarPreferences) => Promise<void>
+}
+
+export function AppSidebar(props: AppSidebarProps) {
+  const { access, suggestions, track } = props
+  // Fallback minimal pour free / annuaire-only
+  if (!isFullSidebarTrack(track)) {
+    return <AppSidebarFallback access={access} suggestions={suggestions} track={track} />
+  }
+  return <AppSidebarFull {...props} />
+}
+
+function AppSidebarFull({
+  access,
+  suggestions,
+  preferences,
+  badgeCounts,
+  user,
+  onLogout,
+  saveAction,
+}: AppSidebarProps) {
+  const pathname = usePathname()
+  const { prefs, setPrefs, toggleCollapsed } = useSidebarPreferences(
+    preferences,
+    user.id,
+    saveAction,
+  )
+  const [customizerOpen, setCustomizerOpen] = useState(false)
+
+  const collapsed = prefs.sidebarCollapsed
+  const width = collapsed ? 64 : 240
+
+  // Items hydratés + filtrés par accès
+  const mainDefs = useMemo(() => hydrate(prefs.mainItems, access, true), [prefs.mainItems, access])
+  const moreDefs = useMemo(() => hydrate(prefs.moreItems, access, true), [prefs.moreItems, access])
+
+  // Split visuel main : workflow (5 premiers) / business (le reste) — séparateur fin
+  // Heuristique : on coupe à index 5 sauf si moins de 6 items au total.
+  const workflowItems = mainDefs.slice(0, Math.min(5, mainDefs.length))
+  const businessItems = mainDefs.slice(Math.min(5, mainDefs.length))
+
+  const handleSave = useCallback(
+    (next: SidebarPreferences) => {
+      setPrefs(next)
+    },
+    [setPrefs],
+  )
+
+  return (
+    <>
+      <aside
+        className={cn(
+          'hidden md:flex shrink-0 flex-col sticky top-0 self-start h-dvh transition-[width] duration-200 ease-in-out',
+        )}
+        style={{ backgroundColor: NAVY_INK, width }}
+        aria-label="Navigation principale"
+      >
+        {/* Z1 — Avatar identité */}
+        <div className="px-2 pt-3 pb-3">
+          <SidebarAvatar
+            displayName={user.displayName}
+            email={user.email}
+            avatarUrl={user.avatarUrl}
+            collapsed={collapsed}
+            onLogout={onLogout}
+          />
+        </div>
+
+        {/* Z2 + Z3 — Workflow + Business */}
+        <nav
+          className="flex-1 overflow-y-auto overflow-x-hidden px-2 pt-1 pb-2 space-y-0.5 scrollbar-none"
+          style={{ scrollbarWidth: 'none' }}
+        >
+          {workflowItems.map((def) => (
+            <SidebarItem
+              key={def.id}
+              href={def.href}
+              label={def.label}
+              icon={def.icon}
+              active={isActive(pathname, def.href)}
+              collapsed={collapsed}
+              badgeCount={def.badgeKey ? badgeCounts[def.badgeKey] : undefined}
+              notificationStyle={prefs.notificationStyle}
+              accent={def.accent}
+            />
+          ))}
+
+          {businessItems.length > 0 ? (
+            <hr
+              className="my-2 border-0 h-px"
+              style={{ backgroundColor: NAVY_DIVIDER }}
+              aria-hidden
+            />
+          ) : null}
+
+          {businessItems.map((def) => (
+            <SidebarItem
+              key={def.id}
+              href={def.href}
+              label={def.label}
+              icon={def.icon}
+              active={isActive(pathname, def.href)}
+              collapsed={collapsed}
+              badgeCount={def.badgeKey ? badgeCounts[def.badgeKey] : undefined}
+              notificationStyle={prefs.notificationStyle}
+              accent={def.accent}
+            />
+          ))}
+
+          {/* Z4 — Menu Plus */}
+          {moreDefs.length > 0 ? (
+            <div className="pt-1">
+              <SidebarMoreMenu
+                items={moreDefs}
+                collapsed={collapsed}
+                badgeCounts={badgeCounts}
+                notificationStyle={prefs.notificationStyle}
+              />
+            </div>
+          ) : null}
+
+          {/* Bouton Découvrir (upsell) — sticky bas zone nav */}
+          <div className="pt-2">
+            <DiscoverSidebarButton access={access} suggestions={suggestions} />
+          </div>
+        </nav>
+
+        {/* Séparateur Z4 ↔ Z5 */}
+        <hr className="border-0 h-px mx-2" style={{ backgroundColor: NAVY_DIVIDER }} aria-hidden />
+
+        {/* Z5 — Système (Aide / Paramètres / Personnaliser) + toggle collapse */}
+        <div className="px-2 py-2 space-y-0.5">
+          <SidebarItem
+            href={SYSTEM_ITEMS.aide.href}
+            label={SYSTEM_ITEMS.aide.label}
+            icon={SYSTEM_ITEMS.aide.icon}
+            active={isActive(pathname, SYSTEM_ITEMS.aide.href)}
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            href={SYSTEM_ITEMS.parametres.href}
+            label={SYSTEM_ITEMS.parametres.label}
+            icon={SYSTEM_ITEMS.parametres.icon}
+            active={isActive(pathname, SYSTEM_ITEMS.parametres.href)}
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            href="#"
+            label={SYSTEM_ITEMS.personnaliser.label}
+            icon={SYSTEM_ITEMS.personnaliser.icon}
+            active={false}
+            collapsed={collapsed}
+            onClick={() => setCustomizerOpen(true)}
+            ariaLabel="Personnaliser la barre latérale"
+            ariaHasPopup={true}
+            ariaExpanded={customizerOpen}
+          />
+        </div>
+
+        {/* Toggle collapse (chevron en bas) */}
+        <div className="px-2 pb-3">
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? 'Étendre la barre latérale' : 'Réduire la barre latérale'}
+            title={collapsed ? 'Étendre' : 'Réduire'}
+            className={cn(
+              'group w-full flex items-center justify-center rounded-[10px] h-9 transition-colors duration-200 outline-none',
+              'hover:bg-[#1A1F26] focus-visible:ring-2',
+            )}
+            style={{ ['--tw-ring-color' as string]: CHARTREUSE }}
+          >
+            <ChevronLeft
+              className={cn(
+                'size-4 transition-transform duration-200',
+                collapsed ? 'rotate-180' : 'rotate-0',
+              )}
+              strokeWidth={1.5}
+              style={{ color: 'rgba(255,255,255,0.65)' }}
+            />
+          </button>
+        </div>
+      </aside>
+
+      <SidebarCustomizer
+        open={customizerOpen}
+        onOpenChange={setCustomizerOpen}
+        prefs={prefs}
+        onSave={handleSave}
+      />
+
+      <SidebarKeyboardShortcuts mainItems={prefs.mainItems} />
+    </>
+  )
+}
+
+/**
+ * Fallback minimal pour track `free` / `annuaire-only` — conserve l'ancien
+ * comportement 80px icon-only, mais sans personnalisation.
+ */
+interface AppSidebarFallbackProps {
+  access: UserAccess
+  suggestions: readonly PendingUpsellSuggestion[]
+  track: TrackAccess
+}
+
+function AppSidebarFallback({ access, suggestions, track }: AppSidebarFallbackProps) {
   const pathname = usePathname()
 
-  // Phase C — Dual track : items filtrés par track puis par features
-  // (un user annuaire-only ne voit pas Dossiers, Devis, etc. même s'il a
-  // un legacy `decouverte` plan vu que son track est `annuaire-only`).
-  const trackItems = getMainNavForTrack(track)
-  const accessibleItems = trackItems.filter((item) => hasFeatureAccess(access, item))
-  const upsellCta = getUpsellCTA(track)
+  const items: readonly { href: string; label: string; icon: SidebarItemDef['icon'] }[] =
+    track === 'annuaire-only'
+      ? [
+          {
+            href: '/dashboard/dashboard',
+            label: "Aujourd'hui",
+            icon: SYSTEM_ITEMS.parametres.icon,
+          },
+          { href: '/dashboard/annuaire/profile', label: 'Profil annuaire', icon: IdCard },
+          { href: '/dashboard/annuaire/leads', label: 'Leads reçus', icon: Inbox },
+        ]
+      : [{ href: '/dashboard/dashboard', label: "Aujourd'hui", icon: LayoutGrid }]
 
   return (
     <aside
       className="hidden md:flex w-20 shrink-0 flex-col items-center sticky top-0 self-start h-dvh"
-      style={{ backgroundColor: '#0F1419' }}
+      style={{ backgroundColor: NAVY_INK }}
       aria-label="Navigation principale"
     >
-      {/* Logo K monogramme 32×32 */}
       <Link href="/dashboard/dashboard" className="mt-4 mb-6" aria-label="KOVAS — Tableau de bord">
         <div
           aria-hidden
@@ -194,141 +344,185 @@ export function AppSidebar({ access, suggestions, track }: AppSidebarProps) {
         </div>
       </Link>
 
-      {/* Nav principale filtrée — scroll vertical activé pour absorber 14 items sans débordement */}
-      <nav
-        className="flex flex-col gap-1 flex-1 px-2 overflow-y-auto scrollbar-none"
-        style={{ scrollbarWidth: 'none' }}
-      >
-        {accessibleItems.map((item) => (
-          <SidebarIconButton key={item.href} item={item} active={isActive(pathname, item.href)} />
+      <nav className="flex flex-col gap-1 flex-1 px-2">
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            title={item.label}
+            aria-label={item.label}
+            className={cn(
+              'relative flex size-12 items-center justify-center rounded-md transition-colors',
+              isActive(pathname, item.href)
+                ? 'bg-white/[0.08] text-white'
+                : 'text-white/60 hover:bg-white/[0.06] hover:text-white',
+            )}
+          >
+            {isActive(pathname, item.href) ? (
+              <span
+                aria-hidden
+                className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
+                style={{ backgroundColor: CHARTREUSE }}
+              />
+            ) : null}
+            <item.icon className="size-5" strokeWidth={1.5} />
+          </Link>
         ))}
       </nav>
 
-      {/* Footer : Découvrir + cross-sell dual track + search + compte + theme */}
       <div className="flex flex-col gap-1 px-2 pb-4 mt-auto">
         <DiscoverSidebarButton access={access} suggestions={suggestions} />
-        {upsellCta && (
-          <Link
-            href={upsellCta.href}
-            title={upsellCta.label}
-            aria-label={upsellCta.label}
-            className="relative flex size-12 items-center justify-center rounded-md text-white/65 hover:text-white transition-colors"
-            style={{ backgroundColor: 'rgba(212, 245, 66, 0.08)' }}
-          >
-            <Sparkles className="size-5" strokeWidth={1.75} style={{ color: '#D4F542' }} />
-          </Link>
-        )}
-        {NAV_BOTTOM.map((item) => (
-          <SidebarIconButton key={item.href} item={item} active={isActive(pathname, item.href)} />
-        ))}
-        <div className="flex size-12 items-center justify-center text-white/65 hover:text-white transition-colors">
-          <ThemeToggle />
-        </div>
+        <Link
+          href="/dashboard/account"
+          title="Compte"
+          aria-label="Compte"
+          className="relative flex size-12 items-center justify-center rounded-md text-white/65 hover:bg-white/[0.06] hover:text-white transition-colors"
+        >
+          <Settings className="size-5" strokeWidth={1.5} />
+        </Link>
+        <Link
+          href="/dashboard/aide"
+          title="Aide"
+          aria-label="Aide"
+          className="relative flex size-12 items-center justify-center rounded-md text-white/65 hover:bg-white/[0.06] hover:text-white transition-colors"
+        >
+          <HelpCircle className="size-5" strokeWidth={1.5} />
+        </Link>
       </div>
     </aside>
   )
 }
 
-function SidebarIconButton({ item, active }: { item: NavItem; active: boolean }) {
-  const Icon = item.icon
-  return (
-    <Link
-      href={item.href}
-      title={item.label}
-      aria-label={item.label}
-      aria-current={active ? 'page' : undefined}
-      className={cn(
-        'relative flex size-12 items-center justify-center rounded-md transition-colors duration-150',
-        active
-          ? 'bg-white/[0.08] text-white'
-          : 'text-white/60 hover:bg-white/[0.06] hover:text-white',
-      )}
-    >
-      {/* Barre active chartreuse 3px à gauche */}
-      {active && (
-        <span
-          aria-hidden
-          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
-          style={{ backgroundColor: '#D4F542' }}
-        />
-      )}
-      <Icon className="size-5" strokeWidth={1.75} />
-    </Link>
-  )
-}
+// =============================================================================
+// MOBILE NAV — Bottom tab bar 5 items (refonte 2026-05-23)
+// =============================================================================
 
 export interface AppMobileNavProps {
   access: UserAccess
   suggestions: readonly PendingUpsellSuggestion[]
   track: TrackAccess
+  /** Items visibles de la sidebar (5 premiers utilisés en bottom bar). */
+  preferences?: SidebarPreferences
+  badgeCounts?: SidebarBadgeCounts
 }
 
 /**
- * AppMobileNav v5 — 5 tabs iOS-style fond #0F1419.
+ * Bottom tab bar mobile — 5 items :
+ *  - 4 raccourcis principaux (Accueil, Dossiers, Capture, Calendrier)
+ *  - 1 bouton "Plus" qui ouvre MobileMoreSheet
  *
- * 4 Links + 1 bouton "Plus" qui ouvre MobileMoreSheet (bottom sheet contenant
- * les 10 sections KOVAS V1 non représentées dans la barre).
- *
- * L1 (2026-06-05) : passe l'access aux composants enfants pour filtrage +
- * passe les suggestions pour le badge dot dans "Plus".
+ * Touch targets >= 48px. Active = dot chartreuse en-dessous + icône chartreuse.
  */
-export function AppMobileNav({ access, suggestions, track }: AppMobileNavProps) {
+export function AppMobileNav({
+  access,
+  suggestions,
+  track,
+  preferences,
+  badgeCounts,
+}: AppMobileNavProps) {
   const pathname = usePathname()
   const [moreOpen, setMoreOpen] = useState(false)
 
-  // Phase C — Dual track : 4 tabs adaptés selon track
-  const tabs: ReadonlyArray<NavItem> =
-    track === 'annuaire-only'
-      ? [
-          { href: '/dashboard/dashboard', label: 'Auj.', icon: Home },
-          { href: '/dashboard/annuaire/leads', label: 'Leads', icon: Inbox },
-          { href: '/dashboard/annuaire/profile', label: 'Profil', icon: IdCard },
-          { href: '/dashboard/account', label: 'Compte', icon: Settings },
-        ]
-      : track === 'free'
-        ? [
-            { href: '/dashboard/dashboard', label: 'Auj.', icon: Home },
-            { href: '/dashboard/upgrade/bundle', label: 'Découvrir', icon: Sparkles },
-            { href: '/dashboard/account', label: 'Compte', icon: Settings },
-          ]
-        : [
-            // logiciel-only et dual partagent les mêmes tabs primaires
-            { href: '/dashboard/dashboard', label: 'Auj.', icon: Home },
-            { href: '/dashboard/dossiers', label: 'Dossiers', icon: FileText },
-            { href: '/dashboard/calendar', label: 'Plan.', icon: CalendarDays },
-            { href: '/dashboard/account', label: 'Compte', icon: Settings },
-          ]
+  // 4 raccourcis principaux — dérivés des préférences si dispo, sinon defaults
+  const visibleMain = preferences
+    ? preferences.mainItems
+        .filter((i) => i.visible)
+        .map((i) => SIDEBAR_ITEMS_BY_ID.get(i.id as SidebarItemId))
+        .filter((d): d is SidebarItemDef => Boolean(d))
+        .filter((d) => hasFeatureAccess(access, d))
+    : []
+
+  // Sélection des 4 tabs primaires pour mobile : priorité aux items
+  // workflow standard (home, dossiers, capture, calendar).
+  const preferredIds: SidebarItemId[] = ['home', 'dossiers', 'capture', 'calendar']
+  const tabDefs: SidebarItemDef[] = []
+  for (const id of preferredIds) {
+    const found = visibleMain.find((d) => d.id === id)
+    if (found) tabDefs.push(found)
+  }
+  // Complète si moins de 4 (track free / annuaire-only ou items masqués)
+  if (tabDefs.length < 4) {
+    for (const def of visibleMain) {
+      if (tabDefs.length >= 4) break
+      if (!tabDefs.find((d) => d.id === def.id)) tabDefs.push(def)
+    }
+  }
+  // Si toujours vide (track free), fallback minimal
+  if (tabDefs.length === 0) {
+    const homeDef = SIDEBAR_ITEMS_BY_ID.get('home')
+    if (homeDef) tabDefs.push(homeDef)
+  }
 
   const hasSuggestion = suggestions.length > 0
+  const counts: SidebarBadgeCounts = badgeCounts ?? {
+    active_dossiers: 0,
+    overdue_invoices: 0,
+    unread_messages: 0,
+    unread_notifications: 0,
+  }
 
   return (
     <>
       <nav
         className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/10 pb-[env(safe-area-inset-bottom)]"
-        style={{ backgroundColor: '#0F1419' }}
+        style={{ backgroundColor: NAVY_INK }}
         aria-label="Navigation mobile"
       >
         <div className="flex items-stretch">
-          {tabs.map((item) => {
-            const active = isActive(pathname, item.href)
-            const Icon = item.icon
+          {tabDefs.map((def) => {
+            const active = isActive(pathname, def.href)
+            const Icon = def.icon
+            const count = def.badgeKey ? counts[def.badgeKey] : 0
             return (
               <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] transition-colors',
-                  active ? 'text-white font-semibold' : 'text-white/60',
-                )}
+                key={def.id}
+                href={def.href}
                 aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'relative flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] transition-colors',
+                )}
               >
-                <Icon className="size-5" strokeWidth={1.75} />
-                <span>{item.label}</span>
+                <span className="relative">
+                  <Icon
+                    className="size-[22px]"
+                    strokeWidth={1.5}
+                    style={{
+                      color: active ? CHARTREUSE : 'rgba(255,255,255,0.65)',
+                    }}
+                  />
+                  {count > 0 ? (
+                    <span
+                      aria-hidden
+                      className="absolute -top-1 -right-2 min-w-[16px] h-[16px] px-1 rounded-full text-[10px] font-semibold flex items-center justify-center"
+                      style={{ backgroundColor: CHARTREUSE, color: NAVY_INK }}
+                    >
+                      {count > 9 ? '9+' : count}
+                    </span>
+                  ) : null}
+                </span>
+                <span
+                  className={cn(
+                    'font-mono text-[10px] leading-tight',
+                    active ? 'font-semibold' : 'font-normal',
+                  )}
+                  style={{
+                    color: active ? CHARTREUSE : 'rgba(255,255,255,0.65)',
+                  }}
+                >
+                  {def.label}
+                </span>
+                {active ? (
+                  <span
+                    aria-hidden
+                    className="absolute bottom-0.5 size-1 rounded-full"
+                    style={{ backgroundColor: CHARTREUSE }}
+                  />
+                ) : null}
               </Link>
             )
           })}
 
-          {/* 5e tab : bouton "Plus" → ouvre MobileMoreSheet */}
+          {/* 5e tab : Plus */}
           <button
             type="button"
             onClick={() => setMoreOpen(true)}
@@ -336,17 +530,32 @@ export function AppMobileNav({ access, suggestions, track }: AppMobileNavProps) 
             aria-expanded={moreOpen}
             aria-controls="mobile-more-sheet"
             className={cn(
-              'relative flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] transition-colors',
-              moreOpen ? 'text-white font-semibold' : 'text-white/60',
+              'relative flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] transition-colors',
             )}
           >
-            <Menu className="size-5" strokeWidth={1.75} />
-            <span>Plus</span>
+            <LayoutGrid
+              className="size-[22px]"
+              strokeWidth={1.5}
+              style={{
+                color: moreOpen ? CHARTREUSE : 'rgba(255,255,255,0.65)',
+              }}
+            />
+            <span
+              className={cn(
+                'font-mono text-[10px] leading-tight',
+                moreOpen ? 'font-semibold' : 'font-normal',
+              )}
+              style={{
+                color: moreOpen ? CHARTREUSE : 'rgba(255,255,255,0.65)',
+              }}
+            >
+              Plus
+            </span>
             {hasSuggestion ? (
               <span
                 aria-hidden
-                className="absolute top-1.5 right-[calc(50%-14px)] size-1.5 rounded-full"
-                style={{ backgroundColor: '#D4F542' }}
+                className="absolute top-2 right-[calc(50%-14px)] size-1.5 rounded-full"
+                style={{ backgroundColor: CHARTREUSE }}
               />
             ) : null}
           </button>

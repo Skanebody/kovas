@@ -1,11 +1,11 @@
 import { AppNavTabs } from '@/components/app-nav-tabs'
-import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { AppShell } from '@/components/app-shell'
+import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { TrialBannerLoader } from '@/components/billing/TrialBannerLoader'
 import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
-import { CommandK } from '@/components/shared/CommandK'
 import { RegulatoryNotificationsBadge } from '@/components/regulatory/RegulatoryNotificationsBadge'
+import { CommandK } from '@/components/shared/CommandK'
 import { MobileQuickActionsFab } from '@/components/ui/mobile-quick-actions'
 import { OfflineBanner } from '@/components/ui/offline-banner'
 import { SyncIndicator } from '@/components/ui/sync-indicator'
@@ -14,6 +14,9 @@ import { UserMenu } from '@/components/user-menu'
 import { getUserTrackAccess } from '@/lib/access/track-access'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { checkTrialGuard, isPathWhitelisted } from '@/lib/billing/trial-guard'
+import { saveSidebarPreferencesAction } from '@/lib/sidebar/actions'
+import { loadSidebarBadgeCounts } from '@/lib/sidebar/badge-counts'
+import { loadSidebarPreferences } from '@/lib/sidebar/preferences-server'
 import { loadPendingSuggestions, loadUserAccess } from '@/lib/upsell/load-access'
 import { headers } from 'next/headers'
 import Link from 'next/link'
@@ -29,12 +32,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // la sidebar adaptive et le bouton "Découvrir" + dot chartreuse.
   // Phase C — Dual track : charge également l'état Annuaire/Logiciel pour
   // adapter la sidebar (annuaire-only / logiciel-only / dual / free).
-  const [access, suggestions, trackAccess, trialVerdict] = await Promise.all([
-    loadUserAccess(supabase, orgId),
-    loadPendingSuggestions(supabase, user.id),
-    getUserTrackAccess(),
-    checkTrialGuard(supabase, orgId),
-  ])
+  // FIX-CC (2026-05-23) : charge les préférences sidebar + compteurs badges.
+  const [access, suggestions, trackAccess, trialVerdict, sidebarPrefs, badgeCounts] =
+    await Promise.all([
+      loadUserAccess(supabase, orgId),
+      loadPendingSuggestions(supabase, user.id),
+      getUserTrackAccess(),
+      checkTrialGuard(supabase, orgId),
+      loadSidebarPreferences(user.id, supabase),
+      loadSidebarBadgeCounts(supabase, orgId),
+    ])
 
   // Garde "essai expiré sans paiement" — redirige vers /dashboard/account?expired=1
   // sauf si déjà sur une route whitelistée (account, billing, API, status, etc.).
@@ -49,7 +56,21 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <AppShell background="light" className="min-h-dvh flex">
-      <AppSidebar access={access} suggestions={suggestions} track={trackAccess.track} />
+      <AppSidebar
+        access={access}
+        suggestions={suggestions}
+        track={trackAccess.track}
+        preferences={sidebarPrefs}
+        badgeCounts={badgeCounts}
+        user={{
+          id: user.id,
+          displayName: displayName ?? profile.email,
+          email: profile.email,
+          avatarUrl: null,
+        }}
+        onLogout={logoutAction}
+        saveAction={saveSidebarPreferencesAction}
+      />
 
       <div className="flex-1 flex flex-col min-w-0">
         <OfflineBanner />
@@ -91,7 +112,13 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      <AppMobileNav access={access} suggestions={suggestions} track={trackAccess.track} />
+      <AppMobileNav
+        access={access}
+        suggestions={suggestions}
+        track={trackAccess.track}
+        preferences={sidebarPrefs}
+        badgeCounts={badgeCounts}
+      />
       <MobileQuickActionsFab />
       {/* Palette riche (Cmd+K, dossiers/clients/biens/récents) — listener Cmd+K interne. */}
       <CommandPalette />

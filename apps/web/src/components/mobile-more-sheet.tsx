@@ -1,5 +1,10 @@
 'use client'
 
+import { DiscoverSidebarButton } from '@/components/upsell/DiscoverSidebarButton'
+import type { TrackAccess } from '@/lib/access/track-access'
+import type { AddonCode, PricingPlanCode } from '@/lib/pricing-plans'
+import { type UserAccess, hasFeatureAccess } from '@/lib/upsell/access-control'
+import type { PendingUpsellSuggestion } from '@/lib/upsell/load-access'
 import { cn } from '@/lib/utils'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
@@ -8,13 +13,18 @@ import {
   Briefcase,
   Building2,
   ChartLine,
+  Gift,
+  HelpCircle,
   IdCard,
   Inbox,
+  KeyRound,
   MessageSquare,
   Radar,
   Receipt,
   ScrollText,
   Send,
+  Settings,
+  Sparkle,
   TrendingUp,
   Users,
   Wrench,
@@ -24,14 +34,6 @@ import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { DiscoverSidebarButton } from '@/components/upsell/DiscoverSidebarButton'
-import type { TrackAccess } from '@/lib/access/track-access'
-import {
-  hasFeatureAccess,
-  type UserAccess,
-} from '@/lib/upsell/access-control'
-import type { PendingUpsellSuggestion } from '@/lib/upsell/load-access'
-import type { AddonCode, PricingPlanCode } from '@/lib/pricing-plans'
 
 type MoreItem = {
   href: string
@@ -54,21 +56,41 @@ type MoreSection = {
  */
 const LOGICIEL_SECTIONS: readonly MoreSection[] = [
   {
+    title: 'Communication',
+    items: [
+      { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare },
+      { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
+      { href: '/dashboard/coach', label: 'Coach IA', icon: Sparkle },
+    ],
+  },
+  {
     title: 'Workflow',
     items: [
       { href: '/dashboard/clients', label: 'Clients', icon: Users },
       { href: '/dashboard/properties', label: 'Biens', icon: Building2 },
       { href: '/dashboard/gain', label: 'Performance', icon: ChartLine },
-      { href: '/dashboard/archive', label: 'Mes fichiers', icon: Archive },
+      { href: '/dashboard/archive', label: 'Archives', icon: Archive },
+      { href: '/dashboard/coffre', label: 'Coffre-fort certifications', icon: KeyRound },
       { href: '/dashboard/outils', label: 'Outils', icon: Wrench },
+      { href: '/dashboard/annuaire', label: 'Mon annuaire', icon: Inbox },
     ],
   },
   {
     title: 'Intelligence',
     items: [
-      { href: '/dashboard/cockpit-ademe', label: 'Cockpit ADEME', icon: Radar, requiredTier: 'pro' },
+      {
+        href: '/dashboard/cockpit-ademe',
+        label: 'Cockpit ADEME',
+        icon: Radar,
+        requiredTier: 'pro',
+      },
       { href: '/dashboard/analytics', label: 'Analytics', icon: TrendingUp, requiredTier: 'pro' },
-      { href: '/dashboard/veille', label: 'Veille', icon: Bell, requiredAddons: ['regulatory_watch'] },
+      {
+        href: '/dashboard/veille',
+        label: 'Veille',
+        icon: Bell,
+        requiredAddons: ['regulatory_watch'],
+      },
       {
         href: '/dashboard/communaute',
         label: 'Communauté',
@@ -86,9 +108,23 @@ const LOGICIEL_SECTIONS: readonly MoreSection[] = [
     ],
   },
   {
-    title: 'Automatisation',
+    title: 'Croissance',
     items: [
-      { href: '/dashboard/prescripteurs', label: 'Prescripteurs', icon: Briefcase, requiredTier: 'pro' },
+      {
+        href: '/dashboard/prescripteurs',
+        label: 'Prescripteurs',
+        icon: Briefcase,
+        requiredTier: 'pro',
+      },
+      { href: '/dashboard/affiliation', label: 'Affiliation rénovation', icon: Gift },
+      { href: '/dashboard/account/parrainage', label: 'Parrainage', icon: Users },
+    ],
+  },
+  {
+    title: 'Système',
+    items: [
+      { href: '/dashboard/aide', label: 'Aide', icon: HelpCircle },
+      { href: '/dashboard/account', label: 'Paramètres', icon: Settings },
     ],
   },
 ] as const
@@ -117,7 +153,6 @@ function getSectionsForTrack(track: TrackAccess): readonly MoreSection[] {
       return LOGICIEL_SECTIONS
     case 'dual':
       return [...LOGICIEL_SECTIONS, ...ANNUAIRE_SECTIONS]
-    case 'free':
     default:
       return []
   }
@@ -197,20 +232,15 @@ export function MobileMoreSheet({
             </DialogPrimitive.Close>
           </div>
 
-          <DialogPrimitive.Description
-            id="mobile-more-sheet-description"
-            className="sr-only"
-          >
-            Toutes les sections KOVAS non visibles dans la barre de navigation
-            mobile principale, regroupées par catégorie.
+          <DialogPrimitive.Description id="mobile-more-sheet-description" className="sr-only">
+            Toutes les sections KOVAS non visibles dans la barre de navigation mobile principale,
+            regroupées par catégorie.
           </DialogPrimitive.Description>
 
           {/* Body : sections scrollables (filtrées par track dual) */}
           <div className="flex-1 overflow-y-auto px-6 pb-4">
             {sections.map((section) => {
-              const visibleItems = section.items.filter((item) =>
-                hasFeatureAccess(access, item),
-              )
+              const visibleItems = section.items.filter((item) => hasFeatureAccess(access, item))
               if (visibleItems.length === 0) return null
               return (
                 <section key={section.title} className="mb-6 last:mb-2">
@@ -235,9 +265,7 @@ export function MobileMoreSheet({
                             )}
                           >
                             <Icon className="size-5 shrink-0" strokeWidth={1.75} />
-                            <span className="text-sm font-medium leading-tight">
-                              {item.label}
-                            </span>
+                            <span className="text-sm font-medium leading-tight">{item.label}</span>
                           </Link>
                         </li>
                       )
@@ -252,11 +280,7 @@ export function MobileMoreSheet({
               <h3 className="font-mono text-[11px] uppercase tracking-[0.06em] text-foreground/55 mb-3">
                 Découvrir
               </h3>
-              <DiscoverSidebarButton
-                access={access}
-                suggestions={suggestions}
-                variant="inline"
-              />
+              <DiscoverSidebarButton access={access} suggestions={suggestions} variant="inline" />
             </section>
           </div>
 
