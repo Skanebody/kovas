@@ -59,7 +59,11 @@ export class AudioRecorder {
     this.recorder.ondataavailable = (e) => {
       if (e.data.size > 0) this.chunks.push(e.data)
     }
-    this.recorder.start(500) // collect chunks every 500ms
+    // Pas de timeslice : MediaRecorder.start() sans argument → un seul chunk
+    // produit au stop, blob garanti valide (sinon les fragments WebM/MP4
+    // intermédiaires ne forment pas un fichier complet — bug Safari + bug Chrome
+    // avec certains codecs opus → <audio> renvoie NotSupportedError).
+    this.recorder.start()
   }
 
   async stop(): Promise<AudioRecording> {
@@ -69,14 +73,30 @@ export class AudioRecorder {
     return new Promise((resolve, reject) => {
       recorder.onstop = () => {
         try {
+          // Précision : durée mesurée avant cleanup pour précision max
+          const durationSeconds = (Date.now() - this.startTime) / 1000
           const finalMime = this.mimeType || recorder.mimeType || 'audio/webm'
           const blob = new Blob(this.chunks, { type: finalMime })
-          const durationSeconds = Math.round((Date.now() - this.startTime) / 1000)
           this.cleanup()
+          // Garde-fou : blob vide = recording cassé (stop() trop rapide,
+          // pas de permission micro, etc.) → reject explicite plutôt que
+          // de retourner un blob illisible qui crashera <audio>.
+          if (blob.size === 0) {
+            reject(new Error('Empty audio blob — recording too short or no data captured'))
+            return
+          }
           resolve({ blob, mimeType: finalMime, durationSeconds })
         } catch (err) {
           reject(err)
         }
+      }
+      // requestData() force MediaRecorder à flush le buffer dans
+      // ondataavailable AVANT que onstop ne tire. Sinon sur certains browsers
+      // (Safari notamment), la dernière trame audio peut être perdue.
+      try {
+        if (recorder.state === 'recording') recorder.requestData()
+      } catch {
+        // requestData peut throw sur certains polyfills — non bloquant
       }
       recorder.stop()
     })
