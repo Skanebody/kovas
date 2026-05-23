@@ -87,14 +87,25 @@ export const MONTH_NAMES = [
   'décembre',
 ]
 
-/** Plage horaire affichée timeline vue Jour. */
+/** Plage horaire affichée timeline vue Jour / Semaine. */
 export const DAY_HOUR_START = 7
 export const DAY_HOUR_END = 21
 export const DAY_HOUR_COUNT = DAY_HOUR_END - DAY_HOUR_START // 14 heures
 
-/** Hauteur d'une heure de timeline (desktop / mobile). */
-export const HOUR_HEIGHT_DESKTOP = 60
+/**
+ * Hauteur d'une heure de timeline (desktop / mobile).
+ *
+ * 48px par heure correspond aux specs Apple Calendar / Cron / Notion Calendar.
+ * Une demi-heure fait donc 24px (graduation pointillée).
+ *
+ * Mobile = 40px pour densifier l'affichage sur petit écran.
+ */
+export const HOUR_HEIGHT_DESKTOP = 48
 export const HOUR_HEIGHT_MOBILE = 40
+
+/** Largeur de la colonne fixe "labels d'heure" à gauche de la grille. */
+export const TIME_GUTTER_WIDTH_DESKTOP = 60
+export const TIME_GUTTER_WIDTH_MOBILE = 44
 
 // =============================================================================
 // Helpers date (purs, sans timezone library — Europe/Paris en pratique).

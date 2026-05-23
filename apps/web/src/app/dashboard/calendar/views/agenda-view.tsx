@@ -10,6 +10,7 @@ import {
   MONTH_NAMES,
   STATUS_LABELS,
   STATUS_VARIANT,
+  formatTimeFR,
   isWeekend,
   sameDay,
 } from '@/lib/calendar/shared'
@@ -135,16 +136,8 @@ interface AgendaRowProps {
 function AgendaRow({ event, onClick }: AgendaRowProps) {
   const start = new Date(event.scheduledAt)
   const end = new Date(start.getTime() + event.durationMinutes * 60_000)
-  const timeStart = start.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Europe/Paris',
-  })
-  const timeEnd = end.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Europe/Paris',
-  })
+  const timeStart = formatTimeFR(start)
+  const timeEnd = formatTimeFR(end)
   const addressLine = [event.address, event.city].filter(Boolean).join(', ')
   const isCancelled = event.status === 'cancelled'
 
@@ -159,13 +152,20 @@ function AgendaRow({ event, onClick }: AgendaRowProps) {
           isCancelled && 'opacity-60',
         )}
       >
-        {/* Heure */}
-        <div className="shrink-0 w-20 sm:w-24">
-          <div className="font-mono font-semibold tabular-nums text-ink text-[12px]">
+        {/* Heure : pillule mono "08:30 → 10:00" avec séparateur · */}
+        <div className="shrink-0 w-20 sm:w-24 pt-0.5">
+          <div className="font-mono font-semibold tabular-nums text-ink text-[12px] leading-tight">
             {timeStart}
           </div>
-          <div className="font-mono tabular-nums text-ink-mute text-[10px]">→ {timeEnd}</div>
+          <div className="font-mono tabular-nums text-ink-mute/80 text-[10px] leading-tight">
+            → {timeEnd}
+          </div>
         </div>
+
+        {/* Séparateur visuel · */}
+        <span aria-hidden className="text-ink-mute/40 text-[14px] leading-none select-none pt-0.5">
+          ·
+        </span>
 
         {/* Contenu central */}
         <div className="flex-1 min-w-0 space-y-1">

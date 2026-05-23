@@ -5,6 +5,7 @@ import {
   type CalendarEvent,
   DAY_NAMES_SHORT,
   addDays,
+  formatTimeFR,
   sameDay,
   startOfMonth,
   startOfWeek,
@@ -23,6 +24,16 @@ interface MonthViewProps {
 
 const MAX_EVENTS_PER_CELL = 3
 
+/**
+ * Vue Mois — grille 7×6 cases jour entier (pas de timeline horaire).
+ *
+ * Layout :
+ *   - Header bandeau navy 28px de haut avec noms de jours JetBrains Mono uppercase
+ *   - Cellules min-height 96px desktop, padding 8px
+ *   - Numéro du jour en haut à gauche ; aujourd'hui = cercle navy 24px cream
+ *   - Max 3 événements visibles + "+N autres"
+ *   - Hover lift léger
+ */
 export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthViewProps) {
   const today = new Date()
   const monthStart = useMemo(() => startOfMonth(anchor), [anchor])
@@ -56,13 +67,13 @@ export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthV
   }, [events, currentMonth])
 
   return (
-    <div className="rounded-2xl border border-rule/70 bg-paper overflow-hidden">
-      {/* Header noms de jours */}
-      <div className="grid grid-cols-7 border-b border-rule/60 bg-sage-alt/30">
+    <div className="rounded-2xl border border-rule/70 bg-paper overflow-hidden shadow-glass-sm">
+      {/* Header bandeau navy noms de jours */}
+      <div className="grid grid-cols-7 bg-[#0F1419] h-7">
         {DAY_NAMES_SHORT.map((name) => (
           <div
             key={name}
-            className="px-2 py-2 text-center text-[10px] uppercase tracking-wider font-semibold text-ink-mute"
+            className="flex items-center justify-center text-center font-mono text-[10px] uppercase tracking-[0.12em] font-semibold text-sage/90"
           >
             {name}
           </div>
@@ -77,6 +88,8 @@ export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthV
           const dayEvents = eventsByDay.get(day.toDateString()) ?? []
           const visibleEvents = dayEvents.slice(0, MAX_EVENTS_PER_CELL)
           const overflow = dayEvents.length - visibleEvents.length
+          const isLastCol = idx % 7 === 6
+          const isLastRow = idx >= 35
 
           return (
             <button
@@ -84,30 +97,41 @@ export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthV
               key={day.toISOString()}
               onClick={() => onSelectDay(day)}
               className={cn(
-                'relative flex flex-col items-stretch text-left min-h-[88px] sm:min-h-[110px] p-1.5 border-r border-b border-rule/40 transition-colors',
-                'hover:bg-[#0F1419]/[0.03]',
-                !isInCurrentMonth && 'opacity-40',
-                isToday && 'bg-chartreuse/[0.06]',
-                idx % 7 === 6 && 'border-r-0',
+                'relative flex flex-col items-stretch text-left min-h-[88px] sm:min-h-[96px] p-2 border-r border-b border-rule/40 transition-all',
+                'hover:bg-sage-alt/40 hover:shadow-glass-sm hover:z-10',
+                !isInCurrentMonth && 'opacity-50 bg-sage-alt/20',
+                isToday && 'bg-chartreuse/[0.08]',
+                isLastCol && 'border-r-0',
+                isLastRow && 'border-b-0',
               )}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span
-                  className={cn(
-                    'font-mono text-[11px] tabular-nums font-medium',
-                    isToday ? 'text-ink' : 'text-ink-mute',
-                  )}
-                >
-                  {day.getDate()}
-                </span>
-                {isToday && (
+              {/* En-tête cellule : numéro jour + badge today */}
+              <div className="flex items-center justify-between mb-1.5">
+                {isToday ? (
                   <span
                     aria-hidden
-                    className="size-1.5 rounded-full bg-chartreuse shadow-[0_0_4px_rgba(212,245,66,0.6)]"
-                  />
+                    className="inline-flex items-center justify-center size-6 rounded-full bg-ink text-sage font-mono text-[11px] font-semibold tabular-nums"
+                  >
+                    {day.getDate()}
+                  </span>
+                ) : (
+                  <span
+                    className={cn(
+                      'font-mono text-[11px] tabular-nums font-medium leading-none pl-0.5',
+                      isInCurrentMonth ? 'text-ink' : 'text-ink-mute',
+                    )}
+                  >
+                    {day.getDate()}
+                  </span>
+                )}
+                {dayEvents.length > 0 && (
+                  <span className="text-[9px] font-mono text-ink-mute tabular-nums leading-none pr-0.5">
+                    {dayEvents.length}
+                  </span>
                 )}
               </div>
 
+              {/* Liste events compacts */}
               <div className="flex-1 space-y-0.5 overflow-hidden">
                 {visibleEvents.map((ev) => (
                   <MonthEventPill
@@ -150,11 +174,7 @@ interface MonthEventPillProps {
 
 function MonthEventPill({ event, onClick }: MonthEventPillProps) {
   const start = new Date(event.scheduledAt)
-  const time = start.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Europe/Paris',
-  })
+  const time = formatTimeFR(start)
   const mainType = event.missionTypes[0]
   const isCancelled = event.status === 'cancelled'
 
@@ -177,9 +197,7 @@ function MonthEventPill({ event, onClick }: MonthEventPillProps) {
           className="text-[8px] px-1 py-0 rounded-sm truncate"
         />
       ) : (
-        <span className="text-[10px] text-ink truncate">
-          {event.clientName ?? 'Sans client'}
-        </span>
+        <span className="text-[10px] text-ink truncate">{event.clientName ?? 'Sans client'}</span>
       )}
     </button>
   )

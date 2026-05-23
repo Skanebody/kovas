@@ -5,6 +5,13 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { MissionTypeTag } from '@/components/ui/mission-type-tag'
 import {
+  type LatLon,
+  estimateDriveMinutes,
+  formatDistance,
+  formatDriveMinutes,
+  haversineKm,
+} from '@/lib/calendar/distances'
+import {
   type CalendarEvent,
   DAY_HOUR_COUNT,
   DAY_HOUR_START,
@@ -14,6 +21,8 @@ import {
   STATUS_BORDER_COLOR,
   STATUS_LABELS,
   STATUS_VARIANT,
+  TIME_GUTTER_WIDTH_DESKTOP,
+  TIME_GUTTER_WIDTH_MOBILE,
   endOfDay,
   formatTimeFR,
   pixelHeightForDuration,
@@ -21,13 +30,6 @@ import {
   sameDay,
   startOfDay,
 } from '@/lib/calendar/shared'
-import {
-  estimateDriveMinutes,
-  formatDistance,
-  formatDriveMinutes,
-  haversineKm,
-  type LatLon,
-} from '@/lib/calendar/distances'
 import { cn } from '@/lib/utils'
 import { CalendarPlus, Car } from 'lucide-react'
 import Link from 'next/link'
@@ -42,19 +44,36 @@ interface DayViewProps {
   onSelectEvent: (event: CalendarEvent) => void
 }
 
+/**
+ * Vue Jour — grille horaire style Apple Calendar / Cron / Notion Calendar.
+ *
+ * Graduation :
+ *   - heures pleines : label JetBrains Mono à gauche + ligne pleine `border-rule/60`
+ *   - demi-heures : ligne pointillée discrète `border-dashed border-rule/30`
+ *   - hauteur 48px par heure (24px par 30min) sur desktop, 40px mobile
+ *
+ * Ligne "heure courante" :
+ *   - trait horizontal `bg-accent-red h-px` + cercle 12px à gauche dans le gutter
+ *   - se met à jour toutes les 60s côté client (uniquement si on regarde aujourd'hui)
+ */
 export function DayView({ date, events, origin, onSelectEvent }: DayViewProps) {
-  // Hauteur d'heure responsive : 40px mobile / 60px desktop.
+  // Hauteur d'heure responsive : 40px mobile / 48px desktop.
   const [hourHeight, setHourHeight] = useState(HOUR_HEIGHT_DESKTOP)
+  const [gutter, setGutter] = useState(TIME_GUTTER_WIDTH_DESKTOP)
   useEffect(() => {
     if (typeof window === 'undefined') return
     const mql = window.matchMedia('(min-width: 640px)')
-    const update = () => setHourHeight(mql.matches ? HOUR_HEIGHT_DESKTOP : HOUR_HEIGHT_MOBILE)
+    const update = () => {
+      const isDesktop = mql.matches
+      setHourHeight(isDesktop ? HOUR_HEIGHT_DESKTOP : HOUR_HEIGHT_MOBILE)
+      setGutter(isDesktop ? TIME_GUTTER_WIDTH_DESKTOP : TIME_GUTTER_WIDTH_MOBILE)
+    }
     update()
     mql.addEventListener('change', update)
     return () => mql.removeEventListener('change', update)
   }, [])
 
-  // Now line — uniquement si on regarde aujourd'hui.
+  // Now line — uniquement si on regarde aujourd'hui. Tick chaque minute.
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000)
@@ -93,7 +112,12 @@ export function DayView({ date, events, origin, onSelectEvent }: DayViewProps) {
     for (let i = 0; i < dayEvents.length - 1; i++) {
       const a = dayEvents[i]
       const b = dayEvents[i + 1]
-      if (a?.latitude != null && a.longitude != null && b?.latitude != null && b.longitude != null) {
+      if (
+        a?.latitude != null &&
+        a.longitude != null &&
+        b?.latitude != null &&
+        b.longitude != null
+      ) {
         const fromCoords: LatLon = { lat: a.latitude, lon: a.longitude }
         const toCoords: LatLon = { lat: b.latitude, lon: b.longitude }
         const km = haversineKm(fromCoords, toCoords)
@@ -106,44 +130,36 @@ export function DayView({ date, events, origin, onSelectEvent }: DayViewProps) {
   }, [dayEvents, origin])
 
   const timelineHeight = DAY_HOUR_COUNT * hourHeight
+  const halfHourHeight = hourHeight / 2
 
-  // Empty state
-  if (dayEvents.length === 0) {
-    return (
-      <div className="rounded-2xl border border-rule/70 bg-[#F5F7F4] overflow-hidden">
-        <EmptyState
-          icon={CalendarPlus}
-          title="Journée libre"
-          description="Aucun rendez-vous prévu ce jour-là. Profitez-en pour traiter le back-office ou planifier de nouvelles missions."
-          action={
-            <Button asChild variant="accent" size="sm">
-              <Link href="/dashboard/dossiers/new">
-                <CalendarPlus className="size-4" /> Planifier un rendez-vous
-              </Link>
-            </Button>
-          }
-        />
-      </div>
-    )
-  }
+  // Empty state — on garde la grille horaire visible en arrière-plan.
+  const hasEvents = dayEvents.length > 0
 
   // Position de la now-line sur la timeline (uniquement si aujourd'hui).
   const nowOffset = isToday ? pixelOffsetForTime(now, hourHeight) : -1
   const nowVisible = nowOffset >= 0 && nowOffset <= timelineHeight
 
   return (
-    <div className="rounded-2xl border border-rule/70 bg-[#F5F7F4] overflow-hidden">
-      <div className="relative" style={{ height: `${timelineHeight}px` }}>
-        {/* Grille heures (background + labels gauche) */}
-        <div className="absolute inset-0 grid" style={{ gridTemplateRows: `repeat(${DAY_HOUR_COUNT}, ${hourHeight}px)` }}>
+    <div className="rounded-2xl border border-rule/70 bg-sage overflow-hidden">
+      <div className="relative flex" style={{ height: `${timelineHeight}px` }}>
+        {/* Colonne gauche fixed : labels d'heure */}
+        <div
+          className="shrink-0 relative border-r border-rule/40 bg-sage"
+          style={{ width: `${gutter}px` }}
+          aria-hidden
+        >
           {Array.from({ length: DAY_HOUR_COUNT }, (_, i) => {
             const hour = DAY_HOUR_START + i
             return (
-              <div
-                key={hour}
-                className="relative border-b border-[#0F1419]/[0.06]"
-              >
-                <span className="absolute -top-2 left-1 sm:left-3 font-mono text-[11px] text-ink-mute tabular-nums bg-[#F5F7F4] px-1">
+              <div key={hour} className="relative" style={{ height: `${hourHeight}px` }}>
+                {/* Label heure pleine — aligné sur la ligne (i.e. en haut de la cellule).
+                    Pour la première heure, on évite que le label déborde du haut du conteneur. */}
+                <span
+                  className={cn(
+                    'absolute right-2 font-mono text-[11px] text-ink-mute tabular-nums',
+                    i === 0 ? 'top-1' : '-top-2 bg-sage px-1',
+                  )}
+                >
                   {String(hour).padStart(2, '0')}:00
                 </span>
               </div>
@@ -151,46 +167,107 @@ export function DayView({ date, events, origin, onSelectEvent }: DayViewProps) {
           })}
         </div>
 
-        {/* Now line rouge animée (aujourd'hui uniquement) */}
-        {nowVisible && (
-          <div
-            className="absolute left-12 sm:left-16 right-2 sm:right-4 z-30 pointer-events-none"
-            style={{ top: `${nowOffset}px` }}
-          >
-            <div className="relative flex items-center">
-              <span
-                aria-hidden
-                className="absolute -left-1.5 size-3 rounded-full bg-accent-red animate-pulse-soft"
-              />
-              <span className="h-px w-full bg-accent-red/80" />
-              <span className="absolute -left-12 sm:-left-14 -top-2 font-mono text-[10px] text-accent-red tabular-nums font-semibold bg-[#F5F7F4] px-1">
-                {formatTimeFR(now)}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Couche events positionnée en absolute */}
-        <div className="absolute inset-0 pl-12 sm:pl-16 pr-2 sm:pr-4 z-10">
-          {dayEvents.map((ev, idx) => {
-            const start = new Date(ev.scheduledAt)
-            const top = pixelOffsetForTime(start, hourHeight)
-            const height = Math.max(40, pixelHeightForDuration(ev.durationMinutes, hourHeight) - 4)
-            const segmentBefore = segments.find((s) => s.toIdx === idx)
-            return (
-              <div key={ev.dossierId}>
-                {/* Bloc trajet avant ce RDV */}
-                {segmentBefore && (
-                  <TrajetBlock
-                    km={segmentBefore.km}
-                    minutes={segmentBefore.minutes}
-                    top={top - 20}
+        {/* Zone événements + graduation */}
+        <div className="relative flex-1">
+          {/* Graduation horaire (heures pleines = trait solide, demi-heures = pointillé) */}
+          <div className="absolute inset-0 pointer-events-none">
+            {Array.from({ length: DAY_HOUR_COUNT }, (_, i) => (
+              <div
+                key={`h-${DAY_HOUR_START + i}`}
+                className="relative"
+                style={{ height: `${hourHeight}px` }}
+              >
+                {/* Trait heure pleine en haut de la cellule (sauf la toute première) */}
+                {i > 0 && (
+                  <div
+                    aria-hidden
+                    className="absolute left-0 right-0 top-0 border-t border-rule/60"
                   />
                 )}
-                <EventBlock event={ev} top={top} height={height} onClick={() => onSelectEvent(ev)} />
+                {/* Trait demi-heure pointillé au milieu */}
+                <div
+                  aria-hidden
+                  className="absolute left-0 right-0 border-t border-dashed border-rule/30"
+                  style={{ top: `${halfHourHeight}px` }}
+                />
               </div>
-            )
-          })}
+            ))}
+            {/* Trait final en bas */}
+            <div aria-hidden className="absolute left-0 right-0 bottom-0 border-t border-rule/60" />
+          </div>
+
+          {/* Now line rouge — uniquement aujourd'hui */}
+          {nowVisible && (
+            <div
+              className="absolute left-0 right-0 z-30 pointer-events-none"
+              style={{ top: `${nowOffset}px` }}
+            >
+              <div className="relative flex items-center">
+                {/* Cercle rouge dans le gutter (à gauche, sort du conteneur) */}
+                <span
+                  aria-hidden
+                  className="absolute -left-[6px] -top-[5px] size-[10px] rounded-full bg-accent-red shadow-[0_0_0_2px_rgba(220,38,38,0.15)]"
+                />
+                {/* Trait fin rouge */}
+                <span className="absolute left-0 right-0 h-px bg-accent-red" />
+                {/* Pillule heure courante à droite du cercle, pos. absolue dans le gutter */}
+                <span
+                  className="absolute left-1 -top-2 font-mono text-[10px] text-accent-red tabular-nums font-semibold bg-sage px-1 rounded-sm"
+                  style={{ transform: `translateX(${-gutter + 4}px)` }}
+                >
+                  {formatTimeFR(now)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Empty state OU couche events absolute */}
+          {!hasEvents ? (
+            <div className="absolute inset-0 flex items-center justify-center p-4 z-10">
+              <EmptyState
+                icon={CalendarPlus}
+                title="Journée libre"
+                description="Aucun rendez-vous prévu ce jour. Profitez-en pour traiter le back-office ou planifier de nouvelles missions."
+                action={
+                  <Button asChild variant="accent" size="sm">
+                    <Link href="/dashboard/dossiers/new">
+                      <CalendarPlus className="size-4" /> Planifier un rendez-vous
+                    </Link>
+                  </Button>
+                }
+              />
+            </div>
+          ) : (
+            <div className="absolute inset-0 px-2 sm:px-3 z-10">
+              {dayEvents.map((ev, idx) => {
+                const start = new Date(ev.scheduledAt)
+                const top = pixelOffsetForTime(start, hourHeight)
+                const height = Math.max(
+                  36,
+                  pixelHeightForDuration(ev.durationMinutes, hourHeight) - 4,
+                )
+                const segmentBefore = segments.find((s) => s.toIdx === idx)
+                return (
+                  <div key={ev.dossierId}>
+                    {/* Bloc trajet avant ce RDV */}
+                    {segmentBefore && (
+                      <TrajetBlock
+                        km={segmentBefore.km}
+                        minutes={segmentBefore.minutes}
+                        top={Math.max(0, top - 18)}
+                      />
+                    )}
+                    <EventBlock
+                      event={ev}
+                      top={top}
+                      height={height}
+                      onClick={() => onSelectEvent(ev)}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
