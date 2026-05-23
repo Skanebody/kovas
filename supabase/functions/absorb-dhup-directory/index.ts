@@ -59,6 +59,7 @@ interface DhupRow {
   city: string
   postalCode: string | null
   departmentCode: string
+  address: string | null
   officialEmail: string | null
   officialPhone: string | null
   officialCompanyName: string | null
@@ -206,10 +207,17 @@ const VALID_CERT_TYPES: ReadonlySet<CertificationType> = new Set<CertificationTy
 // Helpers : normalisation, hash, slugify
 // ────────────────────────────────────────────────────────────
 
+/**
+ * Plage Unicode des combining diacritical marks (accents post-NFD).
+ * U+0300 → U+036F couvre tous les accents combinatoires latin/grec.
+ */
+// biome-ignore lint/suspicious/noMisleadingCharacterClass: plage Unicode U+0300-U+036F intentionnelle (accents combinatoires post-NFD)
+const DIACRITICS_RE = /[̀-ͯ]/g
+
 function slugify(input: string): string {
   return input
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(DIACRITICS_RE, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
@@ -221,7 +229,7 @@ function departmentSlug(code: string): string {
 
 function normalize(value: string | null | undefined): string {
   if (!value) return ''
-  return value.trim().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  return value.trim().normalize('NFD').replace(DIACRITICS_RE, '').toLowerCase()
 }
 
 /** Hash SHA-256 stable pour fabriquer un dhup_source_id deterministe. */
@@ -254,7 +262,7 @@ async function computeDhupSourceId(
 
 /** Normalise un libelle certification DHUP vers nos types canoniques. */
 function normalizeCertificationType(label: string): CertificationType | null {
-  const up = label.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  const up = label.toUpperCase().normalize('NFD').replace(DIACRITICS_RE, '')
   if (up.includes('DPE') || up.includes('PERFORMANCE')) return 'DPE'
   if (up.includes('AMIANTE')) return 'AMIANTE'
   if (up.includes('PLOMB') || up.includes('CREP')) return 'PLOMB'
@@ -300,6 +308,7 @@ interface CsvHeader {
     email: number
     telephone: number
     raisonSociale: number
+    adresse: number
   }
 }
 
@@ -332,11 +341,23 @@ function parseCsvCells(line: string, separator: ',' | ';'): string[] {
   return cells
 }
 
+/** Normalise un libelle d'entete : strip BOM, accents, ponctuation, lowercase, collapse spaces. */
+function normalizeHeader(raw: string): string {
+  return raw
+    .replace(/^﻿/, '') // BOM UTF-8
+    .replace(/^"|"$/g, '')
+    .trim()
+    .normalize('NFD')
+    .replace(DIACRITICS_RE, '') // diacritiques (accents)
+    .toLowerCase()
+    .replace(/[°º]/g, '') // signe degré (N° → n)
+    .replace(/[^a-z0-9]+/g, '_') // tout sauf alphanum → _
+    .replace(/^_+|_+$/g, '')
+}
+
 function buildHeader(headerLine: string): CsvHeader {
   const separator = detectSeparator(headerLine)
-  const columns = parseCsvCells(headerLine, separator).map((c) =>
-    c.replace(/^"|"$/g, '').trim().toLowerCase(),
-  )
+  const columns = parseCsvCells(headerLine, separator).map(normalizeHeader)
   const findCol = (...candidates: string[]): number => {
     for (const candidate of candidates) {
       const idx = columns.indexOf(candidate)
@@ -348,19 +369,52 @@ function buildHeader(headerLine: string): CsvHeader {
     separator,
     columns,
     index: {
+      // DHUP officiel : "Nom"
       nom: findCol('nom', 'last_name', 'lastname'),
-      prenom: findCol('prenom', 'prénom', 'first_name', 'firstname'),
+      // DHUP officiel : "Prenom"
+      prenom: findCol('prenom', 'first_name', 'firstname'),
+      // DHUP officiel : "Ville"
       ville: findCol('ville', 'commune', 'city'),
-      cp: findCol('code_postal', 'cp', 'postal_code', 'postcode'),
-      dept: findCol('departement', 'département', 'dept', 'department_code'),
-      siret: findCol('siret', 'n_siret', 'numero_siret'),
-      certif: findCol('certifications', 'certification', 'domaines'),
+      // DHUP officiel : "CP"
+      cp: findCol('cp', 'code_postal', 'postal_code', 'postcode'),
+      // DHUP officiel : pas de colonne dept → derive du CP
+      dept: findCol('departement', 'dept', 'department_code', 'code_departement'),
+      // DHUP officiel : pas de SIRET (mais on garde le mapping si format futur)
+      siret: findCol('siret', 'n_siret', 'numero_siret', 'siren'),
+      // DHUP officiel : "Type de certificat"
+      certif: findCol(
+        'type_de_certificat',
+        'type_certificat',
+        'certifications',
+        'certification',
+        'domaines',
+      ),
+      // DHUP officiel : "Organisme"
       organism: findCol('organisme', 'organisme_certif', 'organisme_certificateur'),
-      numero: findCol('numero', 'n_certification', 'numero_certification'),
-      validite: findCol('date_validite', 'validite', 'valid_until', 'date_fin_validite'),
-      email: findCol('email', 'courriel', 'mail'),
-      telephone: findCol('telephone', 'téléphone', 'phone', 'tel'),
-      raisonSociale: findCol('raison_sociale', 'entreprise', 'company', 'societe'),
+      // DHUP officiel : "N° de certificat" → normalisé en "n_de_certificat"
+      numero: findCol(
+        'n_de_certificat',
+        'n_certificat',
+        'numero',
+        'numero_certificat',
+        'numero_certification',
+      ),
+      // DHUP officiel : "Date fin validité" → "date_fin_validite"
+      validite: findCol(
+        'date_fin_validite',
+        'date_de_fin_validite',
+        'date_validite',
+        'validite',
+        'valid_until',
+      ),
+      // DHUP officiel : "email"
+      email: findCol('email', 'courriel', 'mail', 'e_mail'),
+      // DHUP officiel : "Tel1" / "Tel2"
+      telephone: findCol('tel1', 'telephone', 'phone', 'tel', 'tel_1'),
+      // DHUP officiel : "Societe"
+      raisonSociale: findCol('societe', 'raison_sociale', 'entreprise', 'company'),
+      // DHUP officiel : "Adresse"
+      adresse: findCol('adresse', 'address', 'rue', 'voie'),
     },
   }
 }
@@ -399,18 +453,25 @@ async function parseDhupLine(line: string, header: CsvHeader): Promise<DhupRow |
   const number = idx.numero !== -1 ? (cells[idx.numero] ?? '') : ''
   const validUntilRaw = idx.validite !== -1 ? (cells[idx.validite] ?? '') : ''
 
-  const certifications: DhupCertification[] = certifRaw
-    .split(/[,;|/]/)
-    .map((token) => normalizeCertificationType(token.trim()))
-    .filter((type): type is CertificationType => type !== null)
-    .map((type) => ({
-      type,
-      organism: organism || 'inconnu',
-      number: number || 'inconnu',
-      validUntil: parseDhupDate(validUntilRaw),
-    }))
+  // DHUP officiel : 1 ligne = 1 certificat (le label peut etre une chaine unique
+  // comme "Performance energetique (DPE individuel)" ou "Amiante (missions
+  // specifiques**)"). On normalise vers UN type canonique, pas plusieurs.
+  const singleType = normalizeCertificationType(certifRaw)
+  const certifications: DhupCertification[] = singleType
+    ? [
+        {
+          type: singleType,
+          organism: organism || 'inconnu',
+          number: number || 'inconnu',
+          validUntil: parseDhupDate(validUntilRaw),
+        },
+      ]
+    : []
 
   const dhupSourceId = await computeDhupSourceId(siret, firstName, lastName, departmentCode)
+
+  // Phone : on prefere Tel1 (deja choisi via findCol). On tombe back sur null si vide.
+  const phone = idx.telephone !== -1 ? (cells[idx.telephone] ?? '').trim() || null : null
 
   return {
     dhupSourceId,
@@ -419,9 +480,11 @@ async function parseDhupLine(line: string, header: CsvHeader): Promise<DhupRow |
     city,
     postalCode,
     departmentCode,
-    officialEmail: idx.email !== -1 ? cells[idx.email] || null : null,
-    officialPhone: idx.telephone !== -1 ? cells[idx.telephone] || null : null,
-    officialCompanyName: idx.raisonSociale !== -1 ? cells[idx.raisonSociale] || null : null,
+    address: idx.adresse !== -1 ? (cells[idx.adresse] ?? '').trim() || null : null,
+    officialEmail: idx.email !== -1 ? (cells[idx.email] ?? '').trim() || null : null,
+    officialPhone: phone,
+    officialCompanyName:
+      idx.raisonSociale !== -1 ? (cells[idx.raisonSociale] ?? '').trim() || null : null,
     siret,
     certifications,
   }
@@ -541,6 +604,7 @@ async function upsertDiagnostician(
     city: row.city,
     postcode: row.postalCode,
     department_code: row.departmentCode,
+    address: row.address,
     certifications: certifJson,
     email: row.officialEmail,
     phone: row.officialPhone,

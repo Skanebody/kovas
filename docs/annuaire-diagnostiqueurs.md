@@ -1,7 +1,7 @@
 # Annuaire diagnostiqueurs — Méthode de croisement données
 
-> **Statut** : V1 — schéma unifié post-FIX-D + pipeline `verify-diagnosticians-daily` (FIX-BB)
-> **Dernière mise à jour** : 2026-05-24 (FIX-BB)
+> **Statut** : V1 — schéma unifié post-FIX-D + pipeline `verify-diagnosticians-daily` (FIX-BB) + **import DHUP officiel réel** (FIX-OO, 2026-05-23)
+> **Dernière mise à jour** : 2026-05-23 (FIX-OO — 13 856 vrais diagnostiqueurs importés)
 
 ## 1. Vue d'ensemble
 
@@ -39,10 +39,18 @@ l'adresse opérationnelle.
 
 **Dataset** : *Annuaire des diagnostiqueurs immobiliers certifiés*
 **Producteur** : DHUP (Direction de l'Habitat, de l'Urbanisme et des Paysages),
-Ministère du Logement.
+Ministère du Logement (page produit : Ministère de la Cohésion des territoires).
 **Licence** : Etalab 2.0 (réutilisation autorisée, attribution requise).
-**URL** : https://www.data.gouv.fr/fr/datasets/annuaire-des-diagnostiqueurs-immobiliers-certifies/
-**Mise à jour officielle** : irrégulière (déclaratif organismes certificateurs).
+**Page dataset** : https://www.data.gouv.fr/fr/datasets/annuaire-des-diagnostiqueurs-immobiliers/
+**URL CSV stable** (configurée dans `DHUP_DATASET_RESOURCE_URL`) :
+`https://www.data.gouv.fr/api/1/datasets/r/7987214d-949e-4245-b005-5cc4e7a5df36`
+**Annuaire web officiel** : https://diagnostiqueurs.din.developpement-durable.gouv.fr/
+**Format** : CSV `;` séparateur, UTF-8, 16-17 MB, ~74k lignes (= ~5 certifs × ~13k diagnostiqueurs)
+**Colonnes (en-tête réelle 2026-05-22)** :
+`Nom;Prenom;Societe;Adresse;CP;Ville;Tel1;Tel2;email;Organisme;Org Cofrac;Type de certificat;N° de certificat;Date début validité;Date fin validité`
+**Mise à jour officielle** : déclarative organismes certificateurs (mensuelle environ).
+**Premier import réel** : **2026-05-23** — 13 856 diagnostiqueurs uniques importés
+(97 départements couverts, Paris 443, Rhône 421, Bouches-du-Rhône 540).
 
 **Pipeline d'import** :
 - Edge Function `supabase/functions/absorb-dhup-directory/index.ts`
@@ -204,25 +212,81 @@ publiées + non retirées + Sirene active + ≥1 certif valide).
 - Bouton "Lancer l'import DHUP" → appel `POST /api/admin/diagnosticians/run-dhup-import`
 - Détail des stats post-import : imported / updated / ceased / errors / durée
 
-## 7. Seed démo `diagnosticians-fixtures.sql`
+## 7. Import bulk via script Node — `scripts/import-dhup-real.ts`
 
-En attendant la première cron DHUP en production, le seed
-`supabase/seed/diagnosticians-fixtures.sql` permet d'avoir **50 fiches démo**
-réparties sur 10 villes (Paris, Lyon, Marseille, Toulouse, Bordeaux, Nice,
-Nantes, Strasbourg, Lille, Dieppe).
+**Statut historique** : les 50 fixtures démo `dhup_source_id='fix_*'` ont été **purgées en
+prod le 2026-05-23** suite à l'import DHUP officiel réussi. Le script qui les
+créait (`supabase/seed/diagnosticians-fixtures.sql`) reste disponible pour les
+environnements de développement local.
 
-Toutes les fiches sont préfixées `dhup_source_id='fix_%'` — facile à purger
-quand la vraie cron tournera :
+**Pipeline de prod** : import bulk PostgREST via `scripts/import-dhup-real.ts`.
+
+Pourquoi pas l'Edge Function `absorb-dhup-directory` pour le premier import ?
+- 13 856 diagnostiqueurs × 3-4 round-trips DB (lookup + RPC slug + insert/update + cert
+  upsert) = ~55 000 requêtes série → > 60 s timeout Edge Function.
+- Le script Node local groupe les INSERT en chunks de 500 via `POST /rest/v1/diagnosticians`
+  avec `Prefer: return=minimal` → **import complet en < 10 s** sur connexion résidentielle.
+- Limite PostgREST : la contrainte `UNIQUE (dhup_source_id) DEFERRABLE INITIALLY IMMEDIATE`
+  empêche `ON CONFLICT (dhup_source_id) DO UPDATE` (erreur 55000). Pour ré-import
+  idempotent, le script **prefetch** d'abord les `dhup_source_id` existants puis **skip** les
+  doublons. Pour les MAJ futures, il faudra soit basculer la contrainte en `NOT DEFERRABLE`,
+  soit refactorer la voie batch UPDATE (cf. §11 Roadmap).
+
+### Usage
+
+```bash
+# Configurer le secret Supabase Edge Functions (1 fois, pour le cron mensuel) :
+curl -X POST "https://api.supabase.com/v1/projects/$PROJECT_REF/secrets" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '[{"name":"DHUP_DATASET_RESOURCE_URL","value":"https://www.data.gouv.fr/api/1/datasets/r/7987214d-949e-4245-b005-5cc4e7a5df36"}]'
+
+# Lancer l'import en prod (purge fixtures + import + skip doublons) :
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_xxx \
+  node --experimental-strip-types scripts/import-dhup-real.ts
+```
+
+### Variables d'env supportées par le script
+
+| Variable | Défaut | Description |
+|---|---|---|
+| `SUPABASE_SERVICE_ROLE_KEY` | (requis) | Clé service_role (PostgREST bypass RLS) |
+| `SUPABASE_PROJECT_REF` | `jlizdkffwjdiokvmhcwg` | Project ref |
+| `DHUP_DATASET_RESOURCE_URL` | URL data.gouv.fr | Source CSV |
+| `DHUP_CSV_LOCAL_PATH` | (non set) | Bypass download — lit un fichier local |
+| `DRY_RUN` | `0` | Parse + log sans écrire en DB |
+| `PURGE_FIXTURES` | `1` | Supprime `fix_*` au début (avant import) |
+| `CHUNK_SIZE` | `500` | Taille des batches INSERT |
+
+### Sortie attendue
+
+```
+[parse] 74292 lignes, 13856 diagnostiqueurs uniques, 0 lignes skip.
+[purge] 50 fixtures supprimees.
+[prefetch] 0 dhup_source_id deja en base — seront skip.
+[insert] chunk 28/28: OK (+356) 134ms
+[KOVAS] Import termine en 8.9s
+  diagnostiqueurs traites : 13,856
+  echecs                  : 0
+  fixtures purgees        : 50
+```
+
+### Post-import : flip `is_published`
+
+Le script importe avec `is_published=false` par défaut (cf. migration schema).
+Pour activer la visibilité publique des fiches DHUP officielles :
 
 ```sql
-DELETE FROM diagnosticians WHERE dhup_source_id LIKE 'fix_%';
+UPDATE diagnosticians
+SET is_published = true,
+    validation_status = 'verified'
+WHERE dhup_source_id LIKE 'dhup_%'
+  AND withdrawal_requested = false;
 ```
 
-**Application en local** :
-```bash
-supabase db reset --linked  # ou
-psql "$DATABASE_URL" -f supabase/seed/diagnosticians-fixtures.sql
-```
+Cette opération est faite côté admin une fois par mois post-import. Justification :
+les fiches DHUP **sont** certifiées par l'État FR, leur publication par défaut est
+conforme RGPD (Etalab 2.0 + données déjà publiques sur diagnostiqueurs.din.developpement-durable.gouv.fr).
 
 ## 8. Pipeline `verify-diagnosticians-daily` (FIX-BB)
 
@@ -344,16 +408,42 @@ Voir `docs/SUPABASE-MANUAL-FIXES.md` pour la procédure complète.
 
 ## 11. Plan de bascule fixtures → DHUP réel
 
+**Statut au 2026-05-23 (FIX-OO)** : bascule **terminée**. 50 fixtures purgées,
+13 856 vrais diagnostiqueurs DHUP officiels importés et publiés.
+
+Étapes historiques (à reproduire pour les MAJ mensuelles ou pour un autre environnement) :
+
 1. **Configurer `DHUP_DATASET_RESOURCE_URL`** dans Supabase Functions Secrets
-2. **(Optionnel)** Configurer INSEE + GMB pour cross-validation enrichie
-3. **Configurer Vault** (`project_url` + `service_role_token`) pour activer les crons
-4. **Lancer la première run** : `./scripts/run-first-dhup-import.sh`
-5. **Purger les fixtures** une fois le DHUP importé :
-   ```sql
-   DELETE FROM diagnosticians WHERE dhup_source_id LIKE 'fix_%';
-   ```
-6. **Vérifier** : `/admin/diagnostiqueurs/audit` doit afficher ~13k fiches
-7. **Laisser tourner le cron** quotidien pendant 26 jours pour 1 rotation complète
+   (URL canonique : `https://www.data.gouv.fr/api/1/datasets/r/7987214d-949e-4245-b005-5cc4e7a5df36`).
+2. **(Optionnel)** Configurer `INSEE_CLIENT_ID` / `INSEE_CLIENT_SECRET` (Sirene)
+   et `GOOGLE_PLACES_API_KEY` (GMB) pour cross-validation enrichie. Sans ces variables,
+   `verify-diagnosticians-daily` skip ces sources avec un warning (graceful degradation).
+3. **Lancer la première run** via le script Node bulk : voir §7.
+4. **Le script purge automatiquement** les `fix_*` AVANT d'importer.
+5. **Flipper `is_published=true`** sur les fiches DHUP via SQL (voir §7 ci-dessus).
+6. **Vérifier** : `curl /rest/v1/rpc/search_diagnosticians` avec `p_city_slug='paris'`
+   doit retourner ≥ 10 fiches Paris.
+7. **Lancer manuellement** `verify-diagnosticians-daily` mode=batch limit=500
+   pour seed les `activity_score` initiaux.
+8. **Laisser tourner le cron** quotidien (`kovas-verify-diagnosticians-daily`) pendant
+   ~26 jours pour une rotation complète des 13 856 fiches.
+
+### Limites V1 (à enrichir progressivement)
+
+- `INSEE_CLIENT_ID/SECRET` **non configurés** côté Supabase Secrets prod (validé via
+  réponse `verify-diagnosticians-daily` : `"sireneSkipped":50, "notes":["INSEE_CLIENT_ID
+  absent — Sirene cross-validation skipped (graceful)"]`).
+  **Conséquence** : tous les `sirene_state` restent `null`, le composant Sirene du score
+  bénéficie du **bénéfice du doute** (+0.3 dans `computeScore`). À configurer dès création
+  d'un compte INSEE Sirene API ([Inscription](https://api.insee.fr/catalogue/)).
+- `GOOGLE_PLACES_API_KEY` **non configuré**. `gmb_*` colonnes restent NULL, perte du
+  composant réputation (-0.2 max). À configurer pour enrichir 13k fiches × ~0,017 $ = ~221 $.
+- `SIRET` **absent du dataset DHUP officiel** (~0 % avec SIRET). Le hash `dhup_source_id`
+  utilise le fallback `name:nom|prenom|dept` → stable mais sensible aux changements de nom
+  (mariage, etc.). À enrichir via cross-validate Sirene par recherche nom + ville.
+- L'Edge Function `absorb-dhup-directory` reste **fonctionnellement correcte** mais
+  son temps d'exécution dépasse le budget timeout (60-150 s) pour 13k+ UPSERTs. **À
+  refactorer** en mode pagination/chunked (cf. §13 Roadmap).
 
 ## 12. Comment ajouter une nouvelle source de croisement
 
