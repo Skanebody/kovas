@@ -26,6 +26,7 @@
 
 import { BottomSheet, BottomSheetTitle } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
+import { AudioLevelMeter } from '@/components/voice/AudioLevelMeter'
 import {
   CHECK_ITEMS_3CL,
   CHECK_ITEMS_3CL_COUNT,
@@ -58,6 +59,7 @@ import {
   usePhotoSyncStatus,
 } from '@/lib/mission/use-mission-photos-count'
 import { cn } from '@/lib/utils'
+import { getOptimalMicrophoneStream } from '@/lib/voice/recording-constraints'
 import {
   type SpeechRecognitionController,
   createSpeechRecognition,
@@ -398,6 +400,10 @@ export function MissionTchatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<SpeechRecognitionController | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  // MISSION-E niveau 2 : stream parallèle pour le VU-mètre (anti-bruit)
+  // pendant la dictée Web Speech API (qui ne nous donne pas accès au stream micro).
+  const meterStreamRef = useRef<MediaStream | null>(null)
+  const [meterStream, setMeterStream] = useState<MediaStream | null>(null)
 
   // ----- State principal -----
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -758,7 +764,15 @@ export function MissionTchatInterface({
     ta.style.height = `${newHeight}px`
   }, [])
 
-  // ----- Speech Recognition -----
+  // ----- Speech Recognition + VU-mètre anti-bruit -----
+  const stopMeterStream = useCallback((): void => {
+    if (meterStreamRef.current) {
+      for (const t of meterStreamRef.current.getTracks()) t.stop()
+      meterStreamRef.current = null
+    }
+    setMeterStream(null)
+  }, [])
+
   const startListening = useCallback(() => {
     if (recognitionRef.current) recognitionRef.current.abort()
     const ctrl = createSpeechRecognition({
@@ -770,11 +784,15 @@ export function MissionTchatInterface({
       },
       onError: (err) => {
         setIsListening(false)
+        stopMeterStream()
         if (err === 'not-allowed') {
           setErrorMsg("Autorisez l'accès au micro dans les réglages du navigateur pour la dictée.")
         }
       },
-      onEnd: () => setIsListening(false),
+      onEnd: () => {
+        setIsListening(false)
+        stopMeterStream()
+      },
     })
     if (!ctrl.isSupported) {
       setErrorMsg(
@@ -785,12 +803,32 @@ export function MissionTchatInterface({
     ctrl.start()
     recognitionRef.current = ctrl
     setIsListening(true)
-  }, [])
+    // MISSION-E : on ouvre un stream parallèle UNIQUEMENT pour le VU-mètre
+    // (le Web Speech API utilise son propre pipeline interne, on ne récupère
+    // pas le stream natif). Pas idéal mais sans alternative — getUserMedia
+    // partage la même permission micro déjà accordée à SpeechRecognition.
+    void getOptimalMicrophoneStream()
+      .then((stream) => {
+        meterStreamRef.current = stream
+        setMeterStream(stream)
+      })
+      .catch(() => {
+        // Échec silencieux — la dictée fonctionne sans VU-mètre.
+      })
+  }, [stopMeterStream])
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) recognitionRef.current.stop()
     setIsListening(false)
-  }, [])
+    stopMeterStream()
+  }, [stopMeterStream])
+
+  // Cleanup VU-mètre stream au unmount
+  useEffect(() => {
+    return () => {
+      stopMeterStream()
+    }
+  }, [stopMeterStream])
 
   // ----- Apply captures → state rooms -----
   // Quand Claude renvoie une capture `room` ou `measurement` ou autres
@@ -1275,6 +1313,12 @@ export function MissionTchatInterface({
 
           {/* Input bar sticky bottom */}
           <div className="border-t border-rule/70 bg-paper px-3 sm:px-5 py-3 shrink-0">
+            {/* MISSION-E niveau 2 : VU-mètre anti-bruit live pendant la dictée */}
+            {isListening ? (
+              <div className="mx-auto max-w-3xl mb-2">
+                <AudioLevelMeter stream={meterStream} />
+              </div>
+            ) : null}
             <div className="mx-auto flex max-w-3xl items-end gap-2">
               {/* MISSION-B : bouton capture rafale (tap court 1 photo, long press = rafale) */}
               <PhotoCaptureButton

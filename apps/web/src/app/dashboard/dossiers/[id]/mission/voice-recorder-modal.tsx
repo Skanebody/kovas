@@ -14,6 +14,7 @@
  */
 
 import { Button } from '@/components/ui/button'
+import { AudioLevelMeter } from '@/components/voice/AudioLevelMeter'
 import { AudioRecorder } from '@/lib/audio-record'
 import { enqueueVoiceNote } from '@/lib/mission/local-storage-queue'
 import { cn } from '@/lib/utils'
@@ -52,6 +53,9 @@ export function VoiceRecorderModal({
   const [silencePrompt, setSilencePrompt] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [waveform, setWaveform] = useState<number[]>(() => new Array(32).fill(0))
+  // MISSION-E niveau 2 : stream partagé pour le VU-mètre (anti-bruit)
+  const [meterStream, setMeterStream] = useState<MediaStream | null>(null)
+  const [criticalIgnored, setCriticalIgnored] = useState(false)
 
   const recorderRef = useRef<AudioRecorder | null>(null)
   const audioCtxRef = useRef<AudioContext | null>(null)
@@ -113,35 +117,32 @@ export function VoiceRecorderModal({
         }
         setPhase('recording')
         startTimestampRef.current = Date.now()
+        setCriticalIgnored(false)
         haptic(50)
 
-        // Setup AudioContext + AnalyserNode pour la waveform live
-        // On reuse le MediaStream du recorder via une astuce : malheureusement
-        // AudioRecorder n'expose pas le stream, donc on récupère un nouveau
-        // stream parallèle dédié à l'analyse (pas idéal, mais évite de refactor
-        // audio-record.ts pour cette itération).
+        // MISSION-E niveau 2 : on partage le MEME stream pour waveform + VU-mètre.
+        // L'AudioRecorder expose désormais getStream() (cf. lib/audio-record.ts).
+        const sharedStream = recorder.getStream()
+        if (sharedStream) {
+          setMeterStream(sharedStream)
+        }
+
+        // Setup AudioContext + AnalyserNode pour la waveform interne (32 barres).
+        // Le VU-mètre AudioLevelMeter a son propre AnalyserNode (hook useAudioLevel)
+        // — deux analysers sur le même MediaStream est OK Web Audio.
         try {
-          const analyserStream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true },
-          })
-          // Si le composant a été unmount entre temps
-          if (cancelled) {
-            for (const t of analyserStream.getTracks()) t.stop()
-            return
-          }
+          if (!sharedStream) throw new Error('no stream')
           const ctx = new (
             window.AudioContext ||
             (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
           )()
           audioCtxRef.current = ctx
-          const source = ctx.createMediaStreamSource(analyserStream)
+          const source = ctx.createMediaStreamSource(sharedStream)
           const analyser = ctx.createAnalyser()
           analyser.fftSize = 256
           source.connect(analyser)
           sourceNodeRef.current = source
           analyserRef.current = analyser
-          // On stocke le stream pour cleanup
-          analyserStreamRef.current = analyserStream
           tickWaveform()
         } catch (audioErr) {
           // Si l'analyseur échoue (Safari restrictif), on continue sans waveform.
@@ -157,10 +158,7 @@ export function VoiceRecorderModal({
 
     return () => {
       cancelled = true
-      if (analyserStreamRef.current) {
-        for (const t of analyserStreamRef.current.getTracks()) t.stop()
-        analyserStreamRef.current = null
-      }
+      setMeterStream(null)
       cleanupAudioGraph()
       if (!stoppedRef.current) {
         recorderRef.current?.cancel()
@@ -169,9 +167,6 @@ export function VoiceRecorderModal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
-
-  // Stream auxiliaire pour l'AnalyserNode (workaround AudioRecorder ne l'expose pas).
-  const analyserStreamRef = useRef<MediaStream | null>(null)
 
   // ── Boucle waveform 60fps ───────────────────────────────────────────
   const tickWaveform = useCallback(() => {
@@ -242,11 +237,8 @@ export function VoiceRecorderModal({
 
     try {
       const rec = await recorder.stop()
+      setMeterStream(null)
       cleanupAudioGraph()
-      if (analyserStreamRef.current) {
-        for (const t of analyserStreamRef.current.getTracks()) t.stop()
-        analyserStreamRef.current = null
-      }
 
       const voiceLocalId = await enqueueVoiceNote({
         dossierId,
@@ -272,11 +264,8 @@ export function VoiceRecorderModal({
     const recorder = recorderRef.current
     recorderRef.current = null
     if (recorder) recorder.cancel()
+    setMeterStream(null)
     cleanupAudioGraph()
-    if (analyserStreamRef.current) {
-      for (const t of analyserStreamRef.current.getTracks()) t.stop()
-      analyserStreamRef.current = null
-    }
     onCancel()
   }
 
@@ -361,6 +350,15 @@ export function VoiceRecorderModal({
 
               {/* Waveform canvas-like (barres) */}
               <Waveform bars={waveform} active={phase === 'recording'} />
+
+              {/* MISSION-E niveau 2 : VU-mètre live anti-bruit */}
+              {phase === 'recording' && !criticalIgnored ? (
+                <AudioLevelMeter
+                  stream={meterStream}
+                  onIgnoreCritical={() => setCriticalIgnored(true)}
+                  className="px-2"
+                />
+              ) : null}
 
               {/* Micro-copy si silence prolongé */}
               {silencePrompt && phase === 'recording' ? (

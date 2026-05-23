@@ -2,7 +2,13 @@
  * Helper enregistrement audio via MediaRecorder.
  * Format préféré : audio/webm;codecs=opus (bon ratio qualité/taille pour la voix).
  * Fallback Safari iOS : audio/mp4.
+ *
+ * MISSION-E niveau 1 : les constraints micro sont centralisées dans
+ * `lib/voice/recording-constraints.ts` (echoCancellation + noiseSuppression +
+ * autoGainControl + sampleRate 16k + mono) avec fallback gracieux Safari iOS.
  */
+
+import { getOptimalMicrophoneStream } from './voice/recording-constraints'
 
 export interface AudioRecording {
   blob: Blob
@@ -32,19 +38,21 @@ export class AudioRecorder {
   private startTime = 0
   public mimeType = ''
 
+  /**
+   * Retourne le MediaStream actif (pour brancher un AnalyserNode / VU-mètre).
+   * Null si l'enregistrement n'est pas démarré.
+   */
+  getStream(): MediaStream | null {
+    return this.stream
+  }
+
   async start(): Promise<void> {
-    if (typeof navigator === 'undefined' || !navigator.mediaDevices) {
-      throw new Error('MediaDevices API non supportée (HTTPS requis)')
-    }
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        sampleRate: 16000, // optimal pour Whisper
-      },
-    })
+    this.stream = await getOptimalMicrophoneStream()
     this.mimeType = pickMimeType()
-    this.recorder = new MediaRecorder(this.stream, this.mimeType ? { mimeType: this.mimeType } : undefined)
+    this.recorder = new MediaRecorder(
+      this.stream,
+      this.mimeType ? { mimeType: this.mimeType } : undefined,
+    )
     this.chunks = []
     this.startTime = Date.now()
 
@@ -55,12 +63,13 @@ export class AudioRecorder {
   }
 
   async stop(): Promise<AudioRecording> {
-    if (!this.recorder) throw new Error('Recorder not started')
+    const recorder = this.recorder
+    if (!recorder) throw new Error('Recorder not started')
 
     return new Promise((resolve, reject) => {
-      this.recorder!.onstop = () => {
+      recorder.onstop = () => {
         try {
-          const finalMime = this.mimeType || this.recorder!.mimeType || 'audio/webm'
+          const finalMime = this.mimeType || recorder.mimeType || 'audio/webm'
           const blob = new Blob(this.chunks, { type: finalMime })
           const durationSeconds = Math.round((Date.now() - this.startTime) / 1000)
           this.cleanup()
@@ -69,7 +78,7 @@ export class AudioRecorder {
           reject(err)
         }
       }
-      this.recorder!.stop()
+      recorder.stop()
     })
   }
 
