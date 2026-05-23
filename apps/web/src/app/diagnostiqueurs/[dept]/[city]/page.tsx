@@ -2,13 +2,53 @@ import { FaqAnswer } from '@/components/faq-answer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { CITIES, getCityBySlug } from '@/lib/cities/registry'
+import {
+  buildEnrichedFaq,
+  buildLocalMarketParagraph,
+  buildNeighborLinks,
+  getCityLocalData,
+} from '@/lib/seo-content/local-data'
 import { createClient } from '@/lib/supabase/server'
-import { ArrowLeft, MapPin, Phone } from 'lucide-react'
+import {
+  ArrowLeft,
+  Banknote,
+  CalendarClock,
+  ChevronRight,
+  Flame,
+  MapPin,
+  Phone,
+} from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { SiteFooter } from '@/components/site-footer'
 import Link from 'next/link'
 import Script from 'next/script'
+
+// Lookup table villes (registry) pour internal linking voisins
+const CITY_LOOKUP = new Map<
+  string,
+  { slug: string; name: string; postalCode: string; dept: string }
+>(
+  CITIES.map((c) => [
+    c.slug,
+    { slug: c.slug, name: c.name, postalCode: c.postalCode, dept: c.dept },
+  ]),
+)
+
+const DIAGNOSTIC_TYPES_FOR_INTERNAL_LINKS: ReadonlyArray<{
+  type: string
+  label: string
+}> = [
+  { type: 'dpe', label: 'DPE' },
+  { type: 'amiante', label: 'Diagnostic amiante' },
+  { type: 'plomb', label: 'CREP plomb' },
+  { type: 'gaz', label: 'Diagnostic gaz' },
+  { type: 'electricite', label: 'Diagnostic électrique' },
+  { type: 'termites', label: 'Diagnostic termites' },
+  { type: 'carrez', label: 'Loi Carrez' },
+  { type: 'erp', label: 'État des risques (ERP)' },
+]
 
 /**
  * KOVAS — Page ville SEO (Mission C1)
@@ -180,7 +220,24 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
     12,
   )
 
-  const faq: FaqItem[] = Array.isArray(page.faq_items) ? page.faq_items : []
+  // Données locales (méthode Amandine Bart) — déterministes par ville
+  const registryCity = getCityBySlug(page.city_slug ?? page.slug)
+  const localData = registryCity ? getCityLocalData(registryCity) : null
+  const neighborLinks = registryCity
+    ? buildNeighborLinks(registryCity, CITY_LOOKUP)
+    : []
+
+  // FAQ : préférer celle en base si présente, sinon FAQ enrichie Amandine Bart
+  const baseFaq: FaqItem[] = Array.isArray(page.faq_items) ? page.faq_items : []
+  const faq: FaqItem[] =
+    baseFaq.length > 0
+      ? baseFaq
+      : localData
+        ? buildEnrichedFaq(localData).map((q) => ({
+            question: q.question,
+            answer: q.answer,
+          }))
+        : []
 
   const cityJsonLd =
     page.schema_jsonld && typeof page.schema_jsonld === 'object'
