@@ -36,8 +36,7 @@ export const revalidate = 3600 // ISR 1h
 const KOVAS_BASE_URL = 'https://kovas.fr'
 
 export const metadata: Metadata = {
-  title:
-    'Observatoire KOVAS · Data publique du diagnostic immobilier en France 2026',
+  title: 'Observatoire KOVAS · Data publique du diagnostic immobilier en France 2026',
   description:
     'Prix médians DPE, distribution F-G par région, évolution rénovation, top villes en transition énergétique. Mise à jour mensuelle. Source officielle KOVAS.',
   keywords: [
@@ -56,8 +55,7 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     url: `${KOVAS_BASE_URL}/observatoire`,
     siteName: 'KOVAS',
-    title:
-      'Observatoire KOVAS · Data publique du diagnostic immobilier en France',
+    title: 'Observatoire KOVAS · Data publique du diagnostic immobilier en France',
     description:
       'Prix médians, distribution énergétique régionale, top villes en transition. Rapport mensuel téléchargeable.',
     images: [
@@ -72,8 +70,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Observatoire KOVAS du Diagnostic Immobilier',
-    description:
-      'Toutes les data publiques du marché français, mises à jour chaque mois.',
+    description: 'Toutes les data publiques du marché français, mises à jour chaque mois.',
   },
 }
 
@@ -223,23 +220,26 @@ export default async function ObservatoirePage() {
               </span>
               <span className="font-mono text-[11px] text-ink-mute">·</span>
               <span className="inline-flex items-center gap-2 rounded-pill bg-chartreuse-soft px-3 py-1 font-mono text-[11px] text-ink">
-                <span
-                  className="size-1.5 rounded-full bg-chartreuse-deep"
-                  aria-hidden
-                />
-                Dernière mise à jour&nbsp;: {stats.lastUpdatedLabel}
+                <span className="size-1.5 rounded-full bg-chartreuse-deep" aria-hidden />
+                {stats.isLive
+                  ? `Mis à jour : ${stats.lastUpdatedLabel}`
+                  : 'Données en cours de mise à jour'}
               </span>
+              {!stats.isLive && (
+                <span className="font-mono text-[11px] text-ink/55">
+                  · Source temporaire référentiel ADEME 2024 — refresh DB en attente
+                </span>
+              )}
             </div>
             <h1 className="font-sans font-semibold text-[44px] sm:text-[64px] md:text-[80px] leading-[1.02] tracking-[-0.03em] mb-8 max-w-[1000px]">
-              L’observatoire{' '}
-              <span className="text-display-serif text-chartreuse-deep">KOVAS</span>{' '}
+              L’observatoire <span className="text-display-serif text-chartreuse-deep">KOVAS</span>{' '}
               du diagnostic immobilier.
             </h1>
             <p className="text-[17px] sm:text-[19px] text-ink/72 max-w-[760px] leading-relaxed">
-              Toutes les data publiques du diagnostic immobilier en France métropolitaine,
-              mises à jour chaque mois. Prix médians, distribution énergétique régionale,
-              évolution de la rénovation et classement des villes en transition. Sources
-              ADEME, Géorisques, INSEE et missions KOVAS anonymisées.
+              Toutes les data publiques du diagnostic immobilier en France métropolitaine, mises à
+              jour chaque mois. Prix médians, distribution énergétique régionale, évolution de la
+              rénovation et classement des villes en transition. Sources ADEME, Géorisques, INSEE et
+              missions KOVAS anonymisées.
             </p>
           </div>
         </section>
@@ -278,14 +278,13 @@ export default async function ObservatoirePage() {
                 Section 2 · Prix
               </p>
               <h2 className="font-sans font-semibold text-[32px] sm:text-[44px] leading-[1.05] tracking-[-0.02em] mb-4">
-                Prix médian par{' '}
-                <span className="text-display-serif">diagnostic</span> et par région.
+                Prix médian par <span className="text-display-serif">diagnostic</span> et par
+                région.
               </h2>
               <p className="text-[15px] sm:text-[17px] text-ink/72 leading-relaxed">
-                Tarifs médians TTC observés sur douze mois glissants, pour les huit
-                diagnostics réglementaires en vigueur. Les écarts régionaux reflètent le
-                coût du foncier, la densité du tissu professionnel et les contraintes
-                d’accès terrain.
+                Tarifs médians TTC observés sur douze mois glissants, pour les huit diagnostics
+                réglementaires en vigueur. Les écarts régionaux reflètent le coût du foncier, la
+                densité du tissu professionnel et les contraintes d’accès terrain.
               </p>
             </div>
             <PriceSection matrix={priceMatrix} regions={REGIONS} />
@@ -300,13 +299,12 @@ export default async function ObservatoirePage() {
                 Section 3 · Distribution énergétique
               </p>
               <h2 className="font-sans font-semibold text-[32px] sm:text-[44px] leading-[1.05] tracking-[-0.02em] mb-4">
-                Classes énergétiques A-G par{' '}
-                <span className="text-display-serif">région</span>.
+                Classes énergétiques A-G par <span className="text-display-serif">région</span>.
               </h2>
               <p className="text-[15px] sm:text-[17px] text-ink/72 leading-relaxed">
                 Distribution en pourcentage du parc diagnostiqué sur douze mois. Les régions
-                septentrionales présentent les parts F-G les plus élevées, reflet d’un parc
-                ancien plus exposé à la déperdition thermique.
+                septentrionales présentent les parts F-G les plus élevées, reflet d’un parc ancien
+                plus exposé à la déperdition thermique.
               </p>
             </div>
             <EnergyDistribution regions={REGIONS} />
@@ -321,13 +319,11 @@ export default async function ObservatoirePage() {
                 Section 4 · Évolution
               </p>
               <h2 className="font-sans font-semibold text-[32px] sm:text-[44px] leading-[1.05] tracking-[-0.02em] mb-4">
-                Évolution de la{' '}
-                <span className="text-display-serif">rénovation</span> énergétique.
+                Évolution de la <span className="text-display-serif">rénovation</span> énergétique.
               </h2>
               <p className="text-[15px] sm:text-[17px] text-ink/72 leading-relaxed">
-                Nombre de rénovations énergétiques engagées chaque mois sur l’ensemble du
-                territoire métropolitain, lissé en moyenne mobile trois mois pour
-                neutraliser la saisonnalité.
+                Nombre de rénovations énergétiques engagées chaque mois sur l’ensemble du territoire
+                métropolitain, lissé en moyenne mobile trois mois pour neutraliser la saisonnalité.
               </p>
             </div>
             <RenovationTrend data={renovationData} />
@@ -342,13 +338,12 @@ export default async function ObservatoirePage() {
                 Section 5 · Classement
               </p>
               <h2 className="font-sans font-semibold text-[32px] sm:text-[44px] leading-[1.05] tracking-[-0.02em] mb-4">
-                Top 10 des villes en{' '}
-                <span className="text-display-serif">transition</span> énergétique.
+                Top 10 des villes en <span className="text-display-serif">transition</span>{' '}
+                énergétique.
               </h2>
               <p className="text-[15px] sm:text-[17px] text-ink/72 leading-relaxed">
-                Score composite (0-100) calculé à partir du ratio rénovations / 1000
-                habitants, de la variation annuelle de la part F-G et du taux de
-                bénéficiaires MaPrimeRénov.
+                Score composite (0-100) calculé à partir du ratio rénovations / 1000 habitants, de
+                la variation annuelle de la part F-G et du taux de bénéficiaires MaPrimeRénov.
               </p>
             </div>
             <TopCities cities={topCities} />
@@ -362,8 +357,8 @@ export default async function ObservatoirePage() {
               Section 6 · Presse
             </p>
             <h2 className="font-sans font-semibold text-[28px] sm:text-[36px] leading-[1.1] tracking-[-0.02em] mb-12 text-center max-w-[760px] mx-auto">
-              Des données reprises par la{' '}
-              <span className="text-display-serif">presse</span> nationale.
+              Des données reprises par la <span className="text-display-serif">presse</span>{' '}
+              nationale.
             </h2>
             <PressMentions />
           </div>
@@ -394,28 +389,16 @@ function SiteHeader() {
           <span className="text-base font-bold tracking-tight">KOVAS</span>
         </Link>
         <nav className="hidden sm:flex items-center gap-6 text-sm">
-          <Link
-            href="/#features"
-            className="text-ink-mute hover:text-ink transition-colors"
-          >
+          <Link href="/#features" className="text-ink-mute hover:text-ink transition-colors">
             Fonctionnalités
           </Link>
-          <Link
-            href="/pricing"
-            className="text-ink-mute hover:text-ink transition-colors"
-          >
+          <Link href="/pricing" className="text-ink-mute hover:text-ink transition-colors">
             Tarifs
           </Link>
-          <Link
-            href="/observatoire"
-            className="text-ink font-medium transition-colors"
-          >
+          <Link href="/observatoire" className="text-ink font-medium transition-colors">
             Observatoire
           </Link>
-          <Link
-            href="/faq"
-            className="text-ink-mute hover:text-ink transition-colors"
-          >
+          <Link href="/faq" className="text-ink-mute hover:text-ink transition-colors">
             FAQ
           </Link>
         </nav>
