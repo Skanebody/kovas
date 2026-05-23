@@ -32,7 +32,8 @@ import type {
   DpeClass,
 } from '@/lib/dpe-calculator/question-tree'
 
-import { submitDpeLead, type SubmitDpeLeadInput } from './actions'
+import { submitDpeLead } from './actions'
+import type { SubmitDpeLeadInput } from './schemas'
 
 interface LeadFormProps {
   answers: CalculatorAnswers

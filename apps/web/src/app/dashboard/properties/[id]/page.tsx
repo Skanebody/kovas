@@ -17,7 +17,7 @@ import {
   type PropertyPhoto,
 } from '@/components/property/v5simp/PropertyGallerieSection'
 import { PropertyIdentitySection } from '@/components/property/v5simp/PropertyIdentitySection'
-import { parsePropertyLocation } from '@/components/property/v5simp/PropertyInteractiveMap'
+import { parsePropertyLocation } from '@/lib/property/location'
 import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { fetchPublicLocalStats } from '@/lib/external/public-stats'
