@@ -91,26 +91,29 @@ interface AnnuaireBundle {
   description: string
 }
 
+// Source de vérité : apps/web/src/lib/pricing-plans.ts (ANNUAIRE_PLANS)
+// 4 paliers Annuaire alignés sur le pricing canonique. Modifier ici si
+// modifications dans pricing-plans.ts (pas de désynchronisation).
 const ANNUAIRE_BUNDLES: AnnuaireBundle[] = [
   {
-    name: 'Annuaire Basique',
+    name: 'Fiche réclamée',
+    price: 'Gratuit',
+    description: 'Fiche publique gratuite après claim et vérification. Annuaire visible.',
+  },
+  {
+    name: 'Visibilité Local',
     price: '19€',
-    description: 'Fiche publique simple, 1 ville couverte, badge KOVAS Pro.',
+    description: 'Ville et alentours. Recevez vos premiers leads particuliers du calculateur DPE.',
   },
   {
-    name: 'Annuaire Standard',
-    price: '29€',
-    description: '3 villes couvertes, mise en avant carousel kovas.fr, statistiques leads.',
-  },
-  {
-    name: 'Annuaire Premium',
+    name: 'Visibilité Régional',
     price: '39€',
-    description: '10 villes, top de page kovas.fr/diag/votre-ville, témoignages clients.',
+    description: 'Département complet, priorité affichage carte annuaire, statistiques détaillées.',
   },
   {
-    name: 'Annuaire Pro Multi',
-    price: '99€',
-    description: 'Tout département couvert, priorité absolue, dashboard leads avancé.',
+    name: 'Visibilité National',
+    price: '79€',
+    description: 'Multi-départements, top de page kovas.fr/diagnostiqueurs, leads enrichis.',
   },
 ]
 

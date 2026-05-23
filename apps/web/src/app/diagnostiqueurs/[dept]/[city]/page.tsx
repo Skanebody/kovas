@@ -293,7 +293,111 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
               {page.intro_content}
             </p>
           ) : null}
+          {localData ? (
+            <p className="text-xs text-ink-faint font-mono inline-flex items-center gap-1.5 pt-2">
+              <CalendarClock className="size-3" aria-hidden />
+              <time dateTime={localData.lastUpdatedIso}>
+                Mise à jour : {new Date(localData.lastUpdatedIso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </time>
+            </p>
+          ) : null}
         </div>
+
+        {/* CTA double intent-match Amandine Bart */}
+        <section
+          aria-label="Actions principales"
+          className="mb-10 grid sm:grid-cols-2 gap-3 max-w-3xl"
+        >
+          <Card className="p-5 flex items-center justify-between gap-3 hover:shadow-glass transition-shadow">
+            <div className="min-w-0">
+              <p className="font-semibold text-ink text-sm">Estimer mon DPE</p>
+              <p className="text-xs text-ink-mute">Simulation gratuite en 2 minutes</p>
+            </div>
+            <Button asChild size="sm">
+              <Link href="/estimer-dpe">
+                Commencer
+                <ChevronRight className="size-3.5" />
+              </Link>
+            </Button>
+          </Card>
+          <Card className="p-5 flex items-center justify-between gap-3 hover:shadow-glass transition-shadow">
+            <div className="min-w-0">
+              <p className="font-semibold text-ink text-sm">Demander des devis</p>
+              <p className="text-xs text-ink-mute">Comparer 3 diagnostiqueurs locaux</p>
+            </div>
+            <Button asChild size="sm" variant="outline">
+              <Link
+                href={`/devis-diagnostic?ville=${encodeURIComponent(
+                  page.city_name ?? page.slug,
+                )}`}
+              >
+                Demander
+                <ChevronRight className="size-3.5" />
+              </Link>
+            </Button>
+          </Card>
+        </section>
+
+        {/* Section data locale Amandine Bart */}
+        {localData ? (
+          <section
+            aria-label="Marché local du diagnostic"
+            className="mb-12 space-y-4"
+          >
+            <h2 className="font-sans font-bold text-2xl tracking-tight">
+              Marché local du diagnostic à {page.city_name ?? page.slug}
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card className="p-4">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint inline-flex items-center gap-1.5">
+                  <Banknote className="size-3" aria-hidden />
+                  Prix médian DPE
+                </p>
+                <p className="font-serif italic text-2xl text-ink mt-1">
+                  {localData.medianDpePrice} €
+                </p>
+                <p className="text-[11px] text-ink-faint">
+                  {localData.minDpePrice}-{localData.maxDpePrice} € TTC
+                </p>
+              </Card>
+              <Card className="p-4">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint inline-flex items-center gap-1.5">
+                  <Flame className="size-3" aria-hidden />
+                  Classe énergétique
+                </p>
+                <p className="font-serif italic text-2xl text-ink mt-1">
+                  {localData.medianEnergyClass}
+                </p>
+                <p className="text-[11px] text-ink-faint">
+                  médiane locale
+                </p>
+              </Card>
+              <Card className="p-4">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
+                  Passoires F+G
+                </p>
+                <p className="font-serif italic text-2xl text-ink mt-1">
+                  {localData.fgRatePct}%
+                </p>
+                <p className="text-[11px] text-ink-faint">du parc local</p>
+              </Card>
+              <Card className="p-4">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
+                  DPE / an
+                </p>
+                <p className="font-serif italic text-2xl text-ink mt-1">
+                  {localData.estimatedDpePerYear.toLocaleString('fr-FR')}
+                </p>
+                <p className="text-[11px] text-ink-faint">estimés</p>
+              </Card>
+            </div>
+            <div className="max-w-3xl pt-2">
+              <div className="text-ink-soft leading-relaxed whitespace-pre-line text-base">
+                {buildLocalMarketParagraph(localData)}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         {/* Liste 12 diag ville */}
         <section className="space-y-4 mb-12">
@@ -436,6 +540,60 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
                   </h3>
                   <FaqAnswer markdown={q.answer} />
                 </Card>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* Internal linking — diagnostics dans la même ville */}
+        {registryCity ? (
+          <section
+            aria-label="Diagnostics à la même adresse"
+            className="mb-12 space-y-4"
+          >
+            <h2 className="font-sans font-bold text-2xl tracking-tight">
+              Diagnostics disponibles à {page.city_name ?? page.slug}
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {DIAGNOSTIC_TYPES_FOR_INTERNAL_LINKS.map((d) => (
+                <Link
+                  key={d.type}
+                  href={`/diagnostic/${d.type}/${registryCity.slug}`}
+                  className="block"
+                >
+                  <Card className="p-4 hover:shadow-glass transition-shadow h-full">
+                    <p className="font-semibold text-ink text-sm">{d.label}</p>
+                    <p className="text-xs text-ink-mute mt-0.5">
+                      à {page.city_name ?? page.slug}
+                    </p>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* Internal linking — villes voisines (rayon ~30km) */}
+        {neighborLinks.length > 0 ? (
+          <section
+            aria-label="Diagnostics dans les villes voisines"
+            className="mb-12 space-y-4"
+          >
+            <h2 className="font-sans font-bold text-2xl tracking-tight">
+              Diagnostiqueurs dans les villes voisines
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {neighborLinks.map((n) => (
+                <Link
+                  key={n.slug}
+                  href={n.href}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-pill border border-rule text-sm text-ink-soft hover:border-ink hover:text-ink transition-colors"
+                >
+                  {n.name}
+                  <span className="font-mono text-[11px] text-ink-faint">
+                    {n.postalCode}
+                  </span>
+                </Link>
               ))}
             </div>
           </section>

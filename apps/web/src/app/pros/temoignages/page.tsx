@@ -1,9 +1,10 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { ArrowRight, ExternalLink } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+
+import { TestimonialsExplorer } from './testimonials-explorer'
 
 export const metadata: Metadata = {
   title: 'Témoignages',
@@ -228,12 +229,6 @@ const TESTIMONIALS: Testimonial[] = [
   },
 ]
 
-const PROFILES: Array<{ value: 'all' | Profile; label: string }> = [
-  { value: 'all', label: 'Tous' },
-  { value: 'Solo', label: 'Solo' },
-  { value: 'Cabinet', label: 'Cabinet' },
-]
-
 const REGIONS_ORDER: Region[] = [
   'Île-de-France',
   'Auvergne-Rhône-Alpes',
@@ -245,15 +240,6 @@ const REGIONS_ORDER: Region[] = [
   'Bretagne',
   'Grand Est',
 ]
-
-function buildInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
 
 export default function TemoignagesPage() {
   return (
@@ -275,79 +261,7 @@ export default function TemoignagesPage() {
           </p>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="font-mono text-[11px] uppercase tracking-wide text-ink-faint">
-              Profil :
-            </span>
-            {PROFILES.map((p) => (
-              <Badge
-                key={p.value}
-                variant={p.value === 'all' ? 'default' : 'outline'}
-                className="cursor-default"
-              >
-                {p.label}
-              </Badge>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[11px] uppercase tracking-wide text-ink-faint">
-              Région :
-            </span>
-            <Badge variant="default" className="cursor-default">
-              Toutes
-            </Badge>
-            {REGIONS_ORDER.map((r) => (
-              <Badge key={r} variant="outline" className="cursor-default">
-                {r}
-              </Badge>
-            ))}
-          </div>
-          <p className="text-xs text-ink-faint">
-            Filtres visuels présentés ici, activation côté client prévue Sprint suivant.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {TESTIMONIALS.map((t) => (
-            <Card key={t.name} variant="opaque" padding="default" className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div
-                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-navy text-sm font-semibold text-paper"
-                  aria-hidden
-                >
-                  {buildInitials(t.name)}
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-sm font-semibold leading-tight">{t.name}</p>
-                  <p className="text-xs text-ink-mute">{t.cabinet}</p>
-                  <p className="text-xs text-ink-faint">
-                    {t.city} · {t.region}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={t.profile === 'Cabinet' ? 'blue' : 'green'}>{t.profile}</Badge>
-                <span className="font-mono text-[11px] uppercase tracking-wide text-ink-faint">
-                  {t.seniority}
-                </span>
-              </div>
-              <blockquote className="text-sm italic text-ink-soft">« {t.quote} »</blockquote>
-              <div className="rounded-md bg-chartreuse-soft/60 p-3">
-                <div className="text-display-serif text-2xl text-chartreuse-deep">{t.metric}</div>
-                <p className="text-xs text-ink-mute">{t.metricLabel}</p>
-              </div>
-              {t.publicProfileSlug && (
-                <Link
-                  href={`/diag/${t.publicProfileSlug}`}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-ink-mute hover:text-ink"
-                >
-                  Voir la fiche annuaire <ExternalLink className="size-3" />
-                </Link>
-              )}
-            </Card>
-          ))}
-        </div>
+        <TestimonialsExplorer testimonials={TESTIMONIALS} regions={REGIONS_ORDER} />
 
         <div className="mx-auto max-w-3xl space-y-4 text-center">
           <h2 className="text-2xl font-semibold tracking-tight">À votre tour ?</h2>
