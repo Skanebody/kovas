@@ -26,14 +26,14 @@ const FAQ: readonly FaqEntry[] = [
       "Oui. 30 jours d'accès complet à KOVAS 360 avec carte bancaire enregistrée à la souscription et débit automatique à l'issue, sans engagement long terme. Vous pouvez annuler à tout moment avant J+30 sans aucun débit. À la fin de l'essai, votre formule est activée automatiquement (ou vous résiliez — votre compte est gelé 90 jours puis archivé).",
   },
   {
-    question: 'Puis-je changer de plan en cours d\'abonnement ?',
+    question: "Puis-je changer de plan en cours d'abonnement ?",
     answer:
-      "Oui, sans frais ni engagement. Vous pouvez passer du Starter à Active (ou à Cabinet), upgrader votre Annuaire de Pro à Visibilité, ou basculer vers un bundle, depuis votre compte. Le prorata est calculé automatiquement par Stripe. Le downgrade prend effet à la fin du cycle de facturation pour éviter toute interruption.",
+      'Oui, sans frais ni engagement. Vous pouvez passer du Solo Light au Solo Pro (ou au Cabinet, ou Cabinet+), upgrader votre Annuaire de Local à Régional ou National, ou basculer vers un bundle, depuis votre compte. Le prorata est calculé automatiquement par Stripe. Le downgrade prend effet à la fin du cycle de facturation pour éviter toute interruption.',
   },
   {
     question: 'Que se passe-t-il si je dépasse mon quota de missions ?',
     answer:
-      "Les caps sont en fair-use : nous ne vous bloquons pas brutalement. À 80 % du quota, vous recevez une notification. À 100 %, vous pouvez continuer en mode dégradé léger. Au-delà de 150 % sur 2 mois consécutifs, nous vous suggérons la formule supérieure (plus économique pour votre profil).",
+      'Les caps sont en fair-use : nous ne vous bloquons pas brutalement. À 80 % du quota, vous recevez une notification. À 100 %, vous pouvez continuer en mode dégradé léger. Au-delà de 150 % sur 2 mois consécutifs, nous vous suggérons la formule supérieure (plus économique pour votre profil).',
   },
   {
     question: 'Y a-t-il un engagement de durée ?',
@@ -43,12 +43,12 @@ const FAQ: readonly FaqEntry[] = [
   {
     question: 'Quel niveau de support est inclus ?',
     answer:
-      "Tous les tiers payants bénéficient du support par email avec réponse sous 24 h ouvrées. À partir du forfait Active (59 €/mo), le support est prioritaire (réponse sous 4 h ouvrées). Les formules Cabinet et Enterprise incluent un account manager dédié.",
+      'Tous les tiers payants bénéficient du support par email avec réponse sous 24 h ouvrées. À partir du forfait Solo Pro (59 €/mo), le support est prioritaire (réponse sous 4 h ouvrées). Les formules Cabinet et Cabinet+ incluent un account manager dédié.',
   },
   {
     question: 'Que se passe-t-il si je suis sur un ancien forfait ?',
     answer:
-      "Si vous êtes déjà client sur l'ancienne grille (Essential 19 €, Découverte 29 €, Pro 39 €, All Inclusive 99 €, Cabinet 149 €), votre prix actuel est verrouillé à vie. Aucune migration forcée. Si vous souhaitez basculer sur la nouvelle grille, nous calculons les économies estimées avant tout changement.",
+      'Si vous êtes déjà client sur une ancienne grille (Essential 19 €, Découverte 29 €, Pro 39 €, All Inclusive 99 €, Cabinet 149 €, Standard 59 €, Volume 99 €, Founder 49 €), votre prix actuel est verrouillé à vie. Aucune migration forcée. Si vous souhaitez basculer sur la grille V4 actuelle (Solo Light 29, Solo Pro 59, Cabinet 149, Cabinet+ 299), nous calculons les économies estimées avant tout changement.',
   },
 ]
 

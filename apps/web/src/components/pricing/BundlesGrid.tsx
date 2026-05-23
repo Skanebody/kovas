@@ -1,10 +1,10 @@
 'use client'
 
+// Type B2 dependency — pricing-plans.ts refonte by parallel agent
+import { BUNDLES, type Bundle } from '@/lib/pricing-plans'
 import { cn } from '@/lib/utils'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-// Type B2 dependency — pricing-plans.ts refonte by parallel agent
-import { BUNDLES, type Bundle } from '@/lib/pricing-plans'
 
 import type { BillingCycle } from './PricingToggle'
 
@@ -15,7 +15,7 @@ interface BundlesGridProps {
 /**
  * Grille des 5 Bundles Annuaire + KOVAS 360 (Spec §4).
  *
- * Affiche l'économie mensuelle (-9 à -19 €) en chartreuse pour visualiser le
+ * Affiche l'économie mensuelle (-9 à -59 €) en chartreuse pour visualiser le
  * gain. CTA Stripe avec `plan=<bundle_code>`.
  *
  * Mobile-first : 1 col → sm:2 cols → lg:5 cols.
@@ -92,8 +92,7 @@ function BundleCard({ bundle, billing }: { bundle: Bundle; billing: BillingCycle
           bundle.featured === true ? 'text-white/72' : 'text-[#0F1419]/55',
         )}
       >
-        <span className="line-through opacity-60">{individualEuros} €</span>{' '}
-        séparément{' '}
+        <span className="line-through opacity-60">{individualEuros} €</span> séparément{' '}
         {billing === 'annual' ? `· ${annualEuros} € HT / an` : `· ${annualEuros} € en annuel`}
       </p>
 

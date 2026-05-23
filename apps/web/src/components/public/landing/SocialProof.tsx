@@ -8,12 +8,15 @@ type ProTestimonial = {
   quote: string
 }
 
+// Plans alignés sur la grille canonique V4 (lib/pricing-plans.ts).
+// Audit FIX-SS (2026-05-23) : suppression des anciens noms Standard/Volume/Standard
+// Founder (grille V3 obsolète) → Solo Pro/Cabinet/Solo Light.
 const PRO_TESTIMONIALS: readonly ProTestimonial[] = [
   {
     id: 'frederic-rouen',
     name: 'Frédéric L.',
     city: 'Rouen',
-    plan: 'Standard 59€/mo',
+    plan: 'Solo Pro 59€/mo',
     quote:
       'Je gagne 2h par jour grâce à la saisie vocale et au bouton Partager. Le retour bureau est devenu quasi inutile.',
   },
@@ -21,7 +24,7 @@ const PRO_TESTIMONIALS: readonly ProTestimonial[] = [
     id: 'isabelle-lyon',
     name: 'Isabelle M.',
     city: 'Lyon',
-    plan: 'Volume 99€/mo',
+    plan: 'Cabinet 149€/mo',
     quote:
       'Les leads du calculateur représentent 3 000€ de chiffre d’affaires le mois dernier. Pas un canal, un vrai pilier.',
   },
@@ -29,7 +32,7 @@ const PRO_TESTIMONIALS: readonly ProTestimonial[] = [
     id: 'patrick-toulouse',
     name: 'Patrick D.',
     city: 'Toulouse',
-    plan: 'Standard Founder 49€/mo',
+    plan: 'Solo Light 29€/mo',
     quote:
       'Plus d’erreur d’export ADEME depuis que je suis sur KOVAS. La validation cohérence m’a sauvé deux rapports critiques.',
   },

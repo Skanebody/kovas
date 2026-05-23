@@ -1,60 +1,38 @@
 import { Button } from '@/components/ui/button'
+import { LOGICIEL_PLANS, UNLIMITED_CAP } from '@/lib/pricing-plans'
 import { cn } from '@/lib/utils'
 import { ArrowRight, Check, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
-interface PreviewTier {
-  id: string
-  name: string
-  price: string
-  bullets: [string, string, string]
-  highlighted?: boolean
-  ctaHref: string
+/**
+ * Mini-grille preview tarifs B2B (utilisé sur /pour-les-diagnostiqueurs).
+ *
+ * SOURCE DE VÉRITÉ : `lib/pricing-plans.ts` (LOGICIEL_PLANS).
+ * Affiche les 4 tiers payants V4 (Solo Light 29 / Solo Pro 59 / Cabinet 149 /
+ * Cabinet+ 299) — on exclut le code `essai` (mode trial des autres tiers).
+ *
+ * Audit FIX-SS (2026-05-23) : suppression des 5 anciens tiers E2c
+ * (Essential 19, Découverte 29, Pro 39, All Inclusive 99, Cabinet 149).
+ */
+
+interface PreviewBullet {
+  text: string
 }
 
-const TIERS: PreviewTier[] = [
-  {
-    id: 'essential',
-    name: 'Essential',
-    price: '19€',
-    bullets: ['20 missions/mois', 'Exports universels', 'Support email 48h'],
-    ctaHref: '/pricing/checkout?plan=essential&billing=monthly',
-  },
-  {
-    id: 'decouverte',
-    name: 'Découverte',
-    price: '29€',
-    bullets: ['30 missions/mois', 'Saisie vocale incluse', 'Support email 24h'],
-    ctaHref: '/pricing/checkout?plan=decouverte&billing=monthly',
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: '39€',
-    bullets: ['80 missions/mois', 'Annuaire public', 'Toutes fonctionnalités'],
-    highlighted: true,
-    ctaHref: '/pricing/checkout?plan=pro&billing=monthly',
-  },
-  {
-    id: 'all-inclusive',
-    name: 'All Inclusive',
-    price: '99€',
-    bullets: ['200 missions/mois', 'Factur-X intégré', 'Support prioritaire 4h'],
-    ctaHref: '/pricing/checkout?plan=all-inclusive&billing=monthly',
-  },
-  {
-    id: 'cabinet',
-    name: 'Cabinet',
-    price: '149€',
-    bullets: ['Missions illimitées', '3 utilisateurs', 'Account manager dédié'],
-    ctaHref: '/pricing/checkout?plan=cabinet&billing=monthly',
-  },
-]
+function buildBullets(plan: (typeof LOGICIEL_PLANS)[number]): readonly PreviewBullet[] {
+  const isUnlimited = plan.caps.missions >= UNLIMITED_CAP
+  const missionsLabel = isUnlimited
+    ? 'Missions illimitées (fair-use)'
+    : `${plan.caps.missions} missions / mois`
+  const usersLabel =
+    plan.caps.users === 1 ? '1 utilisateur' : `Jusqu'à ${plan.caps.users} utilisateurs`
+  const storageLabel = `${plan.caps.storageGb} Go de stockage`
 
-/**
- * Mini-grille 5 tiers preview, lien vers /pricing pour détails complets.
- * B2B only.
- */
+  return [{ text: missionsLabel }, { text: usersLabel }, { text: storageLabel }]
+}
+
+const PAID_TIERS = LOGICIEL_PLANS.filter((p) => p.code !== 'essai')
+
 export function PricingPreview() {
   return (
     <section id="pricing" className="px-6 py-20 md:py-24 bg-paper">
@@ -64,57 +42,62 @@ export function PricingPreview() {
             05 · Tarification
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">
-            5 forfaits. Aucune surprise.
+            4 forfaits. Aucune surprise.
           </h2>
           <p className="text-ink-mute leading-relaxed">
-            Tous les forfaits incluent : missions illimitées, essai 30 jours avec CB enregistrée
-            et débit auto à l&apos;issue, sans engagement.
+            Toutes les fonctionnalités dans tous les tiers. Essai 30 jours avec CB enregistrée et
+            débit auto à l&apos;issue, sans engagement.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {TIERS.map((t) => (
-            <article
-              key={t.id}
-              className={cn(
-                'rounded-xl border p-5 flex flex-col space-y-4 transition-colors duration-200',
-                t.highlighted
-                  ? 'border-chartreuse-deep bg-chartreuse-soft/40 shadow-md'
-                  : 'border-rule/70 bg-paper hover:border-ink/20',
-              )}
-            >
-              <header className="space-y-1">
-                <div className="flex items-center gap-1.5">
-                  <h3 className="text-base font-bold text-ink">{t.name}</h3>
-                  {t.highlighted && (
-                    <Sparkles className="size-3.5 text-chartreuse-deep" aria-hidden />
-                  )}
-                </div>
-                <p className="text-2xl font-bold text-ink">
-                  {t.price}
-                  <span className="text-xs font-medium text-ink-mute"> /mois HT</span>
-                </p>
-              </header>
-
-              <ul className="space-y-2 flex-1">
-                {t.bullets.map((b) => (
-                  <li key={b} className="flex items-start gap-2 text-xs text-ink-mute">
-                    <Check className="size-3.5 text-success shrink-0 mt-0.5" aria-hidden />
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                size="sm"
-                variant={t.highlighted ? 'accent' : 'outline'}
-                className="w-full"
-                asChild
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {PAID_TIERS.map((tier) => {
+            const priceEuros = Math.round(tier.monthlyPrice / 100)
+            const bullets = buildBullets(tier)
+            const ctaHref = `/pricing/checkout?plan=${tier.code}&billing=monthly`
+            return (
+              <article
+                key={tier.code}
+                className={cn(
+                  'rounded-xl border p-5 flex flex-col space-y-4 transition-colors duration-200',
+                  tier.featured
+                    ? 'border-chartreuse-deep bg-chartreuse-soft/40 shadow-md'
+                    : 'border-rule/70 bg-paper hover:border-ink/20',
+                )}
               >
-                <Link href={t.ctaHref}>Choisir</Link>
-              </Button>
-            </article>
-          ))}
+                <header className="space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-base font-bold text-ink">{tier.name}</h3>
+                    {tier.featured && (
+                      <Sparkles className="size-3.5 text-chartreuse-deep" aria-hidden />
+                    )}
+                  </div>
+                  <p className="text-2xl font-bold text-ink">
+                    {priceEuros}€
+                    <span className="text-xs font-medium text-ink-mute"> /mois HT</span>
+                  </p>
+                </header>
+
+                <ul className="space-y-2 flex-1">
+                  {bullets.map((b) => (
+                    <li key={b.text} className="flex items-start gap-2 text-xs text-ink-mute">
+                      <Check className="size-3.5 text-success shrink-0 mt-0.5" aria-hidden />
+                      <span>{b.text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button
+                  size="sm"
+                  variant={tier.featured ? 'accent' : 'outline'}
+                  className="w-full"
+                  asChild
+                >
+                  <Link href={ctaHref}>Choisir</Link>
+                </Button>
+              </article>
+            )
+          })}
         </div>
 
         <div className="text-center">

@@ -102,29 +102,32 @@ interface Tier {
   audience: string
 }
 
+// SOURCE DE VÉRITÉ : apps/web/src/lib/pricing-plans.ts (LOGICIEL_PLANS)
+// Audit FIX-SS (2026-05-23) : missions alignées sur canonique
+// (Solo Light 60 / Solo Pro 150 / Cabinet 400 / Cabinet+ unlimited).
 const TIERS: Tier[] = [
   {
     name: 'Solo Light',
     price: '29€',
-    missions: '20 missions / mois',
+    missions: '60 missions / mois',
     audience: 'Pour démarrer ou volumes faibles',
   },
   {
     name: 'Solo Pro',
     price: '59€',
-    missions: '60 missions / mois',
+    missions: '150 missions / mois',
     audience: 'Le tier le plus choisi des solopreneurs',
   },
   {
     name: 'Cabinet',
     price: '149€',
-    missions: '200 missions / mois',
+    missions: '400 missions / mois',
     audience: 'Cabinet 2 à 3 diagnostiqueurs',
   },
   {
     name: 'Cabinet+',
     price: '299€',
-    missions: '500 missions / mois',
+    missions: 'Missions illimitées',
     audience: 'Cabinet en croissance ou multi-sites',
   },
 ]

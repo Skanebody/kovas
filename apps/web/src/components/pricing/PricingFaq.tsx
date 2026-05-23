@@ -16,46 +16,46 @@ const PRICING_FAQ: readonly FaqEntry[] = [
     question: 'Quelle différence entre KOVAS Annuaire et KOVAS 360 ?',
     answer:
       "KOVAS Annuaire est un service B2C : votre fiche apparaît dans l'annuaire public et reçoit des demandes de particuliers (vendeurs, bailleurs, acheteurs). Vous payez pour la visibilité et les leads. " +
-      "KOVAS 360 est le logiciel SaaS B2B qui vous accompagne sur le terrain : saisie vocale, photos géolocalisées, exports universels, sync iPad/iPhone/Web, conformité ADEME. Vous payez pour la productivité. " +
+      'KOVAS 360 est le logiciel SaaS B2B qui vous accompagne sur le terrain : saisie vocale, photos géolocalisées, exports universels, sync iPad/iPhone/Web, conformité ADEME. Vous payez pour la productivité. ' +
       "Les deux produits sont indépendants. Vous pouvez prendre l'un, l'autre, ou les deux ensemble via un Bundle remisé.",
   },
   {
     question: 'Puis-je prendre les deux ?',
     answer:
-      "Oui, et c'est le cas typique pour les diagnostiqueurs qui veulent maximiser visibilité et productivité. Cinq Bundles combinent Annuaire + KOVAS 360 avec une économie de 9 à 19 € / mois par rapport à la souscription séparée. " +
-      "Exemple : Annuaire Pro 19 € + KOVAS 360 Active 59 € séparément = 78 €. En bundle « Active Pro » = 69 €/mo, soit 9 € d'économie chaque mois (108 €/an).",
+      "Oui, et c'est le cas typique pour les diagnostiqueurs qui veulent maximiser visibilité et productivité. Cinq Bundles combinent Annuaire + KOVAS 360 avec une économie de 9 à 59 € / mois par rapport à la souscription séparée. " +
+      "Exemple : Annuaire Local 19 € + KOVAS 360 Solo Pro 59 € séparément = 78 €. En bundle « Solo Performance » = 65 €/mo, soit 13 € d'économie chaque mois (156 €/an).",
   },
   {
     question: 'Que se passe-t-il si je suis sur un ancien forfait ?',
     answer:
-      "Si vous êtes déjà client sur l'ancienne grille (Essential 19 €, Découverte 29 €, Pro 39 €, All Inclusive 99 €, Cabinet 149 €), votre prix actuel est verrouillé à vie. " +
-      "Vous gardez votre tarif tant que votre abonnement reste actif, même quand la grille V3 augmente. Aucune migration forcée. Si vous souhaitez basculer sur la nouvelle grille, nous calculons les économies estimées avant tout changement.",
+      'Si vous êtes déjà client sur une ancienne grille (Essential 19 €, Découverte 29 €, Pro 39 €, All Inclusive 99 €, Cabinet 149 €, Standard 59 €, Volume 99 €, Founder 49 €), votre prix actuel est verrouillé à vie. ' +
+      'Vous gardez votre tarif tant que votre abonnement reste actif, même quand la grille publique évolue. Aucune migration forcée. Si vous souhaitez basculer sur la grille V4 actuelle (Solo Light 29, Solo Pro 59, Cabinet 149, Cabinet+ 299), nous calculons les économies estimées avant tout changement.',
   },
   {
     question: 'Comment fonctionne le Sponsored Slot ?',
     answer:
       "Le Sponsored Slot est un emplacement exclusif en tête des résultats de l'annuaire, par ville. Un seul diagnostiqueur par ville, badge « Recommandé » visible sur fiche, 30 leads premium / mois inclus. " +
-      "Le surcoût mensuel dépend de la population : 9 € (rural < 3 000 hab) à 199 € (métropole > 500 000 hab). Il s'ajoute à l'abonnement Annuaire Sponsorisé (79 €/mo). " +
+      "Le surcoût mensuel dépend de la population : 9 € (commune < 10 000 hab) à 149 € (mégapole > 1 M hab). Il s'ajoute à l'abonnement Annuaire Visibilité National (79 €/mo). " +
       "Réservation par ordre d'arrivée, priorité aux diagnostiqueurs avec un score d'activité ≥ 70. Pas de surenchère cachée.",
   },
   {
-    question: 'Puis-je changer de plan en cours d\'abonnement ?',
+    question: "Puis-je changer de plan en cours d'abonnement ?",
     answer:
-      "Oui, sans frais ni engagement. Vous pouvez passer du Starter à Active (ou à Cabinet), upgrader votre Annuaire de Pro à Visibilité, ou basculer vers un Bundle, depuis votre compte. " +
-      "Le prorata est calculé automatiquement par Stripe : vous ne payez que la différence pour le mois en cours. Le downgrade prend effet à la fin du cycle de facturation pour éviter toute interruption de service.",
+      'Oui, sans frais ni engagement. Vous pouvez passer du Solo Light au Solo Pro (ou au Cabinet, ou Cabinet+), upgrader votre Annuaire de Local à Régional ou National, ou basculer vers un Bundle, depuis votre compte. ' +
+      'Le prorata est calculé automatiquement par Stripe : vous ne payez que la différence pour le mois en cours. Le downgrade prend effet à la fin du cycle de facturation pour éviter toute interruption de service.',
   },
   // ─── FAQ historiques conservées ───
   {
     question: 'Que se passe-t-il si je dépasse mon quota de missions ?',
     answer:
-      "Les caps sont en « fair-use » : nous ne vous bloquons pas brutalement. " +
-      "À 80 % du quota, vous recevez une notification. À 100 %, vous pouvez continuer en mode dégradé léger. " +
-      "Au-delà de 150 % sur 2 mois consécutifs, nous vous suggérons la formule supérieure (plus économique pour votre profil).",
+      'Les caps sont en « fair-use » : nous ne vous bloquons pas brutalement. ' +
+      'À 80 % du quota, vous recevez une notification. À 100 %, vous pouvez continuer en mode dégradé léger. ' +
+      'Au-delà de 150 % sur 2 mois consécutifs, nous vous suggérons la formule supérieure (plus économique pour votre profil).',
   },
   {
     question: 'Y a-t-il un engagement de durée ?',
     answer:
-      "Aucun. Toutes les formules sont mensuelles, résiliables à tout moment depuis votre compte. " +
+      'Aucun. Toutes les formules sont mensuelles, résiliables à tout moment depuis votre compte. ' +
       "Si vous payez à l'année, vous bénéficiez de 2 mois offerts (10 mois facturés sur 12).",
   },
   {
@@ -67,9 +67,9 @@ const PRICING_FAQ: readonly FaqEntry[] = [
   {
     question: 'Quel niveau de support est inclus ?',
     answer:
-      "Tous les tiers payants bénéficient du support par email avec réponse sous 24 h ouvrées. " +
-      "À partir du forfait Active (59 €/mo), le support est prioritaire (réponse sous 4 h ouvrées). " +
-      "Les formules Cabinet et Enterprise incluent un account manager dédié.",
+      'Tous les tiers payants bénéficient du support par email avec réponse sous 24 h ouvrées. ' +
+      'À partir du forfait Solo Pro (59 €/mo), le support est prioritaire (réponse sous 4 h ouvrées). ' +
+      'Les formules Cabinet et Cabinet+ incluent un account manager dédié.',
   },
 ]
 

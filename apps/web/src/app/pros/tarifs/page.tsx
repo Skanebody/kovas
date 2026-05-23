@@ -66,7 +66,7 @@ const TIERS: Tier[] = [
     missions: 0, // UNLIMITED — affichage spécifique ci-dessous
     surplus: 'inclus',
     storage: '250 Go',
-    users: "jusqu'à 6 utilisateurs",
+    users: "jusqu'à 7 utilisateurs",
     description: 'Cabinet en croissance, multi-sites ou volume très élevé.',
     cta: 'Commencer Cabinet+',
   },

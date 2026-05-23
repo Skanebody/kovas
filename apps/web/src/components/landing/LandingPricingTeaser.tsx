@@ -1,27 +1,33 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-// Type B2 dependency — pricing-plans.ts refonte by parallel agent
-import { getAnnuairePlan, getLogicielPlan } from '@/lib/pricing-plans'
+import { getAnnuairePlan, getBundle, getLogicielPlan } from '@/lib/pricing-plans'
 import { ArrowRight, Check, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 /**
  * Teaser pricing pour la landing diagnostiqueurs (`/pour-les-diagnostiqueurs`).
  *
- * Refonte V3 dual track 2026-05-21 : 2 cards côte-à-côte
- * (Annuaire Pro 19 € + KOVAS 360 Active 59 €) + lien vers `/pricing` détail
- * complet (4 + 5 tiers + bundles + sponsored slot + add-ons).
+ * SOURCE DE VÉRITÉ : `lib/pricing-plans.ts` — tous les chiffres sont dérivés
+ * du canonique. Audit FIX-SS (2026-05-23) : essai 30j (vs 14j obsolète), prix
+ * bundle dérivés du canonique Solo Performance (65 € / -13 €).
  */
 export function LandingPricingTeaser() {
+  // annuaire_pro est l'alias V3 → résout en annuaire_local (19 €).
   const annuairePro = getAnnuairePlan('annuaire_pro')
+  // logiciel_active est l'alias V3 → résout en solo_pro (59 €).
   const logicielActive = getLogicielPlan('logiciel_active')
+  // Bundle Solo Performance (Annuaire Local + Solo Pro) — économie officielle.
+  const bundlePerformance = getBundle('bundle_solo_performance')
 
-  if (!annuairePro || !logicielActive) {
+  if (!annuairePro || !logicielActive || !bundlePerformance) {
     return null
   }
 
   const annuaireEuros = Math.round(annuairePro.monthlyPrice / 100)
   const logicielEuros = Math.round(logicielActive.monthlyPrice / 100)
+  const bundleEuros = Math.round(bundlePerformance.monthlyPrice / 100)
+  const bundleSavingsEuros = Math.round(bundlePerformance.monthlySavingsCents / 100)
+  const individualEuros = Math.round(bundlePerformance.individualMonthlyPriceCents / 100)
 
   return (
     <section className="px-6 py-20 sm:py-28">
@@ -99,9 +105,9 @@ export function LandingPricingTeaser() {
         </div>
 
         <div className="text-center text-sm text-ink-mute leading-relaxed max-w-xl mx-auto">
-          <strong className="text-ink">Bundle Active Pro</strong> : Annuaire Pro + KOVAS 360
-          Active à <strong className="text-ink">69 €/mo</strong> au lieu de 78 € — soit 9 €
-          d'économie chaque mois.
+          <strong className="text-ink">Bundle {bundlePerformance.name}</strong> : Annuaire + KOVAS
+          360 à <strong className="text-ink">{bundleEuros} €/mo</strong> au lieu de{' '}
+          {individualEuros} € — soit {bundleSavingsEuros} € d'économie chaque mois.
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -111,8 +117,8 @@ export function LandingPricingTeaser() {
             </Link>
           </Button>
           <Button size="lg" asChild>
-            <Link href="/signup?plan=logiciel_starter" aria-label="Démarrer l'essai 14 jours">
-              Démarrer l'essai 14 jours
+            <Link href="/signup" aria-label="Démarrer l'essai 30 jours">
+              Démarrer l'essai 30 jours
             </Link>
           </Button>
         </div>

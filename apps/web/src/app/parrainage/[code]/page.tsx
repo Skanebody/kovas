@@ -1,17 +1,17 @@
-import { createClient } from '@/lib/supabase/server'
-import { isValidReferralCodeFormat, normalizeReferralCode } from '@/lib/referral/code-generator'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { isValidReferralCodeFormat, normalizeReferralCode } from '@/lib/referral/code-generator'
 import { KOVAS_TIERS } from '@/lib/stripe-config'
+import { createClient } from '@/lib/supabase/server'
 import { ArrowRight, Check } from 'lucide-react'
-import Link from 'next/link'
-import { cookies } from 'next/headers'
-import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Vous avez été parrainé',
-  description: '1 mois offert sur votre abonnement KOVAS, sur invitation d\'un confrère.',
+  description: "1 mois offert sur votre abonnement KOVAS, sur invitation d'un confrère.",
 }
 
 const REFERRAL_COOKIE = 'kovas_ref_code'
@@ -102,7 +102,9 @@ export default async function ReferralLandingPage({ params }: PageProps) {
             </li>
             <li className="flex items-start gap-3">
               <Check className="size-4 mt-0.5 shrink-0 text-chartreuse-deep" />
-              <span>14 jours d'essai libre puis le forfait de votre choix (29 € à 99 € HT/mois).</span>
+              <span>
+                30 jours d'essai libre puis le forfait de votre choix (29 € à 299 € HT/mois).
+              </span>
             </li>
             <li className="flex items-start gap-3">
               <Check className="size-4 mt-0.5 shrink-0 text-chartreuse-deep" />
@@ -122,10 +124,7 @@ export default async function ReferralLandingPage({ params }: PageProps) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {KOVAS_TIERS.map((t) => (
-              <div
-                key={t.id}
-                className="rounded-lg border border-rule/70 bg-paper p-5 space-y-2"
-              >
+              <div key={t.id} className="rounded-lg border border-rule/70 bg-paper p-5 space-y-2">
                 <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute">
                   {t.label}
                 </div>

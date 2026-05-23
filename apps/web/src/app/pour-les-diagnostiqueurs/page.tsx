@@ -19,7 +19,7 @@ import { buildMetadata } from '@/lib/seo/metadata'
 export const metadata = buildMetadata({
   title: 'KOVAS 360 — Le logiciel terrain pour diagnostiqueurs immobiliers indépendants',
   description:
-    'Saisie vocale, exports universels, conformité ADEME et Factur-X intégrés. 30 jours gratuits. Sans engagement. À partir de 19€/mois.',
+    'Saisie vocale, exports universels, conformité ADEME et Factur-X intégrés. 30 jours gratuits. Sans engagement. À partir de 29€/mois (Solo Light) ou 39€/mois en bundle Solo Starter.',
   path: '/pour-les-diagnostiqueurs',
 })
 
@@ -184,9 +184,11 @@ const SOFTWARE_APPLICATION_SCHEMA = {
     bestRating: '5',
     worstRating: '1',
   },
+  // Schema.org Offer aligné sur la grille V4 canonique (lib/pricing-plans.ts).
+  // Prix de départ = Solo Light 29 € (le tier logiciel le moins cher).
   offers: {
     '@type': 'Offer',
-    price: '19',
+    price: '29',
     priceCurrency: 'EUR',
     priceValidUntil: '2027-12-31',
     availability: 'https://schema.org/InStock',
@@ -228,7 +230,7 @@ export default function PourLesDiagnostiqueursPage() {
           title="Réservez votre place dans les 50 premiers."
           description="Bénéficiez du tarif Founder à vie sur tous nos forfaits, ainsi que d’un accès anticipé à toutes les fonctionnalités Phase 2."
           ctaLabel="Démarrer maintenant"
-          ctaHref="/pricing/checkout?plan=pro&billing=monthly"
+          ctaHref="/pricing/checkout?plan=solo_pro&billing=monthly"
         />
       </main>
       <SiteFooter />

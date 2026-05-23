@@ -23,7 +23,7 @@ export default function UpgradeBundlePage() {
         eyebrow="Bundles Annuaire + KOVAS 360"
         title="Combinez et"
         accent="économisez"
-        description="Souscrivez Annuaire + KOVAS 360 en un seul abonnement et économisez jusqu'à 19 €/mois. Bundles transparents — l'économie mensuelle est affichée sur chaque card."
+        description="Souscrivez Annuaire + KOVAS 360 en un seul abonnement et économisez jusqu'à 59 €/mois. Bundles transparents — l'économie mensuelle est affichée sur chaque card."
       />
 
       <div className="flex justify-center">
@@ -43,8 +43,8 @@ export default function UpgradeBundlePage() {
       <p className="text-xs text-foreground/55 max-w-2xl">
         Les Bundles regroupent un forfait KOVAS Annuaire (B2C lead-gen) et un forfait KOVAS 360
         (SaaS B2B) à un tarif avantageux. Résiliation à tout moment depuis votre compte,
-        conformément au décret n°2023-417. Essai gratuit 30 jours avec carte bancaire
-        enregistrée et débit automatique à l&apos;issue.
+        conformément au décret n°2023-417. Essai gratuit 30 jours avec carte bancaire enregistrée et
+        débit automatique à l&apos;issue.
       </p>
     </div>
   )
