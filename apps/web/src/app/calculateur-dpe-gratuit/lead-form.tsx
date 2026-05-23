@@ -21,16 +21,12 @@
  */
 
 import { Loader2 } from 'lucide-react'
-import posthog from 'posthog-js'
 import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { type BanFeature, searchBanAddress } from '@/lib/ban'
+import type { CalculatorAnswers, DpeClass } from '@/lib/dpe-calculator/question-tree'
 import { cn } from '@/lib/utils'
-import { searchBanAddress, type BanFeature } from '@/lib/ban'
-import type {
-  CalculatorAnswers,
-  DpeClass,
-} from '@/lib/dpe-calculator/question-tree'
 
 import { submitDpeLead } from './actions'
 import type { SubmitDpeLeadInput } from './schemas'
@@ -143,9 +139,8 @@ export function LeadForm({
     }
 
     // Honeypot caché
-    const honeypotValue = (
-      e.currentTarget.elements.namedItem('website') as HTMLInputElement | null
-    )?.value
+    const honeypotValue = (e.currentTarget.elements.namedItem('website') as HTMLInputElement | null)
+      ?.value
     setSubmitting(true)
     try {
       // À ce stade, `areAllAnswersComplete(answers)` est garanti par le
@@ -174,25 +169,28 @@ export function LeadForm({
         return
       }
 
-      // PostHog tracking event
-      try {
-        posthog.capture('lead.dpe-calculator.submitted', {
-          estimated_class: estimatedClass,
-          request_type: form.request_type,
-          recipient_count: result.recipientCount ?? 0,
-          city: form.city,
-          postal_code: form.postal_code,
-        })
-      } catch {
-        // ignore — posthog peut ne pas être initialisé en dev
+      // PostHog tracking event — guard NEXT_PUBLIC_POSTHOG_KEY + window pour éviter
+      // tout crash en dev sans clé ou en SSR. Import dynamique pour ne pas casser
+      // le bundle si la lib n'est pas installée.
+      if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+        try {
+          const { default: posthog } = await import('posthog-js')
+          posthog.capture('lead.dpe-calculator.submitted', {
+            estimated_class: estimatedClass,
+            request_type: form.request_type,
+            recipient_count: result.recipientCount ?? 0,
+            city: form.city,
+            postal_code: form.postal_code,
+          })
+        } catch {
+          // ignore — posthog peut ne pas être initialisé en dev
+        }
       }
 
       onSuccess()
     } catch (err) {
       console.error('[lead-form] submit failed', err)
-      setGlobalError(
-        'Erreur réseau. Vérifiez votre connexion et réessayez dans un instant.',
-      )
+      setGlobalError('Erreur réseau. Vérifiez votre connexion et réessayez dans un instant.')
     } finally {
       setSubmitting(false)
     }
@@ -205,8 +203,8 @@ export function LeadForm({
           Recevez votre estimation détaillée
         </h2>
         <p className="text-[14px] text-ink-mute">
-          Vos coordonnées nous permettent de vous envoyer le détail du calcul et,
-          si vous le souhaitez, des devis de diagnostiqueurs certifiés.
+          Vos coordonnées nous permettent de vous envoyer le détail du calcul et, si vous le
+          souhaitez, des devis de diagnostiqueurs certifiés.
         </p>
       </header>
 
@@ -220,11 +218,7 @@ export function LeadForm({
       ) : null}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field
-          label="Nom complet"
-          required
-          error={fieldErrors['contact.full_name']}
-        >
+        <Field label="Nom complet" required error={fieldErrors['contact.full_name']}>
           <input
             type="text"
             name="full_name"
@@ -261,11 +255,7 @@ export function LeadForm({
           />
         </Field>
 
-        <Field
-          label="Code postal du bien"
-          required
-          error={fieldErrors['contact.postal_code']}
-        >
+        <Field label="Code postal du bien" required error={fieldErrors['contact.postal_code']}>
           <input
             type="text"
             name="postal_code"
@@ -283,11 +273,7 @@ export function LeadForm({
         </Field>
 
         <div className="relative sm:col-span-2">
-          <Field
-            label="Ville du bien"
-            required
-            error={fieldErrors['contact.city']}
-          >
+          <Field label="Ville du bien" required error={fieldErrors['contact.city']}>
             <input
               type="text"
               name="city"
@@ -304,10 +290,7 @@ export function LeadForm({
             />
           </Field>
           {cityOpen && citySuggestions.length > 0 ? (
-            <ul
-              role="listbox"
-              className="absolute left-0 right-0 top-full z-10 mt-1 max-h-60 overflow-auto rounded-lg border border-border bg-paper shadow-glass-lg"
-            >
+            <ul className="absolute left-0 right-0 top-full z-10 mt-1 max-h-60 overflow-auto rounded-lg border border-border bg-paper shadow-glass-lg">
               {citySuggestions.map((f, idx) => (
                 <li key={`${f.properties.label}-${idx}`}>
                   <button
@@ -330,10 +313,7 @@ export function LeadForm({
         </div>
 
         <div className="sm:col-span-2">
-          <Field
-            label="Adresse du bien (optionnel)"
-            error={fieldErrors['contact.address']}
-          >
+          <Field label="Adresse du bien (optionnel)" error={fieldErrors['contact.address']}>
             <input
               type="text"
               name="address"
@@ -348,9 +328,7 @@ export function LeadForm({
       </div>
 
       <fieldset>
-        <legend className="mb-2 block text-[13px] font-semibold text-ink">
-          Type de demande
-        </legend>
+        <legend className="mb-2 block text-[13px] font-semibold text-ink">Type de demande</legend>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           {(
             [
@@ -393,9 +371,8 @@ export function LeadForm({
           required
         />
         <span className="text-[12px] leading-relaxed text-ink">
-          J'accepte que mes coordonnées soient transmises à des diagnostiqueurs
-          certifiés près de chez moi pour me proposer un devis. Conformément au
-          RGPD, je peux exercer mes droits via{' '}
+          J'accepte que mes coordonnées soient transmises à des diagnostiqueurs certifiés près de
+          chez moi pour me proposer un devis. Conformément au RGPD, je peux exercer mes droits via{' '}
           <a
             href="/confidentialite"
             target="_blank"
@@ -408,9 +385,7 @@ export function LeadForm({
         </span>
       </label>
       {fieldErrors['contact.consent_rgpd'] ? (
-        <p className="text-[12px] text-accent-red">
-          {fieldErrors['contact.consent_rgpd']}
-        </p>
+        <p className="text-[12px] text-accent-red">{fieldErrors['contact.consent_rgpd']}</p>
       ) : null}
 
       {/* Honeypot caché */}
@@ -469,15 +444,14 @@ function Field({
   children: React.ReactNode
 }) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: l'input est passé via children — biome ne peut pas le détecter statiquement
     <label className="block">
       <span className="mb-1.5 block text-[13px] font-semibold text-ink">
         {label}
         {required ? <span className="ml-0.5 text-accent-red">*</span> : null}
       </span>
       {children}
-      {error ? (
-        <span className="mt-1 block text-[12px] text-accent-red">{error}</span>
-      ) : null}
+      {error ? <span className="mt-1 block text-[12px] text-accent-red">{error}</span> : null}
     </label>
   )
 }

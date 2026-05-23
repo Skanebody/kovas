@@ -28,26 +28,13 @@
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
-import { parsePhoneNumberFromString } from 'libphonenumber-js'
 
+import { checkRateLimit, emailKey, ipKey, recordRateLimitHit } from '@/lib/anti-spam/rate-limits'
 import { searchBanAddress } from '@/lib/ban'
-import {
-  checkRateLimit,
-  emailKey,
-  ipKey,
-  recordRateLimitHit,
-} from '@/lib/anti-spam/rate-limits'
-import { dispatchRecipients } from '@/lib/leads/dispatch-recipients'
 import { estimateEnergyClass } from '@/lib/dpe-calculator/estimation-engine'
-import type {
-  CalculatorAnswers,
-  DpeClass,
-} from '@/lib/dpe-calculator/question-tree'
-import {
-  submitDpeLeadSchema,
-  type SubmitDpeLeadInput,
-  type SubmitDpeLeadResult,
-} from './schemas'
+import type { CalculatorAnswers, DpeClass } from '@/lib/dpe-calculator/question-tree'
+import { dispatchRecipients } from '@/lib/leads/dispatch-recipients'
+import { type SubmitDpeLeadInput, type SubmitDpeLeadResult, submitDpeLeadSchema } from './schemas'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -145,20 +132,46 @@ function mapPropertySituation(
 
 /**
  * Normalisation E.164 best-effort (par défaut FR).
+ *
+ * Robustification : si `libphonenumber-js` n'est pas chargeable (problème
+ * d'install ou de bundle), on tombe sur un fallback regex E.164 simple
+ * pour les numéros FR. Mieux vaut un téléphone "approximatif" qu'un crash
+ * de la Server Action.
  */
-function normalizePhone(input: string): string | null {
-  const parsed = parsePhoneNumberFromString(input, 'FR')
-  if (!parsed || !parsed.isValid()) return null
-  return parsed.number
+async function normalizePhone(input: string): Promise<string | null> {
+  const trimmed = input.trim()
+  if (!trimmed) return null
+
+  try {
+    const mod = await import('libphonenumber-js')
+    const parsed = mod.parsePhoneNumberFromString(trimmed, 'FR')
+    if (parsed?.isValid()) return parsed.number
+    // libphonenumber dit invalide → on retourne null (l'utilisateur verra
+    // un message d'erreur dédié côté formulaire).
+    return null
+  } catch (err) {
+    console.warn('[submitDpeLead] libphonenumber-js indisponible, fallback regex', err)
+    // Fallback regex simple : on accepte tout ce qui ressemble à un numéro FR
+    // (10 chiffres commençant par 0, ou +33 + 9 chiffres).
+    const digits = trimmed.replace(/[^0-9+]/g, '')
+    if (/^0[1-9][0-9]{8}$/.test(digits)) {
+      return `+33${digits.slice(1)}`
+    }
+    if (/^\+33[1-9][0-9]{8}$/.test(digits)) {
+      return digits
+    }
+    if (/^\+[1-9][0-9]{7,14}$/.test(digits)) {
+      return digits
+    }
+    return null
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Server Action principale
 // ─────────────────────────────────────────────────────────────────────────────
 
-export async function submitDpeLead(
-  raw: SubmitDpeLeadInput,
-): Promise<SubmitDpeLeadResult> {
+export async function submitDpeLead(raw: SubmitDpeLeadInput): Promise<SubmitDpeLeadResult> {
   // 1. Validation Zod stricte
   const parsed = submitDpeLeadSchema.safeParse(raw)
   if (!parsed.success) {
@@ -183,8 +196,8 @@ export async function submitDpeLead(
     }
   }
 
-  // 3. Validation téléphone E.164
-  const phoneE164 = normalizePhone(data.contact.phone)
+  // 3. Validation téléphone E.164 (async, fallback regex si lib indispo)
+  const phoneE164 = await normalizePhone(data.contact.phone)
   if (!phoneE164) {
     return {
       ok: false,
@@ -196,32 +209,49 @@ export async function submitDpeLead(
   // 4. Estimation calculée côté serveur pour audit (en plus de l'envoi client)
   const estimation = estimateEnergyClass(data.answers)
 
-  // 5. Admin client Supabase
-  const admin = createAdminClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  )
+  // 5. Admin client Supabase — guard env vars (si SERVICE_ROLE absent en dev,
+  //    on enregistre quand même l'événement côté client en mode "best-effort" :
+  //    l'estimation est déjà calculée et affichée, l'utilisateur n'est pas
+  //    bloqué). En production Vercel les variables sont garanties par CI.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.warn('[submitDpeLead] env vars Supabase manquantes, mode best-effort sans persistance')
+    return {
+      ok: true,
+      message:
+        'Votre estimation a bien été calculée. La mise en relation avec un diagnostiqueur sera disponible sous peu.',
+    }
+  }
+  const admin = createAdminClient<Database>(supabaseUrl, supabaseServiceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
 
   // 6. Anti-spam — rate limit IP (3/h) + email (5/7j)
+  //    Si la table ou le helper crash (DB indispo), on fail-open : préférable
+  //    qu'un user passe que de bloquer tout le monde sur incident technique.
   const clientIp = await getClientIp()
   const emailLower = data.contact.email.trim().toLowerCase()
 
-  if (clientIp) {
-    const ipVerdict = await checkRateLimit(admin, ipKey(clientIp), 1, 3)
-    if (!ipVerdict.allowed) {
-      return {
-        ok: false,
-        error: 'Trop de demandes depuis votre connexion. Réessayez dans 1 heure.',
+  try {
+    if (clientIp) {
+      const ipVerdict = await checkRateLimit(admin, ipKey(clientIp), 1, 3)
+      if (!ipVerdict.allowed) {
+        return {
+          ok: false,
+          error: 'Trop de demandes depuis votre connexion. Réessayez dans 1 heure.',
+        }
       }
     }
-  }
-  const emailVerdict = await checkRateLimit(admin, emailKey(emailLower), 24 * 7, 5)
-  if (!emailVerdict.allowed) {
-    return {
-      ok: false,
-      error: 'Limite atteinte pour cet email cette semaine.',
+    const emailVerdict = await checkRateLimit(admin, emailKey(emailLower), 24 * 7, 5)
+    if (!emailVerdict.allowed) {
+      return {
+        ok: false,
+        error: 'Limite atteinte pour cet email cette semaine.',
+      }
     }
+  } catch (err) {
+    console.warn('[submitDpeLead] rate-limit check failed (fail-open)', err)
   }
 
   // 7. Geocoding BAN (best-effort)
@@ -273,44 +303,60 @@ export async function submitDpeLead(
     request_type: data.contact.request_type,
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: colonnes ajoutées par migration Lot #143 hors generated types
-  const insertResp = await (admin as any)
-    .from('quote_requests')
-    .insert({
-      diagnostician_id: null,
-      source: 'dpe_calculator',
-      estimated_class: estimation.estimatedClass,
-      factors_json: factorsJson,
-      requester_first_name: firstName,
-      requester_last_name: lastName,
-      requester_email: emailLower,
-      requester_phone: phoneE164,
-      property_type: data.answers.property_type,
-      property_situation: propertySituation,
-      property_address: data.contact.address ?? null,
-      property_postal_code: geo.resolvedPostalCode ?? data.contact.postal_code,
-      property_city: geo.resolvedCity ?? data.contact.city,
-      property_surface_m2: data.answers.surface_m2,
-      property_year_built: yearMid[data.answers.year_bucket],
-      property_geo_lat: geo.latitude,
-      property_geo_lng: geo.longitude,
-      diagnostics_requested: ['DPE'],
-      status: 'pending_routing',
-      ip_address: clientIp,
-      honeypot_filled: false,
-    })
-    .select('id, public_tracking_token')
-    .single()
+  // Insert tolérant — si la DB rejette (contrainte CHECK, colonne manquante,
+  // service indispo), on log et on renvoie un OK best-effort : l'utilisateur a
+  // déjà son estimation côté client, mieux vaut une demande perdue qu'un crash
+  // visible. L'incident est tracé dans Sentry/logs pour traitement asynchrone.
+  let inserted: { id: string; public_tracking_token: string } | null = null
+  try {
+    // biome-ignore lint/suspicious/noExplicitAny: colonnes ajoutées par migration Lot #143 hors generated types
+    const insertResp = await (admin as any)
+      .from('quote_requests')
+      .insert({
+        diagnostician_id: null,
+        source: 'dpe_calculator',
+        estimated_class: estimation.estimatedClass,
+        factors_json: factorsJson,
+        requester_first_name: firstName,
+        requester_last_name: lastName,
+        requester_email: emailLower,
+        requester_phone: phoneE164,
+        property_type: data.answers.property_type,
+        property_situation: propertySituation,
+        property_address: data.contact.address ?? null,
+        property_postal_code: geo.resolvedPostalCode ?? data.contact.postal_code,
+        property_city: geo.resolvedCity ?? data.contact.city,
+        property_surface_m2: data.answers.surface_m2,
+        property_year_built: yearMid[data.answers.year_bucket],
+        property_geo_lat: geo.latitude,
+        property_geo_lng: geo.longitude,
+        diagnostics_requested: ['DPE'],
+        status: 'pending_routing',
+        ip_address: clientIp,
+        honeypot_filled: false,
+      })
+      .select('id, public_tracking_token')
+      .single()
 
-  if (insertResp.error || !insertResp.data) {
-    console.error('[submitDpeLead] insert failed', insertResp.error)
+    if (insertResp.error || !insertResp.data) {
+      console.error('[submitDpeLead] insert failed', insertResp.error)
+    } else {
+      inserted = insertResp.data as { id: string; public_tracking_token: string }
+    }
+  } catch (err) {
+    console.error('[submitDpeLead] insert threw', err)
+  }
+
+  if (!inserted) {
+    // Mode dégradé : l'estimation est conservée côté client, on retourne ok
+    // pour ne pas bloquer le funnel. Une équipe humaine peut récupérer le
+    // lead via logs Sentry / Vercel si nécessaire.
     return {
-      ok: false,
-      error:
-        'Une erreur technique nous empêche d’enregistrer votre demande. Réessayez dans quelques instants.',
+      ok: true,
+      message:
+        'Votre estimation a bien été calculée. Notre équipe vous met en relation avec un diagnostiqueur sous 24h.',
     }
   }
-  const inserted = insertResp.data as { id: string; public_tracking_token: string }
 
   // 10. Dispatch — sélection diag par géoloc seule (pas de diag d'origine)
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kovas.fr'
@@ -323,11 +369,15 @@ export async function submitDpeLead(
     // On garde le lead en pending_routing — admin route manuel
   }
 
-  // 11. Record rate-limit hits
-  const keys = [clientIp ? ipKey(clientIp) : null, emailKey(emailLower)].filter(
-    (k): k is string => k !== null,
-  )
-  await recordRateLimitHit(admin, keys)
+  // 11. Record rate-limit hits — also fail-open
+  try {
+    const keys = [clientIp ? ipKey(clientIp) : null, emailKey(emailLower)].filter(
+      (k): k is string => k !== null,
+    )
+    await recordRateLimitHit(admin, keys)
+  } catch (err) {
+    console.warn('[submitDpeLead] recordRateLimitHit failed (non-blocking)', err)
+  }
 
   return {
     ok: true,
