@@ -24,10 +24,12 @@
  * Authority : CLAUDE.md §3 features 1 + DISCOVERY tchat IA + FIX-MM.
  */
 
+import { AudioMessageBubble } from '@/components/chat/AudioMessageBubble'
 import { BottomSheet, BottomSheetTitle } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
-import { AudioLevelMeter } from '@/components/voice/AudioLevelMeter'
+import { type RecordingMode, RecordingOverlay } from '@/components/voice/RecordingOverlay'
 import { TranscriptCoherenceBanner } from '@/components/voice/TranscriptCoherenceBanner'
+import { VoiceMessageButton } from '@/components/voice/VoiceMessageButton'
 import {
   CHECK_ITEMS_3CL,
   CHECK_ITEMS_3CL_COUNT,
@@ -41,6 +43,7 @@ import {
   detectContradictions,
 } from '@/lib/3cl/contradictions-detector'
 import { computeMissionCompletionPct, useMissionRiskFlags } from '@/lib/3cl/use-mission-risk-flags'
+import { AudioRecorder } from '@/lib/audio-record'
 import { generateDefaultRooms } from '@/lib/mission/default-rooms'
 import {
   type ExtractedMissionData,
@@ -60,7 +63,6 @@ import {
   usePhotoSyncStatus,
 } from '@/lib/mission/use-mission-photos-count'
 import { cn } from '@/lib/utils'
-import { getOptimalMicrophoneStream } from '@/lib/voice/recording-constraints'
 import {
   type SpeechRecognitionController,
   createSpeechRecognition,
@@ -74,12 +76,9 @@ import {
   Cloud,
   CloudUpload,
   Hourglass,
-  Loader2,
   Mic,
-  MicOff,
   MoreVertical,
   Pause,
-  Send,
   Sparkles,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -142,6 +141,10 @@ interface ChatMessage {
   createdAt: number
   /** Si la réponse user a été transcrite via Web Speech API. */
   isVoice?: boolean
+  /** ObjectURL local OU signed URL Supabase du blob audio (message vocal style WhatsApp). */
+  audioUrl?: string
+  /** Durée du blob audio en secondes (affiché dans le mini-player). */
+  audioDuration?: number
   /** Photo URL temporaire (objectURL) si message est une photo. */
   photoUrl?: string
   /** UUID local Dexie (MISSION-B) — sert à mapper le status de sync. */
@@ -404,8 +407,26 @@ export function MissionTchatInterface({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   // MISSION-E niveau 2 : stream parallèle pour le VU-mètre (anti-bruit)
   // pendant la dictée Web Speech API (qui ne nous donne pas accès au stream micro).
+  // FIX-WA (composer WhatsApp) : ce même stream est partagé avec un AudioRecorder
+  // qui capture le blob audio pour produire une bulle "message vocal" style WhatsApp.
   const meterStreamRef = useRef<MediaStream | null>(null)
   const [meterStream, setMeterStream] = useState<MediaStream | null>(null)
+  // Audio recorder parallèle (MediaRecorder) — capture le blob pour la bulle audio.
+  // La transcription reste pilotée par Web Speech API (live) ; le blob sert UNIQUEMENT
+  // à l'affichage de la bulle vocal-style WhatsApp.
+  const audioRecorderRef = useRef<AudioRecorder | null>(null)
+  // Mode courant du bouton vocal (piloté par VoiceMessageButton + RecordingOverlay)
+  const [voiceMode, setVoiceMode] = useState<RecordingMode>('idle')
+  // Timestamp ms du démarrage enregistrement (passé au RecordingOverlay pour le timer)
+  const [voiceStartedAt, setVoiceStartedAt] = useState<number>(0)
+  // Buffer du transcript final accumulé pendant le record (Web Speech onResult)
+  // Utilisé au commit pour créer le ChatMessage avec content = transcript.
+  const voiceTranscriptRef = useRef<string>('')
+  // Forward-ref vers sendMessage (défini plus bas) — permet à commitVoiceMessage
+  // d'appeler sendMessage sans circular dep dans les useCallback.
+  const sendMessageRef = useRef<
+    ((text: string, opts?: { suppressUserBubble?: boolean }) => Promise<void>) | null
+  >(null)
   // MISSION-E niveau 4 (local) : incohérences détectées sur le dernier message
   // user en attente de validation (Ignorer/Refaire/Corriger).
   const [pendingCoherenceIssues, setPendingCoherenceIssues] = useState<CoherenceIssue[]>([])
@@ -770,7 +791,10 @@ export function MissionTchatInterface({
     ta.style.height = `${newHeight}px`
   }, [])
 
-  // ----- Speech Recognition + VU-mètre anti-bruit -----
+  // ----- Speech Recognition + AudioRecorder + VU-mètre anti-bruit -----
+  // FIX-WA : le micro stream est ouvert UNE SEULE FOIS via l'AudioRecorder, et
+  // partagé avec le VU-mètre. Le transcript live arrive par Web Speech API en
+  // parallèle. Au commit on dispose de blob+transcript pour la bulle vocale.
   const stopMeterStream = useCallback((): void => {
     if (meterStreamRef.current) {
       for (const t of meterStreamRef.current.getTracks()) t.stop()
@@ -779,25 +803,40 @@ export function MissionTchatInterface({
     setMeterStream(null)
   }, [])
 
+  /**
+   * Démarre dictée vocale : MediaRecorder (pour blob audio) + Web Speech API (pour transcript live).
+   * Le stream micro est ouvert via AudioRecorder.start() puis exposé au VU-mètre.
+   */
   const startListening = useCallback(() => {
     if (recognitionRef.current) recognitionRef.current.abort()
+    voiceTranscriptRef.current = ''
+    setInput('')
+
     const ctrl = createSpeechRecognition({
       lang: 'fr-FR',
-      continuous: false,
+      continuous: true, // on garde ouvert tant que le user maintient le doigt OU re-tap
       interimResults: true,
       onResult: ({ interim, final }) => {
-        setInput(final.length > 0 ? final : interim)
+        voiceTranscriptRef.current = final.length > 0 ? final : interim
+        setInput(voiceTranscriptRef.current)
       },
       onError: (err) => {
-        setIsListening(false)
-        stopMeterStream()
         if (err === 'not-allowed') {
           setErrorMsg("Autorisez l'accès au micro dans les réglages du navigateur pour la dictée.")
+          // Erreur fatale — on cleanup
+          setIsListening(false)
+          stopMeterStream()
+          if (audioRecorderRef.current) {
+            audioRecorderRef.current.cancel()
+            audioRecorderRef.current = null
+          }
+          setVoiceMode('idle')
         }
+        // Pour les autres erreurs (no-speech, network), on laisse le record continuer.
       },
       onEnd: () => {
-        setIsListening(false)
-        stopMeterStream()
+        // Web Speech se ferme tout seul après silence — on NE coupe PAS le record.
+        // Le user contrôle l'arrêt via le bouton (tap-toggle OU release press-hold).
       },
     })
     if (!ctrl.isSupported) {
@@ -806,26 +845,107 @@ export function MissionTchatInterface({
       )
       return
     }
-    ctrl.start()
-    recognitionRef.current = ctrl
-    setIsListening(true)
-    // MISSION-E : on ouvre un stream parallèle UNIQUEMENT pour le VU-mètre
-    // (le Web Speech API utilise son propre pipeline interne, on ne récupère
-    // pas le stream natif). Pas idéal mais sans alternative — getUserMedia
-    // partage la même permission micro déjà accordée à SpeechRecognition.
-    void getOptimalMicrophoneStream()
-      .then((stream) => {
-        meterStreamRef.current = stream
-        setMeterStream(stream)
+
+    // Démarre l'AudioRecorder D'ABORD (lui ouvre le getUserMedia) puis le speech.
+    const recorder = new AudioRecorder()
+    audioRecorderRef.current = recorder
+    void recorder
+      .start()
+      .then(() => {
+        const stream = recorder.getStream()
+        if (stream) {
+          meterStreamRef.current = stream
+          setMeterStream(stream)
+        }
+        // Démarre Web Speech API après l'ouverture du micro pour éviter double-prompt permission.
+        try {
+          ctrl.start()
+          recognitionRef.current = ctrl
+        } catch {
+          /* InvalidState — on continue avec juste le blob (sans live transcript) */
+        }
+        setIsListening(true)
+        setVoiceStartedAt(Date.now())
       })
       .catch(() => {
-        // Échec silencieux — la dictée fonctionne sans VU-mètre.
+        setErrorMsg("Impossible d'accéder au micro. Vérifiez les autorisations du navigateur.")
+        audioRecorderRef.current = null
+        setVoiceMode('idle')
       })
   }, [stopMeterStream])
 
-  const stopListening = useCallback(() => {
+  /**
+   * COMMIT : l'utilisateur a relâché (press-hold) OU tap sur stop (tap-toggle).
+   * Crée une bulle ChatMessage avec audioUrl + transcript, puis envoie le texte à l'IA.
+   */
+  const commitVoiceMessage = useCallback(async () => {
     if (recognitionRef.current) recognitionRef.current.stop()
+
+    const recorder = audioRecorderRef.current
+    audioRecorderRef.current = null
+    const transcript = (voiceTranscriptRef.current || input).trim()
+    voiceTranscriptRef.current = ''
+
     setIsListening(false)
+    setVoiceMode('idle')
+    setInput('')
+    stopMeterStream()
+
+    if (!recorder) {
+      // Pas de recorder actif → fallback : envoie juste le texte transcrit
+      if (transcript) void sendMessageRef.current?.(transcript)
+      return
+    }
+
+    try {
+      const rec = await recorder.stop()
+      // Crée la bulle USER avec mini-player audio (objectURL local — pas d'upload Storage en V1).
+      // Note V2 : upload vers bucket 'mission-audio-segments' + signed URL pour persistence
+      // multi-device + accessibilité historique chat. Pour l'instant l'audio est local-only.
+      const audioUrl = URL.createObjectURL(rec.blob)
+      const msg: ChatMessage = {
+        id: `voice-${Date.now()}`,
+        role: 'user',
+        content: transcript || '(message vocal sans transcription)',
+        createdAt: Date.now(),
+        isVoice: true,
+        audioUrl,
+        audioDuration: rec.durationSeconds,
+      }
+      setMessages((prev) => [...prev, msg])
+
+      // Envoie le transcript à l'IA pour réponse (uniquement si transcription a réussi).
+      if (transcript) {
+        // On bypass la création d'une 2e bulle user en court-circuitant sendMessage :
+        // on déclenche directement l'appel SSE via sendMessageRef avec un flag interne
+        // ... mais sendMessage actuel ajoute toujours sa propre bulle user.
+        // Solution pragmatique : on garde le double rendu désactivé en suppr la bulle ci-dessus
+        // OU on accepte que sendMessage envoie au backend + crée la sienne (texte simple),
+        // et la nôtre (audio) est purement visuelle. C'est OK : la version "audio" reste
+        // affichée juste au-dessus. Le user voit les deux groupées par timestamp proche.
+        // → On envoie via sendMessageRef en mode "audio-companion" (pas de bulle additionnelle)
+        void sendMessageRef.current?.(transcript, { suppressUserBubble: true })
+      }
+    } catch {
+      // Recording cassé — on garde quand même le transcript text si dispo
+      if (transcript) void sendMessageRef.current?.(transcript)
+    }
+  }, [input, stopMeterStream])
+
+  /**
+   * CANCEL : l'utilisateur a dragé au-delà du seuil cancel OU pointerCancel.
+   * Drop l'audio + transcript, retourne en idle.
+   */
+  const cancelVoiceMessage = useCallback(() => {
+    if (recognitionRef.current) recognitionRef.current.abort()
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.cancel()
+      audioRecorderRef.current = null
+    }
+    voiceTranscriptRef.current = ''
+    setIsListening(false)
+    setVoiceMode('idle')
+    setInput('')
     stopMeterStream()
   }, [stopMeterStream])
 
@@ -864,9 +984,10 @@ export function MissionTchatInterface({
 
   // ----- Streaming IA -----
   const sendMessage = useCallback(
-    async (rawText: string) => {
+    async (rawText: string, opts?: { suppressUserBubble?: boolean }) => {
       const text = rawText.trim()
       if (!text || isStreaming) return
+      const suppressUserBubble = opts?.suppressUserBubble === true
 
       setErrorMsg(null)
 
@@ -940,31 +1061,27 @@ export function MissionTchatInterface({
 
       // Si réponse locale et offline, on traite en local uniquement
       if (localResponse && !isOnline) {
-        const userMsg: ChatMessage = {
-          id: `user-${Date.now()}`,
-          role: 'user',
-          content: text,
-          createdAt: Date.now(),
-          isVoice: isListening,
-        }
         const assistantMsg: ChatMessage = {
           id: `assistant-${Date.now() + 1}`,
           role: 'assistant',
           content: localResponse,
           createdAt: Date.now() + 1,
         }
-        setMessages((prev) => [...prev, userMsg, assistantMsg])
+        if (suppressUserBubble) {
+          // Audio-companion : la bulle user (vocal) a déjà été insérée par commitVoiceMessage.
+          setMessages((prev) => [...prev, assistantMsg])
+        } else {
+          const userMsg: ChatMessage = {
+            id: `user-${Date.now()}`,
+            role: 'user',
+            content: text,
+            createdAt: Date.now(),
+            isVoice: isListening,
+          }
+          setMessages((prev) => [...prev, userMsg, assistantMsg])
+        }
         setInput('')
         return
-      }
-
-      // Insère le user message immédiatement
-      const userMsg: ChatMessage = {
-        id: `user-${Date.now()}`,
-        role: 'user',
-        content: text,
-        createdAt: Date.now(),
-        isVoice: isListening,
       }
 
       // Prépare un placeholder assistant streaming
@@ -977,7 +1094,19 @@ export function MissionTchatInterface({
         streaming: true,
       }
 
-      setMessages((prev) => [...prev, userMsg, assistantPlaceholder])
+      if (suppressUserBubble) {
+        // Audio-companion : la bulle user (vocal) a déjà été insérée par commitVoiceMessage.
+        setMessages((prev) => [...prev, assistantPlaceholder])
+      } else {
+        const userMsg: ChatMessage = {
+          id: `user-${Date.now()}`,
+          role: 'user',
+          content: text,
+          createdAt: Date.now(),
+          isVoice: isListening,
+        }
+        setMessages((prev) => [...prev, userMsg, assistantPlaceholder])
+      }
       setInput('')
       setIsStreaming(true)
 
@@ -1087,6 +1216,11 @@ export function MissionTchatInterface({
       roomsSaved,
     ],
   )
+
+  // Sync forward-ref (utilisé par commitVoiceMessage déclaré plus haut).
+  useEffect(() => {
+    sendMessageRef.current = sendMessage
+  }, [sendMessage])
 
   // ----- Submit avec cross-check métier (MISSION-E niveau 4 local) -----
   const handleSubmit = useCallback(() => {
@@ -1363,12 +1497,9 @@ export function MissionTchatInterface({
                 />
               </div>
             ) : null}
-            {/* MISSION-E niveau 2 : VU-mètre anti-bruit live pendant la dictée */}
-            {isListening ? (
-              <div className="mx-auto max-w-3xl mb-2">
-                <AudioLevelMeter stream={meterStream} />
-              </div>
-            ) : null}
+            {/* FIX-WA : composer style WhatsApp. Pendant l'enregistrement, le textarea
+                est remplacé par le RecordingOverlay (timer + VU-mètre + hint cancel).
+                Sinon : PhotoCaptureButton + textarea + VoiceMessageButton dynamique. */}
             <div className="mx-auto flex max-w-3xl items-end gap-2">
               {/* MISSION-B : bouton capture rafale (tap court 1 photo, long press = rafale) */}
               <PhotoCaptureButton
@@ -1382,70 +1513,65 @@ export function MissionTchatInterface({
                 disabled={isPaused}
               />
 
-              <Button
-                type="button"
-                variant={isListening ? 'accent' : 'ghost'}
-                size="icon"
-                onClick={isListening ? stopListening : startListening}
-                aria-label={isListening ? 'Arrêter la dictée' : 'Démarrer la dictée vocale'}
-                className="shrink-0 size-10 rounded-full"
-                disabled={isPaused || isStreaming}
-              >
-                {isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
-              </Button>
-
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => {
-                  setInput(e.target.value)
-                  // Auto-resize
-                  const ta = e.currentTarget
-                  ta.style.height = 'auto'
-                  ta.style.height = `${Math.min(ta.scrollHeight, 180)}px`
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmit()
-                  } else if (e.key === 'Escape') {
-                    setInput('')
-                  }
-                }}
-                placeholder={
-                  isListening
-                    ? 'Parlez maintenant…'
-                    : isStreaming
+              {/* Zone centrale : textarea OU RecordingOverlay selon état */}
+              {isListening ? (
+                <RecordingOverlay
+                  mode={voiceMode}
+                  meterStream={meterStream}
+                  startedAt={voiceStartedAt}
+                  className="flex-1 min-h-[44px]"
+                />
+              ) : (
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value)
+                    // Auto-resize
+                    const ta = e.currentTarget
+                    ta.style.height = 'auto'
+                    ta.style.height = `${Math.min(ta.scrollHeight, 180)}px`
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSubmit()
+                    } else if (e.key === 'Escape') {
+                      setInput('')
+                    }
+                  }}
+                  placeholder={
+                    isStreaming
                       ? "L'assistant rédige sa réponse…"
                       : 'Tapez votre message — ou utilisez le micro'
-                }
-                disabled={isStreaming || isPaused}
-                rows={1}
-                className={cn(
-                  'flex-1 resize-none rounded-2xl border border-rule bg-sage-alt/40 px-4 py-2.5',
-                  'text-[14px] text-ink placeholder:text-ink-mute',
-                  'focus:outline-none focus:ring-2 focus:ring-chartreuse/40 focus:border-chartreuse/50',
-                  'disabled:opacity-50 transition-colors',
-                  'min-h-[40px] max-h-[180px]',
-                )}
-                aria-label="Votre message"
-              />
+                  }
+                  disabled={isStreaming || isPaused}
+                  rows={1}
+                  className={cn(
+                    'flex-1 resize-none rounded-2xl border border-rule bg-sage-alt/40 px-4 py-2.5',
+                    'text-[14px] text-ink placeholder:text-ink-mute',
+                    'focus:outline-none focus:ring-2 focus:ring-chartreuse/40 focus:border-chartreuse/50',
+                    'disabled:opacity-50 transition-colors',
+                    'min-h-[40px] max-h-[180px]',
+                  )}
+                  aria-label="Votre message"
+                />
+              )}
 
-              <Button
-                type="button"
-                variant="accent"
-                size="icon"
-                onClick={handleSubmit}
-                disabled={!input.trim() || isStreaming || isPaused}
-                aria-label="Envoyer"
-                className="shrink-0 size-10 rounded-full"
-              >
-                {isStreaming ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Send className="size-4" />
-                )}
-              </Button>
+              {/* Bouton dynamique unique (micro/send/stop) — pilote la dictée et l'envoi */}
+              <VoiceMessageButton
+                hasText={input.trim().length > 0}
+                isRecording={isListening}
+                mode={voiceMode}
+                disabled={isPaused || isStreaming}
+                onSendText={handleSubmit}
+                onRecordStart={startListening}
+                onModeChange={setVoiceMode}
+                onRecordCommit={() => {
+                  void commitVoiceMessage()
+                }}
+                onRecordCancel={cancelVoiceMessage}
+              />
             </div>
             <div className="mx-auto max-w-3xl mt-1.5 flex items-center justify-between text-[10px] font-mono text-ink-mute">
               <span>Entrée pour envoyer · Maj+Entrée pour saut de ligne</span>
@@ -1680,6 +1806,17 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
               className="max-h-48 rounded-lg object-cover w-full"
             />
             {message.photoLocalId ? <PhotoSyncStatusBadge localId={message.photoLocalId} /> : null}
+          </div>
+        ) : null}
+
+        {/* Mini-player audio WhatsApp-style si message vocal */}
+        {message.audioUrl ? (
+          <div className={cn('mb-1.5', isUser ? '-mx-1' : '-mx-1')}>
+            <AudioMessageBubble
+              audioUrl={message.audioUrl}
+              duration={message.audioDuration ?? 0}
+              variant={isUser ? 'user' : 'assistant'}
+            />
           </div>
         ) : null}
 
