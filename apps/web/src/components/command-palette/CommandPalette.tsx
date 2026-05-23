@@ -25,6 +25,7 @@ import {
   Receipt,
   Search,
   Settings,
+  Sparkles,
   Users,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -37,7 +38,10 @@ import { useCallback, useEffect, useState, useTransition } from 'react'
 interface DossierRow {
   id: string
   reference: string
-  properties: { address: string | null; city: string | null } | { address: string | null; city: string | null }[] | null
+  properties:
+    | { address: string | null; city: string | null }
+    | { address: string | null; city: string | null }[]
+    | null
 }
 
 interface ClientRow {
@@ -57,8 +61,14 @@ interface MissionRow {
   type: string
   dossier_id: string
   dossiers:
-    | { scheduled_at: string | null; clients: { display_name: string } | { display_name: string }[] | null }
-    | { scheduled_at: string | null; clients: { display_name: string } | { display_name: string }[] | null }[]
+    | {
+        scheduled_at: string | null
+        clients: { display_name: string } | { display_name: string }[] | null
+      }
+    | {
+        scheduled_at: string | null
+        clients: { display_name: string } | { display_name: string }[] | null
+      }[]
     | null
 }
 
@@ -83,27 +93,111 @@ interface TodayMission {
 /* ----------------------------------------------------------------------- */
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Tableau de bord', href: '/dashboard/dashboard', icon: LayoutDashboard, shortcut: 'G D' },
-  { id: 'dossiers', label: 'Dossiers', href: '/dashboard/dossiers', icon: FileText, shortcut: 'G O' },
+  {
+    id: 'dashboard',
+    label: 'Tableau de bord',
+    href: '/dashboard/dashboard',
+    icon: LayoutDashboard,
+    shortcut: 'G D',
+  },
+  {
+    id: 'dossiers',
+    label: 'Dossiers',
+    href: '/dashboard/dossiers',
+    icon: FileText,
+    shortcut: 'G O',
+  },
   { id: 'clients', label: 'Clients', href: '/dashboard/clients', icon: Users, shortcut: 'G C' },
-  { id: 'properties', label: 'Biens', href: '/dashboard/properties', icon: Building2, shortcut: 'G B' },
-  { id: 'calendar', label: 'Planning', href: '/dashboard/calendar', icon: CalendarClock, shortcut: 'G P' },
-  { id: 'facturation', label: 'Facturation', href: '/dashboard/facturation', icon: Receipt, shortcut: 'G F' },
+  {
+    id: 'properties',
+    label: 'Biens',
+    href: '/dashboard/properties',
+    icon: Building2,
+    shortcut: 'G B',
+  },
+  {
+    id: 'calendar',
+    label: 'Planning',
+    href: '/dashboard/calendar',
+    icon: CalendarClock,
+    shortcut: 'G P',
+  },
+  {
+    id: 'facturation',
+    label: 'Facturation',
+    href: '/dashboard/facturation',
+    icon: Receipt,
+    shortcut: 'G F',
+  },
 ] as const
 
 const QUICK_ACTIONS = [
-  { id: 'new-dossier', label: 'Créer un dossier', href: '/dashboard/dossiers/new', icon: Plus, keywords: 'nouveau dossier creation' },
-  { id: 'new-client', label: 'Créer un client', href: '/dashboard/clients/new', icon: Plus, keywords: 'nouveau client creation' },
-  { id: 'new-property', label: 'Créer un bien', href: '/dashboard/properties/new', icon: Plus, keywords: 'nouveau bien propriete creation' },
-  { id: 'new-quote', label: 'Créer un devis', href: '/dashboard/facturation', icon: Receipt, keywords: 'devis quote facture' },
-  { id: 'invoices-overdue', label: 'Voir les factures impayées', href: '/dashboard/facturation?filter=overdue', icon: Receipt, keywords: 'impayees overdue factures' },
+  {
+    id: 'new-dossier',
+    label: 'Créer un dossier',
+    href: '/dashboard/dossiers/new',
+    icon: Plus,
+    keywords: 'nouveau dossier creation',
+  },
+  {
+    id: 'new-client',
+    label: 'Créer un client',
+    href: '/dashboard/clients/new',
+    icon: Plus,
+    keywords: 'nouveau client creation',
+  },
+  {
+    id: 'new-property',
+    label: 'Créer un bien',
+    href: '/dashboard/properties/new',
+    icon: Plus,
+    keywords: 'nouveau bien propriete creation',
+  },
+  {
+    id: 'new-quote',
+    label: 'Créer un devis',
+    href: '/dashboard/facturation',
+    icon: Receipt,
+    keywords: 'devis quote facture',
+  },
+  {
+    id: 'invoices-overdue',
+    label: 'Voir les factures impayées',
+    href: '/dashboard/facturation?filter=overdue',
+    icon: Receipt,
+    keywords: 'impayees overdue factures',
+  },
 ] as const
 
 const STATIC_PAGES = [
-  { id: 'pricing', label: 'Tarifs', href: '/pricing', icon: CreditCard, keywords: 'prix pricing tarifs forfaits' },
-  { id: 'faq', label: 'Aide & FAQ', href: '/faq', icon: HelpCircle, keywords: 'aide help faq questions support' },
-  { id: 'account', label: 'Mon abonnement', href: '/dashboard/account', icon: Settings, keywords: 'abonnement subscription compte' },
-  { id: 'settings', label: 'Paramètres', href: '/dashboard/account', icon: Settings, keywords: 'parametres preferences settings' },
+  {
+    id: 'pricing',
+    label: 'Tarifs',
+    href: '/pricing',
+    icon: CreditCard,
+    keywords: 'prix pricing tarifs forfaits',
+  },
+  {
+    id: 'faq',
+    label: 'Aide & FAQ',
+    href: '/faq',
+    icon: HelpCircle,
+    keywords: 'aide help faq questions support',
+  },
+  {
+    id: 'account',
+    label: 'Mon abonnement',
+    href: '/dashboard/account',
+    icon: Settings,
+    keywords: 'abonnement subscription compte',
+  },
+  {
+    id: 'settings',
+    label: 'Paramètres',
+    href: '/dashboard/account',
+    icon: Settings,
+    keywords: 'parametres preferences settings',
+  },
 ] as const
 
 /* ----------------------------------------------------------------------- */
@@ -134,7 +228,12 @@ export function CommandPalette() {
   const open = useCommandPaletteStore((s) => s.open)
   const setOpen = useCommandPaletteStore((s) => s.setOpen)
   const [search, setSearch] = useState('')
-  const [db, setDb] = useState<DbResult>({ dossiers: [], clients: [], properties: [], missions: [] })
+  const [db, setDb] = useState<DbResult>({
+    dossiers: [],
+    clients: [],
+    properties: [],
+    missions: [],
+  })
   const [today, setToday] = useState<TodayMission[]>([])
   const [recentQueries, setRecentQueries] = useState<readonly string[]>([])
   const [, startTransition] = useTransition()
@@ -142,6 +241,34 @@ export function CommandPalette() {
 
   // Active le raccourci global Cmd+K
   useCommandPaletteShortcut()
+
+  // FIX-JJ multi-accès #6 — raccourci Cmd+M / Ctrl+M : démarre la mission
+  // imminente via /api/dossiers/next-mission, sans passer par la palette.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent): void {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'm') {
+        // Évite le conflit avec Cmd+M (minimize) si le focus est dans un input.
+        const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase()
+        if (tag === 'input' || tag === 'textarea') return
+        e.preventDefault()
+        void (async () => {
+          try {
+            const res = await fetch('/api/dossiers/next-mission')
+            const j = (await res.json()) as { ok: boolean; dossierId: string | null }
+            if (j.ok && j.dossierId) {
+              router.push(`/dashboard/dossiers/${j.dossierId}/mission/tchat`)
+            } else {
+              router.push('/dashboard/dossiers/new')
+            }
+          } catch {
+            // silencieux — l'user retentera
+          }
+        })()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [router])
 
   // Recharge les recherches récentes à l'ouverture
   useEffect(() => {
@@ -155,33 +282,34 @@ export function CommandPalette() {
     let cancelled = false
     async function load(): Promise<void> {
       const supabase = createClient()
-      const [{ data: dossiers }, { data: clients }, { data: properties }, { data: missions }] = await Promise.all([
-        supabase
-          .from('dossiers')
-          .select('id, reference, properties(address, city)')
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false })
-          .limit(20),
-        supabase
-          .from('clients')
-          .select('id, display_name, email')
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false })
-          .limit(20),
-        supabase
-          .from('properties')
-          .select('id, address, city')
-          .is('deleted_at', null)
-          .order('created_at', { ascending: false })
-          .limit(20),
-        supabase
-          .from('missions')
-          .select('id, type, dossier_id, dossiers(scheduled_at, clients(display_name))')
-          .is('deleted_at', null)
-          .in('status', ['scheduled', 'in_progress'])
-          .order('created_at', { ascending: false })
-          .limit(20),
-      ])
+      const [{ data: dossiers }, { data: clients }, { data: properties }, { data: missions }] =
+        await Promise.all([
+          supabase
+            .from('dossiers')
+            .select('id, reference, properties(address, city)')
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false })
+            .limit(20),
+          supabase
+            .from('clients')
+            .select('id, display_name, email')
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false })
+            .limit(20),
+          supabase
+            .from('properties')
+            .select('id, address, city')
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false })
+            .limit(20),
+          supabase
+            .from('missions')
+            .select('id, type, dossier_id, dossiers(scheduled_at, clients(display_name))')
+            .is('deleted_at', null)
+            .in('status', ['scheduled', 'in_progress'])
+            .order('created_at', { ascending: false })
+            .limit(20),
+        ])
 
       if (cancelled) return
 
@@ -307,6 +435,32 @@ export function CommandPalette() {
 
           {/* Actions globales */}
           <CommandGroup heading="Actions">
+            {/* FIX-JJ multi-accès #6 — Action prioritaire "Démarrer la mission" */}
+            <CommandRow
+              value="demarrer mission terrain commencer reprendre tchat"
+              onSelect={() => {
+                void (async () => {
+                  try {
+                    const res = await fetch('/api/dossiers/next-mission')
+                    const j = (await res.json()) as {
+                      ok: boolean
+                      dossierId: string | null
+                    }
+                    close()
+                    if (j.ok && j.dossierId) {
+                      router.push(`/dashboard/dossiers/${j.dossierId}/mission/tchat`)
+                    } else {
+                      router.push('/dashboard/dossiers/new')
+                    }
+                  } catch {
+                    // silencieux
+                  }
+                })()
+              }}
+              icon={<Sparkles className="size-4" />}
+              label="Démarrer la mission"
+              shortcut="⌘ M"
+            />
             {QUICK_ACTIONS.map((a) => (
               <CommandRow
                 key={a.id}
@@ -346,7 +500,9 @@ export function CommandPalette() {
             <CommandGroup heading="Dossiers">
               {db.dossiers.slice(0, 5).map((d) => {
                 const prop = pickFirst(d.properties)
-                const subtitle = prop?.address ? `${prop.address}${prop.city ? `, ${prop.city}` : ''}` : undefined
+                const subtitle = prop?.address
+                  ? `${prop.address}${prop.city ? `, ${prop.city}` : ''}`
+                  : undefined
                 return (
                   <CommandRow
                     key={`dossier-${d.id}`}
@@ -480,7 +636,16 @@ interface CommandRowProps {
   mono?: boolean
 }
 
-function CommandRow({ value, onSelect, icon, label, subtitle, shortcut, disabled, mono }: CommandRowProps) {
+function CommandRow({
+  value,
+  onSelect,
+  icon,
+  label,
+  subtitle,
+  shortcut,
+  disabled,
+  mono,
+}: CommandRowProps) {
   return (
     <Command.Item
       value={value}
@@ -492,11 +657,15 @@ function CommandRow({ value, onSelect, icon, label, subtitle, shortcut, disabled
         'aria-disabled:opacity-50 aria-disabled:cursor-not-allowed',
       )}
     >
-      <span className="text-ink-mute shrink-0 [&_svg]:size-4 data-[selected=true]:text-white">{icon}</span>
+      <span className="text-ink-mute shrink-0 [&_svg]:size-4 data-[selected=true]:text-white">
+        {icon}
+      </span>
       <span className="flex-1 min-w-0">
         <span className={cn('truncate block', mono && 'font-mono text-[13px]')}>{label}</span>
         {subtitle && (
-          <span className={cn('text-[11px] text-ink-mute truncate block', mono && 'font-mono')}>{subtitle}</span>
+          <span className={cn('text-[11px] text-ink-mute truncate block', mono && 'font-mono')}>
+            {subtitle}
+          </span>
         )}
       </span>
       {shortcut && (

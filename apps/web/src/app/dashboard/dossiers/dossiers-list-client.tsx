@@ -4,7 +4,7 @@ import { DiagChip } from '@/components/ui/diag-chip'
 import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils'
 import type { MissionType } from '@kovas/shared'
-import { ChevronRight, FolderOpen } from 'lucide-react'
+import { ChevronRight, FolderOpen, Play } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
@@ -106,6 +106,21 @@ function buildAddressLine(item: DossierListItem): string {
   return parts.join(' · ') || 'Adresse à compléter'
 }
 
+/**
+ * FIX-JJ — un dossier est "mission-éligible" (bouton "Mission" inline affiché) si :
+ *   - status='on_site' (mission en cours, action = reprendre)
+ *   - status='scheduled' ET scheduled_at ∈ [J0..J0+1] (mission planifiée aujourd'hui
+ *     ou demain — pratique pour préparer la veille au soir)
+ */
+function isMissionEligible(item: DossierListItem): boolean {
+  if (item.status === 'on_site') return true
+  if (item.status !== 'scheduled' || !item.scheduledAt) return false
+  const scheduled = new Date(item.scheduledAt).getTime()
+  const now = Date.now()
+  const inTwoDays = now + 2 * 24 * 60 * 60 * 1000
+  return scheduled >= now - 60 * 60 * 1000 && scheduled <= inTwoDays
+}
+
 interface DossiersListClientProps {
   dossiers: DossierListItem[]
   initialTab: TabKey
@@ -205,14 +220,14 @@ export function DossiersListClient({ dossiers, initialTab }: DossiersListClientP
             }
             description={
               active === 'all'
-                ? 'Créez votre premier dossier pour regrouper les diagnostics d\'une même visite.'
+                ? "Créez votre premier dossier pour regrouper les diagnostics d'une même visite."
                 : 'Sélectionnez un autre filtre ou créez un nouveau dossier.'
             }
           />
         ) : (
           <ul className="divide-y divide-rule/30">
             {filtered.map((d) => (
-              <li key={d.id}>
+              <li key={d.id} className="relative">
                 <Link
                   href={`/dashboard/dossiers/${d.id}`}
                   className="group flex items-center gap-4 py-4 px-2 -mx-2 rounded-lg hover:bg-ink/5 transition-colors duration-fast min-h-[72px]"
@@ -258,6 +273,25 @@ export function DossiersListClient({ dossiers, initialTab }: DossiersListClientP
                     className="size-4 text-ink-mute/60 shrink-0 group-hover:text-ink-mute transition-colors"
                   />
                 </Link>
+                {/* FIX-JJ multi-accès #4 — bouton "Mission" inline sur les dossiers
+                    en cours / planifiés aujourd'hui. Positionné en absolute pour ne
+                    pas perturber l'a11y du <Link> parent. */}
+                {isMissionEligible(d) ? (
+                  <Link
+                    href={`/dashboard/dossiers/${d.id}/mission/tchat`}
+                    className={cn(
+                      'absolute right-9 top-1/2 -translate-y-1/2',
+                      'hidden sm:inline-flex items-center gap-1 rounded-pill bg-chartreuse',
+                      'px-2.5 py-1 text-[11px] font-semibold text-ink',
+                      'hover:brightness-95 transition-all shadow-sm',
+                    )}
+                    aria-label={`Démarrer la mission ${d.reference}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Play className="size-3" aria-hidden />
+                    Mission
+                  </Link>
+                ) : null}
               </li>
             ))}
           </ul>

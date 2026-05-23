@@ -74,18 +74,55 @@ export async function ActionDuJour() {
         : upcomingToday.properties
       const who = clientRow?.display_name ?? 'votre prochain rendez-vous'
       const where = propRow ? [propRow.address, propRow.city].filter(Boolean).join(', ') : ''
+      // FIX-JJ — multi-accès mode mission : Card "Action du jour" branche le
+      // bouton "Démarrer ma prochaine mission" directement sur le tchat IA.
+      // Quand le RDV est imminent (< 30min), on bascule sur le CTA "Démarrer"
+      // chartreuse plutôt que "Préparer".
+      const isImminent = minutesUntil <= 30
       return (
         <ActionCard
           content={{
             eyebrow: 'ACTION DU JOUR',
-            title: `Préparer votre intervention ${time} chez ${who}`,
+            title: isImminent
+              ? `Démarrer la mission ${time} chez ${who}`
+              : `Préparer votre intervention ${time} chez ${who}`,
             subtitle: where || 'Vérifiez documents propriétaire et matériel avant le départ.',
-            ctaLabel: 'Préparer',
-            href: `/dashboard/dossiers/${upcomingToday.id}`,
+            ctaLabel: isImminent ? 'Démarrer ma prochaine mission' : 'Préparer',
+            href: isImminent
+              ? `/dashboard/dossiers/${upcomingToday.id}/mission/tchat`
+              : `/dashboard/dossiers/${upcomingToday.id}`,
           }}
         />
       )
     }
+  }
+
+  // 1bis — Mission DÉJÀ DÉMARRÉE aujourd'hui (status=on_site) → reprendre
+  const { data: onSiteList } = await supabase
+    .from('dossiers')
+    .select('id, scheduled_at, clients(display_name), properties(address, city)')
+    .eq('organization_id', orgId)
+    .eq('status', 'on_site')
+    .is('deleted_at', null)
+    .order('started_at', { ascending: false })
+    .limit(1)
+  const onSite = onSiteList?.[0]
+  if (onSite) {
+    const clientRow = Array.isArray(onSite.clients) ? onSite.clients[0] : onSite.clients
+    const propRow = Array.isArray(onSite.properties) ? onSite.properties[0] : onSite.properties
+    const who = clientRow?.display_name ?? 'votre mission en cours'
+    const where = propRow ? [propRow.address, propRow.city].filter(Boolean).join(', ') : ''
+    return (
+      <ActionCard
+        content={{
+          eyebrow: 'MISSION EN COURS',
+          title: `Reprendre votre mission chez ${who}`,
+          subtitle: where || 'La mission a été démarrée mais pas encore terminée.',
+          ctaLabel: 'Reprendre la mission',
+          href: `/dashboard/dossiers/${onSite.id}/mission/tchat`,
+        }}
+      />
+    )
   }
 
   // 2) Lead non répondu — pas de table en V1, on saute.
@@ -164,20 +201,12 @@ export async function ActionDuJour() {
 
 function ActionCard({ content }: { content: ActionContent }) {
   return (
-    <Card
-      variant="opaque"
-      padding="lg"
-      className="border-l-4 border-l-chartreuse"
-    >
+    <Card variant="opaque" padding="lg" className="border-l-4 border-l-chartreuse">
       <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute mb-3">
         {content.eyebrow}
       </p>
-      <h2 className="font-serif italic text-[28px] leading-tight text-ink mb-2">
-        {content.title}
-      </h2>
-      <p className="text-[14px] text-ink-mute leading-relaxed mb-6 max-w-2xl">
-        {content.subtitle}
-      </p>
+      <h2 className="font-serif italic text-[28px] leading-tight text-ink mb-2">{content.title}</h2>
+      <p className="text-[14px] text-ink-mute leading-relaxed mb-6 max-w-2xl">{content.subtitle}</p>
       <Button variant="accent" size="lg" asChild>
         <Link href={content.href}>
           {content.ctaLabel} <ArrowRight className="size-4" />

@@ -140,7 +140,9 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
   },
   {
     id: 'capture',
-    href: '/dashboard/dossiers/new',
+    // FIX-JJ — multi-accès #2 : redirect intelligent vers le mode mission selon
+    // le contexte (mission en cours / RDV imminent / fallback wizard).
+    href: '/dashboard/capture',
     label: 'Capture',
     icon: Sparkles,
     defaultZone: 'main',

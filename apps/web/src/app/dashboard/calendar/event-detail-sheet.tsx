@@ -12,7 +12,17 @@ import {
 import { MissionTypeTag } from '@/components/ui/mission-type-tag'
 import { toast } from '@/components/ui/toaster'
 import { cn } from '@/lib/utils'
-import { Ban, CalendarPlus, Clock, ExternalLink, Loader2, MapPin, PenLine, Tag } from 'lucide-react'
+import {
+  Ban,
+  CalendarPlus,
+  Clock,
+  ExternalLink,
+  Loader2,
+  MapPin,
+  PenLine,
+  Play,
+  Tag,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useTransition } from 'react'
 import { cancelDossierAction } from './actions'
@@ -164,7 +174,18 @@ export function EventDetailSheet({ event, open, onOpenChange }: EventDetailSheet
 
         {/* Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-          <Button asChild variant="accent" size="sm">
+          {/* FIX-JJ multi-accès #3 — Démarrer la mission directement depuis le calendrier */}
+          {event.status !== 'done' &&
+          event.status !== 'archived' &&
+          event.status !== 'cancelled' ? (
+            <Button asChild variant="accent" size="sm" className="sm:col-span-2">
+              <Link href={`/dashboard/dossiers/${event.dossierId}/mission/tchat`}>
+                <Play className="size-3.5" />
+                {event.status === 'on_site' ? 'Reprendre la mission' : 'Démarrer la mission'}
+              </Link>
+            </Button>
+          ) : null}
+          <Button asChild variant="outline" size="sm">
             <Link href={`/dashboard/dossiers/${event.dossierId}`}>
               Voir le dossier <ExternalLink className="size-3.5" />
             </Link>

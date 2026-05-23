@@ -6,6 +6,7 @@ import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
 import { RegulatoryNotificationsBadge } from '@/components/regulatory/RegulatoryNotificationsBadge'
 import { CommandK } from '@/components/shared/CommandK'
+import { MissionFabMobile } from '@/components/mission/MissionFabMobile'
 import { MobileQuickActionsFab } from '@/components/ui/mobile-quick-actions'
 import { OfflineBanner } from '@/components/ui/offline-banner'
 import { SyncIndicator } from '@/components/ui/sync-indicator'
@@ -120,6 +121,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         badgeCounts={badgeCounts}
       />
       <MobileQuickActionsFab />
+      {/* FIX-JJ multi-accès #5 — FAB mission dédié, bottom-right mobile */}
+      <MissionFabMobile />
       {/* Palette riche (Cmd+K, dossiers/clients/biens/récents) — listener Cmd+K interne. */}
       <CommandPalette />
       {/* Palette légère CommandK — montée pour API future ; raccourci désactivé
