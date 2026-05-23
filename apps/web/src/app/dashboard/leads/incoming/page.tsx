@@ -37,7 +37,6 @@ interface QuoteRequestNested {
   property_surface_m2: number | null
   property_type: string | null
   diagnostics_requested: string[] | null
-  urgency: string | null
   acceptance_count: number | null
   requester_email: string | null
   requester_phone: string | null
@@ -47,17 +46,19 @@ interface QuoteRequestNested {
 
 interface AssignmentJoinedRow {
   id: string
-  quote_request_id: string
+  // AUDIT-B (2026-05-23) : FK est nommee `lead_id` en DB (et pointe vers
+  // quote_requests.id — historique de naming). Pas de col `quote_request_id`
+  // ni `routing_strategy` en prod.
+  lead_id: string
   status: AssignmentStatus | null
   expires_at: string | null
   responded_at: string | null
   created_at: string | null
   assignment_type: string | null
-  routing_strategy: string | null
   diagnostician_id: string
   // PostgREST renvoie soit l'objet (single FK) soit un tableau selon la
   // generation des types. On accepte les deux et on normalise.
-  quote_requests?: QuoteRequestNested | QuoteRequestNested[] | null
+  lead?: QuoteRequestNested | QuoteRequestNested[] | null
 }
 
 function firstQuote(
@@ -89,10 +90,13 @@ export default async function IncomingLeadsPage() {
   let assignments: IncomingLeadAssignment[] = []
 
   if (diagIds.length > 0) {
+    // AUDIT-B (2026-05-23) : la FK `lead_id` pointe vers quote_requests.id.
+    // L'alias `lead:quote_requests!lead_id(...)` force PostgREST a resoudre
+    // la jointure via cette FK. Pas de col `urgency` dans quote_requests.
     const { data: assignsRaw } = await supabase
       .from('lead_assignments')
       .select(
-        'id, quote_request_id, status, expires_at, responded_at, created_at, assignment_type, routing_strategy, diagnostician_id, quote_requests(id, requester_first_name, requester_last_name, property_city, property_postal_code, property_surface_m2, property_type, diagnostics_requested, urgency, acceptance_count, requester_email, requester_phone, property_address, message)',
+        'id, lead_id, status, expires_at, responded_at, created_at, assignment_type, diagnostician_id, lead:quote_requests!lead_id(id, requester_first_name, requester_last_name, property_city, property_postal_code, property_surface_m2, property_type, diagnostics_requested, acceptance_count, requester_email, requester_phone, property_address, message)',
       )
       .in('diagnostician_id', diagIds)
       .order('created_at', { ascending: false })
@@ -102,16 +106,16 @@ export default async function IncomingLeadsPage() {
 
     assignments = rows.map<IncomingLeadAssignment>((r) => {
       const isAccepted = r.status === 'accepted'
-      const qr = firstQuote(r.quote_requests)
+      const qr = firstQuote(r.lead)
       return {
         id: r.id,
-        quoteRequestId: r.quote_request_id,
+        quoteRequestId: r.lead_id,
         status: r.status ?? 'pending',
         expiresAt: r.expires_at,
         respondedAt: r.responded_at,
         createdAt: r.created_at,
         assignmentType: r.assignment_type,
-        routingStrategy: r.routing_strategy,
+        routingStrategy: null,
         diagnosticianId: r.diagnostician_id,
         // Identite anonymisee tant que pas accepte
         requesterFirstName: qr?.requester_first_name ?? null,
@@ -129,7 +133,7 @@ export default async function IncomingLeadsPage() {
         surfaceM2: qr?.property_surface_m2 ?? null,
         propertyType: qr?.property_type ?? null,
         diagnosticsRequested: qr?.diagnostics_requested ?? [],
-        urgency: qr?.urgency ?? null,
+        urgency: null,
       }
     })
   }

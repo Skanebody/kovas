@@ -140,11 +140,13 @@ async function loadAnnuaireData(): Promise<AnnuaireData> {
         .not('visitor_city', 'is', null)
         .gte('viewed_at', monthStart.toISOString())
         .limit(500),
+      // AUDIT-B (2026-05-23) : col `assigned_diagnostician_id` n'existe pas
+      // en prod, la col canonique est `diagnostician_id` (FK vers diagnosticians).
       // biome-ignore lint/suspicious/noExplicitAny: leads table types pending regen
       (supabase as any)
         .from('leads')
         .select('id', { count: 'exact', head: true })
-        .eq('assigned_diagnostician_id', diagnostician.id)
+        .eq('diagnostician_id', diagnostician.id)
         .gte('created_at', monthStart.toISOString()),
     ])
 

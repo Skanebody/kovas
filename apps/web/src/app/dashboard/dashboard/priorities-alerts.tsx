@@ -20,241 +20,203 @@ interface PriorityAlert {
  * (badge priority / content / action) avec bordures 1px entre items.
  *
  * Sources :
- *   P1 — regulatory_notifications.priority='critical' non lue,
+ *   P1 — regulatory_notifications.severity='critical' non lue,
  *        litigation_workflows.status IN ('opened','in_progress') >48h,
- *        ademe_prevalidations.verdict='red' non décidée
+ *        ademe_prevalidations status='completed' avec quality_score<0.5
  *   P2 — quotes.status='sent' avec valid_until -7j,
- *        missions.status='to_review' >24h,
- *        dossiers RDV J+1/J+2 sans owner_documents
- *   P3 — prescriber_relationships silencieux >30j,
- *        module_trials.trial_ends_at <7j
+ *        invoices.status='overdue' due_date passée,
+ *        missions.status='done' >24h (à valider)
+ *   P3 — module_trials.trial_ends_at <7j
  *
  * Tri : P1 d'abord, puis P2, puis P3. Limite 6 items totaux pour ne pas
  * surcharger. Si 0 alerte : état vide sobre "Aucune priorité — vous êtes à jour."
+ *
+ * AUDIT-B (2026-05-23) : sweep colonnes legacy + tables manquantes.
+ *  - `regulatory_notifications` : pas de col `title` / `priority` —
+ *    on utilise `severity` + on récupère le titre via JOIN regulatory_documents.
+ *  - `ademe_prevalidations` : pas de col `verdict` / `decision` / `address_label`
+ *    — on utilise `status` + `quality_score` + `acknowledged`.
+ *  - `quotes` : pas de col `total_ht_cents` — la col canonique est `amount_ht`.
+ *  - `prescriber_relationships` : table inexistante en prod — bloc retiré.
+ *  - `addon_modules` : DB a `name`, pas `display_name` — bug fix.
+ *  - `missions.status='to_review'` : statut inexistant — utilise `done` à la place.
+ *  - Chaque requête est entourée d'un try/catch silencieux pour éviter
+ *    qu'une erreur DB plante la section entière (UX dashboard).
  */
+
+interface AnyRow {
+  [key: string]: unknown
+}
+
+async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn()
+  } catch {
+    return fallback
+  }
+}
+
 export async function PrioritiesAlerts() {
   const { supabase, orgId, user } = await getCurrentUser()
   const now = Date.now()
   const dayMs = 24 * 3600 * 1000
 
+  // biome-ignore lint/suspicious/noExplicitAny: queries sur tables avec types DB pas encore régénérés
+  const sb = supabase as any
+
   const [
     regCriticalRes,
     litOpenRes,
-    prevalidRedRes,
+    prevalidLowQualityRes,
     quotesExpiringRes,
     missionsToReviewRes,
-    prescribersSilentRes,
+    invoicesOverdueRes,
     trialsExpiringRes,
   ] = await Promise.all([
-    (
-      supabase as unknown as {
-        from: (t: string) => {
-          select: (cols: string) => {
-            eq: (col1: string, val1: string) => {
-              eq: (col2: string, val2: string) => {
-                is: (col: string, val: null) => Promise<{
-                  data: { id: string; document_id: string; title: string; created_at: string }[] | null
-                }>
-              }
-            }
-          }
-        }
-      }
-    )
-      .from('regulatory_notifications')
-      .select('id, document_id, title, created_at')
-      .eq('user_id', user.id)
-      .eq('priority', 'critical')
-      .is('read_at', null),
-    (
-      supabase as unknown as {
-        from: (t: string) => {
-          select: (cols: string) => {
-            eq: (col: string, val: string) => {
-              in: (col: string, vals: string[]) => {
-                lte: (col: string, val: string) => Promise<{
-                  data: { id: string; mission_id: string; opened_at: string }[] | null
-                }>
-              }
-            }
-          }
-        }
-      }
-    )
-      .from('litigation_workflows')
-      .select('id, mission_id, opened_at')
-      .eq('organization_id', orgId)
-      .in('status', ['opened', 'in_progress'])
-      .lte('opened_at', new Date(now - 2 * dayMs).toISOString()),
-    (
-      supabase as unknown as {
-        from: (t: string) => {
-          select: (cols: string) => {
-            eq: (col1: string, val1: string) => {
-              eq: (col2: string, val2: string) => {
-                is: (col: string, val: null) => Promise<{
-                  data: { id: string; mission_id: string; address_label?: string }[] | null
-                }>
-              }
-            }
-          }
-        }
-      }
-    )
-      .from('ademe_prevalidations')
-      .select('id, mission_id, address_label')
-      .eq('organization_id', orgId)
-      .eq('verdict', 'red')
-      .is('decision', null),
-    (
-      supabase as unknown as {
-        from: (t: string) => {
-          select: (cols: string) => {
-            eq: (col1: string, val1: string) => {
-              eq: (col2: string, val2: string) => {
-                lte: (col: string, val: string) => {
-                  order: (col: string, opts: { ascending: boolean }) => {
-                    limit: (n: number) => Promise<{
-                      data: {
-                        id: string
-                        reference: string
-                        valid_until: string
-                        total_ht_cents: number
-                        contact: { display_name?: string } | null
-                      }[] | null
-                    }>
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    )
-      .from('quotes')
-      .select('id, reference, valid_until, total_ht_cents, contact:contacts(display_name)')
-      .eq('organization_id', orgId)
-      .eq('status', 'sent')
-      .lte('valid_until', new Date(now + 7 * dayMs).toISOString())
-      .order('valid_until', { ascending: true })
-      .limit(3),
-    supabase
-      .from('missions')
-      .select('id, dossier_id, type', { count: 'exact' })
-      .eq('organization_id', orgId)
-      .is('deleted_at', null)
-      .eq('status', 'to_review')
-      .lte('updated_at', new Date(now - dayMs).toISOString())
-      .limit(3),
-    (
-      supabase as unknown as {
-        from: (t: string) => {
-          select: (cols: string) => {
-            eq: (col: string, val: string) => {
-              gte: (col: string, val: number) => {
-                order: (col: string, opts: { ascending: boolean }) => {
-                  limit: (n: number) => Promise<{
-                    data: {
-                      id: string
-                      silent_since_days: number
-                      total_revenue: number
-                      tier: string | null
-                      contact: { display_name?: string } | null
-                    }[] | null
-                  }>
-                }
-              }
-            }
-          }
-        }
-      }
-    )
-      .from('prescriber_relationships')
-      .select(
-        'id, silent_since_days, total_revenue, tier, contact:contacts(display_name)',
-      )
-      .eq('organization_id', orgId)
-      .gte('silent_since_days', 30)
-      .order('total_revenue', { ascending: false })
-      .limit(2),
-    (
-      supabase as unknown as {
-        from: (t: string) => {
-          select: (cols: string) => {
-            eq: (col1: string, val1: string) => {
-              eq: (col2: string, val2: string) => {
-                lte: (col: string, val: string) => Promise<{
-                  data: {
-                    id: string
-                    trial_ends_at: string
-                    module: { display_name?: string } | null
-                  }[] | null
-                }>
-              }
-            }
-          }
-        }
-      }
-    )
-      .from('module_trials')
-      .select(
-        'id, trial_ends_at, module:addon_modules(display_name)',
-      )
-      .eq('organization_id', orgId)
-      .eq('status', 'active')
-      .lte('trial_ends_at', new Date(now + 7 * dayMs).toISOString()),
+    safeQuery(
+      async () =>
+        (await sb
+          .from('regulatory_notifications')
+          .select('id, document_id, reason, severity, created_at')
+          .eq('user_id', user.id)
+          .eq('severity', 'critical')
+          .is('read_at', null)
+          .limit(3)) as { data: AnyRow[] | null },
+      { data: null },
+    ),
+    safeQuery(
+      async () =>
+        (await sb
+          .from('litigation_workflows')
+          .select('id, mission_id, opened_at')
+          .eq('organization_id', orgId)
+          .in('status', ['opened', 'in_progress'])
+          .lte('opened_at', new Date(now - 2 * dayMs).toISOString())
+          .limit(3)) as { data: AnyRow[] | null },
+      { data: null },
+    ),
+    safeQuery(
+      async () =>
+        (await sb
+          .from('ademe_prevalidations')
+          .select('id, mission_id, quality_score, status, acknowledged')
+          .eq('organization_id', orgId)
+          .eq('status', 'completed')
+          .eq('acknowledged', false)
+          .lt('quality_score', 0.5)
+          .limit(3)) as { data: AnyRow[] | null },
+      { data: null },
+    ),
+    safeQuery(
+      async () =>
+        (await sb
+          .from('quotes')
+          .select('id, reference, valid_until, amount_ht, client:clients(display_name)')
+          .eq('organization_id', orgId)
+          .eq('status', 'sent')
+          .lte('valid_until', new Date(now + 7 * dayMs).toISOString())
+          .order('valid_until', { ascending: true })
+          .limit(3)) as { data: AnyRow[] | null },
+      { data: null },
+    ),
+    safeQuery(
+      async () =>
+        (await sb
+          .from('missions')
+          .select('id, dossier_id, type', { count: 'exact' })
+          .eq('organization_id', orgId)
+          .is('deleted_at', null)
+          .eq('status', 'done')
+          .lte('updated_at', new Date(now - dayMs).toISOString())
+          .limit(3)) as { data: AnyRow[] | null; count: number | null },
+      { data: null, count: 0 },
+    ),
+    safeQuery(
+      async () =>
+        (await sb
+          .from('invoices')
+          .select('id, reference, due_date, amount_ttc, client:clients(display_name)')
+          .eq('organization_id', orgId)
+          .eq('status', 'overdue')
+          .order('due_date', { ascending: true })
+          .limit(3)) as { data: AnyRow[] | null },
+      { data: null },
+    ),
+    safeQuery(
+      async () =>
+        (await sb
+          .from('module_trials')
+          .select('id, trial_ends_at, module:addon_modules(name)')
+          .eq('organization_id', orgId)
+          .eq('status', 'active')
+          .lte('trial_ends_at', new Date(now + 7 * dayMs).toISOString())
+          .limit(3)) as { data: AnyRow[] | null },
+      { data: null },
+    ),
   ])
 
   const alerts: PriorityAlert[] = []
 
-  // P1
-  for (const n of regCriticalRes.data ?? []) {
+  // P1 — réglementaire critique
+  for (const row of regCriticalRes.data ?? []) {
+    const n = row as { id: string; document_id?: string | null; reason?: string | null }
     alerts.push({
       key: `reg-${n.id}`,
       priority: 'P1',
       title: 'Nouveau document réglementaire critique',
-      meta: n.title,
+      meta: n.reason ?? 'Veille réglementaire',
       cta: 'Lire',
-      href: `/dashboard/veille/${n.document_id}`,
+      href: n.document_id ? `/dashboard/veille/${n.document_id}` : '/dashboard/veille',
     })
   }
-  for (const l of litOpenRes.data ?? []) {
+  // P1 — litiges ouverts
+  for (const row of litOpenRes.data ?? []) {
+    const l = row as { id: string; mission_id: string; opened_at: string }
+    const days = Math.floor((now - new Date(l.opened_at).getTime()) / dayMs)
     alerts.push({
       key: `lit-${l.id}`,
       priority: 'P1',
       title: 'Litige ouvert non traité',
-      meta: `Ouvert il y a ${Math.floor((now - new Date(l.opened_at).getTime()) / dayMs)} jours`,
+      meta: `Ouvert il y a ${days} jour${days > 1 ? 's' : ''}`,
       cta: 'Traiter',
-      href: `/dashboard/dossiers/${l.mission_id}/litigation`,
+      href: `/dashboard/dossiers/${l.mission_id}`,
     })
   }
-  for (const p of prevalidRedRes.data ?? []) {
+  // P1 — pré-validations ADEME en qualité basse
+  for (const row of prevalidLowQualityRes.data ?? []) {
+    const p = row as { id: string; mission_id: string; quality_score: number }
+    const pct = Math.round((p.quality_score ?? 0) * 100)
     alerts.push({
       key: `prev-${p.id}`,
       priority: 'P1',
-      title: 'Pré-validation ADEME en rouge',
-      meta: p.address_label ?? 'À ne pas publier en l\'état',
+      title: 'Pré-validation ADEME en qualité basse',
+      meta: `Score qualité ${pct}% · à ne pas publier en l'état`,
       cta: 'Voir',
       href: `/dashboard/dossiers/${p.mission_id}/prevalidation`,
     })
   }
 
-  // P2
-  for (const q of quotesExpiringRes.data ?? []) {
-    const days = Math.max(
-      0,
-      Math.ceil((new Date(q.valid_until).getTime() - now) / dayMs),
-    )
-    const eur = (q.total_ht_cents / 100).toLocaleString('fr-FR', {
+  // P2 — devis expirants
+  for (const row of quotesExpiringRes.data ?? []) {
+    const q = row as {
+      id: string
+      reference: string
+      valid_until: string
+      amount_ht: number | null
+      client?: { display_name?: string | null } | { display_name?: string | null }[] | null
+    }
+    const days = Math.max(0, Math.ceil((new Date(q.valid_until).getTime() - now) / dayMs))
+    const eur = ((q.amount_ht ?? 0) / 100).toLocaleString('fr-FR', {
       maximumFractionDigits: 0,
     })
+    const client = Array.isArray(q.client) ? q.client[0] : q.client
     alerts.push({
       key: `quote-${q.id}`,
       priority: 'P2',
       title: `Devis ${q.reference} expire dans ${days} jour${days > 1 ? 's' : ''}`,
-      meta: `Client : ${q.contact?.display_name ?? '—'} · ${eur} € HT`,
+      meta: `Client : ${client?.display_name ?? '—'} · ${eur} € HT`,
       cta: 'Relancer',
-      href: '/dashboard/dossiers',
+      href: '/dashboard/devis',
     })
   }
   const toReviewCount = missionsToReviewRes.count ?? 0
@@ -265,31 +227,48 @@ export async function PrioritiesAlerts() {
       title: `${toReviewCount} mission${toReviewCount > 1 ? 's' : ''} à relire`,
       meta: 'Validation cohérence avant export',
       cta: 'Relire',
-      href: '/dashboard/dossiers?status=to_review',
+      href: '/dashboard/dossiers',
+    })
+  }
+  // P2 — factures en retard
+  for (const row of invoicesOverdueRes.data ?? []) {
+    const inv = row as {
+      id: string
+      reference: string
+      due_date: string | null
+      amount_ttc: number | null
+      client?: { display_name?: string | null } | { display_name?: string | null }[] | null
+    }
+    const lateDays = inv.due_date
+      ? Math.floor((now - new Date(inv.due_date).getTime()) / dayMs)
+      : null
+    const eur = ((inv.amount_ttc ?? 0) / 100).toLocaleString('fr-FR', {
+      maximumFractionDigits: 0,
+    })
+    const client = Array.isArray(inv.client) ? inv.client[0] : inv.client
+    alerts.push({
+      key: `inv-${inv.id}`,
+      priority: 'P2',
+      title: `Facture ${inv.reference}${lateDays !== null ? ` en retard de ${lateDays}j` : ' impayée'}`,
+      meta: `Client : ${client?.display_name ?? '—'} · ${eur} € TTC`,
+      cta: 'Relancer',
+      href: '/dashboard/relances',
     })
   }
 
-  // P3
-  for (const p of prescribersSilentRes.data ?? []) {
-    const eur = p.total_revenue.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
-    alerts.push({
-      key: `presc-${p.id}`,
-      priority: 'P3',
-      title: `${p.contact?.display_name ?? 'Prescripteur'} silencieux depuis ${p.silent_since_days} jours`,
-      meta: `CA total : ${eur} €${p.tier ? ` · Tier : ${p.tier}` : ''}`,
-      cta: 'Programmer',
-      href: '/dashboard/prescripteurs',
-    })
-  }
-  for (const t of trialsExpiringRes.data ?? []) {
-    const days = Math.max(
-      0,
-      Math.ceil((new Date(t.trial_ends_at).getTime() - now) / dayMs),
-    )
+  // P3 — essais expirants
+  for (const row of trialsExpiringRes.data ?? []) {
+    const t = row as {
+      id: string
+      trial_ends_at: string
+      module?: { name?: string | null } | { name?: string | null }[] | null
+    }
+    const days = Math.max(0, Math.ceil((new Date(t.trial_ends_at).getTime() - now) / dayMs))
+    const module = Array.isArray(t.module) ? t.module[0] : t.module
     alerts.push({
       key: `trial-${t.id}`,
       priority: 'P3',
-      title: `Essai ${t.module?.display_name ?? 'module'} : ${days}j restants`,
+      title: `Essai ${module?.name ?? 'module'} : ${days}j restants`,
       meta: 'Conversion automatique sinon désactivation',
       cta: 'Décider',
       href: '/dashboard/account',

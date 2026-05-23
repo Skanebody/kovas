@@ -127,13 +127,15 @@ export async function ActionDuJour() {
 
   // 2) Lead non répondu — pas de table en V1, on saute.
 
-  // 3) Facture en retard la plus ancienne (statut 'overdue' ou 'sent' due_date passée)
+  // 3) Facture en retard la plus ancienne (statut 'overdue' ou 'issued' due_date passée)
+  // AUDIT-B (2026-05-23) : 'sent' et 'late' n'existent pas. La constraint CHECK
+  // invoices.status accepte ('draft', 'issued', 'paid', 'partial', 'overdue', 'cancelled').
   try {
     const { data: overdueInvoices } = await supabase
       .from('invoices')
       .select('id, reference, due_date, issued_at, status')
       .eq('organization_id', orgId)
-      .in('status', ['overdue', 'sent', 'late'])
+      .in('status', ['overdue', 'issued'])
       .lt('due_date', now.toISOString())
       .order('due_date', { ascending: true })
       .limit(1)

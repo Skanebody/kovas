@@ -65,8 +65,14 @@ export async function TodayKpiGrid() {
     (
       supabase as unknown as {
         from: (t: string) => {
-          select: (cols: string, opts: { count: 'exact'; head: true }) => {
-            eq: (col: string, val: string) => {
+          select: (
+            cols: string,
+            opts: { count: 'exact'; head: true },
+          ) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => {
               eq: (col2: string, val2: string) => Promise<{ count: number | null }>
             }
           }
@@ -80,8 +86,14 @@ export async function TodayKpiGrid() {
     (
       supabase as unknown as {
         from: (t: string) => {
-          select: (cols: string, opts: { count: 'exact'; head: true }) => {
-            eq: (col: string, val: string) => {
+          select: (
+            cols: string,
+            opts: { count: 'exact'; head: true },
+          ) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => {
               gte: (col: string, val: string) => Promise<{ count: number | null }>
             }
           }
@@ -96,9 +108,15 @@ export async function TodayKpiGrid() {
       supabase as unknown as {
         from: (t: string) => {
           select: (cols: string) => {
-            eq: (col: string, val: string) => {
-              gte: (col: string, val: string) => {
-                lt: (col: string, val: string) => Promise<{ data: { total_ht_cents: number }[] | null }>
+            eq: (
+              col: string,
+              val: string,
+            ) => {
+              gte: (
+                col: string,
+                val: string,
+              ) => {
+                lt: (col: string, val: string) => Promise<{ data: { amount_ht: number }[] | null }>
               }
             }
           }
@@ -106,7 +124,7 @@ export async function TodayKpiGrid() {
       }
     )
       .from('invoices')
-      .select('total_ht_cents')
+      .select('amount_ht')
       .eq('organization_id', orgId)
       .gte('issued_at', monthStart)
       .lt('issued_at', monthNext),
@@ -114,9 +132,15 @@ export async function TodayKpiGrid() {
       supabase as unknown as {
         from: (t: string) => {
           select: (cols: string) => {
-            eq: (col: string, val: string) => {
-              gte: (col: string, val: string) => {
-                lt: (col: string, val: string) => Promise<{ data: { total_ht_cents: number }[] | null }>
+            eq: (
+              col: string,
+              val: string,
+            ) => {
+              gte: (
+                col: string,
+                val: string,
+              ) => {
+                lt: (col: string, val: string) => Promise<{ data: { amount_ht: number }[] | null }>
               }
             }
           }
@@ -124,21 +148,23 @@ export async function TodayKpiGrid() {
       }
     )
       .from('invoices')
-      .select('total_ht_cents')
+      .select('amount_ht')
       .eq('organization_id', orgId)
       .gte('issued_at', prevMonthStart.toISOString())
       .lt('issued_at', monthStart),
-    supabase
-      .from('subscriptions')
-      .select('plan_code')
-      .eq('organization_id', orgId)
-      .maybeSingle(),
+    supabase.from('subscriptions').select('plan_code').eq('organization_id', orgId).maybeSingle(),
     (
       supabase as unknown as {
         from: (t: string) => {
           select: (cols: string) => {
-            eq: (col: string, val: string) => {
-              order: (col: string, opts: { ascending: boolean }) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => {
+              order: (
+                col: string,
+                opts: { ascending: boolean },
+              ) => {
                 limit: (n: number) => {
                   maybeSingle: () => Promise<{
                     data: { risk_level: string } | null
@@ -170,19 +196,11 @@ export async function TodayKpiGrid() {
   const thisWeek = quotesThisWeek ?? 0
 
   // KPI 3 — CA mois
-  const sumCents = (invoicesMonthRes.data ?? []).reduce(
-    (a, r) => a + (r.total_ht_cents ?? 0),
-    0,
-  )
-  const sumPrevCents = (invoicesPrevMonthRes.data ?? []).reduce(
-    (a, r) => a + (r.total_ht_cents ?? 0),
-    0,
-  )
+  const sumCents = (invoicesMonthRes.data ?? []).reduce((a, r) => a + (r.amount_ht ?? 0), 0)
+  const sumPrevCents = (invoicesPrevMonthRes.data ?? []).reduce((a, r) => a + (r.amount_ht ?? 0), 0)
   const caMonth = sumCents / 100
   const caDeltaPct =
-    sumPrevCents > 0
-      ? Math.round(((sumCents - sumPrevCents) / sumPrevCents) * 100)
-      : null
+    sumPrevCents > 0 ? Math.round(((sumCents - sumPrevCents) / sumPrevCents) * 100) : null
 
   // KPI 4 — Risque ADEME (gated)
   const ademeGated = planAtLeast(planCode, 'decouverte')
@@ -261,7 +279,8 @@ export async function TodayKpiGrid() {
             key={k.label}
             className={cn(
               'p-5',
-              !isLast && (idx % 2 === 0 ? 'md:border-r border-rule/60' : 'md:border-r border-rule/60'),
+              !isLast &&
+                (idx % 2 === 0 ? 'md:border-r border-rule/60' : 'md:border-r border-rule/60'),
               idx < 2 && 'border-b md:border-b-0 border-rule/60',
               !isLastRow && 'md:border-b-0',
               idx === 0 && 'border-r md:border-r border-rule/60',

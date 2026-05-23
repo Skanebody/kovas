@@ -104,31 +104,41 @@ export default async function PrescribersPage({ searchParams }: PageProps) {
   const sortParam = (params.sort ?? 'revenue') as SortKey
   const sort = VALID_SORTS.includes(sortParam) ? sortParam : 'revenue'
 
-  let q = prescribersTable(supabase)
-    .select(
-      'id, organization_id, contact_id, user_id, tier, revenue_12m_eur, missions_12m_count, acceptance_rate, avg_basket_eur, last_mission_at, last_contact_at, silent_since_days, notes, next_action_at, next_action_type, created_at, updated_at',
-    )
-    .eq('organization_id', orgId)
+  // AUDIT-B (2026-05-23) : la table `prescriber_relationships` n'est pas
+  // deployee en prod (creation differee Phase 2 Cabinet). On encapsule la
+  // requete dans un try/catch pour eviter une 404 Supabase qui plante la
+  // page complete. Empty state s'affiche tant que la table n'existe pas.
+  let list: PrescriberRelationshipRow[] = []
+  try {
+    let q = prescribersTable(supabase)
+      .select(
+        'id, organization_id, contact_id, user_id, tier, revenue_12m_eur, missions_12m_count, acceptance_rate, avg_basket_eur, last_mission_at, last_contact_at, silent_since_days, notes, next_action_at, next_action_type, created_at, updated_at',
+      )
+      .eq('organization_id', orgId)
 
-  if (tierFilter) q = q.eq('tier', tierFilter)
-  if (silentDays != null) q = q.gte('silent_since_days', silentDays)
+    if (tierFilter) q = q.eq('tier', tierFilter)
+    if (silentDays != null) q = q.gte('silent_since_days', silentDays)
 
-  switch (sort) {
-    case 'missions':
-      q = q.order('missions_12m_count', { ascending: false })
-      break
-    case 'silence':
-      q = q.order('silent_since_days', { ascending: false, nullsFirst: false })
-      break
-    case 'tier':
-      q = q.order('tier', { ascending: true }).order('revenue_12m_eur', { ascending: false })
-      break
-    default:
-      q = q.order('revenue_12m_eur', { ascending: false })
+    switch (sort) {
+      case 'missions':
+        q = q.order('missions_12m_count', { ascending: false })
+        break
+      case 'silence':
+        q = q.order('silent_since_days', { ascending: false, nullsFirst: false })
+        break
+      case 'tier':
+        q = q.order('tier', { ascending: true }).order('revenue_12m_eur', { ascending: false })
+        break
+      default:
+        q = q.order('revenue_12m_eur', { ascending: false })
+    }
+
+    const { data: rows, error } = await q.limit(200)
+    if (!error) list = rows ?? []
+  } catch {
+    // Table absente en prod, on retombe sur empty state
+    list = []
   }
-
-  const { data: rows } = await q.limit(200)
-  const list = rows ?? []
 
   // Join contacts
   let contactsById = new Map<string, PrescriberContact>()

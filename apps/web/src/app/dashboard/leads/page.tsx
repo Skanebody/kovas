@@ -9,77 +9,116 @@ export const metadata: Metadata = { title: 'Leads' }
 /**
  * Page Leads — file d'attente focale 1 lead à la fois.
  *
- * NB : la table `lead_assignments` (Phase E) n'est pas encore déployée.
- * Le fetch est volontairement défensif : si la table n'existe pas, la page
- * affiche un empty state pédagogique sans planter le rendu.
+ * AUDIT-B (2026-05-23) : refonte schéma. La table `lead_assignments` existe
+ * en prod mais avec un schéma différent (lead_id, diagnostician_id, status,
+ * notified_at, expires_at, ...). Le contenu lead est dans `quote_requests`
+ * (table jointe). On joint user.id -> diagnosticians.claimed_by_user_id ->
+ * diagnosticians.id -> lead_assignments.diagnostician_id (status='pending').
  */
-async function fetchPendingLeads(orgId: string): Promise<LeadItem[]> {
+async function fetchPendingLeads(userId: string): Promise<LeadItem[]> {
   const { supabase } = await getCurrentUser()
 
-  // Try : si la table `lead_assignments` est présente, on l'utilise.
-  // Sinon (Phase E non encore migrée), on retombe sur une liste vide.
   try {
-    const { data, error } = await supabase
-      .from('lead_assignments' as never)
+    // biome-ignore lint/suspicious/noExplicitAny: types DB en attente régénération
+    const sb = supabase as any
+
+    // 1. Diagnostician claimé par cet user (V1 : 1 user = 1 diag)
+    const { data: diags } = await sb
+      .from('diagnosticians')
+      .select('id')
+      .eq('claimed_by_user_id', userId)
+
+    const diagRows = (diags ?? []) as Array<{ id: string }>
+    if (diagRows.length === 0) return []
+    const diagIds = diagRows.map((d) => d.id)
+
+    // 2. Assignments en attente, joints aux quote_requests
+    const { data, error } = await sb
+      .from('lead_assignments')
       .select(
-        'id, status, received_at, response_note, urgency, client_display_name, client_phone, property_address, property_city, property_postal_code, property_type, property_surface, property_year_built, mission_types',
+        'id, status, notified_at, expires_at, lead:quote_requests(requester_first_name, requester_last_name, requester_phone, property_address, property_city, property_postal_code, property_type, property_surface_m2, property_year_built, diagnostics_requested)',
       )
-      .eq('organization_id', orgId)
+      .in('diagnostician_id', diagIds)
       .eq('status', 'pending')
-      .order('received_at', { ascending: true })
+      .order('notified_at', { ascending: true })
       .limit(50)
 
     if (error) {
-      // Table inexistante → on renvoie [] silencieusement
       return []
     }
 
-    const rows = (data ?? []) as unknown as RawLeadRow[]
+    const rows = (data ?? []) as unknown as RawLeadAssignmentRow[]
     return rows.map(normalizeLead)
   } catch {
     return []
   }
 }
 
-interface RawLeadRow {
+interface RawLeadAssignmentRow {
   id: string
   status: string | null
-  received_at: string
-  urgency: string | null
-  client_display_name: string | null
-  client_phone: string | null
-  property_address: string | null
-  property_city: string | null
-  property_postal_code: string | null
-  property_type: string | null
-  property_surface: number | null
-  property_year_built: number | null
-  mission_types: string[] | null
+  notified_at: string | null
+  expires_at: string | null
+  lead:
+    | {
+        requester_first_name: string | null
+        requester_last_name: string | null
+        requester_phone: string | null
+        property_address: string | null
+        property_city: string | null
+        property_postal_code: string | null
+        property_type: string | null
+        property_surface_m2: number | null
+        property_year_built: number | null
+        diagnostics_requested: string[] | null
+      }
+    | {
+        requester_first_name: string | null
+        requester_last_name: string | null
+        requester_phone: string | null
+        property_address: string | null
+        property_city: string | null
+        property_postal_code: string | null
+        property_type: string | null
+        property_surface_m2: number | null
+        property_year_built: number | null
+        diagnostics_requested: string[] | null
+      }[]
+    | null
 }
 
-function normalizeLead(row: RawLeadRow): LeadItem {
+function normalizeLead(row: RawLeadAssignmentRow): LeadItem {
   const status: LeadItem['status'] =
-    row.status === 'responded' || row.status === 'expired' ? row.status : 'pending'
+    row.status === 'responded' || row.status === 'accepted'
+      ? 'responded'
+      : row.status === 'expired'
+        ? 'expired'
+        : 'pending'
+  const lead = Array.isArray(row.lead) ? row.lead[0] : row.lead
+  const displayName = lead
+    ? [lead.requester_first_name, lead.requester_last_name].filter(Boolean).join(' ').trim() ||
+      'Contact à confirmer'
+    : 'Contact à confirmer'
   return {
     id: row.id,
     status,
-    receivedAt: row.received_at,
-    clientDisplayName: row.client_display_name ?? 'Contact à confirmer',
-    clientPhone: row.client_phone,
-    propertyAddress: row.property_address ?? 'Adresse à confirmer',
-    propertyCity: row.property_city,
-    propertyPostalCode: row.property_postal_code,
-    propertyType: row.property_type,
-    propertySurface: row.property_surface,
-    propertyYearBuilt: row.property_year_built,
-    missionTypes: (row.mission_types ?? []) as LeadItem['missionTypes'],
-    urgency: row.urgency,
+    receivedAt: row.notified_at ?? new Date().toISOString(),
+    clientDisplayName: displayName,
+    clientPhone: lead?.requester_phone ?? null,
+    propertyAddress: lead?.property_address ?? 'Adresse à confirmer',
+    propertyCity: lead?.property_city ?? null,
+    propertyPostalCode: lead?.property_postal_code ?? null,
+    propertyType: lead?.property_type ?? null,
+    propertySurface: lead?.property_surface_m2 ?? null,
+    propertyYearBuilt: lead?.property_year_built ?? null,
+    missionTypes: (lead?.diagnostics_requested ?? []) as LeadItem['missionTypes'],
+    urgency: null,
   }
 }
 
 export default async function LeadsPage() {
-  const { orgId } = await getCurrentUser()
-  const leads = await fetchPendingLeads(orgId)
+  const { user } = await getCurrentUser()
+  const leads = await fetchPendingLeads(user.id)
   const count = leads.length
 
   return (
@@ -90,7 +129,7 @@ export default async function LeadsPage() {
         description={
           count > 0
             ? `${count} lead${count > 1 ? 's' : ''} en attente · traitez le plus ancien d'abord`
-            : 'Demandes entrantes des particuliers via l\'annuaire KOVAS'
+            : "Demandes entrantes des particuliers via l'annuaire KOVAS"
         }
       />
 

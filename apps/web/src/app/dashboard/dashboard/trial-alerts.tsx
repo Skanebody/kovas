@@ -9,18 +9,17 @@ interface TrialRow {
   module_id: string
   trial_ends_at: string
   user_decision: 'keep' | 'cancel' | null
+  // AUDIT-B (2026-05-23) : DB réelle = `name` + `monthly_price_cents`
+  // (les anciens noms `display_name` / `price_monthly_cents` n'existent pas).
   module: {
     module_code: string
-    display_name: string
-    price_monthly_cents: number
+    name: string
+    monthly_price_cents: number
   } | null
 }
 
 function daysUntil(iso: string): number {
-  return Math.max(
-    0,
-    Math.ceil((new Date(iso).getTime() - Date.now()) / (24 * 3600 * 1000)),
-  )
+  return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / (24 * 3600 * 1000)))
 }
 
 /**
@@ -41,10 +40,22 @@ export async function TrialAlerts() {
     supabase as unknown as {
       from: (t: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
-            eq: (col2: string, val2: string) => {
-              lte: (col: string, val: string) => {
-                order: (col: string, opts: { ascending: boolean }) => Promise<{
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            eq: (
+              col2: string,
+              val2: string,
+            ) => {
+              lte: (
+                col: string,
+                val: string,
+              ) => {
+                order: (
+                  col: string,
+                  opts: { ascending: boolean },
+                ) => Promise<{
                   data: TrialRow[] | null
                 }>
               }
@@ -56,7 +67,7 @@ export async function TrialAlerts() {
   )
     .from('module_trials')
     .select(
-      'id, module_id, trial_ends_at, user_decision, module:addon_modules(module_code, display_name, price_monthly_cents)',
+      'id, module_id, trial_ends_at, user_decision, module:addon_modules(module_code, name, monthly_price_cents)',
     )
     .eq('organization_id', orgId)
     .eq('status', 'active')
@@ -67,7 +78,11 @@ export async function TrialAlerts() {
   if (items.length === 0) return null
 
   return (
-    <Card variant="opaque" padding="default" className="space-y-4 border-l-[3px] border-l-chartreuse">
+    <Card
+      variant="opaque"
+      padding="default"
+      className="space-y-4 border-l-[3px] border-l-chartreuse"
+    >
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <Sparkles className="size-4 text-ink-mute" aria-hidden />
@@ -91,7 +106,7 @@ export async function TrialAlerts() {
       <ul className="space-y-2.5">
         {items.map((trial) => {
           const days = daysUntil(trial.trial_ends_at)
-          const priceEur = (trial.module?.price_monthly_cents ?? 0) / 100
+          const priceEur = (trial.module?.monthly_price_cents ?? 0) / 100
           return (
             <li
               key={trial.id}
@@ -99,13 +114,11 @@ export async function TrialAlerts() {
             >
               <div className="flex-1 min-w-0">
                 <p className="text-[14px] font-medium text-ink truncate">
-                  {trial.module?.display_name ?? 'Module'}
+                  {trial.module?.name ?? 'Module'}
                 </p>
                 <p className="text-[12px] text-ink-mute">
                   Premier prélèvement dans {days} jour{days > 1 ? 's' : ''} ·{' '}
-                  <span className="tabular-nums">
-                    {priceEur.toFixed(0)} € HT / mois
-                  </span>
+                  <span className="tabular-nums">{priceEur.toFixed(0)} € HT / mois</span>
                 </p>
               </div>
               <Button asChild variant="outline" size="sm" className="shrink-0">

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { FileCheck2, Receipt, Inbox, ArrowRight } from 'lucide-react'
+import { ArrowRight, FileCheck2, Inbox, Receipt } from 'lucide-react'
 import Link from 'next/link'
 import type { ComponentType } from 'react'
 
@@ -9,8 +9,12 @@ import type { ComponentType } from 'react'
  * Sources V1 :
  *  - Leads : table absente V1 → fallback 0 (slot prêt pour V1.5)
  *  - Devis sans réponse : quotes status='sent' AND accepted_at IS NULL
- *  - Factures impayées : invoices status in ('overdue', 'sent') AND due_date passée
+ *  - Factures impayées : invoices status in ('overdue', 'issued') AND due_date passée
  * Si tables absentes ou colonnes non câblées, fallback 0 silencieux.
+ *
+ * AUDIT-B (2026-05-23) : `invoices.status` ne contient pas 'sent' ni 'late' —
+ * contrainte CHECK : ('draft', 'issued', 'paid', 'partial', 'overdue', 'cancelled').
+ * 'issued' = facture émise et envoyée mais pas encore en retard.
  */
 interface TileSpec {
   key: string
@@ -46,7 +50,7 @@ async function fetchCounts(): Promise<Record<'leads' | 'quotes' | 'invoices', nu
       .from('invoices')
       .select('*', { count: 'exact', head: true })
       .eq('organization_id', orgId)
-      .in('status', ['overdue', 'sent', 'late'])
+      .in('status', ['overdue', 'issued'])
       .lt('due_date', nowIso)
     invoices = count ?? 0
   } catch {
