@@ -82,18 +82,38 @@ export function AudioMessageBubble({
   }, [])
 
   // ── Toggle play / pause ─────────────────────────────────────────────
+  const [playError, setPlayError] = useState<string | null>(null)
   const handleToggle = useCallback(() => {
     const a = audioRef.current
-    if (!a) return
+    if (!a) {
+      console.error('[AudioMessageBubble] audioRef.current is null')
+      return
+    }
+    // Log debug : état audio + url avant tentative play
+    console.debug('[AudioMessageBubble] toggle', {
+      paused: a.paused,
+      readyState: a.readyState,
+      networkState: a.networkState,
+      currentSrc: a.currentSrc,
+      audioUrl,
+      duration: a.duration,
+      error: a.error?.code,
+    })
     if (a.paused) {
-      void a.play().catch(() => {
-        // Autoplay refusé OU blob cassé — état sera reset par l'event 'pause'
-        setIsPlaying(false)
-      })
+      void a
+        .play()
+        .then(() => setPlayError(null))
+        .catch((err: unknown) => {
+          const msg =
+            err instanceof Error ? `${err.name}: ${err.message}` : 'Erreur lecture inconnue'
+          console.error('[AudioMessageBubble] play() failed', err, { audioUrl })
+          setPlayError(msg)
+          setIsPlaying(false)
+        })
     } else {
       a.pause()
     }
-  }, [])
+  }, [audioUrl])
 
   // ── Click sur la barre de progression : seek ─────────────────────────
   const handleSeek = useCallback(
@@ -125,68 +145,98 @@ export function AudioMessageBubble({
   } as const
 
   return (
-    <div className={cn('flex items-center gap-2.5', className)}>
-      {/* HTML5 audio caché — piloté en ref */}
-      {/* biome-ignore lint/a11y/useMediaCaption: vocal terrain (auto-transcrit en dessous) */}
-      <audio ref={audioRef} src={audioUrl} preload="metadata" className="hidden" />
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={handleToggle}
-        aria-label={isPlaying ? 'Mettre en pause' : 'Lire le message vocal'}
-        className={cn('shrink-0 size-9 rounded-full', colors.button)}
-      >
-        {isPlaying ? (
-          <Pause className="size-4" aria-hidden />
-        ) : (
-          <Play className="size-4 translate-x-[1px]" aria-hidden />
-        )}
-      </Button>
-
-      {/* Barre de progression — bouton focusable pour respect a11y */}
-      <button
-        type="button"
-        aria-label={`Position lecture ${Math.round(progress * 100)}%, cliquer pour changer`}
-        onClick={handleSeek}
-        onKeyDown={(e) => {
-          // Flèches gauche/droite pour seek ±5%
-          if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-            e.preventDefault()
-            const audio = audioRef.current
-            if (!audio || !audio.duration) return
-            const delta = e.key === 'ArrowLeft' ? -0.05 : 0.05
-            audio.currentTime = Math.max(
-              0,
-              Math.min(audio.duration, audio.currentTime + delta * audio.duration),
+    <div className={cn('flex flex-col gap-1', className)}>
+      <div className="flex items-center gap-2.5">
+        {/* HTML5 audio caché — piloté en ref */}
+        {/* biome-ignore lint/a11y/useMediaCaption: vocal terrain (auto-transcrit en dessous) */}
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          preload="metadata"
+          className="hidden"
+          onError={(e) => {
+            const a = e.currentTarget
+            console.error('[AudioMessageBubble] <audio> error', {
+              code: a.error?.code,
+              message: a.error?.message,
+              audioUrl,
+              networkState: a.networkState,
+              readyState: a.readyState,
+            })
+            setPlayError(
+              a.error
+                ? `Audio illisible (code ${a.error.code})`
+                : 'Audio illisible (source invalide)',
             )
-          }
-        }}
-        className={cn(
-          'group relative flex-1 h-7 flex items-center cursor-pointer text-left',
-          'min-w-[100px] rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-chartreuse/40',
-        )}
-      >
-        <div className={cn('relative h-1 w-full rounded-full overflow-hidden', colors.track)}>
-          <div
-            className={cn('absolute inset-y-0 left-0 transition-[width] duration-100', colors.fill)}
-            style={{ width: `${progress * 100}%` }}
-          />
-        </div>
-      </button>
+          }}
+        />
 
-      <span
-        className={cn(
-          'shrink-0 inline-flex items-center gap-1 font-mono text-[11px] tabular-nums',
-          colors.label,
-        )}
-      >
-        {timeLabel}
-        {isTranscribing ? (
-          <Loader2 className="size-3 animate-spin" aria-label="Transcription en cours" />
-        ) : null}
-      </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={handleToggle}
+          aria-label={isPlaying ? 'Mettre en pause' : 'Lire le message vocal'}
+          className={cn('shrink-0 size-9 rounded-full', colors.button)}
+        >
+          {isPlaying ? (
+            <Pause className="size-4" aria-hidden />
+          ) : (
+            <Play className="size-4 translate-x-[1px]" aria-hidden />
+          )}
+        </Button>
+
+        {/* Barre de progression — bouton focusable pour respect a11y */}
+        <button
+          type="button"
+          aria-label={`Position lecture ${Math.round(progress * 100)}%, cliquer pour changer`}
+          onClick={handleSeek}
+          onKeyDown={(e) => {
+            // Flèches gauche/droite pour seek ±5%
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+              e.preventDefault()
+              const audio = audioRef.current
+              if (!audio || !audio.duration) return
+              const delta = e.key === 'ArrowLeft' ? -0.05 : 0.05
+              audio.currentTime = Math.max(
+                0,
+                Math.min(audio.duration, audio.currentTime + delta * audio.duration),
+              )
+            }
+          }}
+          className={cn(
+            'group relative flex-1 h-7 flex items-center cursor-pointer text-left',
+            'min-w-[100px] rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-chartreuse/40',
+          )}
+        >
+          <div className={cn('relative h-1 w-full rounded-full overflow-hidden', colors.track)}>
+            <div
+              className={cn(
+                'absolute inset-y-0 left-0 transition-[width] duration-100',
+                colors.fill,
+              )}
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+        </button>
+
+        <span
+          className={cn(
+            'shrink-0 inline-flex items-center gap-1 font-mono text-[11px] tabular-nums',
+            colors.label,
+          )}
+        >
+          {timeLabel}
+          {isTranscribing ? (
+            <Loader2 className="size-3 animate-spin" aria-label="Transcription en cours" />
+          ) : null}
+        </span>
+      </div>
+      {playError ? (
+        <p className={cn('text-[11px] font-mono px-1', 'text-accent-red')} role="alert">
+          {playError}
+        </p>
+      ) : null}
     </div>
   )
 }
