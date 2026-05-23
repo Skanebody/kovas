@@ -26,7 +26,26 @@
 
 import { BottomSheet, BottomSheetTitle } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
+import {
+  CHECK_ITEMS_3CL,
+  CHECK_ITEMS_3CL_COUNT,
+  type CheckCategory,
+  getRequiredCheckItems,
+} from '@/lib/3cl/checklist'
+import {
+  type Contradiction,
+  type MissionSnapshot,
+  type RoomSnapshot,
+  detectContradictions,
+} from '@/lib/3cl/contradictions-detector'
+import { computeMissionCompletionPct, useMissionRiskFlags } from '@/lib/3cl/use-mission-risk-flags'
 import { generateDefaultRooms } from '@/lib/mission/default-rooms'
+import {
+  type ExtractedMissionData,
+  extractStructuredData,
+  generateLocalResponse,
+} from '@/lib/mission/local-extraction'
+import { photosSyncManager } from '@/lib/mission/photos-sync-manager'
 import {
   type RoomCompletionStatus,
   type RoomType,
@@ -34,16 +53,23 @@ import {
   getRequiredFieldsCount,
   inferRoomTypeFromName,
 } from '@/lib/mission/room-completion'
+import {
+  useMissionPhotosSyncStatus,
+  usePhotoSyncStatus,
+} from '@/lib/mission/use-mission-photos-count'
 import { cn } from '@/lib/utils'
 import {
   type SpeechRecognitionController,
   createSpeechRecognition,
 } from '@/lib/voice/speech-recognition'
 import {
+  AlertTriangle,
   ArrowDown,
   ArrowLeft,
-  Camera,
   CheckCircle2,
+  Cloud,
+  CloudUpload,
+  Hourglass,
   Loader2,
   Mic,
   MicOff,
@@ -56,7 +82,16 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MissionContextBar } from './MissionContextBar'
+import {
+  MissionRecapButton,
+  MissionRecapSheet,
+  type RecapCellStatus,
+  type RecapGlobalField,
+  type RecapRoom,
+  useMissionRecap,
+} from './MissionRecapSheet'
 import { MissionRoomsSidebar, type MissionSidebarRoom } from './MissionRoomsSidebar'
+import { PhotoCaptureButton } from './PhotoCaptureButton'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -78,6 +113,8 @@ interface InitialChatMessage {
 
 interface MissionTchatInterfaceProps {
   dossierId: string
+  /** Organisation id — utilisé par PhotosSyncManager pour le path Storage RLS. */
+  orgId: string
   reference: string
   clientName: string
   fullAddress: string
@@ -103,6 +140,10 @@ interface ChatMessage {
   isVoice?: boolean
   /** Photo URL temporaire (objectURL) si message est une photo. */
   photoUrl?: string
+  /** UUID local Dexie (MISSION-B) — sert à mapper le status de sync. */
+  photoLocalId?: string
+  /** Pièce auto-associée à la photo (sidebar active au moment du tap). */
+  photoRoomName?: string | null
   /** Indique si ce message assistant est encore en cours de streaming. */
   streaming?: boolean
 }
@@ -340,6 +381,7 @@ function getQuickReplies(phase: ConversationPhase, lastAssistantText: string): Q
 
 export function MissionTchatInterface({
   dossierId,
+  orgId,
   reference,
   clientName,
   fullAddress,
@@ -355,7 +397,6 @@ export function MissionTchatInterface({
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<SpeechRecognitionController | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // ----- State principal -----
@@ -389,6 +430,19 @@ export function MissionTchatInterface({
   const [isStreaming, setIsStreaming] = useState<boolean>(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  // ----- MISSION-B : sync manager photos rafale -----
+  // Démarre le job background photos pending → Supabase Storage + mission_photos.
+  // Le snapshot { pending, uploading, synced, errors } est exposé via hook.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    photosSyncManager.start({ orgId, dossierId, missionSessionId: sessionId })
+    return () => {
+      photosSyncManager.stop()
+    }
+  }, [orgId, dossierId, sessionId])
+
+  const photosSyncSnapshot = useMissionPhotosSyncStatus(sessionId)
 
   // ----- Sidebar pièces (lot MISSION-A) -----
   // Construit l'état initial depuis :
@@ -439,6 +493,21 @@ export function MissionTchatInterface({
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
   const [isRoomsSheetOpen, setIsRoomsSheetOpen] = useState<boolean>(false)
 
+  // ----- Lot MISSION-C : récap visuel + risk flags + contradictions -----
+  // State local pour les champs 3CL renseignés (global + par pièce).
+  // V1 : ce state est mis à jour ad-hoc via les captures Claude. V1.5 : sync DB.
+  const recap = useMissionRecap()
+  const [globalCheckFields, setGlobalCheckFields] = useState<Record<string, unknown>>(() => {
+    // Bootstrap avec les meta propriétés connues
+    const initial: Record<string, unknown> = {}
+    if (propertyMeta?.yearBuilt != null) initial['bati.annee_construction'] = propertyMeta.yearBuilt
+    if (propertyMeta?.surface != null) initial['bati.surface_habitable'] = propertyMeta.surface
+    return initial
+  })
+  const [roomCheckFields, setRoomCheckFields] = useState<
+    Record<string, { roomType: string; fields: Record<string, unknown> }>
+  >({})
+
   // Compteur "X pièces saisies" pour quick-replies & context bar.
   const roomsSaved = useMemo(
     () => rooms.filter((r) => r.completionStatus !== 'empty').length,
@@ -448,6 +517,196 @@ export function MissionTchatInterface({
     () => rooms.filter((r) => r.completionStatus === 'complete').length,
     [rooms],
   )
+
+  // ----- Lot MISSION-C : agrégation données pour récap -----
+  // Maps roomFields pour intégrer le type + filled count (utilisé par hook risk).
+  const roomFieldsForRisk = useMemo(() => {
+    const out: Record<string, { roomType: string; fields: Record<string, unknown> }> = {}
+    for (const room of rooms) {
+      const existing = roomCheckFields[room.id]
+      out[room.id] = {
+        roomType: room.type,
+        fields: existing?.fields ?? {},
+      }
+    }
+    return out
+  }, [rooms, roomCheckFields])
+
+  // Risk flags (champs required + pitfall non remplis)
+  const riskFlags = useMissionRiskFlags({
+    globalFields: globalCheckFields,
+    roomFields: roomFieldsForRisk,
+  })
+
+  // Mission snapshot pour le détecteur de contradictions
+  const missionSnapshot: MissionSnapshot = useMemo(() => {
+    const g = globalCheckFields
+    return {
+      yearBuilt:
+        typeof g['bati.annee_construction'] === 'number'
+          ? (g['bati.annee_construction'] as number)
+          : null,
+      surfaceHabitableSqm:
+        typeof g['bati.surface_habitable'] === 'number'
+          ? (g['bati.surface_habitable'] as number)
+          : null,
+      ceilingHeightAvgM:
+        typeof g['bati.hauteur_sous_plafond_moyenne'] === 'number'
+          ? (g['bati.hauteur_sous_plafond_moyenne'] as number)
+          : null,
+      mitoyennete:
+        typeof g['bati.mitoyennete'] === 'string' ? (g['bati.mitoyennete'] as string) : null,
+      chauffageType:
+        typeof g['chauffage.type_generateur_principal'] === 'string'
+          ? (g['chauffage.type_generateur_principal'] as string)
+          : null,
+      chauffageEnergie:
+        typeof g['chauffage.energie_principale'] === 'string'
+          ? (g['chauffage.energie_principale'] as string)
+          : null,
+      arriveeGazPresent:
+        g['chauffage.arrivee_gaz_present'] === 'oui' || g['chauffage.arrivee_gaz_present'] === 'non'
+          ? (g['chauffage.arrivee_gaz_present'] as 'oui' | 'non')
+          : null,
+      cuveFioulPresent:
+        g['chauffage.cuve_fioul_present'] === 'oui' || g['chauffage.cuve_fioul_present'] === 'non'
+          ? (g['chauffage.cuve_fioul_present'] as 'oui' | 'non')
+          : null,
+      ecsType:
+        typeof g['ecs.type_generateur'] === 'string' ? (g['ecs.type_generateur'] as string) : null,
+      ecsEnergie: typeof g['ecs.energie'] === 'string' ? (g['ecs.energie'] as string) : null,
+      vitrageType:
+        typeof g['parois_vitrees.type_vitrage'] === 'string'
+          ? (g['parois_vitrees.type_vitrage'] as string)
+          : null,
+      menuiserieAnnee:
+        typeof g['parois_vitrees.menuiserie_annee'] === 'number'
+          ? (g['parois_vitrees.menuiserie_annee'] as number)
+          : null,
+      isolationCombles:
+        typeof g['bati.isolation_combles_type'] === 'string'
+          ? (g['bati.isolation_combles_type'] as string)
+          : null,
+      isolationMurs:
+        typeof g['bati.isolation_murs_type'] === 'string'
+          ? (g['bati.isolation_murs_type'] as string)
+          : null,
+      ventilationType:
+        typeof g['ventilation.type_systeme'] === 'string'
+          ? (g['ventilation.type_systeme'] as string)
+          : null,
+      regulationType:
+        typeof g['chauffage.regulation_type'] === 'string'
+          ? (g['chauffage.regulation_type'] as string)
+          : null,
+      nbEmetteursTotal:
+        typeof g['chauffage.nb_emetteurs_total'] === 'number'
+          ? (g['chauffage.nb_emetteurs_total'] as number)
+          : null,
+      nbPiecesPrincipales:
+        typeof g['bati.nombre_pieces_principales'] === 'number'
+          ? (g['bati.nombre_pieces_principales'] as number)
+          : null,
+    }
+  }, [globalCheckFields])
+
+  // Room snapshots pour le détecteur
+  const roomSnapshots: RoomSnapshot[] = useMemo(() => {
+    return rooms.map((r) => ({
+      id: r.id,
+      name: r.name,
+      type: r.type,
+      surfaceSqm: r.surfaceSqm ?? null,
+      ceilingHeightM: null,
+      fields: roomCheckFields[r.id]?.fields as
+        | Record<string, string | number | boolean | null>
+        | undefined,
+    }))
+  }, [rooms, roomCheckFields])
+
+  const contradictions: Contradiction[] = useMemo(
+    () => detectContradictions(missionSnapshot, roomSnapshots),
+    [missionSnapshot, roomSnapshots],
+  )
+
+  // Progression globale
+  const completionPct = useMemo(
+    () => computeMissionCompletionPct(globalCheckFields, roomFieldsForRisk),
+    [globalCheckFields, roomFieldsForRisk],
+  )
+
+  // Compte global de champs renseignés (utilisé dans le bouton FAB + récap)
+  const fieldsFilled = useMemo(() => {
+    let count = 0
+    for (const v of Object.values(globalCheckFields)) {
+      if (v !== null && v !== undefined && v !== '') count++
+    }
+    for (const r of Object.values(roomCheckFields)) {
+      for (const v of Object.values(r.fields)) {
+        if (v !== null && v !== undefined && v !== '') count++
+      }
+    }
+    return count
+  }, [globalCheckFields, roomCheckFields])
+
+  // RecapRoom[] avec status par catégorie
+  const recapRooms: RecapRoom[] = useMemo(() => {
+    return rooms.map((r) => {
+      const fields = roomCheckFields[r.id]?.fields ?? {}
+      // Pour chaque catégorie, on regarde les items applicables à ce roomType
+      // et on calcule "complete" / "partial" / "empty".
+      const statusByCategory: Partial<Record<CheckCategory, RecapCellStatus>> = {}
+      const CATEGORIES: CheckCategory[] = [
+        'pieces',
+        'parois_vitrees',
+        'chauffage',
+        'ecs',
+        'ventilation',
+        'eclairage',
+      ]
+      for (const cat of CATEGORIES) {
+        const applicable = CHECK_ITEMS_3CL.filter(
+          (it) => it.category === cat && it.applicableTo?.includes(r.type),
+        )
+        if (applicable.length === 0) {
+          // pas applicable → ne pas afficher (status undefined)
+          continue
+        }
+        const filledCount = applicable.filter((it) => {
+          const v = fields[it.key]
+          return v !== null && v !== undefined && v !== ''
+        }).length
+        if (filledCount === 0) statusByCategory[cat] = 'empty'
+        else if (filledCount >= applicable.length * 0.9) statusByCategory[cat] = 'complete'
+        else statusByCategory[cat] = 'partial'
+      }
+      return {
+        id: r.id,
+        name: r.name,
+        type: r.type,
+        statusByCategory,
+        requiredFieldsCount: r.requiredFields,
+        filledFieldsCount: r.filledFields,
+      }
+    })
+  }, [rooms, roomCheckFields])
+
+  // RecapGlobalField[] — les champs globaux required en priorité
+  const recapGlobalFields: RecapGlobalField[] = useMemo(() => {
+    const globalItems = CHECK_ITEMS_3CL.filter((it) => !it.applicableTo)
+    return globalItems.map((it) => ({
+      key: it.key,
+      label: it.label,
+      filled: (() => {
+        const v = globalCheckFields[it.key]
+        return v !== null && v !== undefined && v !== ''
+      })(),
+      isRequired: it.required,
+    }))
+  }, [globalCheckFields])
+
+  // Total des champs applicables (cible "X/Y" dans le récap)
+  const fieldsTotal = CHECK_ITEMS_3CL_COUNT
 
   // ----- Online / offline -----
   useEffect(() => {
@@ -566,6 +825,94 @@ export function MissionTchatInterface({
       if (!text || isStreaming) return
 
       setErrorMsg(null)
+
+      // ===== Lot MISSION-C : pré-extraction locale =====
+      // On extrait les données structurées AVANT envoi serveur. Si l'intent est
+      // simple (saisie pièce/surface) ET qu'on a une réponse locale pertinente,
+      // on évite l'appel Claude. Sinon on continue le SSE habituel.
+      const extracted: ExtractedMissionData = extractStructuredData(text)
+      const activeRoomNameLocal = activeRoomId
+        ? (rooms.find((r) => r.id === activeRoomId)?.name ?? null)
+        : null
+
+      // Push les données extraites dans le state local (sans bloquer le flux)
+      if (extracted.confidence > 0.15) {
+        setGlobalCheckFields((prev) => {
+          const next = { ...prev }
+          if (extracted.yearBuilt != null) next['bati.annee_construction'] = extracted.yearBuilt
+          if (extracted.surfaceSqm != null && !activeRoomId)
+            next['bati.surface_habitable'] = extracted.surfaceSqm
+          if (extracted.classeDpe != null) next['general.classe_dpe_estimee'] = extracted.classeDpe
+          if (extracted.chauffageType != null)
+            next['chauffage.type_generateur_principal'] = extracted.chauffageType
+          if (extracted.energie != null) next['chauffage.energie_principale'] = extracted.energie
+          if (extracted.vitrageType != null) {
+            const map: Record<string, string> = {
+              simple: 'simple',
+              double: 'double_argon',
+              triple: 'triple_argon',
+            }
+            next['parois_vitrees.type_vitrage'] = map[extracted.vitrageType]
+          }
+          if (extracted.orientation != null && !activeRoomId)
+            next['bati.exposition_dominante'] = extracted.orientation
+          if (extracted.nbBedrooms != null)
+            next['bati.nombre_pieces_principales'] = extracted.nbBedrooms + 1
+          return next
+        })
+        // Si on a un activeRoom + données scoped, on met à jour roomCheckFields
+        if (activeRoomId) {
+          const activeRoom = rooms.find((r) => r.id === activeRoomId)
+          if (activeRoom) {
+            setRoomCheckFields((prev) => {
+              const existing = prev[activeRoomId] ?? { roomType: activeRoom.type, fields: {} }
+              const fields = { ...existing.fields }
+              if (extracted.surfaceSqm != null) fields['piece.surface'] = extracted.surfaceSqm
+              if (extracted.ceilingHeightM != null)
+                fields['piece.hauteur_sous_plafond'] = extracted.ceilingHeightM
+              if (extracted.nbWindows != null)
+                fields['parois_vitrees.nb_fenetres'] = extracted.nbWindows
+              if (extracted.orientation != null)
+                fields['parois_vitrees.orientation_piece'] = extracted.orientation
+              return { ...prev, [activeRoomId]: { roomType: activeRoom.type, fields } }
+            })
+          }
+        }
+      }
+
+      // Tentative de réponse locale (économie tokens Claude)
+      const localResponse = generateLocalResponse(text, {
+        currentRoomName: activeRoomNameLocal,
+        roomsCount: rooms.length,
+        roomsCompleteCount: roomsCompleted,
+        phase:
+          roomsSaved === 0 && messages.filter((m) => m.role === 'user').length < 2
+            ? 'start'
+            : roomsCompleted >= 4
+              ? 'end'
+              : 'mid',
+        alreadyExtracted: extracted,
+      })
+
+      // Si réponse locale et offline, on traite en local uniquement
+      if (localResponse && !isOnline) {
+        const userMsg: ChatMessage = {
+          id: `user-${Date.now()}`,
+          role: 'user',
+          content: text,
+          createdAt: Date.now(),
+          isVoice: isListening,
+        }
+        const assistantMsg: ChatMessage = {
+          id: `assistant-${Date.now() + 1}`,
+          role: 'assistant',
+          content: localResponse,
+          createdAt: Date.now() + 1,
+        }
+        setMessages((prev) => [...prev, userMsg, assistantMsg])
+        setInput('')
+        return
+      }
 
       // Insère le user message immédiatement
       const userMsg: ChatMessage = {
@@ -690,6 +1037,10 @@ export function MissionTchatInterface({
       applyCapturesToRooms,
       activeRoomId,
       rooms,
+      isOnline,
+      messages,
+      roomsCompleted,
+      roomsSaved,
     ],
   )
 
@@ -699,32 +1050,41 @@ export function MissionTchatInterface({
     void sendMessage(input)
   }, [input, sendMessage])
 
-  // ----- Photo -----
-  const handlePhotoClick = useCallback(() => {
-    fileInputRef.current?.click()
-  }, [])
-
-  const handlePhotoCapture = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
-      const url = URL.createObjectURL(file)
+  // ----- Photo capture (MISSION-B) — handler depuis PhotoCaptureButton -----
+  /**
+   * Callback déclenché APRÈS écriture IndexedDB Dexie (offline-safe).
+   * Crée une bulle USER spéciale dans le chat avec thumbnail base64 + status pending.
+   * Le PhotosSyncManager s'occupe d'uploader en background — le statut sera
+   * mis à jour automatiquement via le snapshot photosSyncSnapshot.
+   */
+  const handlePhotoCaptured = useCallback(
+    (photo: {
+      localId: string
+      thumbnailBase64: string
+      roomName: string | null
+      takenAt: string
+    }) => {
+      const timeStr = new Date(photo.takenAt).toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+      const caption = photo.roomName
+        ? `Photo · ${photo.roomName} · ${timeStr}`
+        : `Photo · ${timeStr}`
       const msg: ChatMessage = {
-        id: `photo-${Date.now()}`,
+        id: `photo-${photo.localId}`,
         role: 'user',
-        content: 'Photo prise',
-        createdAt: Date.now(),
-        photoUrl: url,
+        content: caption,
+        createdAt: new Date(photo.takenAt).getTime(),
+        photoUrl: photo.thumbnailBase64,
+        photoLocalId: photo.localId,
+        photoRoomName: photo.roomName,
       }
       setMessages((prev) => [...prev, msg])
-      setStats((s) => ({ ...s, photos: s.photos + 1 }))
-      // Envoie un message à l'IA pour la prévenir
-      void sendMessage(
-        'Je viens de prendre une photo. Quels angles complémentaires conseillez-vous ?',
-      )
-      e.target.value = ''
+      // NB : on n'envoie PAS de message IA automatique (anti-spam de la conversation).
+      // L'IA peut être interrogée explicitement via les quick replies "Photo prise".
     },
-    [sendMessage],
+    [],
   )
 
   // ----- Pause -----
@@ -750,6 +1110,29 @@ export function MissionTchatInterface({
     // ensuite une CAPTURE room=... quand l'utilisateur précisera le nom.
     void sendMessage('Je souhaite ajouter une nouvelle pièce — laquelle me conseillez-vous ?')
   }, [sendMessage])
+
+  // ----- Lot MISSION-C : "Aller corriger" depuis le récap -----
+  // Ferme le sheet, sélectionne la pièce si fournie, envoie une question
+  // contextuelle à l'IA pour amorcer la saisie du champ.
+  const handleGoToField = useCallback(
+    (fieldKey: string, roomId?: string) => {
+      recap.close()
+      if (roomId) setActiveRoomId(roomId)
+      const item = getRequiredCheckItems().find((it) => it.key === fieldKey)
+      const label = item?.label ?? fieldKey
+      void sendMessage(`Aidez-moi à renseigner : ${label}`)
+    },
+    [recap, sendMessage],
+  )
+
+  const handleFinishMission = useCallback(() => {
+    recap.close()
+    // V1.5 : déclencher l'action serveur "terminer mission" + redirect dossier
+    void fetch(`/api/dossiers/${dossierId}/actions/finish_mission`, { method: 'POST' }).catch(
+      () => undefined,
+    )
+    router.push(`/dashboard/dossiers/${dossierId}`)
+  }, [recap, dossierId, router])
 
   // ----- Phase conversation pour quick replies -----
   const phase: ConversationPhase = useMemo(() => {
@@ -778,7 +1161,7 @@ export function MissionTchatInterface({
           surfaceSqm: propertyMeta?.surface ?? null,
         }}
         rooms={{ total: rooms.length, completed: roomsCompleted }}
-        photosCount={stats.photos}
+        photosCount={stats.photos + photosSyncSnapshot.total}
         isOffline={!isOnline}
         onToggleRoomsSidebar={() => setIsRoomsSheetOpen((o) => !o)}
         isRoomsSidebarOpen={isRoomsSheetOpen}
@@ -893,25 +1276,16 @@ export function MissionTchatInterface({
           {/* Input bar sticky bottom */}
           <div className="border-t border-rule/70 bg-paper px-3 sm:px-5 py-3 shrink-0">
             <div className="mx-auto flex max-w-3xl items-end gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={handlePhotoClick}
-                aria-label="Prendre une photo"
-                className="shrink-0 size-10 rounded-full"
+              {/* MISSION-B : bouton capture rafale (tap court 1 photo, long press = rafale) */}
+              <PhotoCaptureButton
+                dossierId={dossierId}
+                missionSessionId={sessionId}
+                activeRoomId={activeRoomId}
+                activeRoomName={
+                  activeRoomId ? (rooms.find((r) => r.id === activeRoomId)?.name ?? null) : null
+                }
+                onPhotoCaptured={handlePhotoCaptured}
                 disabled={isPaused}
-              >
-                <Camera className="size-4" />
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handlePhotoCapture}
-                className="hidden"
-                aria-hidden
               />
 
               <Button
@@ -1019,6 +1393,27 @@ export function MissionTchatInterface({
           />
         </div>
       </BottomSheet>
+
+      {/* Lot MISSION-C : FAB récap + Bottom sheet récap */}
+      <MissionRecapButton
+        fieldsFilled={fieldsFilled}
+        fieldsTotal={fieldsTotal}
+        contradictionsCount={contradictions.length}
+        onClick={recap.toggle}
+      />
+      <MissionRecapSheet
+        open={recap.open}
+        onOpenChange={recap.setOpen}
+        completionPct={completionPct}
+        fieldsFilled={fieldsFilled}
+        fieldsTotal={fieldsTotal}
+        rooms={recapRooms}
+        globalFields={recapGlobalFields}
+        contradictions={contradictions}
+        riskFlags={riskFlags}
+        onGoToField={handleGoToField}
+        onFinish={handleFinishMission}
+      />
     </>
   )
 }
@@ -1183,12 +1578,15 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
         )}
       >
         {message.photoUrl ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={message.photoUrl}
-            alt="Aperçu pris durant la mission"
-            className="mb-2 max-h-48 rounded-lg object-cover"
-          />
+          <div className="mb-2 relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={message.photoUrl}
+              alt={message.photoRoomName ? `Photo ${message.photoRoomName}` : 'Photo de la mission'}
+              className="max-h-48 rounded-lg object-cover w-full"
+            />
+            {message.photoLocalId ? <PhotoSyncStatusBadge localId={message.photoLocalId} /> : null}
+          </div>
         ) : null}
 
         <div
@@ -1251,6 +1649,59 @@ function TypingDots(): React.ReactElement {
         className="size-1.5 rounded-full bg-ink-mute animate-typing-dot"
         style={{ animationDelay: '0.4s' }}
       />
+    </span>
+  )
+}
+
+// -----------------------------------------------------------------------------
+// PhotoSyncStatusBadge (MISSION-B) — petit badge ⏳ / ☁️ / ✓ / ⚠ overlay photo
+// -----------------------------------------------------------------------------
+
+/**
+ * Badge superposé en bas-droite d'une photo dans le chat.
+ * Réactif à l'état Dexie via useLiveQuery — mis à jour par PhotosSyncManager.
+ */
+function PhotoSyncStatusBadge({ localId }: { localId: string }): React.ReactElement | null {
+  const status = usePhotoSyncStatus(localId)
+  if (!status) return null
+
+  const config: Record<
+    'pending' | 'uploading' | 'synced' | 'error',
+    { icon: React.ReactElement; label: string; className: string }
+  > = {
+    pending: {
+      icon: <Hourglass className="size-3" />,
+      label: 'En attente de sync',
+      className: 'bg-ink/80 text-paper',
+    },
+    uploading: {
+      icon: <CloudUpload className="size-3 animate-pulse" />,
+      label: 'Upload en cours',
+      className: 'bg-accent-blue/90 text-paper',
+    },
+    synced: {
+      icon: <Cloud className="size-3" />,
+      label: 'Synchronisée',
+      className: 'bg-accent-green/90 text-paper',
+    },
+    error: {
+      icon: <AlertTriangle className="size-3" />,
+      label: 'Erreur — sera retentée',
+      className: 'bg-accent-red/90 text-paper',
+    },
+  }
+  const conf = config[status]
+  return (
+    <span
+      className={cn(
+        'absolute bottom-1.5 right-1.5 inline-flex items-center gap-1 px-1.5 py-0.5',
+        'rounded-full text-[10px] font-mono shadow-glass-sm backdrop-blur',
+        conf.className,
+      )}
+      title={conf.label}
+      aria-label={conf.label}
+    >
+      {conf.icon}
     </span>
   )
 }

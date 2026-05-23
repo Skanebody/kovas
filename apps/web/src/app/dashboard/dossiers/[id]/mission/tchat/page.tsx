@@ -170,6 +170,7 @@ export default async function MissionTchatPage({
   return (
     <MissionTchatInterface
       dossierId={dossier.id}
+      orgId={orgId}
       reference={dossier.reference}
       clientName={client?.display_name ?? 'Client à définir'}
       fullAddress={fullAddress}
