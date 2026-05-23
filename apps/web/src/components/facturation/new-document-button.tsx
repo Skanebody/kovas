@@ -18,8 +18,9 @@ const LABEL: Record<FacturationTab, string> = {
 }
 
 const HREF: Record<FacturationTab, string | null> = {
-  devis: '/dashboard/facturation/devis/new',
-  factures: '/dashboard/facturation/factures/new',
+  // Réutilise les routes CRUD historiques (conservées après fusion).
+  devis: '/dashboard/devis/nouveau',
+  factures: '/dashboard/factures/nouveau',
   // Tarifs ouvre une modal d'édition (placeholder pour V1.5).
   tarifs: null,
 }

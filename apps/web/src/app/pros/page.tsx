@@ -20,7 +20,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Le SaaS moderne du diagnostic immobilier',
   description:
-    '3 heures par jour gagnées, 24 missions par semaine, zéro erreur ADEME. KOVAS, le compagnon des diagnostiqueurs immobiliers indépendants.',
+    '3 heures par jour gagnées, 24 missions par semaine, zéro erreur ADEME. KOVAS, la couche terrain compagnon de Liciel, OBBC, AnalysImmo et ORIS pour les diagnostiqueurs immobiliers indépendants.',
 }
 
 interface Workflow {
@@ -50,9 +50,9 @@ const WORKFLOW_STEPS: Workflow[] = [
   },
   {
     icon: Send,
-    title: 'Export sécurisé vers Liciel ou OBBC',
+    title: 'Export sécurisé vers votre logiciel certifié',
     description:
-      'Imports spécifiques XML / Excel, ZIP générique, PDF, Word, CSV, JSON. Vos données vous appartiennent.',
+      'Liciel, OBBC, AnalysImmo, ORIS : imports spécifiques XML / Excel, ZIP générique, PDF, Word, CSV, JSON. Vos données vous appartiennent.',
   },
 ]
 
@@ -195,7 +195,7 @@ function Hero() {
         </h1>
         <p className="mx-auto max-w-2xl text-lg text-ink-mute sm:text-xl">
           3 heures par jour gagnées · 24 missions par semaine · zéro erreur ADEME. KOVAS compagnonne
-          votre logiciel actuel et élimine la friction terrain.
+          votre logiciel certifié (Liciel, OBBC, AnalysImmo, ORIS) et élimine la friction terrain.
         </p>
         <div className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
           <Button size="lg" variant="accent" asChild>

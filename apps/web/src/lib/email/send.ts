@@ -10,7 +10,7 @@
  *
  * Configuration :
  *   RESEND_API_KEY=re_xxx
- *   RESEND_FROM=KOVAS <hello@kovas.fr>
+ *   RESEND_FROM=KOVAS <contact@kovas.fr>
  */
 
 export interface EmailPayload {
@@ -20,7 +20,7 @@ export interface EmailPayload {
   text?: string
   /** Type d'email pour tracking / opt-out par catégorie */
   category: EmailCategory
-  /** Override expéditeur par défaut (KOVAS <hello@kovas.fr>). */
+  /** Override expéditeur par défaut (KOVAS <contact@kovas.fr>). */
   from?: string
   /** Reply-To custom (transactional / personnal sender). */
   replyTo?: string
@@ -42,7 +42,7 @@ export interface EmailResult {
   stub?: boolean
 }
 
-const FROM_DEFAULT = process.env.RESEND_FROM ?? 'KOVAS <hello@kovas.fr>'
+const FROM_DEFAULT = process.env.RESEND_FROM ?? 'KOVAS <contact@kovas.fr>'
 
 /**
  * Envoie un email transactionnel.

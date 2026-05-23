@@ -160,7 +160,7 @@ const TESTIMONIALS: Testimonial[] = [
     profile: 'Solo',
     seniority: 'KOVAS depuis 8 mois',
     metric: '+52 %',
-    metricLabel: 'missions / semaine vs Liciel seul',
+    metricLabel: 'missions / semaine vs éditeur seul',
     quote:
       "Le coach IA personnel répond à mes questions réglementaires en 3 secondes. Avant, j'appelais des collègues ou je cherchais sur des forums. Aujourd'hui, KOVAS me confirme la méthode 3CL ou m'oriente sur MaPrimeRénov.",
   },

@@ -87,7 +87,7 @@ export async function signupAction(
     if (existingTrial.blocked_reason) {
       return {
         error:
-          'Votre cabinet a été suspendu suite à des comportements suspects. Contactez benjamin@kovas.fr.',
+          'Votre cabinet a été suspendu suite à des comportements suspects. Contactez contact@kovas.fr.',
       }
     }
     if (existingTrial.converted_to_paid) {

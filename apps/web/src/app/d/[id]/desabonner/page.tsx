@@ -50,7 +50,7 @@ export default async function UnsubscribePage({ params }: PageProps) {
       .eq('id', id)
 
     if (updateErr) {
-      return <ErrorView message="Une erreur est survenue. Réessayez ou contactez benjamin@kovas.fr." />
+      return <ErrorView message="Une erreur est survenue. Réessayez ou contactez contact@kovas.fr." />
     }
   }
 
@@ -68,7 +68,7 @@ function SuccessView() {
       <p className="text-[13px] text-ink-faint leading-relaxed">
         Si vous souhaitez également retirer votre fiche du site, utilisez la page
         &laquo;&nbsp;Demander le retrait&nbsp;&raquo; depuis l&apos;un de nos emails ou
-        contactez-nous à <a href="mailto:benjamin@kovas.fr" className="underline text-ink">benjamin@kovas.fr</a>.
+        contactez-nous à <a href="mailto:contact@kovas.fr" className="underline text-ink">contact@kovas.fr</a>.
       </p>
     </PageShell>
   )
@@ -82,7 +82,7 @@ function NotFoundView() {
       <p className="text-[14px] text-ink-mute leading-relaxed">
         Ce lien de désabonnement ne correspond à aucune fiche connue.
         Si vous pensez que c&apos;est une erreur, contactez-nous à
-        {' '}<a href="mailto:benjamin@kovas.fr" className="underline text-ink">benjamin@kovas.fr</a>.
+        {' '}<a href="mailto:contact@kovas.fr" className="underline text-ink">contact@kovas.fr</a>.
       </p>
     </PageShell>
   )

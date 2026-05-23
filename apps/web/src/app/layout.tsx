@@ -17,7 +17,8 @@ export const metadata: Metadata = {
     default: 'KOVAS — Diagnostic immobilier IA',
     template: '%s | KOVAS',
   },
-  description: "L'app iPad qui transforme 3h de DPE en 30 minutes. Compagnon Liciel IA-first.",
+  description:
+    "L'app iPad qui transforme 3h de DPE en 30 minutes. Couche terrain compagnon de Liciel, OBBC, AnalysImmo et ORIS — IA-first.",
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -37,7 +38,17 @@ export const metadata: Metadata = {
   applicationName: 'KOVAS',
   authors: [{ name: 'Benjamin Bel', url: 'https://kovas.fr' }],
   generator: 'Next.js',
-  keywords: ['diagnostic immobilier', 'DPE', 'iPad', 'Liciel', 'amiante', 'plomb'],
+  keywords: [
+    'diagnostic immobilier',
+    'DPE',
+    'iPad',
+    'Liciel',
+    'OBBC',
+    'AnalysImmo',
+    'ORIS',
+    'amiante',
+    'plomb',
+  ],
   metadataBase: new URL('https://kovas.fr'),
   openGraph: {
     type: 'website',
@@ -58,7 +69,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'KOVAS — Diagnostic immobilier IA',
-    description: "L'app iPad qui transforme 3h de DPE en 30 minutes. Compagnon Liciel IA-first.",
+    description:
+      "L'app iPad qui transforme 3h de DPE en 30 minutes. Couche terrain compagnon de Liciel, OBBC, AnalysImmo et ORIS — IA-first.",
     images: ['/og-image.png'],
   },
   alternates: {

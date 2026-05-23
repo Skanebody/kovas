@@ -1,4 +1,3 @@
-import { AppPageHeader } from '@/components/app-page-header'
 import { CalendarSyncDialog } from '@/components/calendar/calendar-sync-dialog'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { buildCalendarSubscriptionUrl, buildCalendarWebcalUrl } from '@/lib/calendar-token'
@@ -90,15 +89,27 @@ export default async function CalendarPage() {
   const webcalUrl = buildCalendarWebcalUrl(orgId)
 
   return (
-    <div className="max-w-6xl space-y-6 animate-fade-in">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <AppPageHeader
-          title="Votre"
-          accent="planning"
-          description="Vue calendrier de vos visites diagnostic. Basculez entre Jour, Semaine, Mois et Agenda."
-        />
-        <CalendarSyncDialog httpsUrl={httpsUrl} webcalUrl={webcalUrl} />
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-1 min-w-0">
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+              Planning
+            </p>
+            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+              Votre <span className="font-serif italic font-normal text-ink-mute">planning</span>
+              <span className="text-ink-mute">.</span>
+            </h1>
+            <p className="text-sm text-ink-mute max-w-xl">
+              Vue calendrier de vos visites diagnostic. Basculez entre Jour, Semaine, Mois et
+              Agenda.
+            </p>
+          </div>
+          <div className="shrink-0">
+            <CalendarSyncDialog httpsUrl={httpsUrl} webcalUrl={webcalUrl} />
+          </div>
+        </div>
+      </header>
 
       <CalendarView events={events} origin={origin} />
     </div>

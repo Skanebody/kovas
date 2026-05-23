@@ -31,7 +31,8 @@ const INQUIRY_OPTIONS: Array<{
   {
     value: 'diagnostiqueur',
     title: 'Je suis diagnostiqueur',
-    description: "Démo de l'app, question abonnement, migration depuis Liciel ou OBBC.",
+    description:
+      "Démo de l'app, question abonnement, import base depuis Liciel, OBBC, AnalysImmo ou ORIS.",
   },
   {
     value: 'journaliste',

@@ -1,30 +1,16 @@
-interface PressLogo {
-  name: string
-  /** Chemin vers logo SVG dans /public/press/. Si fichier absent, placeholder gris. */
-  src: string
-  /** Description courte pour aria-label */
-  alt: string
-}
-
-const PRESS_LOGOS: readonly PressLogo[] = [
-  { name: 'Les Échos', src: '/press/les-echos.svg', alt: 'Logo Les Échos' },
-  { name: 'Le Moniteur', src: '/press/le-moniteur.svg', alt: 'Logo Le Moniteur' },
-  { name: 'Le Particulier', src: '/press/le-particulier.svg', alt: 'Logo Le Particulier' },
-  { name: 'Capital', src: '/press/capital.svg', alt: 'Logo Capital' },
-  { name: 'BFM Immo', src: '/press/bfm-immo.svg', alt: 'Logo BFM Immo' },
-  { name: 'Décideurs Magazine', src: '/press/decideurs.svg', alt: 'Logo Décideurs Magazine' },
-]
+import { PRESS_MENTIONS } from '@/lib/institutional/press-mentions'
 
 /**
- * Section 6 — Mentions presse.
+ * Section 6 — Mentions presse de l'observatoire.
  *
- * Affiche jusqu'à 8 logos presse en grille. Les fichiers SVG sont attendus
- * dans `/public/press/`. Si un fichier est absent, le rectangle grisé tient lieu
- * de placeholder visuel — on garde toujours le nom textuel pour l'accessibilité
- * et le SEO.
+ * Lot #153 SITE-POLISH (2026-05-23) : refonte pour partager la même source
+ * de vérité (`@/lib/institutional/press-mentions`) avec la page `/presse`.
  *
- * Convention : 120x40 hauteur uniformisée, opacity 60% par défaut, 100% au hover
- * pour engagement.
+ * - Logos SVG sobres dans `/public/press/logos/` (typo monochrome `#7E8AA4`,
+ *   créés en interne pour éviter toute reproduction de logo officiel).
+ * - Chaque mention est cliquable si `url` est renseigné. Sinon : non-cliquable
+ *   avec attribut `data-status="placeholder"` + tooltip "Article à venir".
+ *   Ne jamais inventer d'URL vers un journal (interdit propriété intellectuelle).
  */
 export function PressMentions() {
   return (
@@ -34,27 +20,45 @@ export function PressMentions() {
         spécialisée immobilier en France.
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-10 gap-y-8 items-center justify-items-center w-full max-w-[1000px]">
-        {PRESS_LOGOS.map((logo) => (
-          <div
-            key={logo.name}
-            className="flex flex-col items-center gap-2 opacity-60 hover:opacity-100 transition-opacity"
-          >
-            <div
-              className="relative h-10 w-[120px] rounded-md bg-paper/60 border border-rule/40"
-              style={{
-                backgroundImage: `url(${logo.src})`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-                backgroundSize: 'contain',
-              }}
-              role="img"
-              aria-label={logo.alt}
-            />
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/55">
-              {logo.name}
+        {PRESS_MENTIONS.map((logo) => {
+          const isLink = logo.url !== null
+          const inner = (
+            <>
+              <img
+                src={logo.logoPath}
+                alt={`Logo ${logo.name}`}
+                className="h-10 max-w-[140px] object-contain opacity-60 group-hover:opacity-100 transition-opacity"
+                loading="lazy"
+                decoding="async"
+              />
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/55">
+                {logo.name}
+              </span>
+            </>
+          )
+
+          return isLink ? (
+            <a
+              key={logo.id}
+              href={logo.url ?? '#'}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="group flex flex-col items-center gap-2 transition-opacity"
+            >
+              {inner}
+            </a>
+          ) : (
+            <span
+              key={logo.id}
+              data-status="placeholder"
+              title="Article à venir"
+              aria-label={`${logo.name} — article à venir`}
+              className="group flex flex-col items-center gap-2 cursor-help"
+            >
+              {inner}
             </span>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

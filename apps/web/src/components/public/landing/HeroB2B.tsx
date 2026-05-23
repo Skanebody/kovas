@@ -47,7 +47,7 @@ export function HeroB2B() {
                 '30 jours gratuits',
                 'Débit auto après essai',
                 'Résiliable à tout moment',
-                'Migration Liciel incluse',
+                'Compatible Liciel · OBBC · AnalysImmo · ORIS',
               ].map((t) => (
                 <li key={t} className="inline-flex items-center gap-1.5">
                   <CheckCircle2 className="size-3.5 text-chartreuse-deep" />

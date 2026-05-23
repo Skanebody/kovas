@@ -7,7 +7,7 @@ interface WaitlistPayload {
   useCase?: string
 }
 
-const ADMIN_EMAIL = process.env.PROS_DEMO_ADMIN_EMAIL ?? 'benjamin@kovas.fr'
+const ADMIN_EMAIL = process.env.PROS_DEMO_ADMIN_EMAIL ?? 'contact@kovas.fr'
 
 function escapeHtml(value: string): string {
   return value

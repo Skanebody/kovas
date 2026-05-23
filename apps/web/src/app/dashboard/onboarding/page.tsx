@@ -86,7 +86,7 @@ export default async function OnboardingPage() {
           </CardTitle>
           <CardDescription>
             Pendant les 14 premiers jours, Benjamin (fondateur) lit chaque message personnellement.
-            Écrivez à <a href="mailto:benjamin@kovas.fr" className="underline">benjamin@kovas.fr</a>.
+            Écrivez à <a href="mailto:contact@kovas.fr" className="underline">contact@kovas.fr</a>.
           </CardDescription>
         </CardHeader>
       </Card>

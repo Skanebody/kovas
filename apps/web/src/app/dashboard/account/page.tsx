@@ -1,4 +1,3 @@
-import { AppPageHeader } from '@/components/app-page-header'
 import { ReactivationModal } from '@/components/cancellation/ReactivationModal'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -261,11 +260,23 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      <AppPageHeader
-        title="Vos"
-        accent="réglages"
-        description="Profil, cabinet, abonnement, modules, conformité ADEME et données."
-      />
+      {/* Header sticky aligné fiche client : paper/95 + backdrop-blur-xl */}
+      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-1 min-w-0">
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+              Compte
+            </p>
+            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+              Vos <span className="font-serif italic font-normal text-ink-mute">réglages</span>
+              <span className="text-ink-mute">.</span>
+            </h1>
+            <p className="text-sm text-ink-mute max-w-xl">
+              Profil, cabinet, abonnement, modules, conformité ADEME et données.
+            </p>
+          </div>
+        </div>
+      </header>
 
       <div>
         <AccountSettingsClient

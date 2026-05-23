@@ -124,7 +124,7 @@ const CATEGORIES: CategoryGroup[] = [
   {
     name: 'Exports',
     intro:
-      'Vos données vous appartiennent. Aucune dépendance à un éditeur unique, six formats universels.',
+      'Vos données vous appartiennent. Compatibles avec les quatre éditeurs majeurs du marché — Liciel, OBBC, AnalysImmo, ORIS — plus formats universels portables.',
     features: [
       {
         title: 'Export PDF',
@@ -153,14 +153,27 @@ const CATEGORIES: CategoryGroup[] = [
         status: 'Inclus',
       },
       {
-        title: 'Imports spécifiques XML / Excel',
-        description: "Passerelles publiques Liciel. Voie d'import la plus solide (priorité 1).",
+        title: 'Imports spécifiques XML Liciel / OBBC',
+        description:
+          'Passerelles publiques Liciel et OBBC (Imports spécifiques XML + Excel). Voie d’import la plus solide (priorité 1).',
+        status: 'Inclus',
+      },
+      {
+        title: 'Export XML CII AnalysImmo',
+        description:
+          'Format AnalysImmo standard, ZIP générique en complément. Bouton « Partager » reconnaît automatiquement le format cible.',
+        status: 'Inclus',
+      },
+      {
+        title: 'Export ZIP + JSON ORIS',
+        description:
+          'Format ORIS via ZIP générique + JSON structuré. Import direct dans votre passerelle ADEME ORIS.',
         status: 'Inclus',
       },
       {
         title: 'Bouton « Partager » 3 modes',
         description:
-          'Email vers vous-même, sync Google Drive automatique, téléchargement direct. 30 secondes vs 1h30.',
+          'Email vers vous-même, sync Google Drive automatique, téléchargement direct. 30 secondes vs 1h30 quel que soit votre éditeur (Liciel, OBBC, AnalysImmo, ORIS).',
         status: 'Inclus',
       },
     ],

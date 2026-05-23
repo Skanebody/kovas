@@ -93,16 +93,27 @@ export const COMPANY_IDENTITY = {
     legalBasis: 'article L.227-6 du Code de commerce',
   },
 
-  /** Directeur de la publication (loi 1982-652 art. 93-2) */
+  /**
+   * Directeur de la publication (loi 1982-652 art. 93-2).
+   *
+   * Lot #153 SITE-POLISH (2026-05-23) : email aliasé sur `contact@kovas.fr`
+   * tant que les mailboxes role-based ne sont pas provisionnées chez le
+   * provider mail. Seule `contact@kovas.fr` est exposée publiquement.
+   */
   publicationDirector: {
     fullName: 'Benjamin BEL',
-    email: 'direction@kovas.fr',
+    email: 'contact@kovas.fr',
   },
 
-  /** Contact RGPD (point de contact dédié — pas DPO formel, pas obligatoire pour cette taille) */
+  /**
+   * Contact RGPD (point de contact dédié — pas DPO formel, pas obligatoire
+   * pour cette taille).
+   *
+   * Lot #153 SITE-POLISH (2026-05-23) : email aliasé sur `contact@kovas.fr`.
+   */
   dpoContact: {
     fullName: 'Benjamin BEL',
-    email: 'dpo@kovas.fr',
+    email: 'contact@kovas.fr',
     postalAddress:
       'KOVAS — Service Protection des Données — 66 Avenue des Champs Élysées, 75008 Paris',
   },

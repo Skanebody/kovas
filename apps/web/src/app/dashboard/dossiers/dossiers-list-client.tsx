@@ -75,6 +75,26 @@ function formatDate(iso: string | null): string {
   return `${day} ${month}`
 }
 
+/**
+ * Affiche l'heure HH:mm si elle est significative (pas minuit, indicateur
+ * d'horaire réellement planifié). Retourne null sinon.
+ */
+function formatTime(iso: string | null): string | null {
+  if (!iso) return null
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return null
+  // Heure rendue en Europe/Paris (UI strings FR).
+  const hhmm = d.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Europe/Paris',
+  })
+  // Si l'horaire est 00:00, considérer qu'il n'y a pas d'heure planifiée
+  // significative (date-only stockée).
+  if (hhmm === '00:00') return null
+  return hhmm
+}
+
 function buildClientLine(item: DossierListItem): string {
   return item.client?.displayName?.trim() || 'Client à définir'
 }
@@ -197,8 +217,16 @@ export function DossiersListClient({ dossiers, initialTab }: DossiersListClientP
                   href={`/dashboard/dossiers/${d.id}`}
                   className="group flex items-center gap-4 py-4 px-2 -mx-2 rounded-lg hover:bg-ink/5 transition-colors duration-fast min-h-[72px]"
                 >
-                  <span className="font-mono text-[12px] uppercase tracking-[0.05em] text-ink-mute w-[70px] shrink-0 tabular-nums">
-                    {formatDate(d.scheduledAt ?? d.createdAt)}
+                  <span className="font-mono text-[12px] uppercase tracking-[0.05em] text-ink-mute w-[80px] shrink-0 tabular-nums flex flex-col leading-tight">
+                    <span>{formatDate(d.scheduledAt ?? d.createdAt)}</span>
+                    {(() => {
+                      const t = formatTime(d.scheduledAt)
+                      return t ? (
+                        <span className="text-[11px] text-ink font-medium normal-case tracking-normal">
+                          {t}
+                        </span>
+                      ) : null
+                    })()}
                   </span>
 
                   <div className="flex-1 min-w-0 flex flex-col">

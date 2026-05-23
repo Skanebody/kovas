@@ -60,8 +60,17 @@ export const PRESS_RELEASES: PressRelease[] = [
 export interface PressLogo {
   id: string
   name: string
-  /** Lien optionnel vers l'article ou la mention (placeholder OK) */
-  url?: string
+  /** Chemin vers le SVG sobre dans `/public/press/logos/` */
+  logoPath: string
+  /**
+   * Lien vers l'article ou la mention.
+   *
+   * Lot #153 SITE-POLISH : aucun article réel n'existe encore — `url` reste
+   * `null` pour rendre le logo non-cliquable avec tooltip "Article à venir".
+   * Ne jamais inventer d'URL vers un journal (interdit propriété intellectuelle
+   * et trompeur pour le lecteur).
+   */
+  url: string | null
 }
 
 /**
@@ -69,15 +78,47 @@ export interface PressLogo {
  *
  * IMPORTANT : ces médias sont des cibles éditoriales du plan presse, pas
  * encore des publications effectives. La page présente cette section
- * comme "Médias suivant le secteur" pour éviter toute ambiguïté.
+ * comme "Médias suivant le secteur" pour éviter toute ambiguïté. Les logos
+ * SVG sont sobres (typographie monochrome `#7E8AA4`), créés en interne pour
+ * éviter toute reproduction de logo officiel sous droit (cf. lot #153).
  */
 export const PRESS_MENTIONS: PressLogo[] = [
-  { id: 'les-echos', name: 'Les Échos' },
-  { id: 'le-moniteur', name: 'Le Moniteur' },
-  { id: 'capital', name: 'Capital' },
-  { id: 'bfm-immo', name: 'BFM Immo' },
-  { id: 'le-particulier', name: 'Le Particulier' },
-  { id: 'decideurs-magazine', name: 'Décideurs Magazine' },
+  {
+    id: 'les-echos',
+    name: 'Les Échos',
+    logoPath: '/press/logos/les-echos.svg',
+    url: null,
+  },
+  {
+    id: 'le-moniteur',
+    name: 'Le Moniteur',
+    logoPath: '/press/logos/le-moniteur.svg',
+    url: null,
+  },
+  {
+    id: 'capital',
+    name: 'Capital',
+    logoPath: '/press/logos/capital.svg',
+    url: null,
+  },
+  {
+    id: 'bfm-immo',
+    name: 'BFM Immo',
+    logoPath: '/press/logos/bfm-immo.svg',
+    url: null,
+  },
+  {
+    id: 'le-particulier',
+    name: 'Le Particulier',
+    logoPath: '/press/logos/le-particulier.svg',
+    url: null,
+  },
+  {
+    id: 'decideurs-magazine',
+    name: 'Décideurs Magazine',
+    logoPath: '/press/logos/decideurs.svg',
+    url: null,
+  },
 ] as const
 
 export interface MarketStat {
@@ -108,9 +149,15 @@ export const MARKET_STATS: MarketStat[] = [
   },
 ] as const
 
-/** Contact presse dédié */
+/**
+ * Contact presse dédié.
+ *
+ * Décision Lot #153 SITE-POLISH (2026-05-23) : seule l'adresse `contact@kovas.fr`
+ * est valide et publique tant que les mailboxes role-based ne sont pas
+ * provisionnées. L'ancienne `presse@kovas.fr` est aliasée vers contact général.
+ */
 export const PRESS_CONTACT = {
-  email: 'presse@kovas.fr',
+  email: 'contact@kovas.fr',
   // Numéro intentionnellement laissé en placeholder tant que la mailbox
   // dédiée n'est pas effectivement provisionnée (cf. company-identity.ts).
   phone: '[placeholder à compléter]',

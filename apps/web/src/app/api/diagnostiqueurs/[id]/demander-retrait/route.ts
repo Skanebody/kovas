@@ -79,7 +79,7 @@ export async function POST(req: Request, context: RouteContext) {
 
   // Notification admin
   await sendEmail({
-    to: 'benjamin@kovas.fr',
+    to: 'contact@kovas.fr',
     subject: `Demande de retrait — ${diag.first_name} ${diag.last_name}`,
     text: `Demande de retrait reçue :
 
@@ -119,8 +119,8 @@ Fondateur · KOVAS
 —
 ${formatLegalMentions()}`,
       category: 'transactional',
-      from: 'KOVAS · Benjamin Bel <benjamin@kovas.fr>',
-      replyTo: 'benjamin@kovas.fr',
+      from: 'KOVAS · Benjamin Bel <contact@kovas.fr>',
+      replyTo: 'contact@kovas.fr',
     })
   }
 

@@ -35,15 +35,18 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-[800px] space-y-6 md:space-y-10 animate-fade-in">
-      {/* Salutation contextuelle */}
-      <header>
-        <h1 className="font-sans font-medium text-[24px] md:text-[32px] leading-tight tracking-tight text-ink">
-          Bonjour{firstName ? ` ${firstName}` : ''}
-        </h1>
-        <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.15em] text-ink-mute capitalize">
-          {todayLabel} <span className="normal-case tracking-normal">·</span>{' '}
-          <span className="normal-case tracking-normal">{visitLabel}</span>
-        </p>
+      {/* Salutation contextuelle — header sticky aligné fiche client */}
+      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+        <div className="space-y-1">
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute capitalize">
+            {todayLabel}
+          </p>
+          <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+            Bonjour{firstName ? ` ${firstName}` : ''}
+            <span className="text-ink-mute">.</span>
+          </h1>
+          <p className="text-sm text-ink-mute">{visitLabel}</p>
+        </div>
       </header>
 
       {/* Action unique du jour */}

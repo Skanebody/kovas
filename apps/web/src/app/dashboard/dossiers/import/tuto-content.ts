@@ -220,7 +220,7 @@ export const TUTO_HELP_LINKS = [
   },
   {
     label: 'Contacter le support KOVAS',
-    href: 'mailto:support@kovas.fr?subject=Aide%20import%20base',
+    href: 'mailto:contact@kovas.fr?subject=Aide%20import%20base',
     icon: 'LifeBuoy' as const,
   },
 ] as const

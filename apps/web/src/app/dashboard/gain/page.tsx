@@ -630,15 +630,15 @@ export default async function GainPage({ searchParams }: GainPageProps) {
   })
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Header sticky : titre + period selector */}
-      <header className="sticky top-0 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 py-4 backdrop-blur bg-sage/80 border-b border-rule/60">
+    <div className="space-y-6 animate-fade-in">
+      {/* Header sticky aligné fiche client : paper/95 + backdrop-blur-xl + shadow-glass-sm */}
+      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="space-y-1">
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-mute">
+          <div className="space-y-1 min-w-0">
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
               {firstName === 'à vous' ? 'Performance' : `${firstName} · Performance`}
             </p>
-            <h1 className="font-sans font-light text-2xl sm:text-3xl tracking-tight text-ink leading-tight">
+            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
               Résumé,{' '}
               <span className="font-serif italic font-normal text-ink-mute">
                 {current.label}.
@@ -649,7 +649,7 @@ export default async function GainPage({ searchParams }: GainPageProps) {
         </div>
       </header>
 
-      <div className="space-y-8 animate-fade-in pb-12">
+      <div className="space-y-8 pb-12">
         {/* 1. Favoris (4 KPIs hero avec sparklines) */}
         <FavoritesHeroCard periodLabel={current.label} kpis={heroKpis} />
 

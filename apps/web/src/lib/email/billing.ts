@@ -93,7 +93,7 @@ Je reste disponible pour toute question.
 Cordialement,
 Benjamin Bel
 Fondateur KOVAS
-benjamin@kovas.fr`
+contact@kovas.fr`
 
   await sendEmail({
     to: contact.email,
@@ -132,7 +132,7 @@ Vous pouvez à tout moment changer de formule ou résilier sans engagement depui
 Cordialement,
 Benjamin Bel
 Fondateur KOVAS
-benjamin@kovas.fr`
+contact@kovas.fr`
 
   await sendEmail({
     to: contact.email,
@@ -173,7 +173,7 @@ En cas de difficulté, répondez simplement à cet email — je vous accompagne 
 Cordialement,
 Benjamin Bel
 Fondateur KOVAS
-benjamin@kovas.fr`
+contact@kovas.fr`
 
   await sendEmail({
     to: contact.email,
@@ -200,7 +200,7 @@ Votre abonnement KOVAS a bien été résilié. Plus aucun prélèvement ne sera 
 Vos données restent accessibles en lecture seule pendant 3 mois, puis seront définitivement supprimées conformément au RGPD. Pour exporter vos dossiers ou réactiver votre compte avant cette échéance :
 ${APP_URL}/app/account
 
-Merci de la confiance que vous nous avez accordée. Vos retours sont les bienvenus à benjamin@kovas.fr.
+Merci de la confiance que vous nous avez accordée. Vos retours sont les bienvenus à contact@kovas.fr.
 
 Cordialement,
 Benjamin Bel

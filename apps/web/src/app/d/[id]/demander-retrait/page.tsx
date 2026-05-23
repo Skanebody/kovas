@@ -77,7 +77,7 @@ function NotFoundView() {
       <MailX className="size-10 mx-auto text-ink-mute" />
       <p className="text-[14px] text-ink-mute leading-relaxed">
         Ce lien ne correspond à aucune fiche connue.
-        Contactez-nous à <a href="mailto:benjamin@kovas.fr" className="underline text-ink">benjamin@kovas.fr</a>.
+        Contactez-nous à <a href="mailto:contact@kovas.fr" className="underline text-ink">contact@kovas.fr</a>.
       </p>
     </PageShell>
   )

@@ -2,7 +2,6 @@
  * /app/prescripteurs — CRM prescripteurs (agences, notaires, syndics).
  */
 
-import { AppPageHeader } from '@/components/app-page-header'
 import {
   AppListTable,
   AppListTableCell,
@@ -168,12 +167,21 @@ export default async function PrescribersPage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <AppPageHeader
-        title="Vos"
-        accent="prescripteurs"
-        description={`${rich.length} relations actives · ${silentCount} silencieux >${PRESCRIBER_SILENT_THRESHOLD_DAYS}j`}
-        eyebrow="CRM cabinet"
-      />
+      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+        <div className="space-y-1">
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            CRM cabinet
+          </p>
+          <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+            Vos <span className="font-serif italic font-normal text-ink-mute">prescripteurs</span>
+            <span className="text-ink-mute">.</span>
+          </h1>
+          <p className="text-sm text-ink-mute max-w-xl">
+            {rich.length} relations actives · {silentCount} silencieux &gt;
+            {PRESCRIBER_SILENT_THRESHOLD_DAYS}j
+          </p>
+        </div>
+      </header>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiHero value={rich.length} label="Prescripteurs actifs" trend={null} />
@@ -240,19 +248,25 @@ export default async function PrescribersPage({ searchParams }: PageProps) {
           }
         />
       ) : (
-        <AppListTable>
+        <AppListTable className="min-w-0">
           <AppListTableHead>
             <tr>
-              <th className="text-left font-medium px-4 py-3">Nom</th>
-              <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Type</th>
-              <th className="text-left font-medium px-4 py-3">Tier</th>
-              <th className="text-right font-medium px-4 py-3 hidden md:table-cell">Missions</th>
-              <th className="text-right font-medium px-4 py-3">CA 12m</th>
-              <th className="text-right font-medium px-4 py-3 hidden lg:table-cell">
+              <th className="text-left font-medium px-4 py-3 min-w-[180px]">Nom</th>
+              <th className="text-left font-medium px-4 py-3 hidden sm:table-cell w-[110px]">
+                Type
+              </th>
+              <th className="text-left font-medium px-4 py-3 w-[100px]">Tier</th>
+              <th className="text-right font-medium px-4 py-3 hidden md:table-cell w-[90px]">
+                Missions
+              </th>
+              <th className="text-right font-medium px-4 py-3 w-[120px]">CA 12m</th>
+              <th className="text-right font-medium px-4 py-3 hidden lg:table-cell w-[120px]">
                 Panier moyen
               </th>
-              <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Dernière</th>
-              <th className="text-left font-medium px-4 py-3">Actions</th>
+              <th className="text-left font-medium px-4 py-3 hidden md:table-cell w-[160px]">
+                Dernière
+              </th>
+              <th className="text-left font-medium px-4 py-3 w-[160px]">Actions</th>
             </tr>
           </AppListTableHead>
           <tbody>

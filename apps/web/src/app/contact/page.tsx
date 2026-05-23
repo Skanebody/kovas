@@ -92,28 +92,20 @@ export default function ContactPage() {
 
               <Card variant="opaque" padding="default" className="space-y-2">
                 <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
-                  Adresses spécialisées
+                  Une seule adresse de contact
                 </p>
-                <ul className="space-y-2 text-sm text-[#0F1419]/72">
-                  <li>
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55 block">
-                      Presse
-                    </span>
-                    presse@kovas.fr
-                  </li>
-                  <li>
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55 block">
-                      Données personnelles
-                    </span>
-                    {COMPANY_IDENTITY.dpoContact.email}
-                  </li>
-                  <li>
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55 block">
-                      Signalement
-                    </span>
-                    {COMPANY_IDENTITY.emails.signalement}
-                  </li>
-                </ul>
+                <p className="text-sm text-[#0F1419]/72 leading-relaxed">
+                  Toutes les demandes — particuliers, diagnostiqueurs, presse, données
+                  personnelles, signalement — sont traitées via la même adresse{' '}
+                  <a
+                    href={`mailto:${COMPANY_IDENTITY.emails.contactGeneral}`}
+                    className="text-[#0F1419] hover:underline underline-offset-4"
+                  >
+                    {COMPANY_IDENTITY.emails.contactGeneral}
+                  </a>
+                  . Indiquez votre profil dans le formulaire ci-contre pour un routage
+                  prioritaire sous 24 heures ouvrées.
+                </p>
               </Card>
             </aside>
           </div>

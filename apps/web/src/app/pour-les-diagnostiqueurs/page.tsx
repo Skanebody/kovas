@@ -80,7 +80,7 @@ const COMPARISON_ROWS: ComparisonRow[] = [
     kovas: 'yes',
   },
   {
-    feature: 'Migration depuis Liciel incluse',
+    feature: 'Import base depuis Liciel · OBBC · AnalysImmo · ORIS',
     competitors: ['no', 'no', 'no'],
     kovas: 'yes',
   },
@@ -105,7 +105,7 @@ const TESTIMONIALS_B2B: Testimonial[] = [
   },
   {
     quote:
-      'Migration depuis Liciel en 1 journée. Tous mes anciens dossiers importés sans perte. La transition s’est faite sans interruption d’activité.',
+      'Import de ma base depuis OBBC en 1 journée. Tous mes anciens dossiers, clients et biens repris sans perte. Je continue à utiliser OBBC pour le calcul DPE, KOVAS me sert pour le terrain.',
     name: 'Sophie L.',
     meta: 'Cabinet Bordeaux · 3 mois sur KOVAS 360',
   },
@@ -128,12 +128,12 @@ const FAQ_B2B: FaqItem[] = [
   {
     question: 'Quel est le délai de mise en place ?',
     answer:
-      '15 minutes pour créer votre compte et démarrer votre première mission. Si vous souhaitez importer vos données existantes (Liciel ou autre), comptez 1 à 2 jours ouvrés. Notre équipe vous accompagne gratuitement.',
+      '15 minutes pour créer votre compte et démarrer votre première mission. Si vous souhaitez importer vos données existantes (Liciel, OBBC, AnalysImmo, ORIS ou autre), comptez 1 à 2 jours ouvrés. Notre équipe vous accompagne gratuitement.',
   },
   {
-    question: 'Comment migrer depuis Liciel ?',
+    question: 'Comment importer ma base depuis Liciel, OBBC, AnalysImmo ou ORIS ?',
     answer:
-      'Nous prenons en charge gratuitement votre migration. Vous nous envoyez vos exports Liciel (ZIP ou XML), nous importons l’intégralité de vos dossiers, clients et biens. Aucune perte de données. Vous gardez en parallèle votre Liciel en lecture seule pendant la transition.',
+      'KOVAS est un compagnon, pas un remplaçant : votre logiciel certifié reste votre moteur ADEME. Pour récupérer votre base existante (clients, biens, copropriétés), nous prenons en charge gratuitement l’import. Vous nous envoyez vos exports (ZIP, XML, Excel ou CSV selon votre éditeur), nous importons l’intégralité sans perte. Vous continuez à utiliser votre logiciel pour le calcul DPE et la soumission ADEME.',
   },
   {
     question: 'Y a-t-il un engagement ?',
@@ -148,7 +148,7 @@ const FAQ_B2B: FaqItem[] = [
   {
     question: 'Quelles données puis-je exporter ?',
     answer:
-      '100% de vos données, à tout moment, sans frais : ZIP Liciel, PDF, Word, CSV, JSON. Vous restez propriétaire de vos données. Aucun verrou éditeur.',
+      '100% de vos données, à tout moment, sans frais. Formats compatibles avec les quatre éditeurs majeurs : Liciel (Imports spécifiques XML + Excel + ZIP), OBBC (Imports spécifiques XML), AnalysImmo (XML CII + ZIP), ORIS (ZIP + JSON). Plus PDF, Word, CSV portables. Vous restez propriétaire de vos données. Aucun verrou éditeur.',
   },
   {
     question: 'Le support est-il en français ?',

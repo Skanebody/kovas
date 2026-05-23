@@ -12,8 +12,8 @@
  *  - /pros/integrations
  *
  * Note : ces pages ciblent le SEO B2B "logiciel diagnostic immobilier",
- * "alternative Liciel", "automatisation diagnostic". Priorité 0.7-0.9
- * selon intent commercial.
+ * "compagnon Liciel / OBBC / AnalysImmo / ORIS", "couche terrain diagnostic",
+ * "automatisation diagnostic". Priorité 0.7-0.9 selon intent commercial.
  */
 
 export const dynamic = 'force-static'

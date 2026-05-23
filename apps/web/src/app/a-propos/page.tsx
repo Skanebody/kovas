@@ -160,10 +160,11 @@ export default function AProposPage() {
               <p>
                 KOVAS s&apos;attaque à ce gâchis avec une approche simple : capture vocale
                 structurée par pièce, photos géolocalisées et nommées automatiquement, validation
-                de cohérence en temps réel, puis exports universels vers Liciel, OBBC ou
-                AnalysImmo. Notre promesse mesurable est l&apos;économie d&apos;une heure trente
-                par mission DPE typique. Notre objectif sous-jacent, plus profond, est de rendre le
-                métier de diagnostiqueur plus serein, plus prévisible et plus respecté.
+                de cohérence en temps réel, puis exports universels vers les quatre éditeurs
+                certifiés du marché — Liciel, OBBC, AnalysImmo et ORIS. Notre promesse mesurable est
+                l&apos;économie d&apos;une heure trente par mission DPE typique. Notre objectif
+                sous-jacent, plus profond, est de rendre le métier de diagnostiqueur plus serein,
+                plus prévisible et plus respecté.
               </p>
             </div>
           </div>
@@ -188,19 +189,21 @@ export default function AProposPage() {
                 rusticité des logiciels métiers historiques.
               </p>
               <p>
-                Le constat est partagé par tous : la saisie sur Liciel ou OBBC après une visite
-                terrain ressemble à un retraitement administratif sans valeur ajoutée. Photos à
-                renommer, mesures à retaper, observations vocales à transcrire à la main, mention
-                par mention. Les confrères acceptent cette friction comme une fatalité du métier.
-                Benjamin ne s&apos;en satisfait pas.
+                Le constat est partagé par tous : la saisie sur Liciel, OBBC, AnalysImmo ou ORIS
+                après une visite terrain ressemble à un retraitement administratif sans valeur
+                ajoutée. Photos à renommer, mesures à retaper, observations vocales à transcrire à
+                la main, mention par mention. Les confrères acceptent cette friction comme une
+                fatalité du métier. Benjamin ne s&apos;en satisfait pas.
               </p>
               <p>
                 Au printemps 2026, après six mois d&apos;entretiens avec une cinquantaine de
-                diagnostiqueurs indépendants, le cahier des charges se stabilise. KOVAS sera un
-                compagnon de Liciel, pas un remplaçant : la saisie terrain se fait dans KOVAS,
-                l&apos;envoi ADEME reste dans Liciel. Le développement démarre en avril 2026 dans
-                une logique solopreneur stricte, sans levée de fonds, avec un objectif de un
-                million d&apos;euros de chiffre d&apos;affaires récurrent à vingt-quatre mois.
+                diagnostiqueurs indépendants, le cahier des charges se stabilise. KOVAS sera la
+                couche terrain commune des quatre éditeurs majeurs — Liciel, OBBC, AnalysImmo,
+                ORIS — pas un remplaçant : la saisie terrain se fait dans KOVAS, le calcul DPE
+                certifié et l&apos;envoi ADEME restent côté éditeur. Le développement démarre en
+                avril 2026 dans une logique solopreneur stricte, sans levée de fonds, avec un
+                objectif de un million d&apos;euros de chiffre d&apos;affaires récurrent à
+                vingt-quatre mois.
               </p>
               <p>
                 Le lancement public est prévu pour septembre-octobre 2026, après une bêta privée

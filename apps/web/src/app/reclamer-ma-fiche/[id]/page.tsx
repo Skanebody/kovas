@@ -78,8 +78,8 @@ export default async function ReclamerMaFichePage({ params }: PageProps) {
             <p className="text-[14px] text-ink-mute mb-6">
               Cette fiche professionnelle a déjà été réclamée par son titulaire.
               Si vous pensez qu&apos;il s&apos;agit d&apos;une erreur, contactez{' '}
-              <a href="mailto:benjamin@kovas.fr" className="underline">
-                benjamin@kovas.fr
+              <a href="mailto:contact@kovas.fr" className="underline">
+                contact@kovas.fr
               </a>
               .
             </p>

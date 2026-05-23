@@ -31,7 +31,7 @@ const ALLOWED_MIMES = new Set([
   'image/heic',
 ])
 
-const ADMIN_NOTIFICATION_EMAIL = process.env.KOVAS_ADMIN_EMAIL ?? 'benjamin@kovas.fr'
+const ADMIN_NOTIFICATION_EMAIL = process.env.KOVAS_ADMIN_EMAIL ?? 'contact@kovas.fr'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id: diagnosticianId } = await params

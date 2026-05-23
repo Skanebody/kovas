@@ -72,7 +72,7 @@ Cordialement,
 
 Benjamin Bel
 Fondateur KOVAS
-benjamin@kovas.fr
+contact@kovas.fr
 `
 
   const html = `<!DOCTYPE html>
@@ -92,7 +92,7 @@ benjamin@kovas.fr
             <a href="${escapeHtml(reactivateUrl)}" style="display:inline-block;background:#0F1E3D;color:#F8F5EE;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:600;">Réactiver mon compte</a>
           </p>
           <p style="margin:0 0 16px 0;font-size:13px;color:#7E8AA4;">Pas de pression, pas de relance — ce code expire dans 6 mois et c'est tout.</p>
-          <p style="margin-top:32px;color:#4A5878;">— Benjamin Bel<br/>Fondateur KOVAS<br/><a href="mailto:benjamin@kovas.fr" style="color:#4A5878;">benjamin@kovas.fr</a></p>
+          <p style="margin-top:32px;color:#4A5878;">— Benjamin Bel<br/>Fondateur KOVAS<br/><a href="mailto:contact@kovas.fr" style="color:#4A5878;">contact@kovas.fr</a></p>
         </td></tr>
       </table>
     </td></tr>

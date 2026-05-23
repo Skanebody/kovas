@@ -28,7 +28,7 @@ const FEATURES: Feature[] = [
     number: '02',
     title: 'Exports universels',
     description:
-      'ZIP Liciel + PDF + Word + CSV + JSON. Compatible avec votre logiciel actuel. Pas besoin de migrer.',
+      'Compatible Liciel, OBBC, AnalysImmo et ORIS (Imports spécifiques XML, ZIP générique, XML CII, JSON) + PDF, Word, CSV. Aucune migration : votre logiciel certifié reste votre moteur ADEME.',
   },
   {
     icon: ShieldCheck,

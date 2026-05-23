@@ -212,14 +212,43 @@ export default function PressePage() {
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {PRESS_MENTIONS.map((media) => (
-                <div
-                  key={media.id}
-                  className="h-20 flex items-center justify-center rounded-lg border border-[#0F1419]/[0.08] bg-paper/70 text-sm font-medium text-[#0F1419]/72 px-4 text-center"
-                >
-                  {media.name}
-                </div>
-              ))}
+              {PRESS_MENTIONS.map((media) => {
+                const isLink = media.url !== null
+                const content = (
+                  <>
+                    <img
+                      src={media.logoPath}
+                      alt={`Logo ${media.name}`}
+                      className="h-8 max-w-[140px] object-contain opacity-70 group-hover:opacity-100 transition-opacity"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span className="sr-only">{media.name}</span>
+                  </>
+                )
+
+                return isLink ? (
+                  <a
+                    key={media.id}
+                    href={media.url ?? '#'}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="group h-20 flex items-center justify-center rounded-lg border border-[#0F1419]/[0.08] bg-paper/70 px-4 hover:border-[#0F1419]/[0.16] transition-colors"
+                  >
+                    {content}
+                  </a>
+                ) : (
+                  <span
+                    key={media.id}
+                    data-status="placeholder"
+                    title="Article à venir"
+                    aria-label={`${media.name} — article à venir`}
+                    className="group h-20 flex items-center justify-center rounded-lg border border-[#0F1419]/[0.08] bg-paper/70 px-4 cursor-help"
+                  >
+                    {content}
+                  </span>
+                )
+              })}
             </div>
           </div>
         </section>

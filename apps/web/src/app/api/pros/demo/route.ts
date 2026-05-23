@@ -11,7 +11,7 @@ interface DemoPayload {
   currentSoftware?: string
 }
 
-const ADMIN_EMAIL = process.env.PROS_DEMO_ADMIN_EMAIL ?? 'benjamin@kovas.fr'
+const ADMIN_EMAIL = process.env.PROS_DEMO_ADMIN_EMAIL ?? 'contact@kovas.fr'
 
 function escapeHtml(value: string): string {
   return value
@@ -82,10 +82,10 @@ export async function POST(request: Request) {
   await sendEmail({
     to: email,
     subject: 'KOVAS — votre demande de démo est bien reçue',
-    text: `Bonjour ${fullName},\n\nNous avons bien reçu votre demande de démo KOVAS pour ${cabinet} (${city}).\n\nUn membre de notre équipe vous recontactera sous 48h ouvrées pour planifier un créneau.\n\nÀ très bientôt,\nL'équipe KOVAS\nbenjamin@kovas.fr`,
+    text: `Bonjour ${fullName},\n\nNous avons bien reçu votre demande de démo KOVAS pour ${cabinet} (${city}).\n\nUn membre de notre équipe vous recontactera sous 48h ouvrées pour planifier un créneau.\n\nÀ très bientôt,\nL'équipe KOVAS\ncontact@kovas.fr`,
     html: `<p>Bonjour ${escapeHtml(fullName)},</p><p>Nous avons bien reçu votre demande de démo KOVAS pour <strong>${escapeHtml(
       cabinet,
-    )}</strong> (${escapeHtml(city)}).</p><p>Un membre de notre équipe vous recontactera sous 48h ouvrées pour planifier un créneau.</p><p>À très bientôt,<br/>L'équipe KOVAS<br/><a href="mailto:benjamin@kovas.fr">benjamin@kovas.fr</a></p>`,
+    )}</strong> (${escapeHtml(city)}).</p><p>Un membre de notre équipe vous recontactera sous 48h ouvrées pour planifier un créneau.</p><p>À très bientôt,<br/>L'équipe KOVAS<br/><a href="mailto:contact@kovas.fr">contact@kovas.fr</a></p>`,
     category: 'transactional',
   })
 

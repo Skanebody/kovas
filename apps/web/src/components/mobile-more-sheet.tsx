@@ -80,8 +80,8 @@ const LOGICIEL_SECTIONS: readonly MoreSection[] = [
   {
     title: 'Facturation',
     items: [
-      { href: '/dashboard/devis', label: 'Devis', icon: ScrollText },
-      { href: '/dashboard/factures', label: 'Factures', icon: Receipt },
+      { href: '/dashboard/facturation?tab=devis', label: 'Devis', icon: ScrollText },
+      { href: '/dashboard/facturation?tab=factures', label: 'Factures', icon: Receipt },
       { href: '/dashboard/relances', label: 'Relances', icon: Send },
     ],
   },

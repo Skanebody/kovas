@@ -1,4 +1,3 @@
-import { AppPageHeader } from '@/components/app-page-header'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import type { Metadata } from 'next'
 import { RelancesPageContent } from './page-content'
@@ -30,12 +29,22 @@ export default async function RelancesPage({ searchParams }: PageProps) {
   const stats = await loadStats(supabase, orgId)
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <AppPageHeader
-        title="Vos"
-        accent="relances"
-        description="Séquences automatiques pour devis envoyés, factures impayées, missions post-DPE F/G, prescripteurs silencieux et avis clients."
-      />
+    <div className="space-y-6 animate-fade-in">
+      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+        <div className="space-y-1">
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            Suivi commercial
+          </p>
+          <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+            Vos <span className="font-serif italic font-normal text-ink-mute">relances</span>
+            <span className="text-ink-mute">.</span>
+          </h1>
+          <p className="text-sm text-ink-mute max-w-xl">
+            Séquences automatiques pour devis envoyés, factures impayées, missions post-DPE F/G,
+            prescripteurs silencieux et avis clients.
+          </p>
+        </div>
+      </header>
 
       <RelancesPageContent stats={stats} defaultTab={normalizeTab(tab)} />
     </div>

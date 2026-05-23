@@ -3,7 +3,7 @@
  *
  * Endpoint public (pas d'auth) pour qu'un diagnostiqueur propose des corrections
  * sur sa fiche. Insère dans diagnostician_corrections_pending pour review manuel,
- * envoie une notification à benjamin@kovas.fr.
+ * envoie une notification à contact@kovas.fr.
  */
 
 import { NextResponse } from 'next/server'
@@ -101,7 +101,7 @@ export async function POST(req: Request, context: RouteContext) {
     : '(aucun champ modifié — message libre uniquement)'
 
   await sendEmail({
-    to: 'benjamin@kovas.fr',
+    to: 'contact@kovas.fr',
     subject: `Correction proposée — ${diag.first_name} ${diag.last_name}`,
     text: `Correction proposée pour la fiche ${diag.first_name} ${diag.last_name} :
 

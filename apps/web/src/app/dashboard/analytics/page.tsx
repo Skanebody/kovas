@@ -20,7 +20,6 @@
 import { SectionHeader } from '@/app/dashboard/dashboard/section-header'
 import { UpsellEmptyState } from '@/components/upsell/UpsellEmptyState'
 import { trackBehaviorEvent } from '@/lib/upsell/track-event'
-import { AppPageHeader } from '@/components/app-page-header'
 import { Card } from '@/components/ui/card'
 import {
   type AnonymousBenchmarkRow,
@@ -168,12 +167,21 @@ export default async function AnalyticsPage() {
     })
     return (
       <div className="space-y-6 animate-fade-in">
-        <AppPageHeader
-          title="Performance"
-          accent="cabinet"
-          eyebrow="Analytics avancées"
-          description="Vision long terme du cabinet — health score, tendances 3 ans, benchmarks FR."
-        />
+        <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+          <div className="space-y-1">
+            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+              Analytics avancées
+            </p>
+            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+              Performance{' '}
+              <span className="font-serif italic font-normal text-ink-mute">cabinet</span>
+              <span className="text-ink-mute">.</span>
+            </h1>
+            <p className="text-sm text-ink-mute max-w-xl">
+              Vision long terme du cabinet — health score, tendances 3 ans, benchmarks FR.
+            </p>
+          </div>
+        </header>
         <UpsellEmptyState
           target="pro"
           trigger="analytics_attempted"
@@ -714,13 +722,22 @@ export default async function AnalyticsPage() {
     : []
 
   return (
-    <div className="space-y-8 animate-fade-in max-w-5xl">
-      <AppPageHeader
-        title="Performance"
-        accent="cabinet"
-        eyebrow={`${list.length} mois d'historique`}
-        description="Vision long terme — santé du cabinet, tendances, benchmarks anonymisés FR."
-      />
+    <div className="space-y-6 animate-fade-in">
+      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+        <div className="space-y-1">
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            {list.length} mois d&apos;historique
+          </p>
+          <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+            Performance{' '}
+            <span className="font-serif italic font-normal text-ink-mute">cabinet</span>
+            <span className="text-ink-mute">.</span>
+          </h1>
+          <p className="text-sm text-ink-mute max-w-xl">
+            Vision long terme — santé du cabinet, tendances, benchmarks anonymisés FR.
+          </p>
+        </div>
+      </header>
 
       {/* Search bar sticky + parcours catégoriel */}
       <section>
