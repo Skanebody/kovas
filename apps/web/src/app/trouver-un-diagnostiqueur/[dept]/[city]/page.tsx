@@ -1,16 +1,18 @@
 import { FaqAnswer } from '@/components/faq-answer'
+import { AuthorBio } from '@/components/public/AuthorBio'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { CITIES, getCityBySlug } from '@/lib/cities/registry'
+import { CITIES } from '@/lib/cities/registry'
+import { findCityAnywhere, getAllTop5000Slugs } from '@/lib/cities/top-5000'
 import {
   DIAGNOSTIC_TYPES_INTERNAL_LINKS,
   buildCityContentAmandine,
 } from '@/lib/seo-content/city-content-amandine'
+import { buildCityContextAmandine } from '@/lib/seo-content/city-context-amandine'
 import {
-  buildEnrichedFaq,
   buildLocalMarketParagraph,
   buildNeighborLinks,
   getCityLocalData,
@@ -23,6 +25,7 @@ import {
   Flame,
   MapPin,
   Phone,
+  ShieldAlert,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
@@ -31,7 +34,26 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Script from 'next/script'
 
-// Lookup table villes (registry) pour internal linking voisins
+/**
+ * KOVAS — Page ville SEO (Mission FIX-GG — Core Update mai 2026)
+ * Route : /trouver-un-diagnostiqueur/[dept]/[city]
+ *
+ * Stratégie Core Update mai 2026 (déployé 21/05/2026) :
+ *  1. E-E-A-T : signature humaine Benjamin Bel + photo + LinkedIn + qualifications.
+ *  2. Helpful content : 3 éléments uniques par page (statistiques exclusives KOVAS,
+ *     contexte ville-spécifique 3-5 paragraphes, 3+ diagnostiqueurs réels).
+ *  3. Anti-pogo-sticking : structure claire H1 → CTA → data locale → contexte
+ *     → diagnostiqueurs → FAQ → linking interne → auteur.
+ *  4. JSON-LD enrichi : LocalBusiness × N + BreadcrumbList + Article (author) +
+ *     FAQPage + Dataset (stats locales).
+ *
+ * SSG + ISR : `generateStaticParams` pré-compile les villes du top-5000 ; les
+ * autres sont générées on-demand avec revalidate 24h.
+ */
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kovas.fr'
+
+// Lookup table villes (registry + extras top-5000) pour internal linking voisins
 const CITY_LOOKUP = new Map<
   string,
   { slug: string; name: string; postalCode: string; dept: string }
@@ -44,13 +66,6 @@ const CITY_LOOKUP = new Map<
 
 // Liste canonique 8 diagnostics — importée depuis city-content-amandine.ts.
 const DIAGNOSTIC_TYPES_FOR_INTERNAL_LINKS = DIAGNOSTIC_TYPES_INTERNAL_LINKS
-
-/**
- * KOVAS — Page ville SEO (Mission C1)
- * Route : /trouver-un-diagnostiqueur/[dept]/[city]
- * Charge seo_geo_pages.slug = <city> + page_type = 'city'.
- * Distincte de /[dept]/[city]/[slug] (fiche diag, scope A2).
- */
 
 type FaqItem = { question: string; answer: string }
 
@@ -90,40 +105,69 @@ type DiagnosticianCard = {
   rating_avg: number | null
   reviews_count: number | null
   certifications: string[] | null
+  years_experience: number | null
 }
 
 async function loadCityPage(citySlug: string): Promise<SeoGeoPageRow | null> {
-  const supabase = await createClient()
-  // biome-ignore lint/suspicious/noExplicitAny: seo_geo_pages pas encore dans Database types
-  const { data, error } = await (supabase as any)
-    .from('seo_geo_pages')
-    .select('*')
-    .eq('slug', citySlug)
-    .eq('page_type', 'city')
-    .maybeSingle()
+  try {
+    const supabase = await createClient()
+    // biome-ignore lint/suspicious/noExplicitAny: seo_geo_pages pas encore dans Database types
+    const { data, error } = await (supabase as any)
+      .from('seo_geo_pages')
+      .select('*')
+      .eq('slug', citySlug)
+      .eq('page_type', 'city')
+      .maybeSingle()
 
-  if (error || !data) return null
-  return data as SeoGeoPageRow
+    if (error || !data) return null
+    return data as SeoGeoPageRow
+  } catch {
+    return null
+  }
 }
 
 async function loadDiagnosticiansForCity(
   citySlug: string,
+  deptCode: string,
   limit = 12,
-): Promise<DiagnosticianCard[]> {
-  const supabase = await createClient()
-  // biome-ignore lint/suspicious/noExplicitAny: diagnosticians créée par mission A1, cast as any cohabitation
-  const { data, error } = await (supabase as any)
-    .from('diagnosticians')
-    .select(
-      'id, slug_full, display_name, company_name, address_line, phone_e164, rating_avg, reviews_count, certifications',
-    )
-    .eq('slug_city', citySlug)
-    .eq('is_published', true)
-    .order('rating_avg', { ascending: false, nullsFirst: false })
-    .limit(limit)
+): Promise<{ rows: DiagnosticianCard[]; widenedToDept: boolean }> {
+  try {
+    const supabase = await createClient()
+    // biome-ignore lint/suspicious/noExplicitAny: diagnosticians cohabitation
+    const { data, error } = await (supabase as any)
+      .from('diagnosticians')
+      .select(
+        'id, slug_full, display_name, company_name, address_line, phone_e164, rating_avg, reviews_count, certifications, years_experience',
+      )
+      .eq('slug_city', citySlug)
+      .eq('is_published', true)
+      .order('rating_avg', { ascending: false, nullsFirst: false })
+      .limit(limit)
 
-  if (error || !data) return []
-  return data as DiagnosticianCard[]
+    const cityRows = !error && data ? (data as DiagnosticianCard[]) : []
+    if (cityRows.length >= 3) {
+      return { rows: cityRows, widenedToDept: false }
+    }
+
+    // Si <3 diags locaux : élargir au département voisin pour respecter "3+
+    // diagnostiqueurs réels par page" (Core Update mai 2026).
+    // biome-ignore lint/suspicious/noExplicitAny: cohabitation
+    const { data: deptData, error: deptError } = await (supabase as any)
+      .from('diagnosticians')
+      .select(
+        'id, slug_full, display_name, company_name, address_line, phone_e164, rating_avg, reviews_count, certifications, years_experience',
+      )
+      .eq('dept_code', deptCode)
+      .eq('is_published', true)
+      .order('rating_avg', { ascending: false, nullsFirst: false })
+      .limit(limit)
+
+    if (deptError || !deptData) return { rows: cityRows, widenedToDept: false }
+
+    return { rows: deptData as DiagnosticianCard[], widenedToDept: true }
+  } catch {
+    return { rows: [], widenedToDept: false }
+  }
 }
 
 const DIAG_PRICE_TABLE: { type: string; price_min: number; price_max: number }[] = [
@@ -139,24 +183,64 @@ const DIAG_PRICE_TABLE: { type: string; price_min: number; price_max: number }[]
 
 type RouteParams = { dept: string; city: string }
 
+/**
+ * Pre-compile les top-5000 villes (registry premium + extras). Toute autre
+ * requête déclenche une génération à la demande avec ISR 24h. C'est le
+ * compromis Core Update mai 2026 : volume × qualité.
+ */
+export async function generateStaticParams(): Promise<Array<{ dept: string; city: string }>> {
+  // En dev/test, on évite le SSG complet pour gagner du temps de build.
+  if (process.env.NEXT_BUILD_SSG_DISABLE === '1') {
+    return CITIES.slice(0, 20).map((c) => ({ dept: c.dept, city: c.slug }))
+  }
+  return getAllTop5000Slugs().slice()
+}
+
+// Revalidate ISR — 24h pour les pages on-demand
+export const revalidate = 86400
+
 export async function generateMetadata({
   params,
 }: { params: Promise<RouteParams> }): Promise<Metadata> {
   const { dept, city } = await params
   const page = await loadCityPage(city)
-  if (!page) {
+  const registryCity = findCityAnywhere(city)
+  const cityName = page?.city_name ?? registryCity?.name ?? city
+  const postalCode = registryCity?.postalCode
+
+  // Si on a au moins une ville registry, on peut générer une page synthétisée
+  if (!page && !registryCity) {
     return { title: 'Ville introuvable — KOVAS' }
   }
+
+  const title =
+    page?.meta_title ??
+    `Trouver un diagnostiqueur immobilier à ${cityName}${postalCode ? ` (${postalCode})` : ''} — KOVAS`
+  const description =
+    page?.meta_description ??
+    `Comparez les diagnostiqueurs immobiliers certifiés à ${cityName}${postalCode ? ` (${postalCode})` : ''}. Prix DPE moyen, délais, spécificités locales et avis vérifiés. Devis gratuit sous 24h.`
+
   return {
-    title: page.meta_title,
-    description: page.meta_description,
+    title,
+    description,
     alternates: {
-      canonical: page.canonical_url ?? `https://kovas.fr/trouver-un-diagnostiqueur/${dept}/${city}`,
+      canonical: page?.canonical_url ?? `${SITE_URL}/trouver-un-diagnostiqueur/${dept}/${city}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/trouver-un-diagnostiqueur/${dept}/${city}`,
+      type: 'article',
+      locale: 'fr_FR',
+    },
+    other: {
+      'article:author': 'Benjamin Bel',
+      'article:published_time': new Date().toISOString(),
     },
   }
 }
 
-function buildFaqJsonLd(faq: FaqItem[]) {
+function buildFaqJsonLd(faq: FaqItem[]): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -171,23 +255,101 @@ function buildFaqJsonLd(faq: FaqItem[]) {
   }
 }
 
-function buildCityJsonLd(page: SeoGeoPageRow, diags: DiagnosticianCard[]) {
+function buildBreadcrumbJsonLd(
+  dept: string,
+  city: string,
+  cityName: string,
+  deptName: string,
+): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE_URL },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Trouver un diagnostiqueur',
+        item: `${SITE_URL}/trouver-un-diagnostiqueur`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: deptName,
+        item: `${SITE_URL}/trouver-un-diagnostiqueur/${dept}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: cityName,
+        item: `${SITE_URL}/trouver-un-diagnostiqueur/${dept}/${city}`,
+      },
+    ],
+  }
+}
+
+function buildArticleJsonLd(
+  url: string,
+  cityName: string,
+  description: string,
+): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: `Trouver un diagnostiqueur immobilier à ${cityName}`,
+    description,
+    author: {
+      '@type': 'Person',
+      name: 'Benjamin Bel',
+      url: 'https://linkedin.com/in/benjaminbel',
+      sameAs: ['https://linkedin.com/in/benjaminbel', `${SITE_URL}/a-propos`],
+      jobTitle: 'Fondateur de KOVAS',
+      worksFor: {
+        '@type': 'Organization',
+        name: 'NEXUS 1993',
+        url: SITE_URL,
+      },
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'KOVAS',
+      url: SITE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/press-kit/logo-kovas-navy.svg`,
+      },
+    },
+    datePublished: new Date().toISOString(),
+    dateModified: new Date().toISOString(),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+  }
+}
+
+function buildLocalBusinessListJsonLd(
+  diags: DiagnosticianCard[],
+  cityName: string,
+  regionName: string | null,
+): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: `Diagnostiqueurs immobiliers à ${page.city_name ?? page.slug}`,
+    name: `Diagnostiqueurs immobiliers à ${cityName}`,
     numberOfItems: diags.length,
     itemListElement: diags.map((d, idx) => ({
       '@type': 'ListItem',
       position: idx + 1,
       item: {
         '@type': 'LocalBusiness',
+        '@id': `${SITE_URL}/trouver-un-diagnostiqueur/diag/${d.slug_full}`,
         name: d.display_name,
         address: {
           '@type': 'PostalAddress',
           streetAddress: d.address_line ?? undefined,
-          addressLocality: page.city_name ?? undefined,
-          addressRegion: page.region_name ?? undefined,
+          addressLocality: cityName,
+          addressRegion: regionName ?? undefined,
           addressCountry: 'FR',
         },
         telephone: d.phone_e164 ?? undefined,
@@ -196,6 +358,8 @@ function buildCityJsonLd(page: SeoGeoPageRow, diags: DiagnosticianCard[]) {
               '@type': 'AggregateRating',
               ratingValue: d.rating_avg,
               reviewCount: d.reviews_count ?? 0,
+              bestRating: 5,
+              worstRating: 1,
             }
           : undefined,
       },
@@ -203,132 +367,276 @@ function buildCityJsonLd(page: SeoGeoPageRow, diags: DiagnosticianCard[]) {
   }
 }
 
+function buildPlaceJsonLd(
+  cityName: string,
+  postalCode: string | undefined,
+  regionName: string | null,
+  population: number | null,
+): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Place',
+    name: cityName,
+    address: {
+      '@type': 'PostalAddress',
+      postalCode,
+      addressLocality: cityName,
+      addressRegion: regionName ?? undefined,
+      addressCountry: 'FR',
+    },
+    additionalProperty: population
+      ? [
+          {
+            '@type': 'PropertyValue',
+            propertyID: 'population',
+            value: population,
+          },
+        ]
+      : undefined,
+  }
+}
+
+function buildDatasetJsonLd(
+  cityName: string,
+  medianPrice: number,
+  fgRate: number,
+  pageUrl: string,
+): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: `Statistiques diagnostic immobilier à ${cityName}`,
+    description: `Données agrégées du marché du diagnostic immobilier à ${cityName} : prix médian DPE ${medianPrice} € TTC, ${fgRate} % de logements F/G, classe énergétique médiane, volumétrie estimée.`,
+    creator: {
+      '@type': 'Organization',
+      name: 'KOVAS',
+      url: SITE_URL,
+    },
+    license: 'https://creativecommons.org/licenses/by/4.0/',
+    keywords: ['DPE', 'diagnostic immobilier', 'amiante', 'plomb', cityName],
+    dateModified: new Date().toISOString(),
+    url: pageUrl,
+  }
+}
+
 export default async function CityPage({ params }: { params: Promise<RouteParams> }) {
   const { dept, city } = await params
-  const page = await loadCityPage(city)
-  if (!page) {
+  const dbPage = await loadCityPage(city)
+  const registryCity = findCityAnywhere(city)
+
+  // Si ni DB ni registry → 404
+  if (!dbPage && !registryCity) {
     notFound()
   }
 
-  const diagnosticians = await loadDiagnosticiansForCity(page.city_slug ?? page.slug, 12)
+  // City fictive (registry-based) si pas en DB
+  const cityName = dbPage?.city_name ?? registryCity?.name ?? city
+  const deptName = dbPage?.department_name ?? `Département ${dept}`
+  const regionName = dbPage?.region_name ?? null
+  const postalCode = registryCity?.postalCode
 
-  // Données locales (méthode Amandine Bart) — déterministes par ville
-  const registryCity = getCityBySlug(page.city_slug ?? page.slug)
+  const { rows: diagnosticians, widenedToDept } = await loadDiagnosticiansForCity(
+    dbPage?.city_slug ?? city,
+    dept,
+    12,
+  )
+
+  // Data déterministe locale (méthode Amandine Bart)
   const localData = registryCity ? getCityLocalData(registryCity) : null
   const neighborLinks = registryCity ? buildNeighborLinks(registryCity, CITY_LOOKUP) : []
 
-  // Contenu Amandine Bart complet (top5 diags, évolution prix, spécificités, FAQ 12 questions)
+  // Contenu Amandine Bart complet (top5, evol prix, FAQ 12, etc.)
   const amandineContent = registryCity ? buildCityContentAmandine(registryCity) : null
 
-  // FAQ : préférer celle en base si présente, sinon FAQ enrichie Amandine Bart 12 questions
-  const baseFaq: FaqItem[] = Array.isArray(page.faq_items) ? page.faq_items : []
+  // Contexte ville-spécifique (paragraphes profonds par dept)
+  const cityContext = registryCity ? buildCityContextAmandine(registryCity) : null
+
+  const baseFaq: FaqItem[] = dbPage && Array.isArray(dbPage.faq_items) ? dbPage.faq_items : []
   const faq: FaqItem[] =
     baseFaq.length > 0
       ? baseFaq
       : amandineContent
-        ? amandineContent.faq.map((q) => ({
-            question: q.question,
-            answer: q.answer,
-          }))
-        : localData
-          ? buildEnrichedFaq(localData).map((q) => ({
-              question: q.question,
-              answer: q.answer,
-            }))
-          : []
+        ? amandineContent.faq.map((q) => ({ question: q.question, answer: q.answer }))
+        : []
 
-  const cityJsonLd =
-    page.schema_jsonld && typeof page.schema_jsonld === 'object'
-      ? page.schema_jsonld
-      : buildCityJsonLd(page, diagnosticians)
+  const pageUrl = `${SITE_URL}/trouver-un-diagnostiqueur/${dept}/${city}`
+  const description =
+    dbPage?.meta_description ??
+    `Comparez les diagnostiqueurs immobiliers certifiés à ${cityName}. Prix DPE moyen, délais, spécificités locales.`
+
+  // Build all JSON-LD blocs
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(dept, city, cityName, deptName)
+  const articleJsonLd = buildArticleJsonLd(pageUrl, cityName, description)
+  const localBusinessListJsonLd = buildLocalBusinessListJsonLd(diagnosticians, cityName, regionName)
+  const placeJsonLd = buildPlaceJsonLd(
+    cityName,
+    postalCode,
+    regionName,
+    registryCity?.population ?? null,
+  )
+  const datasetJsonLd = localData
+    ? buildDatasetJsonLd(cityName, localData.medianDpePrice, localData.fgRatePct, pageUrl)
+    : null
+  const faqJsonLd = faq.length > 0 ? buildFaqJsonLd(faq) : null
+
+  const lastUpdatedIso = localData?.lastUpdatedIso ?? new Date().toISOString().slice(0, 10)
 
   return (
     <div className="min-h-dvh flex flex-col bg-cream">
+      {/* JSON-LD enrichi Core Update mai 2026 — E-E-A-T */}
       <Script
-        id="seo-city-jsonld"
+        id="seo-breadcrumb-jsonld"
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: schema.org JSON
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(cityJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      {faq.length > 0 ? (
+      <Script
+        id="seo-article-jsonld"
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: schema.org JSON
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <Script
+        id="seo-place-jsonld"
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: schema.org JSON
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(placeJsonLd) }}
+      />
+      {diagnosticians.length > 0 ? (
         <Script
-          id="seo-city-faq-jsonld"
+          id="seo-localbusiness-jsonld"
           type="application/ld+json"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: schema.org JSON
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqJsonLd(faq)) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessListJsonLd) }}
+        />
+      ) : null}
+      {datasetJsonLd ? (
+        <Script
+          id="seo-dataset-jsonld"
+          type="application/ld+json"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: schema.org JSON
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetJsonLd) }}
+        />
+      ) : null}
+      {faqJsonLd ? (
+        <Script
+          id="seo-faq-jsonld"
+          type="application/ld+json"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: schema.org JSON
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       ) : null}
 
       <PublicHeader />
 
       <main className="flex-1 mx-auto max-w-6xl px-6 py-12 w-full">
-        <div className="max-w-3xl mb-10 space-y-3">
+        {/* ── Section 1 : H1 + hero ─────────────────────────────────── */}
+        <div className="max-w-3xl mb-8 space-y-3">
           <p className="text-xs uppercase tracking-wider font-semibold text-ink-mute font-mono">
-            {page.department_name ?? `Dépt ${page.department_code}`} · {page.region_name ?? '—'}
-            {page.population ? ` · ${page.population.toLocaleString('fr-FR')} habitants` : ''}
+            {deptName}
+            {regionName ? ` · ${regionName}` : ''}
+            {registryCity?.population
+              ? ` · ${registryCity.population.toLocaleString('fr-FR')} habitants`
+              : ''}
           </p>
           <h1 className="font-sans font-bold text-4xl md:text-5xl tracking-tight text-ink">
-            {page.h1_title}
+            Trouver un diagnostiqueur DPE à {cityName}
+            {postalCode ? ` (${postalCode})` : ''}
           </h1>
-          {page.intro_content ? (
-            <p className="text-ink-mute text-lg leading-relaxed whitespace-pre-line">
-              {page.intro_content}
-            </p>
-          ) : null}
-          {localData ? (
-            <p className="text-xs text-ink-faint font-mono inline-flex items-center gap-1.5 pt-2">
-              <CalendarClock className="size-3" aria-hidden />
-              <time dateTime={localData.lastUpdatedIso}>
-                Mise à jour :{' '}
-                {new Date(localData.lastUpdatedIso).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </time>
-            </p>
-          ) : null}
+          <p className="text-ink-mute text-lg leading-relaxed">
+            {dbPage?.intro_content ??
+              `Comparez les diagnostiqueurs immobiliers certifiés intervenant à ${cityName}. Devis gratuit sous 24h, prix moyens vérifiés, spécificités locales et avis transparents. Tous les diagnostics obligatoires : DPE, amiante, plomb, gaz, électricité, termites, Carrez, ERP.`}
+          </p>
+          <p className="text-xs text-ink-faint font-mono inline-flex items-center gap-1.5 pt-2">
+            <CalendarClock className="size-3" aria-hidden />
+            <time dateTime={lastUpdatedIso}>
+              Mis à jour le{' '}
+              {new Date(lastUpdatedIso).toLocaleDateString('fr-FR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}
+            </time>
+          </p>
         </div>
 
-        {/* CTA double intent-match Amandine Bart */}
+        {/* ── Section 2 : CTA double intent-match ───────────────────── */}
         <section
           aria-label="Actions principales"
-          className="mb-10 grid sm:grid-cols-2 gap-3 max-w-3xl"
+          className="mb-12 grid sm:grid-cols-2 gap-3 max-w-3xl"
         >
           <Card className="p-5 flex items-center justify-between gap-3 hover:shadow-glass transition-shadow">
             <div className="min-w-0">
-              <p className="font-semibold text-ink text-sm">Estimer mon DPE</p>
-              <p className="text-xs text-ink-mute">Simulation gratuite en 2 minutes</p>
+              <p className="font-semibold text-ink text-sm">Demander 3 devis gratuits</p>
+              <p className="text-xs text-ink-mute">Comparer les diagnostiqueurs locaux</p>
             </div>
             <Button asChild size="sm">
-              <Link href="/estimer-dpe">
-                Commencer
+              <Link href={`/devis-diagnostic?ville=${encodeURIComponent(cityName)}`}>
+                Demander
                 <ChevronRight className="size-3.5" />
               </Link>
             </Button>
           </Card>
           <Card className="p-5 flex items-center justify-between gap-3 hover:shadow-glass transition-shadow">
             <div className="min-w-0">
-              <p className="font-semibold text-ink text-sm">Demander des devis</p>
-              <p className="text-xs text-ink-mute">Comparer 3 diagnostiqueurs locaux</p>
+              <p className="font-semibold text-ink text-sm">Estimer mon DPE</p>
+              <p className="text-xs text-ink-mute">Simulation gratuite en 2 minutes</p>
             </div>
             <Button asChild size="sm" variant="outline">
-              <Link
-                href={`/devis-diagnostic?ville=${encodeURIComponent(page.city_name ?? page.slug)}`}
-              >
-                Demander
+              <Link href="/calculateur-dpe-gratuit">
+                Commencer
                 <ChevronRight className="size-3.5" />
               </Link>
             </Button>
           </Card>
         </section>
 
-        {/* Section data locale Amandine Bart */}
+        {/* ── Section 3 : Comment ça marche à {city} en 3 étapes ──── */}
+        <section className="mb-12 space-y-4">
+          <h2 className="font-sans font-bold text-2xl tracking-tight">
+            Comment ça marche à {cityName}
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {[
+              {
+                num: '01',
+                title: 'Vous décrivez votre bien',
+                desc: `Surface, type de bien et localisation à ${cityName}. 2 minutes maximum.`,
+              },
+              {
+                num: '02',
+                title: 'Vous recevez 3 devis',
+                desc: `3 diagnostiqueurs certifiés intervenant à ${cityName} vous contactent sous 24h.`,
+              },
+              {
+                num: '03',
+                title: 'Vous choisissez',
+                desc: 'Comparez prix, délais et avis. Le rapport est livré sous 5-7 jours.',
+              },
+            ].map((step) => (
+              <Card key={step.num} className="p-5 space-y-2">
+                <p className="font-mono text-2xl text-ink-mute">{step.num}</p>
+                <p className="font-semibold text-ink text-base">{step.title}</p>
+                <p className="text-sm text-ink-soft">{step.desc}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* ── ÉLÉMENT UNIQUE 1 : Statistiques exclusives KOVAS ─────── */}
         {localData ? (
-          <section aria-label="Marché local du diagnostic" className="mb-12 space-y-4">
+          <section
+            aria-label={`Statistiques diagnostic immobilier ${cityName}`}
+            className="mb-12 space-y-4"
+          >
             <h2 className="font-sans font-bold text-2xl tracking-tight">
-              Marché local du diagnostic à {page.city_name ?? page.slug}
+              Statistiques locales du diagnostic à {cityName}
             </h2>
+            <p className="text-sm text-ink-mute max-w-3xl">
+              Données agrégées par KOVAS depuis les bases publiques ADEME, INSEE et DVF sur les 12
+              derniers mois. Si la commune dispose de moins de 50 transactions référencées, les
+              chiffres locaux peuvent être pondérés par les données départementales.
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Card className="p-4">
                 <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint inline-flex items-center gap-1.5">
@@ -345,12 +653,12 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
               <Card className="p-4">
                 <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint inline-flex items-center gap-1.5">
                   <Flame className="size-3" aria-hidden />
-                  Classe énergétique
+                  Classe médiane
                 </p>
                 <p className="font-serif italic text-2xl text-ink mt-1">
                   {localData.medianEnergyClass}
                 </p>
-                <p className="text-[11px] text-ink-faint">médiane locale</p>
+                <p className="text-[11px] text-ink-faint">étiquette locale</p>
               </Card>
               <Card className="p-4">
                 <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
@@ -361,34 +669,249 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
               </Card>
               <Card className="p-4">
                 <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
-                  DPE / an
+                  Délai rapport
                 </p>
                 <p className="font-serif italic text-2xl text-ink mt-1">
-                  {localData.estimatedDpePerYear.toLocaleString('fr-FR')}
+                  {localData.medianDeliveryDays}j
                 </p>
-                <p className="text-[11px] text-ink-faint">estimés</p>
+                <p className="text-[11px] text-ink-faint">médiane locale</p>
               </Card>
             </div>
-            <div className="max-w-3xl pt-2">
-              <div className="text-ink-soft leading-relaxed whitespace-pre-line text-base">
-                {buildLocalMarketParagraph(localData)}
-              </div>
+            <p className="text-xs text-ink-faint pt-1">
+              Sources : ADEME DPE Open Data, INSEE Code Officiel Géographique 2024, DVF data.gouv
+              (CC-BY). Mise à jour : 24h ISR.
+            </p>
+          </section>
+        ) : null}
+
+        {/* ── Marché local — paragraphe narratif Amandine Bart ──── */}
+        {localData ? (
+          <section aria-label="Synthèse marché diagnostic local" className="mb-12 space-y-4">
+            <h2 className="font-sans font-bold text-2xl tracking-tight">
+              Synthèse du marché diagnostic à {cityName}
+            </h2>
+            <div className="text-ink-soft leading-relaxed whitespace-pre-line text-base max-w-3xl">
+              {buildLocalMarketParagraph(localData)}
             </div>
           </section>
         ) : null}
 
-        {/* Section Top 5 diagnostics demandés (Amandine Bart) */}
-        {amandineContent ? (
+        {/* ── ÉLÉMENT UNIQUE 3 : Diagnostiqueurs locaux réels ──── */}
+        <section className="space-y-4 mb-12">
+          <div className="flex items-baseline justify-between flex-wrap gap-2">
+            <h2 className="font-sans font-bold text-2xl tracking-tight">
+              Diagnostiqueurs certifiés à {cityName}
+            </h2>
+            <p className="text-sm text-ink-mute">
+              {diagnosticians.length > 0
+                ? `${diagnosticians.length} diagnostiqueur${diagnosticians.length > 1 ? 's' : ''} ${widenedToDept ? `dans le ${deptName}` : `à ${cityName}`}`
+                : 'Aucun diagnostiqueur référencé pour le moment'}
+            </p>
+          </div>
+
+          {widenedToDept ? (
+            <Card className="p-4 bg-accent-warm-soft border-accent-warm/30">
+              <p className="text-sm text-ink-soft inline-flex items-start gap-2">
+                <ShieldAlert className="size-4 text-accent-warm shrink-0 mt-0.5" aria-hidden />
+                <span>
+                  Aucun diagnostiqueur n'a actuellement de fiche publique à {cityName}. Voici les
+                  diagnostiqueurs certifiés du {deptName} susceptibles d'intervenir dans cette
+                  commune.
+                </span>
+              </p>
+            </Card>
+          ) : null}
+
+          {diagnosticians.length === 0 ? (
+            <Card className="p-8 text-center text-ink-mute space-y-3">
+              <p>
+                Aucun diagnostiqueur référencé pour le moment à {cityName}. KOVAS s'enrichit chaque
+                semaine via la base DHUP officielle.
+              </p>
+              <Button asChild size="sm" variant="outline">
+                <Link href={`/trouver-un-diagnostiqueur/${dept}`}>
+                  Voir tous les diagnostiqueurs du {deptName}
+                </Link>
+              </Button>
+            </Card>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {diagnosticians.map((d) => (
+                <Link
+                  key={d.id}
+                  href={`/trouver-un-diagnostiqueur/${dept}/${city}/${d.slug_full}`}
+                  className="block"
+                >
+                  <Card className="p-5 hover:shadow-glass transition-shadow h-full">
+                    <h3 className="font-semibold text-ink text-base">{d.display_name}</h3>
+                    {d.company_name ? (
+                      <p className="text-xs text-ink-mute mt-0.5">{d.company_name}</p>
+                    ) : null}
+                    {d.years_experience ? (
+                      <p className="text-xs text-ink-mute mt-0.5">
+                        {d.years_experience} ans d'expérience
+                      </p>
+                    ) : null}
+                    {d.address_line ? (
+                      <p className="text-sm text-ink-soft mt-2 flex items-start gap-1.5">
+                        <MapPin className="size-3.5 text-ink-mute mt-0.5 shrink-0" />
+                        <span>{d.address_line}</span>
+                      </p>
+                    ) : null}
+                    {d.phone_e164 ? (
+                      <p className="text-sm text-ink-soft mt-1 flex items-center gap-1.5 font-mono">
+                        <Phone className="size-3.5 text-ink-mute" />
+                        {d.phone_e164}
+                      </p>
+                    ) : null}
+                    {d.rating_avg ? (
+                      <p className="text-xs text-ink-mute mt-2">
+                        Note {d.rating_avg.toFixed(1)}/5 ({d.reviews_count ?? 0} avis)
+                      </p>
+                    ) : null}
+                    {d.certifications && d.certifications.length > 0 ? (
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {d.certifications.slice(0, 3).map((c) => (
+                          <Badge key={c} variant="muted" className="text-[10px]">
+                            {c}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : null}
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── ÉLÉMENT UNIQUE 2 : Contexte ville-spécifique 3-5 paragraphes ── */}
+        {cityContext ? (
           <section
-            aria-label={`Top 5 diagnostics demandés à ${page.city_name ?? page.slug}`}
+            aria-label={`Particularités du diagnostic à ${cityName}`}
             className="mb-12 space-y-4"
           >
             <h2 className="font-sans font-bold text-2xl tracking-tight">
-              Top 5 diagnostics demandés à {page.city_name ?? page.slug}
+              Particularités du diagnostic immobilier à {cityName}
+            </h2>
+            <p className="text-sm text-ink-mute max-w-3xl">{cityContext.intro}</p>
+            {cityContext.riskFlags.length > 0 ? (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {cityContext.riskFlags.map((flag) => (
+                  <Badge
+                    key={flag}
+                    variant="muted"
+                    className="text-[11px] uppercase tracking-wider"
+                  >
+                    {flag}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
+            <div className="grid md:grid-cols-2 gap-4 pt-2">
+              {cityContext.paragraphs.map((p) => (
+                <Card
+                  key={p.heading}
+                  className={
+                    p.highlight
+                      ? 'p-5 space-y-2 bg-accent-warm-soft border-accent-warm/40'
+                      : 'p-5 space-y-2'
+                  }
+                >
+                  <h3 className="font-sans font-bold text-base text-ink">{p.heading}</h3>
+                  <p className="text-sm text-ink-soft leading-relaxed">{p.body}</p>
+                </Card>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* ── FAQ 12 questions ville-spécifique ──────────────────── */}
+        {faq.length > 0 ? (
+          <section className="max-w-3xl space-y-4 mb-12">
+            <h2 className="font-sans font-bold text-2xl tracking-tight">
+              Questions fréquentes — Diagnostic à {cityName}
+            </h2>
+            <div className="space-y-3">
+              {faq.map((q, idx) => (
+                <Card key={`${q.question}-${idx}`} className="p-5">
+                  <h3 className="font-semibold text-ink text-base mb-2">{q.question}</h3>
+                  <FaqAnswer markdown={q.answer} />
+                </Card>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* ── Tableau évolution prix DPE 2021-2026 ──────────────── */}
+        {amandineContent ? (
+          <section
+            aria-label={`Évolution prix DPE médian ${cityName} 2021-2026`}
+            className="mb-12 space-y-4"
+          >
+            <h2 className="font-sans font-bold text-2xl tracking-tight">
+              Évolution du prix DPE médian à {cityName} (2021-2026)
             </h2>
             <p className="text-sm text-ink-mute max-w-3xl">
-              Répartition observée des diagnostics commandés à {page.city_name ?? page.slug} sur les
-              12 derniers mois. Tendances annuelles indiquées vs 2024.
+              Trajectoire du prix médian d'un DPE résidentiel à {cityName} sur 5 ans. Données
+              indexées sur l'inflation et la complexification 3CL-2021.
+            </p>
+            <Card className="p-6">
+              <div className="grid grid-cols-6 gap-2 items-end h-32 mb-4">
+                {amandineContent.priceEvolution.map((p) => {
+                  const maxPrice = Math.max(
+                    ...amandineContent.priceEvolution.map((x) => x.priceEur),
+                  )
+                  const heightPct = Math.round((p.priceEur / maxPrice) * 100)
+                  return (
+                    <div key={p.year} className="flex flex-col items-center justify-end h-full">
+                      <span className="font-mono text-[10px] text-ink mb-1 tabular-nums">
+                        {p.priceEur}€
+                      </span>
+                      <div
+                        className="w-full rounded-t bg-navy"
+                        style={{ height: `${heightPct}%` }}
+                        aria-hidden
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="grid grid-cols-6 gap-2">
+                {amandineContent.priceEvolution.map((p) => (
+                  <div key={`label-${p.year}`} className="text-center">
+                    <p className="font-mono text-[10px] text-ink-mute tabular-nums">{p.year}</p>
+                    {p.variationPct !== null ? (
+                      <p
+                        className={`font-mono text-[9px] ${
+                          p.variationPct >= 0 ? 'text-accent-green' : 'text-accent-red'
+                        }`}
+                      >
+                        {p.variationPct >= 0 ? '+' : ''}
+                        {p.variationPct}%
+                      </p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-ink-faint mt-4">
+                Source : agrégation INSEE + ADEME + observatoire KOVAS. Variations indicatives.
+              </p>
+            </Card>
+          </section>
+        ) : null}
+
+        {/* ── Top 5 diagnostics demandés ─────────────────────────── */}
+        {amandineContent ? (
+          <section
+            aria-label={`Top 5 diagnostics demandés à ${cityName}`}
+            className="mb-12 space-y-4"
+          >
+            <h2 className="font-sans font-bold text-2xl tracking-tight">
+              Top 5 diagnostics demandés à {cityName}
+            </h2>
+            <p className="text-sm text-ink-mute max-w-3xl">
+              Répartition observée des diagnostics commandés à {cityName} sur les 12 derniers mois.
             </p>
             <Card className="p-0 overflow-hidden">
               <table className="w-full text-sm">
@@ -436,185 +959,10 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
           </section>
         ) : null}
 
-        {/* Section Évolution prix DPE médian 2021-2026 (mini-chart 5 points) */}
-        {amandineContent ? (
-          <section
-            aria-label={`Évolution prix DPE médian ${page.city_name ?? page.slug} 2021-2026`}
-            className="mb-12 space-y-4"
-          >
-            <h2 className="font-sans font-bold text-2xl tracking-tight">
-              Évolution du prix DPE médian à {page.city_name ?? page.slug} (2021-2026)
-            </h2>
-            <p className="text-sm text-ink-mute max-w-3xl">
-              Trajectoire du prix médian d'un DPE résidentiel à {page.city_name ?? page.slug} sur 5
-              ans. Données indexées sur l'inflation et la complexification 3CL-2021.
-            </p>
-            <Card className="p-6">
-              {/* Mini-chart SVG sobre — 5 points reliés */}
-              <div className="grid grid-cols-6 gap-2 items-end h-32 mb-4">
-                {amandineContent.priceEvolution.map((p) => {
-                  const maxPrice = Math.max(
-                    ...amandineContent.priceEvolution.map((x) => x.priceEur),
-                  )
-                  const heightPct = Math.round((p.priceEur / maxPrice) * 100)
-                  return (
-                    <div key={p.year} className="flex flex-col items-center justify-end h-full">
-                      <span className="font-mono text-[10px] text-ink mb-1 tabular-nums">
-                        {p.priceEur}€
-                      </span>
-                      <div
-                        className="w-full rounded-t bg-navy"
-                        style={{ height: `${heightPct}%` }}
-                        aria-hidden
-                      />
-                    </div>
-                  )
-                })}
-              </div>
-              {/* Labels années sous le graphique */}
-              <div className="grid grid-cols-6 gap-2">
-                {amandineContent.priceEvolution.map((p) => (
-                  <div key={`label-${p.year}`} className="text-center">
-                    <p className="font-mono text-[10px] text-ink-mute tabular-nums">{p.year}</p>
-                    {p.variationPct !== null ? (
-                      <p
-                        className={`font-mono text-[9px] ${
-                          p.variationPct >= 0 ? 'text-accent-green' : 'text-accent-red'
-                        }`}
-                      >
-                        {p.variationPct >= 0 ? '+' : ''}
-                        {p.variationPct}%
-                      </p>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-ink-faint mt-4">
-                Source : agrégation INSEE + ADEME + observatoire KOVAS. Variations indicatives, prix
-                réel selon surface et complexité du bien.
-              </p>
-            </Card>
-          </section>
-        ) : null}
-
-        {/* Section Spécificités locales (3-5 paragraphes variant selon dept) */}
-        {amandineContent && amandineContent.specificities.length > 0 ? (
-          <section
-            aria-label={`Spécificités locales du diagnostic à ${page.city_name ?? page.slug}`}
-            className="mb-12 space-y-4"
-          >
-            <h2 className="font-sans font-bold text-2xl tracking-tight">
-              Spécificités du diagnostic immobilier à {page.city_name ?? page.slug}
-            </h2>
-            <p className="text-sm text-ink-mute max-w-3xl">
-              Le marché du diagnostic à {page.city_name ?? page.slug} présente des caractéristiques
-              propres à son département ({page.department_name ?? page.department_code}) et à son
-              parc immobilier. Voici les points de vigilance majeurs.
-            </p>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {amandineContent.specificities.map((spec) => (
-                <Card key={spec.title} className="p-5 space-y-3">
-                  <h3 className="font-sans font-bold text-base text-ink">{spec.title}</h3>
-                  <p className="text-sm text-ink-soft leading-relaxed">{spec.body}</p>
-                  {spec.relatedDiags.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {spec.relatedDiags.map((diag) => (
-                        <Badge key={diag} variant="muted" className="text-[10px] uppercase">
-                          {diag}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : null}
-                </Card>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {/* Liste 12 diag ville */}
-        <section className="space-y-4 mb-12">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-sans font-bold text-2xl tracking-tight">
-              {page.diagnosticians_count} diagnostiqueur
-              {page.diagnosticians_count > 1 ? 's' : ''} à {page.city_name ?? page.slug}
-            </h2>
-            {page.diagnosticians_count > 12 ? (
-              <Link
-                href={`/trouver-un-diagnostiqueur/${dept}/${city}/tous`}
-                className="text-sm text-navy hover:underline underline-offset-4"
-              >
-                Voir tous &rarr;
-              </Link>
-            ) : null}
-          </div>
-
-          {diagnosticians.length === 0 ? (
-            <Card className="p-8 text-center text-ink-mute">
-              Aucun diagnostiqueur référencé pour le moment dans cette ville. KOVAS s'enrichit
-              chaque semaine.
-            </Card>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {diagnosticians.map((d) => (
-                <Link
-                  key={d.id}
-                  href={`/trouver-un-diagnostiqueur/${dept}/${city}/${d.slug_full}`}
-                  className="block"
-                >
-                  <Card className="p-5 hover:shadow-glass transition-shadow h-full">
-                    <h3 className="font-semibold text-ink text-base">{d.display_name}</h3>
-                    {d.company_name ? (
-                      <p className="text-xs text-ink-mute mt-0.5">{d.company_name}</p>
-                    ) : null}
-                    {d.address_line ? (
-                      <p className="text-sm text-ink-soft mt-2 flex items-start gap-1.5">
-                        <MapPin className="size-3.5 text-ink-mute mt-0.5 shrink-0" />
-                        <span>{d.address_line}</span>
-                      </p>
-                    ) : null}
-                    {d.phone_e164 ? (
-                      <p className="text-sm text-ink-soft mt-1 flex items-center gap-1.5 font-mono">
-                        <Phone className="size-3.5 text-ink-mute" />
-                        {d.phone_e164}
-                      </p>
-                    ) : null}
-                    {d.rating_avg ? (
-                      <p className="text-xs text-ink-mute mt-2">
-                        Note {d.rating_avg.toFixed(1)}/5 ({d.reviews_count ?? 0} avis)
-                      </p>
-                    ) : null}
-                    {d.certifications && d.certifications.length > 0 ? (
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {d.certifications.slice(0, 3).map((c) => (
-                          <Badge key={c} variant="muted" className="text-[10px]">
-                            {c}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : null}
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Section long-form */}
-        {page.long_form_content ? (
-          <section className="max-w-3xl space-y-4 mb-12">
-            <h2 className="font-sans font-bold text-2xl tracking-tight">
-              Pourquoi faire appel à un diagnostiqueur à {page.city_name ?? page.slug}
-            </h2>
-            <div className="text-ink-soft leading-relaxed whitespace-pre-line">
-              {page.long_form_content}
-            </div>
-          </section>
-        ) : null}
-
-        {/* Tableau prix moyens */}
+        {/* ── Prix moyens ─────────────────────────────────────────── */}
         <section className="space-y-4 mb-12">
           <h2 className="font-sans font-bold text-2xl tracking-tight">
-            Prix moyens diagnostic à {page.city_name ?? page.slug}
+            Prix moyens diagnostic à {cityName}
           </h2>
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm">
@@ -640,39 +988,15 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
           </Card>
           <p className="text-xs text-ink-faint">
             Fourchettes indicatives. Les tarifs varient selon la surface, le type de bien et le
-            diagnostiqueur.{' '}
-            {page.avg_price_per_m2 ? (
-              <span>
-                Prix moyen au m² à {page.city_name} :{' '}
-                <strong className="font-mono">
-                  {page.avg_price_per_m2.toLocaleString('fr-FR')} €
-                </strong>{' '}
-                (source DVF).
-              </span>
-            ) : null}
+            diagnostiqueur.
           </p>
         </section>
 
-        {/* FAQ 5 questions */}
-        {faq.length > 0 ? (
-          <section className="max-w-3xl space-y-4 mb-12">
-            <h2 className="font-sans font-bold text-2xl tracking-tight">Questions fréquentes</h2>
-            <div className="space-y-3">
-              {faq.map((q, idx) => (
-                <Card key={`${q.question}-${idx}`} className="p-5">
-                  <h3 className="font-semibold text-ink text-base mb-2">{q.question}</h3>
-                  <FaqAnswer markdown={q.answer} />
-                </Card>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {/* Internal linking — diagnostics dans la même ville */}
+        {/* ── Internal linking : 8 diagnostics types × {city} ──── */}
         {registryCity ? (
-          <section aria-label="Diagnostics à la même adresse" className="mb-12 space-y-4">
+          <section aria-label="Diagnostics disponibles" className="mb-12 space-y-4">
             <h2 className="font-sans font-bold text-2xl tracking-tight">
-              Diagnostics disponibles à {page.city_name ?? page.slug}
+              Diagnostics disponibles à {cityName}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {DIAGNOSTIC_TYPES_FOR_INTERNAL_LINKS.map((d) => (
@@ -683,7 +1007,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
                 >
                   <Card className="p-4 hover:shadow-glass transition-shadow h-full">
                     <p className="font-semibold text-ink text-sm">{d.label}</p>
-                    <p className="text-xs text-ink-mute mt-0.5">à {page.city_name ?? page.slug}</p>
+                    <p className="text-xs text-ink-mute mt-0.5">à {cityName}</p>
                   </Card>
                 </Link>
               ))}
@@ -691,9 +1015,9 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
           </section>
         ) : null}
 
-        {/* Internal linking — villes voisines (rayon ~30km) */}
+        {/* ── Internal linking : villes voisines ─────────────────── */}
         {neighborLinks.length > 0 ? (
-          <section aria-label="Diagnostics dans les villes voisines" className="mb-12 space-y-4">
+          <section aria-label="Diagnostics villes voisines" className="mb-12 space-y-4">
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Diagnostiqueurs dans les villes voisines
             </h2>
@@ -712,13 +1036,27 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
           </section>
         ) : null}
 
+        {/* ── Bloc auteur Benjamin Bel (E-E-A-T Core Update mai 2026) ── */}
+        <section className="mb-12">
+          <AuthorBio
+            lastUpdatedIso={lastUpdatedIso}
+            contextLabel={`le diagnostic immobilier à ${cityName}`}
+          />
+        </section>
+
+        {/* ── CTA final dual ─────────────────────────────────────── */}
         <div className="mt-16 pt-8 border-t border-rule text-center space-y-4">
-          <p className="text-sm text-ink-mute">
-            Vous êtes diagnostiqueur à {page.city_name ?? page.slug} ?
-          </p>
-          <Button asChild>
-            <Link href="/signup">Référencer mon cabinet</Link>
-          </Button>
+          <p className="text-sm text-ink-mute">Vous êtes diagnostiqueur à {cityName} ?</p>
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Button asChild>
+              <Link href="/pros">Référencer mon cabinet</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={`/trouver-un-diagnostiqueur/${dept}`}>
+                Voir tous les diagnostiqueurs du {deptName}
+              </Link>
+            </Button>
+          </div>
         </div>
       </main>
 
