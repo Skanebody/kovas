@@ -1,4 +1,5 @@
-import { SiteFooter } from '@/components/site-footer'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { REGIONS } from '@/lib/observatoire/regions-data'
 import {
   getObservatoireStats,
@@ -7,7 +8,6 @@ import {
   getTopCities,
 } from '@/lib/observatoire/stats-aggregator'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { EnergyDistribution } from './energy-distribution'
 import { HeroStats } from './hero-stats'
 import { LeadMagnet } from './lead-magnet'
@@ -207,8 +207,7 @@ export default async function ObservatoirePage() {
         }}
       />
 
-      {/* Header marketing inline (pas de PublicNav dans ce checkout) */}
-      <SiteHeader />
+      <PublicHeader />
 
       <main className="flex-1">
         {/* ============ HERO ============ */}
@@ -373,42 +372,5 @@ export default async function ObservatoirePage() {
       </main>
       <SiteFooter />
     </div>
-  )
-}
-
-/**
- * Header marketing inline (pattern identique à la home `app/page.tsx`).
- * Pas de PublicNav dans le checkout courant — duplication assumée.
- */
-function SiteHeader() {
-  return (
-    <header className="sticky top-0 z-50 glass-header">
-      <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="size-8 rounded-md bg-navy shadow-accent" aria-hidden />
-          <span className="text-base font-bold tracking-tight">KOVAS</span>
-        </Link>
-        <nav className="hidden sm:flex items-center gap-6 text-sm">
-          <Link href="/#features" className="text-ink-mute hover:text-ink transition-colors">
-            Fonctionnalités
-          </Link>
-          <Link href="/pricing" className="text-ink-mute hover:text-ink transition-colors">
-            Tarifs
-          </Link>
-          <Link href="/observatoire" className="text-ink font-medium transition-colors">
-            Observatoire
-          </Link>
-          <Link href="/faq" className="text-ink-mute hover:text-ink transition-colors">
-            FAQ
-          </Link>
-        </nav>
-        <Link
-          href="/signup"
-          className="inline-flex items-center gap-2 rounded-pill bg-navy text-paper px-4 py-2 text-sm font-medium hover:bg-navy-deep transition-colors"
-        >
-          Essai gratuit
-        </Link>
-      </div>
-    </header>
   )
 }

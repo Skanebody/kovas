@@ -13,7 +13,8 @@
  * Une citation `pending_review` ou `rejected` renvoie un 404 ici.
  */
 
-import { SiteFooter } from '@/components/site-footer'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Button } from '@/components/ui/button'
 import { verifyAdminAccess } from '@/lib/admin/admin-middleware'
 import { PRESS_MENTIONS } from '@/lib/institutional/press-mentions'
@@ -103,6 +104,7 @@ export default async function PressCitationPage({ params }: PageProps) {
         }}
       />
 
+      <PublicHeader />
       <main className="flex-1">
         <section className="bg-paper border-b border-rule/40">
           <div className="max-w-[860px] mx-auto px-6 pt-16 sm:pt-20 pb-12">

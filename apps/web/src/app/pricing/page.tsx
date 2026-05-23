@@ -1,5 +1,6 @@
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { StructuredData } from '@/components/seo/structured-data'
-import { SiteFooter } from '@/components/site-footer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -132,22 +133,7 @@ export default function PricingPage() {
         ])}
         id="ld-breadcrumb"
       />
-      <header className="glass-header sticky top-0 z-50">
-        <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="size-7 rounded-md bg-navy" aria-hidden />
-            <span className="text-base font-semibold tracking-tight">KOVAS</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Se connecter</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/signup">Essai 30j</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="flex-1 mx-auto max-w-6xl w-full px-6 py-16 space-y-16">
         <div className="text-center space-y-3 max-w-2xl mx-auto">

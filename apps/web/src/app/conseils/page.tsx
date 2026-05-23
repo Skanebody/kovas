@@ -1,5 +1,5 @@
-import { PublicFooter } from '@/components/public/PublicFooter'
-import { PublicNav } from '@/components/public/PublicNav'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { KOVAS_BASE_URL, buildBreadcrumbList } from '@/lib/seo/schema-org'
 import { createClient } from '@/lib/supabase/server'
@@ -93,7 +93,7 @@ export default async function ConseilsListPage() {
           { name: 'Conseils', path: '/conseils' },
         ])}
       />
-      <PublicNav variant="b2c" />
+      <PublicHeader />
       <main className="flex-1">
         <section className="max-w-[1200px] mx-auto px-6 pt-16 sm:pt-24 pb-12">
           <p className="font-mono text-[13px] uppercase tracking-[0.18em] text-ink/55 font-medium mb-6">
@@ -149,7 +149,7 @@ export default async function ConseilsListPage() {
           )}
         </section>
       </main>
-      <PublicFooter />
+      <SiteFooter />
     </div>
   )
 }

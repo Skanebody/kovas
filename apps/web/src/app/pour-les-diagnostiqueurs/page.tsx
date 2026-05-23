@@ -1,14 +1,14 @@
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { B2BFeatures } from '@/components/public/landing/B2BFeatures'
-import { ComparisonTable, type ComparisonRow } from '@/components/public/landing/ComparisonTable'
+import { type ComparisonRow, ComparisonTable } from '@/components/public/landing/ComparisonTable'
 import { CtaBanner } from '@/components/public/landing/CtaBanner'
 import { FaqAccordion, type FaqItem } from '@/components/public/landing/FaqAccordion'
 import { HeroB2B } from '@/components/public/landing/HeroB2B'
 import { PainPoints } from '@/components/public/landing/PainPoints'
 import { PricingPreview } from '@/components/public/landing/PricingPreview'
-import { StatsRow, type Stat } from '@/components/public/landing/StatsRow'
-import { Testimonials, type Testimonial } from '@/components/public/landing/TestimonialCard'
-import { PublicFooter } from '@/components/public/PublicFooter'
-import { PublicNav } from '@/components/public/PublicNav'
+import { type Stat, StatsRow } from '@/components/public/landing/StatsRow'
+import { type Testimonial, Testimonials } from '@/components/public/landing/TestimonialCard'
 import { buildMetadata } from '@/lib/seo/metadata'
 
 /**
@@ -197,7 +197,7 @@ const SOFTWARE_APPLICATION_SCHEMA = {
 export default function PourLesDiagnostiqueursPage() {
   return (
     <div className="min-h-dvh flex flex-col bg-sage">
-      <PublicNav variant="b2b" />
+      <PublicHeader />
       <main className="flex-1">
         <HeroB2B />
         <PainPoints />
@@ -231,10 +231,11 @@ export default function PourLesDiagnostiqueursPage() {
           ctaHref="/pricing/checkout?plan=pro&billing=monthly"
         />
       </main>
-      <PublicFooter variant="b2b" />
+      <SiteFooter />
 
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD Schema.org standard
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SOFTWARE_APPLICATION_SCHEMA) }}
       />
     </div>

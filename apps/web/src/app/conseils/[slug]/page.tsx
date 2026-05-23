@@ -1,5 +1,5 @@
-import { PublicFooter } from '@/components/public/PublicFooter'
-import { PublicNav } from '@/components/public/PublicNav'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { MarkdownArticle } from '@/components/seo/MarkdownArticle'
 import { KOVAS_BASE_URL, buildArticleSchema, buildBreadcrumbList } from '@/lib/seo/schema-org'
@@ -139,7 +139,7 @@ export default async function ConseilArticlePage({ params }: PageProps) {
           ]),
         ]}
       />
-      <PublicNav variant="b2c" />
+      <PublicHeader />
 
       <main className="flex-1">
         <article className="max-w-[760px] mx-auto px-6 pt-16 sm:pt-24 pb-16">
@@ -192,7 +192,7 @@ export default async function ConseilArticlePage({ params }: PageProps) {
         </section>
       </main>
 
-      <PublicFooter />
+      <SiteFooter />
     </div>
   )
 }

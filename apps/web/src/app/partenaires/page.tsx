@@ -1,24 +1,21 @@
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Card } from '@/components/ui/card'
-import { LandingFooter } from '@/components/landing/LandingFooter'
-import { LandingHeader } from '@/components/landing/LandingHeader'
-import {
-  PARTNER_PROFILES,
-  PARTNER_USE_CASES,
-} from '@/lib/institutional/partner-programs'
+import { PARTNER_PROFILES, PARTNER_USE_CASES } from '@/lib/institutional/partner-programs'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { PartnerInquiryForm } from './partner-inquiry-form'
 
 export const metadata = buildMetadata({
   title: 'Programmes partenaires',
   description:
-    "Programmes partenaires KOVAS pour notaires, agences immobilières, banques, courtiers et fournisseurs énergie. Commissions, intégrations et co-marketing.",
+    'Programmes partenaires KOVAS pour notaires, agences immobilières, banques, courtiers et fournisseurs énergie. Commissions, intégrations et co-marketing.',
   path: '/partenaires',
 })
 
 export default function PartenairesPage() {
   return (
     <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
-      <LandingHeader />
+      <PublicHeader />
 
       <main className="flex-1">
         {/* HERO */}
@@ -34,8 +31,8 @@ export default function PartenairesPage() {
               Programmes <span className="font-serif italic font-normal">partenaires</span>.
             </h1>
             <p className="mt-8 max-w-2xl text-base sm:text-lg text-[#0F1419]/72 leading-relaxed">
-              Notaires, agences, banques, fournisseurs énergie : nous construisons des
-              partenariats clairs, rémunérateurs et alignés sur l&apos;intérêt du client final.
+              Notaires, agences, banques, fournisseurs énergie : nous construisons des partenariats
+              clairs, rémunérateurs et alignés sur l&apos;intérêt du client final.
             </p>
           </div>
         </section>
@@ -53,12 +50,7 @@ export default function PartenairesPage() {
             </div>
             <div className="grid lg:grid-cols-2 gap-5">
               {PARTNER_PROFILES.map((profile) => (
-                <Card
-                  key={profile.id}
-                  variant="opaque"
-                  padding="lg"
-                  className="space-y-5"
-                >
+                <Card key={profile.id} variant="opaque" padding="lg" className="space-y-5">
                   <div className="space-y-2">
                     <p className="font-mono uppercase tracking-wider text-[10px] text-[#0F1419]/55">
                       Programme
@@ -118,8 +110,8 @@ export default function PartenairesPage() {
                     Tableau de bord
                   </span>
                   <span>
-                    Accès dédié pour suivre les leads transmis, l&apos;avancement des missions
-                    et les commissions accumulées, en temps réel.
+                    Accès dédié pour suivre les leads transmis, l&apos;avancement des missions et
+                    les commissions accumulées, en temps réel.
                   </span>
                 </li>
                 <li className="flex gap-3">
@@ -136,9 +128,9 @@ export default function PartenairesPage() {
                     Co-marketing
                   </span>
                   <span>
-                    Publications presse conjointes, événements régionaux, contenus
-                    pédagogiques mutualisés à destination des particuliers. Toujours validé
-                    en amont, jamais imposé.
+                    Publications presse conjointes, événements régionaux, contenus pédagogiques
+                    mutualisés à destination des particuliers. Toujours validé en amont, jamais
+                    imposé.
                   </span>
                 </li>
                 <li className="flex gap-3">
@@ -169,12 +161,7 @@ export default function PartenairesPage() {
             </div>
             <div className="grid lg:grid-cols-3 gap-5">
               {PARTNER_USE_CASES.map((useCase, idx) => (
-                <Card
-                  key={useCase.id}
-                  variant="opaque"
-                  padding="default"
-                  className="space-y-3"
-                >
+                <Card key={useCase.id} variant="opaque" padding="default" className="space-y-3">
                   <p
                     className="font-serif italic font-normal text-[#0F1419]/30 leading-none"
                     style={{ fontSize: '64px' }}
@@ -184,9 +171,7 @@ export default function PartenairesPage() {
                   <h3 className="text-base font-semibold text-[#0F1419] leading-snug">
                     {useCase.title}
                   </h3>
-                  <p className="text-sm text-[#0F1419]/72 leading-relaxed">
-                    {useCase.description}
-                  </p>
+                  <p className="text-sm text-[#0F1419]/72 leading-relaxed">{useCase.description}</p>
                 </Card>
               ))}
             </div>
@@ -201,8 +186,8 @@ export default function PartenairesPage() {
                 Devenir partenaire
               </p>
               <p className="text-sm text-[#0F1419]/72 leading-relaxed">
-                Présentez votre structure et le partenariat envisagé. Nous revenons vers vous
-                sous quarante-huit heures ouvrées pour échanger.
+                Présentez votre structure et le partenariat envisagé. Nous revenons vers vous sous
+                quarante-huit heures ouvrées pour échanger.
               </p>
             </div>
             <PartnerInquiryForm />
@@ -210,7 +195,7 @@ export default function PartenairesPage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <SiteFooter />
     </div>
   )
 }

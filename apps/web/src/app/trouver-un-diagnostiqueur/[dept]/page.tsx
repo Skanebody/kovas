@@ -1,8 +1,9 @@
-import { SiteFooter } from '@/components/site-footer'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
-import { ArrowLeft, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -130,19 +131,7 @@ export default async function DepartmentPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <header className="glass-header sticky top-0 z-40">
-        <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-md bg-navy shadow-accent" aria-hidden />
-            <span className="text-base font-bold tracking-tight">KOVAS</span>
-          </Link>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/trouver-un-diagnostiqueur">
-              <ArrowLeft className="size-4" /> Annuaire
-            </Link>
-          </Button>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="flex-1 mx-auto max-w-6xl px-6 py-12 w-full">
         <div className="max-w-3xl mb-10 space-y-3">

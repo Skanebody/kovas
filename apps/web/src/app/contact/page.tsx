@@ -1,6 +1,6 @@
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Card } from '@/components/ui/card'
-import { LandingFooter } from '@/components/landing/LandingFooter'
-import { LandingHeader } from '@/components/landing/LandingHeader'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { Clock, Mail, MapPin, Phone } from 'lucide-react'
@@ -9,14 +9,14 @@ import { ContactInquiryForm } from './contact-inquiry-form'
 export const metadata = buildMetadata({
   title: 'Nous contacter',
   description:
-    "Quatre canaux dédiés pour joindre KOVAS : particuliers, diagnostiqueurs, journalistes et partenaires B2B. Réponse sous 24h ouvrées.",
+    'Quatre canaux dédiés pour joindre KOVAS : particuliers, diagnostiqueurs, journalistes et partenaires B2B. Réponse sous 24h ouvrées.',
   path: '/contact',
 })
 
 export default function ContactPage() {
   return (
     <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
-      <LandingHeader />
+      <PublicHeader />
 
       <main className="flex-1">
         {/* HERO */}
@@ -95,16 +95,16 @@ export default function ContactPage() {
                   Une seule adresse de contact
                 </p>
                 <p className="text-sm text-[#0F1419]/72 leading-relaxed">
-                  Toutes les demandes — particuliers, diagnostiqueurs, presse, données
-                  personnelles, signalement — sont traitées via la même adresse{' '}
+                  Toutes les demandes — particuliers, diagnostiqueurs, presse, données personnelles,
+                  signalement — sont traitées via la même adresse{' '}
                   <a
                     href={`mailto:${COMPANY_IDENTITY.emails.contactGeneral}`}
                     className="text-[#0F1419] hover:underline underline-offset-4"
                   >
                     {COMPANY_IDENTITY.emails.contactGeneral}
                   </a>
-                  . Indiquez votre profil dans le formulaire ci-contre pour un routage
-                  prioritaire sous 24 heures ouvrées.
+                  . Indiquez votre profil dans le formulaire ci-contre pour un routage prioritaire
+                  sous 24 heures ouvrées.
                 </p>
               </Card>
             </aside>
@@ -112,7 +112,7 @@ export default function ContactPage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <SiteFooter />
     </div>
   )
 }

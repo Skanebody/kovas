@@ -1,6 +1,6 @@
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Card } from '@/components/ui/card'
-import { LandingFooter } from '@/components/landing/LandingFooter'
-import { LandingHeader } from '@/components/landing/LandingHeader'
 import { CAREER_VALUES } from '@/lib/institutional/team'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { SpontaneousApplicationForm } from './spontaneous-application-form'
@@ -8,14 +8,14 @@ import { SpontaneousApplicationForm } from './spontaneous-application-form'
 export const metadata = buildMetadata({
   title: 'Carrières',
   description:
-    "Rejoindre KOVAS : nos valeurs, notre approche du travail à distance, candidatures spontanées pour les profils tech et métier du diagnostic immobilier.",
+    'Rejoindre KOVAS : nos valeurs, notre approche du travail à distance, candidatures spontanées pour les profils tech et métier du diagnostic immobilier.',
   path: '/carrieres',
 })
 
 export default function CarrieresPage() {
   return (
     <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
-      <LandingHeader />
+      <PublicHeader />
 
       <main className="flex-1">
         {/* HERO */}
@@ -54,13 +54,13 @@ export default function CarrieresPage() {
                 Vous travaillerez sur un produit utilisé chaque jour par des diagnostiqueurs
                 indépendants pour gagner du temps sur leurs missions. Pas de couche
                 d&apos;abstraction entre votre code et l&apos;utilisateur final. Pas de roadmap
-                imposée par un département marketing à six mille kilomètres. Les décisions
-                produit se prennent vite et se mesurent en quelques semaines.
+                imposée par un département marketing à six mille kilomètres. Les décisions produit
+                se prennent vite et se mesurent en quelques semaines.
               </p>
               <p>
-                Nous privilégions la qualité technique, la maturité humaine et l&apos;autonomie.
-                Le télétravail est la norme, les visios sont rares mais préparées. Les contrats
-                sont en CDI ou en freelance, jamais en stage non rémunéré.
+                Nous privilégions la qualité technique, la maturité humaine et l&apos;autonomie. Le
+                télétravail est la norme, les visios sont rares mais préparées. Les contrats sont en
+                CDI ou en freelance, jamais en stage non rémunéré.
               </p>
             </div>
           </div>
@@ -81,9 +81,7 @@ export default function CarrieresPage() {
               {CAREER_VALUES.map((value) => (
                 <Card key={value.id} variant="opaque" padding="default" className="space-y-3">
                   <h3 className="text-lg font-semibold text-[#0F1419]">{value.title}</h3>
-                  <p className="text-sm text-[#0F1419]/72 leading-relaxed">
-                    {value.description}
-                  </p>
+                  <p className="text-sm text-[#0F1419]/72 leading-relaxed">{value.description}</p>
                 </Card>
               ))}
             </div>
@@ -123,8 +121,8 @@ export default function CarrieresPage() {
                 Candidature spontanée
               </p>
               <p className="text-sm text-[#0F1419]/72 leading-relaxed">
-                Si votre profil correspond à notre veille, votre candidature sera conservée et
-                relue dès qu&apos;un poste s&apos;ouvre. Nous répondons à chaque message.
+                Si votre profil correspond à notre veille, votre candidature sera conservée et relue
+                dès qu&apos;un poste s&apos;ouvre. Nous répondons à chaque message.
               </p>
             </div>
             <SpontaneousApplicationForm />
@@ -150,7 +148,7 @@ export default function CarrieresPage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <SiteFooter />
     </div>
   )
 }

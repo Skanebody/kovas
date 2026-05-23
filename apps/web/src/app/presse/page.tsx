@@ -1,5 +1,5 @@
-import { LandingFooter } from '@/components/landing/LandingFooter'
-import { LandingHeader } from '@/components/landing/LandingHeader'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -60,7 +60,7 @@ export default function PressePage() {
         />
       ) : null}
 
-      <LandingHeader />
+      <PublicHeader />
 
       <main className="flex-1">
         {/* HERO */}
@@ -278,7 +278,7 @@ export default function PressePage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <SiteFooter />
     </div>
   )
 }

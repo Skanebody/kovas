@@ -1,13 +1,13 @@
 'use client'
 
-import { LandingFooter } from '@/components/landing/LandingFooter'
-import { LandingHeader } from '@/components/landing/LandingHeader'
 import { AddonPicker } from '@/components/pricing/AddonPicker'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 // Type B2 dependency — pricing-plans.ts refonte by parallel agent
 import {
   ADDON_MODULES,
-  LOGICIEL_PLANS,
   type AddonCode,
+  LOGICIEL_PLANS,
   type LogicielPlan,
   type LogicielPlanCode,
   getAddon,
@@ -39,10 +39,7 @@ export default function PricingCalculatorPage() {
   const [planCode, setPlanCode] = useState<LogicielPlanCode>(defaultPlan)
   const [selectedAddons] = useState<AddonCode[]>([])
 
-  const plan: LogicielPlan | undefined = useMemo(
-    () => getLogicielPlan(planCode),
-    [planCode],
-  )
+  const plan: LogicielPlan | undefined = useMemo(() => getLogicielPlan(planCode), [planCode])
 
   const monthlyTotal = useMemo(() => {
     const planPriceCents = plan?.monthlyPrice ?? 0
@@ -60,7 +57,7 @@ export default function PricingCalculatorPage() {
 
   return (
     <div className="min-h-dvh flex flex-col bg-[#F5F7F4] text-[#0F1419] font-sans">
-      <LandingHeader current="pricing" />
+      <PublicHeader />
 
       <main className="flex-1">
         <section className="px-5 sm:px-12 max-w-[1240px] mx-auto text-center pt-16 sm:pt-24 pb-10">
@@ -72,8 +69,8 @@ export default function PricingCalculatorPage() {
             <span className="block text-[#0F1419]/35">À l'euro près.</span>
           </h1>
           <p className="text-[16px] sm:text-[18px] text-[#0F1419]/72 max-w-[680px] mx-auto leading-relaxed">
-            Choisissez un forfait logiciel, ajoutez les modules dont vous avez vraiment besoin.
-            Pour combiner avec l'Annuaire, voyez les{' '}
+            Choisissez un forfait logiciel, ajoutez les modules dont vous avez vraiment besoin. Pour
+            combiner avec l'Annuaire, voyez les{' '}
             <Link
               href="/pricing#bundles"
               className="border-b border-[#0F1419]/35 hover:border-[#0F1419]"
@@ -96,8 +93,8 @@ export default function PricingCalculatorPage() {
                 Ajoutez vos modules.
               </h2>
               <p className="text-[14px] text-[#0F1419]/72 mb-6 leading-relaxed">
-                Quatre modules indépendants du forfait : signatures eIDAS, Pennylane,
-                SMS rappel, Communauté Pro. Activables à tout moment.
+                Quatre modules indépendants du forfait : signatures eIDAS, Pennylane, SMS rappel,
+                Communauté Pro. Activables à tout moment.
               </p>
               <AddonPicker />
             </div>
@@ -112,7 +109,7 @@ export default function PricingCalculatorPage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <SiteFooter />
     </div>
   )
 }
@@ -223,10 +220,7 @@ function RecapPanel({
       {recurringAddons.length > 0 && (
         <ul className="py-4 space-y-3 border-b border-[#0F1419]/[0.08]">
           {recurringAddons.map((a) => (
-            <li
-              key={a.code}
-              className="flex items-baseline justify-between gap-3 text-[14px]"
-            >
+            <li key={a.code} className="flex items-baseline justify-between gap-3 text-[14px]">
               <span className="text-[#0F1419]/80 flex-1">{a.name}</span>
               <span className="font-semibold tabular-nums">
                 {Math.round(a.monthlyPrice / 100)} €
@@ -258,8 +252,8 @@ function RecapPanel({
 
       {ADDON_MODULES.length > 0 && (
         <p className="mt-5 pt-5 border-t border-[#0F1419]/[0.08] text-[12px] text-[#0F1419]/55 leading-snug">
-          Les modules sont activables / désactivables module-par-module depuis Réglages →
-          Modules. Surcharges à l'usage (signatures, SMS) facturées à la consommation.
+          Les modules sont activables / désactivables module-par-module depuis Réglages → Modules.
+          Surcharges à l'usage (signatures, SMS) facturées à la consommation.
         </p>
       )}
     </aside>

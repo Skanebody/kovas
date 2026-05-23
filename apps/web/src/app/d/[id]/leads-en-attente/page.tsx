@@ -1,4 +1,4 @@
-import { SiteFooter } from '@/components/site-footer'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { asUntyped } from '@/lib/diagnosticians/supabase-untyped'
 import { createClient } from '@/lib/supabase/server'
 import { Building2, Lock, MapPin } from 'lucide-react'
@@ -91,8 +91,8 @@ export default async function LeadsEnAttentePage({ params }: PageProps) {
               <h2 className="font-semibold text-lg">Coordonnées verrouillées</h2>
               <p className="text-sm text-white/80 mt-1">
                 Pour découvrir les téléphones et emails de ces prospects, réclamez votre fiche
-                KOVAS. Activation immédiate, pas de carte bancaire requise pour l&apos;essai
-                14 jours.
+                KOVAS. Activation immédiate, pas de carte bancaire requise pour l&apos;essai 14
+                jours.
               </p>
               <Link
                 href={claimUrl}

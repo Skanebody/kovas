@@ -1,5 +1,6 @@
 import { FaqAnswer } from '@/components/faq-answer'
-import { SiteFooter } from '@/components/site-footer'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import type { City } from '@/lib/cities/registry'
@@ -27,7 +28,7 @@ export interface ProgrammaticShellProps {
   readonly children: ReactNode
 }
 
-export function ProgrammaticShell({ city, breadcrumbs, jsonLd, children }: ProgrammaticShellProps) {
+export function ProgrammaticShell({ breadcrumbs, jsonLd, children }: ProgrammaticShellProps) {
   return (
     <div className="min-h-dvh flex flex-col bg-cream">
       {jsonLd.map((schema, idx) => {
@@ -44,25 +45,7 @@ export function ProgrammaticShell({ city, breadcrumbs, jsonLd, children }: Progr
         )
       })}
 
-      <header className="glass-header sticky top-0 z-40">
-        <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-md bg-navy shadow-accent" aria-hidden />
-            <span className="text-base font-bold tracking-tight">KOVAS</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-ink-mute">
-            <Link href="/trouver-un-diagnostiqueur" className="hover:text-ink transition-colors">
-              Annuaire
-            </Link>
-            <Link
-              href={`/trouver-un-diagnostiqueur/${city.dept}/${city.slug}`}
-              className="hover:text-ink transition-colors"
-            >
-              Diagnostiqueurs {city.name}
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PublicHeader />
 
       <nav aria-label="Fil d’Ariane" className="border-b border-rule/40 bg-paper/30">
         <ol className="mx-auto max-w-6xl px-6 py-2.5 flex flex-wrap items-center gap-1.5 text-xs text-ink-mute">

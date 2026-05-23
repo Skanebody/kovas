@@ -1,6 +1,6 @@
-import { LandingFooter } from '@/components/landing/LandingFooter'
-import { LandingHeader } from '@/components/landing/LandingHeader'
 import { CheckoutFlow } from '@/components/pricing/CheckoutFlow'
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { PRICING_PLANS, type PricingPlanCode } from '@/lib/pricing-plans'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -44,7 +44,7 @@ export default async function CheckoutPage({
 
   return (
     <div className="min-h-dvh flex flex-col bg-[#F5F7F4] text-[#0F1419] font-sans">
-      <LandingHeader current="pricing" />
+      <PublicHeader />
 
       <main className="flex-1 px-5 sm:px-12 py-10 sm:py-16">
         <div className="max-w-[1240px] mx-auto">
@@ -66,8 +66,8 @@ export default async function CheckoutPage({
               <span className="font-serif italic font-normal text-[#0F1419]/72">{plan.name}</span>.
             </h1>
             <p className="text-base sm:text-lg text-[#0F1419]/72 leading-relaxed max-w-2xl">
-              Personnalisez votre offre avec des modules optionnels — chacun en essai gratuit
-              14 jours, désactivables d'un clic. La création du compte vient juste après.
+              Personnalisez votre offre avec des modules optionnels — chacun en essai gratuit 14
+              jours, désactivables d'un clic. La création du compte vient juste après.
             </p>
           </div>
 
@@ -79,7 +79,7 @@ export default async function CheckoutPage({
         </div>
       </main>
 
-      <LandingFooter />
+      <SiteFooter />
     </div>
   )
 }
