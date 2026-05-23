@@ -11,6 +11,7 @@ import {
   Bot,
   CalendarRange,
   DollarSign,
+  Flag,
   Gauge,
   HardDrive,
   Home,
@@ -20,6 +21,7 @@ import {
   Newspaper,
   ScrollText,
   Settings,
+  ShieldAlert,
   ShieldCheck,
   Target,
   TrendingUp,
@@ -76,6 +78,18 @@ const NAV_GROUPS: NavGroup[] = [
   {
     group: 'Leads',
     items: [{ label: 'Queue leads', icon: Inbox, href: '/admin/leads/queue', enabled: true }],
+  },
+  {
+    group: 'Vérifications',
+    items: [
+      {
+        label: 'File modération',
+        icon: ShieldAlert,
+        href: '/admin/verifications/queue',
+        enabled: true,
+      },
+      { label: 'Signalements', icon: Flag, href: '/admin/signalements', enabled: true },
+    ],
   },
   {
     group: 'Observabilité',

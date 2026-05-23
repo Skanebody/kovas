@@ -1,3 +1,4 @@
+import { BadgeVerified, type BadgeVerifiedLevel } from '@/components/diagnostician/BadgeVerified'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { DIAG_CERT_BY_CODE, type DiagCertCode } from '@/lib/diag-certifications'
@@ -16,6 +17,8 @@ export interface DiagResultCardProps {
   claimStatus: 'claimed' | 'unclaimed' | string | null
   distanceKm: number | null
   photoUrl: string | null
+  /** Badge KOVAS (Doctolib 2022). Default 'unverified'. */
+  badgeLevel?: BadgeVerifiedLevel
 }
 
 /** Initiales depuis le nom complet (max 2 lettres). */
@@ -45,6 +48,7 @@ export function DiagResultCard({
   claimStatus,
   distanceKm,
   photoUrl,
+  badgeLevel = 'unverified',
 }: DiagResultCardProps) {
   const href = `/trouver-un-diagnostiqueur/${deptCode}/${citySlug}/${slug}`
   const claimed = claimStatus === 'claimed'
@@ -89,9 +93,11 @@ export function DiagResultCard({
           ) : null}
         </div>
 
-        {/* Badge claimed */}
+        {/* Badge vérifié KOVAS (priorité) OU statut claim */}
         <div className="shrink-0">
-          {claimed ? (
+          {badgeLevel !== 'unverified' ? (
+            <BadgeVerified level={badgeLevel} size="sm" />
+          ) : claimed ? (
             <Badge variant="green" className="gap-1">
               <ShieldCheck className="size-3" aria-hidden />
               Réclamée

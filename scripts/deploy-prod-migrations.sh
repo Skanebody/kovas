@@ -29,6 +29,9 @@ MIGRATIONS=(
   "supabase/migrations/20260524130000_veille_articles_seed_initial.sql"
   "supabase/migrations/20260524140000_observatoire_report_mai_2026.sql"
   "supabase/migrations/20260524150000_quote_requests_dpe_calculator.sql"
+  "supabase/migrations/20260524240000_diagnosticians_verification_pipeline.sql"
+  "supabase/migrations/20260524250000_verification_continuous_crons.sql"
+  "supabase/migrations/20260524260000_annuaire_public_verified_only.sql"
 )
 
 run_sql_from_string() {

@@ -1,5 +1,6 @@
+import { BadgeVerified } from '@/components/diagnostician/BadgeVerified'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
-import { ChevronRight, Mail, MapPin, Phone, Search, ShieldCheck, Star } from 'lucide-react'
+import { ChevronRight, Flag, Mail, MapPin, Phone, Search, ShieldCheck, Star } from 'lucide-react'
 import Link from 'next/link'
 import { CertCard } from './cert-card'
 import { ClaimBanner } from './claim-banner'
@@ -14,6 +15,8 @@ type DiagnosticianPageContentProps = {
   related: DiagnosticianRow[]
   dept: string
   city: string
+  /** Niveau de badge vérification (Doctolib 2022). Default 'unverified'. */
+  badgeLevel?: 'unverified' | 'verified' | 'verified_plus'
 }
 
 const SERVICE_TYPES = [
@@ -36,6 +39,7 @@ export function DiagnosticianPageContent({
   related,
   dept,
   city,
+  badgeLevel = 'unverified',
 }: DiagnosticianPageContentProps) {
   const fullName = formatName(d.first_name, d.last_name)
   const deptLabel = decodeURIComponent(dept)
@@ -123,6 +127,12 @@ export function DiagnosticianPageContent({
                   Diagnostiqueur immobilier · {cityLabel}
                 </p>
                 <h1 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">{fullName}</h1>
+
+                {badgeLevel !== 'unverified' ? (
+                  <div className="mt-3">
+                    <BadgeVerified level={badgeLevel} size="md" />
+                  </div>
+                ) : null}
 
                 {d.company_name ? (
                   <p className="mt-2 text-base text-black/70">{d.company_name}</p>
@@ -350,6 +360,19 @@ export function DiagnosticianPageContent({
             </div>
           </section>
         ) : null}
+
+        {/* Lien signalement discret en bas de page */}
+        <section className="border-t border-black/5 bg-white py-8">
+          <div className="mx-auto max-w-6xl px-6 text-center text-xs text-black/40">
+            <Link
+              href={`/signaler-un-diagnostiqueur/${String(d.id)}`}
+              className="inline-flex items-center gap-1.5 hover:text-black/70 transition-colors"
+            >
+              <Flag className="h-3 w-3" aria-hidden />
+              Signaler un problème avec ce diagnostiqueur
+            </Link>
+          </div>
+        </section>
       </main>
 
       <DarkFooter />
@@ -418,7 +441,7 @@ function AvatarBlock({
   const initials = `${(firstName?.[0] ?? '').toUpperCase()}${(lastName?.[0] ?? '').toUpperCase()}`
   if (photoUrl) {
     return (
-      // biome-ignore lint/performance/noImgElement: external URL, no Next/Image config
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={photoUrl}
         alt={`${firstName} ${lastName}`}

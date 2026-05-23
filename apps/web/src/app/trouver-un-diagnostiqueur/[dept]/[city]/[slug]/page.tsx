@@ -58,6 +58,31 @@ async function fetchRelatedDiagnosticians(
   return data as DiagnosticianRow[]
 }
 
+/**
+ * Fetch verification status — sert à afficher le badge "Vérifié" / "Vérifié+".
+ * Lecture via service_role pour bypasser le RLS strict de la table (service role only).
+ */
+async function fetchVerificationBadge(
+  diagId: string,
+): Promise<{
+  overallStatus: string | null
+  badgeLevel: 'unverified' | 'verified' | 'verified_plus'
+}> {
+  const supabase = await createClient()
+  // biome-ignore lint/suspicious/noExplicitAny: table cross-schema; types regen pending
+  const { data } = await (supabase as any)
+    .from('diagnostician_verification_status')
+    .select('overall_status, badge_level')
+    .eq('diagnostician_id', diagId)
+    .maybeSingle()
+  if (!data) return { overallStatus: null, badgeLevel: 'unverified' }
+  return {
+    overallStatus: (data.overall_status as string | null) ?? null,
+    badgeLevel:
+      (data.badge_level as 'unverified' | 'verified' | 'verified_plus' | null) ?? 'unverified',
+  }
+}
+
 async function incrementViewCount(id: string): Promise<void> {
   try {
     const supabase = await createClient()
@@ -126,7 +151,10 @@ export default async function DiagnosticianPage({ params }: PageProps) {
   // Fire-and-forget incrément vue (n'attend pas, n'interrompt jamais le rendu)
   void incrementViewCount(String(diag.id))
 
-  const related = await fetchRelatedDiagnosticians(diag.city ?? '', String(diag.id), 3)
+  const [related, verification] = await Promise.all([
+    fetchRelatedDiagnosticians(diag.city ?? '', String(diag.id), 3),
+    fetchVerificationBadge(String(diag.id)),
+  ])
 
   // Schema.org JSON-LD Person
   const fullName = [diag.first_name, diag.last_name].filter(Boolean).join(' ').trim()
@@ -225,7 +253,13 @@ export default async function DiagnosticianPage({ params }: PageProps) {
           ]),
         ]}
       />
-      <DiagnosticianPageContent diagnostician={diag} related={related} dept={dept} city={city} />
+      <DiagnosticianPageContent
+        diagnostician={diag}
+        related={related}
+        dept={dept}
+        city={city}
+        badgeLevel={verification.badgeLevel}
+      />
     </>
   )
 }
