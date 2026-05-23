@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/card'
 import { CITIES, type City } from '@/lib/cities/registry'
 import { EXTRA_CITIES_TOP_5000, extraToCity } from '@/lib/cities/top-5000'
 import { getDepartmentName } from '@/lib/fr-departments'
-import { createClient } from '@/lib/supabase/server'
 import { MapPin, Users } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -59,7 +58,10 @@ function getCitiesOfDepartment(deptCode: string): City[] {
 
 async function countDiagnosticiansInDept(deptCode: string): Promise<number> {
   try {
-    const supabase = await createClient()
+    // Page publique : utiliser admin client (bypass RLS) pour éviter l'asymétrie
+    // anon / authenticated qui masque les diagnostiqueurs aux users connectés.
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabase = createAdminClient()
     // biome-ignore lint/suspicious/noExplicitAny: types Database à régénérer
     const client = supabase as any
     const { count } = await client
@@ -74,7 +76,10 @@ async function countDiagnosticiansInDept(deptCode: string): Promise<number> {
 
 async function getDiagCountByCity(deptCode: string): Promise<Map<string, number>> {
   try {
-    const supabase = await createClient()
+    // Page publique : utiliser admin client (bypass RLS) pour éviter l'asymétrie
+    // anon / authenticated qui masque les diagnostiqueurs aux users connectés.
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabase = createAdminClient()
     // biome-ignore lint/suspicious/noExplicitAny: types Database à régénérer
     const client = supabase as any
     const { data } = await client

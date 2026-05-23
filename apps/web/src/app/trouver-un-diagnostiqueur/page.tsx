@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { type DiagCertCode, parseCertCodes } from '@/lib/diag-certifications'
 import { getDepartmentName } from '@/lib/fr-departments'
-import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft, ArrowRight, ChevronRight, Inbox } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -281,7 +280,12 @@ function extractCertCodes(raw: unknown): string[] {
 
 async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
   try {
-    const supabase = await createClient()
+    // Page publique : admin client (bypass RLS) pour éviter l'asymétrie
+    // anon / authenticated (RLS policies différentes selon auth.uid()).
+    // La table reste publique par design (annuaire SEO), pas de fuite — on
+    // filtre is_published côté query.
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabase = createAdminClient()
     // Types Database pas encore régénérés post-migration 20260524110000.
     // biome-ignore lint/suspicious/noExplicitAny: types Database à régénérer post-FIX-D
     const client = supabase as any

@@ -131,17 +131,39 @@ async function loadDiagnosticiansForCity(
   deptCode: string,
   limit = 12,
 ): Promise<{ rows: DiagnosticianCard[]; widenedToDept: boolean }> {
-  // Schéma canonique prod (post-réconciliation FIX-AA) : slug / full_name /
-  // city_slug / department_code (alias dept_code) / gmb_rating / etc.
+  // ────────────────────────────────────────────────────────────────────────
+  // PAGE PUBLIQUE — utilise impérativement le client admin (service_role)
+  // pour cette query, JAMAIS le client server cookies-aware.
+  //
+  // Pourquoi : la page `/trouver-un-diagnostiqueur/[dept]/[city]` est servie
+  // aussi bien à un visiteur anonyme qu'à un diagnostiqueur authentifié.
+  // Quand un diag connecté visite cette URL, le `createClient()` cookies-aware
+  // passe `auth.uid()` à PostgREST. Les RLS policies actives sur
+  // `diagnosticians` (post-réconciliation FIX-AA) entrent alors dans des
+  // chemins différents — `diag_owner_select_unified` (claimed_by_user_id =
+  // auth.uid()) + `diag_public_read_verified_only` (verified-only) — et
+  // l'UNION peut renvoyer 0 rows si la session a un cookie expiré/invalide.
+  // Un visiteur anon, lui, déclenche `diagnosticians_public_read` (is_published)
+  // et voit les 5 fixtures. D'où l'asymétrie utilisateur connecté / anon.
+  //
+  // Le service_role bypass RLS et garantit une lecture cohérente quel que
+  // soit l'état de session du visiteur. La table reste publique par design
+  // (annuaire SEO), donc pas de fuite de données — on filtre simplement sur
+  // is_published côté query.
+  //
+  // Schéma canonique prod : slug / full_name / city_slug / department_code
+  // (alias dept_code) / gmb_rating / gmb_review_count / years_active / etc.
   // Les anciens alias display_name / slug_full / address_line / phone_e164 /
-  // rating_avg / reviews_count / years_experience ont disparu → query échouait
+  // rating_avg / reviews_count / years_experience ont disparu — query échouait
   // silencieusement, d'où "aucun diagnostiqueur" sur les pages city alors que
   // 50 fixtures sont en base. Fix 2026-05-23.
+  // ────────────────────────────────────────────────────────────────────────
   const SELECT_FIELDS =
     'id, slug, full_name, city, address, phone, gmb_rating, gmb_review_count, certifications, years_active'
 
   try {
-    const supabase = await createClient()
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabase = createAdminClient()
     // biome-ignore lint/suspicious/noExplicitAny: types Database à régénérer post-FIX-AA
     const client = supabase as any
 

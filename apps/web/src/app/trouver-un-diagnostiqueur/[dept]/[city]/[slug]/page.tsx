@@ -26,8 +26,11 @@ const SITE_URL = 'https://kovas.fr'
 type DiagnosticianRow = any
 
 async function fetchDiagnosticianBySlug(slug: string): Promise<DiagnosticianRow | null> {
-  const supabase = await createClient()
-  // A1 creates the type — table `diagnosticians` not yet in generated types.
+  // Page publique : admin client (bypass RLS) — la fiche d'un diagnostiqueur
+  // est visible par tous (anon + authenticated). On évite l'asymétrie d'auth
+  // qui masquait la fiche aux users connectés (RLS verified-only).
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const supabase = createAdminClient()
   // biome-ignore lint/suspicious/noExplicitAny: A1 creates the type
   const { data, error } = await (supabase as any)
     .from('diagnosticians')
@@ -44,7 +47,9 @@ async function fetchRelatedDiagnosticians(
   excludeId: string,
   limit = 3,
 ): Promise<DiagnosticianRow[]> {
-  const supabase = await createClient()
+  // Page publique : admin client (bypass RLS) idem fetchDiagnosticianBySlug.
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const supabase = createAdminClient()
   // biome-ignore lint/suspicious/noExplicitAny: A1 creates the type
   const { data, error } = await (supabase as any)
     .from('diagnosticians')
