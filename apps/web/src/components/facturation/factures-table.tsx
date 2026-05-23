@@ -33,11 +33,11 @@ export function FacturesTable({ rows }: FacturesTableProps) {
     <AppListTable>
       <AppListTableHead>
         <tr>
-          <th className="text-left font-medium px-4 py-3">Numéro</th>
+          <th className="text-left font-medium px-4 py-3 hidden sm:table-cell">Numéro</th>
           <th className="text-left font-medium px-4 py-3">Client</th>
-          <th className="text-right font-medium px-4 py-3 hidden sm:table-cell">Montant TTC</th>
-          <th className="text-left font-medium px-4 py-3">Statut</th>
-          <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Échéance</th>
+          <th className="text-right font-medium px-4 py-3">Montant TTC</th>
+          <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Statut</th>
+          <th className="text-left font-medium px-4 py-3 hidden lg:table-cell">Échéance</th>
           <th className="text-right font-medium px-4 py-3 w-12" aria-label="Actions" />
         </tr>
       </AppListTableHead>
@@ -48,7 +48,7 @@ export function FacturesTable({ rows }: FacturesTableProps) {
           const delayVariant = paymentDelayVariant(daysLeft)
           return (
             <AppListTableRow key={f.id}>
-              <AppListTableCell>
+              <AppListTableCell className="hidden sm:table-cell">
                 <Link
                   href={`/dashboard/factures/${f.id}`}
                   className="font-mono text-[11px] font-semibold text-ink hover:underline"
@@ -63,16 +63,20 @@ export function FacturesTable({ rows }: FacturesTableProps) {
                 >
                   {f.clientName}
                 </Link>
+                {/* En mobile (<sm), afficher la référence sous le nom du client. */}
+                <div className="sm:hidden mt-0.5 font-mono text-[10px] text-ink-mute">
+                  {f.reference}
+                </div>
               </AppListTableCell>
-              <AppListTableCell className="hidden sm:table-cell text-right font-mono tabular-nums">
+              <AppListTableCell className="text-right font-mono tabular-nums">
                 {formatEur(f.amountCents)}
               </AppListTableCell>
-              <AppListTableCell>
+              <AppListTableCell className="hidden md:table-cell">
                 <Badge variant={FACTURE_STATUS_VARIANT[f.status]}>
                   {FACTURE_STATUS_LABELS[f.status]}
                 </Badge>
               </AppListTableCell>
-              <AppListTableCell className="hidden md:table-cell">
+              <AppListTableCell className="hidden lg:table-cell">
                 <div className="flex flex-col gap-1">
                   <span className="text-ink-mute text-[12px]">{formatDateShort(f.dueAt)}</span>
                   {delayVariant !== 'muted' && daysLeft !== null ? (

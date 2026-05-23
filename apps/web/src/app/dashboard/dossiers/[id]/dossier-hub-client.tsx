@@ -2,9 +2,9 @@
 
 import { Button } from '@/components/ui/button'
 import { useDossierRealtime } from '@/lib/dossier/realtime'
-import { type DossierState, type VisibleSections } from '@/lib/dossier/states'
+import type { DossierState, VisibleSections } from '@/lib/dossier/states'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 
 interface DossierHubClientProps {
   dossierId: string
@@ -20,6 +20,10 @@ interface DossierHubClientProps {
   billing: ReactNode | null
   followup: ReactNode | null
   notes: ReactNode
+  /** Chantier B (FIX-KK §B) — scans documents anciens du bien. */
+  historicalDocs: ReactNode | null
+  /** Chantier E (FIX-KK §E) — timeline activité dossier. */
+  activityLog: ReactNode | null
   sidebar: ReactNode
 }
 
@@ -45,6 +49,8 @@ export function DossierHubClient({
   billing,
   followup,
   notes,
+  historicalDocs,
+  activityLog,
   sidebar,
 }: DossierHubClientProps) {
   const router = useRouter()
@@ -92,14 +98,40 @@ export function DossierHubClient({
           break
         }
         case 'm': {
+          // Raccourci Cmd+M = démarre/reprend la mission via tchat IA (FIX-JJ)
           e.preventDefault()
-          router.push(`/dashboard/dossiers/${dossierId}?mode=mission`)
+          router.push(`/dashboard/dossiers/${dossierId}/mission/tchat`)
           break
         }
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+  }, [dossierId, router])
+
+  // FIX-LL (2026-05-23) — Hash anchor smart fallback :
+  // si l'URL contient `#capture` ou `#exports` mais que la section correspondante
+  // n'est pas rendue (état dossier brouillon/confirme/archive...), on bascule
+  // automatiquement vers la sous-page dédiée qui existe toujours.
+  // Évite les liens "morts" qui ont historiquement frustré Benjamin (3 tentatives).
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    function onHashChangeFallback() {
+      const hash = window.location.hash.replace(/^#/, '').toLowerCase()
+      if (!hash) return
+      // Petit délai pour laisser la page rendre, puis tester si l'ancre existe
+      setTimeout(() => {
+        if (document.getElementById(hash)) return // OK, l'ancre est dans le DOM
+        if (hash === 'capture') {
+          router.push(`/dashboard/dossiers/${dossierId}/mission`)
+        } else if (hash === 'exports') {
+          router.push(`/dashboard/dossiers/${dossierId}/prevalidation`)
+        }
+      }, 50)
+    }
+    onHashChangeFallback()
+    window.addEventListener('hashchange', onHashChangeFallback)
+    return () => window.removeEventListener('hashchange', onHashChangeFallback)
   }, [dossierId, router])
 
   // ============================================================
@@ -117,6 +149,7 @@ export function DossierHubClient({
       {visibleSections.dataQuality ? dataQuality : null}
       {visibleSections.preExport ? preExport : null}
       {visibleSections.exports ? exports : null}
+      {visibleSections.historicalDocs ? historicalDocs : null}
     </div>
   )
   const actionsBlock = (
@@ -128,6 +161,7 @@ export function DossierHubClient({
   const followupBlock = (
     <div className="space-y-3">
       {visibleSections.followup ? followup : null}
+      {visibleSections.activityLog ? activityLog : null}
       {sidebar}
     </div>
   )
@@ -148,9 +182,11 @@ export function DossierHubClient({
           {visibleSections.dataQuality ? dataQuality : null}
           {visibleSections.preExport ? preExport : null}
           {visibleSections.exports ? exports : null}
+          {visibleSections.historicalDocs ? historicalDocs : null}
           {visibleSections.communication ? communication : null}
           {visibleSections.billing ? billing : null}
           {visibleSections.followup ? followup : null}
+          {visibleSections.activityLog ? activityLog : null}
           {notes}
         </div>
         <div className="lg:col-span-4">{sidebar}</div>
@@ -163,9 +199,11 @@ export function DossierHubClient({
         {visibleSections.dataQuality ? dataQuality : null}
         {visibleSections.preExport ? preExport : null}
         {visibleSections.exports ? exports : null}
+        {visibleSections.historicalDocs ? historicalDocs : null}
         {visibleSections.communication ? communication : null}
         {visibleSections.billing ? billing : null}
         {visibleSections.followup ? followup : null}
+        {visibleSections.activityLog ? activityLog : null}
         {notes}
         <div className="pt-4 border-t border-rule/60">{sidebar}</div>
       </div>
