@@ -135,11 +135,19 @@ async function loadCityPage(citySlug: string): Promise<SeoGeoPageRow | null> {
   }
 }
 
+/**
+ * Scope d'élargissement utilisé pour informer l'utilisateur du périmètre
+ * réellement utilisé. `city` = ville recherchée, `department` = élargi au
+ * dept, `national` = filet final (dernier recours, B2C garantie ≥ 1
+ * résultat).
+ */
+type LoadScope = 'city' | 'department' | 'national'
+
 async function loadDiagnosticiansForCity(
   citySlug: string,
   deptCode: string,
   limit = 12,
-): Promise<{ rows: DiagnosticianCard[]; widenedToDept: boolean }> {
+): Promise<{ rows: DiagnosticianCard[]; scope: LoadScope }> {
   // ────────────────────────────────────────────────────────────────────────
   // PAGE PUBLIQUE — utilise impérativement le client admin (service_role)
   // pour cette query, JAMAIS le client server cookies-aware.
@@ -191,7 +199,7 @@ async function loadDiagnosticiansForCity(
 
     const cityRows = !cityError && cityData ? (cityData as DiagnosticianCard[]) : []
     if (cityRows.length >= 3) {
-      return { rows: cityRows, widenedToDept: false }
+      return { rows: cityRows, scope: 'city' }
     }
 
     // <3 diags locaux : on élargit au département pour respecter "3+
@@ -205,13 +213,31 @@ async function loadDiagnosticiansForCity(
       .order('gmb_rating', { ascending: false, nullsFirst: false })
       .limit(limit)
 
-    if (deptError || !deptData) {
-      return { rows: cityRows, widenedToDept: false }
+    const deptRows = !deptError && deptData ? (deptData as DiagnosticianCard[]) : []
+    if (deptRows.length > 0) {
+      return { rows: deptRows, scope: 'department' }
     }
 
-    return { rows: deptData as DiagnosticianCard[], widenedToDept: true }
+    // ────────────────────────────────────────────────────────────────────
+    // Dernier filet (B2C garantie ≥ 1 résultat) : on ouvre au national.
+    // Un particulier qui visite une page ville d'un département sans
+    // diagnostiqueur référencé DOIT voir des contacts (même éloignés)
+    // plutôt qu'une page vide qui le pousse à fermer l'onglet. Les
+    // diagnostiqueurs nationaux interviennent en province sur déplacement
+    // et compte spécialisé — leur affichage est légitime ici.
+    // ────────────────────────────────────────────────────────────────────
+    const { data: nationalData } = await client
+      .from('diagnosticians')
+      .select(SELECT_FIELDS)
+      .eq('is_published', true)
+      .order('gmb_rating', { ascending: false, nullsFirst: false })
+      .limit(limit)
+
+    const nationalRows =
+      nationalData && Array.isArray(nationalData) ? (nationalData as DiagnosticianCard[]) : []
+    return { rows: nationalRows, scope: 'national' }
   } catch {
-    return { rows: [], widenedToDept: false }
+    return { rows: [], scope: 'city' }
   }
 }
 
@@ -483,11 +509,13 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
   const regionName = dbPage?.region_name ?? null
   const postalCode = registryCity?.postalCode
 
-  const { rows: diagnosticians, widenedToDept } = await loadDiagnosticiansForCity(
+  const { rows: diagnosticians, scope: diagScope } = await loadDiagnosticiansForCity(
     dbPage?.city_slug ?? city,
     dept,
     12,
   )
+  const widenedToDept = diagScope === 'department'
+  const widenedToNational = diagScope === 'national'
 
   // Data : essai DB réelle (ADEME+INSEE+Claude) puis fallback déterministe
   const localData = registryCity ? await getCityStats(registryCity) : null
@@ -791,7 +819,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
             </h2>
             <p className="text-sm text-ink-mute">
               {diagnosticians.length > 0
-                ? `${diagnosticians.length} diagnostiqueur${diagnosticians.length > 1 ? 's' : ''} ${widenedToDept ? `dans le ${deptName}` : `à ${cityName}`}`
+                ? `${diagnosticians.length} diagnostiqueur${diagnosticians.length > 1 ? 's' : ''} ${widenedToNational ? 'disponibles en France' : widenedToDept ? `dans le ${deptName}` : `à ${cityName}`}`
                 : 'Aucun diagnostiqueur référencé pour le moment'}
             </p>
           </div>
@@ -804,6 +832,19 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
                   Aucun diagnostiqueur n'a actuellement de fiche publique à {cityName}. Voici les
                   diagnostiqueurs certifiés du {deptName} susceptibles d'intervenir dans cette
                   commune.
+                </span>
+              </p>
+            </Card>
+          ) : null}
+
+          {widenedToNational ? (
+            <Card className="p-4 bg-accent-warm-soft border-accent-warm/30">
+              <p className="text-sm text-ink-soft inline-flex items-start gap-2">
+                <ShieldAlert className="size-4 text-accent-warm shrink-0 mt-0.5" aria-hidden />
+                <span>
+                  Aucun diagnostiqueur n'a actuellement de fiche publique à {cityName} ni dans le{' '}
+                  {deptName}. Voici les diagnostiqueurs disponibles ailleurs en France susceptibles
+                  d'intervenir sur déplacement.
                 </span>
               </p>
             </Card>

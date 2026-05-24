@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { type DiagCertCode, parseCertCodes } from '@/lib/diag-certifications'
 import { getDepartmentName } from '@/lib/fr-departments'
-import { ArrowLeft, ArrowRight, ChevronRight, Inbox } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronRight, Inbox, Info } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { DiagResultCard } from './diag-result-card'
@@ -14,6 +14,18 @@ import { SearchBar } from './search-bar'
 
 const PAGE_SIZE = 24
 const EARTH_RADIUS_KM = 6371
+
+/**
+ * Paliers d'élargissement progressif (km) appliqués SI une géoloc est
+ * disponible et que le rayon initial retourne 0 résultats. Après le dernier
+ * palier `national`, on bascule en query "tout le pays" (sans rayon).
+ *
+ * Règle métier B2C : l'utilisateur DOIT toujours voir au moins 1 contact —
+ * un particulier qui cherche un diagnostiqueur pour son DPE ne doit jamais
+ * tomber sur une page vide, quitte à élargir au département voire au pays.
+ */
+const RADIUS_LADDER_KM = [20, 50, 100] as const
+type WidenedScope = 'initial' | 'expanded-radius' | 'department' | 'national' | 'all'
 
 interface PageProps {
   searchParams: Promise<{
@@ -73,7 +85,7 @@ export default async function DiagnostiqueursPage({ searchParams }: PageProps) {
   const dist = parseFloatSafe(sp.dist)
   const hasGeo = lat !== undefined && lng !== undefined
 
-  const { rows, count, error } = await fetchDiagnosticians({
+  const { rows, count, error, widened, effectiveRadiusKm } = await fetchDiagnosticians({
     q,
     dept,
     certs,
@@ -168,6 +180,16 @@ export default async function DiagnostiqueursPage({ searchParams }: PageProps) {
               )}
             </div>
 
+            {/* Banner d'élargissement progressif (B2C : toujours ≥ 1 résultat).
+             * S'affiche quand l'algo a dû élargir au-delà du rayon initial. */}
+            {hasResults && widened !== 'initial' ? (
+              <WideningNotice
+                widened={widened}
+                effectiveRadiusKm={effectiveRadiusKm}
+                deptCode={dept}
+              />
+            ) : null}
+
             {/* Grid résultats */}
             {error ? (
               <ErrorState />
@@ -240,6 +262,15 @@ interface FetchResult {
   rows: DiagRow[]
   count: number
   error: string | null
+  /**
+   * Indique si l'algorithme d'élargissement progressif a dû élargir le
+   * périmètre pour garantir au moins 1 résultat. `initial` = rayon demandé
+   * suffisant ; les autres valeurs signalent un widening progressif que la
+   * page rend visible via un banner d'information sobre.
+   */
+  widened: WidenedScope
+  /** Rayon effectivement utilisé (km). Null pour scope dept/national/all. */
+  effectiveRadiusKm: number | null
 }
 
 /**
@@ -301,45 +332,140 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
 
     const offset = (args.page - 1) * PAGE_SIZE
     const useGeoSort = args.lat !== undefined && args.lng !== undefined
-    const radiusKm = useGeoSort ? (args.dist ?? 50) : 50
 
-    // Appel RPC unifiée. On surdimensionne le LIMIT (5×page) pour permettre
-    // le count exact côté serveur en post-filtrage (cf. count séparé ci-dessous).
-    const { data, error } = await client.rpc('search_diagnosticians', {
-      p_query: args.q || null,
-      p_city_slug: null,
-      p_dept_code: args.dept ?? null,
-      p_certs: args.certs.length > 0 ? args.certs : null,
-      p_lat: args.lat ?? null,
-      p_lng: args.lng ?? null,
-      p_radius_km: radiusKm,
-      p_limit: PAGE_SIZE,
-      p_offset: offset,
-    })
-
-    if (error) {
-      // RPC inexistante = migration pas encore appliquée → fallback gracieux.
-      const msg = error.message || ''
-      const isMissing =
-        msg.includes('does not exist') ||
-        msg.includes('not found') ||
-        msg.includes('function') ||
-        error.code === 'PGRST202' ||
-        error.code === 'PGRST205' ||
-        error.code === '42P01' ||
-        error.code === '42883'
-      if (isMissing) {
-        return fallbackTableQuery(client, args, offset)
+    /**
+     * Exécute une tentative de recherche unique. Retourne soit la liste des
+     * rows, soit `null` si la RPC est absente (déclenche fallback table).
+     */
+    async function runRpc(params: {
+      lat?: number
+      lng?: number
+      radiusKm?: number
+      dept?: string
+      limit?: number
+      offset?: number
+    }): Promise<{ rows: RpcDiagRow[]; missing: boolean; errMsg: string | null }> {
+      const { data: rpcData, error: rpcError } = await client.rpc('search_diagnosticians', {
+        p_query: args.q || null,
+        p_city_slug: null,
+        p_dept_code: params.dept ?? null,
+        p_certs: args.certs.length > 0 ? args.certs : null,
+        p_lat: params.lat ?? null,
+        p_lng: params.lng ?? null,
+        p_radius_km: params.radiusKm ?? null,
+        p_limit: params.limit ?? PAGE_SIZE,
+        p_offset: params.offset ?? 0,
+      })
+      if (rpcError) {
+        const msg = rpcError.message || ''
+        const isMissing =
+          msg.includes('does not exist') ||
+          msg.includes('not found') ||
+          msg.includes('function') ||
+          rpcError.code === 'PGRST202' ||
+          rpcError.code === 'PGRST205' ||
+          rpcError.code === '42P01' ||
+          rpcError.code === '42883'
+        return { rows: [], missing: isMissing, errMsg: msg }
       }
-      return { rows: [], count: 0, error: msg }
+      return { rows: (rpcData ?? []) as RpcDiagRow[], missing: false, errMsg: null }
     }
 
-    const rpcRows = (data ?? []) as RpcDiagRow[]
+    // ────────────────────────────────────────────────────────────────────
+    // Pipeline d'élargissement progressif (B2C garantie ≥ 1 résultat)
+    //
+    // 1. Si géoloc dispo (sélection BAN) : essais à 20, 50, 100 km
+    // 2. Si toujours vide ET dept connu : query "tout le département"
+    // 3. Si toujours vide : query "tout le pays" (LIMIT PAGE_SIZE)
+    //
+    // L'utilisateur doit TOUJOURS voir au moins 1 contact, quitte à voir
+    // un diag à 200 km — un B2C qui cherche un diagnostiqueur DPE ne doit
+    // jamais tomber sur une page vide.
+    // ────────────────────────────────────────────────────────────────────
 
-    // Count total (mêmes filtres, sans pagination) — appel RPC count séparé.
-    // Pour éviter une 2e RPC, on prend le LIMIT comme borne haute + 1 pour
-    // détecter la dernière page. Implémentation simple : si rpcRows.length
-    // === PAGE_SIZE on suppose qu'il y en a au moins une page de plus.
+    let rpcRows: RpcDiagRow[] = []
+    let widened: WidenedScope = 'initial'
+    let effectiveRadiusKm: number | null = null
+
+    if (useGeoSort) {
+      // Si l'utilisateur a explicitement choisi une distance via filter-bar,
+      // on commence par celle-ci puis on élargit progressivement. Sinon on
+      // démarre à 20 km (palier le plus serré du ladder).
+      const userRadius = args.dist
+      const ladder =
+        userRadius !== undefined
+          ? [userRadius, ...RADIUS_LADDER_KM.filter((r) => r > userRadius)]
+          : [...RADIUS_LADDER_KM]
+
+      for (const r of ladder) {
+        const attempt = await runRpc({
+          lat: args.lat,
+          lng: args.lng,
+          radiusKm: r,
+          dept: args.dept,
+          limit: PAGE_SIZE,
+          offset,
+        })
+        if (attempt.missing) return fallbackTableQuery(client, args, offset)
+        if (attempt.errMsg) return mkErr(attempt.errMsg)
+        if (attempt.rows.length > 0) {
+          rpcRows = attempt.rows
+          effectiveRadiusKm = r
+          // Élargi si r > rayon initial demandé (par défaut 20 km au minimum).
+          const baseline = userRadius ?? RADIUS_LADDER_KM[0]
+          widened = r > baseline ? 'expanded-radius' : 'initial'
+          break
+        }
+      }
+    } else {
+      // Pas de géoloc → query classique sans rayon. Le RPC ignore p_lat/p_lng
+      // si NULL et applique seulement les filtres texte/dept/certs.
+      const attempt = await runRpc({
+        dept: args.dept,
+        limit: PAGE_SIZE,
+        offset,
+      })
+      if (attempt.missing) return fallbackTableQuery(client, args, offset)
+      if (attempt.errMsg) return mkErr(attempt.errMsg)
+      rpcRows = attempt.rows
+      effectiveRadiusKm = null
+    }
+
+    // Étape 2 — élargissement au département (si géoloc épuisée + dept connu)
+    if (rpcRows.length === 0 && args.dept) {
+      const attempt = await runRpc({
+        dept: args.dept,
+        limit: PAGE_SIZE,
+        offset,
+      })
+      if (attempt.missing) return fallbackTableQuery(client, args, offset)
+      if (attempt.errMsg) return mkErr(attempt.errMsg)
+      if (attempt.rows.length > 0) {
+        rpcRows = attempt.rows
+        widened = 'department'
+        effectiveRadiusKm = null
+      }
+    }
+
+    // Étape 3 — élargissement national (dernier filet)
+    if (rpcRows.length === 0) {
+      const attempt = await runRpc({
+        // Pas de dept : on cherche partout en FR. Garde les filtres texte
+        // et certifs pour respecter l'intent utilisateur, mais ignore lat/lng.
+        limit: PAGE_SIZE,
+        offset: 0,
+      })
+      if (attempt.missing) return fallbackTableQuery(client, args, offset)
+      if (attempt.errMsg) return mkErr(attempt.errMsg)
+      rpcRows = attempt.rows
+      // Si on a fini par trouver quelque chose, c'est du national. Sinon
+      // base réellement vide pour ces filtres.
+      widened = rpcRows.length > 0 ? 'national' : 'all'
+      effectiveRadiusKm = null
+    }
+
+    // Count total approximatif (cf. logique avant : la RPC ne renvoie pas
+    // de count exact, on borne via PAGE_SIZE)
     const approxCount =
       rpcRows.length === PAGE_SIZE ? offset + PAGE_SIZE + 1 : offset + rpcRows.length
 
@@ -367,14 +493,20 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
       }
     })
 
-    return { rows, count: approxCount, error: null }
-  } catch (e) {
     return {
-      rows: [],
-      count: 0,
-      error: e instanceof Error ? e.message : 'Erreur inconnue',
+      rows,
+      count: approxCount,
+      error: null,
+      widened,
+      effectiveRadiusKm,
     }
+  } catch (e) {
+    return mkErr(e instanceof Error ? e.message : 'Erreur inconnue')
   }
+}
+
+function mkErr(message: string): FetchResult {
+  return { rows: [], count: 0, error: message, widened: 'initial', effectiveRadiusKm: null }
 }
 
 /**
@@ -424,42 +556,48 @@ async function fallbackTableQuery(
         error.code === 'PGRST205' ||
         error.code === '42P01'
       ) {
-        return { rows: [], count: 0, error: null }
+        return { rows: [], count: 0, error: null, widened: 'all', effectiveRadiusKm: null }
       }
-      return { rows: [], count: 0, error: msg }
+      return { rows: [], count: 0, error: msg, widened: 'initial', effectiveRadiusKm: null }
     }
 
-    const rows: DiagRow[] = ((data ?? []) as unknown as Array<Record<string, unknown>>).map(
-      (r) => {
-        const certCodes = extractCertCodes(r.certifications)
-        return {
-          id: String(r.id),
-          slug: (r.slug as string | null) ?? null,
-          full_name: (r.full_name as string | null) ?? null,
-          company_name: (r.company_name as string | null) ?? null,
-          city: (r.city as string | null) ?? null,
-          city_slug: (r.city_slug as string | null) ?? null,
-          department_code:
-            (r.department_code as string | null) ?? (r.dept_code as string | null) ?? null,
-          certifications: certCodes,
-          has_mention_audit: certCodes.includes('DPE_MENTION'),
-          gmb_rating: (r.gmb_rating as number | null) ?? null,
-          gmb_review_count: (r.gmb_review_count as number | null) ?? null,
-          claim_status: (r.claim_status as string | null) ?? null,
-          photo_url: (r.photo_url as string | null) ?? null,
-          latitude: (r.latitude as number | null) ?? (r.geo_lat as number | null) ?? null,
-          longitude: (r.longitude as number | null) ?? (r.geo_lng as number | null) ?? null,
-          created_at: (r.created_at as string | null) ?? null,
-        }
-      },
-    )
+    const rows: DiagRow[] = ((data ?? []) as unknown as Array<Record<string, unknown>>).map((r) => {
+      const certCodes = extractCertCodes(r.certifications)
+      return {
+        id: String(r.id),
+        slug: (r.slug as string | null) ?? null,
+        full_name: (r.full_name as string | null) ?? null,
+        company_name: (r.company_name as string | null) ?? null,
+        city: (r.city as string | null) ?? null,
+        city_slug: (r.city_slug as string | null) ?? null,
+        department_code:
+          (r.department_code as string | null) ?? (r.dept_code as string | null) ?? null,
+        certifications: certCodes,
+        has_mention_audit: certCodes.includes('DPE_MENTION'),
+        gmb_rating: (r.gmb_rating as number | null) ?? null,
+        gmb_review_count: (r.gmb_review_count as number | null) ?? null,
+        claim_status: (r.claim_status as string | null) ?? null,
+        photo_url: (r.photo_url as string | null) ?? null,
+        latitude: (r.latitude as number | null) ?? (r.geo_lat as number | null) ?? null,
+        longitude: (r.longitude as number | null) ?? (r.geo_lng as number | null) ?? null,
+        created_at: (r.created_at as string | null) ?? null,
+      }
+    })
 
-    return { rows, count: count ?? 0, error: null }
+    return {
+      rows,
+      count: count ?? 0,
+      error: null,
+      widened: 'initial',
+      effectiveRadiusKm: null,
+    }
   } catch (e) {
     return {
       rows: [],
       count: 0,
       error: e instanceof Error ? e.message : 'Erreur inconnue',
+      widened: 'initial',
+      effectiveRadiusKm: null,
     }
   }
 }
@@ -483,8 +621,11 @@ function Pagination({
     const params = new URLSearchParams()
     for (const [key, val] of Object.entries(preservedParams)) {
       if (val === undefined) continue
-      if (Array.isArray(val)) val.forEach((v) => params.append(key, v))
-      else params.set(key, val)
+      if (Array.isArray(val)) {
+        for (const v of val) params.append(key, v)
+      } else {
+        params.set(key, val)
+      }
     }
     if (p > 1) params.set('page', String(p))
     const s = params.toString()
@@ -567,6 +708,47 @@ function ErrorState() {
   )
 }
 
+/**
+ * Banner sobre informant l'utilisateur que le périmètre a été élargi pour
+ * lui garantir au moins un résultat (règle métier B2C). Design System v5 :
+ * couleur warm-soft (ambre pâle), pas d'emoji, vouvoiement.
+ */
+function WideningNotice({
+  widened,
+  effectiveRadiusKm,
+  deptCode,
+}: {
+  widened: WidenedScope
+  effectiveRadiusKm: number | null
+  deptCode: string | undefined
+}) {
+  if (widened === 'initial') return null
+  const initialRadius = RADIUS_LADDER_KM[0]
+  const deptLabel = deptCode
+    ? `${getDepartmentName(deptCode) ?? `département ${deptCode}`}`
+    : 'département'
+
+  const message =
+    widened === 'expanded-radius' && effectiveRadiusKm !== null
+      ? `Aucun professionnel dans un rayon de ${initialRadius} km. Voici les plus proches (rayon élargi à ${effectiveRadiusKm} km).`
+      : widened === 'department'
+        ? `Aucun professionnel dans un rayon de ${initialRadius} km. Voici les diagnostiqueurs du ${deptLabel}.`
+        : widened === 'national'
+          ? `Aucun professionnel à proximité ni dans le ${deptLabel}. Voici les diagnostiqueurs disponibles ailleurs en France susceptibles d'intervenir.`
+          : ''
+
+  if (!message) return null
+
+  return (
+    <Card variant="opaque" padding="default" className="bg-accent-warm-soft border-accent-warm/30">
+      <div className="flex items-start gap-2.5">
+        <Info className="size-4 mt-0.5 text-ink-mute shrink-0" aria-hidden />
+        <p className="text-[13px] text-ink-soft leading-relaxed">{message}</p>
+      </div>
+    </Card>
+  )
+}
+
 function ItemListJsonLd({ rows }: { rows: DiagRow[] }) {
   if (rows.length === 0) return null
   const itemListElement = rows.map((row, idx) => ({
@@ -607,7 +789,7 @@ function ItemListJsonLd({ rows }: { rows: DiagRow[] }) {
   return (
     <script
       type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD Schema.org SEO — pas de XSS car JSON.stringify échappe correctement
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   )

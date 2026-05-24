@@ -181,7 +181,20 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
           ? postcode.slice(0, 3)
           : postcode.slice(0, 2)
         : undefined
-      router.push(buildHref({ q: label, dept }))
+      // BAN renvoie [lng, lat] (ordre GeoJSON). On les pousse en URL pour que
+      // la recherche serveur applique le pipeline d'élargissement progressif
+      // (20 km → 50 → 100 → dept → national, garantit toujours ≥1 résultat).
+      const [lng, lat] = feature.geometry.coordinates
+      router.push(
+        buildHref({
+          q: label,
+          dept,
+          lat: Number.isFinite(lat) ? lat.toFixed(5) : undefined,
+          lng: Number.isFinite(lng) ? lng.toFixed(5) : undefined,
+          // Pas de `dist` : laissé au serveur (qui démarre à 20 km).
+          dist: undefined,
+        }),
+      )
     },
     [buildHref, router],
   )
