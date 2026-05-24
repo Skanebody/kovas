@@ -1067,7 +1067,16 @@ export function MissionTchatInterface({
       window.clearTimeout(timeoutId)
 
       if (!res.ok) {
-        throw new Error(`transcribe http ${res.status}`)
+        // Lit le body même en erreur pour récupérer le vrai message serveur
+        let serverMsg = `HTTP ${res.status}`
+        try {
+          const errBody = (await res.json()) as { error?: string; name?: string }
+          if (errBody.error) serverMsg = `${errBody.name ?? 'Error'}: ${errBody.error}`
+          console.error('[mission-tchat] transcribe HTTP error', res.status, errBody)
+        } catch {
+          /* response non-JSON */
+        }
+        throw new Error(`transcribe ${serverMsg}`)
       }
 
       const data = (await res.json()) as {

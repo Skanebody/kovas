@@ -202,8 +202,20 @@ export async function POST(request: Request) {
       voiceNoteId,
     })
   } catch (err) {
+    // Log explicite côté serveur (visible dans le terminal `pnpm dev`)
+    console.error('[transcribe] route threw exception', {
+      message: err instanceof Error ? err.message : String(err),
+      name: err instanceof Error ? err.name : 'Unknown',
+      stack: err instanceof Error ? err.stack?.split('\n').slice(0, 5).join('\n') : undefined,
+    })
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'transcription failed' },
+      {
+        error: err instanceof Error ? err.message : 'transcription failed',
+        // Détails additionnels en dev pour débugger côté browser
+        ...(process.env.NODE_ENV !== 'production' && err instanceof Error
+          ? { name: err.name, stack: err.stack?.split('\n').slice(0, 3) }
+          : {}),
+      },
       { status: 500 },
     )
   }

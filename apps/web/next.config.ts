@@ -35,7 +35,8 @@ const CONTENT_SECURITY_POLICY = [
   // produit des blob: URLs). Sans ça, <audio src='blob:...'> renvoie
   // NotSupportedError (default-src 'self' rejette).
   "media-src 'self' blob: https://*.supabase.co",
-  "connect-src 'self' blob: https://*.supabase.co https://api.anthropic.com https://api.groq.com https://api.stripe.com https://api.brevo.com https://*.vercel-insights.com https://app.dvf.etalab.gouv.fr https://geo.api.gouv.fr https://api-adresse.data.gouv.fr https://data.ademe.fr",
+  // wss:// requis pour Supabase Realtime (préférences sidebar, etc.)
+  "connect-src 'self' blob: https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://api.groq.com https://api.stripe.com https://api.brevo.com https://*.vercel-insights.com https://app.dvf.etalab.gouv.fr https://geo.api.gouv.fr https://api-adresse.data.gouv.fr https://data.ademe.fr",
   "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
   "object-src 'none'",
   "base-uri 'self'",
