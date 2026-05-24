@@ -185,10 +185,13 @@ export function DiagnosticianPageContent({
                 <p className="text-xs font-mono uppercase tracking-[0.12em] text-black/50">
                   Diagnostiqueur immobilier · {cityLabel}
                 </p>
-                <h1 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">{displayName}</h1>
+                <h1 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">
+                  {displayName}
+                </h1>
                 {subtitleGerant ? (
                   <p className="mt-2 text-sm text-black/55">
-                    Représenté par <span className="font-medium text-black/75">{subtitleGerant}</span>
+                    Représenté par{' '}
+                    <span className="font-medium text-black/75">{subtitleGerant}</span>
                   </p>
                 ) : null}
 
@@ -490,20 +493,28 @@ function TopBar() {
           <span className="text-base font-bold tracking-tight text-[#0B1D33]">KOVAS</span>
         </Link>
 
-        <div className="hidden md:flex flex-1 max-w-md">
-          <label className="relative w-full">
-            <span className="sr-only">Rechercher un diagnostiqueur</span>
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/40"
-              aria-hidden
-            />
-            <input
-              type="search"
-              placeholder="Rechercher par ville, nom, code postal..."
-              className="w-full rounded-full border border-black/10 bg-white pl-9 pr-4 py-2 text-sm placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[#0B1D33]/15 focus:border-[#0B1D33]/40"
-            />
-          </label>
-        </div>
+        <search className="hidden md:flex flex-1 max-w-md">
+          <form
+            action="/trouver-un-diagnostiqueur"
+            method="GET"
+            className="w-full"
+            aria-label="Rechercher un diagnostiqueur"
+          >
+            <label className="relative w-full">
+              <span className="sr-only">Rechercher un diagnostiqueur</span>
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/40"
+                aria-hidden
+              />
+              <input
+                type="search"
+                name="q"
+                placeholder="Rechercher par ville, nom, code postal..."
+                className="w-full rounded-full border border-black/10 bg-white pl-9 pr-4 py-2 text-sm placeholder:text-black/40 focus:outline-none focus:ring-2 focus:ring-[#0B1D33]/15 focus:border-[#0B1D33]/40"
+              />
+            </label>
+          </form>
+        </search>
 
         <nav className="flex items-center gap-5 text-sm">
           <Link
@@ -586,8 +597,7 @@ function RelatedCard({
   const rawFullName: string =
     (typeof r.full_name === 'string' && r.full_name.trim()) || formatName(r.first_name, r.last_name)
   const formattedGerant = formatFullName(rawFullName)
-  const companyTrim =
-    typeof r.company_name === 'string' ? r.company_name.trim() : ''
+  const companyTrim = typeof r.company_name === 'string' ? r.company_name.trim() : ''
   const displayName =
     getDiagDisplayName({
       company_name: companyTrim || null,
