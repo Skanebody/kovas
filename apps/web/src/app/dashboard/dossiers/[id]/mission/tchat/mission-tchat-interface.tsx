@@ -1605,34 +1605,70 @@ export function MissionTchatInterface({
 
   // ----- MISSION-H lot 2 : déclenche l'analyse finale -----
   const runFinalAnalysis = useCallback(async () => {
+    const url = `/api/mission/${dossierId}/finalize-analysis`
+    console.info('[finalize-analysis] click → POST', url, { sessionId })
     setAnalysisLoading(true)
     setAnalysisError(null)
     setAnalysisResult(null)
     setAnalysisOpen(true)
     try {
-      const res = await fetch(`/api/mission/${dossierId}/finalize-analysis`, {
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ sessionId }),
       })
-      const data = (await res.json()) as
-        | { ok: true; summary: string; rooms: unknown; gaps: unknown; capturesCount: number }
-        | { ok: false; error: string }
-      if (!data.ok) {
-        setAnalysisError(data.error)
-        setAnalysisResult(null)
-      } else {
-        const rooms = Array.isArray(data.rooms) ? (data.rooms as FinalAnalysisResult['rooms']) : []
-        const gaps = Array.isArray(data.gaps) ? (data.gaps as FinalAnalysisGap[]) : []
-        setAnalysisResult({
-          summary: data.summary ?? '',
-          rooms,
-          gaps,
-          capturesCount: data.capturesCount,
+      console.info('[finalize-analysis] response', { status: res.status, ok: res.ok })
+
+      // Lecture du body avec fallback texte (au cas où non-JSON)
+      const rawText = await res.text()
+      let data: unknown
+      try {
+        data = JSON.parse(rawText)
+      } catch {
+        console.error('[finalize-analysis] non-JSON response', {
+          status: res.status,
+          rawText: rawText.slice(0, 500),
         })
+        setAnalysisError(
+          `Réponse serveur invalide (HTTP ${res.status}). Voir la console pour le détail.`,
+        )
+        return
       }
+      console.info('[finalize-analysis] parsed body', data)
+
+      if (!res.ok) {
+        const errMsg =
+          typeof data === 'object' && data !== null && 'error' in data
+            ? String((data as { error: unknown }).error)
+            : `HTTP ${res.status}`
+        setAnalysisError(errMsg)
+        return
+      }
+
+      const d = data as {
+        ok?: boolean
+        summary?: string
+        rooms?: unknown
+        gaps?: unknown
+        capturesCount?: number
+        error?: string
+      }
+      if (d.ok === false) {
+        setAnalysisError(d.error ?? 'Erreur inconnue')
+        return
+      }
+      const rooms = Array.isArray(d.rooms) ? (d.rooms as FinalAnalysisResult['rooms']) : []
+      const gaps = Array.isArray(d.gaps) ? (d.gaps as FinalAnalysisGap[]) : []
+      setAnalysisResult({
+        summary: d.summary ?? '',
+        rooms,
+        gaps,
+        capturesCount: d.capturesCount ?? 0,
+      })
     } catch (err) {
-      setAnalysisError(err instanceof Error ? err.message : 'Erreur réseau')
+      const msg = err instanceof Error ? `${err.name}: ${err.message}` : 'Erreur réseau'
+      console.error('[finalize-analysis] fetch threw', err)
+      setAnalysisError(msg)
     } finally {
       setAnalysisLoading(false)
     }
