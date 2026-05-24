@@ -49,14 +49,13 @@ export async function POST(
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  // Insert direct dans mission_text_notes (table capture_first, pas dans le type généré)
+  // Insert direct dans mission_text_notes (schema réel : pas de mission_session_id
+  // ni source — juste org/dossier/room/text/created_by/timestamps).
   const { error } = await supabase.from('mission_text_notes' as never).insert({
     organization_id: orgId,
     dossier_id: dossierId,
-    mission_session_id: body.sessionId ?? null,
     room_id: body.roomId ?? null,
     text: body.text.trim(),
-    source: body.source ?? 'text',
     created_by: userId,
   } as never)
 

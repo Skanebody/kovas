@@ -131,6 +131,49 @@ export async function POST(request: Request) {
       console.warn('[transcribe] storage step failed', storageErr)
     }
 
+    // ── PERSISTENCE voice_notes (MISSION-I) ────────────────────────────
+    // Sans cet INSERT, les vocaux disparaissent à chaque refresh et l'analyse
+    // finale ne trouve rien à analyser. Critique pour le mode Capture.
+    let voiceNoteId: string | null = null
+    if (audioStoragePath) {
+      const segmentsPayload = segments.map((s) => ({
+        id: s.id,
+        text: s.text,
+        start: s.start,
+        end: s.end,
+        avgLogprob: s.avgLogprob,
+        noSpeechProb: s.noSpeechProb,
+        confidence: s.confidence,
+      }))
+      const { data: vn, error: vnErr } = await supabase
+        .from('voice_notes')
+        .insert({
+          dossier_id: dossierId,
+          organization_id: orgId,
+          recorded_by: user.id,
+          storage_path: audioStoragePath,
+          duration_seconds: Math.round(duration),
+          language: (result as { language?: string }).language ?? 'fr',
+          provider: 'openai',
+          transcript_raw: result.text,
+          transcript_structured: { segments: segmentsPayload, markedText } as never,
+          ai_cost_eur: costEur,
+          status: 'transcribed',
+          transcribed_at: new Date().toISOString(),
+          file_size_bytes: file.size,
+          transcription_status: 'completed',
+          transcription_model: model,
+          transcription_cost_usd: costEur,
+        } as never)
+        .select('id')
+        .single()
+      if (vnErr) {
+        console.warn('[transcribe] voice_notes insert failed (non blocking)', vnErr.message)
+      } else if (vn && typeof (vn as { id?: unknown }).id === 'string') {
+        voiceNoteId = (vn as { id: string }).id
+      }
+    }
+
     return NextResponse.json({
       transcript: result.text,
       // markedText : transcription avec [inaudible] sur les segments rejetés
@@ -154,6 +197,8 @@ export async function POST(request: Request) {
       // URL signée 1h pour réécouter l'audio source (permettre le replay segment)
       audioSignedUrl,
       audioStoragePath,
+      // ID de la voice_note persistée (null si l'INSERT a échoué ou pas d'audio)
+      voiceNoteId,
     })
   } catch (err) {
     return NextResponse.json(
