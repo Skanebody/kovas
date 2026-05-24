@@ -85,6 +85,12 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type CaptureMode, CaptureModeToggle } from './CaptureModeToggle'
+import {
+  type FinalAnalysisGap,
+  type FinalAnalysisResult,
+  FinalAnalysisSheet,
+} from './FinalAnalysisSheet'
 import { MissionContextBar } from './MissionContextBar'
 import {
   MissionRecapButton,
@@ -96,6 +102,7 @@ import {
 } from './MissionRecapSheet'
 import { MissionRoomsSidebar, type MissionSidebarRoom } from './MissionRoomsSidebar'
 import { PhotoCaptureButton } from './PhotoCaptureButton'
+import { PhotoMetadataModal, type PhotoVisionSuggestion } from './PhotoMetadataModal'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -486,6 +493,25 @@ export function MissionTchatInterface({
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
+  // ----- Mode Capture (par défaut) vs Conversation IA (MISSION-H lot 1) -----
+  // Persisté dans mission_sessions.captured_data.capture_mode via PATCH.
+  // Le mode Capture ne déclenche AUCUNE réponse Claude → flow terrain silencieux.
+  const [captureMode, setCaptureMode] = useState<CaptureMode>('capture')
+  const [captureModeLoaded, setCaptureModeLoaded] = useState<boolean>(false)
+
+  // ----- Analyse finale (MISSION-H lot 2) -----
+  const [analysisOpen, setAnalysisOpen] = useState<boolean>(false)
+  const [analysisLoading, setAnalysisLoading] = useState<boolean>(false)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [analysisResult, setAnalysisResult] = useState<FinalAnalysisResult | null>(null)
+
+  // ----- Photo metadata modal (MISSION-H lot 3) -----
+  const [photoModalOpen, setPhotoModalOpen] = useState<boolean>(false)
+  const [photoModalSuggestion, setPhotoModalSuggestion] = useState<PhotoVisionSuggestion | null>(
+    null,
+  )
+  const [photoModalLocalId, setPhotoModalLocalId] = useState<string | null>(null)
+
   // ----- MISSION-B : sync manager photos rafale -----
   // Démarre le job background photos pending → Supabase Storage + mission_photos.
   // Le snapshot { pending, uploading, synced, errors } est exposé via hook.
@@ -762,6 +788,47 @@ export function MissionTchatInterface({
 
   // Total des champs applicables (cible "X/Y" dans le récap)
   const fieldsTotal = CHECK_ITEMS_3CL_COUNT
+
+  // ----- Charge le capture_mode depuis mission_sessions.captured_data au mount -----
+  useEffect(() => {
+    let aborted = false
+    void (async () => {
+      try {
+        const res = await fetch(`/api/dossiers/${dossierId}/sessions/${sessionId}/mode`, {
+          cache: 'no-store',
+        })
+        if (!aborted && res.ok) {
+          const data = (await res.json()) as { capture_mode?: CaptureMode }
+          if (data.capture_mode === 'capture' || data.capture_mode === 'conversation') {
+            setCaptureMode(data.capture_mode)
+          }
+        }
+      } catch {
+        // Route optionnelle — défaut 'capture' si indisponible
+      } finally {
+        if (!aborted) setCaptureModeLoaded(true)
+      }
+    })()
+    return () => {
+      aborted = true
+    }
+  }, [dossierId, sessionId])
+
+  // Persiste le capture_mode au changement (debounce léger via PATCH async)
+  const updateCaptureMode = useCallback(
+    (next: CaptureMode) => {
+      setCaptureMode(next)
+      if (!captureModeLoaded) return
+      void fetch(`/api/dossiers/${dossierId}/sessions/${sessionId}/mode`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ capture_mode: next }),
+      }).catch(() => {
+        // Non bloquant — le state local reste correct, sera resync à la prochaine ouverture
+      })
+    },
+    [dossierId, sessionId, captureModeLoaded],
+  )
 
   // ----- Online / offline -----
   useEffect(() => {
@@ -1139,6 +1206,39 @@ export function MissionTchatInterface({
 
       setErrorMsg(null)
 
+      // ===== MISSION-H lot 1 : mode Capture silencieuse =====
+      // En mode Capture, on ajoute la bulle user mais on n'appelle PAS Claude.
+      // Le message est persisté en background (mission_text_notes via API) — on
+      // garde le state local pour l'affichage instantané.
+      if (captureMode === 'capture') {
+        if (!suppressUserBubble) {
+          const userMsg: ChatMessage = {
+            id: `user-${Date.now()}`,
+            role: 'user',
+            content: text,
+            createdAt: Date.now(),
+            isVoice: isListening,
+          }
+          setMessages((prev) => [...prev, userMsg])
+        }
+        setInput('')
+        // Persistence background (best-effort, non bloquant)
+        void fetch(`/api/dossiers/${dossierId}/notes`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            text,
+            roomId: activeRoomId,
+            source: isListening ? 'voice' : 'text',
+          }),
+        }).catch(() => {
+          // Le state local reste la source de vérité ; la queue de retry
+          // est gérée par le manager photos/voice existant.
+        })
+        return
+      }
+
       // ===== Lot MISSION-C : pré-extraction locale =====
       // On extrait les données structurées AVANT envoi serveur. Si l'intent est
       // simple (saisie pièce/surface) ET qu'on a une réponse locale pertinente,
@@ -1362,6 +1462,7 @@ export function MissionTchatInterface({
       messages,
       roomsCompleted,
       roomsSaved,
+      captureMode,
     ],
   )
 
@@ -1440,10 +1541,19 @@ export function MissionTchatInterface({
         photoRoomName: photo.roomName,
       }
       setMessages((prev) => [...prev, msg])
+      // MISSION-H lot 3 : en offline, on propose immédiatement la modale de
+      // classification (pièce/équipement/note) — pas d'IA Vision dispo.
+      // En online, la Vision IA tourne en background via le sync manager ; on
+      // n'ouvre PAS la modale automatiquement (le badge sur la photo permettra
+      // une correction manuelle si besoin).
+      if (!isOnline) {
+        setPhotoModalLocalId(photo.localId)
+        setPhotoModalSuggestion(null)
+      }
       // NB : on n'envoie PAS de message IA automatique (anti-spam de la conversation).
       // L'IA peut être interrogée explicitement via les quick replies "Photo prise".
     },
-    [],
+    [isOnline],
   )
 
   // ----- Pause -----
@@ -1492,6 +1602,78 @@ export function MissionTchatInterface({
     )
     router.push(`/dashboard/dossiers/${dossierId}`)
   }, [recap, dossierId, router])
+
+  // ----- MISSION-H lot 2 : déclenche l'analyse finale -----
+  const runFinalAnalysis = useCallback(async () => {
+    setAnalysisLoading(true)
+    setAnalysisError(null)
+    setAnalysisResult(null)
+    setAnalysisOpen(true)
+    try {
+      const res = await fetch(`/api/mission/${dossierId}/finalize-analysis`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      })
+      const data = (await res.json()) as
+        | { ok: true; summary: string; rooms: unknown; gaps: unknown; capturesCount: number }
+        | { ok: false; error: string }
+      if (!data.ok) {
+        setAnalysisError(data.error)
+        setAnalysisResult(null)
+      } else {
+        const rooms = Array.isArray(data.rooms) ? (data.rooms as FinalAnalysisResult['rooms']) : []
+        const gaps = Array.isArray(data.gaps) ? (data.gaps as FinalAnalysisGap[]) : []
+        setAnalysisResult({
+          summary: data.summary ?? '',
+          rooms,
+          gaps,
+          capturesCount: data.capturesCount,
+        })
+      }
+    } catch (err) {
+      setAnalysisError(err instanceof Error ? err.message : 'Erreur réseau')
+    } finally {
+      setAnalysisLoading(false)
+    }
+  }, [dossierId, sessionId])
+
+  const handleAddVoiceNoteForGap = useCallback((gap: FinalAnalysisGap) => {
+    setAnalysisOpen(false)
+    // Pré-remplit le composer avec un libellé contextuel pour amorcer la dictée
+    setInput(`À propos de ${gap.label} : `)
+    textareaRef.current?.focus()
+  }, [])
+
+  const handleExportToLiciel = useCallback(() => {
+    setAnalysisOpen(false)
+    router.push(`/dashboard/dossiers/${dossierId}/export`)
+  }, [dossierId, router])
+
+  // ----- MISSION-H lot 3 : photo metadata modal -----
+  // Affichée seulement en offline pour V1 (online = Vision IA auto via sync manager).
+  const handlePhotoMetadataConfirm = useCallback(
+    (_metadata: { room: string; equipment: string | null; note: string | null }) => {
+      // V1.5 : on logge la métadonnée en background (mission_text_notes attachée à la photo).
+      // Pour l'instant on ne fait que fermer la modal — l'UI se mettra à jour quand
+      // le sync manager poussera la photo + la metadata.
+      setPhotoModalLocalId(null)
+      setPhotoModalSuggestion(null)
+    },
+    [],
+  )
+
+  const handlePhotoMetadataSkip = useCallback(() => {
+    setPhotoModalLocalId(null)
+    setPhotoModalSuggestion(null)
+  }, [])
+
+  // Auto-open dès qu'un localId arrive (photo captée offline)
+  useEffect(() => {
+    if (photoModalLocalId && !photoModalOpen) {
+      setPhotoModalOpen(true)
+    }
+  }, [photoModalLocalId, photoModalOpen])
 
   // ----- Phase conversation pour quick replies -----
   const phase: ConversationPhase = useMemo(() => {
@@ -1551,6 +1733,12 @@ export function MissionTchatInterface({
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* MISSION-H lot 1 : toggle Capture / Conversation */}
+          <CaptureModeToggle
+            mode={captureMode}
+            onModeChange={updateCaptureMode}
+            disabled={isStreaming || isPaused}
+          />
           <Button
             type="button"
             variant="ghost"
@@ -1610,27 +1798,56 @@ export function MissionTchatInterface({
             ) : null}
           </div>
 
-          {/* Quick replies contextuelles */}
-          <div className="border-t border-rule/40 bg-paper/60 px-3 sm:px-6 py-2 shrink-0 overflow-x-auto">
-            <div className="mx-auto max-w-3xl flex items-center gap-2 min-w-fit">
-              {quickReplies.map((qr) => (
-                <button
-                  key={qr.label}
-                  type="button"
-                  onClick={() => void sendMessage(qr.message)}
-                  disabled={isStreaming || isPaused}
-                  className={cn(
-                    'shrink-0 rounded-pill border border-rule bg-paper px-3 py-1.5',
-                    'text-[12px] font-medium text-ink',
-                    'hover:bg-sage-alt hover:border-ink/30 transition-colors',
-                    'disabled:opacity-40 disabled:cursor-not-allowed',
-                  )}
-                >
-                  {qr.label}
-                </button>
-              ))}
+          {/* Quick replies (Conversation IA) OU bouton Analyser (Capture) */}
+          {captureMode === 'conversation' ? (
+            <div className="border-t border-rule/40 bg-paper/60 px-3 sm:px-6 py-2 shrink-0 overflow-x-auto">
+              <div className="mx-auto max-w-3xl flex items-center gap-2 min-w-fit">
+                {quickReplies.map((qr) => (
+                  <button
+                    key={qr.label}
+                    type="button"
+                    onClick={() => void sendMessage(qr.message)}
+                    disabled={isStreaming || isPaused}
+                    className={cn(
+                      'shrink-0 rounded-pill border border-rule bg-paper px-3 py-1.5',
+                      'text-[12px] font-medium text-ink',
+                      'hover:bg-sage-alt hover:border-ink/30 transition-colors',
+                      'disabled:opacity-40 disabled:cursor-not-allowed',
+                    )}
+                  >
+                    {qr.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            // MISSION-H lot 2 : bouton "Terminer et analyser" en mode Capture
+            // Visible UNIQUEMENT si ≥ 3 messages capturés (sinon pas grand chose à analyser)
+            <div className="border-t border-rule/40 bg-paper/60 px-3 sm:px-6 py-2 shrink-0">
+              <div className="mx-auto max-w-3xl flex items-center justify-between gap-2">
+                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
+                  Mode capture silencieuse · vos messages ne déclenchent pas d'IA
+                </p>
+                {messages.filter((m) => m.role === 'user').length >= 3 ? (
+                  <Button
+                    type="button"
+                    variant="accent"
+                    size="sm"
+                    onClick={() => void runFinalAnalysis()}
+                    disabled={isPaused || analysisLoading}
+                    className="gap-1.5"
+                  >
+                    <Sparkles className="size-3.5" aria-hidden />
+                    Terminer et analyser
+                  </Button>
+                ) : (
+                  <span className="font-mono text-[10px] text-ink-mute">
+                    {messages.filter((m) => m.role === 'user').length}/3 captures avant analyse
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Input bar sticky bottom */}
           <div className="border-t border-rule/70 bg-paper px-3 sm:px-5 py-3 shrink-0">
@@ -1691,7 +1908,9 @@ export function MissionTchatInterface({
                   placeholder={
                     isStreaming
                       ? "L'assistant rédige sa réponse…"
-                      : 'Tapez votre message — ou utilisez le micro'
+                      : captureMode === 'capture'
+                        ? 'Dictez ou écrivez votre observation…'
+                        : 'Tapez votre message — ou utilisez le micro'
                   }
                   disabled={isStreaming || isPaused}
                   rows={1}
@@ -1781,6 +2000,39 @@ export function MissionTchatInterface({
         riskFlags={riskFlags}
         onGoToField={handleGoToField}
         onFinish={handleFinishMission}
+      />
+
+      {/* MISSION-H lot 2 : sheet d'analyse finale (mode Capture) */}
+      <FinalAnalysisSheet
+        open={analysisOpen}
+        onOpenChange={(open) => {
+          setAnalysisOpen(open)
+          if (!open) {
+            setAnalysisError(null)
+          }
+        }}
+        result={analysisResult}
+        isLoading={analysisLoading}
+        error={analysisError}
+        onAddVoiceNoteForGap={handleAddVoiceNoteForGap}
+        onExport={handleExportToLiciel}
+        onRetry={() => void runFinalAnalysis()}
+      />
+
+      {/* MISSION-H lot 3 : modal métadonnées photo (offline OU correction manuelle) */}
+      <PhotoMetadataModal
+        open={photoModalOpen}
+        onOpenChange={(open) => {
+          setPhotoModalOpen(open)
+          if (!open) {
+            setPhotoModalLocalId(null)
+            setPhotoModalSuggestion(null)
+          }
+        }}
+        suggestion={photoModalSuggestion}
+        knownRooms={rooms.map((r) => r.name)}
+        onConfirm={handlePhotoMetadataConfirm}
+        onSkip={handlePhotoMetadataSkip}
       />
     </>
   )

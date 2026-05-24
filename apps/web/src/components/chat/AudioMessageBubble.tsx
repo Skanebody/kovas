@@ -49,7 +49,23 @@ export function AudioMessageBubble({
   const [currentTime, setCurrentTime] = useState(0)
   const [loadedDuration, setLoadedDuration] = useState<number | null>(null)
 
-  const effectiveDuration = loadedDuration ?? duration
+  // ── Fallback Web Audio API (Safari ne sait pas décoder certains blobs MediaRecorder)
+  // Si <audio> élément refuse la source (NotSupportedError), on tente le décodage via
+  // AudioContext.decodeAudioData puis lecture via AudioBufferSourceNode. La signed
+  // URL HTTP Whisper remplacera de toutes façons l'objectURL local quelques secondes
+  // plus tard — c'est juste un patch UX pour la fenêtre où seul le blob local existe.
+  const webAudioCtxRef = useRef<AudioContext | null>(null)
+  const webAudioBufferRef = useRef<AudioBuffer | null>(null)
+  const webAudioSourceRef = useRef<AudioBufferSourceNode | null>(null)
+  const webAudioStartedAtRef = useRef<number>(0)
+  const webAudioOffsetRef = useRef<number>(0)
+  const timeRafRef = useRef<number | null>(null)
+  const [useWebAudioFallback, setUseWebAudioFallback] = useState(false)
+  const [webAudioFatal, setWebAudioFatal] = useState(false)
+
+  const effectiveDuration = useWebAudioFallback
+    ? (webAudioBufferRef.current?.duration ?? duration)
+    : (loadedDuration ?? duration)
 
   // ── Listeners audio element ────────────────────────────────────────
   useEffect(() => {
@@ -81,29 +97,146 @@ export function AudioMessageBubble({
     }
   }, [])
 
+  // ── Cleanup Web Audio à l'unmount ──────────────────────────────────
+  useEffect(() => {
+    return () => {
+      if (timeRafRef.current != null) cancelAnimationFrame(timeRafRef.current)
+      try {
+        webAudioSourceRef.current?.stop()
+      } catch {
+        /* déjà stoppé */
+      }
+      webAudioSourceRef.current?.disconnect()
+      webAudioSourceRef.current = null
+      void webAudioCtxRef.current?.close()
+      webAudioCtxRef.current = null
+    }
+  }, [])
+
+  // ── Reset les états quand l'URL change (swap blob:… → signed URL Whisper) ──
+  useEffect(() => {
+    // Si l'URL change après un fallback, on tente d'abord à nouveau le <audio>.
+    setUseWebAudioFallback(false)
+    setWebAudioFatal(false)
+    setPlayError(null)
+    setIsPlaying(false)
+    setCurrentTime(0)
+    webAudioBufferRef.current = null
+    webAudioOffsetRef.current = 0
+  }, [])
+
+  // ── Fallback : tente de décoder le blob via Web Audio API ───────────
+  const tryWebAudioFallback = useCallback(async (): Promise<boolean> => {
+    try {
+      const AudioCtxCtor =
+        window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      if (!AudioCtxCtor) return false
+      const ctx = webAudioCtxRef.current ?? new AudioCtxCtor()
+      webAudioCtxRef.current = ctx
+      const res = await fetch(audioUrl)
+      const buf = await res.arrayBuffer()
+      const decoded = await ctx.decodeAudioData(buf.slice(0))
+      webAudioBufferRef.current = decoded
+      setUseWebAudioFallback(true)
+      return true
+    } catch (err) {
+      console.warn('[AudioMessageBubble] Web Audio fallback failed', err)
+      setWebAudioFatal(true)
+      return false
+    }
+  }, [audioUrl])
+
+  // ── Animation frame pour suivre currentTime en mode Web Audio ────────
+  const tickWebAudio = useCallback(() => {
+    const ctx = webAudioCtxRef.current
+    if (!ctx || !webAudioBufferRef.current) return
+    const elapsed = ctx.currentTime - webAudioStartedAtRef.current + webAudioOffsetRef.current
+    const dur = webAudioBufferRef.current.duration
+    if (elapsed >= dur) {
+      setCurrentTime(dur)
+      setIsPlaying(false)
+      webAudioOffsetRef.current = 0
+      return
+    }
+    setCurrentTime(elapsed)
+    timeRafRef.current = requestAnimationFrame(tickWebAudio)
+  }, [])
+
+  // ── Lecture / pause Web Audio ────────────────────────────────────────
+  const playWebAudio = useCallback(() => {
+    const ctx = webAudioCtxRef.current
+    const buffer = webAudioBufferRef.current
+    if (!ctx || !buffer) return
+    if (ctx.state === 'suspended') void ctx.resume()
+    const src = ctx.createBufferSource()
+    src.buffer = buffer
+    src.connect(ctx.destination)
+    src.onended = () => {
+      // Distingue "fini" vs "stoppé manuellement" via offset
+      if (webAudioOffsetRef.current === 0) {
+        setIsPlaying(false)
+        setCurrentTime(0)
+      }
+    }
+    const startOffset = webAudioOffsetRef.current
+    src.start(0, startOffset)
+    webAudioSourceRef.current = src
+    webAudioStartedAtRef.current = ctx.currentTime
+    setIsPlaying(true)
+    if (timeRafRef.current != null) cancelAnimationFrame(timeRafRef.current)
+    timeRafRef.current = requestAnimationFrame(tickWebAudio)
+  }, [tickWebAudio])
+
+  const pauseWebAudio = useCallback(() => {
+    const ctx = webAudioCtxRef.current
+    if (!ctx) return
+    const elapsed = ctx.currentTime - webAudioStartedAtRef.current + webAudioOffsetRef.current
+    webAudioOffsetRef.current = elapsed
+    try {
+      webAudioSourceRef.current?.stop()
+    } catch {
+      /* déjà arrêté */
+    }
+    webAudioSourceRef.current?.disconnect()
+    webAudioSourceRef.current = null
+    if (timeRafRef.current != null) cancelAnimationFrame(timeRafRef.current)
+    timeRafRef.current = null
+    setIsPlaying(false)
+  }, [])
+
   // ── Toggle play / pause ─────────────────────────────────────────────
   const [playError, setPlayError] = useState<string | null>(null)
   const handleToggle = useCallback(() => {
+    // Mode fallback Web Audio actif
+    if (useWebAudioFallback) {
+      if (isPlaying) pauseWebAudio()
+      else playWebAudio()
+      return
+    }
     const a = audioRef.current
     if (!a) {
       console.error('[AudioMessageBubble] audioRef.current is null')
       return
     }
-    // Log debug : état audio + url avant tentative play
-    console.debug('[AudioMessageBubble] toggle', {
-      paused: a.paused,
-      readyState: a.readyState,
-      networkState: a.networkState,
-      currentSrc: a.currentSrc,
-      audioUrl,
-      duration: a.duration,
-      error: a.error?.code,
-    })
     if (a.paused) {
       void a
         .play()
         .then(() => setPlayError(null))
         .catch((err: unknown) => {
+          const name = err instanceof Error ? err.name : ''
+          // NotSupportedError sur Safari = blob audio/mp4 que <audio> refuse.
+          // On tente le fallback Web Audio API silencieusement.
+          if (name === 'NotSupportedError' || name === 'NotAllowedError') {
+            void tryWebAudioFallback().then((ok) => {
+              if (ok) playWebAudio()
+              else {
+                setPlayError('Audio illisible — sera rejouable après analyse')
+                setIsPlaying(false)
+              }
+            })
+            return
+          }
           const msg =
             err instanceof Error ? `${err.name}: ${err.message}` : 'Erreur lecture inconnue'
           console.error('[AudioMessageBubble] play() failed', err, { audioUrl })
@@ -113,20 +246,28 @@ export function AudioMessageBubble({
     } else {
       a.pause()
     }
-  }, [audioUrl])
+  }, [audioUrl, useWebAudioFallback, isPlaying, playWebAudio, pauseWebAudio, tryWebAudioFallback])
 
   // ── Click sur la barre de progression : seek ─────────────────────────
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
-      const a = audioRef.current
-      if (!a) return
       const rect = e.currentTarget.getBoundingClientRect()
       const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
       const target = pct * effectiveDuration
+      if (useWebAudioFallback) {
+        const wasPlaying = isPlaying
+        if (wasPlaying) pauseWebAudio()
+        webAudioOffsetRef.current = target
+        setCurrentTime(target)
+        if (wasPlaying) playWebAudio()
+        return
+      }
+      const a = audioRef.current
+      if (!a) return
       a.currentTime = target
       setCurrentTime(target)
     },
-    [effectiveDuration],
+    [effectiveDuration, useWebAudioFallback, isPlaying, pauseWebAudio, playWebAudio],
   )
 
   const progress = effectiveDuration > 0 ? Math.min(1, currentTime / effectiveDuration) : 0
@@ -156,18 +297,18 @@ export function AudioMessageBubble({
           className="hidden"
           onError={(e) => {
             const a = e.currentTarget
-            console.error('[AudioMessageBubble] <audio> error', {
+            console.warn('[AudioMessageBubble] <audio> error → trying Web Audio fallback', {
               code: a.error?.code,
-              message: a.error?.message,
-              audioUrl,
-              networkState: a.networkState,
-              readyState: a.readyState,
+              audioUrl: audioUrl.slice(0, 60),
             })
-            setPlayError(
-              a.error
-                ? `Audio illisible (code ${a.error.code})`
-                : 'Audio illisible (source invalide)',
-            )
+            // Tente le décodage Web Audio API avant d'afficher une erreur.
+            void tryWebAudioFallback().then((ok) => {
+              if (!ok && !webAudioFatal) {
+                setPlayError('Audio illisible — sera rejouable après analyse')
+              } else {
+                setPlayError(null)
+              }
+            })
           }}
         />
 
@@ -233,7 +374,13 @@ export function AudioMessageBubble({
         </span>
       </div>
       {playError ? (
-        <p className={cn('text-[11px] font-mono px-1', 'text-accent-red')} role="alert">
+        <p
+          className={cn(
+            'text-[11px] font-mono italic px-1',
+            variant === 'user' ? 'text-ink/60' : 'text-ink-mute',
+          )}
+          role="alert"
+        >
           {playError}
         </p>
       ) : null}
