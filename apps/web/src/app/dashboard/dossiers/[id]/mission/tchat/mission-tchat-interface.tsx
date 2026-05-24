@@ -1858,29 +1858,38 @@ export function MissionTchatInterface({
             </div>
           ) : (
             // MISSION-H lot 2 : bouton "Terminer et analyser" en mode Capture
-            // Visible UNIQUEMENT si ≥ 3 messages capturés (sinon pas grand chose à analyser)
+            // Toujours visible — Benjamin décide quand sa session est terminée.
+            // Désactivé uniquement si AUCUN message user n'a été capturé.
             <div className="border-t border-rule/40 bg-paper/60 px-3 sm:px-6 py-2 shrink-0">
               <div className="mx-auto max-w-3xl flex items-center justify-between gap-2">
                 <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
                   Mode capture silencieuse · vos messages ne déclenchent pas d'IA
                 </p>
-                {messages.filter((m) => m.role === 'user').length >= 3 ? (
-                  <Button
-                    type="button"
-                    variant="accent"
-                    size="sm"
-                    onClick={() => void runFinalAnalysis()}
-                    disabled={isPaused || analysisLoading}
-                    className="gap-1.5"
-                  >
-                    <Sparkles className="size-3.5" aria-hidden />
-                    Terminer et analyser
-                  </Button>
-                ) : (
-                  <span className="font-mono text-[10px] text-ink-mute">
-                    {messages.filter((m) => m.role === 'user').length}/3 captures avant analyse
-                  </span>
-                )}
+                <Button
+                  type="button"
+                  variant="accent"
+                  size="sm"
+                  onClick={() => void runFinalAnalysis()}
+                  disabled={
+                    isPaused ||
+                    analysisLoading ||
+                    messages.filter((m) => m.role === 'user').length === 0
+                  }
+                  className="gap-1.5"
+                  title={
+                    messages.filter((m) => m.role === 'user').length === 0
+                      ? 'Dictez ou écrivez au moins une observation avant de lancer l’analyse'
+                      : undefined
+                  }
+                >
+                  <Sparkles className="size-3.5" aria-hidden />
+                  Terminer et analyser
+                  {messages.filter((m) => m.role === 'user').length > 0 ? (
+                    <span className="font-mono text-[10px] opacity-70">
+                      · {messages.filter((m) => m.role === 'user').length}
+                    </span>
+                  ) : null}
+                </Button>
               </div>
             </div>
           )}

@@ -26,7 +26,10 @@ export const runtime = 'nodejs'
 export const maxDuration = 90
 
 const MODEL = process.env.ANTHROPIC_CONSOLIDATION_MODEL ?? 'claude-sonnet-4-6'
-const MIN_CAPTURES = 3
+// Pas de seuil minimum : Benjamin a explicitement demandé que l'utilisateur
+// décide quand il a terminé sa session. On rejette uniquement si capturesCount = 0
+// (cas où aucune donnée n'est dispo et l'IA n'a rien à analyser).
+const MIN_CAPTURES = 1
 
 interface FinalAnalysisGap {
   field: string
@@ -183,7 +186,7 @@ export async function POST(
     return NextResponse.json(
       {
         ok: false,
-        error: `Pas assez de captures pour analyser (minimum ${MIN_CAPTURES}, vous en avez ${capturesCount}). Continuez à dicter vos observations.`,
+        error: `Aucune capture trouvée pour cette session. Dictez ou écrivez au moins une observation, puis relancez l'analyse.`,
       },
       { status: 400 },
     )
