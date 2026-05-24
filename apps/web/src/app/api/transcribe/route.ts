@@ -161,7 +161,8 @@ export async function POST(request: Request) {
           status: 'transcribed',
           transcribed_at: new Date().toISOString(),
           file_size_bytes: file.size,
-          transcription_status: 'completed',
+          // CHECK constraint : ne tolère que pending|processing|transcribed|failed|skipped
+          transcription_status: 'transcribed',
           transcription_model: model,
           transcription_cost_usd: costEur,
         } as never)
