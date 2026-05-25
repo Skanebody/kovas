@@ -1,10 +1,20 @@
 /**
  * KOVAS — Rate limiter pour l'API publique v1.
  *
- * Stratégie cascade :
+ * Stratégie cascade (résiliente) :
  *   1. Si UPSTASH_REDIS_REST_URL + TOKEN définis → Upstash Redis sliding window
  *      (production-grade, distribué, persistent).
- *   2. Sinon → in-memory Map (dev / staging / fallback).
+ *   2. Si Upstash retourne une erreur réseau / 5xx → fallback in-memory automatique
+ *      (try/catch ligne ~119, console.warn en monitoring).
+ *   3. Si env vars absentes → in-memory direct (dev / staging).
+ *
+ * ⚠️  EN PROD : configurer impérativement les 2 env vars Upstash. Sans elles,
+ *     chaque lambda Vercel a son propre Map → un attaquant peut multiplier les
+ *     requêtes en hammering plusieurs instances. Le rate-limit reste actif mais
+ *     n'est PAS distribué.
+ *
+ * Guide de provisionnement Upstash (étape par étape pour Benjamin) :
+ *   → docs/refonte-2026-05/UPSTASH-SETUP.md
  *
  * Limites par défaut (override via params) :
  *   - Anonyme (IP)   : 60 requêtes / minute
@@ -14,6 +24,7 @@
  *   - X-RateLimit-Limit
  *   - X-RateLimit-Remaining
  *   - X-RateLimit-Reset (epoch seconds)
+ *   - X-RateLimit-Source ('upstash' | 'memory')
  *   - Retry-After (seconds, si 429)
  *
  * Authority : REFONTE-ACQUI-TARGET-V2 §10 API publique.
