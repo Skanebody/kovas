@@ -126,6 +126,41 @@ export function GET() {
           },
         },
       },
+      '/department/{deptCode}': {
+        get: {
+          summary: 'Distribution DPE par classe pour un département',
+          description:
+            "Répartition des étiquettes DPE (A-G) sur les 24 derniers mois pour un département français. Code 2 chars métropole (01-95) + 2A/2B Corse, 3 chars outre-mer (971-976). Source ADEME. Cache 6h.",
+          parameters: [
+            {
+              name: 'deptCode',
+              in: 'path',
+              required: true,
+              schema: { type: 'string', pattern: '^(0[1-9]|[1-8][0-9]|9[0-5]|2A|2B|97[1-6])$' },
+              description: 'Code département (ex: 75 Paris, 2A Corse-du-Sud, 974 La Réunion)',
+            },
+            {
+              name: 'X-API-Key',
+              in: 'header',
+              required: false,
+              schema: { type: 'string' },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'Distribution DPE par classe',
+              content: {
+                'application/json': { schema: { $ref: '#/components/schemas/DepartmentDpeDist' } },
+              },
+            },
+            '400': { description: 'Code département invalide' },
+            '404': { description: "Aucune donnée pour ce département (24 derniers mois)" },
+            '429': { description: 'Rate limit dépassé' },
+            '500': { description: 'Erreur serveur' },
+            '503': { description: 'Data lake indisponible' },
+          },
+        },
+      },
     },
     components: {
       schemas: {
@@ -156,6 +191,37 @@ export function GET() {
                 partial_failures: { type: 'array', items: { type: 'string' } },
               },
             },
+          },
+        },
+        DepartmentDpeDist: {
+          type: 'object',
+          properties: {
+            api_version: { type: 'string', const: '1.0' },
+            generated_at: { type: 'string', format: 'date-time' },
+            department_code: { type: 'string' },
+            region: { type: 'string' },
+            window: { type: 'string', const: '24 derniers mois' },
+            total_dpe: { type: 'integer' },
+            class_distribution: {
+              type: 'object',
+              properties: {
+                A: { type: 'integer' },
+                B: { type: 'integer' },
+                C: { type: 'integer' },
+                D: { type: 'integer' },
+                E: { type: 'integer' },
+                F: { type: 'integer' },
+                G: { type: 'integer' },
+              },
+            },
+            passoires: {
+              type: 'object',
+              properties: {
+                count: { type: 'integer' },
+                ratio_pct: { type: 'number', nullable: true },
+              },
+            },
+            methodology: { type: 'object' },
           },
         },
         CommuneStats: {

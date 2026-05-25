@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
+  BarChart3,
   BookOpen,
   Building2,
   Camera,
@@ -65,6 +66,15 @@ const LIVE_ENDPOINTS: LiveEndpoint[] = [
       'Statistiques DPE + DVF agrégées par commune (code INSEE) : % passoires F-G, volume DPE 24 mois, prix médian, avg €/m² 12 mois.',
     example_curl: 'curl https://kovas.fr/api/public/v1/commune/75056',
     source: 'ADEME ademe_dpe + Etalab DVF',
+  },
+  {
+    icon: BarChart3,
+    method: 'GET',
+    path: '/api/public/v1/department/{deptCode}',
+    description:
+      'Distribution DPE par classe (A-G) sur 24 mois pour un département (01-95, 2A/2B Corse, 971-976 outre-mer).',
+    example_curl: 'curl https://kovas.fr/api/public/v1/department/75',
+    source: 'ADEME ademe_dpe (agg INSEE prefix)',
   },
 ]
 
