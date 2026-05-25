@@ -60,6 +60,8 @@ const PROS_REDIRECTS: Record<string, string> = {
   '/pros/comparatif': '/comparatif',
   '/pros/api': '/api-publique',
   '/pros/api-publique': '/api-publique',
+  // Lot B63 — legacy /pros/aide vers le nouveau centre d'aide racine
+  '/pros/aide': '/aide',
 }
 
 function matchProsRedirect(pathname: string): string | null {

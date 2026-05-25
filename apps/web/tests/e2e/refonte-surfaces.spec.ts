@@ -240,3 +240,28 @@ test.describe('Refonte — /tarifs grille V5 mockup (Lot B43)', () => {
     expect(count).toBeGreaterThanOrEqual(4)
   })
 })
+
+test.describe('Refonte — /aide + /guides + /pros/aide (Lot B63)', () => {
+  test("GET /aide répond 200 (page centre d'aide existe)", async ({ request }) => {
+    const res = await request.get('/aide')
+    expect(res.status()).toBe(200)
+    const body = await res.text()
+    // Tokens éditoriaux sobres attendus (avatar professionnel)
+    expect(body).toContain('Aide')
+    expect(body).toContain('contact@kovas.fr')
+  })
+
+  test('GET /guides redirige (307/308) vers /guide (alias pluriel)', async ({ request }) => {
+    const res = await request.get('/guides', { maxRedirects: 0 })
+    expect([307, 308]).toContain(res.status())
+    const location = res.headers().location ?? ''
+    // Next.js redirect() peut renvoyer un path absolu ou relatif
+    expect(location.endsWith('/guide')).toBe(true)
+  })
+
+  test('GET /pros/aide redirige (301) vers /aide (legacy /pros/*)', async ({ request }) => {
+    const res = await request.get('/pros/aide', { maxRedirects: 0 })
+    expect(res.status()).toBe(301)
+    expect(res.headers().location).toBe('/aide')
+  })
+})
