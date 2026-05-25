@@ -1,11 +1,12 @@
 /**
- * E2E Playwright — surfaces neuves de la refonte acqui-target (Lot B38).
+ * E2E Playwright — surfaces neuves de la refonte acqui-target (Lot B38 + B44).
  *
  * Couvre les comportements infrastructure-level qui ne dépendent pas du
  * contenu DB (donc stables en CI sans seed) :
  *   - Redirects 301 /pros/* → /* (Lot B33)
  *   - Admin gate /admin/* anon → / (sécurité)
  *   - /tarifs 3 onglets canoniques + deep-link ?tab= (Lot B34)
+ *   - /tarifs grille V5 — 4/3/5 tiers + Enterprise + Add-ons + Loyalty (Lot B43, ajoutés B44)
  *   - Homepage 8 sections cibles + CTA conversion (Lot B35)
  *   - API publique v1 path renommé toujours fonctionnel (regression)
  *
@@ -117,5 +118,102 @@ test.describe('Refonte — API publique v1 regression (Lot B19/B25)', () => {
     expect(res.status()).toBe(200)
     const spec = await res.json()
     expect(spec.openapi).toBe('3.1.0')
+  })
+})
+
+test.describe('Refonte — /tarifs grille V5 mockup (Lot B43)', () => {
+  test('Hero "Le logiciel fait pour toi" + meta promesses visibles', async ({ page }) => {
+    await page.goto('/tarifs')
+    await expect(page.locator('h1').first()).toContainText(/Le logiciel/i)
+    await expect(page.locator('h1').first()).toContainText(/fait pour toi/i)
+    // Meta promesses du header
+    await expect(page.getByText(/À partir de 29€\/mois/i)).toBeVisible()
+    await expect(page.getByText(/Compatible Liciel, ORIS, OBBC/i)).toBeVisible()
+  })
+
+  test('Onglet Logiciel : 4 tiers Solo / Pro / Cabinet / Cabinet+ avec prix exacts', async ({
+    page,
+  }) => {
+    await page.goto('/tarifs')
+    // Tier names — repère via le span uppercase tracking
+    await expect(page.getByText(/^Solo$/).first()).toBeVisible()
+    await expect(page.getByText(/^Pro$/).first()).toBeVisible()
+    await expect(page.getByText(/^Cabinet$/).first()).toBeVisible()
+    await expect(page.getByText(/Cabinet\+/).first()).toBeVisible()
+    // Prix : 29, 79, 199, 499 (servis comme texte dans .tier-price)
+    await expect(page.getByText('29', { exact: false }).first()).toBeVisible()
+    await expect(page.getByText('79', { exact: false }).first()).toBeVisible()
+    await expect(page.getByText('199', { exact: false }).first()).toBeVisible()
+    await expect(page.getByText('499', { exact: false }).first()).toBeVisible()
+  })
+
+  test('Tier Pro est featured avec badge "Le plus populaire"', async ({ page }) => {
+    await page.goto('/tarifs')
+    await expect(page.getByText(/Le plus populaire/i).first()).toBeVisible()
+  })
+
+  test('Enterprise card visible avec CTA "Parlons-en"', async ({ page }) => {
+    await page.goto('/tarifs')
+    await expect(page.getByText(/^Enterprise$/i).first()).toBeVisible()
+    await expect(page.getByText(/Tu pilotes un réseau/i)).toBeVisible()
+    await expect(page.getByRole('link', { name: /Parlons-en/i })).toBeVisible()
+  })
+
+  test('Onglet Annuaire : 3 tiers Présence / Boost / Premium', async ({ page }) => {
+    await page.goto('/tarifs?tab=annuaire')
+    await expect(page.getByText(/Présence/).first()).toBeVisible()
+    await expect(page.getByText(/^Boost$/).first()).toBeVisible()
+    await expect(page.getByText(/^Premium$/).first()).toBeVisible()
+    // Badge "Recommandé" sur Boost
+    await expect(page.getByText(/Recommandé/i).first()).toBeVisible()
+  })
+
+  test('Onglet Bundles : 5 bundles avec économies affichées', async ({ page }) => {
+    await page.goto('/tarifs?tab=bundles')
+    await expect(page.getByText(/Démarrage/i).first()).toBeVisible()
+    await expect(page.getByText(/Croissance/i).first()).toBeVisible()
+    await expect(page.getByText(/Acquisition/i).first()).toBeVisible()
+    // Best value badge sur Croissance
+    await expect(page.getByText(/Best value/i).first()).toBeVisible()
+    // Économies (au moins 1 visible)
+    await expect(page.getByText(/Économie/i).first()).toBeVisible()
+  })
+
+  test('Section "Options en plus" — 3 add-ons (Utilisateur, Vérif, Quota)', async ({ page }) => {
+    await page.goto('/tarifs')
+    await expect(page.getByText(/Options/i).first()).toBeVisible()
+    await expect(page.getByText(/Utilisateur en plus/i)).toBeVisible()
+    await expect(page.getByText(/Vérification renforcée/i)).toBeVisible()
+    await expect(page.getByText(/Au-delà du quota/i)).toBeVisible()
+  })
+
+  test('Section "Fidélité progressive" — 4 paliers (15%, 5%, 10%, Partenaire)', async ({
+    page,
+  }) => {
+    await page.goto('/tarifs')
+    await expect(page.getByText(/Fidélité/i).first()).toBeVisible()
+    await expect(page.getByText(/Paiement annuel/i)).toBeVisible()
+    await expect(page.getByText(/Après 12 mois/i)).toBeVisible()
+    await expect(page.getByText(/Après 24 mois/i)).toBeVisible()
+    await expect(page.getByText(/Partenaire fondateur/i)).toBeVisible()
+    await expect(page.getByText(/−15%/).first()).toBeVisible()
+  })
+
+  test('Footer 5 promesses (essai 30j, satisfait/remboursé 60j, résiliation 2 clics, etc.)', async ({
+    page,
+  }) => {
+    await page.goto('/tarifs')
+    await expect(page.getByText(/Essai 30 jours/i).first()).toBeVisible()
+    await expect(page.getByText(/Satisfait ou remboursé/i).first()).toBeVisible()
+    await expect(page.getByText(/Résiliation en 2 clics/i)).toBeVisible()
+    await expect(page.getByText(/Hébergement France/i)).toBeVisible()
+  })
+
+  test('CTA "Essai 30 jours" présent sur tous les tiers (links vers /signup)', async ({ page }) => {
+    await page.goto('/tarifs')
+    // Au moins 4 liens "Essai 30 jours" (1 par tier Logiciel)
+    const essaiLinks = page.getByRole('link', { name: /Essai 30 jours/i })
+    const count = await essaiLinks.count()
+    expect(count).toBeGreaterThanOrEqual(4)
   })
 })
