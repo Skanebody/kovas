@@ -13,8 +13,8 @@
 - **Build production `next build`** : ✅ vert (B39 + B43 — 2781 pages SSG, 0 erreur, pricing V5 appliqué)
 - **Pricing V5 (mockup 2026-05-25)** : Logiciel 29/79/199/499€ + Annuaire 19/39/79€ + Bundles 39/89/99/229/529€ — sweep transversal 21 fichiers (Lot B43)
 - **AI Economics doc** : `docs/refonte-2026-05/AI_ECONOMICS.md` — 15 techniques d'optimisation tokens, 9/15 ✅ déjà en prod
-- **Tests Vitest** : **248 tests** pure-fn + rate-limit + helpers fiche publique + adaptateur IO mocké + cascading IA + equipment cache
-- **AI techniques** : 9/15 ✅ → **11/15 ✅** (B47 cascading dynamique + B48 equipment cache app-level)
+- **Tests Vitest** : **267 tests** pure-fn + rate-limit + helpers fiche publique + adaptateur IO mocké + cascading IA + equipment cache + incremental recompute
+- **AI techniques** : 9/15 ✅ → **12/15 ✅** (B47 cascading + B48 equipment cache + B49 incremental recompute)
 - **Tests E2E Playwright** : **34 tests** (API publique + redirects 301 + admin gate + tarifs onglets + homepage + grille V5 mockup)
 
 ## Algorithmes A1.3.* — 13 / 13 livrés ✅
@@ -162,10 +162,11 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 | `lib/diag-availability-fetch.test.ts` | 8 | (B42) |
 | `lib/ai/cascading.test.ts` | 18 | (B47) |
 | `lib/cache/equipment-models.test.ts` | 29 | (B48) |
+| `lib/ai/incremental-recompute.test.ts` | 19 | (B49) |
 | `tests/e2e/api-public-v1.spec.ts` | 10 | `c6ad3d3` |
 | `tests/e2e/refonte-surfaces.spec.ts` | 24 | (B38 + B44) |
 
-**Total : 248 unit + 34 e2e = 282 tests dédiés au refonte.**
+**Total : 267 unit + 34 e2e = 301 tests dédiés au refonte.**
 
 Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 
