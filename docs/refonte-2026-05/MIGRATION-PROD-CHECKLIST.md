@@ -1,6 +1,6 @@
-# Checklist migration Supabase prod — Refonte acqui-target 2026-05 (Lot B52)
+# Checklist migration Supabase prod — Refonte acqui-target 2026-05 (Lot B52 + B54 + B55)
 
-> **Authority** : ce document est le runbook canonique pour appliquer en prod les **6 migrations refonte** de la branche `refonte-acqui-target-2026-05` + les **7 Edge Functions** + les **7 secrets Vault**.
+> **Authority** : ce document est le runbook canonique pour appliquer en prod les **8 migrations refonte** de la branche `refonte-acqui-target-2026-05` (6 du Lot B52 + 1 fix Lot B54 + 1 perf Lot B55) + les **7 Edge Functions** + les **7 secrets Vault**.
 > **Public** : Benjamin Bel (exécutant).
 > **Date cible d'application** : à planifier sur fenêtre low-traffic (suggestion : mardi soir 22h-23h CET).
 > **Pré-requis** : `supabase` CLI ≥ 1.200 installée + accès owner projet `kovas-prod` + accès Vercel prod.
@@ -9,7 +9,7 @@
 
 ## 0. Vue d'ensemble
 
-### Les 6 migrations à appliquer (ordre alphabétique = chronologique)
+### Les 8 migrations à appliquer (ordre alphabétique = chronologique)
 
 | # | Fichier | Catégorie | Risque | Reversible facile ? |
 |---|---|---|---|---|
@@ -19,8 +19,10 @@
 | 4 | `20260525230000_v_etat_profession.sql` | 2 VIEWS (CREATE OR REPLACE) | Très faible | Oui (DROP VIEW) |
 | 5 | `20260525240000_mission_flow_state.sql` | DDL (2 tables + RLS + 1 RPC) | Faible | Oui (DROP TABLE CASCADE + DROP FUNCTION) |
 | 6 | `20260525250000_diagnostician_response_metrics.sql` | 1 index partiel + 1 RPC | Très faible | Oui (DROP INDEX + DROP FUNCTION) |
+| 7 | `20260526100000_matview_first_refresh.sql` | **Fix B54 — matview 1st refresh** (REFRESH sans CONCURRENTLY pour amorcer les 2 matviews `analytics.*`) | Nul (DO block avec EXCEPTION WHEN OTHERS) | Sans objet (purement runtime, pas de DDL) |
+| 8 | `20260526110000_route_lead_postgis.sql` | **Perf B55 — Haversine → PostGIS** (1 index GIST expression partiel + CREATE OR REPLACE de `route_lead_rank_candidates` avec `ST_DWithin(geography)` à la place de la formule Haversine maison) | Très faible (CREATE OR REPLACE FUNCTION, signature identique) | Oui (DROP INDEX + restaurer la version Haversine via migration 3) |
 
-**Toutes les migrations sont idempotentes** (`CREATE TABLE IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `CREATE OR REPLACE VIEW`).
+**Toutes les migrations sont idempotentes** (`CREATE TABLE IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `CREATE OR REPLACE VIEW`, et pour B54 : `REFRESH MATERIALIZED VIEW` sans `CONCURRENTLY` rejouable + bloc `DO ... EXCEPTION WHEN OTHERS THEN NULL`).
 
 ### Downtime estimé : **0 minute**
 
@@ -112,6 +114,8 @@ Applying migration 20260525220000_lead_scoring_a135.sql...
 Applying migration 20260525230000_v_etat_profession.sql...
 Applying migration 20260525240000_mission_flow_state.sql...
 Applying migration 20260525250000_diagnostician_response_metrics.sql...
+Applying migration 20260526100000_matview_first_refresh.sql...
+Applying migration 20260526110000_route_lead_postgis.sql...
 Finished supabase db push.
 ```
 
@@ -296,13 +300,22 @@ ORDER BY grantee;
 
 ### 3.7 Refresh des matviews data lake
 
-Les 2 matviews `analytics.*` sont créées `WITH NO DATA`. Premier remplissage manuel :
+Les 2 matviews `analytics.*` sont créées `WITH NO DATA` par la migration 1. **Fix B54** (migration 7 `20260526100000_matview_first_refresh.sql`) les amorce automatiquement par un `REFRESH MATERIALIZED VIEW` (sans `CONCURRENTLY`) pour qu'elles soient considérées comme "populated" par Postgres et acceptent ensuite les refresh `CONCURRENTLY` de l'Edge Function `refresh-data-lake-matviews` (cron 06h CET quotidien).
+
+Vérification optionnelle (devrait remonter 0 lignes mais pas d'erreur) :
 
 ```sql
-REFRESH MATERIALIZED VIEW analytics.passoires_thermiques_by_commune;
-REFRESH MATERIALIZED VIEW analytics.transactions_history_by_commune;
--- Attendu : ne renvoie rien (tables ademe_dpe et dvf_mutations encore vides → matviews vides)
--- Le refresh CONCURRENTLY ne sera utilisable qu'après la 1re ingestion (1 ligne minimum).
+-- A. Confirme que les 2 matviews sont peuplées (état Postgres, pas le contenu)
+SELECT schemaname, matviewname, ispopulated
+FROM pg_matviews
+WHERE schemaname = 'analytics'
+ORDER BY matviewname;
+-- Attendu : 2 lignes, ispopulated = true partout (grâce au fix B54)
+
+-- B. Refresh CONCURRENTLY de test (utile uniquement si déjà des données ingérées)
+REFRESH MATERIALIZED VIEW CONCURRENTLY analytics.passoires_thermiques_by_commune;
+REFRESH MATERIALIZED VIEW CONCURRENTLY analytics.transactions_history_by_commune;
+-- Attendu : ne renvoie rien, pas d'erreur. À J+0 les tables sources sont vides → matviews vides.
 ```
 
 ---
@@ -551,6 +564,7 @@ Le cron `send-monthly-press-release` lance la génération le 5 du mois à 9h UT
 | `v_etat_profession` | `public.diagnosticians` (toutes colonnes : `validation_status`, `sirene_state`, `activity_score`, `claim_status`, `fraud_flags`, `dhup_last_synced_at`, `department_code`) |
 | `mission_flow_state` | `public.missions`, `public.organizations`, `public.mission_rooms` (`20260524600000`), `public.is_member_of()` |
 | `diagnostician_response_metrics` | `public.quote_requests` (colonnes `diagnostician_id`, `diag_responded_at`, `created_at`) |
+| `route_lead_postgis` (B55) | `public.diagnosticians` (cols `geo_lat`, `geo_lng`, `is_active`, `activity_score`, `organization_id`), `public.subscriptions`, `public.bandit_thompson_rank` (créée par `lead_scoring_a135`), extension PostGIS (déjà 3.3.7 prod) |
 
 ### 9.2 Anomalies signalées (à creuser dans un lot séparé)
 
@@ -558,9 +572,9 @@ Le cron `send-monthly-press-release` lance la génération le 5 du mois à 9h UT
 
 1. **`bandit_thompson_rank` SECURITY DEFINER + `random()`** : la fn est `SECURITY DEFINER` et utilise `random()` non-déterministe. Sans contrainte de session, deux appels successifs donnent des résultats différents → comportement attendu pour Thompson sampling. Aucun risque de sécurité, mais à documenter pour l'équipe ops.
 
-2. **Matviews créées `WITH NO DATA`** : `REFRESH MATERIALIZED VIEW CONCURRENTLY` exige un index unique **ET** un premier refresh non-CONCURRENTLY. Le 1er refresh doit être manuel sans `CONCURRENTLY` (cf. § 3.7). À ajouter au runbook ops.
+2. ~~**Matviews créées `WITH NO DATA`** : `REFRESH MATERIALIZED VIEW CONCURRENTLY` exige un index unique **ET** un premier refresh non-CONCURRENTLY. Le 1er refresh doit être manuel sans `CONCURRENTLY` (cf. § 3.7).~~ **✓ Résolu Lot B54** — migration `20260526100000_matview_first_refresh.sql` amorce les 2 matviews automatiquement.
 
-3. **`route_lead_rank_candidates` Haversine au lieu de PostGIS** : la fn utilise une formule Haversine maison alors que `data.properties_unified.geom` (PostGIS) existe déjà. Performance OK pour < 15k diag, mais migration future vers `ST_DWithin(d.geom::geography, ...)` recommandée.
+3. ~~**`route_lead_rank_candidates` Haversine au lieu de PostGIS** : la fn utilise une formule Haversine maison alors que `data.properties_unified.geom` (PostGIS) existe déjà.~~ **✓ Résolu Lot B55** — migration `20260526110000_route_lead_postgis.sql` réécrit la RPC avec `ST_DWithin(geography)` + ajoute l'index GIST expression partiel `idx_diagnosticians_geog_active`. Signature préservée (aucun changement appelants).
 
 4. **`v_press_mentions_stats` 6 sub-queries** : pas un bug, mais la vue exécute 6 `COUNT(*)` à chaque appel. Si la page `/presse` devient virale, envisager une vue matérialisée rafraîchie 1×/heure.
 
