@@ -157,17 +157,17 @@ function extractToc(markdown: string): readonly LegalTocEntry[] {
 // ============================================
 
 /**
- * Vérifie que les 5 prix officiels (19/29/39/99/149 €) figurent dans le markdown
- * de la CGV. Tout écart est loggé au build sans faire échouer le build.
+ * Vérifie que les 4 prix officiels V5 Logiciel (29/79/199/499 €) figurent dans
+ * le markdown de la CGV. Tout écart est loggé au build sans faire échouer le build.
+ * Mis à jour Lot B53 — CGV v1.4 alignée sur la grille V5 (refonte 2026-05-25).
  */
 function warnIfPricingDivergence(slug: LegalDocumentSlug, content: string): void {
   if (slug !== '03-cgv') return
   const expectedPrices: ReadonlyArray<{ tier: string; eur: number }> = [
-    { tier: 'Essential', eur: 19 },
-    { tier: 'Découverte', eur: 29 },
-    { tier: 'Pro', eur: 39 },
-    { tier: 'All Inclusive', eur: 99 },
-    { tier: 'Cabinet', eur: 149 },
+    { tier: 'Solo', eur: 29 },
+    { tier: 'Pro', eur: 79 },
+    { tier: 'Cabinet', eur: 199 },
+    { tier: 'Cabinet+', eur: 499 },
   ]
   const missing: string[] = []
   for (const { tier, eur } of expectedPrices) {
@@ -178,17 +178,22 @@ function warnIfPricingDivergence(slug: LegalDocumentSlug, content: string): void
   if (missing.length > 0) {
     // eslint-disable-next-line no-console
     console.warn(
-      `[legal/cgv] Tarifs absents du document CGV — vérifier docs/legal/03-cgv.md article 1.1 :\n  - ${missing.join('\n  - ')}`,
+      `[legal/cgv] Tarifs V5 absents du document CGV — vérifier docs/legal/03-cgv.md article 4.3 :\n  - ${missing.join('\n  - ')}`,
     )
   }
-  // Avertissement complémentaire : code PRICING_PLANS hors de la grille officielle.
-  const codePrices = PRICING_PLANS.map((p) => p.monthlyPrice)
-  const officialPrices = expectedPrices.map((e) => e.eur)
-  const codeOutOfGrid = codePrices.filter((p) => !officialPrices.includes(p))
+  // Avertissement complémentaire : code PRICING_PLANS officiels (LOGICIEL_PLANS V5) hors de la grille CGV.
+  // Filtré sur les plans non-legacy (les *_legacy grandfather peuvent diverger par construction).
+  const officialPriceCents = expectedPrices.map((e) => e.eur * 100)
+  const codeOutOfGrid = PRICING_PLANS.filter(
+    (p) =>
+      p.monthlyPrice > 0 &&
+      !p.code.endsWith('_legacy') &&
+      !officialPriceCents.includes(p.monthlyPrice),
+  ).map((p) => `${p.code} (${p.monthlyPrice / 100} €)`)
   if (codeOutOfGrid.length > 0) {
     // eslint-disable-next-line no-console
     console.warn(
-      `[legal/cgv] Divergence détectée : PRICING_PLANS (apps/web/src/lib/pricing-plans.ts) contient des prix hors grille officielle CGV : ${codeOutOfGrid.join(', ')} €. À synchroniser ultérieurement.`,
+      `[legal/cgv] Divergence détectée : PRICING_PLANS (apps/web/src/lib/pricing-plans.ts) contient des prix hors grille officielle V5 CGV : ${codeOutOfGrid.join(', ')}. À synchroniser ultérieurement.`,
     )
   }
 }

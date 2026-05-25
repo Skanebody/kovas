@@ -6,7 +6,7 @@ import { loadLegalDocument } from '@/lib/legal/load-document'
 export const metadata: Metadata = {
   title: 'Conditions générales de vente',
   description:
-    "Conditions générales de vente applicables aux Diagnostiqueurs Abonnés à l'un des Forfaits payants KOVAS (Essential, Découverte, Pro, All Inclusive, Cabinet).",
+    "Conditions générales de vente applicables aux Diagnostiqueurs Abonnés à l'un des Forfaits payants KOVAS (Solo, Pro, Cabinet, Cabinet+) ou aux Forfaits Annuaire (Présence, Boost, Premium).",
   alternates: { canonical: '/cgv' },
   robots: { index: true, follow: true },
 }
