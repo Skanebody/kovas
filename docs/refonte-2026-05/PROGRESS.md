@@ -133,15 +133,22 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 
 | Suite | Tests | Commit |
 |---|---|---|
-| `lib/algos/expiry-predictor.test.ts` | 9 | `45dd3a0` |
+| `lib/algos/dpe-shopping.test.ts` | 6 | (B26) |
+| `lib/algos/cadastre-coherence.test.ts` | 5 | (B26) |
 | `lib/algos/lead-scoring.test.ts` | 11 | `45dd3a0` |
-| `lib/algos/churn-predictor.test.ts` | 7 | `45dd3a0` |
-| `lib/algos/production-anomaly.test.ts` | 8 | `45dd3a0` |
+| `lib/algos/document-classifier.test.ts` | 12 | (B26) |
 | `lib/algos/annuaire-sync.test.ts` | 8 | `7fc89dd` |
+| `lib/algos/production-anomaly.test.ts` | 8 | `45dd3a0` |
+| `lib/algos/expiry-predictor.test.ts` | 9 | `45dd3a0` |
+| `lib/algos/churn-predictor.test.ts` | 7 | `45dd3a0` |
+| `lib/algos/seo-quality-scorer.test.ts` | 9 | (B26) |
+| `lib/algos/diagnostician-pattern-learning.test.ts` | 11 | (B26) |
 | `lib/api-public/rate-limit.test.ts` | 6 | `4e485b6` |
 | `tests/e2e/api-public-v1.spec.ts` | 10 | `c6ad3d3` |
 
-**Total : 49 unit + 10 e2e = 59 tests dédiés au refonte.**
+**Total : 92 unit + 10 e2e = 102 tests dédiés au refonte.**
+
+Couverture pure-fn : **10/12 algos testés** (A1.3.4 profile builder et A1.3.6 Vision IA nécessitent des mocks d'IO, déférés).
 
 ## Reste à livrer (priorité décroissante)
 
