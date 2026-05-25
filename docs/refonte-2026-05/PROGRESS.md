@@ -183,12 +183,18 @@ Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 - ✅ Admin pages : press / renewals / churn / leads-detail / refonte status + 2 batch actions (backfill A1.3.5 + audit A1.3.12)
 - ✅ Liciel V4 **schema JSON pivot + validation cross-refs + 14 tests** (microservice MDB Jackcess différé)
 - ✅ Sweep KOVAS 360 → KOVAS (56 fichiers) + restructure /pros/* → /* (301 redirects) + Homepage 8 sections + /tarifs 3 onglets
+- ✅ **Pricing V5** (Lot B43) — Logiciel 29/79/199/499€ + Annuaire 19/39/79€ (Présence/Boost/Premium) + Bundles 39/89/99/229/529€ + sweep 21 fichiers + CGV v1.4 (B53) + grandfather V4 préservé
+- ✅ **13/15 AI techniques** (B47 cascading + B48 equipment cache + B49 incremental recompute + B50 tools filter — pure-fn 88 tests)
+- ✅ **Production hardening docs** : `UPSTASH-SETUP.md` (B51) + `MIGRATION-PROD-CHECKLIST.md` 577 lignes (B52)
 
 ### Vraies tâches restantes
 1. **GC2 UI complète** — composants tchat continu + composer + transitions animées (session UX dédiée 3-5j)
 2. **Microservice MDB Jackcess** — Java/Kotlin sur Railway pour bridge JSON ↔ MDB Liciel
-3. **Rate-limit Upstash production** — provisionner Redis Upstash + env vars
-4. **Tests E2E Playwright** — admin pages neuves (press/renewals/churn/refonte) + fiche publique enrichie B37 — **smoke partiellement livré B38** (redirects 301 + admin gate + tarifs + homepage)
+3. **Whisper local WASM** — `lib/audio/transcription.ts` hybride local + API (technique 6 du doc AI_ECONOMICS)
+4. **Pattern learning graph sémantique** — au-delà de A1.3.13 historique (technique 10 du doc AI_ECONOMICS)
+5. **Tests E2E Playwright admin pages neuves** — press / renewals / churn / leads-detail / refonte (nécessite seed DB + auth admin en CI)
+6. **Provisionnement Upstash Redis réel** — créer compte + base eu-west-1 + coller secrets dans Vercel prod (cf. `docs/refonte-2026-05/UPSTASH-SETUP.md`)
+7. **Application des 6 migrations Supabase prod** — suivre `docs/refonte-2026-05/MIGRATION-PROD-CHECKLIST.md` (backup PITR + dry-run + push + smoke tests)
 
 ## Stratégie de merge
 
