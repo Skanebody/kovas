@@ -9,6 +9,7 @@ import {
   Archive,
   BarChart3,
   Bot,
+  CalendarCheck,
   CalendarRange,
   DollarSign,
   Flag,
@@ -18,6 +19,7 @@ import {
   Inbox,
   LogOut,
   MailCheck,
+  Megaphone,
   Newspaper,
   ScrollText,
   Settings,
@@ -78,6 +80,14 @@ const NAV_GROUPS: NavGroup[] = [
   {
     group: 'Leads',
     items: [{ label: 'Queue leads', icon: Inbox, href: '/admin/leads/queue', enabled: true }],
+  },
+  {
+    group: 'Rétention (acqui-target)',
+    items: [
+      { label: 'Renouvellements', icon: CalendarCheck, href: '/admin/renewals', enabled: true },
+      { label: 'Churn (A1.3.11)', icon: UserMinus, href: '/admin/churn', enabled: true },
+      { label: 'Presse', icon: Megaphone, href: '/admin/press', enabled: true },
+    ],
   },
   {
     group: 'Vérifications',
