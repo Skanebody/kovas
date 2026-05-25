@@ -100,6 +100,7 @@ L'ordre chronologique est respecté — appliquer dans l'ordre alphabétique des
 | `20260525220000_lead_scoring_a135.sql` | Cache intent_* sur quote_requests + RPC bandit_thompson_rank + route_lead_rank_candidates |
 | `20260525230000_v_etat_profession.sql` | Vues v_etat_profession_summary + v_etat_profession_by_dept |
 | `20260525240000_mission_flow_state.sql` | mission_flow_states + mission_flow_events + RPC mission_flow_transition (GC2 fondations) |
+| `20260525250000_diagnostician_response_metrics.sql` | RPC `get_diagnostician_response_metrics` + partial index `(diagnostician_id, diag_responded_at)` pour fiche publique B37/B41 |
 
 ## Edge Functions à déployer
 

@@ -91,12 +91,10 @@ async function fetchVerificationBadge(diagId: string): Promise<{
 /**
  * Calcule les signaux de réactivité/fraîcheur affichés sur la fiche publique (B37).
  *
- * Stratégie défensive : on tente une lecture sur les demandes de devis liées au
- * diag pour calculer une médiane de réponse, mais on retombe gracieusement sur
- * "pas de phrase de réactivité" si :
- *   - aucune donnée
- *   - moins de 3 leads avec un `diag_responded_at` non-NULL
- *   - colonnes absentes (variations de schéma)
+ * Lot B41 — utilise la RPC SQL `get_diagnostician_response_metrics` (médiane
+ * + sample_size côté Postgres, latence < 5 ms, bypass RLS via SECURITY DEFINER)
+ * plutôt qu'une query JS qui re-parse les dates côté Node. Fallback gracieux si
+ * la RPC est absente (migration pas encore appliquée) ou si la query échoue.
  *
  * `last_verified_at` et `updated_at` sont lus directement depuis la fiche.
  */
@@ -104,42 +102,32 @@ async function fetchAvailabilitySignals(
   diagId: string,
   diagRow: { last_verified_at?: string | null; updated_at?: string | null },
 ): Promise<AvailabilitySignals> {
-  // Lecture côté admin pour bypasser RLS strict sur `quote_requests`.
-  const { createAdminClient } = await import('@/lib/supabase/admin')
-  const supabase = createAdminClient()
-
   let medianResponseMinutes: number | null = null
   let sampleSize = 0
 
   try {
-    // biome-ignore lint/suspicious/noExplicitAny: cross-table read; types pas régen
-    const { data, error } = await (supabase as any)
-      .from('quote_requests')
-      .select('created_at, diag_responded_at')
-      .eq('diagnostician_id', diagId)
-      .not('diag_responded_at', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(30)
+    // RPC SECURITY DEFINER : exposée à anon, retourne agrégat sans PII.
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabase = createAdminClient()
+    // biome-ignore lint/suspicious/noExplicitAny: RPC typing pas régen
+    const { data, error } = await (supabase as any).rpc('get_diagnostician_response_metrics', {
+      p_diagnostician_id: diagId,
+    })
 
     if (!error && Array.isArray(data) && data.length > 0) {
-      const deltas: number[] = []
-      for (const row of data as Array<{ created_at: string; diag_responded_at: string }>) {
-        const created = new Date(row.created_at).getTime()
-        const responded = new Date(row.diag_responded_at).getTime()
-        if (Number.isFinite(created) && Number.isFinite(responded) && responded >= created) {
-          deltas.push((responded - created) / (1000 * 60))
-        }
-      }
-      if (deltas.length > 0) {
-        deltas.sort((a, b) => a - b)
-        const mid = Math.floor(deltas.length / 2)
-        medianResponseMinutes =
-          deltas.length % 2 === 1 ? deltas[mid] : (deltas[mid - 1] + deltas[mid]) / 2
-        sampleSize = deltas.length
-      }
+      const row = data[0] as { median_minutes: number | string | null; sample_size: number }
+      // numeric Postgres peut arriver en string selon le driver — coerce robuste
+      const median =
+        typeof row.median_minutes === 'string'
+          ? Number.parseFloat(row.median_minutes)
+          : row.median_minutes
+      medianResponseMinutes = typeof median === 'number' && Number.isFinite(median) ? median : null
+      sampleSize = typeof row.sample_size === 'number' ? row.sample_size : 0
     }
   } catch {
-    // schema variation ou table absente : on ignore et la phrase ne s'affichera pas
+    // RPC absente (migration pas encore appliquée) ou erreur transitoire :
+    // on laisse les valeurs à leur défaut (null/0) — l'helper pure-fn renverra
+    // null pour responseSentence et la section masquera proprement la ligne.
   }
 
   return computeAvailabilitySignals({
