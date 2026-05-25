@@ -5,6 +5,7 @@ import { BUNDLES } from '@/lib/pricing-plans'
 import { ArrowRight, Check, TrendingUp } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { TarifsTabs } from './TarifsTabs'
 
 export const metadata: Metadata = {
@@ -535,11 +536,14 @@ export default function TarifsPage() {
           </p>
         </div>
 
-        <TarifsTabs
-          logiciel={<LogicielSection />}
-          annuaire={<AnnuaireSection />}
-          bundles={<BundlesSection />}
-        />
+        {/* TarifsTabs utilise useSearchParams() — Next.js 15 exige un wrapper Suspense */}
+        <Suspense fallback={<LogicielSection />}>
+          <TarifsTabs
+            logiciel={<LogicielSection />}
+            annuaire={<AnnuaireSection />}
+            bundles={<BundlesSection />}
+          />
+        </Suspense>
 
         <section className="mx-auto max-w-3xl space-y-6">
           <div className="space-y-2 text-center">
