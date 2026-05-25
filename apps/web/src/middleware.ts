@@ -42,17 +42,24 @@ function isRemovedRoute(pathname: string): boolean {
 /**
  * Restructure /pros/* → /* (post-pivot SaaS-only, Lot B33).
  * Redirect 301 permanent pour préserver SEO + signets utilisateurs.
- * /api-publique → /api-publique (collision avec /api Next.js réservé).
+ *
+ * **CRITIQUE** : les CLÉS sont les ANCIENS chemins `/pros/*`, les VALUES
+ * sont les NOUVEAUX chemins racine. Mapper `/tarifs → /tarifs` causerait
+ * une boucle infinie ERR_TOO_MANY_REDIRECTS (fix B62 du 2026-05-26).
+ *
+ * Note : `/pros/api` redirige vers `/api-publique` car `/api/*` est réservé
+ * par Next.js pour les route handlers.
  */
 const PROS_REDIRECTS: Record<string, string> = {
   '/pros': '/',
-  '/fonctionnalites': '/fonctionnalites',
-  '/tarifs': '/tarifs',
-  '/temoignages': '/temoignages',
-  '/demo': '/demo',
-  '/blog': '/blog',
-  '/comparatif': '/comparatif',
-  '/api-publique': '/api-publique',
+  '/pros/fonctionnalites': '/fonctionnalites',
+  '/pros/tarifs': '/tarifs',
+  '/pros/temoignages': '/temoignages',
+  '/pros/demo': '/demo',
+  '/pros/blog': '/blog',
+  '/pros/comparatif': '/comparatif',
+  '/pros/api': '/api-publique',
+  '/pros/api-publique': '/api-publique',
 }
 
 function matchProsRedirect(pathname: string): string | null {
