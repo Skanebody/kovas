@@ -139,7 +139,7 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 |---|---|---|
 | `lib/algos/dpe-shopping.test.ts` | 6 | (B26) |
 | `lib/algos/cadastre-coherence.test.ts` | 5 | (B26) |
-| `lib/algos/conformity-score.test.ts` | — | TODO |
+| `lib/algos/conformity-score.test.ts` | 16 | (B36) |
 | `lib/property/unified-profile.test.ts` | 17 | (B28) |
 | `lib/algos/lead-scoring.test.ts` | 11 | `45dd3a0` |
 | `lib/algos/vision-equipment.test.ts` | 7 | (B28) |
@@ -155,9 +155,9 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 | `lib/liciel/zip-v4-schema.test.ts` | 14 | (B31) |
 | `tests/e2e/api-public-v1.spec.ts` | 10 | `c6ad3d3` |
 
-**Total : 149 unit + 10 e2e = 159 tests dédiés au refonte.**
+**Total : 165 unit + 10 e2e = 175 tests dédiés au refonte.**
 
-Couverture pure-fn : **12/13 algos testés** (A1.3.3 conformity-score : tests à faire post-MVP — la fn `computeConformityScore` consomme déjà des profils unifiés couverts par A1.3.4).
+Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 
 ## Reste à livrer (priorité décroissante)
 
