@@ -1,4 +1,5 @@
 import { JsonLd } from '@/components/seo/JsonLd'
+import { type AvailabilitySignals, computeAvailabilitySignals } from '@/lib/diag-availability'
 import { getDiagDisplayName } from '@/lib/diag-certifications'
 import {
   type DiagnosticianForSchema,
@@ -87,6 +88,68 @@ async function fetchVerificationBadge(diagId: string): Promise<{
   }
 }
 
+/**
+ * Calcule les signaux de réactivité/fraîcheur affichés sur la fiche publique (B37).
+ *
+ * Stratégie défensive : on tente une lecture sur les demandes de devis liées au
+ * diag pour calculer une médiane de réponse, mais on retombe gracieusement sur
+ * "pas de phrase de réactivité" si :
+ *   - aucune donnée
+ *   - moins de 3 leads avec un `diag_responded_at` non-NULL
+ *   - colonnes absentes (variations de schéma)
+ *
+ * `last_verified_at` et `updated_at` sont lus directement depuis la fiche.
+ */
+async function fetchAvailabilitySignals(
+  diagId: string,
+  diagRow: { last_verified_at?: string | null; updated_at?: string | null },
+): Promise<AvailabilitySignals> {
+  // Lecture côté admin pour bypasser RLS strict sur `quote_requests`.
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const supabase = createAdminClient()
+
+  let medianResponseMinutes: number | null = null
+  let sampleSize = 0
+
+  try {
+    // biome-ignore lint/suspicious/noExplicitAny: cross-table read; types pas régen
+    const { data, error } = await (supabase as any)
+      .from('quote_requests')
+      .select('created_at, diag_responded_at')
+      .eq('diagnostician_id', diagId)
+      .not('diag_responded_at', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(30)
+
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const deltas: number[] = []
+      for (const row of data as Array<{ created_at: string; diag_responded_at: string }>) {
+        const created = new Date(row.created_at).getTime()
+        const responded = new Date(row.diag_responded_at).getTime()
+        if (Number.isFinite(created) && Number.isFinite(responded) && responded >= created) {
+          deltas.push((responded - created) / (1000 * 60))
+        }
+      }
+      if (deltas.length > 0) {
+        deltas.sort((a, b) => a - b)
+        const mid = Math.floor(deltas.length / 2)
+        medianResponseMinutes =
+          deltas.length % 2 === 1 ? deltas[mid] : (deltas[mid - 1] + deltas[mid]) / 2
+        sampleSize = deltas.length
+      }
+    }
+  } catch {
+    // schema variation ou table absente : on ignore et la phrase ne s'affichera pas
+  }
+
+  return computeAvailabilitySignals({
+    median_response_minutes: medianResponseMinutes,
+    sample_size: sampleSize,
+    last_verified_at: diagRow.last_verified_at ?? null,
+    updated_at: diagRow.updated_at ?? null,
+  })
+}
+
 async function incrementViewCount(id: string): Promise<void> {
   try {
     const supabase = await createClient()
@@ -169,9 +232,13 @@ export default async function DiagnosticianPage({ params }: PageProps) {
   // Fire-and-forget incrément vue (n'attend pas, n'interrompt jamais le rendu)
   void incrementViewCount(String(diag.id))
 
-  const [related, verification] = await Promise.all([
+  const [related, verification, availability] = await Promise.all([
     fetchRelatedDiagnosticians(diag.city ?? '', String(diag.id), 3),
     fetchVerificationBadge(String(diag.id)),
+    fetchAvailabilitySignals(String(diag.id), {
+      last_verified_at: typeof diag.last_verified_at === 'string' ? diag.last_verified_at : null,
+      updated_at: typeof diag.updated_at === 'string' ? diag.updated_at : null,
+    }),
   ])
 
   // Schema.org JSON-LD Person
@@ -322,6 +389,7 @@ export default async function DiagnosticianPage({ params }: PageProps) {
         dept={dept}
         city={city}
         badgeLevel={verification.badgeLevel}
+        availability={availability}
       />
     </>
   )

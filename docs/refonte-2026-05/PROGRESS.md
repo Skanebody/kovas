@@ -10,7 +10,7 @@
 - **Base** : `main` (Phase 0 le 2026-05-25)
 - **Stratégie** : repositionnement KOVAS 360 → acqui-target Enersweet (Liciel) 5-10 M€ sur 24 mois
 - **Typecheck** : 0 erreur en permanence sur la branche
-- **Tests Vitest** : 41 tests pure-fn + rate-limit
+- **Tests Vitest** : **193 tests pure-fn + rate-limit + helpers fiche publique**
 - **Tests E2E Playwright** : 10 tests API publique + observatoire
 
 ## Algorithmes A1.3.* — 13 / 13 livrés ✅
@@ -37,7 +37,7 @@
 |---|---|---|---|---|
 | GC1 | Pre-export AI conformity panel | ✅ | `b8f45b2` | `PrevalidationPanel` + `/api/missions/[id]/prevalidation-score` |
 | GC2 | Mission flow continu | ⏳ | — | À démarrer |
-| GC3 | Annuaire B2C enrichi | 🟡 | `1f91d68` + `b1e357c` + `20937ae` | A1.3.5 livré, admin queue branchée, fiche enrichie à compléter |
+| GC3 | Annuaire B2C enrichi | 🟢 | `1f91d68` + `b1e357c` + `20937ae` + (B37) | A1.3.5 livré, admin queue, fiche publique + section Réactivité/Vérification/Fraîcheur (B37) |
 | GC4 | État de la profession publique | ✅ | `c99acf4` | `/observatoire/etat-profession` + vues SQL + endpoint API public |
 | GC5 | Communiqués presse automatisés | ✅ | `e8b627f` | Edge Function Claude Sonnet + `/admin/press` + `/presse` enrichi |
 | GC6 | Cockpit fraude DPE diagnostiqueur-facing | ✅ | `58f4dec` | `/dashboard/cockpit-fraude` + endpoint dpe-shopping-check |
@@ -153,30 +153,30 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 | `lib/api-public/rate-limit.test.ts` | 6 | `4e485b6` |
 | `lib/mission-flow/state-machine.test.ts` | 19 | (B30) |
 | `lib/liciel/zip-v4-schema.test.ts` | 14 | (B31) |
+| `lib/diag-availability.test.ts` | 28 | (B37) |
 | `tests/e2e/api-public-v1.spec.ts` | 10 | `c6ad3d3` |
 
-**Total : 165 unit + 10 e2e = 175 tests dédiés au refonte.**
+**Total : 193 unit + 10 e2e = 203 tests dédiés au refonte.**
 
 Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 
 ## Reste à livrer (priorité décroissante)
 
 ### Surfaces totalement livrées ✅
-- ✅ A1.3.* — 13/13 algos livrés + 12/13 testés
-- ✅ Game Changers 1/4/5/6 + GC3 partiel (A1.3.5 livré côté algo + admin UI)
+- ✅ A1.3.* — 13/13 algos livrés + **13/13 testés**
+- ✅ Game Changers 1/3/4/5/6 livrés (GC3 = A1.3.5 + admin UI + fiche publique enrichie B37)
 - ✅ GC2 **fondations data layer + state machine + 19 tests** (UI tchat continu différé)
 - ✅ API publique V1 — 4 endpoints + OpenAPI 3.1 + rate-limit Upstash-ready
 - ✅ Ingesters complets : ADEME DPE + DVF + BAN cache + Géorisques + IGN cadastre + refresh matviews
 - ✅ Admin pages : press / renewals / churn / leads-detail / refonte status + 2 batch actions (backfill A1.3.5 + audit A1.3.12)
 - ✅ Liciel V4 **schema JSON pivot + validation cross-refs + 14 tests** (microservice MDB Jackcess différé)
+- ✅ Sweep KOVAS 360 → KOVAS (56 fichiers) + restructure /pros/* → /* (301 redirects) + Homepage 8 sections + /tarifs 3 onglets
 
 ### Vraies tâches restantes
 1. **GC2 UI complète** — composants tchat continu + composer + transitions animées (session UX dédiée 3-5j)
 2. **Microservice MDB Jackcess** — Java/Kotlin sur Railway pour bridge JSON ↔ MDB Liciel
 3. **Rate-limit Upstash production** — provisionner Redis Upstash + env vars
-4. **GC3 fiche Doctolib-style** — pricing dynamique annuaire (consomme A1.3.5 livré)
-5. **Tests E2E Playwright** — admin pages neuves (press/renewals/churn/refonte)
-6. **A1.3.3 tests** — conformity-score tests Vitest (pure-fn, ~30 min)
+4. **Tests E2E Playwright** — admin pages neuves (press/renewals/churn/refonte) + fiche publique enrichie B37
 
 ## Stratégie de merge
 

@@ -1,4 +1,5 @@
 import { BadgeVerified } from '@/components/diagnostician/BadgeVerified'
+import type { AvailabilitySignals } from '@/lib/diag-availability'
 import {
   DIAG_CERT_BY_CODE,
   formatFullName,
@@ -18,6 +19,7 @@ import {
   Star,
 } from 'lucide-react'
 import Link from 'next/link'
+import { AvailabilitySection } from './availability-section'
 import { CertCard } from './cert-card'
 import { ClaimBanner } from './claim-banner'
 import { DiagMap } from './diag-map'
@@ -33,6 +35,8 @@ type DiagnosticianPageContentProps = {
   city: string
   /** Niveau de badge vérification (Doctolib 2022). Default 'unverified'. */
   badgeLevel?: 'unverified' | 'verified' | 'verified_plus'
+  /** Signaux de réactivité/fraîcheur (B37 / GC3). Optionnel : section masquée si null/0 signal. */
+  availability?: AvailabilitySignals | null
 }
 
 const SERVICE_TYPES = [
@@ -56,6 +60,7 @@ export function DiagnosticianPageContent({
   dept,
   city,
   badgeLevel = 'unverified',
+  availability = null,
 }: DiagnosticianPageContentProps) {
   // AUDIT-A — Mapping schéma canonique (post-consolidation FIX-AA) :
   //   full_name canonique (fallback first_name+last_name), postal_code → postcode,
@@ -342,10 +347,15 @@ export function DiagnosticianPageContent({
                 </div>
               </div>
 
-              {/* 04 — Avis Google */}
+              {/* 04 — Réactivité & vérification (B37 / GC3) */}
+              {availability && availability.signalsCount > 0 ? (
+                <AvailabilitySection signals={availability} sectionNumber="04" />
+              ) : null}
+
+              {/* 05 — Avis Google */}
               {reviewCount !== null && reviewCount > 0 ? (
                 <div>
-                  <SectionHeader number="04" title="Avis Google" />
+                  <SectionHeader number="05" title="Avis Google" />
                   <div className="mt-6 rounded-2xl border border-black/8 bg-white p-5">
                     <div className="flex items-baseline gap-3">
                       <span className="font-serif italic text-5xl text-[#0B1D33]">
@@ -451,11 +461,11 @@ export function DiagnosticianPageContent({
           </div>
         </section>
 
-        {/* 05 — Related */}
+        {/* 06 — Related */}
         {related.length > 0 ? (
           <section className="border-b border-black/5">
             <div className="mx-auto max-w-6xl px-6 py-12">
-              <SectionHeader number="05" title={`Autres diagnostiqueurs à ${cityLabel}`} />
+              <SectionHeader number="06" title={`Autres diagnostiqueurs à ${cityLabel}`} />
               <div className="mt-8 grid gap-4 md:grid-cols-3">
                 {related.map((r) => (
                   <RelatedCard key={String(r.id)} diagnostician={r} dept={dept} city={city} />
