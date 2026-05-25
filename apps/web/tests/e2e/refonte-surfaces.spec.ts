@@ -68,6 +68,29 @@ test.describe('Refonte — admin gate /admin/* anon → /', () => {
     const res = await request.get('/admin/churn', { maxRedirects: 0 })
     expect([301, 302, 307, 308, 404]).toContain(res.status())
   })
+
+  test('GET /admin/sante-tech anon ne révèle PAS la page AI Economics (Lot B57)', async ({
+    request,
+  }) => {
+    const res = await request.get('/admin/sante-tech', { maxRedirects: 0 })
+    expect([301, 302, 307, 308, 404]).toContain(res.status())
+    if (res.status() >= 300 && res.status() < 400) {
+      const location = res.headers().location ?? ''
+      expect(location.startsWith('/admin/sante-tech')).toBe(false)
+    }
+  })
+
+  test('GET /admin/sante-tech anon ne fuit AUCUN contenu AI Economics dans le body', async ({
+    request,
+  }) => {
+    const res = await request.get('/admin/sante-tech')
+    const body = await res.text().catch(() => '')
+    // Tokens spécifiques à la page (sobre, vouvoiement) qui ne doivent pas
+    // fuiter via une page d'erreur ou un fallback.
+    expect(body).not.toContain('Économies IA')
+    expect(body).not.toContain('Cascading Haiku')
+    expect(body).not.toContain('Equipment cache progressif')
+  })
 })
 
 test.describe('Refonte — /tarifs 3 onglets canoniques (Lot B34)', () => {

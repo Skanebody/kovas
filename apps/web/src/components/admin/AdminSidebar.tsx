@@ -15,6 +15,7 @@ import {
   Flag,
   Gauge,
   HardDrive,
+  HeartPulse,
   Home,
   Inbox,
   LogOut,
@@ -107,6 +108,7 @@ const NAV_GROUPS: NavGroup[] = [
     group: 'Observabilité',
     items: [
       { label: 'Email Health', icon: MailCheck, href: '/admin/email-health', enabled: true },
+      { label: 'Santé tech', icon: HeartPulse, href: '/admin/sante-tech', enabled: true },
       { label: 'Performance', icon: Gauge, href: '/admin/performance', enabled: true },
       { label: 'Churn risk', icon: UserMinus, href: '/admin/churn-risk', enabled: true },
       { label: 'PITR Backups', icon: Archive, href: '/admin/backups', enabled: true },
