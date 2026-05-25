@@ -215,6 +215,9 @@ R : Dashboard Upstash → base → **REST API** → **Reset Token**. Régénére
 **Q : Apps/web a-t-il son propre `.env.example` ?**
 R : Non, la source unique est [`.env.example`](../../.env.example) à la racine du monorepo. La section Upstash y est documentée (lignes 159-178 environ).
 
+**Q : Comment Next.js (qui tourne depuis `apps/web/`) lit-il le `.env.local` racine ?**
+R : Via un symlink `apps/web/.env.local → ../../.env.local` (non versionné, comme `.env.local` lui-même via `.gitignore`). Next.js charge donc le fichier racine de manière transparente, sans configuration `dotenv` custom dans `next.config.ts`. Sur un nouveau clone, créer manuellement le symlink : `cd apps/web && ln -sf ../../.env.local .env.local`. Sur Vercel, les vars d'environnement sont définies dans le dashboard (pas de fichier `.env*`), donc aucun symlink requis en prod.
+
 ---
 
 ## 10. Checklist Benjamin (à cocher au moment du provisionnement)
