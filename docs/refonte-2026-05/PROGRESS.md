@@ -13,7 +13,7 @@
 - **Tests Vitest** : 41 tests pure-fn + rate-limit
 - **Tests E2E Playwright** : 10 tests API publique + observatoire
 
-## Algorithmes A1.3.* — 12 / 13 livrés
+## Algorithmes A1.3.* — 13 / 13 livrés ✅
 
 | ID | Algo | Status | Commit | Fichier |
 |---|---|---|---|---|
@@ -24,7 +24,7 @@
 | A1.3.5 | Lead scoring + Thompson sampling | ✅ | `1f91d68` | `lib/algos/lead-scoring.ts` |
 | A1.3.6 | Vision IA classification équipement | ✅ | `a39ddad` | `lib/algos/vision-equipment.ts` |
 | A1.3.7 | Document classifier client uploads | ✅ | `d3a8d7d` | `lib/algos/document-classifier.ts` |
-| A1.3.8 | Annuaire sync DHUP/SIRENE/COFRAC | ⏳ | — | (Edge Function `verify-diagnosticians-daily` existante) |
+| A1.3.8 | Annuaire sync DHUP/SIRENE/COFRAC/GMB | ✅ | `7fc89dd` | `lib/algos/annuaire-sync.ts` |
 | A1.3.9 | Production anomaly detection DPE | ✅ | `233aef9` | `lib/algos/production-anomaly.ts` |
 | A1.3.10 | Certificate expiry predictor | ✅ | `97ea7c3` | `lib/algos/expiry-predictor.ts` |
 | A1.3.11 | Churn risk predictor | ✅ | `9ea3021` | `lib/algos/churn-predictor.ts` |
@@ -137,10 +137,11 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 | `lib/algos/lead-scoring.test.ts` | 11 | `45dd3a0` |
 | `lib/algos/churn-predictor.test.ts` | 7 | `45dd3a0` |
 | `lib/algos/production-anomaly.test.ts` | 8 | `45dd3a0` |
+| `lib/algos/annuaire-sync.test.ts` | 8 | `7fc89dd` |
 | `lib/api-public/rate-limit.test.ts` | 6 | `4e485b6` |
 | `tests/e2e/api-public-v1.spec.ts` | 10 | `c6ad3d3` |
 
-**Total : 41 unit + 10 e2e = 51 tests dédiés au refonte.**
+**Total : 49 unit + 10 e2e = 59 tests dédiés au refonte.**
 
 ## Reste à livrer (priorité décroissante)
 
