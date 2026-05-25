@@ -4,13 +4,11 @@ import { GuideHero } from '@/components/guide/GuideHero'
 import { GuideLocalSearch } from '@/components/guide/GuideLocalSearch'
 import { GuideSection } from '@/components/guide/GuideSection'
 import { GuideTOC } from '@/components/guide/GuideTOC'
+import { GuideSources } from '@/components/guides/GuideSources'
+import { RelatedGuides } from '@/components/guides/RelatedGuides'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { Card } from '@/components/ui/card'
-import {
-  GUIDE_SLUGS,
-  getGuideBySlug,
-  getRelatedGuides,
-} from '@/lib/guides/registry'
+import { getMergedRelatedGuides } from '@/data/guides/internal-linking'
+import { GUIDE_SLUGS, getGuideBySlug } from '@/lib/guides/registry'
 import { buildGuideSchemaGraph } from '@/lib/guides/schema'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { ArrowRight, BookOpen } from 'lucide-react'
@@ -34,9 +32,7 @@ export function generateStaticParams(): ReadonlyArray<PageParams> {
   return GUIDE_SLUGS.map((slug) => ({ type: slug }))
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { type } = await params
   const guide = getGuideBySlug(type)
   if (!guide) {
@@ -63,7 +59,9 @@ export default async function GuideDetailPage({ params }: PageProps) {
     notFound()
   }
 
-  const relatedGuides = getRelatedGuides(guide)
+  // Maillage interne curé (méthode Amandine Bart) : combine
+  // `INTERNAL_LINKING_MAP` + fallback historique `Guide.relatedTypes`.
+  const relatedGuides = getMergedRelatedGuides(guide, 4)
   const schemaGraph = buildGuideSchemaGraph(guide)
 
   // Heuristique d'insertion CTA :
@@ -120,7 +118,10 @@ export default async function GuideDetailPage({ params }: PageProps) {
                           <BookOpen className="size-3.5 shrink-0 text-ink-faint" aria-hidden />
                           {related.shortTitle}
                         </span>
-                        <ArrowRight className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+                        <ArrowRight
+                          className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                          aria-hidden
+                        />
                       </Link>
                     </li>
                   ))}
@@ -147,11 +148,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
 
             <GuideCalculatorCTA type={guide.type} shortTitle={guide.shortTitle} />
 
-            <section
-              id="faq"
-              className="mt-16 scroll-mt-28"
-              aria-labelledby="faq-heading"
-            >
+            <section id="faq" className="mt-16 scroll-mt-28" aria-labelledby="faq-heading">
               <h2
                 id="faq-heading"
                 className="font-display text-2xl font-bold leading-tight tracking-tight text-ink sm:text-3xl md:text-4xl"
@@ -162,8 +159,8 @@ export default async function GuideDetailPage({ params }: PageProps) {
                 Questions fréquentes
               </h2>
               <p className="mt-3 text-base leading-relaxed text-ink-soft md:text-[17px]">
-                Les réponses aux {guide.faq.length} questions les plus fréquentes
-                concernant le {guide.shortTitle.toLowerCase()}.
+                Les réponses aux {guide.faq.length} questions les plus fréquentes concernant le{' '}
+                {guide.shortTitle.toLowerCase()}.
               </p>
               <div className="mt-8">
                 <GuideFAQ items={guide.faq} />
@@ -172,43 +169,14 @@ export default async function GuideDetailPage({ params }: PageProps) {
 
             <GuideLocalSearch diagnosticLabel={guide.shortTitle} />
 
-            {/* Cross-links bas de page (en complément de la sidebar) */}
-            {relatedGuides.length > 0 && (
-              <section className="mt-12" aria-labelledby="related-heading">
-                <h2
-                  id="related-heading"
-                  className="font-display text-xl font-bold text-ink md:text-2xl"
-                >
-                  Continuer la lecture
-                </h2>
-                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {relatedGuides.map((related) => (
-                    <Card
-                      key={related.type}
-                      variant="opaque"
-                      padding="default"
-                      className="group transition-all hover:-translate-y-px hover:shadow-md"
-                    >
-                      <Link href={`/guide/${related.slug}`} className="block">
-                        <p className="font-mono text-[10px] font-medium uppercase tracking-wider text-ink-mute">
-                          Guide complet
-                        </p>
-                        <h3 className="mt-1 font-display text-lg font-bold text-ink">
-                          {related.shortTitle}
-                        </h3>
-                        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                          {related.teaser}
-                        </p>
-                        <p className="mt-4 inline-flex items-center gap-1.5 font-mono text-xs text-ink">
-                          Lire
-                          <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden />
-                        </p>
-                      </Link>
-                    </Card>
-                  ))}
-                </div>
-              </section>
-            )}
+            {/* Sources externes officielles (méthode E-E-A-T) — affichées
+               uniquement si le guide a déclaré ses sources. */}
+            {guide.sources && guide.sources.length > 0 && <GuideSources sources={guide.sources} />}
+
+            {/* "Pour aller plus loin" — maillage interne curé via
+               `INTERNAL_LINKING_MAP`. Remplace l'ancienne section
+               "Continuer la lecture" hard-codée. */}
+            <RelatedGuides guide={guide} />
           </article>
         </div>
       </div>

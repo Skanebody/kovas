@@ -64,6 +64,32 @@ export interface FAQItem {
   readonly answer: string
 }
 
+/**
+ * Source externe officielle citée dans un guide (méthode E-E-A-T).
+ *
+ * Chaque chiffre ou affirmation réglementaire devrait pointer vers une
+ * source vérifiable (ADEME, INSEE, DHUP, Géorisques, Légifrance, JO).
+ * Les notes `[1]`, `[2]`... insérées dans le corps du texte renvoient à
+ * l'`id` correspondant en bas de page via la section "Sources".
+ *
+ * Règle d'admission stricte :
+ *  - Organismes publics français uniquement (ministères, agences d'État,
+ *    établissements publics, observatoires officiels) ;
+ *  - Pas de blog, pas de Wikipédia, pas de média généraliste.
+ */
+export interface GuideSource {
+  /** Numéro d'ordre (1, 2, 3…) cité dans le corps du texte. */
+  readonly id: number
+  /** Titre du document/article source. */
+  readonly title: string
+  /** Organisme émetteur (ADEME, INSEE, DHUP, Légifrance, etc.). */
+  readonly organization: string
+  /** URL canonique vers la source publiée. */
+  readonly url: string
+  /** Date de consultation au format ISO 8601 (YYYY-MM-DD). */
+  readonly accessedAt: string
+}
+
 /** Guide long complet (entité versionnée). */
 export interface Guide {
   readonly type: GuideType
@@ -93,6 +119,12 @@ export interface Guide {
   readonly faq: ReadonlyArray<FAQItem>
   /** 3-4 autres types connexes pour cross-link sidebar + bas de page. */
   readonly relatedTypes: ReadonlyArray<GuideType>
+  /**
+   * Sources externes officielles citées dans le corps du guide
+   * (méthode E-E-A-T). Optionnel pour rester rétrocompatible avec les
+   * guides historiques ; à terme tous les guides doivent en fournir.
+   */
+  readonly sources?: ReadonlyArray<GuideSource>
 }
 
 /**

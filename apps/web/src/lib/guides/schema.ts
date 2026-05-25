@@ -30,20 +30,36 @@ const AUTHOR_NAME = 'Équipe KOVAS' as const
 export type JsonLdObject = Record<string, unknown>
 
 /**
- * Article schema pour un guide long.
+ * Article schema pour un guide long (méthode E-E-A-T).
  * Schema.org `Article` est compatible avec les guides éditoriaux longs ;
  * `TechArticle` aurait été envisageable mais Google indexe mieux `Article`.
+ *
+ * Améliorations E-E-A-T :
+ *  - `image` (OG par défaut) pour rich result éligibilité ;
+ *  - `author` + `publisher` typés Organization avec logo ;
+ *  - `citation` listant les sources externes officielles si fournies ;
+ *  - `articleSection` pour catégorisation thématique.
  */
 export function buildGuideArticleSchema(guide: Guide): JsonLdObject {
-  return {
+  const imageUrl = guide.heroImage ?? `${SITE_URL}/og/guide/${guide.slug}.png`
+
+  const base: JsonLdObject = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     '@id': `${SITE_URL}/guide/${guide.slug}#article`,
     headline: guide.title,
     description: guide.metaDescription,
+    image: {
+      '@type': 'ImageObject',
+      url: imageUrl,
+      width: 1200,
+      height: 630,
+    },
     datePublished: guide.publishedAt,
     dateModified: guide.updatedAt,
     wordCount: guide.wordCount,
+    timeRequired: `PT${guide.readingTimeMinutes}M`,
+    articleSection: guide.category,
     author: {
       '@type': 'Organization',
       name: AUTHOR_NAME,
@@ -64,16 +80,27 @@ export function buildGuideArticleSchema(guide: Guide): JsonLdObject {
     },
     inLanguage: 'fr-FR',
   }
+
+  if (guide.sources && guide.sources.length > 0) {
+    base.citation = guide.sources.map((source) => ({
+      '@type': 'CreativeWork',
+      name: source.title,
+      url: source.url,
+      publisher: {
+        '@type': 'Organization',
+        name: source.organization,
+      },
+    }))
+  }
+
+  return base
 }
 
 /**
  * Construit un HowTo pour une section ayant des `howToSteps`.
  * Une section sans steps retourne `null` et ne sera pas injectée.
  */
-export function buildSectionHowToSchema(
-  guide: Guide,
-  section: GuideSection,
-): JsonLdObject | null {
+export function buildSectionHowToSchema(guide: Guide, section: GuideSection): JsonLdObject | null {
   if (!section.howToSteps || section.howToSteps.length === 0) return null
 
   return {
