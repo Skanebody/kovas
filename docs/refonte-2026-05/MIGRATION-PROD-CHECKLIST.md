@@ -9,7 +9,7 @@
 
 ## 0. Vue d'ensemble
 
-### Les 8 migrations à appliquer (ordre alphabétique = chronologique)
+### Les 9 migrations à appliquer (ordre alphabétique = chronologique)
 
 | # | Fichier | Catégorie | Risque | Reversible facile ? |
 |---|---|---|---|---|
@@ -21,6 +21,7 @@
 | 6 | `20260525250000_diagnostician_response_metrics.sql` | 1 index partiel + 1 RPC | Très faible | Oui (DROP INDEX + DROP FUNCTION) |
 | 7 | `20260526100000_matview_first_refresh.sql` | **Fix B54 — matview 1st refresh** (REFRESH sans CONCURRENTLY pour amorcer les 2 matviews `analytics.*`) | Nul (DO block avec EXCEPTION WHEN OTHERS) | Sans objet (purement runtime, pas de DDL) |
 | 8 | `20260526110000_route_lead_postgis.sql` | **Perf B55 — Haversine → PostGIS** (1 index GIST expression partiel + CREATE OR REPLACE de `route_lead_rank_candidates` avec `ST_DWithin(geography)` à la place de la formule Haversine maison) | Très faible (CREATE OR REPLACE FUNCTION, signature identique) | Oui (DROP INDEX + restaurer la version Haversine via migration 3) |
+| 9 | `20260526190000_user_mission_patterns.sql` | **Lot B61 — pattern learning runtime** (1 table `data.user_mission_patterns` + 1 index + RLS SELECT scoped au claimer) | Faible (IF NOT EXISTS, RLS strict, aucun trigger) | Oui (DROP TABLE CASCADE) |
 
 **Toutes les migrations sont idempotentes** (`CREATE TABLE IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `CREATE OR REPLACE VIEW`, et pour B54 : `REFRESH MATERIALIZED VIEW` sans `CONCURRENTLY` rejouable + bloc `DO ... EXCEPTION WHEN OTHERS THEN NULL`).
 
@@ -351,6 +352,46 @@ ORDER BY grantee;
 -- Attendu : 1 ligne (service_role, EXECUTE). PAS de anon ni authenticated.
 ```
 
+### 3.9 Migration 9 — `user_mission_patterns` (Lot B61)
+
+```sql
+-- A. Table créée dans le schéma data
+SELECT table_schema, table_name FROM information_schema.tables
+WHERE table_schema = 'data' AND table_name = 'user_mission_patterns';
+-- Attendu : 1 ligne (data, user_mission_patterns)
+
+-- B. Table vide à l'application (sera peuplée par l'Edge Function rebuild)
+SELECT count(*) FROM data.user_mission_patterns;
+-- Attendu : 0 (puis > 0 après le premier cron rebuild-user-patterns)
+
+-- C. RLS activée + policy SELECT scoped au claimer
+SELECT relname, relrowsecurity FROM pg_class
+WHERE relname = 'user_mission_patterns';
+-- Attendu : relrowsecurity = true
+
+SELECT polname, polcmd FROM pg_policy
+WHERE polrelid = 'data.user_mission_patterns'::regclass;
+-- Attendu : 1 ligne (user_patterns_select_own, r)
+
+-- D. Test RLS avec un user authenticated bidon (ne doit RIEN voir si pas de claim)
+-- (À tester depuis Supabase Studio en mode "Run as authenticated user" ; on doit avoir 0 lignes
+-- même si un autre user a un graph dans la table.)
+
+-- E. Index sur last_rebuilt_at
+SELECT indexname FROM pg_indexes
+WHERE tablename = 'user_mission_patterns' AND schemaname = 'data';
+-- Attendu : idx_user_patterns_updated_at + la PK implicite
+
+-- F. Grants
+SELECT grantee, privilege_type FROM information_schema.table_privileges
+WHERE table_schema = 'data' AND table_name = 'user_mission_patterns'
+ORDER BY grantee, privilege_type;
+-- Attendu :
+--   - authenticated : SELECT
+--   - service_role  : SELECT, INSERT, UPDATE, DELETE
+--   - anon          : (rien)
+```
+
 ---
 
 ## 4. Vault secrets à configurer en prod (T+10 min)
@@ -375,7 +416,7 @@ Va dans **Supabase Studio > Project Settings > Edge Functions > Secrets** et ajo
 
 ## 5. Déploiement Edge Functions (T+15 min)
 
-### 5.1 Les 7 fonctions à déployer
+### 5.1 Les 8 fonctions à déployer
 
 ```bash
 cd /Users/benjaminbel/Desktop/KOVAS
@@ -388,6 +429,7 @@ supabase functions deploy send-monthly-press-release --linked
 supabase functions deploy ingest-ban-cache-daily --linked
 supabase functions deploy ingest-georisques-weekly --linked
 supabase functions deploy ingest-ign-cadastre-weekly --linked
+supabase functions deploy rebuild-user-patterns --linked   # Lot B61
 
 # Variante : tout d'un coup
 # supabase functions deploy --linked
@@ -405,6 +447,7 @@ supabase functions deploy ingest-ign-cadastre-weekly --linked
 | `ingest-ban-cache-daily` | `0 3 * * *` | 4h CET — avant tout le reste |
 | `ingest-georisques-weekly` | `0 4 * * 1` | 5h CET — lundi |
 | `ingest-ign-cadastre-weekly` | `0 5 * * 2` | 6h CET — mardi |
+| `rebuild-user-patterns` (Lot B61) | `0 3 * * 0` | 4h CET — dimanche (rebuild hebdo des knowledge graphs diagnostiqueurs) |
 
 **Création d'un cron** (exemple ADEME daily) via SQL Editor :
 
