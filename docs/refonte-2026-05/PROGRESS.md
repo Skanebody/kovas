@@ -186,6 +186,9 @@ Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 - ✅ **Pricing V5** (Lot B43) — Logiciel 29/79/199/499€ + Annuaire 19/39/79€ (Présence/Boost/Premium) + Bundles 39/89/99/229/529€ + sweep 21 fichiers + CGV v1.4 (B53) + grandfather V4 préservé
 - ✅ **13/15 AI techniques** (B47 cascading + B48 equipment cache + B49 incremental recompute + B50 tools filter — pure-fn 88 tests)
 - ✅ **Production hardening docs** : `UPSTASH-SETUP.md` (B51) + `MIGRATION-PROD-CHECKLIST.md` 577 lignes (B52)
+- ✅ **Fixes prod-blocking** (B54 + B55) : migration `20260526100000_matview_first_refresh.sql` (amorce les 2 matviews `analytics.*` avant le 1er REFRESH CONCURRENTLY) + migration `20260526110000_route_lead_postgis.sql` (PostGIS ST_DWithin + index GIST expression partiel, perf x3-x10 sur la RPC routing leads)
+- ✅ **Sweep authority docs** : CLAUDE.md header + §22 pointent vers les 4 nouveaux docs (AI_ECONOMICS, UPSTASH-SETUP, MIGRATION-PROD-CHECKLIST, CGV v1.4)
+- ✅ **Test bandit decay fix** : tolérance test `converges towards prior Beta(1,1)` calibrée à 150 itérations (vs 100 mathématiquement insuffisant pour `toBeCloseTo(_, 1)` à γ=0.95)
 
 ### Vraies tâches restantes
 1. **GC2 UI complète** — composants tchat continu + composer + transitions animées (session UX dédiée 3-5j)

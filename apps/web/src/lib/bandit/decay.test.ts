@@ -3,8 +3,14 @@ import { decayBeta, halfLife } from './decay'
 
 describe('decayBeta', () => {
   it('converges towards prior Beta(1, 1) after many applications', () => {
+    // Avec γ=0.95, la déviation au prior est multipliée par 0.95 à chaque tick.
+    // Après N itérations, deviation_finale = deviation_initiale × 0.95^N.
+    // Pour α=50, β=30, dev_init = 49 et 29 respectivement.
+    // Pour atteindre tolérance 0.05 (toBeCloseTo(_, 1)), il faut :
+    //   49 × 0.95^N ≤ 0.05  →  N ≥ log(0.05/49) / log(0.95) ≈ 134 itérations.
+    // On prend 150 pour une marge confortable.
     let { alpha, beta } = { alpha: 50, beta: 30 }
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 150; i++) {
       ;({ alpha, beta } = decayBeta(alpha, beta, 0.95))
     }
     expect(alpha).toBeCloseTo(1, 1)
