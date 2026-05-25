@@ -21,6 +21,7 @@ import {
   MailCheck,
   Megaphone,
   Newspaper,
+  Rocket,
   ScrollText,
   Settings,
   ShieldAlert,
@@ -84,6 +85,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     group: 'Rétention (acqui-target)',
     items: [
+      { label: 'Refonte status', icon: Rocket, href: '/admin/refonte', enabled: true },
       { label: 'Renouvellements', icon: CalendarCheck, href: '/admin/renewals', enabled: true },
       { label: 'Churn (A1.3.11)', icon: UserMinus, href: '/admin/churn', enabled: true },
       { label: 'Presse', icon: Megaphone, href: '/admin/press', enabled: true },
