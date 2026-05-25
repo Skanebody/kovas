@@ -11,7 +11,7 @@
 - **Stratégie** : repositionnement KOVAS 360 → acqui-target Enersweet (Liciel) 5-10 M€ sur 24 mois
 - **Typecheck** : 0 erreur en permanence sur la branche
 - **Tests Vitest** : **193 tests pure-fn + rate-limit + helpers fiche publique**
-- **Tests E2E Playwright** : 10 tests API publique + observatoire
+- **Tests E2E Playwright** : **24 tests** (API publique + redirects 301 + admin gate + tarifs onglets + homepage)
 
 ## Algorithmes A1.3.* — 13 / 13 livrés ✅
 
@@ -155,8 +155,9 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 | `lib/liciel/zip-v4-schema.test.ts` | 14 | (B31) |
 | `lib/diag-availability.test.ts` | 28 | (B37) |
 | `tests/e2e/api-public-v1.spec.ts` | 10 | `c6ad3d3` |
+| `tests/e2e/refonte-surfaces.spec.ts` | 14 | (B38) |
 
-**Total : 193 unit + 10 e2e = 203 tests dédiés au refonte.**
+**Total : 193 unit + 24 e2e = 217 tests dédiés au refonte.**
 
 Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 
@@ -176,7 +177,7 @@ Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 1. **GC2 UI complète** — composants tchat continu + composer + transitions animées (session UX dédiée 3-5j)
 2. **Microservice MDB Jackcess** — Java/Kotlin sur Railway pour bridge JSON ↔ MDB Liciel
 3. **Rate-limit Upstash production** — provisionner Redis Upstash + env vars
-4. **Tests E2E Playwright** — admin pages neuves (press/renewals/churn/refonte) + fiche publique enrichie B37
+4. **Tests E2E Playwright** — admin pages neuves (press/renewals/churn/refonte) + fiche publique enrichie B37 — **smoke partiellement livré B38** (redirects 301 + admin gate + tarifs + homepage)
 
 ## Stratégie de merge
 
