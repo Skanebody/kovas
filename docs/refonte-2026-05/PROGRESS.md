@@ -98,6 +98,7 @@ L'ordre chronologique est respecté — appliquer dans l'ordre alphabétique des
 | `20260525210000_press_kit_releases.sql` | press_contacts + press_releases + press_release_sends + v_press_mentions_stats |
 | `20260525220000_lead_scoring_a135.sql` | Cache intent_* sur quote_requests + RPC bandit_thompson_rank + route_lead_rank_candidates |
 | `20260525230000_v_etat_profession.sql` | Vues v_etat_profession_summary + v_etat_profession_by_dept |
+| `20260525240000_mission_flow_state.sql` | mission_flow_states + mission_flow_events + RPC mission_flow_transition (GC2 fondations) |
 
 ## Edge Functions à déployer
 
@@ -107,6 +108,9 @@ L'ordre chronologique est respecté — appliquer dans l'ordre alphabétique des
 | `ingest-dvf-quarterly` | `0 6 1 1,4,7,10 *` (trimestriel) | Pull DVF top 500 communes |
 | `refresh-data-lake-matviews` | `0 5 * * *` (5h UTC) | REFRESH MATERIALIZED VIEW CONCURRENTLY |
 | `send-monthly-press-release` | `0 9 5 * *` (5e du mois 9h CET) | Génère brouillon presse Claude Sonnet à partir du rapport observatoire |
+| `ingest-ban-cache-daily` | `0 3 * * *` (3h UTC) | Pré-warm BAN sur top 1500 adresses récentes |
+| `ingest-georisques-weekly` | `0 4 * * 1` (lundi 4h UTC) | Pré-warm Géorisques sur top 500 communes |
+| `ingest-ign-cadastre-weekly` | `0 5 * * 2` (mardi 5h UTC) | Pré-warm IGN cadastre sur ban_id sans parcelle |
 
 ## Variables d'environnement requises
 
@@ -135,7 +139,10 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 |---|---|---|
 | `lib/algos/dpe-shopping.test.ts` | 6 | (B26) |
 | `lib/algos/cadastre-coherence.test.ts` | 5 | (B26) |
+| `lib/algos/conformity-score.test.ts` | — | TODO |
+| `lib/property/unified-profile.test.ts` | 17 | (B28) |
 | `lib/algos/lead-scoring.test.ts` | 11 | `45dd3a0` |
+| `lib/algos/vision-equipment.test.ts` | 7 | (B28) |
 | `lib/algos/document-classifier.test.ts` | 12 | (B26) |
 | `lib/algos/annuaire-sync.test.ts` | 8 | `7fc89dd` |
 | `lib/algos/production-anomaly.test.ts` | 8 | `45dd3a0` |
@@ -144,21 +151,32 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 | `lib/algos/seo-quality-scorer.test.ts` | 9 | (B26) |
 | `lib/algos/diagnostician-pattern-learning.test.ts` | 11 | (B26) |
 | `lib/api-public/rate-limit.test.ts` | 6 | `4e485b6` |
+| `lib/mission-flow/state-machine.test.ts` | 19 | (B30) |
+| `lib/liciel/zip-v4-schema.test.ts` | 14 | (B31) |
 | `tests/e2e/api-public-v1.spec.ts` | 10 | `c6ad3d3` |
 
-**Total : 92 unit + 10 e2e = 102 tests dédiés au refonte.**
+**Total : 149 unit + 10 e2e = 159 tests dédiés au refonte.**
 
-Couverture pure-fn : **10/12 algos testés** (A1.3.4 profile builder et A1.3.6 Vision IA nécessitent des mocks d'IO, déférés).
+Couverture pure-fn : **12/13 algos testés** (A1.3.3 conformity-score : tests à faire post-MVP — la fn `computeConformityScore` consomme déjà des profils unifiés couverts par A1.3.4).
 
 ## Reste à livrer (priorité décroissante)
 
-1. **GC2 mission flow continu** — refonte UX du tchat mission en flow continu plutôt que step-by-step
-2. **Import Liciel ZIP V4** — round-trip parsing/écriture complète
-3. **Ingesters BAN/IGN/Géorisques** — pré-warm offensif top communes
-4. **A1.3.8 helper** — orchestration sync annuaire (Edge Functions existantes à formaliser en lib)
-5. **Endpoints API publique restants** — 4-5 endpoints (diagnostician by-postcode, etc.)
-6. **Rate-limit Upstash production** — configurer prod
-7. **Page admin "Refonte status"** — vue introspection live des KPIs algos
+### Surfaces totalement livrées ✅
+- ✅ A1.3.* — 13/13 algos livrés + 12/13 testés
+- ✅ Game Changers 1/4/5/6 + GC3 partiel (A1.3.5 livré côté algo + admin UI)
+- ✅ GC2 **fondations data layer + state machine + 19 tests** (UI tchat continu différé)
+- ✅ API publique V1 — 4 endpoints + OpenAPI 3.1 + rate-limit Upstash-ready
+- ✅ Ingesters complets : ADEME DPE + DVF + BAN cache + Géorisques + IGN cadastre + refresh matviews
+- ✅ Admin pages : press / renewals / churn / leads-detail / refonte status + 2 batch actions (backfill A1.3.5 + audit A1.3.12)
+- ✅ Liciel V4 **schema JSON pivot + validation cross-refs + 14 tests** (microservice MDB Jackcess différé)
+
+### Vraies tâches restantes
+1. **GC2 UI complète** — composants tchat continu + composer + transitions animées (session UX dédiée 3-5j)
+2. **Microservice MDB Jackcess** — Java/Kotlin sur Railway pour bridge JSON ↔ MDB Liciel
+3. **Rate-limit Upstash production** — provisionner Redis Upstash + env vars
+4. **GC3 fiche Doctolib-style** — pricing dynamique annuaire (consomme A1.3.5 livré)
+5. **Tests E2E Playwright** — admin pages neuves (press/renewals/churn/refonte)
+6. **A1.3.3 tests** — conformity-score tests Vitest (pure-fn, ~30 min)
 
 ## Stratégie de merge
 
