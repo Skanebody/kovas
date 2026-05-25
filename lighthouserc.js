@@ -5,9 +5,15 @@
  * Seuils stricts qui font échouer la CI dès qu'une régression dépasse les budgets.
  *
  * Pour lancer : `pnpm lighthouse` (depuis la racine) après `pnpm -F @kovas/web build`.
- * Les URLs marketing /blog, /diagnostiqueurs/dieppe, /qui-sommes-nous, /pour-les-diagnostiqueurs
- * sont prévues par la roadmap M0-M3 (acquisition SEO local 30-50 villes) — en attendant
- * leur livraison, lhci peut être lancé en mode partiel via `LHCI_URLS_OVERRIDE`.
+ *
+ * URLs auditées (mises à jour B46 post-refonte) :
+ *   - `/` (homepage 8 sections — Lot B35)
+ *   - `/tarifs` (page tarifs V5 canonique — Lot B43)
+ *   - `/pricing` (alias SEO legacy toujours en place)
+ *   - `/trouver-un-diagnostiqueur/76/dieppe` (annuaire ville après FIX-T)
+ *   - `/blog`, `/a-propos`, `/pour-les-diagnostiqueurs` (pages publiques marketing)
+ *
+ * En mode partiel : `LHCI_URLS_OVERRIDE=http://localhost:3000/tarifs pnpm lighthouse`.
  */
 
 /** @type {import('@lhci/cli').Config} */
@@ -20,10 +26,11 @@ const config = {
       startServerReadyTimeout: 60_000,
       url: [
         'http://localhost:3000/',
+        'http://localhost:3000/tarifs',
         'http://localhost:3000/pricing',
-        'http://localhost:3000/diagnostiqueurs/dieppe',
+        'http://localhost:3000/trouver-un-diagnostiqueur/76/dieppe',
         'http://localhost:3000/blog',
-        'http://localhost:3000/qui-sommes-nous',
+        'http://localhost:3000/a-propos',
         'http://localhost:3000/pour-les-diagnostiqueurs',
       ],
       numberOfRuns: 3,
