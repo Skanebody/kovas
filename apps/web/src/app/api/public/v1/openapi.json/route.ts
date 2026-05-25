@@ -1,7 +1,7 @@
 /**
  * KOVAS — OpenAPI 3.1 spec pour l'API publique v1.
  *
- * Servi à `/api/public/v1/openapi.json` (et linkée depuis /pros/api).
+ * Servi à `/api/public/v1/openapi.json` (et linkée depuis /api-publique).
  * Mise à jour manuelle à chaque ajout d'endpoint.
  *
  * Authority : REFONTE-ACQUI-TARGET-V2 §10.
@@ -23,7 +23,7 @@ export function GET() {
       contact: {
         name: 'Équipe KOVAS',
         email: 'contact@kovas.fr',
-        url: 'https://kovas.fr/pros/api',
+        url: 'https://kovas.fr/api-publique',
       },
       license: {
         name: 'CC-BY 4.0',

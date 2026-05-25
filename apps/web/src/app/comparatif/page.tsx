@@ -1,5 +1,5 @@
 /**
- * /pros/comparatif — refonte 23/05/2026.
+ * /comparatif — refonte 23/05/2026.
  *
  * Reframing stratégique : KOVAS n'est PAS une alternative à Liciel/OBBC.
  * C'est une couche terrain compagnon qui supprime la re-saisie. Le calcul DPE
@@ -46,11 +46,10 @@ import Link from 'next/link'
 // ───────────────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = buildMetadata({
-  title:
-    'KOVAS — Couche terrain pour Liciel, OBBC, AnalysImmo, ORIS | Compagnon, pas alternative',
+  title: 'KOVAS — Couche terrain pour Liciel, OBBC, AnalysImmo, ORIS | Compagnon, pas alternative',
   description:
     "KOVAS n'est pas une alternative à Liciel, OBBC, AnalysImmo ou ORIS. C'est leur couche terrain commune : saisie vocale, photos géolocalisées, pré-vérification ADEME. Votre logiciel certifié reste votre moteur ADEME — KOVAS amplifie tout autour.",
-  path: '/pros/comparatif',
+  path: '/comparatif',
 })
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -160,7 +159,8 @@ const COMPARISON_ROWS: readonly ComparisonRow[] = [
   },
   {
     step: '3. Retour bureau',
-    without: '30 à 45 minutes de re-saisie complète dans votre logiciel (Liciel, OBBC, AnalysImmo…)',
+    without:
+      '30 à 45 minutes de re-saisie complète dans votre logiciel (Liciel, OBBC, AnalysImmo…)',
     with: 'Bouton Partager 3 modes : email / GDrive auto-sync / téléchargement direct → 30 secondes',
     isRegulatory: false,
   },
@@ -351,7 +351,7 @@ export default function ComparatifPage() {
   const breadcrumbSchema = buildBreadcrumbList([
     { name: 'Accueil', path: '/' },
     { name: 'Espace diagnostiqueurs', path: '/pros' },
-    { name: 'Couche terrain Liciel / OBBC / AnalysImmo / ORIS', path: '/pros/comparatif' },
+    { name: 'Couche terrain Liciel / OBBC / AnalysImmo / ORIS', path: '/comparatif' },
   ])
 
   const faqSchema = getFAQPageSchema(FAQ_ENTRIES)
@@ -361,10 +361,10 @@ export default function ComparatifPage() {
   const softwareApplicationSchema = {
     '@context': 'https://schema.org' as const,
     '@type': 'SoftwareApplication' as const,
-    '@id': `${KOVAS_BASE_URL}/pros/comparatif#software`,
+    '@id': `${KOVAS_BASE_URL}/comparatif#software`,
     name: 'KOVAS — Couche terrain compagnon des logiciels diagnostic certifiés',
     description:
-      "Application mobile compatible Liciel, OBBC, AnalysImmo, ORIS : saisie vocale, photos géolocalisées, pré-vérification ADEME, import ZIP/XML automatique vers votre éditeur. Compagnon, pas alternative.",
+      'Application mobile compatible Liciel, OBBC, AnalysImmo, ORIS : saisie vocale, photos géolocalisées, pré-vérification ADEME, import ZIP/XML automatique vers votre éditeur. Compagnon, pas alternative.',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web, iOS, Android (PWA)',
     offers: {
@@ -673,9 +673,8 @@ export default function ComparatifPage() {
                 </p>
                 <p className="text-paper text-lg leading-relaxed">
                   Les trois étapes réglementaires — calcul DPE, soumission ADEME, validation
-                  officielle — restent inchangées. Votre logiciel certifié (Liciel, OBBC,
-                  AnalysImmo ou ORIS) reste votre référence ADEME. KOVAS amplifie tout ce qui se
-                  trouve autour.
+                  officielle — restent inchangées. Votre logiciel certifié (Liciel, OBBC, AnalysImmo
+                  ou ORIS) reste votre référence ADEME. KOVAS amplifie tout ce qui se trouve autour.
                 </p>
               </div>
             </Card>
@@ -863,7 +862,7 @@ export default function ComparatifPage() {
                   </Link>
                 </Button>
                 <Button size="lg" variant="glass" asChild>
-                  <Link href="/pros/demo">
+                  <Link href="/demo">
                     <PlayCircle className="size-4" aria-hidden />
                     Voir la démo 15 min
                   </Link>

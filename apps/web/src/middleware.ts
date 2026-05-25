@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { type NextRequest, NextResponse } from 'next/server'
 
 /**
  * REFONTE ACQUI-TARGET 2026-05 — routes Bucket C supprimées.
@@ -39,12 +39,49 @@ function isRemovedRoute(pathname: string): boolean {
   return REMOVED_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))
 }
 
+/**
+ * Restructure /pros/* → /* (post-pivot SaaS-only, Lot B33).
+ * Redirect 301 permanent pour préserver SEO + signets utilisateurs.
+ * /api-publique → /api-publique (collision avec /api Next.js réservé).
+ */
+const PROS_REDIRECTS: Record<string, string> = {
+  '/pros': '/',
+  '/fonctionnalites': '/fonctionnalites',
+  '/tarifs': '/tarifs',
+  '/temoignages': '/temoignages',
+  '/demo': '/demo',
+  '/blog': '/blog',
+  '/comparatif': '/comparatif',
+  '/api-publique': '/api-publique',
+}
+
+function matchProsRedirect(pathname: string): string | null {
+  if (pathname in PROS_REDIRECTS) return PROS_REDIRECTS[pathname] ?? null
+  for (const [from, to] of Object.entries(PROS_REDIRECTS)) {
+    if (from === '/pros') continue // évite prefix match qui capturerait toutes les sous-routes
+    if (pathname.startsWith(`${from}/`)) {
+      return `${to}${pathname.slice(from.length)}`
+    }
+  }
+  return null
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // 1. Bucket C routes supprimées
   if (isRemovedRoute(pathname)) {
-    const target = pathname.startsWith('/dashboard') || pathname.startsWith('/admin') ? '/dashboard' : '/'
+    const target =
+      pathname.startsWith('/dashboard') || pathname.startsWith('/admin') ? '/dashboard' : '/'
     return NextResponse.redirect(new URL(target, request.url))
   }
+
+  // 2. Restructure /pros/* → /* (301 permanent)
+  const prosTarget = matchProsRedirect(pathname)
+  if (prosTarget) {
+    return NextResponse.redirect(new URL(prosTarget, request.url), 301)
+  }
+
   return await updateSession(request)
 }
 

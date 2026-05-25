@@ -23,7 +23,7 @@ function isValidEmail(value: string): boolean {
 }
 
 /**
- * POST /api/pros/api-waitlist
+ * POST /api/api-publique-waitlist
  *
  * Inscription à la liste d'attente API publique. Notifie l'admin.
  */

@@ -2,7 +2,7 @@
 
 /**
  * Client component qui rend les filtres Profil + Région cliquables sur
- * /pros/temoignages. Auparavant les chips Badge étaient affichées en
+ * /temoignages. Auparavant les chips Badge étaient affichées en
  * read-only (`cursor-default`) avec un mot "activation côté client prévue
  * Sprint suivant". Maintenant pleinement fonctionnels.
  *
@@ -14,8 +14,8 @@
  * deep-linking SEO ultérieurement, basculer sur useSearchParams.
  */
 
-import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'

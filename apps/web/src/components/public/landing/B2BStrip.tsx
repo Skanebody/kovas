@@ -56,7 +56,7 @@ export function B2BStrip() {
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-3 pt-2">
               <Button size="lg" variant="accent" asChild>
-                <Link href="/pros/demo">
+                <Link href="/demo">
                   Voir la plateforme en démo <ArrowRight className="size-4" aria-hidden />
                 </Link>
               </Button>

@@ -15,11 +15,11 @@ const PARTICULIERS: readonly FooterLink[] = [
 
 const PROS: readonly FooterLink[] = [
   { label: 'Fonctionnalités', href: '/pros' },
-  { label: 'Tarifs', href: '/pros/tarifs' },
-  { label: 'Témoignages', href: '/pros/temoignages' },
-  { label: 'Comparatif Liciel · OBBC · AnalysImmo · ORIS', href: '/pros/comparatif' },
-  { label: 'Démo', href: '/pros/demo' },
-  { label: 'API', href: '/pros/api' },
+  { label: 'Tarifs', href: '/tarifs' },
+  { label: 'Témoignages', href: '/temoignages' },
+  { label: 'Comparatif Liciel · OBBC · AnalysImmo · ORIS', href: '/comparatif' },
+  { label: 'Démo', href: '/demo' },
+  { label: 'API', href: '/api-publique' },
   { label: "Centre d'aide", href: '/pros/aide' },
 ] as const
 

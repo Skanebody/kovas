@@ -255,9 +255,9 @@ export default function TemoignagesPage() {
             Métriques chiffrées, citations authentiques.
           </p>
           <p className="mx-auto max-w-xl font-mono text-[11px] uppercase tracking-wide text-ink-faint">
-            Témoignages illustratifs V1 — exemples-types issus de la phase de
-            recherche utilisateurs. Les retours bêta-testeurs réels seront publiés
-            à partir de l'ouverture au public (M9).
+            Témoignages illustratifs V1 — exemples-types issus de la phase de recherche
+            utilisateurs. Les retours bêta-testeurs réels seront publiés à partir de l'ouverture au
+            public (M9).
           </p>
         </div>
 

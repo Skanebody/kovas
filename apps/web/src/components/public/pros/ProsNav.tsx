@@ -13,12 +13,12 @@ import { usePathname } from 'next/navigation'
  */
 const PROS_NAV_LINKS = [
   { href: '/pros', label: 'Accueil' },
-  { href: '/pros/fonctionnalites', label: 'Fonctionnalités' },
-  { href: '/pros/tarifs', label: 'Tarifs' },
-  { href: '/pros/temoignages', label: 'Témoignages' },
-  { href: '/pros/comparatif', label: 'Comparatif' },
-  { href: '/pros/demo', label: 'Démo' },
-  { href: '/pros/api', label: 'API' },
+  { href: '/fonctionnalites', label: 'Fonctionnalités' },
+  { href: '/tarifs', label: 'Tarifs' },
+  { href: '/temoignages', label: 'Témoignages' },
+  { href: '/comparatif', label: 'Comparatif' },
+  { href: '/demo', label: 'Démo' },
+  { href: '/api-publique', label: 'API' },
 ] as const
 
 export function ProsNav() {

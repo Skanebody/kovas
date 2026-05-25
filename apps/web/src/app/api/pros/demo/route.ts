@@ -27,9 +27,9 @@ function isValidEmail(value: string): boolean {
 }
 
 /**
- * POST /api/pros/demo
+ * POST /api/demo
  *
- * Demande de démo soumise depuis `/pros/demo`. Notifie l'admin
+ * Demande de démo soumise depuis `/demo`. Notifie l'admin
  * (`PROS_DEMO_ADMIN_EMAIL`) et envoie une confirmation au prospect.
  */
 export async function POST(request: Request) {
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
   const adminResult = await sendEmail({
     to: ADMIN_EMAIL,
     subject: `Nouvelle demande de démo KOVAS — ${fullName} (${cabinet})`,
-    text: `Nouvelle demande de démo reçue depuis /pros/demo.\n\n${adminLines.join('\n')}`,
-    html: `<h2>Nouvelle demande de démo KOVAS</h2><p>Reçue depuis <code>/pros/demo</code>.</p><ul>${adminLines
+    text: `Nouvelle demande de démo reçue depuis /demo.\n\n${adminLines.join('\n')}`,
+    html: `<h2>Nouvelle demande de démo KOVAS</h2><p>Reçue depuis <code>/demo</code>.</p><ul>${adminLines
       .map((line) => `<li>${escapeHtml(line)}</li>`)
       .join('')}</ul>`,
     category: 'transactional',

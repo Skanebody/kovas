@@ -63,7 +63,7 @@ export function DemoForm() {
     setErrorMessage(null)
 
     try {
-      const response = await fetch('/api/pros/demo', {
+      const response = await fetch('/api/demo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

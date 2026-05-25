@@ -190,7 +190,7 @@ export default function ProsBlogPage() {
                   {formatDate(post.publishedAt)}
                 </span>
                 <a
-                  href={`/pros/blog/${post.slug}`}
+                  href={`/blog/${post.slug}`}
                   aria-label={`Lire ${post.title}`}
                   className="inline-flex items-center gap-1 text-sm font-medium text-ink hover:text-navy-deep"
                 >

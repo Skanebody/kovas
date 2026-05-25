@@ -493,7 +493,7 @@ export default function AProposPage() {
                 </Link>
               </Button>
               <Button asChild variant="ghost" size="lg">
-                <Link href="/pros/tarifs">Voir les tarifs</Link>
+                <Link href="/tarifs">Voir les tarifs</Link>
               </Button>
             </div>
           </div>

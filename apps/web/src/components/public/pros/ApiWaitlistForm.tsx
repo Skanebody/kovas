@@ -32,7 +32,7 @@ export function ApiWaitlistForm() {
     setErrorMessage(null)
 
     try {
-      const response = await fetch('/api/pros/api-waitlist', {
+      const response = await fetch('/api/api-publique-waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

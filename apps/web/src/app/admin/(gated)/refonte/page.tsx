@@ -372,10 +372,10 @@ export default async function AdminRefontePage() {
               <ExternalLink className="size-3 opacity-50" />
             </a>
             <Link
-              href="/pros/api"
+              href="/api-publique"
               className="inline-flex items-center gap-1.5 rounded-md border border-rule px-3 py-1.5 text-[12px] hover:bg-paper transition-colors"
             >
-              Page publique /pros/api
+              Page publique /api-publique
             </Link>
           </div>
         </Card>
