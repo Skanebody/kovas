@@ -28,7 +28,7 @@ export const COMPANY_IDENTITY = {
     /** Service B2C annuaire — désignation explicite */
     b2cService: 'KOVAS Annuaire',
     /** Produit SaaS B2B payant pour diagnostiqueurs */
-    b2bProduct: 'KOVAS 360',
+    b2bProduct: 'KOVAS',
   },
 
   /** Forme juridique */

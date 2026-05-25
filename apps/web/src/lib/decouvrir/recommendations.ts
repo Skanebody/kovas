@@ -3,7 +3,7 @@
  * pour la page Découvrir.
  *
  * Trois familles d'offres :
- *  - logiciel (SaaS KOVAS 360, 5 plans)
+ *  - logiciel (SaaS KOVAS, 5 plans)
  *  - annuaire (KOVAS Annuaire, 4 plans + sponsorisé)
  *  - bundle (combos cross-sell logiciel + annuaire avec remise)
  *  - addons (extensions ponctuelles)
@@ -15,7 +15,7 @@
  * annuaire-only, dual, free) pour éviter de recommander une offre déjà
  * souscrite.
  *
- * Cf. CLAUDE.md §1 (KOVAS 360 + KOVAS Annuaire) et §4 (pricing).
+ * Cf. CLAUDE.md §1 (KOVAS + KOVAS Annuaire) et §4 (pricing).
  */
 
 export type DecouvrirSection =
@@ -65,12 +65,12 @@ export const LOGICIEL_OFFERS: readonly OfferDescriptor[] = [
     family: 'logiciel',
     section: 'logiciel',
     label: 'Essai gratuit 14 jours',
-    tagline: 'Tester KOVAS 360 sans engagement',
+    tagline: 'Tester KOVAS sans engagement',
     priceLabel: 'Gratuit · 14 jours',
     priceMonthlyCents: 0,
     features: [
-      'Toutes les fonctionnalités KOVAS 360',
-      'Jusqu\'à 30 missions de test',
+      'Toutes les fonctionnalités KOVAS',
+      "Jusqu'à 30 missions de test",
       'Tous les exports universels',
       'Branding "Essai KOVAS" sur les rapports',
     ],
@@ -138,7 +138,7 @@ export const LOGICIEL_OFFERS: readonly OfferDescriptor[] = [
       '400 missions incluses / mois',
       'Surplus 0,80€ HT / mission',
       '200 Go de stockage',
-      'Jusqu\'à 3 utilisateurs inclus',
+      "Jusqu'à 3 utilisateurs inclus",
     ],
     primaryTracks: ['logiciel_only', 'dual'],
   },
@@ -224,7 +224,7 @@ export const BUNDLE_OFFERS: readonly OfferDescriptor[] = [
     priceMonthlyCents: 3900,
     bundleSavingLabel: 'Économie 9€/mois',
     features: [
-      'KOVAS 360 Solo Light (20 missions)',
+      'KOVAS Solo Light (20 missions)',
       'KOVAS Annuaire Local (1 ville)',
       'Synchronisation profil automatique',
       'Engagement 0 — résiliation 1 clic',
@@ -242,7 +242,7 @@ export const BUNDLE_OFFERS: readonly OfferDescriptor[] = [
     priceMonthlyCents: 6900,
     bundleSavingLabel: 'Économie 9€/mois',
     features: [
-      'KOVAS 360 Solo Pro (60 missions)',
+      'KOVAS Solo Pro (60 missions)',
       'KOVAS Annuaire Local',
       'Synchronisation profil automatique',
       'Pack conformité ADEME inclus',
@@ -260,7 +260,7 @@ export const BUNDLE_OFFERS: readonly OfferDescriptor[] = [
     priceMonthlyCents: 9500,
     bundleSavingLabel: 'Économie 13€/mois',
     features: [
-      'KOVAS 360 Solo Pro (60 missions)',
+      'KOVAS Solo Pro (60 missions)',
       'KOVAS Annuaire Régional (département)',
       'Mise en avant cartographique',
       'Statistiques sectorielles',
@@ -277,7 +277,7 @@ export const BUNDLE_OFFERS: readonly OfferDescriptor[] = [
     priceMonthlyCents: 13500,
     bundleSavingLabel: 'Économie 13€/mois',
     features: [
-      'KOVAS 360 Cabinet (150 missions)',
+      'KOVAS Cabinet (150 missions)',
       'KOVAS Annuaire Régional',
       'Account manager partagé',
       'Reporting trimestriel',
@@ -294,7 +294,7 @@ export const BUNDLE_OFFERS: readonly OfferDescriptor[] = [
     priceMonthlyCents: 32900,
     bundleSavingLabel: 'Économie 19€/mois',
     features: [
-      'KOVAS 360 Cabinet + (400 missions, 3 users)',
+      'KOVAS Cabinet + (400 missions, 3 users)',
       'KOVAS Annuaire National FR',
       'API leads + Webhooks',
       'Onboarding personnalisé 2h',
@@ -456,7 +456,7 @@ export function getOffer(code: string): OfferDescriptor | undefined {
 // ---------------------------------------------------------------------------
 
 export interface UserAccess {
-  /** A un abonnement actif sur le logiciel KOVAS 360 */
+  /** A un abonnement actif sur le logiciel KOVAS */
   hasLogiciel: boolean
   /** A une fiche annuaire payante active (Local, Régional, National) */
   hasAnnuaire: boolean
@@ -554,7 +554,7 @@ export function scoreOffers(
     if (hoverMs >= 500) {
       const delta = hoverMs * HOVER_WEIGHT
       score += delta
-      if (delta > 0.1) reasons.push('Vous l\'avez survolée plusieurs fois')
+      if (delta > 0.1) reasons.push("Vous l'avez survolée plusieurs fois")
     }
 
     // Signal CTA secondaire
@@ -635,7 +635,7 @@ export function summarizeTrack(access: UserAccess): TrackSummary {
     case 'dual':
       return {
         track,
-        title: 'Vous utilisez KOVAS 360 + KOVAS Annuaire',
+        title: 'Vous utilisez KOVAS + KOVAS Annuaire',
         description:
           'Vous êtes équipé sur les deux versants : logiciel terrain et visibilité publique. Découvrez les modules avancés et les Packs Cabinet pour passer à la vitesse supérieure.',
         badgeLabel: 'Profil complet',
@@ -643,7 +643,7 @@ export function summarizeTrack(access: UserAccess): TrackSummary {
     case 'logiciel_only':
       return {
         track,
-        title: 'Vous utilisez uniquement KOVAS 360',
+        title: 'Vous utilisez uniquement KOVAS',
         description:
           'Votre cabinet est outillé côté terrain. Une fiche annuaire vous permettrait de capter directement des demandes de particuliers — sans publicité.',
         badgeLabel: 'Logiciel actif',
@@ -653,16 +653,15 @@ export function summarizeTrack(access: UserAccess): TrackSummary {
         track,
         title: 'Vous êtes référencé sur KOVAS Annuaire',
         description:
-          'Vous recevez déjà des demandes via l\'annuaire. KOVAS 360 vous permettrait de produire vos rapports terrain 1h30 plus vite, et de synchroniser vos exports automatiquement.',
+          "Vous recevez déjà des demandes via l'annuaire. KOVAS vous permettrait de produire vos rapports terrain 1h30 plus vite, et de synchroniser vos exports automatiquement.",
         badgeLabel: 'Annuaire actif',
       }
-    case 'free':
     default:
       return {
         track,
-        title: 'Vous n\'avez aucun abonnement actif',
+        title: "Vous n'avez aucun abonnement actif",
         description:
-          'Essayez gratuitement KOVAS 360 pendant 14 jours, ou inscrivez-vous gratuitement à l\'annuaire pour capter vos premières demandes.',
+          "Essayez gratuitement KOVAS pendant 14 jours, ou inscrivez-vous gratuitement à l'annuaire pour capter vos premières demandes.",
         badgeLabel: 'Démarrage',
       }
   }

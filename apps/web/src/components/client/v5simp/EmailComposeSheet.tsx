@@ -10,7 +10,7 @@
  *   - Bouton primary navy + ghost annuler
  *   - Toast sonner success / error
  *
- * Le serveur ajoute automatiquement signature "L'équipe KOVAS 360" + footer
+ * Le serveur ajoute automatiquement signature "L'équipe KOVAS" + footer
  * mentions légales NEXUS 1993 (source unique vérité : COMPANY_IDENTITY).
  */
 
@@ -104,7 +104,10 @@ export function EmailComposeSheet({
       <BottomSheetBody>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="email-to" className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            <label
+              htmlFor="email-to"
+              className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute"
+            >
               À
             </label>
             <input
@@ -120,7 +123,10 @@ export function EmailComposeSheet({
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="email-subject" className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            <label
+              htmlFor="email-subject"
+              className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute"
+            >
               Sujet
             </label>
             <input
@@ -136,7 +142,10 @@ export function EmailComposeSheet({
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="email-body" className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            <label
+              htmlFor="email-body"
+              className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute"
+            >
               Message
             </label>
             <textarea
@@ -154,7 +163,8 @@ export function EmailComposeSheet({
           </div>
 
           <p className="text-[12px] text-ink-mute">
-            Signature « L&apos;équipe KOVAS 360 » et mentions légales NEXUS 1993 sont ajoutées automatiquement.
+            Signature « L&apos;équipe KOVAS » et mentions légales NEXUS 1993 sont ajoutées
+            automatiquement.
           </p>
         </div>
       </BottomSheetBody>

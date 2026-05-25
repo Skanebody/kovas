@@ -1,6 +1,6 @@
 import 'server-only'
-import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { cache } from 'react'
 
 /**
  * KOVAS — Track access dual track (Annuaire B2C + Logiciel B2B).
@@ -37,7 +37,7 @@ const EMPTY_RESULT: TrackAccessResult = {
  * Retourne l'accès dual track de l'organisation courante :
  * - `'free'`         : aucune souscription active (essai ou plan gratuit)
  * - `'annuaire-only'`: souscription KOVAS Annuaire active uniquement
- * - `'logiciel-only'`: souscription KOVAS 360 active uniquement
+ * - `'logiciel-only'`: souscription KOVAS active uniquement
  * - `'dual'`         : les deux souscriptions actives OU bundle souscrit
  *
  * Memoized via React `cache()` pour une seule requête par request lifecycle.
@@ -65,7 +65,10 @@ export const getUserTrackAccess = cache(async (): Promise<TrackAccessResult> => 
   const untyped = supabase as unknown as {
     from: (table: string) => {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           eq: (col: string, val: string) => Promise<{ data: unknown[] | null }>
           limit: (n: number) => Promise<{ data: unknown[] | null }>
         }
@@ -110,9 +113,7 @@ export const getUserTrackAccess = cache(async (): Promise<TrackAccessResult> => 
   }
 
   const subs = (rawSubs ?? []) as Array<{ plan_code?: string | null; tier?: string | null }>
-  const planCodes = subs
-    .map((s) => s.plan_code ?? s.tier)
-    .filter((c): c is string => Boolean(c))
+  const planCodes = subs.map((s) => s.plan_code ?? s.tier).filter((c): c is string => Boolean(c))
 
   // Codes V4 officiels du track Annuaire (grille 2026-05-22).
   const annuaireActiveCodes = new Set<string>([
@@ -128,12 +129,7 @@ export const getUserTrackAccess = cache(async (): Promise<TrackAccessResult> => 
   const annuaireActive = planCodes.some((c) => annuaireActiveCodes.has(c))
 
   // Codes V4 officiels du track Logiciel (grille 2026-05-22).
-  const logicielV4Codes = new Set<string>([
-    'solo_light',
-    'solo_pro',
-    'cabinet',
-    'cabinet_plus',
-  ])
+  const logicielV4Codes = new Set<string>(['solo_light', 'solo_pro', 'cabinet', 'cabinet_plus'])
   const logicielActive = planCodes.some((c) => {
     if (logicielV4Codes.has(c)) return true
     // Alias V3 historique (logiciel_*) — c.startsWith en excluant logiciel_free.

@@ -129,7 +129,7 @@ function buildSystemPrompt(ctx: DossierContext): string {
     : 'non planifiée'
 
   return [
-    "Tu es l'assistant KOVAS 360, spécialisé en diagnostic immobilier français (DPE, amiante, plomb CREP, gaz, électricité, termites, Carrez/Boutin, ERP).",
+    "Tu es l'assistant KOVAS, spécialisé en diagnostic immobilier français (DPE, amiante, plomb CREP, gaz, électricité, termites, Carrez/Boutin, ERP).",
     '',
     `Contexte du dossier ${ctx.reference} :`,
     `- Bien : ${propLine}`,
@@ -142,9 +142,9 @@ function buildSystemPrompt(ctx: DossierContext): string {
     'Règles strictes :',
     "- Ton sobre, professionnel, technique. Vouvoiement obligatoire. Pas d'emoji.",
     '- Réponses concises (5 phrases max sauf si on vous demande explicitement un développement).',
-    '- Pour les questions réglementaires, citez les articles pertinents (Code de la construction et de l\'habitation, RT2012, RE2020, arrêtés DPE 3CL-2021, etc.) sans inventer.',
+    "- Pour les questions réglementaires, citez les articles pertinents (Code de la construction et de l'habitation, RT2012, RE2020, arrêtés DPE 3CL-2021, etc.) sans inventer.",
     '- Si la question sort du périmètre diagnostic immobilier, redirigez poliment.',
-    "- Ne jamais inventer de valeurs absentes du contexte. Si une donnée manque, dites-le clairement.",
+    '- Ne jamais inventer de valeurs absentes du contexte. Si une donnée manque, dites-le clairement.',
   ]
     .filter(Boolean)
     .join('\n')
@@ -292,13 +292,8 @@ export async function POST(request: Request): Promise<Response> {
         })
 
         for await (const event of anthropicStream) {
-          if (
-            event.type === 'content_block_delta' &&
-            event.delta.type === 'text_delta'
-          ) {
-            controller.enqueue(
-              sseEncode({ type: 'delta', text: event.delta.text }),
-            )
+          if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+            controller.enqueue(sseEncode({ type: 'delta', text: event.delta.text }))
           }
         }
 

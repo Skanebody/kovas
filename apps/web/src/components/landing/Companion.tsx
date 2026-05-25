@@ -17,13 +17,13 @@ export function Companion() {
           Compagnon, pas remplaçant
         </p>
         <h2 className="text-[40px] sm:text-[56px] md:text-[72px] font-semibold leading-[1.02] tracking-[-0.03em] mb-6 max-w-[900px] mx-auto">
-          KOVAS 360 ne remplace pas votre logiciel.
+          KOVAS ne remplace pas votre logiciel.
           <br />
           <span className="text-[#0F1419]/35">Il enlève la friction qui vous épuisait.</span>
         </h2>
         <p className="text-[17px] sm:text-[20px] text-[#0F1419]/72 max-w-[720px] mx-auto leading-relaxed mb-20">
           Votre logiciel principal reste le même : Liciel, AnalysImmo, WinDiagnostics, peu importe.
-          KOVAS 360 s'intercale entre vous et lui sur le seul moment où la double saisie vous fait
+          KOVAS s'intercale entre vous et lui sur le seul moment où la double saisie vous fait
           perdre de l'argent.
         </p>
 
@@ -36,7 +36,7 @@ export function Companion() {
           <WorkflowArrow />
           <WorkflowNode
             label="Compagnon"
-            title="KOVAS 360"
+            title="KOVAS"
             desc="Structuration, validation, géolocalisation, export"
             kovas
           />
@@ -72,7 +72,7 @@ export function Companion() {
           <Step
             n="02"
             title="Validation"
-            desc="KOVAS 360 détecte les incohérences et les oublis avant la fin de mission. « Vous n'avez pas saisi la VMC, volontaire ? » Vous corrigez sur le palier, pas le soir."
+            desc="KOVAS détecte les incohérences et les oublis avant la fin de mission. « Vous n'avez pas saisi la VMC, volontaire ? » Vous corrigez sur le palier, pas le soir."
           />
           <Step
             n="03"
@@ -145,9 +145,7 @@ function WorkflowArrow() {
 function Step({ n, title, desc }: { n: string; title: string; desc: string }) {
   return (
     <article>
-      <p className="font-serif italic font-normal text-5xl text-[#95B11A] leading-none mb-4">
-        {n}
-      </p>
+      <p className="font-serif italic font-normal text-5xl text-[#95B11A] leading-none mb-4">{n}</p>
       <h3 className="text-2xl font-semibold tracking-[-0.01em] mb-3 text-[#0F1419]">{title}</h3>
       <p className="text-base text-[#0F1419]/72 leading-[1.55]">{desc}</p>
     </article>

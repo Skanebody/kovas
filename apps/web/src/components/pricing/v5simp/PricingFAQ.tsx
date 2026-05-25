@@ -16,14 +16,14 @@ interface FaqEntry {
 
 const FAQ: readonly FaqEntry[] = [
   {
-    question: "Quelle différence entre l'Annuaire et KOVAS 360 ?",
+    question: "Quelle différence entre l'Annuaire et KOVAS ?",
     answer:
-      "L'Annuaire est un service B2C : votre fiche apparaît dans l'annuaire public et reçoit des demandes de particuliers. Vous payez pour la visibilité et les leads. KOVAS 360 est le logiciel SaaS B2B qui vous accompagne sur le terrain : saisie vocale, photos géolocalisées, exports universels, sync iPad / iPhone / Web. Vous payez pour la productivité. Les deux produits sont indépendants — vous pouvez prendre l'un, l'autre, ou les deux en bundle remisé.",
+      "L'Annuaire est un service B2C : votre fiche apparaît dans l'annuaire public et reçoit des demandes de particuliers. Vous payez pour la visibilité et les leads. KOVAS est le logiciel SaaS B2B qui vous accompagne sur le terrain : saisie vocale, photos géolocalisées, exports universels, sync iPad / iPhone / Web. Vous payez pour la productivité. Les deux produits sont indépendants — vous pouvez prendre l'un, l'autre, ou les deux en bundle remisé.",
   },
   {
     question: "L'essai gratuit est-il vraiment sans engagement ?",
     answer:
-      "Oui. 30 jours d'accès complet à KOVAS 360 avec carte bancaire enregistrée à la souscription et débit automatique à l'issue, sans engagement long terme. Vous pouvez annuler à tout moment avant J+30 sans aucun débit. À la fin de l'essai, votre formule est activée automatiquement (ou vous résiliez — votre compte est gelé 90 jours puis archivé).",
+      "Oui. 30 jours d'accès complet à KOVAS avec carte bancaire enregistrée à la souscription et débit automatique à l'issue, sans engagement long terme. Vous pouvez annuler à tout moment avant J+30 sans aucun débit. À la fin de l'essai, votre formule est activée automatiquement (ou vous résiliez — votre compte est gelé 90 jours puis archivé).",
   },
   {
     question: "Puis-je changer de plan en cours d'abonnement ?",

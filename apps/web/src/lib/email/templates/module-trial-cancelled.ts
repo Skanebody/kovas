@@ -78,7 +78,7 @@ function renderHtml(d: ModuleTrialCancelledData): string {
           C'est confirmé : votre essai du module <strong>${safeModule}</strong> a été annulé le ${cancelledDate}.
         </p>
         <p style="margin:0 0 16px 0;font-size:15px;line-height:1.55;color:${COLOR_INK};">
-          <strong>Aucun prélèvement n'a été effectué.</strong> Votre forfait KOVAS 360 reste actif aux mêmes conditions.
+          <strong>Aucun prélèvement n'a été effectué.</strong> Votre forfait KOVAS reste actif aux mêmes conditions.
         </p>
         <p style="margin:0 0 24px 0;font-size:15px;line-height:1.55;color:${COLOR_INK};">
           Vous pourrez réactiver ce module à tout moment depuis votre tableau de bord, sans nouvelle période d'essai gratuit.
@@ -114,7 +114,7 @@ function renderText(d: ModuleTrialCancelledData): string {
 
 C'est confirmé : votre essai du module ${d.moduleDisplayName} a été annulé le ${formatDateFr(d.cancelledAtIso)}.
 
-Aucun prélèvement n'a été effectué. Votre forfait KOVAS 360 reste actif aux mêmes conditions.
+Aucun prélèvement n'a été effectué. Votre forfait KOVAS reste actif aux mêmes conditions.
 
 Vous pourrez réactiver ce module à tout moment depuis votre tableau de bord, sans nouvelle période d'essai gratuit :
 ${d.dashboardUrl}

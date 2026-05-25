@@ -11,7 +11,7 @@ interface LogicielPlansGridProps {
 }
 
 /**
- * Section 3 — Toutes les offres logiciel KOVAS 360 (5 plans).
+ * Section 3 — Toutes les offres logiciel KOVAS (5 plans).
  */
 export function LogicielPlansGrid({ currentCode, recommendedCode }: LogicielPlansGridProps) {
   return (

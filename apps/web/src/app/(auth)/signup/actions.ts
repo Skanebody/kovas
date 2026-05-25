@@ -1,20 +1,20 @@
 'use server'
 
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { z } from 'zod'
 import { joinFullName } from '@/lib/name-utils'
+import { isValidReferralCodeFormat } from '@/lib/referral/code-generator'
+import { applyReferralOnSignup } from '@/lib/referral/referral-engine'
+import { createClient } from '@/lib/supabase/server'
 import { getEmailValidationMessage, validateProEmail } from '@/lib/validation/email'
 import {
   getSiretValidationMessage,
   isFakeSiretAllowed,
   validateSiret,
 } from '@/lib/validation/siret'
-import { applyReferralOnSignup } from '@/lib/referral/referral-engine'
-import { isValidReferralCodeFormat } from '@/lib/referral/code-generator'
-import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { z } from 'zod'
 
 const REFERRAL_COOKIE = 'kovas_ref_code'
 
@@ -30,10 +30,7 @@ export type SignupState =
   | { error?: string; fieldErrors?: Partial<Record<keyof z.infer<typeof signupSchema>, string>> }
   | undefined
 
-export async function signupAction(
-  _prev: SignupState,
-  formData: FormData,
-): Promise<SignupState> {
+export async function signupAction(_prev: SignupState, formData: FormData): Promise<SignupState> {
   const parsed = signupSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -45,9 +42,7 @@ export async function signupAction(
   if (!parsed.success) {
     return {
       error: 'Données invalides',
-      fieldErrors: Object.fromEntries(
-        parsed.error.issues.map((i) => [i.path[0], i.message]),
-      ),
+      fieldErrors: Object.fromEntries(parsed.error.issues.map((i) => [i.path[0], i.message])),
     }
   }
 
@@ -71,8 +66,8 @@ export async function signupAction(
   }
 
   const admin = createAdminClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
@@ -97,7 +92,7 @@ export async function signupAction(
     }
     return {
       error:
-        'Votre cabinet a déjà bénéficié d\'un essai KOVAS 360. Choisissez un abonnement à partir de 29€/mois.',
+        "Votre cabinet a déjà bénéficié d'un essai KOVAS. Choisissez un abonnement à partir de 29€/mois.",
     }
   }
 

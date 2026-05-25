@@ -82,7 +82,7 @@ function renderHtml(d: ModuleTrialJMinus5Data): string {
         </p>
         <p style="margin:0 0 16px 0;font-size:15px;line-height:1.55;color:${COLOR_INK};">
           Sans action de votre part, le module sera reconduit automatiquement à <strong>${d.modulePriceEurPerMonth} € HT/mois</strong>,
-          prélevé sur la carte enregistrée à la souscription de votre forfait KOVAS 360.
+          prélevé sur la carte enregistrée à la souscription de votre forfait KOVAS.
         </p>
         <p style="margin:0 0 24px 0;font-size:15px;line-height:1.55;color:${COLOR_INK};">
           Si vous ne souhaitez pas poursuivre, vous pouvez désactiver le module en un clic ci-dessous.
@@ -123,7 +123,7 @@ function renderText(d: ModuleTrialJMinus5Data): string {
 
 Votre essai gratuit de 14 jours sur le module ${d.moduleDisplayName} se termine le ${formatDateFr(d.trialEndsAtIso)}.
 
-Sans action de votre part, le module sera reconduit automatiquement à ${d.modulePriceEurPerMonth} € HT/mois, prélevé sur la carte enregistrée à la souscription de votre forfait KOVAS 360.
+Sans action de votre part, le module sera reconduit automatiquement à ${d.modulePriceEurPerMonth} € HT/mois, prélevé sur la carte enregistrée à la souscription de votre forfait KOVAS.
 
 Si vous ne souhaitez pas poursuivre, vous pouvez désactiver le module en un clic :
 ${d.disableUrl}

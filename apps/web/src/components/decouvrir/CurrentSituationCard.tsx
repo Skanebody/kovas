@@ -38,7 +38,7 @@ export function CurrentSituationCard({ access, summary }: CurrentSituationCardPr
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
         <SituationLine
-          label="KOVAS 360 (logiciel)"
+          label="KOVAS (logiciel)"
           activeLabel={access.logicielTier ? `Tier ${access.logicielTier}` : 'Actif'}
           active={access.hasLogiciel}
           inactiveLabel="Aucun abonnement"

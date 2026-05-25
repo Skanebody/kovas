@@ -2,10 +2,10 @@ import {
   Camera,
   CheckCircle2,
   FileText,
+  type LucideIcon,
   Mic,
   ShieldCheck,
   Upload,
-  type LucideIcon,
 } from 'lucide-react'
 
 interface Feature {
@@ -19,7 +19,7 @@ const FEATURES: Feature[] = [
     icon: Mic,
     title: 'Saisie vocale terrain',
     description:
-      "Décrivez l'état d'une pièce à voix haute. KOVAS 360 structure les données automatiquement, en arrière-plan, pendant que vous continuez le relevé.",
+      "Décrivez l'état d'une pièce à voix haute. KOVAS structure les données automatiquement, en arrière-plan, pendant que vous continuez le relevé.",
   },
   {
     icon: Camera,
@@ -31,7 +31,7 @@ const FEATURES: Feature[] = [
     icon: CheckCircle2,
     title: 'Validation cohérence',
     description:
-      "Règles métier intégrées. KOVAS 360 détecte les incohérences avant export : « Surface 100 m² + chaudière 5 kW = à vérifier ». Avant export, pas après.",
+      'Règles métier intégrées. KOVAS détecte les incohérences avant export : « Surface 100 m² + chaudière 5 kW = à vérifier ». Avant export, pas après.',
   },
   {
     icon: Upload,
@@ -61,10 +61,7 @@ const FEATURES: Feature[] = [
  */
 export function FeaturesGrid() {
   return (
-    <section
-      id="features"
-      className="px-5 sm:px-12 py-20 sm:py-32 md:py-40 max-w-[1240px] mx-auto"
-    >
+    <section id="features" className="px-5 sm:px-12 py-20 sm:py-32 md:py-40 max-w-[1240px] mx-auto">
       <div className="text-center max-w-[800px] mx-auto mb-20">
         <p className="font-mono text-[13px] uppercase tracking-[0.18em] text-[#0F1419]/55 font-medium mb-4">
           Les 6 fonctions cœur
@@ -74,9 +71,8 @@ export function FeaturesGrid() {
           <span className="text-[#0F1419]/35">Le retour bureau quasi inutile.</span>
         </h2>
         <p className="text-[17px] sm:text-[20px] text-[#0F1419]/72 leading-relaxed">
-          KOVAS 360 ne remplace pas votre logiciel principal. Il élimine la friction terrain, valide
-          vos données avant export, et envoie vers Liciel, AnalysImmo ou tout autre outil en un
-          bouton.
+          KOVAS ne remplace pas votre logiciel principal. Il élimine la friction terrain, valide vos
+          données avant export, et envoie vers Liciel, AnalysImmo ou tout autre outil en un bouton.
         </p>
       </div>
 

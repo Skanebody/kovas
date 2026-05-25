@@ -42,7 +42,7 @@ export default function UpgradeAnnuairePage() {
       </section>
 
       <p className="text-xs text-foreground/55 max-w-2xl">
-        KOVAS Annuaire est un produit complémentaire de KOVAS 360 — vous pouvez souscrire à
+        KOVAS Annuaire est un produit complémentaire de KOVAS — vous pouvez souscrire à
         l&apos;Annuaire seul ou en bundle économique avec votre logiciel actuel pour un prix
         avantageux. Pas d&apos;engagement de durée, résiliation conforme au décret n°2023-417.
       </p>

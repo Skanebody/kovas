@@ -39,7 +39,7 @@ export function LandingPricingTeaser() {
           </h2>
           <p className="text-ink-mute">
             Choisissez ce dont vous avez besoin : visibilité B2C avec l'Annuaire, productivité
-            terrain avec KOVAS 360, ou les deux en bundle remisé.
+            terrain avec KOVAS, ou les deux en bundle remisé.
           </p>
         </div>
 
@@ -76,7 +76,7 @@ export function LandingPricingTeaser() {
           <article className="rounded-xl border border-chartreuse-deep bg-chartreuse-soft/40 shadow-md p-6 space-y-4">
             <header>
               <p className="text-[11px] uppercase tracking-wider font-semibold text-ink-mute flex items-center gap-1.5">
-                KOVAS 360
+                KOVAS
                 <Sparkles className="size-3.5 text-chartreuse-deep" aria-hidden />
               </p>
               <h3 className="text-xl font-bold tracking-tight mt-1">{logicielActive.name}</h3>

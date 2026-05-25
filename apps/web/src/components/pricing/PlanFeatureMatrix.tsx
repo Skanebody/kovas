@@ -3,11 +3,11 @@
 // Type B2 dependency — pricing-plans.ts refonte by parallel agent
 import {
   ANNUAIRE_PLANS,
-  BUNDLES,
-  LOGICIEL_PLANS,
   type AnnuairePlan,
   type AnnuairePlanCode,
+  BUNDLES,
   type Bundle,
+  LOGICIEL_PLANS,
   type LogicielPlan,
   type LogicielPlanCode,
 } from '@/lib/pricing-plans'
@@ -17,8 +17,8 @@ import { Check, Minus } from 'lucide-react'
 /**
  * Matrice comparative V3 dual track — affichée sur `/pricing/compare`.
  *
- * 9 colonnes : 4 Annuaire + 5 Logiciel KOVAS 360.
- * Sections : "Annuaire" / "KOVAS 360" / "Bundles" (5 lignes simples).
+ * 9 colonnes : 4 Annuaire + 5 Logiciel KOVAS.
+ * Sections : "Annuaire" / "KOVAS" / "Bundles" (5 lignes simples).
  *
  * Mobile : table scroll horizontale. Les anciennes 5 colonnes E2c et les
  * 5 addons supprimés (`bilingual_reports`, `facturx_ppf`, `analytics_advanced`,
@@ -184,7 +184,7 @@ function AnnuaireMatrix() {
   )
 }
 
-// ─── KOVAS 360 ───────────────────────────────────────────────
+// ─── KOVAS ───────────────────────────────────────────────
 
 interface LogicielRow {
   category: string
@@ -315,7 +315,7 @@ function LogicielMatrix() {
   return (
     <div>
       <h3 className="font-mono text-[12px] uppercase tracking-[0.16em] text-[#0F1419]/55 font-semibold mb-3">
-        KOVAS 360 — 5 tiers
+        KOVAS — 5 tiers
       </h3>
       <div className="overflow-x-auto rounded-[24px] border border-[#0F1419]/[0.08] bg-white">
         <table className="w-full border-collapse text-[14px]">
@@ -325,7 +325,7 @@ function LogicielMatrix() {
                 scope="col"
                 className="sticky left-0 bg-white text-left px-5 py-5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#0F1419]/55 font-semibold min-w-[260px]"
               >
-                Fonctionnalité KOVAS 360
+                Fonctionnalité KOVAS
               </th>
               {LOGICIEL_PLANS.map((plan: LogicielPlan) => (
                 <th

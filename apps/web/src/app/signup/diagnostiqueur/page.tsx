@@ -11,7 +11,7 @@ import { Step6SireneForm } from './_steps/step6-sirene-form'
 import { Step7Confirmation } from './_steps/step7-confirmation'
 
 export const metadata: Metadata = {
-  title: 'Inscription diagnostiqueur — KOVAS 360',
+  title: 'Inscription diagnostiqueur — KOVAS',
   description:
     'Activation conditionnelle stricte (Doctolib-style 2022) — vérification identité civile, COFRAC, RC Pro, SIRENE en 7 étapes.',
   robots: { index: false, follow: false },

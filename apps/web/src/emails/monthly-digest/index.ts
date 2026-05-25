@@ -72,7 +72,7 @@ export function renderMonthlyDigestHtml(data: MonthlyDigestData): string {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Votre activité du mois — KOVAS 360</title>
+<title>Votre activité du mois — KOVAS</title>
 </head>
 <body style="margin:0;padding:0;background:#F8F5EE;font-family:'Manrope',Arial,sans-serif;color:#0F1E3D;">
 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#F8F5EE;padding:32px 0;">
@@ -80,7 +80,7 @@ export function renderMonthlyDigestHtml(data: MonthlyDigestData): string {
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width:600px;background:#FDFBF6;border-radius:24px;padding:32px;">
       <tr><td>
         <p style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#4A5878;margin:0 0 6px 0;">
-          KOVAS 360 · Rapport mensuel
+          KOVAS · Rapport mensuel
         </p>
         <h1 style="font-family:'Instrument Serif',serif;font-style:italic;font-size:32px;color:#0F1E3D;margin:0 0 6px 0;line-height:1.15;">
           ${escapeHtml(monthLabel)}
@@ -122,7 +122,7 @@ export function renderMonthlyDigestHtml(data: MonthlyDigestData): string {
         }
 
         <p style="font-family:'Manrope',sans-serif;font-size:14px;color:#0F1E3D;margin:32px 0 4px 0;">Benjamin</p>
-        <p style="font-family:'Manrope',sans-serif;font-size:12px;color:#4A5878;margin:0;">Fondateur · KOVAS 360</p>
+        <p style="font-family:'Manrope',sans-serif;font-size:12px;color:#4A5878;margin:0;">Fondateur · KOVAS</p>
 
         <p style="font-family:'Manrope',sans-serif;font-size:11px;color:#7E8AA4;margin:24px 0 0 0;line-height:1.5;">
           Vous recevez ce mail parce que vous avez activé les rapports mensuels d&apos;activité.

@@ -60,7 +60,7 @@ export function HeroB2B() {
           {/* Visuel app à droite — placeholder stylisé (à remplacer en prod par screenshot réel) */}
           <div
             className="relative aspect-[4/3] rounded-xl bg-[#0F1419] overflow-hidden shadow-lg"
-            aria-label="Capture d'écran de l'application KOVAS 360 — placeholder"
+            aria-label="Capture d'écran de l'application KOVAS — placeholder"
           >
             <div
               aria-hidden
@@ -79,7 +79,7 @@ export function HeroB2B() {
                   <span className="size-2.5 rounded-full bg-[#28C840]" />
                 </div>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-paper/40">
-                  KOVAS 360 · app.kovas.fr
+                  KOVAS · app.kovas.fr
                 </span>
               </div>
 

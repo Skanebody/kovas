@@ -24,7 +24,7 @@ interface FaqItem {
 const FAQ_ITEMS: FaqItem[] = [
   {
     id: 'data-ownership',
-    question: "Mes données restent-elles à moi si j'arrête KOVAS 360 ?",
+    question: "Mes données restent-elles à moi si j'arrête KOVAS ?",
     answer:
       "Oui, sans condition. Export complet en PDF, Word, CSV, JSON ou ZIP Liciel à tout moment, depuis votre tableau de bord. Après résiliation, votre abonnement reste actif jusqu'à la fin de la période en cours, puis votre compte bascule 90 jours en mode lecture et export pour reprendre vos dossiers à votre rythme. Au-delà, vos données opérationnelles sont supprimées ; vos factures restent conservées 10 ans (obligation légale comptable). Une demande explicite d'effacement RGPD via contact@kovas.fr est traitée sous 30 jours. Aucun verrou propriétaire, aucune négociation de sortie.",
   },
@@ -38,7 +38,7 @@ const FAQ_ITEMS: FaqItem[] = [
     id: 'offline',
     question: "Et si je n'ai pas de connexion sur le terrain ?",
     answer:
-      "KOVAS 360 fonctionne hors ligne intégralement. Saisie vocale traitée localement sur l'appareil, photos stockées en local, validation cohérence en local. La synchronisation se déclenche dès que vous retrouvez du réseau, sans intervention de votre part. Aucune mission perdue, aucune saisie à refaire.",
+      "KOVAS fonctionne hors ligne intégralement. Saisie vocale traitée localement sur l'appareil, photos stockées en local, validation cohérence en local. La synchronisation se déclenche dès que vous retrouvez du réseau, sans intervention de votre part. Aucune mission perdue, aucune saisie à refaire.",
   },
   {
     id: 'quota-overflow',
@@ -50,7 +50,7 @@ const FAQ_ITEMS: FaqItem[] = [
     id: 'proof-1h30',
     question: 'Pourquoi vous croire sur les 1h30 gagnées par mission ?',
     answer:
-      "Parce que le calcul est mécanique : un DPE T3 demande en moyenne 50 minutes de relevé terrain et 90 minutes de re-saisie bureau (sources : enquête métier 2024, benchmark sur missions test). KOVAS 360 structure la saisie pendant le relevé, ce qui réduit la re-saisie à 0–10 minutes selon la complexité. Le gain médian observé sur les bêta-tests est de 1h27 par DPE individuel.",
+      'Parce que le calcul est mécanique : un DPE T3 demande en moyenne 50 minutes de relevé terrain et 90 minutes de re-saisie bureau (sources : enquête métier 2024, benchmark sur missions test). KOVAS structure la saisie pendant le relevé, ce qui réduit la re-saisie à 0–10 minutes selon la complexité. Le gain médian observé sur les bêta-tests est de 1h27 par DPE individuel.',
   },
 ]
 
@@ -58,10 +58,7 @@ export function LandingFaq() {
   const [openId, setOpenId] = useState<string | null>(null)
 
   return (
-    <section
-      id="faq"
-      className="px-5 sm:px-12 py-20 sm:py-32 md:py-40 max-w-[880px] mx-auto"
-    >
+    <section id="faq" className="px-5 sm:px-12 py-20 sm:py-32 md:py-40 max-w-[880px] mx-auto">
       <div className="text-center max-w-[720px] mx-auto">
         <p className="font-mono text-[13px] uppercase tracking-[0.18em] text-[#0F1419]/55 font-medium mb-4">
           FAQ
@@ -110,16 +107,16 @@ export function LandingFaq() {
                   +
                 </span>
               </button>
-              <div
+              <section
                 id={`landing-faq-${item.id}`}
-                role="region"
+                aria-label="Réponse"
                 className={cn(
                   'overflow-hidden transition-[max-height,padding] duration-300 ease-in-out text-base text-[#0F1419]/72 leading-[1.6]',
                   open ? 'max-h-[800px] pt-4' : 'max-h-0',
                 )}
               >
                 {item.answer}
-              </div>
+              </section>
             </div>
           )
         })}

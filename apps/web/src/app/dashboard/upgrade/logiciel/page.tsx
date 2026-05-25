@@ -8,7 +8,7 @@ import { useState } from 'react'
 /**
  * Page /dashboard/upgrade/logiciel
  *
- * Cross-sell KOVAS 360 (SaaS B2B) pour un user `annuaire-only` ou `free`.
+ * Cross-sell KOVAS (SaaS B2B) pour un user `annuaire-only` ou `free`.
  * Affiche les 5 tiers Logiciel (free / starter / active / cabinet / enterprise)
  * avec toggle mensuel/annuel et CTAs Stripe checkout.
  *
@@ -20,7 +20,7 @@ export default function UpgradeLogicielPage() {
   return (
     <div className="space-y-8 pb-8">
       <AppPageHeader
-        eyebrow="KOVAS 360"
+        eyebrow="KOVAS"
         title="Gagnez"
         accent="1h30 par mission"
         description="Le logiciel terrain qui élimine la friction : saisie vocale, photos géolocalisées, exports multi-format universels et bouton Partager 3 modes vers Liciel. Migration sans rupture."
@@ -35,16 +35,16 @@ export default function UpgradeLogicielPage() {
         className="rounded-2xl bg-paper/60 p-4 sm:p-6"
       >
         <h2 id="logiciel-grid-heading" className="sr-only">
-          Forfaits KOVAS 360
+          Forfaits KOVAS
         </h2>
         <LogicielTrackGrid billing={billing} />
       </section>
 
       <p className="text-xs text-foreground/55 max-w-2xl">
-        KOVAS 360 est le logiciel SaaS B2B pour diagnostiqueurs immobiliers indépendants. Tarif
-        fixe mensuel, missions illimitées sous fair-use, sans surplus à l&apos;usage. Essai
-        gratuit 30 jours avec carte bancaire enregistrée et débit automatique à l&apos;issue —
-        résiliation conforme au décret n°2023-417.
+        KOVAS est le logiciel SaaS B2B pour diagnostiqueurs immobiliers indépendants. Tarif fixe
+        mensuel, missions illimitées sous fair-use, sans surplus à l&apos;usage. Essai gratuit 30
+        jours avec carte bancaire enregistrée et débit automatique à l&apos;issue — résiliation
+        conforme au décret n°2023-417.
       </p>
     </div>
   )

@@ -36,7 +36,7 @@ import type {
 const SITE_URL = 'https://kovas.fr' as const
 const LOGO_URL = `${SITE_URL}/icons/icon-512.png` as const
 const PUBLISHER_NAME = 'NEXUS 1993' as const
-const PRODUCT_NAME_B2B = 'KOVAS 360' as const
+const PRODUCT_NAME_B2B = 'KOVAS' as const
 const PRODUCT_NAME_B2C = 'KOVAS Annuaire' as const
 
 // ────────────────────────────────────────────────────────────────────────────

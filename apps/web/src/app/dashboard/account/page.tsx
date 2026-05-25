@@ -294,7 +294,7 @@ export default async function AccountPage({
             Votre essai gratuit est arrivé à échéance.
           </p>
           <p className="mt-1 text-[13px] text-amber-900/85">
-            Pour continuer à utiliser KOVAS 360, choisissez un forfait ci-dessous et enregistrez un
+            Pour continuer à utiliser KOVAS, choisissez un forfait ci-dessous et enregistrez un
             moyen de paiement. Vos données sont conservées : la réactivation est immédiate.
           </p>
         </div>

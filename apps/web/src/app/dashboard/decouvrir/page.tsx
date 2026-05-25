@@ -6,7 +6,7 @@ import { DecouvrirClient } from './decouvrir-client'
 export const metadata: Metadata = {
   title: 'Découvrir KOVAS',
   description:
-    'Catalogue unifié des offres KOVAS 360 et KOVAS Annuaire — bundles, add-ons, sponsorisé.',
+    'Catalogue unifié des offres KOVAS et KOVAS Annuaire — bundles, add-ons, sponsorisé.',
 }
 
 /**

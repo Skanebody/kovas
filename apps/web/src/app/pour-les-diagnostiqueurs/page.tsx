@@ -12,12 +12,12 @@ import { type Testimonial, Testimonials } from '@/components/public/landing/Test
 import { buildMetadata } from '@/lib/seo/metadata'
 
 /**
- * KOVAS 360 — Page d'accueil B2B (kovas.fr/pour-les-diagnostiqueurs)
+ * KOVAS — Page d'accueil B2B (kovas.fr/pour-les-diagnostiqueurs)
  * Cible : diagnostiqueurs immobiliers indépendants (Avatar Benjamin 43 ans ex-cadre).
  * Brand : sage + dark + chartreuse (DS v5 — sobre productivité B2B).
  */
 export const metadata = buildMetadata({
-  title: 'KOVAS 360 — Le logiciel terrain pour diagnostiqueurs immobiliers indépendants',
+  title: 'KOVAS — Le logiciel terrain pour diagnostiqueurs immobiliers indépendants',
   description:
     'Saisie vocale, exports universels, conformité ADEME et Factur-X intégrés. 30 jours gratuits. Sans engagement. À partir de 29€/mois (Solo Light) ou 39€/mois en bundle Solo Starter.',
   path: '/pour-les-diagnostiqueurs',
@@ -101,19 +101,19 @@ const TESTIMONIALS_B2B: Testimonial[] = [
     quote:
       'J’ai économisé 25h ce mois grâce à la saisie vocale. Mes weekends sont à moi à nouveau, c’est inestimable.',
     name: 'Pierre B.',
-    meta: 'Diagnostiqueur Normandie · 6 mois sur KOVAS 360',
+    meta: 'Diagnostiqueur Normandie · 6 mois sur KOVAS',
   },
   {
     quote:
       'Import de ma base depuis OBBC en 1 journée. Tous mes anciens dossiers, clients et biens repris sans perte. Je continue à utiliser OBBC pour le calcul DPE, KOVAS me sert pour le terrain.',
     name: 'Sophie L.',
-    meta: 'Cabinet Bordeaux · 3 mois sur KOVAS 360',
+    meta: 'Cabinet Bordeaux · 3 mois sur KOVAS',
   },
   {
     quote:
       'L’annuaire m’apporte en moyenne 8 leads qualifiés par mois. Mon ROI sur l’abonnement était atteint dès le 3ᵉ mois.',
     name: 'Marc D.',
-    meta: 'Solopreneur Lyon · 4 mois sur KOVAS 360',
+    meta: 'Solopreneur Lyon · 4 mois sur KOVAS',
   },
 ]
 
@@ -171,7 +171,7 @@ const FAQ_B2B: FaqItem[] = [
 const SOFTWARE_APPLICATION_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: 'KOVAS 360',
+  name: 'KOVAS',
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web, iOS, Android (PWA)',
   description:
@@ -206,7 +206,7 @@ export default function PourLesDiagnostiqueursPage() {
         <B2BFeatures />
         <ComparisonTable
           eyebrow="03 · Comparatif"
-          title="KOVAS 360 vs logiciels existants."
+          title="KOVAS vs logiciels existants."
           subtitle="Transparence totale. Pas de discours marketing, juste les faits."
           rows={COMPARISON_ROWS}
           footnote="Comparatif établi sur la base d’informations publiquement accessibles au 2 juin 2026. Logiciels A, B, C anonymisés conformément aux usages."

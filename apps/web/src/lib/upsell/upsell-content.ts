@@ -130,7 +130,8 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     code: 'community_pro',
     kind: 'addon',
     title: 'Communauté Pro',
-    description: 'Accès au cercle privé des diagnostiqueurs KOVAS : Q&A métier, jurisprudence, sourcing.',
+    description:
+      'Accès au cercle privé des diagnostiqueurs KOVAS : Q&A métier, jurisprudence, sourcing.',
     benefits: [
       'Communauté privée 250+ diagnostiqueurs FR',
       'Bibliothèque jurisprudence + cas concrets',
@@ -179,7 +180,8 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     code: 'cockpit_ademe_m2',
     kind: 'addon',
     title: 'Cockpit ADEME Mode 2',
-    description: 'Pilotage avancé des envois ADEME : lots, retours, anomalies, corrections groupées.',
+    description:
+      'Pilotage avancé des envois ADEME : lots, retours, anomalies, corrections groupées.',
     benefits: [
       'Pilotage lots + corrections groupées',
       'Détection anomalies et retours ADEME auto',
@@ -200,7 +202,7 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     description: 'Veille IA hebdo + Cockpit ADEME M2 + Communauté Pro à prix groupé.',
     benefits: [
       'Veille IA + Cockpit ADEME M2 + Communauté',
-      "Économie ~7€/mo vs achat séparé",
+      'Économie ~7€/mo vs achat séparé',
       'Activable / désactivable mensuellement',
     ],
     priceLabel: '29€/mo HT',
@@ -217,7 +219,7 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
       'Analytics avancés + Pennylane + Factur-X PPF (100 factures incluses) pour cabinets en croissance.',
     benefits: [
       'Analytics + Pennylane + Factur-X PPF',
-      "Économie ~12€/mo vs achat séparé",
+      'Économie ~12€/mo vs achat séparé',
       '100 factures Factur-X incluses',
     ],
     priceLabel: '49€/mo HT',
@@ -234,7 +236,7 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
       '3 signatures eIDAS + 3 rapports bilingues FR/EN inclus chaque mois pour vos clients étrangers.',
     benefits: [
       'Signatures eIDAS + Rapports bilingues',
-      "Économie ~15€/mo vs achat séparé",
+      'Économie ~15€/mo vs achat séparé',
       '3 signatures et 3 rapports inclus',
     ],
     priceLabel: '25€/mo HT',
@@ -290,7 +292,8 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     code: 'all_inclusive',
     kind: 'tier_upgrade',
     title: 'Forfait All Inclusive',
-    description: 'Pour les power users en activité soutenue — 250 missions, 25h Whisper, accès Phase 2.',
+    description:
+      'Pour les power users en activité soutenue — 250 missions, 25h Whisper, accès Phase 2.',
     benefits: [
       '250 missions + 25h Whisper + Vision IA 200/mo',
       '80 Go stockage',
@@ -306,8 +309,7 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     code: 'cabinet',
     kind: 'tier_upgrade',
     title: 'Forfait Cabinet',
-    description:
-      "Jusqu'à 3 utilisateurs, 400 missions, multi-rôles et account manager dédié.",
+    description: "Jusqu'à 3 utilisateurs, 400 missions, multi-rôles et account manager dédié.",
     benefits: [
       '3 utilisateurs inclus + multi-rôles',
       '400 missions + 40h Whisper',
@@ -391,7 +393,7 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     code: 'logiciel_free',
     kind: 'tier_upgrade',
     title: 'Essai 30 jours',
-    description: 'Pour découvrir KOVAS 360. CB enregistrée à la souscription, débit auto à J+30.',
+    description: 'Pour découvrir KOVAS. CB enregistrée à la souscription, débit auto à J+30.',
     benefits: ['30 missions sur 30 jours', '1h Whisper', 'Exports universels'],
     priceLabel: 'Gratuit',
     trialLabel: '30 jours gratuits',
@@ -428,7 +430,11 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     kind: 'tier_upgrade',
     title: 'Cabinet',
     description: "Jusqu'à 3 utilisateurs, audit trail, Factur-X inclus.",
-    benefits: ['400 missions / mois — 3 users', '40h Whisper + Vision IA 600/mo', 'Account manager dédié'],
+    benefits: [
+      '400 missions / mois — 3 users',
+      '40h Whisper + Vision IA 600/mo',
+      'Account manager dédié',
+    ],
     priceLabel: '149€/mo HT',
     trialLabel: '14 jours gratuits',
     ctaPrimary: 'Passer sur Cabinet',
@@ -440,7 +446,11 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     kind: 'tier_upgrade',
     title: 'Enterprise',
     description: 'API publique + SLA 4h + onboarding white-glove.',
-    benefits: ['Missions illimitées (fair-use)', '80h Whisper + Vision IA 1500/mo', 'API + multi-users 10+'],
+    benefits: [
+      'Missions illimitées (fair-use)',
+      '80h Whisper + Vision IA 1500/mo',
+      'API + multi-users 10+',
+    ],
     priceLabel: '299€/mo HT',
     trialLabel: '14 jours gratuits',
     ctaPrimary: 'Passer sur Enterprise',
@@ -501,7 +511,8 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     code: 'cabinet_legacy',
     kind: 'tier_upgrade',
     title: 'Cabinet (héritage)',
-    description: 'Plan grandfather E2c — prix 199€ préservé à vie (400 missions, 3 users, surplus 0,80 €/mission).',
+    description:
+      'Plan grandfather E2c — prix 199€ préservé à vie (400 missions, 3 users, surplus 0,80 €/mission).',
     benefits: ['400 missions — 3 users', '40h Whisper', 'Account manager dédié'],
     priceLabel: '199€/mo HT',
     trialLabel: '14 jours gratuits',
@@ -617,7 +628,8 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     code: 'essai',
     kind: 'tier_upgrade',
     title: 'Essai gratuit 30 jours',
-    description: 'Pour découvrir KOVAS 360. CB enregistrée à la souscription, débit auto vers Solo Light à J+30.',
+    description:
+      'Pour découvrir KOVAS. CB enregistrée à la souscription, débit auto vers Solo Light à J+30.',
     benefits: ['30 missions max', '1h Whisper inclus', 'Exports universels'],
     priceLabel: 'Gratuit',
     trialLabel: '30 jours gratuits',
@@ -654,7 +666,11 @@ export const UPSELL_CATALOG: Record<UpsellTargetCode, UpsellCatalogEntry> = {
     kind: 'tier_upgrade',
     title: 'Cabinet+',
     description: 'API publique + SLA 4h + onboarding white-glove (jusqu’à 7 utilisateurs).',
-    benefits: ['Missions illimitées (fair-use)', '80h Whisper + Vision IA 1500/mo', 'API + jusqu’à 7 utilisateurs'],
+    benefits: [
+      'Missions illimitées (fair-use)',
+      '80h Whisper + Vision IA 1500/mo',
+      'API + jusqu’à 7 utilisateurs',
+    ],
     priceLabel: '299€/mo HT',
     trialLabel: '14 jours gratuits',
     ctaPrimary: 'Passer sur Cabinet+',

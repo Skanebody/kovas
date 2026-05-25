@@ -256,7 +256,7 @@ export function buildAttestationData(
     editor,
     attestationNumber: buildAttestationNumber(client.orgId, issuedAt),
     issuedAt: issuedAt.toISOString(),
-    softwareVersion: options.softwareVersion ?? `KOVAS 360 v${getSoftwareVersion()}`,
+    softwareVersion: options.softwareVersion ?? `KOVAS v${getSoftwareVersion()}`,
     scope:
       options.scope ??
       'Module Devis & Factures — émission, numérotation, conservation et archivage des factures du diagnostiqueur',

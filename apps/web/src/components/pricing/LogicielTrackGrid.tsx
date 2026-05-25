@@ -1,14 +1,10 @@
 'use client'
 
+// Type B2 dependency — pricing-plans.ts refonte by parallel agent
+import { LOGICIEL_PLANS, type LogicielPlan, type LogicielPlanCode } from '@/lib/pricing-plans'
 import { cn } from '@/lib/utils'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-// Type B2 dependency — pricing-plans.ts refonte by parallel agent
-import {
-  LOGICIEL_PLANS,
-  type LogicielPlan,
-  type LogicielPlanCode,
-} from '@/lib/pricing-plans'
 
 import type { BillingCycle } from './PricingToggle'
 
@@ -17,7 +13,7 @@ interface LogicielTrackGridProps {
 }
 
 /**
- * Grille des 5 tiers KOVAS 360 (SaaS B2B diagnostiqueurs).
+ * Grille des 5 tiers KOVAS (SaaS B2B diagnostiqueurs).
  *
  * Spec : `docs/pricing/v3-dual-track-spec.md` §3. Tier `logiciel_active`
  * (59€/mo) flaggué featured.
@@ -93,10 +89,7 @@ function LogicielCard({
           {displayPrice}
         </span>
         <span
-          className={cn(
-            'text-sm',
-            plan.featured === true ? 'text-white/72' : 'text-[#0F1419]/55',
-          )}
+          className={cn('text-sm', plan.featured === true ? 'text-white/72' : 'text-[#0F1419]/55')}
         >
           € HT / mois
         </span>
@@ -111,10 +104,7 @@ function LogicielCard({
       </p>
 
       <div
-        className={cn(
-          'h-px mb-5',
-          plan.featured === true ? 'bg-white/15' : 'bg-[#0F1419]/[0.08]',
-        )}
+        className={cn('h-px mb-5', plan.featured === true ? 'bg-white/15' : 'bg-[#0F1419]/[0.08]')}
         aria-hidden
       />
 
@@ -140,10 +130,8 @@ function LogicielCard({
             plan.featured === true ? 'text-white/72' : 'text-[#0F1419]/72',
           )}
         >
-          {plan.caps.users === 1
-            ? '1 utilisateur'
-            : `${plan.caps.users} utilisateurs inclus`}{' '}
-          · {plan.caps.storageGb} Go stockage
+          {plan.caps.users === 1 ? '1 utilisateur' : `${plan.caps.users} utilisateurs inclus`} ·{' '}
+          {plan.caps.storageGb} Go stockage
         </p>
       </div>
 

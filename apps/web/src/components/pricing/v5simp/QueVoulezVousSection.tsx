@@ -22,9 +22,7 @@ export function QueVoulezVousSection() {
         </p>
         <h2 className="font-sans font-semibold text-[28px] sm:text-[36px] md:text-[44px] leading-[1.08] tracking-[-0.025em] text-[#0B1D33]">
           Deux objectifs,{' '}
-          <span className="font-serif italic font-normal text-[#0B1D33]/72">
-            deux parcours.
-          </span>
+          <span className="font-serif italic font-normal text-[#0B1D33]/72">deux parcours.</span>
         </h2>
       </header>
 
@@ -41,8 +39,8 @@ export function QueVoulezVousSection() {
             Recevoir plus de clients
           </p>
           <p className="text-[13px] text-[#0B1D33]/65 leading-relaxed mb-5">
-            Votre fiche dans l&apos;annuaire public KOVAS — leads particuliers
-            qualifiés livrés chaque mois.
+            Votre fiche dans l&apos;annuaire public KOVAS — leads particuliers qualifiés livrés
+            chaque mois.
           </p>
           <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#0B1D33] group-hover:gap-2.5 transition-all">
             Voir les forfaits Annuaire
@@ -62,11 +60,10 @@ export function QueVoulezVousSection() {
             Gagner du temps administratif
           </p>
           <p className="text-[13px] text-[#0B1D33]/65 leading-relaxed mb-5">
-            Le logiciel KOVAS 360 — saisie vocale, exports universels, sync
-            iPad / iPhone / Web.
+            Le logiciel KOVAS — saisie vocale, exports universels, sync iPad / iPhone / Web.
           </p>
           <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#0B1D33] group-hover:gap-2.5 transition-all">
-            Voir les forfaits KOVAS 360
+            Voir les forfaits KOVAS
             <ArrowRight aria-hidden className="size-3.5" />
           </span>
         </button>

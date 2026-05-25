@@ -25,7 +25,7 @@ export default function DiagnostiqueurOnboardingLayout({
           href="/"
           className="font-sans font-semibold tracking-[0.22em] text-[15px] text-[#0F1419]"
         >
-          KOVAS 360
+          KOVAS
         </Link>
         <a
           href="mailto:contact@kovas.fr"

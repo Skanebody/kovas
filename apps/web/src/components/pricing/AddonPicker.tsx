@@ -24,12 +24,10 @@ export function AddonPicker() {
   return (
     <div className="space-y-4">
       <div className="text-center space-y-2">
-        <h3 className="text-xl font-semibold tracking-tight">
-          Add-ons à la carte
-        </h3>
+        <h3 className="text-xl font-semibold tracking-tight">Add-ons à la carte</h3>
         <p className="text-sm text-ink-mute max-w-2xl mx-auto">
-          Modules optionnels souscriptibles depuis n'importe quel tier payant Annuaire ou
-          KOVAS 360. Désactivables à tout moment depuis Réglages → Modules.
+          Modules optionnels souscriptibles depuis n'importe quel tier payant Annuaire ou KOVAS.
+          Désactivables à tout moment depuis Réglages → Modules.
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">

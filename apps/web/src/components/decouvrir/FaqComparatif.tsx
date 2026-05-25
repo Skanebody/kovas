@@ -13,15 +13,15 @@ import { Check, Minus } from 'lucide-react'
 export function FaqComparatif() {
   const faqs = [
     {
-      q: 'Que se passe-t-il après l\'essai 30 jours ?',
+      q: "Que se passe-t-il après l'essai 30 jours ?",
       a: 'Aucun prélèvement automatique. Vous choisissez ensuite parmi nos plans payants. Vos données restent stockées 90 jours en cas de réactivation.',
     },
     {
-      q: 'Puis-je changer de plan en cours d\'abonnement ?',
+      q: "Puis-je changer de plan en cours d'abonnement ?",
       a: 'Oui, à tout moment depuis Mon compte. La différence est calculée au prorata et appliquée sur la prochaine facture.',
     },
     {
-      q: 'Comment fonctionne l\'annuaire KOVAS ?',
+      q: "Comment fonctionne l'annuaire KOVAS ?",
       a: 'Une fiche gratuite donne une visibilité de base. Les plans Local / Régional / National vous donnent une priorité géographique + des fonctions avancées (avis, statistiques, leads).',
     },
     {
@@ -39,7 +39,7 @@ export function FaqComparatif() {
       {/* Tableau comparatif */}
       <Card variant="flat" padding="default" className="overflow-x-auto">
         <h3 className="font-display font-semibold text-base mb-4 text-ink">
-          Comparatif des plans KOVAS 360
+          Comparatif des plans KOVAS
         </h3>
         <table className="w-full text-sm">
           <thead>

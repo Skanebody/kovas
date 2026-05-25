@@ -54,7 +54,7 @@ export function DayComparison() {
             Mardi, 3 missions DPE.
           </h2>
           <p className="text-[17px] sm:text-[20px] text-[#0F1419]/72 leading-relaxed">
-            La même journée. Avec KOVAS 360 et sans. Voici à quoi ressemble votre soir.
+            La même journée. Avec KOVAS et sans. Voici à quoi ressemble votre soir.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export function DayComparison() {
           {/* Sans KOVAS */}
           <article className="bg-[#F5F7F4] rounded-[32px] p-10 relative">
             <h3 className="text-2xl font-semibold tracking-[-0.01em] mb-2 text-[#0F1419]">
-              Sans KOVAS 360
+              Sans KOVAS
             </h3>
             <p className="text-sm text-[#0F1419]/55 mb-8">
               Workflow Liciel seul, notes papier sur le terrain
@@ -87,7 +87,7 @@ export function DayComparison() {
               −4h30 / jour
             </span>
             <h3 className="text-2xl font-semibold tracking-[-0.01em] mb-2 text-white">
-              Avec KOVAS 360
+              Avec KOVAS
             </h3>
             <p className="text-sm text-white/60 mb-8">
               Saisie vocale terrain, export logiciel automatique

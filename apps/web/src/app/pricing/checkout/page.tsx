@@ -7,7 +7,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-export const metadata: Metadata = { title: 'Finaliser votre commande KOVAS 360' }
+export const metadata: Metadata = { title: 'Finaliser votre commande KOVAS' }
 
 interface CheckoutSearchParams {
   plan?: string

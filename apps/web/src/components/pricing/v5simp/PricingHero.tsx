@@ -17,19 +17,17 @@ export function PricingHero() {
       </p>
       <h1 className="font-sans font-semibold text-[44px] sm:text-[64px] md:text-[80px] leading-[1.02] tracking-[-0.035em] text-[#0B1D33] mb-7">
         Le logiciel et{' '}
-        <span className="font-serif italic font-normal text-[#0B1D33]/72">
-          l&apos;annuaire
-        </span>{' '}
+        <span className="font-serif italic font-normal text-[#0B1D33]/72">l&apos;annuaire</span>{' '}
         pour diagnostiqueurs immobiliers.
       </h1>
       <p className="text-[17px] sm:text-[19px] md:text-[21px] text-[#0B1D33]/72 max-w-[760px] mx-auto leading-[1.5] mb-10">
-        Recevez plus de clients avec l&apos;annuaire public. Gagnez 1h30 par mission avec
-        le logiciel KOVAS 360. Achetables séparément ou en bundle remisé.
+        Recevez plus de clients avec l&apos;annuaire public. Gagnez 1h30 par mission avec le
+        logiciel KOVAS. Achetables séparément ou en bundle remisé.
       </p>
 
       <Link
         href="/signup?plan=logiciel_starter"
-        aria-label="Essayer KOVAS 360 gratuitement 30 jours avec carte bancaire enregistrée et débit automatique à l’issue"
+        aria-label="Essayer KOVAS gratuitement 30 jours avec carte bancaire enregistrée et débit automatique à l’issue"
         className="inline-flex items-center justify-center gap-2 bg-[#D4F542] text-[#0B1D33] px-8 py-4 rounded-full text-[15px] font-semibold hover:bg-[#A3C920] hover:-translate-y-px transition-all duration-150 shadow-[0_8px_24px_rgba(212,245,66,0.35)]"
       >
         Essayer gratuitement

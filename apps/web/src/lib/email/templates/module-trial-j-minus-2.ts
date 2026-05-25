@@ -77,7 +77,7 @@ function renderHtml(d: ModuleTrialJMinus2Data): string {
           Petit rappel : votre essai du module <strong>${safeModule}</strong> se termine dans deux jours, le <strong>${endDate}</strong>.
         </p>
         <p style="margin:0 0 16px 0;font-size:15px;line-height:1.55;color:${COLOR_INK};">
-          Si vous décidez de continuer, le premier prélèvement de <strong>${d.modulePriceEurPerMonth} € HT</strong> sera effectué automatiquement sur la carte associée à votre compte KOVAS 360, sans action de votre part.
+          Si vous décidez de continuer, le premier prélèvement de <strong>${d.modulePriceEurPerMonth} € HT</strong> sera effectué automatiquement sur la carte associée à votre compte KOVAS, sans action de votre part.
         </p>
         <p style="margin:0 0 24px 0;font-size:15px;line-height:1.55;color:${COLOR_INK};">
           Si le module ne correspond pas à votre besoin, désactivez-le maintenant pour éviter le prélèvement :
@@ -116,7 +116,7 @@ function renderText(d: ModuleTrialJMinus2Data): string {
 
 Petit rappel : votre essai du module ${d.moduleDisplayName} se termine dans deux jours, le ${formatDateFr(d.trialEndsAtIso)}.
 
-Si vous décidez de continuer, le premier prélèvement de ${d.modulePriceEurPerMonth} € HT sera effectué automatiquement sur la carte associée à votre compte KOVAS 360, sans action de votre part.
+Si vous décidez de continuer, le premier prélèvement de ${d.modulePriceEurPerMonth} € HT sera effectué automatiquement sur la carte associée à votre compte KOVAS, sans action de votre part.
 
 Si le module ne correspond pas à votre besoin, désactivez-le maintenant pour éviter le prélèvement :
 ${d.disableUrl}

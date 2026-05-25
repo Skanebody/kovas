@@ -83,7 +83,7 @@ export function Step1AccountForm() {
               <Link href="/cgv" target="_blank" className="underline">
                 CGV
               </Link>{' '}
-              de KOVAS 360 (SASU Nexus 1993, SIREN 944 037 220).
+              de KOVAS (SASU Nexus 1993, SIREN 944 037 220).
             </span>
           </label>
         </fieldset>

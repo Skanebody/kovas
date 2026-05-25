@@ -31,7 +31,7 @@ function formatEurosPrecise(amount: number): string {
 /**
  * Section ROI standalone — refonte V3 dual track 2026-05-21.
  *
- * Modèle KOVAS 360 prix fixe : on compare directement le coût annuel KOVAS 360
+ * Modèle KOVAS prix fixe : on compare directement le coût annuel KOVAS
  * (tier optimal pour le volume) à l'empilement Liciel + outils annexes
  * (~1500 €/an sur 50 entretiens découverte).
  *
@@ -49,8 +49,7 @@ export function RoiStandalone() {
     ).map((p: LogicielPlan) => {
       const monthlyEuros = Math.round(p.monthlyPrice / 100)
       const annualEuros = Math.round(p.annualPrice / 100)
-      const capMissions =
-        p.code === 'logiciel_enterprise' ? 999_999 : p.caps.missions
+      const capMissions = p.code === 'logiciel_enterprise' ? 999_999 : p.caps.missions
       return {
         plan: p,
         annualCostMonthlyBilled: monthlyEuros * 12,
@@ -60,9 +59,7 @@ export function RoiStandalone() {
       }
     })
 
-    const optimal =
-      payablePlans.find((c) => c.fitsCap) ??
-      payablePlans[payablePlans.length - 1]
+    const optimal = payablePlans.find((c) => c.fitsCap) ?? payablePlans[payablePlans.length - 1]
 
     const annualCostBilled = optimal?.annualCostBilledAnnual ?? 0
     const savingsVsLiciel = LICIEL_STACK_ANNUAL_EUR - annualCostBilled
@@ -96,8 +93,8 @@ export function RoiStandalone() {
             </span>
           </h2>
           <p className="text-base text-white/72 mt-4 max-w-xl mx-auto">
-            Comparaison directe avec l'empilement Liciel + modules ADEME + outils annexes
-            (~1 500 € / an sur la base de 50 entretiens diagnostiqueurs).
+            Comparaison directe avec l'empilement Liciel + modules ADEME + outils annexes (~1 500 €
+            / an sur la base de 50 entretiens diagnostiqueurs).
           </p>
         </div>
 
@@ -136,9 +133,7 @@ export function RoiStandalone() {
               +
             </button>
           </div>
-          <p className="text-center text-[11px] text-white/72 mt-2 font-mono">
-            missions / mois
-          </p>
+          <p className="text-center text-[11px] text-white/72 mt-2 font-mono">missions / mois</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/15 rounded-[16px] overflow-hidden">
@@ -160,14 +155,14 @@ export function RoiStandalone() {
 
           <div className="bg-[#0F1419] p-6">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/72 mb-3">
-              Coût KOVAS 360 / an
+              Coût KOVAS / an
             </p>
             <p className="font-serif italic font-normal text-5xl sm:text-6xl text-white leading-none tracking-tight">
               {formatEuros(result.annualCostBilled)}
             </p>
             <p className="text-[13px] text-white/72 mt-3 leading-snug">
-              Forfait fixe annuel (2 mois offerts). Pas de surplus, pas de seconde saisie de CB,
-              pas de surprise.
+              Forfait fixe annuel (2 mois offerts). Pas de surplus, pas de seconde saisie de CB, pas
+              de surprise.
             </p>
           </div>
 
@@ -176,14 +171,12 @@ export function RoiStandalone() {
               Économie vs Liciel + outils
             </p>
             <p className="font-serif italic font-normal text-5xl sm:text-6xl text-chartreuse leading-none tracking-tight">
-              {result.savingsVsLiciel > 0
-                ? `−${formatEuros(result.savingsVsLiciel)}`
-                : '—'}
+              {result.savingsVsLiciel > 0 ? `−${formatEuros(result.savingsVsLiciel)}` : '—'}
             </p>
             <p className="text-[13px] text-white/72 mt-3 leading-snug">
               {result.savingsVsLiciel > 0
                 ? `Économie annuelle vs l'empilement Liciel (~1 500 €/an). Sans compter les ${totalHoursSaved}h de re-saisie évitées.`
-                : `KOVAS 360 reste plus cher que votre stack actuelle. Mais vous gagnez ${totalHoursSaved}h chaque mois.`}
+                : `KOVAS reste plus cher que votre stack actuelle. Mais vous gagnez ${totalHoursSaved}h chaque mois.`}
             </p>
             <p className="text-[11px] text-white/72 mt-2 font-mono">
               Volume saisie : {formatEurosPrecise(result.annualCostBilled / 12)} / mois

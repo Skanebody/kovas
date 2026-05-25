@@ -80,8 +80,7 @@ export function HiddenCostCalculator() {
       )} € de CA additionnel par an, au tarif moyen national.`
     } else {
       businessText = 'Gain marginal de temps'
-      revenueText =
-        'KOVAS 360 reste utile pour la fiabilité, la conformité et la qualité du rapport.'
+      revenueText = 'KOVAS reste utile pour la fiabilité, la conformité et la qualité du rapport.'
     }
 
     return {
@@ -109,8 +108,8 @@ export function HiddenCostCalculator() {
         </h2>
         <p className="text-[18px] sm:text-[20px] md:text-[22px] text-white/90 max-w-[720px] mx-auto leading-[1.55] mb-[60px]">
           Ce n'est pas la mission qui vous épuise. C'est ce qui vient après — re-noter chaque
-          information dans Liciel ou AnalysImmo le soir, dans le silence du bureau. Cette
-          re-saisie est votre friction numéro un. Mesurez-la.
+          information dans Liciel ou AnalysImmo le soir, dans le silence du bureau. Cette re-saisie
+          est votre friction numéro un. Mesurez-la.
         </p>
 
         <div className="bg-white/[0.04] border border-white/15 rounded-[32px] p-7 sm:p-12 text-left">
@@ -157,9 +156,9 @@ export function HiddenCostCalculator() {
           </div>
 
           <div className="mt-7 px-6 py-5 bg-chartreuse/[0.08] border-l-[3px] border-chartreuse rounded-[8px] text-[15px] text-white/90 leading-[1.55]">
-            KOVAS 360 structure vos données pendant le relevé terrain. La re-saisie tombe à environ{' '}
-            <strong className="text-chartreuse font-semibold">10 minutes par mission</strong>{' '}
-            au lieu des {entryTime} actuelles. Voici ce que ça change pour vous.
+            KOVAS structure vos données pendant le relevé terrain. La re-saisie tombe à environ{' '}
+            <strong className="text-chartreuse font-semibold">10 minutes par mission</strong> au
+            lieu des {entryTime} actuelles. Voici ce que ça change pour vous.
           </div>
 
           <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -181,7 +180,7 @@ export function HiddenCostCalculator() {
                   first
                 />
                 <BreakdownRow
-                  label="Re-saisie avec KOVAS 360 par semaine"
+                  label="Re-saisie avec KOVAS par semaine"
                   value={formatHours(calc.kovasWeekHours)}
                 />
                 <BreakdownRow
@@ -192,10 +191,7 @@ export function HiddenCostCalculator() {
                   label="Soit, sur l'année"
                   value={`${fmt(Math.round(calc.savedYearHours))} heures`}
                 />
-                <BreakdownRow
-                  label="Équivalent en jours de 8h"
-                  value={`${calc.daysSaved} jours`}
-                />
+                <BreakdownRow label="Équivalent en jours de 8h" value={`${calc.daysSaved} jours`} />
               </ul>
             </article>
 
@@ -220,8 +216,8 @@ export function HiddenCostCalculator() {
               </div>
 
               <div className="my-7 text-center font-mono text-[11px] tracking-[0.22em] uppercase text-white/35 font-medium relative">
-                <span className="absolute left-0 top-1/2 w-[calc(50%-36px)] h-px bg-white/15" />
-                — ou —
+                <span className="absolute left-0 top-1/2 w-[calc(50%-36px)] h-px bg-white/15" />— ou
+                —
                 <span className="absolute right-0 top-1/2 w-[calc(50%-36px)] h-px bg-white/15" />
               </div>
 

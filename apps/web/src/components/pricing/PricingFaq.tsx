@@ -13,17 +13,17 @@ interface FaqEntry {
 
 const PRICING_FAQ: readonly FaqEntry[] = [
   {
-    question: 'Quelle différence entre KOVAS Annuaire et KOVAS 360 ?',
+    question: 'Quelle différence entre KOVAS Annuaire et KOVAS ?',
     answer:
       "KOVAS Annuaire est un service B2C : votre fiche apparaît dans l'annuaire public et reçoit des demandes de particuliers (vendeurs, bailleurs, acheteurs). Vous payez pour la visibilité et les leads. " +
-      'KOVAS 360 est le logiciel SaaS B2B qui vous accompagne sur le terrain : saisie vocale, photos géolocalisées, exports universels, sync iPad/iPhone/Web, conformité ADEME. Vous payez pour la productivité. ' +
+      'KOVAS est le logiciel SaaS B2B qui vous accompagne sur le terrain : saisie vocale, photos géolocalisées, exports universels, sync iPad/iPhone/Web, conformité ADEME. Vous payez pour la productivité. ' +
       "Les deux produits sont indépendants. Vous pouvez prendre l'un, l'autre, ou les deux ensemble via un Bundle remisé.",
   },
   {
     question: 'Puis-je prendre les deux ?',
     answer:
-      "Oui, et c'est le cas typique pour les diagnostiqueurs qui veulent maximiser visibilité et productivité. Cinq Bundles combinent Annuaire + KOVAS 360 avec une économie de 9 à 59 € / mois par rapport à la souscription séparée. " +
-      "Exemple : Annuaire Local 19 € + KOVAS 360 Solo Pro 59 € séparément = 78 €. En bundle « Solo Performance » = 65 €/mo, soit 13 € d'économie chaque mois (156 €/an).",
+      "Oui, et c'est le cas typique pour les diagnostiqueurs qui veulent maximiser visibilité et productivité. Cinq Bundles combinent Annuaire + KOVAS avec une économie de 9 à 59 € / mois par rapport à la souscription séparée. " +
+      "Exemple : Annuaire Local 19 € + KOVAS Solo Pro 59 € séparément = 78 €. En bundle « Solo Performance » = 65 €/mo, soit 13 € d'économie chaque mois (156 €/an).",
   },
   {
     question: 'Que se passe-t-il si je suis sur un ancien forfait ?',
@@ -61,7 +61,7 @@ const PRICING_FAQ: readonly FaqEntry[] = [
   {
     question: "L'essai gratuit est-il vraiment sans engagement ?",
     answer:
-      "Oui. 30 jours d'accès complet à KOVAS 360, avec carte bancaire enregistrée à la souscription et débit automatique à l'issue, sans engagement long terme. " +
+      "Oui. 30 jours d'accès complet à KOVAS, avec carte bancaire enregistrée à la souscription et débit automatique à l'issue, sans engagement long terme. " +
       "Vous pouvez annuler à tout moment depuis votre compte avant J+30 sans aucun débit. À la fin de l'essai, votre formule est activée automatiquement (ou vous résiliez — votre compte est gelé 90 jours puis archivé).",
   },
   {

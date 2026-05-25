@@ -93,7 +93,7 @@ export function ComparisonTable({
                   scope="col"
                   className="text-center text-xs font-mono uppercase tracking-wider text-chartreuse-deep px-3 py-4 bg-chartreuse-soft/40"
                 >
-                  KOVAS 360
+                  KOVAS
                 </th>
               </tr>
             </thead>

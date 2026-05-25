@@ -17,7 +17,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Validation de mon profil — KOVAS 360',
+  title: 'Validation de mon profil — KOVAS',
   robots: { index: false, follow: false },
 }
 

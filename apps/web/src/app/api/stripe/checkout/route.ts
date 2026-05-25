@@ -3,7 +3,7 @@
  *
  * Crée une session Stripe Checkout pour souscrire à :
  *   - un plan Annuaire (3 tiers payants)                  → ?plan=annuaire_pro
- *   - un plan Logiciel KOVAS 360 (4 tiers payants)        → ?plan=logiciel_active
+ *   - un plan Logiciel KOVAS (4 tiers payants)        → ?plan=logiciel_active
  *   - un Bundle (5 combos avec économies)                 → ?bundle=bundle_active_pro
  *   - un slot sponsorisé (réservé annuaire_sponsored)     → ?plan=annuaire_sponsored&slot=slot_metropole
  *   - un add-on indépendant (4 modules)                   → ?plan=addon_signatures_eidas
@@ -22,14 +22,14 @@
  * Source de vérité code     : `apps/web/src/lib/pricing/stripe-products.ts`.
  */
 
-import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { getStripe, isStripeConfigured } from '@/lib/stripe'
 import {
-  getStripePriceId,
   type BillingCycle,
   type StripeProductType,
+  getStripePriceId,
 } from '@/lib/pricing/stripe-products'
+import { getStripe, isStripeConfigured } from '@/lib/stripe'
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 
@@ -88,7 +88,10 @@ async function handleCheckout(request: Request): Promise<Response> {
 
   if (!plan && !bundle) {
     return NextResponse.json(
-      { error: 'missing_plan_or_bundle', message: 'Paramètre ?plan=<code> ou ?bundle=<code> requis' },
+      {
+        error: 'missing_plan_or_bundle',
+        message: 'Paramètre ?plan=<code> ou ?bundle=<code> requis',
+      },
       { status: 400 },
     )
   }
@@ -114,7 +117,10 @@ async function handleCheckout(request: Request): Promise<Response> {
   const orgId = profile?.default_org_id ?? null
   if (!orgId) {
     return NextResponse.json(
-      { error: 'no_organization', message: 'Utilisateur sans organisation. Complétez l’onboarding.' },
+      {
+        error: 'no_organization',
+        message: 'Utilisateur sans organisation. Complétez l’onboarding.',
+      },
       { status: 409 },
     )
   }
@@ -160,7 +166,10 @@ async function handleCheckout(request: Request): Promise<Response> {
     // Plans gratuits — pas de checkout Stripe.
     if (plan === 'annuaire_free' || plan === 'logiciel_free') {
       return NextResponse.json(
-        { error: 'free_plan_no_checkout', message: 'Les plans gratuits ne nécessitent pas de checkout Stripe.' },
+        {
+          error: 'free_plan_no_checkout',
+          message: 'Les plans gratuits ne nécessitent pas de checkout Stripe.',
+        },
         { status: 400 },
       )
     }

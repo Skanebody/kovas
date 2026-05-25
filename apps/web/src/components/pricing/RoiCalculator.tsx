@@ -35,7 +35,7 @@ function formatRoundedEuros(amount: number): string {
 }
 
 /**
- * Calculateur ROI compact — adapté V3 dual track (focus track Logiciel KOVAS 360).
+ * Calculateur ROI compact — adapté V3 dual track (focus track Logiciel KOVAS).
  *
  * L'utilisateur saisit son volume mensuel de missions. On compare au tier
  * `logiciel_active` (recommandé, 59 €/mo) et on suggère le tier optimal selon
@@ -64,8 +64,7 @@ export function RoiCalculator({ billing }: RoiCalculatorProps) {
     const perMissionActive = safeMissions > 0 ? activeFee / safeMissions : 0
 
     const optimal =
-      PLAN_PARAMS.find((p) => safeMissions <= p.fairUseCap) ??
-      PLAN_PARAMS[PLAN_PARAMS.length - 1]
+      PLAN_PARAMS.find((p) => safeMissions <= p.fairUseCap) ?? PLAN_PARAMS[PLAN_PARAMS.length - 1]
 
     return { safeMissions, activeFee, perMissionActive, optimal }
   }, [missions, billing])
@@ -85,9 +84,8 @@ export function RoiCalculator({ billing }: RoiCalculatorProps) {
   let adviceBody = ''
   if (result.safeMissions > 0 && result.optimal) {
     if (result.optimal.code === 'logiciel_active') {
-      adviceTitle = 'KOVAS 360 Active est votre tier.'
-      adviceBody =
-        "Vous êtes dans la zone d'usage confortable du fair-use 150 missions / mois."
+      adviceTitle = 'KOVAS Active est votre tier.'
+      adviceBody = "Vous êtes dans la zone d'usage confortable du fair-use 150 missions / mois."
     } else if (result.safeMissions < 50) {
       adviceTitle = `À ce volume, regardez ${result.optimal.label}.`
       adviceBody = `${formatRoundedEuros(result.optimal.monthly)} / mois suffisent pour un volume sous ${result.optimal.fairUseCap} missions. On préfère vous le dire.`
@@ -129,8 +127,7 @@ export function RoiCalculator({ billing }: RoiCalculatorProps) {
 
         {adviceTitle !== '' && (
           <div className="mt-3.5 px-3.5 py-3 bg-chartreuse/10 border-l-[3px] border-chartreuse rounded-[6px] text-[13px] text-white/90 leading-relaxed">
-            <strong className="text-chartreuse font-semibold">{adviceTitle}</strong>{' '}
-            {adviceBody}
+            <strong className="text-chartreuse font-semibold">{adviceTitle}</strong> {adviceBody}
           </div>
         )}
       </div>

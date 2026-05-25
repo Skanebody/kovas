@@ -13,7 +13,7 @@
  *
  * Format :
  *   - Conversion markdown léger (paragraphes → <p>, sauts de ligne → <br/>)
- *   - Signature auto "L'équipe KOVAS 360"
+ *   - Signature auto "L'équipe KOVAS"
  *   - Footer mentions NEXUS 1993 (depuis COMPANY_IDENTITY — source unique vérité)
  *
  * Journalisation : table `email_queue` (template='email_manual').
@@ -53,12 +53,12 @@ function badRequest(error: string): NextResponse {
  * Échappe les chevrons pour éviter l'injection HTML basique.
  */
 function plainTextToHtml(input: string): string {
-  const escaped = input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  const escaped = input.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
-  const paragraphs = escaped.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+  const paragraphs = escaped
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
   return paragraphs
     .map((p) => `<p style="margin:0 0 12px 0;">${p.replace(/\n/g, '<br/>')}</p>`)
     .join('')
@@ -145,7 +145,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return badRequest('Service email non configuré.')
   }
 
-  const senderDisplay = "L'équipe KOVAS 360"
+  const senderDisplay = "L'équipe KOVAS"
   const htmlContent = buildHtmlContent(subject, messageBody, senderDisplay)
   const recipientName = profile.full_name ?? to
 

@@ -1,13 +1,13 @@
+import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 
 /**
  * Layout des écrans non authentifiés (login + signup).
  *
  * Design System v5 strict :
  *  - Fond sage `#F5F7F4` (pas de gradient)
- *  - Header sticky avec logo lettré KOVAS 360 tracking large (mirror LandingHeader)
+ *  - Header sticky avec logo lettré KOVAS tracking large (mirror LandingHeader)
  *  - Card centrale opaque (paper white) + bordure 1px ink/8% + rounded-2xl 24px
  *  - Footer minimal mentions légales
  */
@@ -19,7 +19,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           href="/"
           className="font-sans font-semibold tracking-[0.22em] text-[15px] text-[#0F1419]"
         >
-          KOVAS 360
+          KOVAS
         </Link>
       </header>
       <main className="flex-1 flex items-center justify-center px-6 py-12">

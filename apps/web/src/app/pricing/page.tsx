@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     'Solo Light 29€, Solo Pro 59€, Cabinet 149€, Cabinet+ 299€ par mois HT. Essai gratuit 30 jours avec CB, sans engagement, résiliable à tout moment. 8 diagnostics, exports universels.',
   alternates: { canonical: 'https://kovas.fr/pricing' },
   openGraph: {
-    title: 'Tarifs KOVAS 360 — à partir de 29€/mois',
+    title: 'Tarifs KOVAS — à partir de 29€/mois',
     description:
       'Solo Light, Solo Pro, Cabinet, Cabinet+ — 4 forfaits transparents, sans engagement, résiliable à tout moment.',
     url: 'https://kovas.fr/pricing',
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tarifs KOVAS 360 — à partir de 29€/mois',
+    title: 'Tarifs KOVAS — à partir de 29€/mois',
     description: '4 forfaits transparents pour diagnostiqueurs indépendants. Essai 30 jours.',
     images: ['/og-image.png'],
   },

@@ -2,7 +2,7 @@
  * KOVAS — Pricing V4 grille officielle (validée fondateur 2026-05-22)
  *
  * Architecture en deux tracks distincts achetables séparément ou via Bundle :
- *   - Track Logiciel KOVAS 360 (B2B) : 5 plans
+ *   - Track Logiciel KOVAS (B2B) : 5 plans
  *       essai / solo_light / solo_pro / cabinet / cabinet_plus
  *   - Track Annuaire KOVAS (B2C)    : 4 plans
  *       annuaire_free / annuaire_local / annuaire_regional / annuaire_national
@@ -28,7 +28,7 @@ const SECONDS_PER_HOUR = 3600
 // 1. TRACK LOGICIEL — 5 plans officiels (29 / 59 / 149 / 299 €)
 // ════════════════════════════════════════════════════════════════
 
-/** Codes officiels du track logiciel KOVAS 360 (grille 2026-05-22). */
+/** Codes officiels du track logiciel KOVAS (grille 2026-05-22). */
 export type LogicielPlanCode =
   | 'essai'
   | 'solo_light'
@@ -81,7 +81,7 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   {
     code: 'essai',
     name: 'Essai gratuit',
-    tagline: 'Pour découvrir KOVAS 360 · 30 jours · CB enregistrée, débit auto à J+30',
+    tagline: 'Pour découvrir KOVAS · 30 jours · CB enregistrée, débit auto à J+30',
     monthlyPrice: 0,
     annualPrice: 0,
     caps: {
@@ -369,7 +369,7 @@ export const BUNDLES: readonly BundleCombo[] = [
     savingsPerMonth: 900,
     monthlySavingsCents: 900,
     individualMonthlyPriceCents: 4800,
-    includedPlanLabels: ['Annuaire Local 19€', 'KOVAS 360 Solo Light 29€'],
+    includedPlanLabels: ['Annuaire Local 19€', 'KOVAS Solo Light 29€'],
   },
   {
     code: 'bundle_solo_performance',
@@ -382,7 +382,7 @@ export const BUNDLES: readonly BundleCombo[] = [
     savingsPerMonth: 1300,
     monthlySavingsCents: 1300,
     individualMonthlyPriceCents: 7800,
-    includedPlanLabels: ['Annuaire Local 19€', 'KOVAS 360 Solo Pro 59€'],
+    includedPlanLabels: ['Annuaire Local 19€', 'KOVAS Solo Pro 59€'],
   },
   {
     code: 'bundle_solo_regional',
@@ -395,7 +395,7 @@ export const BUNDLES: readonly BundleCombo[] = [
     savingsPerMonth: 1900,
     monthlySavingsCents: 1900,
     individualMonthlyPriceCents: 9800,
-    includedPlanLabels: ['Annuaire Régional 39€', 'KOVAS 360 Solo Pro 59€'],
+    includedPlanLabels: ['Annuaire Régional 39€', 'KOVAS Solo Pro 59€'],
     featured: true,
   },
   {
@@ -409,7 +409,7 @@ export const BUNDLES: readonly BundleCombo[] = [
     savingsPerMonth: 2900,
     monthlySavingsCents: 2900,
     individualMonthlyPriceCents: 18800,
-    includedPlanLabels: ['Annuaire Régional 39€', 'KOVAS 360 Cabinet 149€'],
+    includedPlanLabels: ['Annuaire Régional 39€', 'KOVAS Cabinet 149€'],
   },
   {
     code: 'bundle_cabinet_national',
@@ -422,7 +422,7 @@ export const BUNDLES: readonly BundleCombo[] = [
     savingsPerMonth: 5900,
     monthlySavingsCents: 5900,
     individualMonthlyPriceCents: 37800,
-    includedPlanLabels: ['Annuaire National 79€', 'KOVAS 360 Cabinet+ 299€'],
+    includedPlanLabels: ['Annuaire National 79€', 'KOVAS Cabinet+ 299€'],
   },
 ] as const
 
@@ -550,9 +550,7 @@ export function getSponsoredSlotTier(
 }
 
 /** Retourne le palier matchant une population donnée (hab.). */
-export function findSponsoredSlotForPopulation(
-  population: number,
-): SponsoredSlotTier | undefined {
+export function findSponsoredSlotForPopulation(population: number): SponsoredSlotTier | undefined {
   return SPONSORED_SLOT_TIERS.find((tier) => {
     if (population < tier.populationMin) return false
     if (tier.populationMax === null) return true
@@ -669,7 +667,8 @@ export const ADDON_MODULES: readonly AddonModule[] = [
   {
     code: 'addon_conformite_avancee',
     name: 'Pack Conformité Avancée',
-    description: 'Factur-X PPF + Cockpit ADEME M2 + signatures eIDAS incluses (réservé Solo Pro et +)',
+    description:
+      'Factur-X PPF + Cockpit ADEME M2 + signatures eIDAS incluses (réservé Solo Pro et +)',
     monthlyPrice: 3900,
     includedQuantity: null,
     overagePrice: null,
@@ -942,10 +941,7 @@ export const LEGACY_PLANS: readonly PricingPlan[] = [
  * Les composants /pricing publics doivent filtrer hors `*_legacy` pour
  * n'afficher que les plans officiels.
  */
-export const PRICING_PLANS: readonly PricingPlan[] = [
-  ...LOGICIEL_PLANS,
-  ...LEGACY_PLANS,
-] as const
+export const PRICING_PLANS: readonly PricingPlan[] = [...LOGICIEL_PLANS, ...LEGACY_PLANS] as const
 
 export function getPricingPlan(code: PricingPlanCode): PricingPlan | undefined {
   // Résout alias V3 logiciel et legacy E2c.
@@ -992,12 +988,7 @@ export function getAnnualSavings(
 }
 
 /** Discriminateurs typés legacy / grandfather. */
-const LEGACY_PLAN_CODES = new Set<string>([
-  'essential',
-  'decouverte',
-  'pro',
-  'all_inclusive',
-])
+const LEGACY_PLAN_CODES = new Set<string>(['essential', 'decouverte', 'pro', 'all_inclusive'])
 
 const GRANDFATHER_PLAN_CODES = new Set<string>([
   'essential_legacy',
@@ -1015,9 +1006,7 @@ export function isLegacyPlan(code: string | null | undefined): code is LegacyPla
   return LEGACY_PLAN_CODES.has(code)
 }
 
-export function isGrandfatherPlan(
-  code: string | null | undefined,
-): code is GrandfatherPlanCode {
+export function isGrandfatherPlan(code: string | null | undefined): code is GrandfatherPlanCode {
   if (!code) return false
   return GRANDFATHER_PLAN_CODES.has(code)
 }

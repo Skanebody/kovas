@@ -17,7 +17,7 @@ import type { MetadataRoute } from 'next'
  *   le builder retourne `[]` au lieu de planter. Le sitemap segment reste valide
  *   et se remplira automatiquement dès que la table sera créée + populée.
  *
- * Référence métier : voir CLAUDE.md §1.1 (architecture URLs publiques KOVAS Annuaire + KOVAS 360).
+ * Référence métier : voir CLAUDE.md §1.1 (architecture URLs publiques KOVAS Annuaire + KOVAS).
  */
 
 /** URL racine canonique. Doit matcher `metadataBase` dans `app/layout.tsx`. */

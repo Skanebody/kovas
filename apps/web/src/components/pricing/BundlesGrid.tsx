@@ -13,7 +13,7 @@ interface BundlesGridProps {
 }
 
 /**
- * Grille des 5 Bundles Annuaire + KOVAS 360 (Spec §4).
+ * Grille des 5 Bundles Annuaire + KOVAS (Spec §4).
  *
  * Affiche l'économie mensuelle (-9 à -59 €) en chartreuse pour visualiser le
  * gain. CTA Stripe avec `plan=<bundle_code>`.

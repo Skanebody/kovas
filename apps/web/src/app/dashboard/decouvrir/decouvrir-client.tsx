@@ -12,11 +12,7 @@ import { SectionTracker } from '@/components/decouvrir/SectionTracker'
 import { SponsorisedTiersGrid } from '@/components/decouvrir/SponsorisedTiersGrid'
 import { trackPageViewed } from '@/lib/decouvrir/analytics'
 import { useIntentTracker } from '@/lib/decouvrir/intent-tracker'
-import {
-  deriveTrack,
-  summarizeTrack,
-  type UserAccess,
-} from '@/lib/decouvrir/recommendations'
+import { type UserAccess, deriveTrack, summarizeTrack } from '@/lib/decouvrir/recommendations'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 interface DecouvrirClientProps {
@@ -89,10 +85,7 @@ export function DecouvrirClient({
         accent="pour vous"
         description="Sélection dynamique basée sur votre profil et les sections consultées. Mise à jour automatique après quelques secondes de navigation."
       >
-        <RecommendedOffersSection
-          track={track}
-          onTopRecommendedChange={setTopRecommendedCode}
-        />
+        <RecommendedOffersSection track={track} onTopRecommendedChange={setTopRecommendedCode} />
       </SectionTracker>
 
       {/* Section 3 — toutes offres logiciel */}
@@ -101,7 +94,7 @@ export function DecouvrirClient({
         anchorId="decouvrir-logiciel"
         title="Toutes les offres"
         accent="logiciel"
-        description="KOVAS 360 — votre logiciel terrain et bureau. 5 plans calibrés selon votre volume."
+        description="KOVAS — votre logiciel terrain et bureau. 5 plans calibrés selon votre volume."
       >
         <LogicielPlansGrid
           currentCode={currentLogicielCode}

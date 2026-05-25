@@ -20,13 +20,13 @@ import { useMemo, useState } from 'react'
 /**
  * Page `/pricing/calculator` — constructeur d'offre interactif V3.
  *
- * Refonte 2026-05-21 : focus track Logiciel KOVAS 360 (5 tiers) + 4 add-ons.
+ * Refonte 2026-05-21 : focus track Logiciel KOVAS (5 tiers) + 4 add-ons.
  * Pour combinaisons Annuaire + Logiciel, l'utilisateur passe par les Bundles
  * sur `/pricing`. Le calculator reste un explorateur libre pour le track
  * logiciel.
  *
  * Flow :
- *   1. Choix du forfait KOVAS 360 parmi 5 (mini-cards radio)
+ *   1. Choix du forfait KOVAS parmi 5 (mini-cards radio)
  *   2. Sélection des 4 add-ons (toggle)
  *   3. Récap sticky : plan + modules + total HT / mois
  *   4. CTA "Démarrer l'essai 14 jours" → /signup avec params
@@ -65,7 +65,7 @@ export default function PricingCalculatorPage() {
             Constructeur d'offre
           </p>
           <h1 className="font-sans font-semibold text-[40px] sm:text-[56px] md:text-[72px] leading-[1.02] tracking-[-0.035em] mb-6">
-            Composez votre KOVAS 360.
+            Composez votre KOVAS.
             <span className="block text-[#0F1419]/35">À l'euro près.</span>
           </h1>
           <p className="text-[16px] sm:text-[18px] text-[#0F1419]/72 max-w-[680px] mx-auto leading-relaxed">
@@ -130,7 +130,7 @@ function PlanPicker({
         Étape 1
       </p>
       <h2 className="text-[24px] sm:text-[32px] font-semibold tracking-[-0.02em] mb-6">
-        Choisissez votre forfait KOVAS 360.
+        Choisissez votre forfait KOVAS.
       </h2>
       <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {LOGICIEL_PLANS.map((plan: LogicielPlan) => {
@@ -210,7 +210,7 @@ function RecapPanel({
       <div className="flex items-baseline justify-between gap-3 pb-4 border-b border-[#0F1419]/[0.08]">
         <div>
           <p className="text-[14px] font-semibold text-[#0F1419]">{plan.name}</p>
-          <p className="text-[12px] text-[#0F1419]/55">Forfait KOVAS 360</p>
+          <p className="text-[12px] text-[#0F1419]/55">Forfait KOVAS</p>
         </div>
         <p className="font-semibold text-[16px] tabular-nums">
           {Math.round(plan.monthlyPrice / 100)} €

@@ -10,8 +10,8 @@
  * Pattern V5 : sobre, vouvoiement, sans emoji, navy + chartreuse.
  */
 
-import { Button } from '@/components/ui/button'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 
 export interface RelancerSheetProps {
@@ -50,10 +50,10 @@ export function RelancerSheet({
     '',
     `Nous vous remercions de bien vouloir procéder au règlement dans les meilleurs délais. Si le paiement a déjà été effectué, merci d'ignorer ce message.`,
     '',
-    'Pour toute question, n\'hésitez pas à nous répondre directement à cet email.',
+    "Pour toute question, n'hésitez pas à nous répondre directement à cet email.",
     '',
     'Cordialement,',
-    "L'équipe KOVAS 360",
+    "L'équipe KOVAS",
   ].join('\n')
 
   async function handleSend() {
@@ -91,17 +91,13 @@ export function RelancerSheet({
 
         {/* Sujet */}
         <div className="rounded-xl border border-rule/60 bg-paper px-4 py-3 space-y-1">
-          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-mute">
-            Objet
-          </p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-mute">Objet</p>
           <p className="text-[14px] text-ink font-medium">{subject}</p>
         </div>
 
         {/* Corps */}
         <div className="rounded-xl border border-rule/60 bg-paper px-4 py-3 space-y-1">
-          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-mute">
-            Message
-          </p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-mute">Message</p>
           <pre className="font-sans text-[13px] text-ink whitespace-pre-wrap leading-relaxed">
             {body}
           </pre>

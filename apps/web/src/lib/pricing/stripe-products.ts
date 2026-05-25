@@ -3,7 +3,7 @@
  *
  * Centralise les Stripe Price IDs pour les 5 surfaces commerciales V3 :
  *   - KOVAS Annuaire (3 tiers payants × 2 cycles = 6 vars)
- *   - KOVAS 360 logiciel (4 tiers payants × 2 cycles = 8 vars)
+ *   - KOVAS logiciel (4 tiers payants × 2 cycles = 8 vars)
  *   - Bundles Annuaire + Logiciel (5 combos × 2 cycles = 10 vars)
  *   - Slots sponsorisés par taille de ville (6 niveaux × 2 cycles = 12 vars)
  *   - Add-ons modules indépendants (4 modules × 2 cycles = 8 vars)
@@ -26,10 +26,10 @@
  */
 
 import type {
-  AnnuairePlanCode,
-  LogicielPlanCode,
-  BundleCode,
   AddonCodeV3,
+  AnnuairePlanCode,
+  BundleCode,
+  LogicielPlanCode,
   SponsoredSlotCategory,
 } from '@/lib/pricing-plans'
 
@@ -39,12 +39,7 @@ import type {
 
 export type BillingCycle = 'monthly' | 'annual'
 
-export type StripeProductType =
-  | 'annuaire'
-  | 'logiciel'
-  | 'bundle'
-  | 'sponsored_slot'
-  | 'addon'
+export type StripeProductType = 'annuaire' | 'logiciel' | 'bundle' | 'sponsored_slot' | 'addon'
 
 export interface StripePriceIds {
   readonly monthly: string | null
@@ -59,16 +54,34 @@ export interface StripePriceIds {
 // + alias V3 historiques (annuaire_pro / visibility / sponsored) qui partagent
 // les mêmes Stripe Price IDs (mêmes prix 19 / 39 / 79 €).
 const annuaireLocalPrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_ANNUAIRE_LOCAL_MONTHLY ?? process.env.STRIPE_PRICE_ANNUAIRE_PRO_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_ANNUAIRE_LOCAL_ANNUAL ?? process.env.STRIPE_PRICE_ANNUAIRE_PRO_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_ANNUAIRE_LOCAL_MONTHLY ??
+    process.env.STRIPE_PRICE_ANNUAIRE_PRO_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_ANNUAIRE_LOCAL_ANNUAL ??
+    process.env.STRIPE_PRICE_ANNUAIRE_PRO_ANNUAL ??
+    null,
 }
 const annuaireRegionalPrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_ANNUAIRE_REGIONAL_MONTHLY ?? process.env.STRIPE_PRICE_ANNUAIRE_VISIBILITY_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_ANNUAIRE_REGIONAL_ANNUAL ?? process.env.STRIPE_PRICE_ANNUAIRE_VISIBILITY_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_ANNUAIRE_REGIONAL_MONTHLY ??
+    process.env.STRIPE_PRICE_ANNUAIRE_VISIBILITY_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_ANNUAIRE_REGIONAL_ANNUAL ??
+    process.env.STRIPE_PRICE_ANNUAIRE_VISIBILITY_ANNUAL ??
+    null,
 }
 const annuaireNationalPrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_ANNUAIRE_NATIONAL_MONTHLY ?? process.env.STRIPE_PRICE_ANNUAIRE_SPONSORED_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_ANNUAIRE_NATIONAL_ANNUAL ?? process.env.STRIPE_PRICE_ANNUAIRE_SPONSORED_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_ANNUAIRE_NATIONAL_MONTHLY ??
+    process.env.STRIPE_PRICE_ANNUAIRE_SPONSORED_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_ANNUAIRE_NATIONAL_ANNUAL ??
+    process.env.STRIPE_PRICE_ANNUAIRE_SPONSORED_ANNUAL ??
+    null,
 }
 
 export const STRIPE_ANNUAIRE_PRICES: Record<
@@ -86,26 +99,44 @@ export const STRIPE_ANNUAIRE_PRICES: Record<
 }
 
 // ─────────────────────────────────────────────
-// Logiciel KOVAS 360 — 4 tiers payants (logiciel_free exclu)
+// Logiciel KOVAS — 4 tiers payants (logiciel_free exclu)
 // ─────────────────────────────────────────────
 
 // Tiers payants Logiciel V4 (Solo Light 29 / Solo Pro 59 / Cabinet 149 / Cabinet+ 299€).
 // Les alias V3 (logiciel_*) partagent les mêmes Stripe Price IDs.
 const soloLightPrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_LOGICIEL_SOLO_LIGHT_MONTHLY ?? process.env.STRIPE_PRICE_LOGICIEL_STARTER_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_LOGICIEL_SOLO_LIGHT_ANNUAL ?? process.env.STRIPE_PRICE_LOGICIEL_STARTER_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_LOGICIEL_SOLO_LIGHT_MONTHLY ??
+    process.env.STRIPE_PRICE_LOGICIEL_STARTER_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_LOGICIEL_SOLO_LIGHT_ANNUAL ??
+    process.env.STRIPE_PRICE_LOGICIEL_STARTER_ANNUAL ??
+    null,
 }
 const soloProPrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_LOGICIEL_SOLO_PRO_MONTHLY ?? process.env.STRIPE_PRICE_LOGICIEL_ACTIVE_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_LOGICIEL_SOLO_PRO_ANNUAL ?? process.env.STRIPE_PRICE_LOGICIEL_ACTIVE_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_LOGICIEL_SOLO_PRO_MONTHLY ??
+    process.env.STRIPE_PRICE_LOGICIEL_ACTIVE_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_LOGICIEL_SOLO_PRO_ANNUAL ??
+    process.env.STRIPE_PRICE_LOGICIEL_ACTIVE_ANNUAL ??
+    null,
 }
 const cabinetPrices: StripePriceIds = {
   monthly: process.env.STRIPE_PRICE_LOGICIEL_CABINET_MONTHLY ?? null,
   annual: process.env.STRIPE_PRICE_LOGICIEL_CABINET_ANNUAL ?? null,
 }
 const cabinetPlusPrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_LOGICIEL_CABINET_PLUS_MONTHLY ?? process.env.STRIPE_PRICE_LOGICIEL_ENTERPRISE_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_LOGICIEL_CABINET_PLUS_ANNUAL ?? process.env.STRIPE_PRICE_LOGICIEL_ENTERPRISE_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_LOGICIEL_CABINET_PLUS_MONTHLY ??
+    process.env.STRIPE_PRICE_LOGICIEL_ENTERPRISE_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_LOGICIEL_CABINET_PLUS_ANNUAL ??
+    process.env.STRIPE_PRICE_LOGICIEL_ENTERPRISE_ANNUAL ??
+    null,
 }
 
 export const STRIPE_LOGICIEL_PRICES: Record<
@@ -131,24 +162,54 @@ export const STRIPE_LOGICIEL_PRICES: Record<
 // Bundles V4 (Solo Starter 39 / Solo Performance 65 / Solo Régional 79 /
 // Cabinet 360 159 / Cabinet National 319€). Les alias V3 partagent les Price IDs.
 const bundleSoloStarterPrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_BUNDLE_SOLO_STARTER_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_STARTER_VISIBILITY_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_BUNDLE_SOLO_STARTER_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_STARTER_VISIBILITY_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_BUNDLE_SOLO_STARTER_MONTHLY ??
+    process.env.STRIPE_PRICE_BUNDLE_STARTER_VISIBILITY_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_BUNDLE_SOLO_STARTER_ANNUAL ??
+    process.env.STRIPE_PRICE_BUNDLE_STARTER_VISIBILITY_ANNUAL ??
+    null,
 }
 const bundleSoloPerformancePrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_BUNDLE_SOLO_PERFORMANCE_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_ACTIVE_PRO_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_BUNDLE_SOLO_PERFORMANCE_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_ACTIVE_PRO_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_BUNDLE_SOLO_PERFORMANCE_MONTHLY ??
+    process.env.STRIPE_PRICE_BUNDLE_ACTIVE_PRO_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_BUNDLE_SOLO_PERFORMANCE_ANNUAL ??
+    process.env.STRIPE_PRICE_BUNDLE_ACTIVE_PRO_ANNUAL ??
+    null,
 }
 const bundleSoloRegionalPrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_BUNDLE_SOLO_REGIONAL_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_ACTIVE_VISIBILITY_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_BUNDLE_SOLO_REGIONAL_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_ACTIVE_VISIBILITY_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_BUNDLE_SOLO_REGIONAL_MONTHLY ??
+    process.env.STRIPE_PRICE_BUNDLE_ACTIVE_VISIBILITY_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_BUNDLE_SOLO_REGIONAL_ANNUAL ??
+    process.env.STRIPE_PRICE_BUNDLE_ACTIVE_VISIBILITY_ANNUAL ??
+    null,
 }
 const bundleCabinet360Prices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_BUNDLE_CABINET_360_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_CABINET_PRO_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_BUNDLE_CABINET_360_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_CABINET_PRO_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_BUNDLE_CABINET_360_MONTHLY ??
+    process.env.STRIPE_PRICE_BUNDLE_CABINET_PRO_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_BUNDLE_CABINET_360_ANNUAL ??
+    process.env.STRIPE_PRICE_BUNDLE_CABINET_PRO_ANNUAL ??
+    null,
 }
 const bundleCabinetNationalPrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_BUNDLE_CABINET_NATIONAL_MONTHLY ?? process.env.STRIPE_PRICE_BUNDLE_CABINET_VISIBILITY_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_BUNDLE_CABINET_NATIONAL_ANNUAL ?? process.env.STRIPE_PRICE_BUNDLE_CABINET_VISIBILITY_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_BUNDLE_CABINET_NATIONAL_MONTHLY ??
+    process.env.STRIPE_PRICE_BUNDLE_CABINET_VISIBILITY_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_BUNDLE_CABINET_NATIONAL_ANNUAL ??
+    process.env.STRIPE_PRICE_BUNDLE_CABINET_VISIBILITY_ANNUAL ??
+    null,
 }
 
 export const STRIPE_BUNDLE_PRICES: Record<BundleCode, StripePriceIds> = {
@@ -171,14 +232,17 @@ export const STRIPE_BUNDLE_PRICES: Record<BundleCode, StripePriceIds> = {
 // ─────────────────────────────────────────────
 
 const slotCommunePrices: StripePriceIds = {
-  monthly: process.env.STRIPE_PRICE_SLOT_COMMUNE_MONTHLY ?? process.env.STRIPE_PRICE_SLOT_RURAL_MONTHLY ?? null,
-  annual: process.env.STRIPE_PRICE_SLOT_COMMUNE_ANNUAL ?? process.env.STRIPE_PRICE_SLOT_RURAL_ANNUAL ?? null,
+  monthly:
+    process.env.STRIPE_PRICE_SLOT_COMMUNE_MONTHLY ??
+    process.env.STRIPE_PRICE_SLOT_RURAL_MONTHLY ??
+    null,
+  annual:
+    process.env.STRIPE_PRICE_SLOT_COMMUNE_ANNUAL ??
+    process.env.STRIPE_PRICE_SLOT_RURAL_ANNUAL ??
+    null,
 }
 
-export const STRIPE_SPONSORED_SLOT_PRICES: Record<
-  SponsoredSlotCategory,
-  StripePriceIds
-> = {
+export const STRIPE_SPONSORED_SLOT_PRICES: Record<SponsoredSlotCategory, StripePriceIds> = {
   megapole: {
     monthly: process.env.STRIPE_PRICE_SLOT_MEGAPOLE_MONTHLY ?? null,
     annual: process.env.STRIPE_PRICE_SLOT_MEGAPOLE_ANNUAL ?? null,
@@ -250,8 +314,7 @@ export function getStripePriceId(
   switch (productType) {
     case 'annuaire': {
       if (code === 'annuaire_free') return null
-      const entry =
-        STRIPE_ANNUAIRE_PRICES[code as Exclude<AnnuairePlanCode, 'annuaire_free'>]
+      const entry = STRIPE_ANNUAIRE_PRICES[code as Exclude<AnnuairePlanCode, 'annuaire_free'>]
       return entry ? entry[billingCycle] : null
     }
     case 'logiciel': {
