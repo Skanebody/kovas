@@ -13,9 +13,9 @@
 - **Build production `next build`** : ✅ vert (B39 + B43 — 2781 pages SSG, 0 erreur, pricing V5 appliqué)
 - **Pricing V5 (mockup 2026-05-25)** : Logiciel 29/79/199/499€ + Annuaire 19/39/79€ + Bundles 39/89/99/229/529€ — sweep transversal 21 fichiers (Lot B43)
 - **AI Economics doc** : `docs/refonte-2026-05/AI_ECONOMICS.md` — 15 techniques d'optimisation tokens, 9/15 ✅ déjà en prod
-- **Tests Vitest** : **289 tests** pure-fn + rate-limit + helpers fiche publique + adaptateur IO mocké + cascading IA + equipment cache + incremental recompute + tools filter
-- **AI techniques** : 9/15 ✅ → **13/15 ✅** (B47 cascading + B48 equipment cache + B49 incremental recompute + B50 tools filter)
-- **Reste : 2/15 ❌** Whisper local WASM + pattern learning graph sémantique (différés)
+- **Tests Vitest** : **415 tests** pure-fn + helpers + cascading + equipment cache + incremental recompute + tools filter + transcription router + knowledge graph
+- **Tests E2E Playwright** : **26 tests** refonte-surfaces (redirects 301 + admin gate + tarifs V5 + homepage + API v1 + AI Economics gate)
+- **AI techniques** : **15/15 ✅** 🎯 (toutes livrées en pure-fn pattern, prêtes pour orchestrateurs futurs)
 - **Tests E2E Playwright** : **34 tests** (API publique + redirects 301 + admin gate + tarifs onglets + homepage + grille V5 mockup)
 
 ## Algorithmes A1.3.* — 13 / 13 livrés ✅
@@ -189,15 +189,19 @@ Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 - ✅ **Fixes prod-blocking** (B54 + B55) : migration `20260526100000_matview_first_refresh.sql` (amorce les 2 matviews `analytics.*` avant le 1er REFRESH CONCURRENTLY) + migration `20260526110000_route_lead_postgis.sql` (PostGIS ST_DWithin + index GIST expression partiel, perf x3-x10 sur la RPC routing leads)
 - ✅ **Sweep authority docs** : CLAUDE.md header + §22 pointent vers les 4 nouveaux docs (AI_ECONOMICS, UPSTASH-SETUP, MIGRATION-PROD-CHECKLIST, CGV v1.4)
 - ✅ **Test bandit decay fix** : tolérance test `converges towards prior Beta(1,1)` calibrée à 150 itérations (vs 100 mathématiquement insuffisant pour `toBeCloseTo(_, 1)` à γ=0.95)
+- ✅ **Dashboard /admin/sante-tech section AI Economics** (Lot B57) : Server Component avec TOTAL agrégé navy + 4 LeverCards (cascading B47 / equipment cache B48 / recompute B49 / tools filter B50) + sidebar admin entrée "Santé tech" + 2 tests E2E admin gate
+- ✅ **Whisper local WASM router** (Lot B58) : `lib/audio/transcription-router.ts` pure-fn — seuils 180s/600s/0.4 noise + 29 tests Vitest. Intégration WASM réelle = lot futur dédié.
+- ✅ **Pattern learning graph sémantique** (Lot B59) : `lib/learning/user-knowledge-graph.ts` — `UserKnowledgeGraph` JSONB-friendly + 4 pure-fn (buildKnowledgeGraph / predictFromGraph / computeDelta / routeAnalysisStrategy) + 38 tests Vitest. Migration SQL `data.user_mission_patterns` + orchestrateur = lots futurs.
+- ✅ **15/15 AI techniques 🎯** (B47 cascading + B48 equipment cache + B49 incremental recompute + B50 tools filter + B58 Whisper router + B59 pattern learning graph)
 
 ### Vraies tâches restantes
 1. **GC2 UI complète** — composants tchat continu + composer + transitions animées (session UX dédiée 3-5j)
 2. **Microservice MDB Jackcess** — Java/Kotlin sur Railway pour bridge JSON ↔ MDB Liciel
-3. **Whisper local WASM** — `lib/audio/transcription.ts` hybride local + API (technique 6 du doc AI_ECONOMICS)
-4. **Pattern learning graph sémantique** — au-delà de A1.3.13 historique (technique 10 du doc AI_ECONOMICS)
-5. **Tests E2E Playwright admin pages neuves** — press / renewals / churn / leads-detail / refonte (nécessite seed DB + auth admin en CI)
-6. **Provisionnement Upstash Redis réel** — créer compte + base eu-west-1 + coller secrets dans Vercel prod (cf. `docs/refonte-2026-05/UPSTASH-SETUP.md`)
-7. **Application des 6 migrations Supabase prod** — suivre `docs/refonte-2026-05/MIGRATION-PROD-CHECKLIST.md` (backup PITR + dry-run + push + smoke tests)
+3. **Tests E2E Playwright admin pages neuves** — press / renewals / churn / leads-detail / refonte / sante-tech (nécessite seed DB + auth admin en CI ; smoke gate déjà couvert B38/B57)
+4. **Provisionnement Upstash Redis réel** — créer compte + base eu-west-1 + coller secrets dans Vercel prod (cf. `docs/refonte-2026-05/UPSTASH-SETUP.md`)
+5. **Application des 8 migrations Supabase prod** — suivre `docs/refonte-2026-05/MIGRATION-PROD-CHECKLIST.md` (backup PITR + dry-run + push + smoke tests). 8 migrations = 6 refonte initiales + B54 fix matview + B55 perf PostGIS.
+6. **Intégration WASM réelle Whisper local** — ajouter dep `whisper.cpp-wasm` + hook `useLocalWhisper()` + brancher `decideTranscriptionEngine` dans `/api/transcribe` route handler (le router pure-fn B58 est prêt)
+7. **Migration + orchestrateur pattern learning** — table `data.user_mission_patterns` JSONB + Edge Function rebuild cron + intégration dans pipeline mission (le module pure-fn B59 est prêt)
 
 ## Stratégie de merge
 
