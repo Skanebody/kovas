@@ -32,7 +32,7 @@ import {
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BackfillButton } from './BackfillButton'
+import { BackfillButton, SeoAuditButton } from './BackfillButton'
 
 export const metadata: Metadata = {
   title: 'Refonte acqui-target — Admin',
@@ -230,6 +230,17 @@ export default async function AdminRefontePage() {
             </p>
           </div>
           <BackfillButton />
+        </div>
+        {/* Audit SEO batch — A1.3.12 */}
+        <div className="rounded-lg border border-rule/60 bg-paper px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-0.5">
+            <p className="text-[13px] font-medium text-ink">Audit SEO pages programmatiques</p>
+            <p className="text-[11px] text-ink-mute leading-relaxed">
+              Recompute quality_score + needs_refresh + refresh_reason sur seo_page_quality_signals
+              via A1.3.12. Batch 500 par exécution.
+            </p>
+          </div>
+          <SeoAuditButton />
         </div>
       </section>
 
