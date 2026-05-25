@@ -7,7 +7,7 @@ import Link from 'next/link'
  * KOVAS — Bloc auteur "Benjamin Bel" (E-E-A-T Core Update mai 2026).
  *
  * Obligatoire sur toute page YMYL programmatique du site
- * (`/trouver-un-diagnostiqueur/*`, `/diagnostic/*`, `/prix/*`, `/guides/*`).
+ * (`/trouver-un-diagnostiqueur/*`, `/diagnostic/*`, `/guides/*`).
  *
  * Signal Google : auteur identifié + photo + qualifications + sameAs LinkedIn.
  * À combiner avec un JSON-LD `Article.author` côté page.

@@ -136,8 +136,8 @@ export default async function SeoQualityMonitorPage() {
         </h1>
         <p className="text-sm text-ink-mute max-w-3xl">
           Tracking des signaux Core Update mai 2026 sur les pages programmatiques
-          (/trouver-un-diagnostiqueur/*, /diagnostic/*, /prix/*). Les pages à fort taux de rebond,
-          faible temps sur page ou pogo-sticking détecté sont marquées pour refresh prioritaire.
+          (/trouver-un-diagnostiqueur/*, /diagnostic/*). Les pages à fort taux de rebond, faible
+          temps sur page ou pogo-sticking détecté sont marquées pour refresh prioritaire.
         </p>
       </header>
 

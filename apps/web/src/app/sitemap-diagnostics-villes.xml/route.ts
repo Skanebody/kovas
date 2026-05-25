@@ -1,23 +1,18 @@
 /**
  * /sitemap-diagnostics-villes.xml — sitemap des pages programmatiques SEO.
  *
- * Couvre 6 patterns d'URL :
- *   - /diagnostic/{type}/{ville}      (9 × N villes)
- *   - /prix/{type}/{ville}            (9 × N villes)
- *   - /urgent/{ville}                 (N villes)
- *   - /comparatif/{type}/{ville}      (9 × N villes)
- *   - /audit-energetique/{ville}      (N villes)
- *   - /maprimerenov/{ville}           (N villes)
+ * Refonte Acqui-Target 2026-05 : suppression de 4 templates programmatiques
+ * (prix, comparatif, audit-energetique, maprimerenov, urgent) au profit d'un
+ * unique template enrichi.
  *
- * Volume V1 (213 villes registry) : 6 390 URLs (sous limite 50k).
+ * Couvre désormais 1 pattern d'URL :
+ *   - /diagnostic/{type}/{ville}      (9 diagnostics × N villes)
  *
- * Priorités sitemap :
- *   - /diagnostic/, /prix/ : 0.6 (longue traîne forte)
- *   - /comparatif/ : 0.55
- *   - /urgent/ : 0.5 (saisonnier)
- *   - /audit-energetique/, /maprimerenov/ : 0.55 (réglementaire)
+ * Volume V1 (213 villes registry × 9 diagnostics) : ~1 917 URLs.
  *
- * Note : si volume dépasse 50k URLs (sprint V2 avec 1000+ villes), passer en
+ * Priorité sitemap : 0.6 par défaut + boost top cities (+0.1) / penalité low (-0.05).
+ *
+ * Note : si volume dépasse 50k URLs (sprint V2 avec 5000+ villes), passer en
  * sitemap-index paginé via Next.js `generateSitemaps`.
  */
 
@@ -53,33 +48,7 @@ function buildEntries(): ReadonlyArray<SitemapEntry> {
         priority: Math.max(0.3, Math.min(0.9, 0.6 + boost)),
         changefreq: 'monthly',
       })
-      entries.push({
-        loc: `${BASE_URL}/prix/${type}/${city.slug}`,
-        priority: Math.max(0.3, Math.min(0.9, 0.6 + boost)),
-        changefreq: 'monthly',
-      })
-      entries.push({
-        loc: `${BASE_URL}/comparatif/${type}/${city.slug}`,
-        priority: Math.max(0.3, Math.min(0.9, 0.55 + boost)),
-        changefreq: 'monthly',
-      })
     }
-
-    entries.push({
-      loc: `${BASE_URL}/urgent/${city.slug}`,
-      priority: Math.max(0.3, Math.min(0.9, 0.5 + boost)),
-      changefreq: 'weekly',
-    })
-    entries.push({
-      loc: `${BASE_URL}/audit-energetique/${city.slug}`,
-      priority: Math.max(0.3, Math.min(0.9, 0.55 + boost)),
-      changefreq: 'monthly',
-    })
-    entries.push({
-      loc: `${BASE_URL}/maprimerenov/${city.slug}`,
-      priority: Math.max(0.3, Math.min(0.9, 0.55 + boost)),
-      changefreq: 'monthly',
-    })
   }
 
   return entries

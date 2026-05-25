@@ -2,13 +2,16 @@
  * Référentiel typé des 9 diagnostics immobiliers couverts par KOVAS.
  *
  * Source canonique pour :
- *  - pages programmatiques /diagnostic/[type]/[ville], /prix/[type]/[ville],
- *    /comparatif/[type]/[ville]
+ *  - pages programmatiques /diagnostic/[type]/[ville]
  *  - guides /guide/[type]
  *  - composants annuaire diagnostiqueurs
  *
  * 8 diagnostics standards (92% du volume métier FR — cf. CLAUDE.md §3) +
  * audit énergétique (obligatoire F/G depuis 04/2023, E depuis 01/2025).
+ *
+ * Refonte Acqui-Target 2026-05 : les templates /prix, /comparatif,
+ * /audit-energetique, /maprimerenov, /urgent ont été supprimés pour ne garder
+ * qu'un unique template enrichi par data points uniques.
  */
 
 export type DiagnosticType =
@@ -70,8 +73,7 @@ export const DIAGNOSTIC_DESCRIPTIONS: Record<DiagnosticType, string> = {
   gaz: 'État de l’installation intérieure de gaz pour les installations de plus de 15 ans, obligatoire vente et location.',
   electricite:
     'État de l’installation électrique intérieure pour les installations de plus de 15 ans.',
-  termites:
-    'Diagnostic obligatoire dans les zones d’infestation déclarées par arrêté préfectoral.',
+  termites: 'Diagnostic obligatoire dans les zones d’infestation déclarées par arrêté préfectoral.',
   carrez:
     'Mesurage de la superficie privative pour la vente d’un lot de copropriété ou de la surface habitable pour la location (loi Boutin).',
   erp: 'Information de l’acquéreur ou du locataire sur les risques naturels, miniers, technologiques, sismiques, radon et pollution des sols.',

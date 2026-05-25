@@ -1,3 +1,4 @@
+import { EnrichedDataSection } from '@/components/seo-prog/EnrichedDataSection'
 import {
   ProgrammaticShell,
   SeoCtaBlock,
@@ -17,6 +18,7 @@ import {
   type DiagnosticType,
   isDiagnosticType,
 } from '@/lib/diagnostics/types'
+import { getEnrichedDataPoints } from '@/lib/seo-content/enriched-data'
 import {
   buildBreadcrumbLD,
   buildFaqLD,
@@ -89,6 +91,7 @@ export default async function DiagnosticVillePage({
   const label = DIAGNOSTIC_LABELS[diagnosticType]
   const longLabel = DIAGNOSTIC_LONG_LABELS[diagnosticType]
   const content = generateLocalContent(diagnosticType, city)
+  const enriched = getEnrichedDataPoints(diagnosticType, city)
   const neighbors = getNeighborCities(city.slug)
   const otherTypes = DIAGNOSTIC_TYPES.filter((t) => t !== diagnosticType).slice(0, 8)
   const mockDiags = buildMockDiagnosticians(city, 5)
@@ -117,6 +120,8 @@ export default async function DiagnosticVillePage({
         titleEm={`à ${city.name}`}
         lede={content.intro}
       />
+
+      <EnrichedDataSection city={city} data={enriched} />
 
       <SeoSection title={`Pourquoi faire un ${label} à ${city.name}`}>
         <p>{content.whyHere}</p>
