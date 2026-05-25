@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { BackfillButton } from './BackfillButton'
 
 export const metadata: Metadata = {
   title: 'Refonte acqui-target — Admin',
@@ -218,6 +219,17 @@ export default async function AdminRefontePage() {
             sublabel={`${formatCount(diagnosticiansVerified)} vérifiés (A1.3.8)`}
             footer={`Sync DHUP : ${formatDateFr(lastDhupSync)}`}
           />
+        </div>
+        {/* Backfill action — utile post-déploiement initial */}
+        <div className="rounded-lg border border-rule/60 bg-paper px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-0.5">
+            <p className="text-[13px] font-medium text-ink">Backfill leads non scorés</p>
+            <p className="text-[11px] text-ink-mute leading-relaxed">
+              Applique A1.3.5 aux quote_requests créés avant le déploiement initial de l&apos;algo.
+              Batch 200 par exécution.
+            </p>
+          </div>
+          <BackfillButton />
         </div>
       </section>
 
