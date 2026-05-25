@@ -3,8 +3,8 @@
  *
  * Sources de vérité :
  * - CLAUDE.md §3 (10 features V1)
- * - CLAUDE.md §4 (tarifs : Découverte 29€/20 missions, Standard 59€/60 missions,
- *   Volume 99€/150 missions)
+ * - Grille V5 (2026-05-25) : Solo 29€/40 missions, Pro 79€/100 missions,
+ *   Cabinet 199€/300 missions, Cabinet+ 499€/1000 missions
  * - CLAUDE.md §8 (hébergement Supabase eu-west-3 Paris)
  * - CLAUDE.md §15 (Hiscox Phase 1 : 500k€/sinistre, 1M€/an)
  *
@@ -53,7 +53,7 @@ export const FAQ_LANDING: FaqQuestion[] = [
     id: 'combien-coute-kovas',
     question: 'Combien coûte KOVAS ?',
     answer:
-      'KOVAS propose 3 formules HT par mois sans engagement de durée :\n\n- **Découverte 29€** : 20 missions incluses, surplus 2€/mission, 1 utilisateur, 20 Go de stockage\n- **Standard 59€** (recommandé) : 60 missions incluses, surplus 1,50€/mission, 1 utilisateur, 50 Go\n- **Volume 99€** : 150 missions incluses, surplus 1€/mission, 1 utilisateur, 100 Go\n\nToutes les fonctionnalités sont incluses dans chaque formule. Le paiement annuel offre 2 mois offerts (10 mois payés sur 12).',
+      'KOVAS propose 4 formules HT par mois sans engagement de durée :\n\n- **Solo 29€** : 40 missions incluses, surplus 0,99€/mission, 1 utilisateur, 20 Go de stockage\n- **Pro 79€** (recommandé) : 100 missions incluses, surplus 0,79€/mission, 1 utilisateur, 50 Go\n- **Cabinet 199€** : 300 missions incluses, surplus 0,59€/mission, jusqu’à 5 utilisateurs, 100 Go\n- **Cabinet+ 499€** : 1000 missions incluses, surplus 0,29€/mission, jusqu’à 15 utilisateurs, 200 Go\n\nToutes les fonctionnalités sont incluses dans chaque formule. Le paiement annuel offre 2 mois offerts (10 mois payés sur 12).',
   },
   {
     id: 'essai-gratuit',
@@ -365,7 +365,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: 'prix-kovas-diagnostiqueur',
         question: 'Combien coûte KOVAS pour un diagnostiqueur immobilier ?',
         answer:
-          "KOVAS propose 3 formules HT/mois sans engagement de durée :\n\n- **Découverte 29€/mois** : 20 missions incluses, surplus 2€/mission, 1 utilisateur, 20 Go de stockage\n- **Standard 59€/mois** (recommandé) : 60 missions incluses, surplus 1,50€/mission, 1 utilisateur, 50 Go\n- **Volume 99€/mois** : 150 missions incluses, surplus 1€/mission, 1 utilisateur, 100 Go\n\nToutes les fonctionnalités sont incluses dans chaque formule : saisie vocale, photos terrain, exports vers Liciel et logiciels tiers, lien d'upload public pour les documents propriétaire, dashboard, archivage légal.\n\nLe paiement annuel offre **2 mois offerts** (10 mois payés sur 12), soit une réduction de ~17%.",
+          "KOVAS propose 4 formules HT/mois sans engagement de durée :\n\n- **Solo 29€/mois** : 40 missions incluses, surplus 0,99€/mission, 1 utilisateur, 20 Go de stockage\n- **Pro 79€/mois** (recommandé) : 100 missions incluses, surplus 0,79€/mission, 1 utilisateur, 50 Go\n- **Cabinet 199€/mois** : 300 missions incluses, surplus 0,59€/mission, jusqu’à 5 utilisateurs, 100 Go\n- **Cabinet+ 499€/mois** : 1000 missions incluses, surplus 0,29€/mission, jusqu’à 15 utilisateurs, 200 Go\n\nToutes les fonctionnalités sont incluses dans chaque formule : saisie vocale, photos terrain, exports vers Liciel et logiciels tiers, lien d'upload public pour les documents propriétaire, dashboard, archivage légal.\n\nLe paiement annuel offre **2 mois offerts** (10 mois payés sur 12), soit une réduction de ~17%.",
       },
       {
         id: 'engagement-frais-caches',
@@ -377,7 +377,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: 'roi-reel-kovas',
         question: 'Quel est le retour sur investissement estimé de KOVAS ?',
         answer:
-          "La promesse mesurable KOVAS est de **1h30 économisée par mission DPE typique** (terrain + retour bureau).\n\nPour un diagnostiqueur réalisant 60 missions par mois avec un mix de diagnostics, les gains estimés sur les fonctionnalités principales :\n\n- Saisie vocale terrain vs saisie clavier\n- Photos auto-nommées et géolocalisées vs renommage manuel\n- Exports ZIP Liciel 1 clic vs re-saisie\n- Lien d'upload propriétaire vs allers-retours email\n- Templates pièces vs saisie répétitive\n\nÀ 100€/h de productivité, le ROI estimé est de plusieurs fois le coût de l'abonnement Standard (59€/mois). La validation chiffrée précise sera affinée par les retours des bêta-testeurs M6-M9 puis communiquée publiquement.",
+          "La promesse mesurable KOVAS est de **1h30 économisée par mission DPE typique** (terrain + retour bureau).\n\nPour un diagnostiqueur réalisant 100 missions par mois avec un mix de diagnostics, les gains estimés sur les fonctionnalités principales :\n\n- Saisie vocale terrain vs saisie clavier\n- Photos auto-nommées et géolocalisées vs renommage manuel\n- Exports ZIP Liciel 1 clic vs re-saisie\n- Lien d'upload propriétaire vs allers-retours email\n- Templates pièces vs saisie répétitive\n\nÀ 100€/h de productivité, le ROI estimé est de plusieurs fois le coût de l'abonnement Pro (79€/mois). La validation chiffrée précise sera affinée par les retours des bêta-testeurs M6-M9 puis communiquée publiquement.",
       },
       {
         id: 'changer-resilier',
@@ -389,7 +389,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: 'depassement-quota',
         question: 'Que se passe-t-il si je dépasse le nombre de missions de ma formule ?',
         answer:
-          'Si vous dépassez votre quota mensuel, KOVAS facture les missions supplémentaires à un tarif unitaire dégressif selon votre formule :\n\n- **Découverte** : 2€/mission au-delà de 20\n- **Standard** : 1,50€/mission au-delà de 60\n- **Volume** : 1€/mission au-delà de 150\n\nVous restez fonctionnel sans interruption. Si vous dépassez régulièrement votre quota 3 mois consécutifs, KOVAS vous suggère automatiquement la formule supérieure (potentiellement plus économique).\n\nUn plafond mensuel auto-protecteur est également activable : au-delà du plafond que vous définissez, les missions restent fonctionnelles mais le branding KOVAS revient sur les PDF — vous évitez ainsi tout dépassement budgétaire surprise.',
+          'Si vous dépassez votre quota mensuel, KOVAS facture les missions supplémentaires à un tarif unitaire dégressif selon votre formule :\n\n- **Solo** : 0,99€/mission au-delà de 40\n- **Pro** : 0,79€/mission au-delà de 100\n- **Cabinet** : 0,59€/mission au-delà de 300\n- **Cabinet+** : 0,29€/mission au-delà de 1000\n\nVous restez fonctionnel sans interruption. Si vous dépassez régulièrement votre quota 3 mois consécutifs, KOVAS vous suggère automatiquement la formule supérieure (potentiellement plus économique).\n\nUn plafond mensuel auto-protecteur est également activable : au-delà du plafond que vous définissez, les missions restent fonctionnelles mais le branding KOVAS revient sur les PDF — vous évitez ainsi tout dépassement budgétaire surprise.',
       },
     ],
   },

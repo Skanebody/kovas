@@ -3,10 +3,11 @@
  *
  * Authority : CLAUDE.md §4 (pricing) + §5 (UX anti-friction).
  *
- * Comportement :
- *   - Tier Découverte 29€ : 60 scans/mois, dépassement BLOQUANT (UX rappel upgrade).
- *   - Tier Standard 59€ : 300 scans inclus, overage 0,10€/scan, non bloquant.
- *   - Tier Volume 99€  : 1000 scans inclus, overage 0,05€/scan, non bloquant.
+ * Comportement (les `plan_id` ci-dessous sont des codes DB legacy V3 conservés
+ * pour rétrocompatibilité — le mapping public V5 est Solo / Pro / Cabinet) :
+ *   - Tier `decouverte` → Solo 29€ : 60 scans/mois, dépassement BLOQUANT (UX rappel upgrade).
+ *   - Tier `standard` → Pro 79€ : 300 scans inclus, overage 0,10€/scan, non bloquant.
+ *   - Tier `volume` → Cabinet 199€  : 1000 scans inclus, overage 0,05€/scan, non bloquant.
  *   - Founder 49€      : 300 scans inclus, overage 0,10€/scan, non bloquant.
  *
  * Reset automatique au passage de mois calendaire (Europe/Paris).
@@ -97,7 +98,7 @@ export async function checkAndDeductQuota(
   if (config.isBlocking) {
     return {
       ok: false,
-      reason: `Quota mensuel atteint (${included} scans). Passer au tier Standard pour continuer.`,
+      reason: `Quota mensuel atteint (${included} scans). Passer au tier Pro pour continuer.`,
       used,
       included,
       planId,

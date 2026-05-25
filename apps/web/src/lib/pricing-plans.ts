@@ -1,31 +1,39 @@
 /**
- * KOVAS — Pricing V4 grille officielle (validée fondateur 2026-05-22)
+ * KOVAS — Pricing V5 grille officielle (refonte mockup 2026-05-25, Lot B43)
  *
  * Architecture en deux tracks distincts achetables séparément ou via Bundle :
  *   - Track Logiciel KOVAS (B2B) : 5 plans
- *       essai / solo_light / solo_pro / cabinet / cabinet_plus
+ *       essai / solo_light (Solo) / solo_pro (Pro) / cabinet / cabinet_plus
  *   - Track Annuaire KOVAS (B2C)    : 4 plans
- *       annuaire_free / annuaire_local / annuaire_regional / annuaire_national
+ *       annuaire_free / annuaire_local (Présence) / annuaire_regional (Boost) /
+ *       annuaire_national (Premium)
  *   - Bundles cross-sell             : 5 combos remisés
  *   - Add-ons                        : 4 modules optionnels
  *   - Sponsorisé dynamique           : 6 paliers par tranche ville
  *
- * Cf. CLAUDE.md §4 pour la spec exhaustive.
+ * V5 (2026-05-25) — changements majeurs vs V4 :
+ *   - Logiciel : Solo (29€, 40 missions) / Pro (79€ vs 59€, 100 missions) /
+ *     Cabinet (199€ vs 149€, 300 missions, 5 users vs 3) / Cabinet+ (499€ vs
+ *     299€, 1000 missions, 15 users vs 7)
+ *   - Annuaire : renaming d'affichage uniquement (Local→Présence, Régional→Boost,
+ *     National→Premium). Prix inchangés.
+ *   - Bundles : recompositions et prix recalibrés (39/99/89/229/529€)
+ *   - Trial extended : essai 30j + satisfait ou remboursé 60j
+ *   - Loyalty progressive : -15% annuel + -5% à M12 + -10% à M24 (cap -30%)
  *
  * IMPORTANT — prix exprimés en centimes (integer), jamais float ni string.
  * Cf. CLAUDE.md §10 — Conventions formats régionaux.
  *
  * Rétro-compat : les codes V3 historiques (`logiciel_*`, `annuaire_pro/visibility/sponsored`)
- * sont conservés comme alias dans `PricingPlanCode` pour ne pas casser les 50+
- * composants qui en dépendent. Les codes E2c initiaux (`essential`, `decouverte`,
- * `pro`, `all_inclusive`, `cabinet` simple) sont mappés en lecture seule via
- * `LEGACY_PLAN_MAP` vers les nouveaux plans officiels.
+ * et les anciens prix V4 sont conservés comme alias / grandfather pour ne pas
+ * casser les 50+ composants qui en dépendent. Les anciens abonnés gardent leur
+ * prix historique à vie via les `*_legacy` plans dans `LEGACY_PLANS`.
  */
 
 const SECONDS_PER_HOUR = 3600
 
 // ════════════════════════════════════════════════════════════════
-// 1. TRACK LOGICIEL — 5 plans officiels (29 / 59 / 149 / 299 €)
+// 1. TRACK LOGICIEL — 5 plans officiels V5 (29 / 79 / 199 / 499 €)
 // ════════════════════════════════════════════════════════════════
 
 /** Codes officiels du track logiciel KOVAS (grille 2026-05-22). */
@@ -69,13 +77,18 @@ function annualPriceWithDiscount(monthlyCents: number): number {
 }
 
 /**
- * Plans officiels track logiciel (grille 2026-05-22).
+ * Plans officiels track logiciel V5 (refonte mockup 2026-05-25).
  *
- * - Essai gratuit       : 0 € — 30 jours puis débit auto vers Solo Light
- * - Solo Light          : 29 € — 24,65 € annuel (-15%)
- * - Solo Pro            : 59 € — 50,15 € annuel
- * - Cabinet             : 149 € — 126,65 € annuel
- * - Cabinet+            : 299 € — 254,15 € annuel
+ * - Essai gratuit       : 0 € — 30 jours puis débit auto vers Solo
+ * - Solo (solo_light)   : 29 € — 24,65 € annuel (-15%) · 40 missions, surplus 0,99€
+ * - Pro (solo_pro)      : 79 € — 67,15 € annuel · 100 missions, surplus 0,79€
+ * - Cabinet             : 199 € — 169,15 € annuel · 300 missions, surplus 0,59€, 5 users
+ * - Cabinet+            : 499 € — 424,15 € annuel · 1000 missions, surplus 0,29€, 15 users
+ *
+ * Note interne : les codes plan (`solo_light`, `solo_pro`) restent inchangés
+ * pour préserver la rétro-compat des 50+ composants ; seuls les `name`,
+ * `monthlyPrice` et `caps` sont mis à jour. Le mapping `LEGACY_PLAN_MAP` et
+ * les `*_legacy` grandfather préservent les anciens abonnés.
  */
 export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   {
@@ -93,6 +106,7 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
     },
     features: [
       '30 jours d’essai complet · CB enregistrée à la souscription, débit auto à J+30',
+      'Satisfait ou remboursé sous 60 jours',
       '30 missions max sur la période (cap anti-abus)',
       '1h Whisper inclus',
       'Exports universels (PDF · Word · CSV · JSON · ZIP)',
@@ -101,33 +115,36 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   },
   {
     code: 'solo_light',
-    name: 'Solo Light',
-    tagline: 'Démarrer en solo sur les diagnostics standards',
+    name: 'Solo',
+    tagline: 'Tu démarres ou tu fais ~10 missions par semaine',
     monthlyPrice: 2900,
     annualPrice: annualPriceWithDiscount(2900),
     caps: {
-      missions: 60,
+      missions: 40,
       whisperSeconds: 5 * SECONDS_PER_HOUR,
       visionCalls: 0,
       storageGb: 12,
       users: 1,
     },
     features: [
-      '60 missions / mois',
-      '5h Whisper',
-      '12 Go stockage',
-      '8 diagnostics standards (DPE / Amiante / Plomb / Gaz / Élec / Termites / Carrez / ERP)',
-      'Sync mobile / web + offline',
+      '40 missions / mois · surplus 0,99€ / mission',
+      'Notes vocales transcrites automatiquement',
+      'Photos plaques lues automatiquement',
+      'Vérification automatique avant ADEME',
+      'Mise à jour des normes en continu',
+      'Facturation Qonto + Pennylane',
+      'Signature électronique légale',
+      '1 utilisateur',
     ],
   },
   {
     code: 'solo_pro',
-    name: 'Solo Pro',
-    tagline: 'Le choix recommandé pour les diagnostiqueurs en activité',
-    monthlyPrice: 5900,
-    annualPrice: annualPriceWithDiscount(5900),
+    name: 'Pro',
+    tagline: 'Tu travailles à temps plein, 15 à 25 missions par semaine',
+    monthlyPrice: 7900,
+    annualPrice: annualPriceWithDiscount(7900),
     caps: {
-      missions: 150,
+      missions: 100,
       whisperSeconds: 10 * SECONDS_PER_HOUR,
       visionCalls: 100,
       storageGb: 25,
@@ -135,53 +152,68 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
     },
     featured: true,
     features: [
-      '150 missions / mois',
-      '10h Whisper + Vision IA (100 / mo)',
-      'Recos post-DPE F/G automatiques',
-      'Validation cohérence métier',
-      'Templates pièces + support 4h ouvré',
+      '100 missions / mois · surplus 0,79€ / mission',
+      'Tout Solo, plus :',
+      'Suivi du temps gagné chaque semaine',
+      'Tableau de bord (CA, devis, conversion)',
+      'Templates de rapports illimités',
+      'Facturation conforme 2027 (Factur-X)',
+      'Historique complet des biens',
+      'Relances impayés automatiques',
+      'Réponse support sous 1 jour ouvré',
+      '1 invité lecture seule',
     ],
   },
   {
     code: 'cabinet',
     name: 'Cabinet',
-    tagline: 'Multi-utilisateurs (3 inclus) + gouvernance',
-    monthlyPrice: 14900,
-    annualPrice: annualPriceWithDiscount(14900),
+    tagline: 'Tu travailles en équipe de 2 à 5 personnes',
+    monthlyPrice: 19900,
+    annualPrice: annualPriceWithDiscount(19900),
     caps: {
-      missions: 400,
+      missions: 300,
       whisperSeconds: 40 * SECONDS_PER_HOUR,
       visionCalls: 600,
       storageGb: 100,
-      users: 3,
+      users: 5,
     },
     features: [
-      '400 missions / mois pour 3 utilisateurs',
-      '40h Whisper + Vision IA (600 / mo)',
-      'Audit trail + analytics avancés',
-      'Factur-X PPF inclus + gestion des rôles',
-      'Account manager dédié',
+      '300 missions / mois · surplus 0,59€ / mission',
+      'Tout Pro, plus :',
+      '5 utilisateurs avec rôles distincts',
+      'Workload distribution + planning équipe',
+      'Audit trail par membre (qui a fait quoi)',
+      'Dashboard manager (productivité, CA par diag)',
+      'Alerte si DPE existe déjà sur le bien',
+      'Aide à la défense en cas de plainte',
+      'Branding cabinet personnalisé',
+      'Réponse support sous 4 heures ouvrées',
     ],
   },
   {
     code: 'cabinet_plus',
     name: 'Cabinet+',
-    tagline: 'API publique + SLA 4h + onboarding white-glove',
-    monthlyPrice: 29900,
-    annualPrice: annualPriceWithDiscount(29900),
+    tagline: 'Tu pilotes 6 à 15 personnes sur un ou plusieurs sites',
+    monthlyPrice: 49900,
+    annualPrice: annualPriceWithDiscount(49900),
     caps: {
-      missions: UNLIMITED_CAP,
+      missions: 1000,
       whisperSeconds: 80 * SECONDS_PER_HOUR,
       visionCalls: 1500,
       storageGb: 250,
-      users: 7,
+      users: 15,
     },
     features: [
-      'Missions illimitées (fair-use)',
-      '80h Whisper + Vision IA (1 500 / mo)',
-      'API publique REST + webhooks',
-      'SLA 4h ouvré + onboarding white-glove',
-      'Multi-utilisateurs jusqu’à 7 inclus + extensibles',
+      '1000 missions / mois · surplus 0,29€ / mission',
+      'Tout Cabinet, plus :',
+      '15 utilisateurs inclus',
+      'Reporting consolidé multi-sites',
+      'White-label complet (logo + couleurs)',
+      'Vérification renforcée incluse',
+      'Échange direct avec Benjamin, le fondateur',
+      'Onboarding sur-mesure de ton équipe',
+      'Réponse support sous 1 heure ouvrée',
+      'Personnalisation avancée du workflow',
     ],
   },
 ] as const
@@ -249,48 +281,55 @@ export const ANNUAIRE_PLANS: readonly AnnuairePlan[] = [
   },
   {
     code: 'annuaire_local',
-    name: 'Visibilité Local',
-    tagline: 'Recevez vos premiers leads particuliers · ville et alentours',
+    name: 'Présence',
+    tagline: 'Tu veux que les particuliers de ton département te trouvent',
     monthlyPrice: 1900,
     annualPrice: annualPriceWithDiscount(1900),
     leadsPerMonth: 5,
     ficheLevel: 'premium',
     features: [
-      '5 leads particuliers / mois',
-      'Fiche Premium (photos, services, tarifs indicatifs)',
-      'Réponse directe via messagerie KOVAS',
-      'Visibilité ville d’implantation + communes limitrophes',
+      'Fiche publique sur l’annuaire KOVAS',
+      'Tes 3 derniers avis Google affichés',
+      'Indicateur de disponibilité de la semaine',
+      'Statistiques de ta fiche (vues, contacts)',
+      'Réception de demandes de devis qualifiés',
+      'Tu paies seulement quand un lead t’intéresse',
     ],
   },
   {
     code: 'annuaire_regional',
-    name: 'Visibilité Régional',
-    tagline: 'Boost SEO local + analytics fiche · département complet',
+    name: 'Boost',
+    tagline: 'Tu veux passer devant tes concurrents dans les résultats',
     monthlyPrice: 3900,
     annualPrice: annualPriceWithDiscount(3900),
     leadsPerMonth: 15,
     ficheLevel: 'premium',
     featured: true,
     features: [
-      '15 leads particuliers / mois',
-      'Fiche Premium + boost SEO local',
-      'Analytics fiche (vues, clics, conversion)',
-      'Visibilité département entier',
+      'Tout Présence, plus :',
+      'Position prioritaire (top 5 département)',
+      '1 commune mise en avant',
+      'Badge Vérifié bleu sur ta fiche',
+      'Notifications de leads en temps réel',
+      '−20% sur ton premier lead du mois',
     ],
   },
   {
     code: 'annuaire_national',
-    name: 'Visibilité National',
-    tagline: 'Top département + badge Recommandé · France entière',
+    name: 'Premium',
+    tagline: 'Tu veux capturer tout le marché de ta région',
     monthlyPrice: 7900,
     annualPrice: annualPriceWithDiscount(7900),
     leadsPerMonth: 30,
     ficheLevel: 'sponsored',
     features: [
-      '30 leads premium / mois',
-      'Top département + badge "Recommandé"',
-      'Éligible aux slots ville sponsorisés (cf. SPONSORED_SLOT_TIERS)',
-      'Visibilité France entière',
+      'Tout Boost, plus :',
+      'Visibilité multi-départements (top 3 région)',
+      '3 communes mises en avant',
+      'Badge Premium doré',
+      '−50% sur tes 3 premiers leads du mois',
+      'Promesse de réponse client le jour même',
+      'Support prioritaire',
     ],
   },
 ] as const
@@ -347,21 +386,26 @@ export interface BundleCombo {
 }
 
 /**
- * Bundles officiels (grille 2026-05-22) :
+ * Bundles officiels V5 (refonte mockup 2026-05-25) :
  *
- * | Code                   | Composition                       | Prix bundle | Sépare | Économie |
- * |------------------------|-----------------------------------|-------------|--------|----------|
- * | bundle_solo_starter    | Local 19 + Solo Light 29          | 39 €        | 48 €   | 9 €      |
- * | bundle_solo_performance| Local 19 + Solo Pro 59            | 65 €        | 78 €   | 13 €     |
- * | bundle_solo_regional   | Régional 39 + Solo Pro 59         | 79 €        | 98 €   | 19 €     |
- * | bundle_cabinet_360     | Régional 39 + Cabinet 149         | 159 €       | 188 €  | 29 €     |
- * | bundle_cabinet_national| National 79 + Cabinet+ 299        | 319 €       | 378 €  | 59 €     |
+ * | Code                   | Affichage   | Composition                  | Prix | Sépare | Économie |
+ * |------------------------|-------------|------------------------------|------|--------|----------|
+ * | bundle_solo_starter    | Démarrage   | Présence 19 + Solo 29        | 39 € |  48 €  |   9 €    |
+ * | bundle_solo_performance| Croissance  | Boost 39 + Pro 79            | 99 € | 118 €  |  19 €    |
+ * | bundle_solo_regional   | Acquisition | Premium 79 + Solo 29         | 89 € | 108 €  |  19 €    |
+ * | bundle_cabinet_360     | Cabinet     | Premium 79 + Cabinet 199     | 229€ | 278 €  |  49 €    |
+ * | bundle_cabinet_national| Cabinet+    | Premium 79 + Cabinet+ 499 +  | 529€ | 628 €  |  99 €    |
+ * |                        |             | 5 communes (slot petite ville × 5)            |
+ *
+ * Codes internes inchangés pour préserver la rétro-compat des Stripe price IDs
+ * existants. Seuls `name`, `tagline`, `monthlyPrice` et la composition (annuaire
+ * + logiciel) sont mis à jour.
  */
 export const BUNDLES: readonly BundleCombo[] = [
   {
     code: 'bundle_solo_starter',
-    name: 'Solo Starter',
-    tagline: 'Local + Solo Light · idéal premier installé',
+    name: 'Démarrage',
+    tagline: 'Tu démarres et tu veux te faire connaître',
     annuaireComponent: 'annuaire_local',
     logicielComponent: 'solo_light',
     monthlyPrice: 3900,
@@ -369,60 +413,64 @@ export const BUNDLES: readonly BundleCombo[] = [
     savingsPerMonth: 900,
     monthlySavingsCents: 900,
     individualMonthlyPriceCents: 4800,
-    includedPlanLabels: ['Annuaire Local 19€', 'KOVAS Solo Light 29€'],
+    includedPlanLabels: ['Annuaire Présence 19€', 'KOVAS Solo 29€'],
   },
   {
     code: 'bundle_solo_performance',
-    name: 'Solo Performance',
-    tagline: 'Local + Solo Pro · combo activité quotidienne',
-    annuaireComponent: 'annuaire_local',
-    logicielComponent: 'solo_pro',
-    monthlyPrice: 6500,
-    annualPrice: annualPriceWithDiscount(6500),
-    savingsPerMonth: 1300,
-    monthlySavingsCents: 1300,
-    individualMonthlyPriceCents: 7800,
-    includedPlanLabels: ['Annuaire Local 19€', 'KOVAS Solo Pro 59€'],
-  },
-  {
-    code: 'bundle_solo_regional',
-    name: 'Solo Régional',
-    tagline: 'Régional + Solo Pro · boost SEO département',
+    name: 'Croissance',
+    tagline: 'Le combo le plus choisi par les diagnostiqueurs en croissance',
     annuaireComponent: 'annuaire_regional',
     logicielComponent: 'solo_pro',
-    monthlyPrice: 7900,
-    annualPrice: annualPriceWithDiscount(7900),
+    monthlyPrice: 9900,
+    annualPrice: annualPriceWithDiscount(9900),
     savingsPerMonth: 1900,
     monthlySavingsCents: 1900,
-    individualMonthlyPriceCents: 9800,
-    includedPlanLabels: ['Annuaire Régional 39€', 'KOVAS Solo Pro 59€'],
+    individualMonthlyPriceCents: 11800,
+    includedPlanLabels: ['Annuaire Boost 39€', 'KOVAS Pro 79€'],
     featured: true,
   },
   {
+    code: 'bundle_solo_regional',
+    name: 'Acquisition',
+    tagline: 'Pour ceux qui font de l’annuaire leur source n°1 de clients',
+    annuaireComponent: 'annuaire_national',
+    logicielComponent: 'solo_light',
+    monthlyPrice: 8900,
+    annualPrice: annualPriceWithDiscount(8900),
+    savingsPerMonth: 1900,
+    monthlySavingsCents: 1900,
+    individualMonthlyPriceCents: 10800,
+    includedPlanLabels: ['Annuaire Premium 79€', 'KOVAS Solo 29€'],
+  },
+  {
     code: 'bundle_cabinet_360',
-    name: 'Cabinet 360',
-    tagline: 'Régional + Cabinet · cabinet visible département',
-    annuaireComponent: 'annuaire_regional',
+    name: 'Cabinet',
+    tagline: 'L’équipe coordonnée + la visibilité maximale',
+    annuaireComponent: 'annuaire_national',
     logicielComponent: 'cabinet',
-    monthlyPrice: 15900,
-    annualPrice: annualPriceWithDiscount(15900),
-    savingsPerMonth: 2900,
-    monthlySavingsCents: 2900,
-    individualMonthlyPriceCents: 18800,
-    includedPlanLabels: ['Annuaire Régional 39€', 'KOVAS Cabinet 149€'],
+    monthlyPrice: 22900,
+    annualPrice: annualPriceWithDiscount(22900),
+    savingsPerMonth: 4900,
+    monthlySavingsCents: 4900,
+    individualMonthlyPriceCents: 27800,
+    includedPlanLabels: ['Annuaire Premium 79€', 'KOVAS Cabinet 199€'],
   },
   {
     code: 'bundle_cabinet_national',
-    name: 'Cabinet National',
-    tagline: 'National + Cabinet+ · couverture nationale élite',
+    name: 'Cabinet+',
+    tagline: 'Le tout-en-un, multi-site, avec Benjamin en accompagnement direct',
     annuaireComponent: 'annuaire_national',
     logicielComponent: 'cabinet_plus',
-    monthlyPrice: 31900,
-    annualPrice: annualPriceWithDiscount(31900),
-    savingsPerMonth: 5900,
-    monthlySavingsCents: 5900,
-    individualMonthlyPriceCents: 37800,
-    includedPlanLabels: ['Annuaire National 79€', 'KOVAS Cabinet+ 299€'],
+    monthlyPrice: 52900,
+    annualPrice: annualPriceWithDiscount(52900),
+    savingsPerMonth: 9900,
+    monthlySavingsCents: 9900,
+    individualMonthlyPriceCents: 62800,
+    includedPlanLabels: [
+      'Annuaire Premium 79€',
+      'KOVAS Cabinet+ 499€',
+      'Mise en avant sur 5 communes',
+    ],
   },
 ] as const
 

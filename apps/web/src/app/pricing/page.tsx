@@ -18,27 +18,27 @@ import Link from 'next/link'
  * Page /pricing publique — harmonisée sur la source canonique.
  *
  * SOURCE DE VÉRITÉ : `apps/web/src/lib/pricing-plans.ts`
- *   - LOGICIEL_PLANS (4 tiers payants V4 :
- *       Solo Light 29 € · Solo Pro 59 € · Cabinet 149 € · Cabinet+ 299 €)
+ *   - LOGICIEL_PLANS (4 tiers payants V5 :
+ *       Solo 29 € · Pro 79 € · Cabinet 199 € · Cabinet+ 499 €)
  *   - ANNUAIRE_PLANS (4 paliers visibilité :
- *       Gratuit · Local 19 € · Régional 39 € · National 79 €)
+ *       Gratuit · Présence 19 € · Boost 39 € · Premium 79 €)
  *
  * Ne PAS dupliquer les chiffres ici — tout est dérivé du canonique. Si
  * modification, modifier `pricing-plans.ts`.
  *
- * Audit FIX-SS (2026-05-23) : remplace l'ancienne grille V3 monobloc
- * (Découverte 29 / Standard 59 / Volume 99) par la grille V4 dual track.
+ * Audit V5 (2026-05-25) : nouvelle grille — Solo 29 / Pro 79 / Cabinet 199 /
+ * Cabinet+ 499 €. Renames Solo Light → Solo, Solo Pro → Pro.
  */
 
 export const metadata: Metadata = {
-  title: 'Tarifs — Solo Light 29€ · Solo Pro 59€ · Cabinet 149€ · Cabinet+ 299€',
+  title: 'Tarifs — Solo 29€ · Pro 79€ · Cabinet 199€ · Cabinet+ 499€',
   description:
-    'Solo Light 29€, Solo Pro 59€, Cabinet 149€, Cabinet+ 299€ par mois HT. Essai gratuit 30 jours avec CB, sans engagement, résiliable à tout moment. 8 diagnostics, exports universels.',
+    'Solo 29€, Pro 79€, Cabinet 199€, Cabinet+ 499€ par mois HT. Essai gratuit 30 jours avec CB, sans engagement, résiliable à tout moment. 8 diagnostics, exports universels.',
   alternates: { canonical: 'https://kovas.fr/pricing' },
   openGraph: {
     title: 'Tarifs KOVAS — à partir de 29€/mois',
     description:
-      'Solo Light, Solo Pro, Cabinet, Cabinet+ — 4 forfaits transparents, sans engagement, résiliable à tout moment.',
+      'Solo, Pro, Cabinet, Cabinet+ — 4 forfaits transparents, sans engagement, résiliable à tout moment.',
     url: 'https://kovas.fr/pricing',
     siteName: 'KOVAS',
     locale: 'fr_FR',

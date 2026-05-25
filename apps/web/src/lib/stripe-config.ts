@@ -1,18 +1,19 @@
 /**
- * Configuration backend des forfaits KOVAS V4 — grille officielle 2026-05-22.
+ * Configuration backend des forfaits KOVAS V5 — grille officielle 2026-05-25.
  *
  * Conserve l'API publique `KovasPlanId` / `KOVAS_PLANS` / `getPlan` / `KOVAS_TIERS`
  * pour ne pas casser les consommateurs historiques (admin dashboard, /app/account,
  * finance-calculator, webhook Stripe, etc.).
  *
- * Les noms officiels publics sont désormais Solo Light / Solo Pro / Cabinet /
- * Cabinet+ (cf. `lib/pricing-plans.ts`). Ce fichier ne contient que les IDs
- * legacy E2c (essential / decouverte / pro / all_inclusive / cabinet) car les
- * abonnements DB de phase E2c portent encore ces tier IDs ; le mapping vers la
- * nouvelle grille est géré par `LEGACY_PLAN_MAP` exporté depuis `pricing-plans.ts`.
+ * Les noms officiels publics sont désormais Solo / Pro / Cabinet / Cabinet+
+ * (cf. `lib/pricing-plans.ts`). Ce fichier ne contient que les IDs legacy E2c
+ * (essential / decouverte / pro / all_inclusive / cabinet) car les abonnements
+ * DB de phase E2c portent encore ces tier IDs ; le mapping vers la nouvelle
+ * grille est géré par `LEGACY_PLAN_MAP` exporté depuis `pricing-plans.ts`.
  *
- * Les prix sont alignés sur la grille officielle (29 / 59 / 149 / 299 €) pour
- * que les futurs writes Stripe utilisent les bons montants.
+ * Les prix sont alignés sur la grille officielle V5 (29 / 79 / 199 / 499 €) pour
+ * que les futurs writes Stripe utilisent les bons montants. Les Price IDs
+ * runtime Stripe restent identifiés par leur ID legacy (price_legacy_*).
  *
  * Source de vérité côté DB : table `subscription_plans`.
  * Source de vérité produit : `lib/pricing-plans.ts` + CLAUDE.md §4.
@@ -22,12 +23,7 @@
 // Nouveau modèle — 5 plans V1 illimités
 // ============================================
 
-export type KovasPlanId =
-  | 'essential'
-  | 'decouverte'
-  | 'pro'
-  | 'all_inclusive'
-  | 'cabinet'
+export type KovasPlanId = 'essential' | 'decouverte' | 'pro' | 'all_inclusive' | 'cabinet'
 
 export interface KovasPlan {
   id: KovasPlanId
@@ -61,43 +57,43 @@ function annualCentsWithDiscount(monthlyCents: number): number {
 
 export const KOVAS_PLANS: readonly KovasPlan[] = [
   {
-    // Tier `essential` legacy E2c — remappé vers Solo Light 29€ (grille officielle V4).
+    // Tier `essential` legacy E2c — remappé vers Solo 29€ (grille officielle V5).
     id: 'essential',
-    label: 'Solo Light',
+    label: 'Solo',
     description: 'Démarrer en solo sur les diagnostics standards',
     priceMonthlyCents: 2900,
     priceAnnualCents: annualCentsWithDiscount(2900),
     storageGb: 12,
     usersIncluded: 1,
-    fairUseMissionsSoftCap: 60,
+    fairUseMissionsSoftCap: 40,
     hardCapWhisperSeconds: 5 * 3600,
     hardCapVisionCalls: 0,
     hardCapBurstPerDay: 15,
   },
   {
-    // Tier `decouverte` legacy E2c — équivalent Solo Light (alias historique).
+    // Tier `decouverte` legacy E2c — équivalent Solo (alias historique).
     id: 'decouverte',
-    label: 'Solo Light',
+    label: 'Solo',
     description: 'Tier d’entrée pour valider le gain de temps — alias historique',
     priceMonthlyCents: 2900,
     priceAnnualCents: annualCentsWithDiscount(2900),
     storageGb: 12,
     usersIncluded: 1,
-    fairUseMissionsSoftCap: 60,
+    fairUseMissionsSoftCap: 40,
     hardCapWhisperSeconds: 5 * 3600,
     hardCapVisionCalls: 0,
     hardCapBurstPerDay: 15,
   },
   {
-    // Tier `pro` legacy E2c — remappé vers Solo Pro 59€ (grille officielle V4).
+    // Tier `pro` legacy E2c — remappé vers Pro 79€ (grille officielle V5).
     id: 'pro',
-    label: 'Solo Pro',
+    label: 'Pro',
     description: 'Le choix recommandé pour les diagnostiqueurs en activité',
-    priceMonthlyCents: 5900,
-    priceAnnualCents: annualCentsWithDiscount(5900),
+    priceMonthlyCents: 7900,
+    priceAnnualCents: annualCentsWithDiscount(7900),
     storageGb: 25,
     usersIncluded: 1,
-    fairUseMissionsSoftCap: 150,
+    fairUseMissionsSoftCap: 100,
     hardCapWhisperSeconds: 10 * 3600,
     hardCapVisionCalls: 100,
     hardCapBurstPerDay: 30,
@@ -105,34 +101,34 @@ export const KOVAS_PLANS: readonly KovasPlan[] = [
     featured: true,
   },
   {
-    // Tier `all_inclusive` legacy E2c — remappé vers Cabinet 149€ (grille officielle V4).
+    // Tier `all_inclusive` legacy E2c — remappé vers Cabinet 199€ (grille officielle V5).
     id: 'all_inclusive',
     label: 'Cabinet',
-    description: 'Multi-utilisateurs (3 inclus) + gouvernance',
-    priceMonthlyCents: 14900,
-    priceAnnualCents: annualCentsWithDiscount(14900),
+    description: 'Multi-utilisateurs (5 inclus) + gouvernance',
+    priceMonthlyCents: 19900,
+    priceAnnualCents: annualCentsWithDiscount(19900),
     storageGb: 100,
-    usersIncluded: 3,
+    usersIncluded: 5,
     extraUserPriceCents: 1900,
-    maxUsers: 7,
-    fairUseMissionsSoftCap: 400,
+    maxUsers: 15,
+    fairUseMissionsSoftCap: 300,
     hardCapWhisperSeconds: 40 * 3600,
     hardCapVisionCalls: 600,
     hardCapBurstPerDay: 60,
   },
   {
-    // Tier `cabinet` legacy E2c — remappé vers Cabinet+ 299€ (grille officielle V4).
-    // Les anciens abonnements DB à 89€ migrent vers Cabinet+ via LEGACY_PLAN_MAP.
+    // Tier `cabinet` legacy E2c — remappé vers Cabinet+ 499€ (grille officielle V5).
+    // Les anciens abonnements DB migrent vers Cabinet+ via LEGACY_PLAN_MAP.
     id: 'cabinet',
     label: 'Cabinet+',
     description: 'API publique + SLA 4h + onboarding white-glove',
-    priceMonthlyCents: 29900,
-    priceAnnualCents: annualCentsWithDiscount(29900),
+    priceMonthlyCents: 49900,
+    priceAnnualCents: annualCentsWithDiscount(49900),
     storageGb: 250,
-    usersIncluded: 7,
+    usersIncluded: 15,
     extraUserPriceCents: 1900,
-    maxUsers: 7,
-    fairUseMissionsSoftCap: 999_999,
+    maxUsers: 15,
+    fairUseMissionsSoftCap: 1000,
     hardCapWhisperSeconds: 80 * 3600,
     hardCapVisionCalls: 1500,
     hardCapBurstPerDay: 100,
@@ -173,10 +169,10 @@ export function getStripePriceId(
 // Mapping rétrocompat pour les consommateurs historiques (admin dashboard,
 // /app/account, finance-calculator, webhook Stripe).
 //
-// Mapping retenu :
-//   ancien 'discovery' (29€, 20 missions)  → nouveau 'decouverte' (19€)
-//   ancien 'standard'  (59€, 60 missions)  → nouveau 'pro'        (35€)
-//   ancien 'volume'    (99€, 150 missions) → nouveau 'all_inclusive' (49€)
+// Mapping retenu (grille V5 2026-05-25) :
+//   ancien 'discovery' (29€, 20 missions)  → nouveau 'decouverte' → Solo 29€
+//   ancien 'standard'  (59€, 60 missions)  → nouveau 'pro'        → Pro 79€
+//   ancien 'volume'    (99€, 150 missions) → nouveau 'all_inclusive' → Cabinet 199€
 //
 // Important : les abonnements grandfathered restent sur leur **ancien** prix
 // Stripe (rétrocompat à vie). Cette table n'affecte que les **nouveaux**

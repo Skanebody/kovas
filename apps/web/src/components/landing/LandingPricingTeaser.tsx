@@ -8,15 +8,15 @@ import Link from 'next/link'
  * Teaser pricing pour la landing diagnostiqueurs (`/pour-les-diagnostiqueurs`).
  *
  * SOURCE DE VÉRITÉ : `lib/pricing-plans.ts` — tous les chiffres sont dérivés
- * du canonique. Audit FIX-SS (2026-05-23) : essai 30j (vs 14j obsolète), prix
- * bundle dérivés du canonique Solo Performance (65 € / -13 €).
+ * du canonique. Audit V5 (2026-05-25) : essai 30j, prix bundle dérivés du
+ * canonique Croissance (99 € — Pro 79 + Présence 19 - remise).
  */
 export function LandingPricingTeaser() {
-  // annuaire_pro est l'alias V3 → résout en annuaire_local (19 €).
+  // annuaire_pro est l'alias V3 → résout en annuaire_local (19 €) = Présence.
   const annuairePro = getAnnuairePlan('annuaire_pro')
-  // logiciel_active est l'alias V3 → résout en solo_pro (59 €).
+  // logiciel_active est l'alias V3 → résout en solo_pro / Pro (79 €).
   const logicielActive = getLogicielPlan('logiciel_active')
-  // Bundle Solo Performance (Annuaire Local + Solo Pro) — économie officielle.
+  // Bundle Croissance (Annuaire Présence + Pro) — économie officielle.
   const bundlePerformance = getBundle('bundle_solo_performance')
 
   if (!annuairePro || !logicielActive || !bundlePerformance) {

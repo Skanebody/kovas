@@ -1,15 +1,15 @@
 'use client'
 
+import { cn } from '@/lib/utils'
 import { Loader2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { cn } from '@/lib/utils'
 
 interface TrialBannerProps {
   /** ISO 8601, fin d'essai = début du débit auto */
   trialEndsAt: string
   /** Prix mensuel HT en centimes (issu de stripe-config tier courant) */
   monthlyPriceCents: number
-  /** Label du tier en cours (Découverte / Standard / Volume) — pour le tooltip */
+  /** Label du tier en cours (Solo / Pro / Cabinet / Cabinet+) — pour le tooltip */
   tierLabel: string
 }
 
@@ -19,7 +19,7 @@ const SESSION_KEY = 'kovas_trial_banner_dismissed'
  * Bannière essai 30j affichée en haut du dashboard tant que l'essai est actif.
  *
  * Wireframe :
- *   [ESSAI · 12 jours restants · Prélèvement de 59€ le 21 juin] [Voir l'abonnement] [X]
+ *   [ESSAI · 12 jours restants · Prélèvement de 79€ le 21 juin] [Voir l'abonnement] [X]
  *
  * - Dismissible session-only (réapparaît à la prochaine session)
  * - Couleur sage info en background, label mono pour "ESSAI", chiffres normaux pour le compteur
@@ -79,6 +79,7 @@ export function TrialBanner({ trialEndsAt, monthlyPriceCents, tierLabel }: Trial
   }
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: <output> is for form computation results; div role="status" is correct for a live region banner here.
     <div
       role="status"
       aria-live="polite"

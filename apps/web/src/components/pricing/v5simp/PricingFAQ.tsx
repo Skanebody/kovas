@@ -28,7 +28,7 @@ const FAQ: readonly FaqEntry[] = [
   {
     question: "Puis-je changer de plan en cours d'abonnement ?",
     answer:
-      'Oui, sans frais ni engagement. Vous pouvez passer du Solo Light au Solo Pro (ou au Cabinet, ou Cabinet+), upgrader votre Annuaire de Local à Régional ou National, ou basculer vers un bundle, depuis votre compte. Le prorata est calculé automatiquement par Stripe. Le downgrade prend effet à la fin du cycle de facturation pour éviter toute interruption.',
+      'Oui, sans frais ni engagement. Vous pouvez passer du Solo au Pro (ou au Cabinet, ou Cabinet+), upgrader votre Annuaire de Présence à Boost ou Premium, ou basculer vers un bundle, depuis votre compte. Le prorata est calculé automatiquement par Stripe. Le downgrade prend effet à la fin du cycle de facturation pour éviter toute interruption.',
   },
   {
     question: 'Que se passe-t-il si je dépasse mon quota de missions ?',
@@ -43,12 +43,12 @@ const FAQ: readonly FaqEntry[] = [
   {
     question: 'Quel niveau de support est inclus ?',
     answer:
-      'Tous les tiers payants bénéficient du support par email avec réponse sous 24 h ouvrées. À partir du forfait Solo Pro (59 €/mo), le support est prioritaire (réponse sous 4 h ouvrées). Les formules Cabinet et Cabinet+ incluent un account manager dédié.',
+      'Tous les tiers payants bénéficient du support par email avec réponse sous 24 h ouvrées. À partir du forfait Pro (79 €/mo), le support est prioritaire (réponse sous 4 h ouvrées). Les formules Cabinet et Cabinet+ incluent un account manager dédié.',
   },
   {
     question: 'Que se passe-t-il si je suis sur un ancien forfait ?',
     answer:
-      'Si vous êtes déjà client sur une ancienne grille (Essential 19 €, Découverte 29 €, Pro 39 €, All Inclusive 99 €, Cabinet 149 €, Standard 59 €, Volume 99 €, Founder 49 €), votre prix actuel est verrouillé à vie. Aucune migration forcée. Si vous souhaitez basculer sur la grille V4 actuelle (Solo Light 29, Solo Pro 59, Cabinet 149, Cabinet+ 299), nous calculons les économies estimées avant tout changement.',
+      'Si vous êtes déjà client sur une ancienne grille (Essential 19 €, Découverte 29 €, Pro 39 €, All Inclusive 99 €, Cabinet 149 €, Standard 59 €, Volume 99 €, Founder 49 €, Solo Light 29 €, Solo Pro 59 €), votre prix actuel est verrouillé à vie. Aucune migration forcée. Si vous souhaitez basculer sur la grille V5 actuelle (Solo 29, Pro 79, Cabinet 199, Cabinet+ 499), nous calculons les économies estimées avant tout changement.',
   },
 ]
 

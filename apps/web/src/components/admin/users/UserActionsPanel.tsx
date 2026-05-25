@@ -474,11 +474,11 @@ export function UserActionsPanel({ user }: UserActionsPanelProps) {
             </DialogDescription>
           </DialogHeader>
           <Select value={newPlan} onChange={(e) => setNewPlan(e.target.value)}>
-            <option value="decouverte">Découverte (29€/mo)</option>
-            <option value="standard">Standard (59€/mo)</option>
-            <option value="volume">Volume (99€/mo)</option>
+            <option value="decouverte">Solo (29€/mo)</option>
+            <option value="standard">Pro (79€/mo)</option>
+            <option value="volume">Cabinet (199€/mo)</option>
             <option value="founder">Founder (49€/mo à vie)</option>
-            <option value="cabinet">Cabinet Phase 2 (199€/mo)</option>
+            <option value="cabinet">Cabinet+ (499€/mo)</option>
           </Select>
           {error ? (
             <p className="text-[12px] text-danger" role="alert">

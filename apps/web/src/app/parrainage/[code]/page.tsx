@@ -103,7 +103,7 @@ export default async function ReferralLandingPage({ params }: PageProps) {
             <li className="flex items-start gap-3">
               <Check className="size-4 mt-0.5 shrink-0 text-chartreuse-deep" />
               <span>
-                30 jours d'essai libre puis le forfait de votre choix (29 € à 299 € HT/mois).
+                30 jours d'essai libre puis le forfait de votre choix (29 € à 499 € HT/mois).
               </span>
             </li>
             <li className="flex items-start gap-3">

@@ -18,23 +18,23 @@ const inDays = (n: number): string => new Date(Date.now() + n * 86400_000).toISO
 export const Standard: Story = {
   args: {
     trialEndsAt: inDays(12),
-    monthlyPriceCents: 5900,
-    tierLabel: 'Standard',
+    monthlyPriceCents: 7900,
+    tierLabel: 'Pro',
   },
 }
 
 export const SoonExpiring: Story = {
   args: {
     trialEndsAt: inDays(2),
-    monthlyPriceCents: 5900,
-    tierLabel: 'Standard',
+    monthlyPriceCents: 7900,
+    tierLabel: 'Pro',
   },
 }
 
 export const Volume: Story = {
   args: {
     trialEndsAt: inDays(8),
-    monthlyPriceCents: 9900,
-    tierLabel: 'Volume',
+    monthlyPriceCents: 19900,
+    tierLabel: 'Cabinet',
   },
 }

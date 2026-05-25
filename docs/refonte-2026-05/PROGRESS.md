@@ -10,7 +10,9 @@
 - **Base** : `main` (Phase 0 le 2026-05-25)
 - **Stratégie** : repositionnement KOVAS 360 → acqui-target Enersweet (Liciel) 5-10 M€ sur 24 mois
 - **Typecheck** : 0 erreur en permanence sur la branche
-- **Build production `next build`** : ✅ vert (B39 — 2781 pages SSG, 0 erreur, fix Suspense TarifsTabs)
+- **Build production `next build`** : ✅ vert (B39 + B43 — 2781 pages SSG, 0 erreur, pricing V5 appliqué)
+- **Pricing V5 (mockup 2026-05-25)** : Logiciel 29/79/199/499€ + Annuaire 19/39/79€ + Bundles 39/89/99/229/529€ — sweep transversal 21 fichiers (Lot B43)
+- **AI Economics doc** : `docs/refonte-2026-05/AI_ECONOMICS.md` — 15 techniques d'optimisation tokens, 9/15 ✅ déjà en prod
 - **Tests Vitest** : **201 tests pure-fn + rate-limit + helpers fiche publique + adaptateur IO mocké**
 - **Tests E2E Playwright** : **24 tests** (API publique + redirects 301 + admin gate + tarifs onglets + homepage)
 

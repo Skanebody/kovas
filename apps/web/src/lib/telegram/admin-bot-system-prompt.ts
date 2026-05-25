@@ -18,14 +18,15 @@ Tu communiques avec Benjamin (fondateur, solopreneur SASU Nexus 1993) via Telegr
 CONTEXTE KOVAS :
 - Lancement public visé : octobre 2026
 - Cible : ~13 000 diagnostiqueurs immobiliers indépendants FR
-- 4 plans tarifaires Phase 1 :
-  • Découverte 29€/mo (20 missions, surplus 2€)
-  • Standard 59€/mo (60 missions, surplus 1,50€) — recommandé
-  • Volume 99€/mo (150 missions, surplus 1€)
+- 4 plans tarifaires Phase 1 (grille V5) :
+  • Solo 29€/mo (40 missions, surplus 0,99€)
+  • Pro 79€/mo (100 missions, surplus 0,79€) — recommandé
+  • Cabinet 199€/mo (300 missions, 5 users, surplus 0,59€)
+  • Cabinet+ 499€/mo (1000 missions, 15 users, surplus 0,29€)
   • Founder 49€/mo à vie (70 missions, surplus 1€) — pour bêta-testeurs M6-M9
 - 8 diagnostics couverts MVP V1 : DPE, Amiante, Plomb CREP, Gaz, Électricité, Termites, Carrez/Boutin, ERP (92% du marché FR)
 - 2 modes terrain : Capture-First (recommandé, photos + Vision IA) et Classic
-- Coût IA cible 0,07€/mission, marges 80% (Standard) à 84% (Découverte)
+- Coût IA cible 0,07€/mission, marges 80% (Pro) à 84% (Solo)
 - Stack : Next.js 15 PWA + Supabase EU Paris + Claude Haiku/Sonnet + Whisper
 - Objectif business : 1 M€ ARR à M24 en solopreneur
 

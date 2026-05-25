@@ -100,54 +100,78 @@
 
 ---
 
-## 4. Pricing intelligent — 4 tiers simplifiés
+## 4. Pricing intelligent V5 — 4 tiers Logiciel + 3 tiers Annuaire + 5 Bundles
+
+> **Refonte 2026-05-25 (Lot B43)** : grille recalibrée selon mockup canonique. Les anciens prix V4 (29/59/149/299€) sont préservés à vie pour les abonnés existants via `LEGACY_PLANS` (codes `*_legacy`). Source de vérité : [`apps/web/src/lib/pricing-plans.ts`](apps/web/src/lib/pricing-plans.ts).
 
 ### Architecture
 
-**4 tiers** avec quotas missions inclus + surplus à l'usage. **AUCUN add-on activable**. Toutes les fonctionnalités sont incluses dans tous les tiers.
+**4 tiers Logiciel + Enterprise** avec quotas missions + surplus à l'usage. **3 tiers Annuaire** modèle Doctolib. **5 Bundles** cross-sell logiciel + annuaire.
 
-### Phase 1 — Compagnon (M1-M9)
+### Track Logiciel (29 / 79 / 199 / 499 €)
 
-| Tier | Prix HT/mo | Missions incluses | Surplus | Users | Stockage |
+| Tier | Prix HT/mo | Missions | Surplus | Users | Pour qui |
 |---|---|---|---|---|---|
-| **Découverte** | **29€** | 20 | 2€/mission | 1 | 20 Go |
-| **Standard (recommandé)** | **59€** | 60 | 1,50€/mission | 1 | 50 Go |
-| **Volume** | **99€** | 150 | 1€/mission | 1 | 100 Go |
+| **Solo** | **29€** | 40 | 0,99€ | 1 | Démarrage ou ~10 missions/semaine |
+| **Pro (recommandé)** | **79€** | 100 | 0,79€ | 1 + 1 invité | Temps plein, 15-25 missions/semaine |
+| **Cabinet** | **199€** | 300 | 0,59€ | 5 | Équipe 2-5 personnes |
+| **Cabinet+** | **499€** | 1000 | 0,29€ | 15 | 6-15 personnes, multi-site |
+| **Enterprise** | sur devis | illimité | négocié | illimité | Réseau, franchise, > 15 users |
 
-### Phase 2 — Complet (M10-M18, après cert ADEME)
+### Track Annuaire (19 / 39 / 79 €)
 
-| Tier | Prix HT/mo | Missions | Surplus | Users |
-|---|---|---|---|---|
-| Standard Complet | **99€** | 60 | 1,50€ | 1 |
-| Volume Complet | **149€** | 150 | 1€ | 1 |
-| **Cabinet** | **199€** | 400 | 0,80€ | jusqu'à 3 |
+| Tier | Prix HT/mo | Visibilité | Pour qui |
+|---|---|---|---|
+| **Présence** | **19€** | Département | Visibilité de base + leads à l'usage |
+| **Boost (recommandé)** | **39€** | Top 5 département + badge Vérifié | Passer devant la concurrence |
+| **Premium** | **79€** | Top 3 région + badge doré + 3 communes | Capturer tout le marché régional |
 
-### Phase 3 — Augmenté (M19+)
+### Bundles (Logiciel + Annuaire combinés)
 
-| Tier | Prix HT/mo |
+| Bundle | Prix HT/mo | Composition | Économie |
+|---|---|---|---|
+| **Démarrage** | **39€** | Solo + Présence | −9€ |
+| **Croissance (best value)** | **99€** | Pro + Boost | −19€ |
+| **Acquisition** | **89€** | Solo + Premium | −19€ |
+| **Cabinet** | **229€** | Cabinet + Premium | −49€ |
+| **Cabinet+** | **529€** | Cabinet+ + Premium + 5 communes mises en avant | −99€ |
+
+### Add-ons (combinables avec n'importe quel plan)
+
+| Add-on | Tarif |
 |---|---|
-| Standard Augmenté | 149€ |
-| Volume Augmenté | 199€ |
-| Cabinet Augmenté | 299€ |
-| **Enterprise** (4-10 users) | 499€ |
+| Utilisateur supplémentaire | **19€/mo/user** |
+| Vérification renforcée | **39€/mo** |
+| Au-delà du quota | **0,29€ → 0,99€/mission** selon tier |
 
-### Tarif Founder à vie (40-50 bêta-testeurs M6-M9)
+### Fidélité progressive (cumulable)
 
-- **M6-M7** : accès gratuit total (1 mois, validation fonctionnelle)
-- **M7-M9** : tier Découverte à 29€/mo (validation économique willingness-to-pay)
-- **M9+** : **Standard Founder à vie = 49€/mo** (vs 59€ public) avec **70 missions inclus** (vs 60) et **surplus 1€/mission** (vs 1,50€)
-- **Cabinet Phase 2 Founder** : **169€/mo à vie** (vs 199€ public, rabais ~15%)
+| Trigger | Remise |
+|---|---|
+| Paiement annuel | **−15%** |
+| Après 12 mois (M13+) | **−5% additionnel** |
+| Après 24 mois (M25+) | **−10% additionnel** · plafond −30% total |
+| Partenaire fondateur (10 places S1 2026) | **2000€ / 3 ans Cabinet** + influence roadmap |
+
+### Phase 2-3 (M10+) — pricing inchangé, features ajoutées
+
+Le pricing V5 reste stable. La Phase 2 (post-cert ADEME M10) débloque le calcul DPE certifié + recos post-DPE F/G + audit énergétique avec mention pour les Cabinet/Cabinet+ sans changement de tarif. La Phase 3 (M19+) ajoute l'assistant IA conversationnel + productivité avancée toujours sans hausse.
+
+### Tarif Founder à vie (10 partenaires fondateurs S1 2026)
+
+- **S1 2026 (10 places)** : **2000€ / 3 ans** sur le tier Cabinet + échange direct fondateur + influence sur la roadmap
+- Le tarif Founder Standard 49€/mo est conservé en `founder_legacy` pour les premiers bêta-testeurs déjà engagés
 - Badge Founder + accès anticipé Phase 2 + influence roadmap
 
-### Options ponctuelles (paiement à l'usage, AUCUN pack mensuel)
+### Options ponctuelles (paiement à l'usage, en plus des add-ons)
 
 | Action | Tarif unitaire |
 |---|---|
-| Signature eIDAS Yousign (tiers Découverte/Standard/Volume) | **2€/signature** |
+| Signature eIDAS Yousign (tiers Solo/Pro) | **2€/signature** |
 | Rapport bilingue FR/EN | **5€/rapport** |
 | SMS rappel client J-1 | **0,15€/SMS** |
 
-### Annuel : 2 mois offerts (10 mois payés sur 12) sur tous les tiers.
+### Engagement annuel : −15% sur tous les tiers (vs −16,67% précédent en 2 mois offerts). Aligné mockup canonique V5.
 
 ---
 

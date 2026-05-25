@@ -408,9 +408,9 @@ function SectionPricingTeaser(): React.ReactElement {
     {
       icon: <Building2 className="size-5" aria-hidden />,
       title: 'Logiciel',
-      price: '29 – 299 €',
+      price: '29 – 499 €',
       sub: '/ mois HT',
-      body: '4 tiers selon volume mensuel : Solo Light (60 missions), Solo Pro (150), Cabinet (400), Cabinet+ illimité.',
+      body: '4 tiers selon ton volume : Solo (40 missions), Pro (100), Cabinet (300, 5 users), Cabinet+ (1000, 15 users).',
       cta: 'Voir le Logiciel',
       href: '/tarifs',
     },
@@ -426,9 +426,9 @@ function SectionPricingTeaser(): React.ReactElement {
     {
       icon: <Sparkles className="size-5" aria-hidden />,
       title: 'Bundles',
-      price: '39 – 319 €',
+      price: '39 – 529 €',
       sub: '/ mois HT',
-      body: "5 bundles canoniques Logiciel + Annuaire avec remise jusqu'à 24 %. Un seul abonnement, deux produits.",
+      body: "5 bundles Logiciel + Annuaire combinés avec jusqu'à 99 € d'économie. Un seul abonnement, deux produits.",
       cta: 'Voir les Bundles',
       href: '/tarifs?tab=bundles',
     },

@@ -102,8 +102,10 @@ export const STRIPE_ANNUAIRE_PRICES: Record<
 // Logiciel KOVAS — 4 tiers payants (logiciel_free exclu)
 // ─────────────────────────────────────────────
 
-// Tiers payants Logiciel V4 (Solo Light 29 / Solo Pro 59 / Cabinet 149 / Cabinet+ 299€).
-// Les alias V3 (logiciel_*) partagent les mêmes Stripe Price IDs.
+// Tiers payants Logiciel V5 (Solo 29 / Pro 79 / Cabinet 199 / Cabinet+ 499€).
+// Les alias V3/V4 (logiciel_*, solo_light, solo_pro) partagent les mêmes Stripe
+// Price IDs — seul le mapping logique change, les Price IDs runtime restent
+// identifiés par leur ID Stripe legacy (price_legacy_*).
 const soloLightPrices: StripePriceIds = {
   monthly:
     process.env.STRIPE_PRICE_LOGICIEL_SOLO_LIGHT_MONTHLY ??
@@ -159,8 +161,9 @@ export const STRIPE_LOGICIEL_PRICES: Record<
 // Bundles — 5 combos Annuaire + Logiciel
 // ─────────────────────────────────────────────
 
-// Bundles V4 (Solo Starter 39 / Solo Performance 65 / Solo Régional 79 /
-// Cabinet 360 159 / Cabinet National 319€). Les alias V3 partagent les Price IDs.
+// Bundles V5 (Solo Starter 39 / Croissance 99 / Acquisition 89 /
+// Cabinet 229 / Cabinet+ 529€). Les alias V3/V4 partagent les Price IDs
+// (price_legacy_* identifiés côté Stripe — seul le label public change).
 const bundleSoloStarterPrices: StripePriceIds = {
   monthly:
     process.env.STRIPE_PRICE_BUNDLE_SOLO_STARTER_MONTHLY ??

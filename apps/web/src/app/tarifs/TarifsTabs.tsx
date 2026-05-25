@@ -1,10 +1,10 @@
 'use client'
 
 /**
- * Client wrapper pour les 3 onglets canoniques de /tarifs:
- *   - Logiciel  (KOVAS SaaS terrain — 29/59/149/299 €/mo)
+ * Client wrapper pour les 3 onglets canoniques de /tarifs (V5 — mockup 2026-05-25):
+ *   - Logiciel  (KOVAS SaaS terrain — 29/79/199/499 €/mo)
  *   - Annuaire  (KOVAS Annuaire — 19/39/79 €/mo, second pilier revenu)
- *   - Bundles   (Logiciel + Annuaire combinés avec remise)
+ *   - Bundles   (Logiciel + Annuaire combinés — 39/89/99/229/529 €/mo)
  *
  * URL deep-link via query param ?tab=annuaire / ?tab=bundles (par défaut
  * "logiciel"). Préserve l'état au refresh + permet de partager un lien direct.
@@ -12,9 +12,6 @@
  * Modèle Doctolib : l'annuaire est un produit à part entière, pas un add-on.
  * Cette présentation 3 onglets signale au visiteur qu'il peut souscrire à
  * l'annuaire SEUL sans le logiciel.
- *
- * Authority : prompt orchestration refonte (Update 6 — architecture
- * économique annuaire second pilier de revenu).
  */
 
 import { cn } from '@/lib/utils'
@@ -33,7 +30,7 @@ const TABS: ReadonlyArray<{
   {
     key: 'logiciel',
     label: 'Logiciel',
-    pricing: '29 – 299 €/mois',
+    pricing: '29 – 499 €/mois',
     helper: 'Outil terrain compagnon de Liciel · OBBC · AnalysImmo · ORIS',
   },
   {
@@ -45,8 +42,8 @@ const TABS: ReadonlyArray<{
   {
     key: 'bundles',
     label: 'Bundles',
-    pricing: '39 – 319 €/mois',
-    helper: "Logiciel + Annuaire combinés, jusqu'à 24 % de remise",
+    pricing: '39 – 529 €/mois',
+    helper: "Logiciel + Annuaire combinés, jusqu'à 99 € d'économie",
   },
 ]
 

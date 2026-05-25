@@ -86,7 +86,7 @@ export function FaqComparatif() {
               <td className="py-2 pr-4 font-medium">Conformité ADEME</td>
               {LOGICIEL_OFFERS.map((offer) => (
                 <td key={offer.code} className="py-2 px-3">
-                  {offer.priceMonthlyCents !== null && offer.priceMonthlyCents >= 5900 ? (
+                  {offer.priceMonthlyCents !== null && offer.priceMonthlyCents >= 7900 ? (
                     <Check className="size-3.5 text-accent-green" />
                   ) : (
                     <Minus className="size-3.5 text-ink-ghost" />
