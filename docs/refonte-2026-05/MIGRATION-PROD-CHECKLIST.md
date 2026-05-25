@@ -318,6 +318,39 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY analytics.transactions_history_by_commune
 -- Attendu : ne renvoie rien, pas d'erreur. À J+0 les tables sources sont vides → matviews vides.
 ```
 
+### 3.8 Migration 8 — `route_lead_postgis` (perf Lot B55)
+
+```sql
+-- A. L'index GIST expression partiel est créé
+SELECT indexname, indexdef FROM pg_indexes
+WHERE tablename = 'diagnosticians' AND indexname = 'idx_diagnosticians_geog_active';
+-- Attendu : 1 ligne, indexdef contient "USING gist" + "st_makepoint" + "WHERE"
+
+-- B. La RPC route_lead_rank_candidates est toujours callable avec la même signature
+SELECT * FROM public.route_lead_rank_candidates(48.8566::float8, 2.3522::float8, 30, 5, false);
+-- Attendu : 0..5 lignes (selon données diagnosticians prod), sans erreur
+
+-- C. EXPLAIN ANALYZE pour vérifier que l'index GIST est utilisé sur une requête type
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT id FROM public.diagnosticians
+WHERE is_active = true
+  AND geo_lat IS NOT NULL
+  AND geo_lng IS NOT NULL
+  AND ST_DWithin(
+    ST_MakePoint(geo_lng, geo_lat)::geography,
+    ST_MakePoint(2.3522, 48.8566)::geography,
+    45000
+  );
+-- Attendu : "Bitmap Index Scan on idx_diagnosticians_geog_active" dans le plan
+-- (peut tomber en seq scan si volumétrie diagnosticians prod < ~500 lignes — auquel cas l'index sera utile en croissance)
+
+-- D. Permissions service_role uniquement (pas anon)
+SELECT grantee, privilege_type FROM information_schema.role_routine_grants
+WHERE routine_name = 'route_lead_rank_candidates'
+ORDER BY grantee;
+-- Attendu : 1 ligne (service_role, EXECUTE). PAS de anon ni authenticated.
+```
+
 ---
 
 ## 4. Vault secrets à configurer en prod (T+10 min)
@@ -460,9 +493,19 @@ Ouvre Sentry et vérifie **aucune nouvelle erreur 5xx** dans les 5 minutes suiva
 
 ### 7.2 Rollback ciblé par migration (DROP manuel)
 
-Exécute dans Supabase Studio > SQL Editor **dans l'ordre inverse** (6 → 1) selon ce qui a réussi :
+Exécute dans Supabase Studio > SQL Editor **dans l'ordre inverse** (8 → 1) selon ce qui a réussi :
 
 ```sql
+-- Rollback migration 8 (route_lead_postgis — Lot B55)
+-- Note : la signature de route_lead_rank_candidates reste identique. Pour
+-- restaurer l'ancienne version Haversine, réappliquer migration 3 (lead_scoring_a135).
+DROP INDEX IF EXISTS public.idx_diagnosticians_geog_active;
+-- La fn route_lead_rank_candidates est conservée (signature et appelants identiques).
+-- Si rollback complet souhaité : re-exécuter le CREATE OR REPLACE FUNCTION de la migration 3.
+
+-- Rollback migration 7 (matview_first_refresh — Lot B54)
+-- Rien à faire : c'est un REFRESH MATERIALIZED VIEW runtime, pas de DDL persistant.
+
 -- Rollback migration 6 (diagnostician_response_metrics)
 DROP FUNCTION IF EXISTS public.get_diagnostician_response_metrics(uuid);
 DROP INDEX IF EXISTS public.idx_quote_requests_diag_response;
