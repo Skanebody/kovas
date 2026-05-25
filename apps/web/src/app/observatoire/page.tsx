@@ -1,5 +1,6 @@
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { REGIONS } from '@/lib/observatoire/regions-data'
 import {
   getObservatoireStats,
@@ -367,6 +368,28 @@ export default async function ObservatoirePage() {
         <section>
           <div className="max-w-[1200px] mx-auto px-6 py-20 sm:py-28">
             <LeadMagnet editionLabel={stats.lastUpdatedLabel} />
+          </div>
+        </section>
+
+        {/* ============ MÉTHODOLOGIE — glossaire express ============ */}
+        <section className="border-t border-rule/40 bg-paper">
+          <div className="max-w-[1200px] mx-auto px-6 py-14">
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium mb-3">
+              Méthodologie
+            </p>
+            <p className="text-[14px] text-ink/72 max-w-[860px] leading-relaxed">
+              Données agrégées à partir des bases publiques ADEME (
+              <GlossaryTerm term="DPE" /> · <GlossaryTerm term="3CL-2021">3CL-2021</GlossaryTerm>),
+              Géorisques (<GlossaryTerm term="ERP" />
+              ), INSEE et missions diagnostiquées sur KOVAS (anonymisées et accréditées{' '}
+              <GlossaryTerm term="COFRAC" />
+              ). Le calendrier des{' '}
+              <GlossaryTerm term="passoire-thermique">passoires thermiques</GlossaryTerm> applique
+              le décret 2022-510. L&apos;
+              <GlossaryTerm term="audit-energetique">audit énergétique</GlossaryTerm> réglementaire
+              est obligatoire à la vente des classes F, G depuis avril 2023 et E depuis janvier
+              2025.
+            </p>
           </div>
         </section>
       </main>

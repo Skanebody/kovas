@@ -1,6 +1,8 @@
 import { JsonLd } from '@/components/seo/JsonLd'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
+import { GLOSSARY_KEYS } from '@/lib/glossary/diagnostic-terms'
 import { GUIDES_LIST } from '@/lib/guides/registry'
 import type { Guide, GuideCategory } from '@/lib/guides/types'
 import { buildMetadata } from '@/lib/seo/metadata'
@@ -23,8 +25,7 @@ import Link from 'next/link'
 import type { ComponentType } from 'react'
 
 export const metadata: Metadata = buildMetadata({
-  title:
-    'Guides du diagnostic immobilier : 9 guides complets (DPE, amiante, plomb…)',
+  title: 'Guides du diagnostic immobilier : 9 guides complets (DPE, amiante, plomb…)',
   description:
     'Tout savoir sur les 9 diagnostics immobiliers obligatoires en France : DPE, amiante, plomb, gaz, électricité, termites, Carrez, ERP, audit énergétique.',
   path: '/guide',
@@ -99,9 +100,8 @@ export default function GuidesIndexPage() {
             </span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-mute">
-            Tout ce qu’il faut savoir sur les 9 diagnostics immobiliers
-            obligatoires : obligations, méthodes, prix, validité, travaux et
-            aides. Mis à jour avec les règles 2026.
+            Tout ce qu’il faut savoir sur les 9 diagnostics immobiliers obligatoires : obligations,
+            méthodes, prix, validité, travaux et aides. Mis à jour avec les règles 2026.
           </p>
         </div>
       </section>
@@ -126,6 +126,9 @@ interface GuideCardProps {
 function GuideCard({ guide }: GuideCardProps) {
   const Icon = ICON_BY_TYPE[guide.type] ?? FileText
   const category = CATEGORY_LABELS[guide.category]
+  // Match du slug du guide avec une entrée du glossaire (clés normalisées).
+  // On expose un tooltip discret à côté du titre quand un terme existe.
+  const glossaryKey = GLOSSARY_KEYS.includes(guide.type) ? guide.type : null
 
   return (
     <Card
@@ -147,7 +150,11 @@ function GuideCard({ guide }: GuideCardProps) {
         </span>
       </div>
       <h2 className="mt-5 font-display text-xl font-bold leading-tight text-ink">
-        {guide.shortTitle}
+        {glossaryKey ? (
+          <GlossaryTerm term={glossaryKey}>{guide.shortTitle}</GlossaryTerm>
+        ) : (
+          guide.shortTitle
+        )}
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-ink-soft">{guide.teaser}</p>
       <div className="mt-4 flex items-center gap-3 font-mono text-[11px] text-ink-faint">
@@ -162,7 +169,10 @@ function GuideCard({ guide }: GuideCardProps) {
       <Button asChild variant="ghost" className="self-start" size="sm">
         <Link href={`/guide/${guide.slug}`}>
           Lire le guide
-          <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+          <ArrowRight
+            className="size-3.5 transition-transform group-hover:translate-x-0.5"
+            aria-hidden
+          />
         </Link>
       </Button>
     </Card>

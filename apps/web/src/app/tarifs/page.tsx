@@ -23,6 +23,7 @@
  */
 
 import { JsonLd } from '@/components/seo/JsonLd'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { ANNUAIRE_PLANS, BUNDLES, LOGICIEL_PLANS } from '@/lib/pricing-plans'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { buildBreadcrumbList, buildPricingItemListSchema } from '@/lib/seo/schema-org'
@@ -767,6 +768,22 @@ export default function TarifsPage() {
         <AddonsSection />
         <LoyaltySection />
         <FooterPromises />
+
+        {/* Glossaire express — termes techniques cités dans les forfaits */}
+        <section className="border-t border-[#0F1419]/10 py-10">
+          <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#4A525B]">
+            Glossaire express
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-[#0F1419] max-w-[720px]">
+            Les forfaits intègrent <GlossaryTerm term="Factur-X">Factur-X</GlossaryTerm> conforme
+            2027, les calculs <GlossaryTerm term="Carrez" /> / <GlossaryTerm term="Boutin" /> en
+            location, la rédaction d&apos;
+            <GlossaryTerm term="ERP" /> à jour Géorisques, la détection des{' '}
+            <GlossaryTerm term="passoire-thermique">passoires thermiques</GlossaryTerm> F-G et
+            l&apos;alerte si un <GlossaryTerm term="DPE" /> existe déjà sur le bien. Survolez chaque
+            terme souligné pour la définition officielle.
+          </p>
+        </section>
 
         {/* Maillage interne SEO + lien aide/contact */}
         <div className="border-t border-[#0F1419] py-10">

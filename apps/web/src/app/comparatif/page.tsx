@@ -23,6 +23,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { KOVAS_BASE_URL, buildBreadcrumbList } from '@/lib/seo/schema-org'
 import { getFAQPageSchema } from '@/lib/seo/structured-data'
@@ -404,9 +405,10 @@ export default function ComparatifPage() {
                 C&apos;est leur couche terrain commune.
               </h1>
               <p className="mx-auto max-w-2xl text-base text-ink-mute leading-relaxed sm:text-lg">
-                Vous gardez votre logiciel certifié pour le calcul DPE 3CL-2021 et la soumission
-                ADEME. KOVAS vous fait gagner 1h30 par mission avant d&apos;arriver dans votre
-                éditeur. Aucune migration. Aucun risque réglementaire.
+                Vous gardez votre logiciel certifié pour le calcul <GlossaryTerm term="DPE" />{' '}
+                <GlossaryTerm term="3CL-2021">3CL-2021</GlossaryTerm> et la soumission ADEME. KOVAS
+                vous fait gagner 1h30 par mission avant d&apos;arriver dans votre éditeur. Aucune
+                migration. Aucun risque réglementaire.
               </p>
             </div>
 

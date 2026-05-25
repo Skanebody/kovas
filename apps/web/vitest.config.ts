@@ -24,6 +24,12 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // JSX runtime "automatic" : permet d'écrire des tests `.test.tsx` sans
+  // importer React explicitement, aligné sur la pratique Next.js 15 + React 19.
+  // Aucun impact sur la build prod (gérée par Next/SWC).
+  esbuild: {
+    jsx: 'automatic',
+  },
   test: {
     globals: true,
     environment: 'jsdom',

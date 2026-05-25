@@ -3,6 +3,7 @@ import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { buildBreadcrumbList } from '@/lib/seo/schema-org'
 import { getFAQPageSchema } from '@/lib/seo/structured-data'
@@ -331,6 +332,52 @@ export default function AidePage() {
                 </dl>
               </Card>
             </div>
+          </div>
+        </section>
+
+        {/* Glossaire express — termes techniques avec définition au survol/clic */}
+        <section className="border-t border-rule/40 bg-paper py-12 md:py-16">
+          <div className="mx-auto max-w-screen-xl px-4 md:px-6">
+            <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-wider text-ink-mute">
+              Glossaire express
+            </p>
+            <h2 className="font-display text-2xl font-bold leading-tight text-ink md:text-3xl">
+              Comprendre le jargon en un coup d&apos;œil
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-mute">
+              Survolez ou touchez chaque terme souligné pour afficher la définition courte et la
+              source officielle (Légifrance, ADEME, INSEE).
+            </p>
+            <ul className="mt-8 grid grid-cols-1 gap-x-8 gap-y-3 text-sm leading-relaxed text-ink-soft sm:grid-cols-2 lg:grid-cols-3">
+              <li>
+                Le <GlossaryTerm term="DPE" /> est obligatoire à la vente et la location.
+              </li>
+              <li>
+                Diagnostiqueurs accrédités <GlossaryTerm term="COFRAC" /> uniquement.
+              </li>
+              <li>
+                Habilitation <GlossaryTerm term="RGE">RGE</GlossaryTerm> pour les artisans
+                rénovation.
+              </li>
+              <li>
+                Méthode officielle <GlossaryTerm term="3CL-2021">3CL-2021</GlossaryTerm>.
+              </li>
+              <li>
+                Calcul <GlossaryTerm term="Carrez" /> en copropriété.
+              </li>
+              <li>
+                Surface habitable <GlossaryTerm term="Boutin" /> en location vide.
+              </li>
+              <li>
+                <GlossaryTerm term="ERP" /> remis avant la vente.
+              </li>
+              <li>
+                <GlossaryTerm term="CREP" /> obligatoire pré-1949.
+              </li>
+              <li>
+                <GlossaryTerm term="audit-energetique">Audit énergétique</GlossaryTerm> vente F/G.
+              </li>
+            </ul>
           </div>
         </section>
 

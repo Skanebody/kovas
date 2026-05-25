@@ -19,6 +19,7 @@ import { ArrowLeft, CheckCircle2, MapPin, ShieldAlert, XCircle } from 'lucide-re
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { DPE_CLASS_STYLES, classToColor } from '@/lib/dpe-calculator/energy-class-mapper'
 import type { EstimationResult } from '@/lib/dpe-calculator/estimation-engine'
 import type { CalculatorAnswers } from '@/lib/dpe-calculator/question-tree'
@@ -37,7 +38,7 @@ function slugify(input: string): string {
   return input
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/\p{Diacritic}/gu, '') // strip combining marks (accents)
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 }
@@ -97,9 +98,10 @@ export function ResultCard({
       >
         <ShieldAlert className={cn('size-5 shrink-0', styles.text)} aria-hidden />
         <p className="text-[13px] leading-relaxed text-ink">
-          <strong>Cette estimation est indicative et non opposable.</strong> Seul un DPE officiel
-          établi par un diagnostiqueur certifié a une valeur réglementaire pour une vente, une
-          location ou une déclaration d'audit énergétique.
+          <strong>Cette estimation est indicative et non opposable.</strong> Seul un{' '}
+          <GlossaryTerm term="DPE" /> officiel établi par un diagnostiqueur certifié a une valeur
+          réglementaire pour une vente, une location ou une déclaration d&apos;
+          <GlossaryTerm term="audit-energetique">audit énergétique</GlossaryTerm>.
         </p>
       </div>
 
