@@ -8,9 +8,17 @@ import {
   PRESS_RELEASES,
   SECTOR_MEDIA,
 } from '@/lib/institutional/press-mentions'
+import {
+  type DynamicPressRelease,
+  getPressMentionsStats,
+  listPublicPressReleases,
+} from '@/lib/press/releases'
 import { KOVAS_SITE_URL, buildMetadata } from '@/lib/seo/metadata'
 import { ArrowDownToLine, ArrowUpRight, Mail, Phone } from 'lucide-react'
 import Script from 'next/script'
+
+// Revalidate hourly — dynamic press releases are admin-published, not real-time.
+export const revalidate = 3600
 
 export const metadata = buildMetadata({
   title: 'Espace presse',
@@ -19,21 +27,36 @@ export const metadata = buildMetadata({
   path: '/presse',
 })
 
-function buildPressJsonLd() {
+function buildPressJsonLd(dynamicReleases: DynamicPressRelease[]) {
+  const fromHardcoded = PRESS_RELEASES.filter((p) => p.status === 'published').map((release) => ({
+    '@type': 'NewsArticle' as const,
+    headline: release.title,
+    datePublished: release.date,
+    description: release.excerpt,
+    url: `${KOVAS_SITE_URL}/presse#${release.id}`,
+    publisher: {
+      '@type': 'Organization' as const,
+      name: 'KOVAS',
+      url: KOVAS_SITE_URL,
+    },
+  }))
+
+  const fromDynamic = dynamicReleases.map((release) => ({
+    '@type': 'NewsArticle' as const,
+    headline: release.title,
+    datePublished: release.sentAt ?? new Date().toISOString(),
+    description: release.subtitle ?? release.title,
+    url: `${KOVAS_SITE_URL}/presse#${release.slug}`,
+    publisher: {
+      '@type': 'Organization' as const,
+      name: 'KOVAS',
+      url: KOVAS_SITE_URL,
+    },
+  }))
+
   return {
     '@context': 'https://schema.org',
-    '@graph': PRESS_RELEASES.filter((p) => p.status === 'published').map((release) => ({
-      '@type': 'NewsArticle',
-      headline: release.title,
-      datePublished: release.date,
-      description: release.excerpt,
-      url: `${KOVAS_SITE_URL}/presse#${release.id}`,
-      publisher: {
-        '@type': 'Organization',
-        name: 'KOVAS',
-        url: KOVAS_SITE_URL,
-      },
-    })),
+    '@graph': [...fromDynamic, ...fromHardcoded],
   }
 }
 
@@ -45,9 +68,15 @@ function formatDateFr(isoDate: string): string {
   })
 }
 
-export default function PressePage() {
-  const jsonLd = buildPressJsonLd()
+export default async function PressePage() {
+  const [dynamicReleases, mentionsStats] = await Promise.all([
+    listPublicPressReleases(12),
+    getPressMentionsStats(),
+  ])
+  const jsonLd = buildPressJsonLd(dynamicReleases)
   const hasJsonLd = (jsonLd['@graph'] as unknown[]).length > 0
+  const hasDynamicReleases = dynamicReleases.length > 0
+  const hasMentionsCounter = mentionsStats.totalMentions > 0 || mentionsStats.totalReleasesSent > 0
 
   return (
     <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
@@ -82,15 +111,140 @@ export default function PressePage() {
           </div>
         </section>
 
-        {/* COMMUNIQUÉS */}
+        {/* COMPTEUR MENTIONS (affiché uniquement si data disponible) */}
+        {hasMentionsCounter ? (
+          <section className="px-5 sm:px-12 py-12 sm:py-16 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]">
+            <div className="max-w-[1240px] mx-auto grid sm:grid-cols-3 gap-10">
+              <div className="space-y-2">
+                <p
+                  className="font-serif italic font-normal text-[#0F1419] leading-none"
+                  style={{ fontSize: 'clamp(48px, 5vw, 80px)' }}
+                >
+                  {mentionsStats.totalMentions}
+                </p>
+                <p className="text-sm font-medium text-[#0F1419]/80 leading-snug">
+                  Mentions presse vérifiées
+                </p>
+                <p className="text-[11px] text-[#0F1419]/55 italic">
+                  Citations dans la presse spécialisée et généraliste depuis le lancement.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p
+                  className="font-serif italic font-normal text-[#0F1419] leading-none"
+                  style={{ fontSize: 'clamp(48px, 5vw, 80px)' }}
+                >
+                  {mentionsStats.uniqueOutlets}
+                </p>
+                <p className="text-sm font-medium text-[#0F1419]/80 leading-snug">
+                  Médias distincts
+                </p>
+                <p className="text-[11px] text-[#0F1419]/55 italic">
+                  Titres et supports ayant publié au moins une référence à KOVAS.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p
+                  className="font-serif italic font-normal text-[#0F1419] leading-none"
+                  style={{ fontSize: 'clamp(48px, 5vw, 80px)' }}
+                >
+                  {mentionsStats.totalReleasesSent}
+                </p>
+                <p className="text-sm font-medium text-[#0F1419]/80 leading-snug">
+                  Communiqués publiés
+                </p>
+                <p className="text-[11px] text-[#0F1419]/55 italic">
+                  Rythme cible : un communiqué mensuel adossé à l&apos;Observatoire KOVAS.
+                </p>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {/* COMMUNIQUÉS DYNAMIQUES (Game Changer 5 — alimentés par Edge Function send-monthly-press-release) */}
+        {hasDynamicReleases ? (
+          <section className="px-5 sm:px-12 py-16 sm:py-20 border-t border-[#0F1419]/[0.08]">
+            <div className="max-w-[1240px] mx-auto space-y-10">
+              <div className="space-y-3 max-w-2xl">
+                <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+                  Communiqués mensuels
+                </p>
+                <h2 className="font-sans font-medium tracking-tight text-3xl sm:text-4xl text-[#0F1419] leading-tight">
+                  L&apos;Observatoire KOVAS, mois après mois.
+                </h2>
+                <p className="text-[#0F1419]/72 leading-relaxed">
+                  Chaque mois, un communiqué de presse accompagne la publication de
+                  l&apos;Observatoire. Données ADEME, DVF et INSEE consolidées et mises en
+                  perspective.
+                </p>
+              </div>
+              <div className="grid gap-5">
+                {dynamicReleases.map((release) => (
+                  <Card
+                    key={release.id}
+                    id={release.slug}
+                    variant="opaque"
+                    padding="default"
+                    className="space-y-3"
+                  >
+                    <div className="flex flex-wrap items-baseline justify-between gap-3">
+                      <p className="text-xs font-mono uppercase tracking-wider text-[#0F1419]/55">
+                        {release.sentAt ? formatDateFr(release.sentAt) : release.dateline}
+                      </p>
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-[#0F1419]/55 border border-[#0F1419]/[0.12] rounded-pill px-3 py-1">
+                        {release.category === 'observatoire' ? 'Observatoire' : release.category}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-[#0F1419] leading-snug">
+                      {release.title}
+                    </h3>
+                    {release.subtitle ? (
+                      <p className="text-sm text-[#0F1419]/72 leading-relaxed">
+                        {release.subtitle}
+                      </p>
+                    ) : null}
+                    {release.keyFigures.length > 0 ? (
+                      <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                        {release.keyFigures.slice(0, 3).map((figure, idx) => (
+                          <li
+                            // biome-ignore lint/suspicious/noArrayIndexKey: figures déjà ordonnés stables
+                            key={idx}
+                            className="rounded-lg border border-[#0F1419]/[0.08] bg-paper px-3 py-2"
+                          >
+                            <p className="font-mono text-[10px] uppercase tracking-wide text-[#0F1419]/55">
+                              {figure.label}
+                            </p>
+                            <p className="text-base font-semibold text-[#0F1419]">{figure.value}</p>
+                            <p className="text-[10px] text-[#0F1419]/55 italic">{figure.source}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {release.pdfUrl ? (
+                      <div>
+                        <Button asChild variant="ghost" size="sm">
+                          <a href={release.pdfUrl} target="_blank" rel="noreferrer noopener">
+                            Télécharger le PDF <ArrowDownToLine className="size-4" />
+                          </a>
+                        </Button>
+                      </div>
+                    ) : null}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {/* COMMUNIQUÉS HISTORIQUES (placeholders + jalons éditoriaux) */}
         <section className="px-5 sm:px-12 py-16 sm:py-20 border-t border-[#0F1419]/[0.08]">
           <div className="max-w-[1240px] mx-auto space-y-10">
             <div className="space-y-3 max-w-2xl">
               <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
-                Communiqués
+                Annonces officielles
               </p>
               <h2 className="font-sans font-medium tracking-tight text-3xl sm:text-4xl text-[#0F1419] leading-tight">
-                Annonces officielles.
+                Jalons et annonces produit.
               </h2>
             </div>
             <div className="grid gap-5">
