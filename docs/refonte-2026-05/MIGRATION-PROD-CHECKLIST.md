@@ -22,6 +22,7 @@
 | 7 | `20260526100000_matview_first_refresh.sql` | **Fix B54 — matview 1st refresh** (REFRESH sans CONCURRENTLY pour amorcer les 2 matviews `analytics.*`) | Nul (DO block avec EXCEPTION WHEN OTHERS) | Sans objet (purement runtime, pas de DDL) |
 | 8 | `20260526110000_route_lead_postgis.sql` | **Perf B55 — Haversine → PostGIS** (1 index GIST expression partiel + CREATE OR REPLACE de `route_lead_rank_candidates` avec `ST_DWithin(geography)` à la place de la formule Haversine maison) | Très faible (CREATE OR REPLACE FUNCTION, signature identique) | Oui (DROP INDEX + restaurer la version Haversine via migration 3) |
 | 9 | `20260526190000_user_mission_patterns.sql` | **Lot B61 — pattern learning runtime** (1 table `data.user_mission_patterns` + 1 index + RLS SELECT scoped au claimer) | Faible (IF NOT EXISTS, RLS strict, aucun trigger) | Oui (DROP TABLE CASCADE) |
+| 10 | `20260526200000_guides_refresh_queue.sql` | **Lot B65 — pipeline auto-update guides** (2 tables `internal.guide_refresh_queue` + `internal.guide_versions` + 2 RPCs SECURITY DEFINER + RLS service_role only) | Faible (IF NOT EXISTS, CHECK contraints idempotents, RLS strict) | Oui (DROP TABLE CASCADE + DROP FUNCTION) |
 
 **Toutes les migrations sont idempotentes** (`CREATE TABLE IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `CREATE OR REPLACE VIEW`, et pour B54 : `REFRESH MATERIALIZED VIEW` sans `CONCURRENTLY` rejouable + bloc `DO ... EXCEPTION WHEN OTHERS THEN NULL`).
 
@@ -407,6 +408,8 @@ Va dans **Supabase Studio > Project Settings > Edge Functions > Secrets** et ajo
 | `RESEND_FROM` | `KOVAS <contact@kovas.fr>` | idem |
 | `USD_TO_EUR_RATE` | `0.92` | Facturation interne IA (ai-usage-tracker) |
 | `PRESS_ADMIN_NOTIFY_EMAIL` | `contact@kovas.fr` | Notification draft presse Benjamin |
+| `GUIDES_ADMIN_NOTIFY_EMAIL` (Lot B65) | `contact@kovas.fr` | Notification draft auto-update guide Benjamin (`refresh-guides-content`) |
+| `CRON_SECRET` | Secret aléatoire 32+ chars (déjà setté pour ingest-ban-cache) | `refresh-guides-content` accepte aussi `x-cron-secret` (alternative à Bearer SERVICE_ROLE_KEY) |
 
 > **`SUPABASE_SERVICE_ROLE_KEY` et `NEXT_PUBLIC_SUPABASE_URL`** sont injectés automatiquement par la plateforme — ne pas les ajouter manuellement dans cette section.
 
@@ -430,6 +433,7 @@ supabase functions deploy ingest-ban-cache-daily --linked
 supabase functions deploy ingest-georisques-weekly --linked
 supabase functions deploy ingest-ign-cadastre-weekly --linked
 supabase functions deploy rebuild-user-patterns --linked   # Lot B61
+supabase functions deploy refresh-guides-content --linked  # Lot B65
 
 # Variante : tout d'un coup
 # supabase functions deploy --linked
@@ -448,6 +452,7 @@ supabase functions deploy rebuild-user-patterns --linked   # Lot B61
 | `ingest-georisques-weekly` | `0 4 * * 1` | 5h CET — lundi |
 | `ingest-ign-cadastre-weekly` | `0 5 * * 2` | 6h CET — mardi |
 | `rebuild-user-patterns` (Lot B61) | `0 3 * * 0` | 4h CET — dimanche (rebuild hebdo des knowledge graphs diagnostiqueurs) |
+| `refresh-guides-content` (Lot B65) | `0 4 * * 1` | 5h CET — lundi (auto-update hebdo des 9 guides `/guide/*`, 3 guides / invocation → rotation complète en ~3 semaines, draft → admin valide sur `/admin/guides-refresh`) |
 
 **Création d'un cron** (exemple ADEME daily) via SQL Editor :
 
