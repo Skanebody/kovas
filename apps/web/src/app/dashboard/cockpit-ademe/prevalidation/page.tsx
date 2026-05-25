@@ -8,12 +8,18 @@
 
 import type { Metadata } from 'next'
 
-import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
-import { AppPageHeader } from '@/components/app-page-header'
 import { PrevalidationForm } from '@/components/ademe/PrevalidationForm'
+import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
+
+// Note REFONTE acqui-target : pour brancher le nouveau PrevalidationPanel (GC1)
+// sur une mission existante, importer + utiliser :
+//   import { PrevalidationPanel } from '@/components/cockpit-ademe/PrevalidationPanel'
+//   <PrevalidationPanel missionId={missionId} />
+// Le composant consomme /api/missions/[id]/prevalidation-score (A1.3.3 + A1.3.4).
 
 export const metadata: Metadata = { title: 'Pré-validation DPE' }
 
