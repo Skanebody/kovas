@@ -22,7 +22,7 @@
  */
 
 import { cn } from '@/lib/utils'
-import { ChevronLeft, HelpCircle, IdCard, Inbox, LayoutGrid, Settings } from 'lucide-react'
+import { ChevronLeft, HelpCircle, Inbox, LayoutGrid, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
@@ -326,8 +326,7 @@ function AppSidebarFallback({ access, suggestions, track }: AppSidebarFallbackPr
             label: "Aujourd'hui",
             icon: SYSTEM_ITEMS.parametres.icon,
           },
-          { href: '/dashboard/annuaire/profile', label: 'Profil annuaire', icon: IdCard },
-          { href: '/dashboard/annuaire/leads', label: 'Leads reçus', icon: Inbox },
+          { href: '/dashboard/leads/incoming', label: 'Leads reçus', icon: Inbox },
         ]
       : [{ href: '/dashboard/dashboard', label: "Aujourd'hui", icon: LayoutGrid }]
 

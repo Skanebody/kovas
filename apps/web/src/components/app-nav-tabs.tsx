@@ -38,7 +38,7 @@ const NAV: readonly NavItem[] = [
   { href: '/dashboard/calendar', label: 'Planning', icon: CalendarDays },
   { href: '/dashboard/clients', label: 'Clients', icon: Users },
   { href: '/dashboard/properties', label: 'Biens', icon: Building2 },
-  { href: '/dashboard/gain', label: 'Performance', icon: ChartLine },
+  { href: '/dashboard/analytics', label: 'Performance', icon: ChartLine },
   { href: '/dashboard/account', label: 'Compte', icon: Settings },
 ] as const
 

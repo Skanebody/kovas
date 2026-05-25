@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-05-25T17:50:00.000Z",
+  "agent": "REFONTE Bucket C removal (réalisé en main sans worktree obsolète)",
+  "context": "Phase 1 Lot A — élagage features ne servant aucun des 6 game changers ni 13 algorithmes acqui-target. Cf. docs/refonte-2026-05/REFONTE-ACQUI-TARGET-V2.md",
+  "tables_to_drop": [
+    "ai_coach_conversations",
+    "ai_coach_messages",
+    "regulatory_documents",
+    "regulatory_notifications",
+    "regulatory_embeddings",
+    "community_cases",
+    "community_responses",
+    "community_votes",
+    "gain_tracker_entries",
+    "user_progression_levels",
+    "user_badges",
+    "parrainage_badges",
+    "prescripteurs",
+    "vcard_qr_assets",
+    "branding_custom_settings",
+    "connecteur_indy_sync_state",
+    "connecteur_tiime_sync_state",
+    "ab_experiments",
+    "ab_assignments",
+    "ab_events",
+    "docuseal_signing_sessions",
+    "telegram_user_commands",
+    "franceconnect_pending_links",
+    "signalements"
+  ],
+  "edge_functions_removed": [
+    "regulatory-ai-chat",
+    "regulatory-analyze",
+    "regulatory-batch-analyze",
+    "regulatory-embed-backfill",
+    "regulatory-watcher",
+    "community-anonymize"
+  ],
+  "notes": "Toutes les tables listées sont à DROP via Agent 6 (consolidation admin + DB cleanup). Utiliser DROP TABLE IF EXISTS ... CASCADE pour idempotence. Vérifier au préalable qu'aucune FK ne pointe vers depuis tables conservées (CASCADE absorbe les éventuelles dépendances)."
+}
