@@ -19,6 +19,8 @@ import { useMemo, useState } from 'react'
 
 export type RoutingStrategy = 'subscribed' | 'non_subscribed' | 'onboarding_gift' | 'none'
 
+export type IntentBucket = 'spam' | 'low' | 'mid' | 'high' | 'premium'
+
 export interface LeadQueueRow {
   id: string
   quoteRequestId: string
@@ -32,11 +34,16 @@ export interface LeadQueueRow {
   city: string | null
   certificationType: string | null
   surfaceM2: number | null
+  /** Algo A1.3.5 — score d'intent 0-100, NULL si pas encore scoré */
+  intentScore: number | null
+  /** Bucket dérivé (spam/low/mid/high/premium) */
+  intentBucket: IntentBucket | null
 }
 
 type StrategyFilter = 'all' | RoutingStrategy
 type DateRangeFilter = '7j' | '30j' | 'all'
 type StatusFilter = 'all' | 'open' | 'closed'
+type BucketFilter = 'all' | IntentBucket
 
 interface LeadsQueueTableProps {
   initialRows: readonly LeadQueueRow[]
@@ -48,6 +55,7 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
   const [strategy, setStrategy] = useState<StrategyFilter>('all')
   const [dateRange, setDateRange] = useState<DateRangeFilter>('30j')
   const [status, setStatus] = useState<StatusFilter>('all')
+  const [bucket, setBucket] = useState<BucketFilter>('all')
   const [page, setPage] = useState(0)
 
   const filtered = useMemo(() => {
@@ -63,13 +71,14 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
       if (strategy !== 'all' && r.routingStrategy !== strategy) return false
       if (status === 'open' && r.closedAt !== null) return false
       if (status === 'closed' && r.closedAt === null) return false
+      if (bucket !== 'all' && r.intentBucket !== bucket) return false
       if (cutoffMs > 0) {
         if (!r.createdAt) return false
         if (new Date(r.createdAt).getTime() < cutoffMs) return false
       }
       return true
     })
-  }, [initialRows, strategy, status, dateRange])
+  }, [initialRows, strategy, status, dateRange, bucket])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages - 1)
@@ -85,6 +94,10 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
   }
   function handleStatusChange(next: StatusFilter) {
     setStatus(next)
+    setPage(0)
+  }
+  function handleBucketChange(next: BucketFilter) {
+    setBucket(next)
     setPage(0)
   }
 
@@ -142,6 +155,27 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
             Cloturés
           </FilterPill>
         </FilterGroup>
+
+        <FilterGroup label="Intent">
+          <FilterPill active={bucket === 'all'} onClick={() => handleBucketChange('all')}>
+            Tous
+          </FilterPill>
+          <FilterPill active={bucket === 'premium'} onClick={() => handleBucketChange('premium')}>
+            Premium
+          </FilterPill>
+          <FilterPill active={bucket === 'high'} onClick={() => handleBucketChange('high')}>
+            Haut
+          </FilterPill>
+          <FilterPill active={bucket === 'mid'} onClick={() => handleBucketChange('mid')}>
+            Moyen
+          </FilterPill>
+          <FilterPill active={bucket === 'low'} onClick={() => handleBucketChange('low')}>
+            Bas
+          </FilterPill>
+          <FilterPill active={bucket === 'spam'} onClick={() => handleBucketChange('spam')}>
+            Spam
+          </FilterPill>
+        </FilterGroup>
       </div>
 
       {/* Tableau */}
@@ -166,6 +200,9 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
                   m²
                 </th>
                 <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                  Intent
+                </th>
+                <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
                   Strategie
                 </th>
                 <th className="text-right px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
@@ -182,7 +219,7 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
             <tbody>
               {pagedRows.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-3 py-8 text-center text-ink-mute">
+                  <td colSpan={10} className="px-3 py-8 text-center text-ink-mute">
                     Aucun lead pour ces filtres.
                   </td>
                 </tr>
@@ -204,6 +241,9 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
                     </td>
                     <td className="px-3 py-2 text-right text-ink-mute font-mono text-[11px]">
                       {r.surfaceM2 ?? '—'}
+                    </td>
+                    <td className="px-3 py-2">
+                      <IntentBadge bucket={r.intentBucket} score={r.intentScore} />
                     </td>
                     <td className="px-3 py-2">
                       <StrategyBadge strategy={r.routingStrategy} />
@@ -262,6 +302,33 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
       ) : null}
     </div>
   )
+}
+
+function IntentBadge({
+  bucket,
+  score,
+}: {
+  bucket: IntentBucket | null
+  score: number | null
+}) {
+  if (!bucket) {
+    return <span className="text-[11px] text-ink-mute">—</span>
+  }
+  const label = score != null ? `${bucket} · ${score}` : bucket
+  switch (bucket) {
+    case 'premium':
+      return <Badge variant="green">{label}</Badge>
+    case 'high':
+      return <Badge variant="blue">{label}</Badge>
+    case 'mid':
+      return <Badge variant="yellow">{label}</Badge>
+    case 'low':
+      return <Badge variant="muted">{label}</Badge>
+    case 'spam':
+      return <Badge variant="red">{label}</Badge>
+    default:
+      return <Badge variant="muted">{label}</Badge>
+  }
 }
 
 function StrategyBadge({ strategy }: { strategy: RoutingStrategy }) {

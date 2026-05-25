@@ -12,7 +12,12 @@
 
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import type { Metadata } from 'next'
-import { type LeadQueueRow, LeadsQueueTable, type RoutingStrategy } from './LeadsQueueTable'
+import {
+  type IntentBucket,
+  type LeadQueueRow,
+  LeadsQueueTable,
+  type RoutingStrategy,
+} from './LeadsQueueTable'
 
 export const metadata: Metadata = {
   title: 'Queue leads — Admin',
@@ -30,6 +35,8 @@ interface QuoteRequestNested {
   property_surface_m2: number | null
   diagnostics_requested: string[] | null
   created_at: string | null
+  intent_score: number | null
+  intent_bucket: IntentBucket | null
 }
 
 interface LeadAssignmentJoinedRow {
@@ -81,7 +88,7 @@ async function fetchRecentLeads(): Promise<LeadQueueRow[]> {
   )
     .from('lead_assignments')
     .select(
-      'id, quote_request_id, routing_strategy, acceptance_count, assigned_count, closed_at, created_at, quote_requests(id, requester_first_name, requester_last_name, property_city, property_surface_m2, diagnostics_requested, created_at)',
+      'id, quote_request_id, routing_strategy, acceptance_count, assigned_count, closed_at, created_at, quote_requests(id, requester_first_name, requester_last_name, property_city, property_surface_m2, diagnostics_requested, created_at, intent_score, intent_bucket)',
     )
     .gte('created_at', thirtyDaysAgo)
     .order('created_at', { ascending: false })
@@ -109,6 +116,8 @@ async function fetchRecentLeads(): Promise<LeadQueueRow[]> {
       city: qr?.property_city ?? null,
       certificationType: (qr?.diagnostics_requested ?? [])[0] ?? null,
       surfaceM2: qr?.property_surface_m2 ?? null,
+      intentScore: qr?.intent_score ?? null,
+      intentBucket: qr?.intent_bucket ?? null,
     }
   })
 }
