@@ -16,29 +16,41 @@
  */
 
 import { NextResponse } from 'next/server'
+import { checkRateLimit, rateLimitHeaders } from '@/lib/api-public/rate-limit'
 import { buildPropertyUnifiedProfile } from '@/lib/property/build-profile'
 
 export const runtime = 'nodejs'
 export const revalidate = 604800 // 7 jours ISR
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ banId: string }> },
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ banId: string }> }) {
+  // Rate limit (60/min anon, 600/min API key)
+  const rl = await checkRateLimit(request, { prefix: 'api:property' })
+  const rlHeaders = rateLimitHeaders(rl)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'rate_limit_exceeded', retry_after: rl.retry_after },
+      { status: 429, headers: rlHeaders },
+    )
+  }
+
   const { banId } = await params
   if (!banId || banId.length < 5 || banId.length > 100) {
-    return NextResponse.json({ error: 'invalid banId' }, { status: 400 })
+    return NextResponse.json({ error: 'invalid banId' }, { status: 400, headers: rlHeaders })
   }
 
   try {
     const result = await buildPropertyUnifiedProfile(banId)
     if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: result.status })
+      return NextResponse.json(
+        { error: result.error },
+        { status: result.status, headers: rlHeaders },
+      )
     }
 
     return NextResponse.json(result, {
       status: 200,
       headers: {
+        ...rlHeaders,
         'Cache-Control': 'public, max-age=604800, s-maxage=604800',
         'X-Source-Updated-At': result.meta.last_synced_at,
         'API-Version': '1.0',
@@ -48,7 +60,7 @@ export async function GET(
     console.error('[api/public/property] error', err)
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'internal error' },
-      { status: 500 },
+      { status: 500, headers: rlHeaders },
     )
   }
 }
