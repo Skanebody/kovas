@@ -10,6 +10,7 @@ import {
   Download,
   FileText,
   ListChecks,
+  MapPin,
   Mic,
   Terminal,
 } from 'lucide-react'
@@ -55,6 +56,15 @@ const LIVE_ENDPOINTS: LiveEndpoint[] = [
       'État de la profession du diagnostic immobilier en France — total DHUP, % SIRENE actif, % activité élevée, distribution par département (top 20). Aucune PII.',
     example_curl: 'curl https://kovas.fr/api/public/v1/observatoire/profession',
     source: 'DHUP + INSEE Sirene + scoring KOVAS interne',
+  },
+  {
+    icon: MapPin,
+    method: 'GET',
+    path: '/api/public/v1/commune/{inseeCode}',
+    description:
+      'Statistiques DPE + DVF agrégées par commune (code INSEE) : % passoires F-G, volume DPE 24 mois, prix médian, avg €/m² 12 mois.',
+    example_curl: 'curl https://kovas.fr/api/public/v1/commune/75056',
+    source: 'ADEME ademe_dpe + Etalab DVF',
   },
 ]
 

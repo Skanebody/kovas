@@ -92,6 +92,40 @@ export function GET() {
           },
         },
       },
+      '/commune/{inseeCode}': {
+        get: {
+          summary: 'Statistiques DPE + DVF par commune',
+          description:
+            'Statistiques agrégées open data pour une commune française : passoires thermiques (% F-G), volume DPE 24 mois, prix médian DVF, prix moyen €/m² 12 mois. Source ADEME + Etalab DVF. Cache 6h.',
+          parameters: [
+            {
+              name: 'inseeCode',
+              in: 'path',
+              required: true,
+              schema: { type: 'string', pattern: '^[0-9A-B]{5}$' },
+              description: 'Code INSEE 5 caractères (ex: 75056 pour Paris)',
+            },
+            {
+              name: 'X-API-Key',
+              in: 'header',
+              required: false,
+              schema: { type: 'string' },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'Statistiques commune',
+              content: {
+                'application/json': { schema: { $ref: '#/components/schemas/CommuneStats' } },
+              },
+            },
+            '400': { description: 'Code INSEE invalide' },
+            '404': { description: "Commune absente du data lake (pas encore ingérée)" },
+            '429': { description: 'Rate limit dépassé' },
+            '500': { description: 'Erreur serveur' },
+          },
+        },
+      },
     },
     components: {
       schemas: {
@@ -122,6 +156,35 @@ export function GET() {
                 partial_failures: { type: 'array', items: { type: 'string' } },
               },
             },
+          },
+        },
+        CommuneStats: {
+          type: 'object',
+          properties: {
+            api_version: { type: 'string', const: '1.0' },
+            generated_at: { type: 'string', format: 'date-time' },
+            insee_code: { type: 'string' },
+            dpe: {
+              type: 'object',
+              nullable: true,
+              properties: {
+                total_dpe_24_months: { type: 'integer' },
+                count_passoires_f_g: { type: 'integer' },
+                ratio_passoires_pct: { type: 'number', nullable: true },
+                last_dpe_date: { type: 'string', format: 'date', nullable: true },
+              },
+            },
+            transactions: {
+              type: 'object',
+              nullable: true,
+              properties: {
+                total_transactions_12_months: { type: 'integer' },
+                avg_price_per_m2_eur: { type: 'integer', nullable: true },
+                median_price_eur: { type: 'integer', nullable: true },
+                last_transaction_date: { type: 'string', format: 'date', nullable: true },
+              },
+            },
+            methodology: { type: 'object' },
           },
         },
         ObservatoireProfession: {
