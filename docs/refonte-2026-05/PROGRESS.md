@@ -13,10 +13,10 @@
 - **Build production `next build`** : ✅ vert (B39 + B43 — 2781 pages SSG, 0 erreur, pricing V5 appliqué)
 - **Pricing V5 (mockup 2026-05-25)** : Logiciel 29/79/199/499€ + Annuaire 19/39/79€ + Bundles 39/89/99/229/529€ — sweep transversal 21 fichiers (Lot B43)
 - **AI Economics doc** : `docs/refonte-2026-05/AI_ECONOMICS.md` — 15 techniques d'optimisation tokens, 9/15 ✅ déjà en prod
-- **Tests Vitest** : **415 tests** pure-fn + helpers + cascading + equipment cache + incremental recompute + tools filter + transcription router + knowledge graph
-- **Tests E2E Playwright** : **26 tests** refonte-surfaces (redirects 301 + admin gate + tarifs V5 + homepage + API v1 + AI Economics gate)
+- **Tests Vitest** : **422 tests** pure-fn + helpers + cascading + equipment cache + incremental recompute + tools filter + transcription router + knowledge graph + InfoTooltip
+- **Tests E2E Playwright** : **34 tests** (API publique + redirects 301 + admin gate + tarifs onglets + homepage + grille V5 mockup + /aide + /guides + /pros/aide)
 - **AI techniques** : **15/15 ✅** 🎯 (toutes livrées en pure-fn pattern, prêtes pour orchestrateurs futurs)
-- **Tests E2E Playwright** : **34 tests** (API publique + redirects 301 + admin gate + tarifs onglets + homepage + grille V5 mockup)
+- **SEO méthode Amandine Bart** : audit complet 41 pages (B66) + glossaire 20 termes diagnostic + 6 pages avec tooltips (B67) + sweep 8 pages clés Schema.org (B68)
 
 ## Algorithmes A1.3.* — 13 / 13 livrés ✅
 
@@ -165,10 +165,11 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 | `lib/cache/equipment-models.test.ts` | 29 | (B48) |
 | `lib/ai/incremental-recompute.test.ts` | 19 | (B49) |
 | `lib/ai/tools-filter.test.ts` | 22 | (B50) |
+| `components/ui/info-tooltip.test.tsx` | 7 | (B67) |
 | `tests/e2e/api-public-v1.spec.ts` | 10 | `c6ad3d3` |
-| `tests/e2e/refonte-surfaces.spec.ts` | 24 | (B38 + B44) |
+| `tests/e2e/refonte-surfaces.spec.ts` | 24 | (B38 + B44 + B63) |
 
-**Total : 289 unit + 34 e2e = 323 tests dédiés au refonte.**
+**Total : 296 unit + 34 e2e = 330 tests dédiés au refonte.**
 
 Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 
@@ -199,15 +200,21 @@ Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 - ✅ **Pages publiques manquantes** (Lot B63) : `/aide` (centre d'aide 4 sections + SLA tier + contact) + `/guides` alias server-side `redirect('/guide')` + `/pros/aide → /aide` middleware + 3 tests E2E
 - ✅ **Guides SEO méthode Amandine Bart** (Lot B64) : 3 guides prioritaires enrichis (DPE/Amiante/Audit énergétique) avec **23 sources externes** 100% légitimes (Légifrance, ADEME, INRS, Anah, Service-public.fr, EUR-Lex, DGEC, France Rénov', OPQIBI), composants `<GuideSources>` + `<RelatedGuides>`, JSON-LD `Article` enrichi (image, timeRequired ISO 8601, citation[]), `internal-linking.ts` map curé + `getRelatedGuides()`
 - ✅ **MAJ automatique guides via IA** (Lot B65) : migration `internal.guide_refresh_queue` + `internal.guide_versions` + 2 RPCs (rotation + current_version) + Edge Function `refresh-guides-content` (web_search filtré 14 domaines officiels whitelist + extraction Haiku + draft Sonnet cached + notification admin) + page admin `/admin/guides-refresh` (diff side-by-side approve/reject/regen) + cron `0 4 * * 1` (rotation 9 guides en ~3 semaines)
+- ✅ **Audit SEO exhaustif méthode Amandine Bart** (Lot B66) : `docs/refonte-2026-05/SEO-AUDIT-2026-05-26.md` — **41 pages auditées** (31 publiques + 10 légales + 1 917 prog. `/diagnostic/[type]/[ville]` + arbo `/trouver-un-diagnostiqueur/[dept]/[city]/[slug]`), score moyen **66/100**. Top 5 : `/trouver-un-diagnostiqueur/[dept]/[city]` (94/100, 30 JSON-LD) > `/[…]/[slug]` (92) > 9 `/guide/[type]` (90) > `/comparatif` (88) > `/diagnostic/[type]/[ville]` (87). Bottom 5 : `/guides` (22, à supprimer + 301) > `/pricing/calculator` (42, doublon) > `/contact` (48) > `/pricing/compare` (50) > `/blog` (52). Trouvailles critiques : doublons URLs `/pricing` ↔ `/tarifs` (dilution PageRank ~75%), 16 pages sans `buildMetadata` complet, 18 pages sans Schema.org pertinent, 14 pages 0 lien interne, sources `.gouv.fr` quasi-absentes (signal E-E-A-T)
+- ✅ **InfoTooltip + glossaire diagnostic** (Lot B67) : composants `<InfoTooltip>` (client, icône Info Lucide 14px navy/55 %, popover blanc max-w 320px, hover desktop + tap mobile + ESC + focus visible + aria-label) + `<GlossaryTerm>` (server wrapper résout entrée auto) + `lib/glossary/diagnostic-terms.ts` (**20 termes** : DPE, COFRAC, Carrez, Boutin, ERP, mention audit énergétique, 3CL-2021, RGE, AGC, DTA, CREP, GES, MaPrimeRénov', ESRIS, PPRT, passoire thermique, audit énergétique réglementaire, Factur-X, Liciel, OBBC, ORIS). Déploiement **6 pages** : `/aide` (9 tooltips) + `/tarifs` (6) + `/comparatif` (hero DPE+3CL-2021) + `/observatoire` (méthodo 6) + `/guide` (auto-tooltip cards) + `/calculateur-dpe-gratuit/result-card.tsx`. **7 tests Vitest** verts + drive-by `esbuild.jsx: 'automatic'` dans vitest.config.ts
+- ✅ **Sweep SEO 8 pages clés méthode Amandine Bart** (Lot B68) : `/`, `/tarifs`, `/aide`, `/comparatif`, `/temoignages`, `/api-publique`, `/demo`, `/a-propos`. Titles 50-60 char optimisés intent transactionnel, migrations vers `buildMetadata` helper canonique, JSON-LD pertinents ajoutés : `/` (Organization + WebSite SearchAction + FAQPage 8 Q) ・ `/tarifs` (BreadcrumbList + ItemList complet via `buildPricingItemListSchema`) ・ `/aide` (WebPage + FAQPage 5 Q) ・ `/temoignages` (CollectionPage + ItemList 15 Quotation, volontairement pas `Review` pour ne pas tromper Google sur des témoignages V1) ・ `/api-publique` (WebAPI + DataCatalog 4 datasets CC-BY 4.0) ・ `/demo` (WebPage + ReserveAction) ・ `/a-propos` (BreadcrumbList ajouté au graph Person+Organization+AboutPage). Maillage interne ≥3 liens contextuels chaque page. Brand V5 / `contact@kovas.fr` préservés
 
 ### Vraies tâches restantes
 1. **GC2 UI complète** — composants tchat continu + composer + transitions animées (session UX dédiée 3-5j)
 2. **Microservice MDB Jackcess** — Java/Kotlin sur Railway pour bridge JSON ↔ MDB Liciel
-3. **Tests E2E Playwright admin pages neuves** — press / renewals / churn / leads-detail / refonte / sante-tech (nécessite seed DB + auth admin en CI ; smoke gate déjà couvert B38/B57)
+3. **Tests E2E Playwright admin pages neuves** — press / renewals / churn / leads-detail / refonte / sante-tech / guides-refresh (nécessite seed DB + auth admin en CI ; smoke gate déjà couvert B38/B57)
 4. **Provisionnement Upstash Redis réel** — créer compte + base eu-west-1 + coller secrets dans Vercel prod (cf. `docs/refonte-2026-05/UPSTASH-SETUP.md`)
-5. **Application des 8 migrations Supabase prod** — suivre `docs/refonte-2026-05/MIGRATION-PROD-CHECKLIST.md` (backup PITR + dry-run + push + smoke tests). 8 migrations = 6 refonte initiales + B54 fix matview + B55 perf PostGIS.
+5. **Application des 10 migrations Supabase prod** — suivre `docs/refonte-2026-05/MIGRATION-PROD-CHECKLIST.md` (backup PITR + dry-run + push + smoke tests). 10 migrations = 6 refonte initiales + B54 fix matview + B55 perf PostGIS + B61 user_mission_patterns + B65 guides_refresh_queue.
 6. **Intégration WASM réelle Whisper local** — ajouter dep `whisper.cpp-wasm` + hook `useLocalWhisper()` + brancher `decideTranscriptionEngine` dans `/api/transcribe` route handler (le router pure-fn B58 est prêt)
-7. **Migration + orchestrateur pattern learning** — table `data.user_mission_patterns` JSONB + Edge Function rebuild cron + intégration dans pipeline mission (le module pure-fn B59 est prêt)
+7. **Génération 8 OG images** (1200×630, palette V5) — `home.png`, `tarifs.png`, `aide.png`, `comparatif.png`, `temoignages.png`, `api-publique.png`, `demo.png`, `a-propos.png` dans `/public/og-images/`. Fallback `/og-image.png` actif tant qu'absentes (pas de crash)
+8. **Fixes SEO bottom 5 (B66)** — supprimer `/guides` route doublon + 301 vers `/guide` (déjà en place, vérifier que la route physique disparaît du sitemap) · refonte `/contact` avec `ContactPage` + `LocalBusiness` schema · canonical/OG/Twitter sur `/pricing/compare` et `/pricing/calculator` · pages détail articles `/blog/[slug]` ou décision suppression `/blog` complète
+9. **Sweep `buildMetadata` sur 16 pages restantes (B66)** — pages utilisant encore `Metadata` brut sans canonical/OG/Twitter complets (lot dédié B69 à prévoir)
+10. **Maillage interne sur 14 pages 0 lien (B66)** — ajouter ≥3 liens contextuels par page (lot dédié B70)
 
 ## Stratégie de merge
 
