@@ -24,10 +24,13 @@
 
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { getPublicStats } from '@/lib/public-stats'
 import { buildMetadata } from '@/lib/seo/metadata'
+import { buildOrganizationSchema, buildWebSiteSchema } from '@/lib/seo/schema-org'
+import { getFAQPageSchema } from '@/lib/seo/structured-data'
 import {
   ArrowRight,
   Building2,
@@ -43,10 +46,11 @@ import {
 import Link from 'next/link'
 
 export const metadata = buildMetadata({
-  title: 'KOVAS — Le copilote des diagnostiqueurs',
+  title: 'Logiciel diagnostic immobilier compagnon Liciel | KOVAS',
   description:
-    'Logiciel SaaS B2B pour diagnostiqueurs immobiliers. Compatible Liciel, ORIS, OBBC. 1h30 gagnée par mission DPE, zéro erreur ADEME, leads B2C qualifiés. Essai 30 jours.',
+    'Logiciel SaaS pour diagnostiqueurs immobiliers, compagnon Liciel, ORIS, OBBC. Saisie vocale terrain, photos géolocalisées, exports ZIP. 1h30 gagnée par DPE. Essai 30 jours.',
   path: '/',
+  ogImage: '/og-images/home.png',
 })
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -601,8 +605,13 @@ export default async function HomePage() {
     citiesCount: (rawStats as { citiesCount?: number | null }).citiesCount ?? null,
   }
 
+  const organizationSchema = buildOrganizationSchema()
+  const websiteSchema = buildWebSiteSchema()
+  const faqSchema = getFAQPageSchema(HOME_FAQ.map((item) => ({ question: item.q, answer: item.a })))
+
   return (
     <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
+      <JsonLd data={[organizationSchema, websiteSchema, faqSchema]} id="home" />
       <PublicHeader />
       <main className="flex-1">
         <SectionHero />

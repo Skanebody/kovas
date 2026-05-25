@@ -42,10 +42,11 @@ const FOUNDER = {
 } as const
 
 export const metadata = buildMetadata({
-  title: 'À propos — Benjamin Bel, fondateur de KOVAS',
+  title: 'À propos — Benjamin Bel, fondateur KOVAS et Nexus 1993 | KOVAS',
   description:
-    "Le parcours de Benjamin Bel, dirigeant de la SASU Nexus 1993 et fondateur de KOVAS. Entrepreneur normand, opérateur immobilier indépendant depuis 2020, à l'origine d'une plateforme de productivité dédiée aux diagnostiqueurs immobiliers indépendants en France.",
+    'Benjamin Bel, fondateur de KOVAS et président de la SASU Nexus 1993. Entrepreneur normand basé à Dieppe, opérateur immobilier indépendant depuis 2020, à l’origine de KOVAS.',
   path: '/a-propos',
+  ogImage: '/og-images/a-propos.png',
 })
 
 function buildJsonLd() {
@@ -96,7 +97,23 @@ function buildJsonLd() {
         '@id': `${KOVAS_SITE_URL}/a-propos#aboutpage`,
         url: `${KOVAS_SITE_URL}/a-propos`,
         name: 'À propos de KOVAS — Benjamin Bel',
+        inLanguage: 'fr-FR',
+        isPartOf: { '@id': `${KOVAS_SITE_URL}/#website` },
         about: [{ '@id': orgId }, { '@id': personId }],
+        breadcrumb: { '@id': `${KOVAS_SITE_URL}/a-propos#breadcrumb` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${KOVAS_SITE_URL}/a-propos#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Accueil', item: KOVAS_SITE_URL },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'À propos',
+            item: `${KOVAS_SITE_URL}/a-propos`,
+          },
+        ],
       },
     ],
   }

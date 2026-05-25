@@ -22,18 +22,23 @@
  * Authority : mockup HTML user 2026-05-25.
  */
 
-import { BUNDLES } from '@/lib/pricing-plans'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { ANNUAIRE_PLANS, BUNDLES, LOGICIEL_PLANS } from '@/lib/pricing-plans'
+import { buildMetadata } from '@/lib/seo/metadata'
+import { buildBreadcrumbList, buildPricingItemListSchema } from '@/lib/seo/schema-org'
 import { ArrowRight, Check, Flag } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { TarifsTabs } from './TarifsTabs'
 
-export const metadata: Metadata = {
-  title: 'Tarifs · KOVAS',
+export const metadata: Metadata = buildMetadata({
+  title: 'Tarifs logiciel diagnostic immobilier dès 29€/mois | KOVAS',
   description:
-    'KOVAS Logiciel 29/79/199/499€/mo · KOVAS Annuaire 19/39/79€/mo · Bundles combinés. Essai 30 jours, satisfait ou remboursé 60 jours. TVA 20%.',
-}
+    'Tarifs KOVAS : logiciel SaaS dès 29€/mois (Solo 40 missions), annuaire pro dès 19€/mois, bundles combinés. Essai 30 jours gratuit, satisfait ou remboursé 60 jours.',
+  path: '/tarifs',
+  ogImage: '/og-images/tarifs.png',
+})
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /* TYPES                                                                       */
@@ -707,8 +712,19 @@ function FooterPromises() {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 export default function TarifsPage() {
+  const breadcrumb = buildBreadcrumbList([
+    { name: 'Accueil', path: '/' },
+    { name: 'Tarifs', path: '/tarifs' },
+  ])
+  const pricingItemList = buildPricingItemListSchema({
+    logicielPlans: LOGICIEL_PLANS.filter((p) => p.monthlyPrice > 0),
+    annuairePlans: ANNUAIRE_PLANS.filter((p) => p.monthlyPrice > 0),
+    bundles: BUNDLES,
+  })
+
   return (
     <div className="bg-[#F5F7F4] text-[#0F1419] min-h-dvh font-sans">
+      <JsonLd data={[breadcrumb, pricingItemList]} id="tarifs" />
       <div className="mx-auto max-w-[1280px] px-6">
         {/* Header */}
         <header className="border-b border-[#0F1419] pt-8 pb-6">
@@ -752,16 +768,43 @@ export default function TarifsPage() {
         <LoyaltySection />
         <FooterPromises />
 
-        {/* Lien discret signalement / aide en bas */}
-        <div className="border-t border-[#0F1419] py-8 text-center">
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-[#4A525B] hover:text-[#0F1419] transition-colors"
-          >
-            <Flag className="h-3 w-3" />
-            Une question sur la tarification ?
-            <ArrowRight className="h-3 w-3" />
-          </Link>
+        {/* Maillage interne SEO + lien aide/contact */}
+        <div className="border-t border-[#0F1419] py-10">
+          <div className="flex flex-col gap-6 items-center text-center">
+            <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.15em] text-[#4A525B]">
+              <li>
+                <Link href="/aide" className="hover:text-[#0F1419] transition-colors">
+                  Centre d&apos;aide
+                </Link>
+              </li>
+              <li aria-hidden>·</li>
+              <li>
+                <Link href="/comparatif" className="hover:text-[#0F1419] transition-colors">
+                  Comparatif Liciel
+                </Link>
+              </li>
+              <li aria-hidden>·</li>
+              <li>
+                <Link href="/observatoire" className="hover:text-[#0F1419] transition-colors">
+                  Observatoire DPE
+                </Link>
+              </li>
+              <li aria-hidden>·</li>
+              <li>
+                <Link href="/temoignages" className="hover:text-[#0F1419] transition-colors">
+                  Témoignages
+                </Link>
+              </li>
+            </ul>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-[#4A525B] hover:text-[#0F1419] transition-colors"
+            >
+              <Flag className="h-3 w-3" />
+              Une question sur la tarification ?
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

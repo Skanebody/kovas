@@ -4,6 +4,8 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { buildMetadata } from '@/lib/seo/metadata'
+import { buildBreadcrumbList } from '@/lib/seo/schema-org'
+import { getFAQPageSchema } from '@/lib/seo/structured-data'
 import {
   ArrowRight,
   BookOpen,
@@ -21,10 +23,11 @@ import Link from 'next/link'
 import type { ComponentType } from 'react'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Aide & support — KOVAS',
+  title: 'Aide et support diagnostiqueur immobilier | KOVAS',
   description:
-    "Centre d'aide KOVAS : démarrage rapide, FAQ, tutoriels vidéo et contact direct. Réponse en 24 h ouvrées, 4 h sur les tiers payants, 1 h en priorité Volume.",
+    "Centre d'aide KOVAS : démarrage rapide, FAQ, tutoriels vidéo et contact direct. Réponse garantie 24 h ouvrées, 4 h sur Standard et Volume, 1 h en priorité Volume.",
   path: '/aide',
+  ogImage: '/og-images/aide.png',
 })
 
 interface QuickStartCard {
@@ -96,23 +99,30 @@ const FAQ_KEY: ReadonlyArray<FaqItem> = [
 ] as const
 
 export default function AidePage() {
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Accueil', item: 'https://kovas.fr' },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Aide & support',
-        item: 'https://kovas.fr/aide',
-      },
-    ],
+  const breadcrumbSchema = buildBreadcrumbList([
+    { name: 'Accueil', path: '/' },
+    { name: 'Aide & support', path: '/aide' },
+  ])
+
+  const webPageSchema = {
+    '@context': 'https://schema.org' as const,
+    '@type': 'WebPage' as const,
+    '@id': 'https://kovas.fr/aide#webpage',
+    url: 'https://kovas.fr/aide',
+    name: 'Aide et support diagnostiqueur immobilier | KOVAS',
+    description: "Centre d'aide KOVAS : démarrage rapide, FAQ, tutoriels vidéo et contact direct.",
+    inLanguage: 'fr-FR' as const,
+    isPartOf: { '@id': 'https://kovas.fr/#website' },
+    breadcrumb: { '@id': 'https://kovas.fr/aide#breadcrumb' },
   }
+
+  const faqSchema = getFAQPageSchema(
+    FAQ_KEY.map((item) => ({ question: item.question, answer: item.answer })),
+  )
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
-      <JsonLd data={breadcrumbSchema} id="aide-breadcrumb" />
+      <JsonLd data={[webPageSchema, breadcrumbSchema, faqSchema]} id="aide" />
 
       <PublicHeader />
 
@@ -342,6 +352,24 @@ export default function AidePage() {
                 </Link>
               </li>
               <li>
+                <Link href="/tarifs" className="text-ink-soft transition-colors hover:text-ink">
+                  Tarifs &amp; forfaits →
+                </Link>
+              </li>
+              <li>
+                <Link href="/comparatif" className="text-ink-soft transition-colors hover:text-ink">
+                  Comparatif Liciel →
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/temoignages"
+                  className="text-ink-soft transition-colors hover:text-ink"
+                >
+                  Témoignages diagnostiqueurs →
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="text-ink-soft transition-colors hover:text-ink">
                   Formulaire contact →
                 </Link>
@@ -352,6 +380,14 @@ export default function AidePage() {
                   className="text-ink-soft transition-colors hover:text-ink"
                 >
                   Observatoire DPE →
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/api-publique"
+                  className="text-ink-soft transition-colors hover:text-ink"
+                >
+                  API publique →
                 </Link>
               </li>
             </ul>

@@ -1,7 +1,10 @@
 import { ApiWaitlistForm } from '@/components/public/pros/ApiWaitlistForm'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { buildMetadata } from '@/lib/seo/metadata'
+import { KOVAS_BASE_URL, buildBreadcrumbList } from '@/lib/seo/schema-org'
 import {
   BarChart3,
   BookOpen,
@@ -16,12 +19,15 @@ import {
   Terminal,
 } from 'lucide-react'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
-export const metadata: Metadata = {
-  title: 'API publique KOVAS',
+export const metadata: Metadata = buildMetadata({
+  title: 'API publique diagnostic immobilier open data | KOVAS',
   description:
-    'API publique KOVAS — endpoints open data LIVE (property unifié, observatoire profession) + V2 roadmap (missions, photos, exports). OpenAPI 3.1 + rate-limit 60/600 req/min.',
-}
+    'API publique KOVAS open data : adresses BAN, cadastre IGN, DPE ADEME, DVF, risques ERP, observatoire profession. OpenAPI 3.1, CC-BY 4.0, rate-limit 60/600 req/min.',
+  path: '/api-publique',
+  ogImage: '/og-images/api-publique.png',
+})
 
 interface LiveEndpoint {
   icon: typeof ListChecks
@@ -123,8 +129,51 @@ const ENDPOINTS: Endpoint[] = [
 ]
 
 export default function ApiPage() {
+  const breadcrumb = buildBreadcrumbList([
+    { name: 'Accueil', path: '/' },
+    { name: 'API publique', path: '/api-publique' },
+  ])
+
+  // WebAPI Schema.org — décrit l'API publique KOVAS
+  const webApiSchema = {
+    '@context': 'https://schema.org' as const,
+    '@type': 'WebAPI' as const,
+    '@id': `${KOVAS_BASE_URL}/api-publique#webapi`,
+    name: 'API publique KOVAS — open data diagnostic immobilier',
+    description:
+      'API REST publique exposant des jeux de données ouverts sur le diagnostic immobilier français : profil propriété unifié (BAN + IGN + DVF + ADEME + Géorisques), observatoire de la profession, statistiques DPE par commune et département.',
+    url: `${KOVAS_BASE_URL}/api-publique`,
+    documentation: `${KOVAS_BASE_URL}/api/public/v1/openapi.json`,
+    provider: { '@id': `${KOVAS_BASE_URL}/#organization` },
+    license: 'https://creativecommons.org/licenses/by/4.0/',
+    inLanguage: 'fr-FR' as const,
+  }
+
+  // DataCatalog regroupant les 4 endpoints LIVE en datasets exposés
+  const dataCatalogSchema = {
+    '@context': 'https://schema.org' as const,
+    '@type': 'DataCatalog' as const,
+    '@id': `${KOVAS_BASE_URL}/api-publique#datacatalog`,
+    name: 'KOVAS Open Data — catalogue diagnostic immobilier',
+    description:
+      'Catalogue de jeux de données ouverts dérivés des sources publiques officielles françaises (BAN, IGN, DVF, ADEME, DHUP, Géorisques).',
+    publisher: { '@id': `${KOVAS_BASE_URL}/#organization` },
+    license: 'https://creativecommons.org/licenses/by/4.0/',
+    inLanguage: 'fr-FR' as const,
+    dataset: LIVE_ENDPOINTS.map((endpoint) => ({
+      '@type': 'Dataset' as const,
+      name: endpoint.path,
+      description: endpoint.description,
+      url: `${KOVAS_BASE_URL}${endpoint.path}`,
+      keywords: endpoint.source,
+      license: 'https://creativecommons.org/licenses/by/4.0/',
+      creator: { '@id': `${KOVAS_BASE_URL}/#organization` },
+    })),
+  }
+
   return (
     <div className="px-6 py-16">
+      <JsonLd data={[webApiSchema, dataCatalogSchema, breadcrumb]} id="api-publique" />
       <div className="mx-auto max-w-5xl space-y-12">
         <div className="mx-auto max-w-2xl space-y-3 text-center">
           <Badge variant="green">V1 open data · LIVE</Badge>
@@ -255,6 +304,42 @@ export default function ApiPage() {
         <Card variant="opaque" padding="lg" className="mx-auto max-w-3xl">
           <ApiWaitlistForm />
         </Card>
+
+        {/* Maillage interne SEO */}
+        <nav
+          aria-label="Aller plus loin"
+          className="mx-auto max-w-3xl border-t border-ink/10 pt-8 text-center text-sm text-ink-mute"
+        >
+          <p className="mb-3 font-mono text-[11px] uppercase tracking-wider">Aller plus loin</p>
+          <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <li>
+              <Link
+                href="/observatoire"
+                className="hover:text-ink underline-offset-2 hover:underline"
+              >
+                Observatoire DPE
+              </Link>
+            </li>
+            <li aria-hidden>·</li>
+            <li>
+              <Link href="/tarifs" className="hover:text-ink underline-offset-2 hover:underline">
+                Tarifs KOVAS
+              </Link>
+            </li>
+            <li aria-hidden>·</li>
+            <li>
+              <Link href="/aide" className="hover:text-ink underline-offset-2 hover:underline">
+                Centre d&apos;aide
+              </Link>
+            </li>
+            <li aria-hidden>·</li>
+            <li>
+              <Link href="/a-propos" className="hover:text-ink underline-offset-2 hover:underline">
+                À propos
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   )

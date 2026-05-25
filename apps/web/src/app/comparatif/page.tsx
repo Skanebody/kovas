@@ -46,10 +46,11 @@ import Link from 'next/link'
 // ───────────────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = buildMetadata({
-  title: 'KOVAS — Couche terrain pour Liciel, OBBC, AnalysImmo, ORIS | Compagnon, pas alternative',
+  title: 'Comparatif Liciel, OBBC, AnalysImmo, ORIS | KOVAS',
   description:
-    "KOVAS n'est pas une alternative à Liciel, OBBC, AnalysImmo ou ORIS. C'est leur couche terrain commune : saisie vocale, photos géolocalisées, pré-vérification ADEME. Votre logiciel certifié reste votre moteur ADEME — KOVAS amplifie tout autour.",
+    'Comparatif KOVAS vs Liciel, OBBC, AnalysImmo, ORIS : KOVAS est leur couche terrain compagnon (saisie vocale, pré-vérif ADEME). Votre logiciel certifié reste votre moteur. 1h30 gagnée par DPE.',
   path: '/comparatif',
+  ogImage: '/og-images/comparatif.png',
 })
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -350,8 +351,7 @@ function ToolBadge({ tool }: { tool: ToolKind }) {
 export default function ComparatifPage() {
   const breadcrumbSchema = buildBreadcrumbList([
     { name: 'Accueil', path: '/' },
-    { name: 'Espace diagnostiqueurs', path: '/pros' },
-    { name: 'Couche terrain Liciel / OBBC / AnalysImmo / ORIS', path: '/comparatif' },
+    { name: 'Comparatif Liciel, OBBC, AnalysImmo, ORIS', path: '/comparatif' },
   ])
 
   const faqSchema = getFAQPageSchema(FAQ_ENTRIES)

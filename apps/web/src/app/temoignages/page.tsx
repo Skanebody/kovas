@@ -1,16 +1,21 @@
+import { JsonLd } from '@/components/seo/JsonLd'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { buildMetadata } from '@/lib/seo/metadata'
+import { KOVAS_BASE_URL, buildBreadcrumbList } from '@/lib/seo/schema-org'
 import { ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { TestimonialsExplorer } from './testimonials-explorer'
 
-export const metadata: Metadata = {
-  title: 'Témoignages',
+export const metadata: Metadata = buildMetadata({
+  title: 'Témoignages diagnostiqueurs immobiliers KOVAS | KOVAS',
   description:
-    'Quinze diagnostiqueurs partagent leur expérience KOVAS. Solo, cabinet, toutes régions. Métriques chiffrées, citations authentiques.',
-}
+    'Quinze diagnostiqueurs immobiliers Solo et Cabinet, toutes régions, partagent leur expérience KOVAS : gain de temps, leads B2C, zéro rejet ADEME. Citations chiffrées et authentiques.',
+  path: '/temoignages',
+  ogImage: '/og-images/temoignages.png',
+})
 
 type Profile = 'Solo' | 'Cabinet'
 type Region =
@@ -242,8 +247,65 @@ const REGIONS_ORDER: Region[] = [
 ]
 
 export default function TemoignagesPage() {
+  const breadcrumb = buildBreadcrumbList([
+    { name: 'Accueil', path: '/' },
+    { name: 'Témoignages', path: '/temoignages' },
+  ])
+
+  // ItemList de Quotation : sémantiquement honnête pour des témoignages
+  // illustratifs V1 (non encore vérifiés par tiers). Évite Review schema
+  // qui exigerait des avis publiquement traçables côté Google.
+  const testimonialsItemList = {
+    '@context': 'https://schema.org' as const,
+    '@type': 'ItemList' as const,
+    '@id': `${KOVAS_BASE_URL}/temoignages#itemlist`,
+    name: 'Témoignages diagnostiqueurs KOVAS',
+    numberOfItems: TESTIMONIALS.length,
+    itemListElement: TESTIMONIALS.map((t, idx) => ({
+      '@type': 'ListItem' as const,
+      position: idx + 1,
+      item: {
+        '@type': 'Quotation' as const,
+        text: t.quote,
+        creator: {
+          '@type': 'Person' as const,
+          name: t.name,
+          jobTitle:
+            t.profile === 'Solo'
+              ? 'Diagnostiqueur immobilier indépendant'
+              : 'Cabinet de diagnostic immobilier',
+          address: {
+            '@type': 'PostalAddress' as const,
+            addressLocality: t.city,
+            addressRegion: t.region,
+            addressCountry: 'FR' as const,
+          },
+        },
+        about: {
+          '@type': 'SoftwareApplication' as const,
+          name: 'KOVAS',
+          applicationCategory: 'BusinessApplication',
+        },
+      },
+    })),
+  }
+
+  const collectionPage = {
+    '@context': 'https://schema.org' as const,
+    '@type': 'CollectionPage' as const,
+    '@id': `${KOVAS_BASE_URL}/temoignages#collection`,
+    url: `${KOVAS_BASE_URL}/temoignages`,
+    name: 'Témoignages diagnostiqueurs immobiliers KOVAS',
+    description:
+      'Retours d’expérience de diagnostiqueurs immobiliers Solo et Cabinet utilisateurs de KOVAS.',
+    inLanguage: 'fr-FR' as const,
+    isPartOf: { '@id': `${KOVAS_BASE_URL}/#website` },
+    mainEntity: { '@id': `${KOVAS_BASE_URL}/temoignages#itemlist` },
+  }
+
   return (
     <div className="px-6 py-16">
+      <JsonLd data={[collectionPage, testimonialsItemList, breadcrumb]} id="temoignages" />
       <div className="mx-auto max-w-6xl space-y-12">
         <div className="mx-auto max-w-2xl space-y-3 text-center">
           <Badge variant="muted">Témoignages</Badge>
@@ -269,11 +331,27 @@ export default function TemoignagesPage() {
             Essai 30 jours, sans engagement. Si KOVAS ne vous convient pas, résiliation en deux
             clics.
           </p>
-          <Button size="lg" variant="accent" asChild>
-            <Link href="/signup">
-              Démarrer mon essai gratuit <ArrowRight className="size-4" />
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Button size="lg" variant="accent" asChild>
+              <Link href="/signup">
+                Démarrer mon essai gratuit <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/tarifs">Voir les tarifs</Link>
+            </Button>
+          </div>
+          <p className="pt-4 text-sm text-ink-mute">
+            Voir aussi le{' '}
+            <Link href="/comparatif" className="underline underline-offset-2 hover:text-ink">
+              comparatif KOVAS vs Liciel
+            </Link>{' '}
+            ou demander une{' '}
+            <Link href="/demo" className="underline underline-offset-2 hover:text-ink">
+              démo personnalisée
             </Link>
-          </Button>
+            .
+          </p>
         </div>
       </div>
     </div>

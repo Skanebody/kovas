@@ -1,20 +1,52 @@
 import { DemoForm } from '@/components/public/pros/DemoForm'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { buildMetadata } from '@/lib/seo/metadata'
+import { KOVAS_BASE_URL, buildBreadcrumbList } from '@/lib/seo/schema-org'
 import { ArrowRight, Calendar, Clock, Headset } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata: Metadata = {
-  title: 'Demander une démo',
+export const metadata: Metadata = buildMetadata({
+  title: 'Démo KOVAS personnalisée pour diagnostiqueur immobilier | KOVAS',
   description:
-    'Réservez une démo personnalisée de KOVAS avec un membre de notre équipe. Réponse sous 48h ouvrées, démo planifiée selon vos disponibilités.',
-}
+    'Réservez votre démo KOVAS personnalisée en visio 45 min avec un membre de l’équipe. Démonstration adaptée à votre cabinet et votre logiciel actuel. Réponse sous 48 h ouvrées.',
+  path: '/demo',
+  ogImage: '/og-images/demo.png',
+})
 
 export default function DemoPage() {
+  const breadcrumb = buildBreadcrumbList([
+    { name: 'Accueil', path: '/' },
+    { name: 'Démo personnalisée', path: '/demo' },
+  ])
+
+  const webPageSchema = {
+    '@context': 'https://schema.org' as const,
+    '@type': 'WebPage' as const,
+    '@id': `${KOVAS_BASE_URL}/demo#webpage`,
+    url: `${KOVAS_BASE_URL}/demo`,
+    name: 'Démo KOVAS personnalisée pour diagnostiqueur immobilier',
+    description:
+      "Réservez une démo personnalisée de KOVAS en visio (45 min) avec un membre de l'équipe.",
+    inLanguage: 'fr-FR' as const,
+    isPartOf: { '@id': `${KOVAS_BASE_URL}/#website` },
+    primaryImageOfPage: {
+      '@type': 'ImageObject' as const,
+      url: `${KOVAS_BASE_URL}/og-images/demo.png`,
+    },
+    potentialAction: {
+      '@type': 'ReserveAction' as const,
+      name: 'Réserver une démo',
+      target: `${KOVAS_BASE_URL}/demo`,
+    },
+  }
+
   return (
     <div className="px-6 py-16">
+      <JsonLd data={[webPageSchema, breadcrumb]} id="demo" />
       <div className="mx-auto max-w-5xl space-y-12">
         <div className="mx-auto max-w-2xl space-y-3 text-center">
           <Badge variant="muted">Démo personnalisée</Badge>
@@ -70,6 +102,21 @@ export default function DemoPage() {
               Essayez gratuitement 30 jours <ArrowRight className="size-4" />
             </Link>
           </Button>
+          <p className="pt-4 text-sm text-ink-mute">
+            Voir aussi les{' '}
+            <Link href="/tarifs" className="underline underline-offset-2 hover:text-ink">
+              tarifs détaillés
+            </Link>
+            , le{' '}
+            <Link href="/comparatif" className="underline underline-offset-2 hover:text-ink">
+              comparatif Liciel
+            </Link>{' '}
+            ou les{' '}
+            <Link href="/temoignages" className="underline underline-offset-2 hover:text-ink">
+              témoignages diagnostiqueurs
+            </Link>
+            .
+          </p>
         </div>
       </div>
     </div>
