@@ -11,7 +11,7 @@
 - **Stratégie** : repositionnement KOVAS 360 → acqui-target Enersweet (Liciel) 5-10 M€ sur 24 mois
 - **Typecheck** : 0 erreur en permanence sur la branche
 - **Build production `next build`** : ✅ vert (B39 — 2781 pages SSG, 0 erreur, fix Suspense TarifsTabs)
-- **Tests Vitest** : **193 tests pure-fn + rate-limit + helpers fiche publique**
+- **Tests Vitest** : **201 tests pure-fn + rate-limit + helpers fiche publique + adaptateur IO mocké**
 - **Tests E2E Playwright** : **24 tests** (API publique + redirects 301 + admin gate + tarifs onglets + homepage)
 
 ## Algorithmes A1.3.* — 13 / 13 livrés ✅
@@ -156,10 +156,11 @@ UPSTASH_REDIS_REST_TOKEN=                    # idem
 | `lib/mission-flow/state-machine.test.ts` | 19 | (B30) |
 | `lib/liciel/zip-v4-schema.test.ts` | 14 | (B31) |
 | `lib/diag-availability.test.ts` | 28 | (B37) |
+| `lib/diag-availability-fetch.test.ts` | 8 | (B42) |
 | `tests/e2e/api-public-v1.spec.ts` | 10 | `c6ad3d3` |
 | `tests/e2e/refonte-surfaces.spec.ts` | 14 | (B38) |
 
-**Total : 193 unit + 24 e2e = 217 tests dédiés au refonte.**
+**Total : 201 unit + 24 e2e = 225 tests dédiés au refonte.**
 
 Couverture pure-fn : **13/13 algos testés ✅** (suite complète).
 

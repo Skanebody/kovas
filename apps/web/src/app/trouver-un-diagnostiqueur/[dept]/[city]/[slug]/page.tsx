@@ -1,5 +1,6 @@
 import { JsonLd } from '@/components/seo/JsonLd'
-import { type AvailabilitySignals, computeAvailabilitySignals } from '@/lib/diag-availability'
+import type { AvailabilitySignals } from '@/lib/diag-availability'
+import { fetchAvailabilitySignals as fetchAvailabilitySignalsRpc } from '@/lib/diag-availability-fetch'
 import { getDiagDisplayName } from '@/lib/diag-certifications'
 import {
   type DiagnosticianForSchema,
@@ -89,52 +90,20 @@ async function fetchVerificationBadge(diagId: string): Promise<{
 }
 
 /**
- * Calcule les signaux de réactivité/fraîcheur affichés sur la fiche publique (B37).
- *
- * Lot B41 — utilise la RPC SQL `get_diagnostician_response_metrics` (médiane
- * + sample_size côté Postgres, latence < 5 ms, bypass RLS via SECURITY DEFINER)
- * plutôt qu'une query JS qui re-parse les dates côté Node. Fallback gracieux si
- * la RPC est absente (migration pas encore appliquée) ou si la query échoue.
- *
- * `last_verified_at` et `updated_at` sont lus directement depuis la fiche.
+ * Wrapper local — instancie le client admin et délègue au module testable
+ * `lib/diag-availability-fetch` (Lot B42).
  */
 async function fetchAvailabilitySignals(
   diagId: string,
   diagRow: { last_verified_at?: string | null; updated_at?: string | null },
 ): Promise<AvailabilitySignals> {
-  let medianResponseMinutes: number | null = null
-  let sampleSize = 0
-
-  try {
-    // RPC SECURITY DEFINER : exposée à anon, retourne agrégat sans PII.
-    const { createAdminClient } = await import('@/lib/supabase/admin')
-    const supabase = createAdminClient()
-    // biome-ignore lint/suspicious/noExplicitAny: RPC typing pas régen
-    const { data, error } = await (supabase as any).rpc('get_diagnostician_response_metrics', {
-      p_diagnostician_id: diagId,
-    })
-
-    if (!error && Array.isArray(data) && data.length > 0) {
-      const row = data[0] as { median_minutes: number | string | null; sample_size: number }
-      // numeric Postgres peut arriver en string selon le driver — coerce robuste
-      const median =
-        typeof row.median_minutes === 'string'
-          ? Number.parseFloat(row.median_minutes)
-          : row.median_minutes
-      medianResponseMinutes = typeof median === 'number' && Number.isFinite(median) ? median : null
-      sampleSize = typeof row.sample_size === 'number' ? row.sample_size : 0
-    }
-  } catch {
-    // RPC absente (migration pas encore appliquée) ou erreur transitoire :
-    // on laisse les valeurs à leur défaut (null/0) — l'helper pure-fn renverra
-    // null pour responseSentence et la section masquera proprement la ligne.
-  }
-
-  return computeAvailabilitySignals({
-    median_response_minutes: medianResponseMinutes,
-    sample_size: sampleSize,
-    last_verified_at: diagRow.last_verified_at ?? null,
-    updated_at: diagRow.updated_at ?? null,
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const supabase = createAdminClient()
+  return fetchAvailabilitySignalsRpc({
+    diagnosticianId: diagId,
+    diagRow,
+    // biome-ignore lint/suspicious/noExplicitAny: SupabaseClient surface > SupabaseRpcClient
+    supabase: supabase as any,
   })
 }
 
