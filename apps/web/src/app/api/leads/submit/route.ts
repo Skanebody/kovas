@@ -23,12 +23,12 @@
  *   500 { error: 'insert_failed' }
  */
 
-import type { Database } from '@kovas/database/types'
-import { createClient as createAdminClient, type SupabaseClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
 import { dispatchRecipients } from '@/lib/leads/dispatch-recipients'
 import { quoteRequestPayloadSchema } from '@/lib/quote-request/schema'
+import type { Database } from '@kovas/database/types'
+import { type SupabaseClient, createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -123,8 +123,7 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json(
       {
         error: 'otp_not_verified',
-        message:
-          'Vérifiez votre numéro de téléphone avant d’envoyer votre demande.',
+        message: 'Vérifiez votre numéro de téléphone avant d’envoyer votre demande.',
       },
       { status: 400 },
     )
@@ -200,6 +199,40 @@ export async function POST(request: Request): Promise<Response> {
 
   const inserted = insertResp.data as { id: string; public_tracking_token: string }
 
+  // 3bis. Calcule + persiste le score d'intent (algo A1.3.5 refonte acqui-target).
+  // Pure function locale, < 1ms — pas de risque de blocage du flow.
+  try {
+    const { scoreLeadIntent } = await import('@/lib/algos/lead-scoring')
+    const scoring = scoreLeadIntent({
+      property_situation: leadDraft.property_situation,
+      property_type: leadDraft.property_type,
+      property_surface_m2: leadDraft.property_surface_m2 ?? null,
+      property_postal_code: leadDraft.property_postal_code ?? null,
+      property_year_built: leadDraft.property_year_built ?? null,
+      diagnostics_requested: leadDraft.diagnostics_requested,
+      diagnostics_suggested_count: Array.isArray(leadDraft.diagnostics_suggested)
+        ? leadDraft.diagnostics_suggested.length
+        : 0,
+      requester_email: requesterEmail,
+      has_phone: Boolean(phone),
+      has_message: Boolean(leadDraft.message && leadDraft.message.trim().length > 0),
+      honeypot_filled: false,
+      recaptcha_score: null,
+    })
+    await adminAny
+      .from('quote_requests')
+      .update({
+        intent_score: scoring.intent_score,
+        intent_bucket: scoring.bucket,
+        intent_signals: scoring.signals,
+        intent_scored_at: new Date().toISOString(),
+      })
+      .eq('id', inserted.id)
+  } catch (err) {
+    // Le scoring est best-effort — un échec ne bloque pas le routing du lead.
+    console.error('[leads/submit] intent scoring failed (non-blocking)', err)
+  }
+
   // 4. Lie l'OTP au lead (pour audit) si pas déjà lié
   await adminAny
     .from('otp_codes')
@@ -209,8 +242,7 @@ export async function POST(request: Request): Promise<Response> {
 
   // 5. Trigger dispatch vers 5 diag (équivalent route-lead).
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (request.headers.get('origin') ?? 'https://kovas.fr')
+    process.env.NEXT_PUBLIC_SITE_URL ?? request.headers.get('origin') ?? 'https://kovas.fr'
 
   let recipientCount = 0
   let routingStrategy: 'multi_dispatch' | 'failed' = 'multi_dispatch'
