@@ -10,6 +10,7 @@
 - **Base** : `main` (Phase 0 le 2026-05-25)
 - **Stratégie** : repositionnement KOVAS 360 → acqui-target Enersweet (Liciel) 5-10 M€ sur 24 mois
 - **Typecheck** : 0 erreur en permanence sur la branche
+- **Build production `next build`** : ✅ vert (B39 — 2781 pages SSG, 0 erreur, fix Suspense TarifsTabs)
 - **Tests Vitest** : **193 tests pure-fn + rate-limit + helpers fiche publique**
 - **Tests E2E Playwright** : **24 tests** (API publique + redirects 301 + admin gate + tarifs onglets + homepage)
 
@@ -191,6 +192,20 @@ Avant le merge, exécuter :
 
 ```bash
 pnpm --filter @kovas/web typecheck  # 0 erreur attendu
-pnpm --filter @kovas/web test:unit  # 51 tests pass attendu
-pnpm --filter @kovas/web test:e2e   # E2E pertinents au scope mergé
+pnpm --filter @kovas/web test:unit  # 193 tests pass attendu
+pnpm --filter @kovas/web test:e2e   # 24+ tests E2E refonte (lance app au préalable)
+pnpm --filter @kovas/web build      # 'next build' production — 2781 pages SSG, 0 erreur
 ```
+
+## Garde-fous Next.js 15 — leçons apprises (B39)
+
+- **`useSearchParams()` dans un client component utilisé par une page statique** doit
+  être wrappé par un `<Suspense>` côté server component parent, sinon `next build`
+  casse le prerender avec « should be wrapped in a suspense boundary ». Pattern :
+  ```tsx
+  <Suspense fallback={<DefaultTab />}>
+    <ClientTabsComponent />
+  </Suspense>
+  ```
+- **Toujours lancer `next build` avant un merge** — typecheck seul ne détecte pas
+  ces erreurs de prerender / sérialisation RSC.
