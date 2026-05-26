@@ -232,3 +232,43 @@ export function progressPercent(phase: MissionFlowPhase): number {
   if (idx < 0) return 0
   return Math.round((idx / (order.length - 1)) * 100)
 }
+
+/**
+ * Helper multi-mission — sélectionne une mission par son id depuis une liste.
+ * Si l'id est null/undefined OU absent de la liste, retourne la première
+ * mission (fallback déterministe pour le scaffold initial). Retourne null si
+ * la liste est vide.
+ *
+ * Pure fn — testable sans mock.
+ */
+export interface MissionSummary {
+  readonly id: string
+  readonly type: string
+}
+
+export function selectMissionById<T extends MissionSummary>(
+  missions: ReadonlyArray<T>,
+  id: string | null | undefined,
+): T | null {
+  if (missions.length === 0) return null
+  if (!id) return missions[0] ?? null
+  const found = missions.find((m) => m.id === id)
+  return found ?? missions[0] ?? null
+}
+
+/**
+ * Helper optimistic concurrency — détecte si une erreur de transition est un
+ * `version_mismatch`. La RPC `mission_flow_transition` retourne ce code dans
+ * `error_reason` quand la version DB diverge de `p_expected_ver`.
+ *
+ * Le caller client peut alors déclencher un `router.refresh()` pour resync.
+ */
+export function isVersionMismatch(
+  result: { success: boolean; code?: string | null; error?: string | null } | null | undefined,
+): boolean {
+  if (!result) return false
+  if (result.success) return false
+  if (result.code === 'version_mismatch') return true
+  // Fallback : pattern legacy si la code n'est pas remontée explicitement
+  return Boolean(result.error?.toLowerCase().includes('version_mismatch'))
+}

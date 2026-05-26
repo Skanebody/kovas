@@ -4,12 +4,15 @@
 
 import { describe, expect, it } from 'vitest'
 import {
+  type MissionSummary,
   type TransitionPreconditions,
   checkTransitionPreconditions,
   isTransitionAllowed,
+  isVersionMismatch,
   nextPossibleTransitions,
   phaseLabel,
   progressPercent,
+  selectMissionById,
 } from './state-machine'
 
 function noFlags(): TransitionPreconditions {
@@ -136,6 +139,75 @@ describe('checkTransitionPreconditions', () => {
   it('returns satisfied for backward transitions (no preconditions)', () => {
     const res = checkTransitionPreconditions('verification', 'capture_terrain', noFlags())
     expect(res.satisfied).toBe(true)
+  })
+})
+
+describe('selectMissionById (Lot B92 — multi-mission)', () => {
+  const missions: ReadonlyArray<MissionSummary> = [
+    { id: 'mission-1', type: 'dpe_vente' },
+    { id: 'mission-2', type: 'amiante_vente' },
+    { id: 'mission-3', type: 'plomb_crep' },
+  ]
+
+  it('returns the first mission when id is null', () => {
+    expect(selectMissionById(missions, null)).toEqual(missions[0])
+  })
+
+  it('returns the first mission when id is undefined', () => {
+    expect(selectMissionById(missions, undefined)).toEqual(missions[0])
+  })
+
+  it('returns the first mission when id is empty string', () => {
+    expect(selectMissionById(missions, '')).toEqual(missions[0])
+  })
+
+  it('returns the matching mission when id is valid', () => {
+    expect(selectMissionById(missions, 'mission-2')).toEqual(missions[1])
+    expect(selectMissionById(missions, 'mission-3')).toEqual(missions[2])
+  })
+
+  it('falls back to the first mission when id is not found', () => {
+    expect(selectMissionById(missions, 'unknown-id')).toEqual(missions[0])
+  })
+
+  it('returns null on empty list', () => {
+    expect(selectMissionById([], null)).toBeNull()
+    expect(selectMissionById([], 'any-id')).toBeNull()
+  })
+
+  it('returns the only mission when list has 1 entry', () => {
+    const single: ReadonlyArray<MissionSummary> = [{ id: 'solo', type: 'dpe_vente' }]
+    expect(selectMissionById(single, null)).toEqual(single[0])
+    expect(selectMissionById(single, 'solo')).toEqual(single[0])
+    expect(selectMissionById(single, 'other')).toEqual(single[0])
+  })
+})
+
+describe('isVersionMismatch (Lot B92 — optimistic concurrency)', () => {
+  it('returns false for null/undefined results', () => {
+    expect(isVersionMismatch(null)).toBe(false)
+    expect(isVersionMismatch(undefined)).toBe(false)
+  })
+
+  it('returns false for successful transitions', () => {
+    expect(isVersionMismatch({ success: true })).toBe(false)
+    expect(isVersionMismatch({ success: true, code: 'version_mismatch' })).toBe(false)
+  })
+
+  it('detects version_mismatch via the code field', () => {
+    expect(isVersionMismatch({ success: false, code: 'version_mismatch' })).toBe(true)
+  })
+
+  it('detects version_mismatch via legacy error string fallback', () => {
+    expect(
+      isVersionMismatch({ success: false, error: 'Conflict: version_mismatch detected' }),
+    ).toBe(true)
+  })
+
+  it('returns false for other error codes', () => {
+    expect(isVersionMismatch({ success: false, code: 'forbidden' })).toBe(false)
+    expect(isVersionMismatch({ success: false, code: 'terminal_state' })).toBe(false)
+    expect(isVersionMismatch({ success: false, error: 'Mission introuvable.' })).toBe(false)
   })
 })
 

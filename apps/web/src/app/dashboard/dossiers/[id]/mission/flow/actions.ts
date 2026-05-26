@@ -24,6 +24,19 @@ import { revalidatePath } from 'next/cache'
 interface TransitionResult {
   success: boolean
   error?: string
+  /** Code machine (ex: 'version_mismatch') exposé pour gestion fine côté client */
+  code?:
+    | 'mission_not_found'
+    | 'forbidden'
+    | 'version_mismatch'
+    | 'terminal_state'
+    | 'invalid_transition'
+    | 'rpc_error'
+    | 'unknown'
+  /** Version actuelle côté DB (renvoyée en cas de mismatch pour resync) */
+  currentVersion?: number
+  /** Nouvelle version après transition réussie */
+  newVersion?: number
 }
 
 interface RpcRow {
@@ -43,13 +56,14 @@ const PHASE_ERROR_LABELS: Record<string, string> = {
 export async function transitionMissionFlowAction(
   missionId: string,
   targetPhase: MissionFlowPhase,
+  expectedVersion: number | null = null,
 ): Promise<TransitionResult> {
   // 1. Auth + récupération supabase user-context
   const { supabase } = await getCurrentUser()
 
-  // 2. Récupère la phase courante pour valider la transition côté code
+  // 2. Récupère la phase courante + version pour valider la transition côté code
   //    avant le round-trip RPC (early-fail UX).
-  type FlowStateRow = { current_phase: MissionFlowPhase; mission_id: string }
+  type FlowStateRow = { current_phase: MissionFlowPhase; mission_id: string; version: number }
   const flowTbl = supabase.from('mission_flow_states' as never) as unknown as {
     select: (q: string) => {
       eq: (
@@ -62,22 +76,25 @@ export async function transitionMissionFlowAction(
   }
 
   const { data: existing } = await flowTbl
-    .select('current_phase, mission_id')
+    .select('current_phase, mission_id, version')
     .eq('mission_id', missionId)
     .maybeSingle()
 
   // Si pas encore initialisé, on traite comme 'preparation' (la RPC créera la row).
   const currentPhase: MissionFlowPhase = existing?.current_phase ?? 'preparation'
+  const dbVersion: number | undefined = existing?.version
 
   // 3. Validation pure-fn (state machine)
   if (!isTransitionAllowed(currentPhase, targetPhase)) {
     return {
       success: false,
+      code: 'invalid_transition',
       error: `Transition non autorisée : ${currentPhase} → ${targetPhase}.`,
+      ...(typeof dbVersion === 'number' ? { currentVersion: dbVersion } : {}),
     }
   }
 
-  // 4. Appel RPC atomique (transition + append event log)
+  // 4. Appel RPC atomique (transition + append event log + check optimistic ver)
   const rpc = supabase.rpc as unknown as (
     fn: string,
     args: Record<string, unknown>,
@@ -87,23 +104,25 @@ export async function transitionMissionFlowAction(
     p_mission_id: missionId,
     p_to_phase: targetPhase,
     p_to_step: null,
-    p_expected_ver: null,
+    p_expected_ver: expectedVersion,
     p_trigger: 'user_action',
     p_payload: {},
   })
 
   if (error) {
-    return { success: false, error: error.message }
+    return { success: false, code: 'rpc_error', error: error.message }
   }
 
   // La RPC RETURNS TABLE → tableau de 1 row
   const row: RpcRow | null = Array.isArray(data) ? (data[0] ?? null) : data
 
   if (!row || !row.ok) {
-    const reason = row?.error_reason ?? 'unknown'
+    const reason = (row?.error_reason ?? 'unknown') as TransitionResult['code']
     return {
       success: false,
-      error: PHASE_ERROR_LABELS[reason] ?? `Échec transition (${reason}).`,
+      code: reason ?? 'unknown',
+      error: PHASE_ERROR_LABELS[reason ?? 'unknown'] ?? `Échec transition (${reason}).`,
+      ...(typeof row?.new_version === 'number' ? { currentVersion: row.new_version } : {}),
     }
   }
 
@@ -113,7 +132,10 @@ export async function transitionMissionFlowAction(
   //    Ici on utilise un wildcard implicite via revalidatePath du segment parent.
   revalidatePath('/dashboard/dossiers', 'layout')
 
-  return { success: true }
+  return {
+    success: true,
+    ...(typeof row.new_version === 'number' ? { newVersion: row.new_version } : {}),
+  }
 }
 
 /**
@@ -125,5 +147,5 @@ export async function initializeMissionFlowAction(
   missionId: string,
   _formData: FormData,
 ): Promise<void> {
-  await transitionMissionFlowAction(missionId, 'capture_terrain')
+  await transitionMissionFlowAction(missionId, 'capture_terrain', null)
 }

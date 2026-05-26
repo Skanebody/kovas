@@ -1,15 +1,16 @@
 'use client'
 
 /**
- * KOVAS — GC2 Mission Flow Continu : composant transition picker (Lot B83 scaffold).
+ * KOVAS — GC2 Mission Flow Continu : composant transition picker (Lot B92 polish).
  *
  * Liste les transitions sortantes possibles depuis la phase courante et permet
  * au diagnostiqueur de déclencher une transition. Toast success/error post-action.
  *
  * Consommé par <MissionFlowComposer>.
  *
- * SCAFFOLD MINIMAL — pas d'animation, pas de gestion d'erreur sophistiquée
- * (préconditions affichées brutes).
+ * Lot B92 — animations framer-motion subtle :
+ *   - Apparition des boutons stagger 0.05s entre chacun au mount
+ *   - Respect prefers-reduced-motion (duration=0)
  *
  * Authority : CLAUDE.md Design System v5 + REFONTE-ACQUI-TARGET-V2 §6.2 (GC2).
  */
@@ -18,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import type { MissionFlowPhase } from '@/lib/mission-flow/state-machine'
 import { phaseLabel } from '@/lib/mission-flow/state-machine'
 import { cn } from '@/lib/utils'
+import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
@@ -39,7 +41,7 @@ interface MissionFlowTransitionPickerProps {
   /** Transitions sortantes possibles */
   availableTransitions: ReadonlyArray<AvailableTransition>
   /** Handler appelé avec l'event de la transition sélectionnée */
-  onTransition: (event: string) => Promise<{ success: boolean; error?: string }>
+  onTransition: (event: string) => Promise<{ success: boolean; error?: string; code?: string }>
   /** Si true, désactive tous les boutons (chargement externe) */
   loading?: boolean
 }
@@ -50,6 +52,7 @@ export function MissionFlowTransitionPicker({
   onTransition,
   loading = false,
 }: MissionFlowTransitionPickerProps) {
+  const prefersReducedMotion = useReducedMotion()
   const [pending, startTransition] = useTransition()
   const isLoading = loading || pending
 
@@ -57,12 +60,19 @@ export function MissionFlowTransitionPicker({
     startTransition(async () => {
       const res = await onTransition(event)
       if (!res.success) {
-        toast.error(res.error ?? 'Transition impossible.')
+        // Si c'est un version_mismatch, le composer parent gère déjà le toast
+        // warning + refresh ; on évite le doublon ici.
+        if (res.code !== 'version_mismatch') {
+          toast.error(res.error ?? 'Transition impossible.')
+        }
         return
       }
       toast.success('Phase mise à jour.')
     })
   }
+
+  const baseDuration = prefersReducedMotion ? 0 : 0.25
+  const staggerDelay = prefersReducedMotion ? 0 : 0.05
 
   return (
     <section
@@ -84,8 +94,17 @@ export function MissionFlowTransitionPicker({
         </p>
       ) : (
         <ul className="grid grid-cols-1 gap-2">
-          {availableTransitions.map((t) => (
-            <li key={t.event}>
+          {availableTransitions.map((t, idx) => (
+            <motion.li
+              key={t.event}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: baseDuration,
+                delay: idx * staggerDelay,
+                ease: 'easeOut',
+              }}
+            >
               <Button
                 type="button"
                 variant="outline"
@@ -105,11 +124,11 @@ export function MissionFlowTransitionPicker({
                 ) : (
                   <ArrowRight
                     aria-hidden
-                    className="size-4 text-[#0F1419]/55 transition-transform group-hover:translate-x-0.5"
+                    className="size-4 text-[#0F1419]/55 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
                   />
                 )}
               </Button>
-            </li>
+            </motion.li>
           ))}
         </ul>
       )}

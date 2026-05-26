@@ -1,28 +1,36 @@
 /**
- * KOVAS — Page Mission Flow Continu (GC2, Lot B83 scaffold).
+ * KOVAS — Page Mission Flow Continu (GC2, Lot B92 polish).
  *
  * Server Component coquille qui :
- *   1. Récupère le dossier + sa première mission (scaffold simple)
- *   2. Charge l'état persistant `mission_flow_states` (peut être absent)
- *   3. Charge l'historique `mission_flow_events`
- *   4. Délègue à <MissionFlowComposer> avec server action pré-bindée
+ *   1. Récupère le dossier + TOUTES ses missions
+ *   2. Sélectionne la mission via `searchParams.missionId` ou fallback first()
+ *   3. Charge l'état persistant `mission_flow_states` (peut être absent)
+ *   4. Charge l'historique `mission_flow_events`
+ *   5. Délègue à <MissionFlowComposer> avec server action pré-bindée
+ *
+ * Lot B92 — multi-mission selection :
+ *   - Pattern Next.js 15 : `searchParams: Promise<{ missionId?: string }>`
+ *   - Helper pure-fn `selectMissionById` pour la sélection déterministe
+ *   - Liste passée au composer pour afficher le picker si > 1 mission
  *
  * Si le flow n'est pas encore initialisé en DB (pas de row dans
  * `mission_flow_states`), affiche un EmptyState avec CTA "Initialiser le flow"
  * qui déclenche une première transition preparation → preparation (création
  * implicite par la RPC).
  *
- * SCAFFOLD MINIMAL — pas de Realtime, pas de presence cursor multi-device.
- *
  * Authority : CLAUDE.md §3 + REFONTE-ACQUI-TARGET-V2 §6.2 (GC2).
  */
 
 import { AppPageHeader } from '@/components/app-page-header'
+import { MissionFlowBreadcrumb } from '@/components/mission-flow/MissionFlowBreadcrumb'
 import { MissionFlowComposer } from '@/components/mission-flow/MissionFlowComposer'
 import type { MissionFlowEvent } from '@/components/mission-flow/MissionFlowTimeline'
 import { EmptyState } from '@/components/ui/empty-state'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import type { MissionFlowPhase } from '@/lib/mission-flow/state-machine'
+import { selectMissionById } from '@/lib/mission-flow/state-machine'
+import { MISSION_TYPE_LABEL } from '@/lib/mission-pastels'
+import type { MissionType } from '@kovas/shared'
 import { Workflow } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -51,12 +59,30 @@ interface FlowEventRow {
   occurred_at: string
 }
 
+interface MissionRow {
+  id: string
+  type: string
+}
+
+/**
+ * Format un label de mission pour le picker. Si le type est connu, utilise
+ * MISSION_TYPE_LABEL ; sinon fallback "Mission #idx".
+ */
+function buildMissionLabel(mission: MissionRow, idx: number): string {
+  const knownLabel = (MISSION_TYPE_LABEL as Record<string, string | undefined>)[mission.type]
+  if (knownLabel) return knownLabel
+  return `Mission #${idx + 1}`
+}
+
 export default async function MissionFlowPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ missionId?: string }>
 }) {
   const { id: dossierId } = await params
+  const { missionId: missionIdParam } = await searchParams
   const { supabase, orgId } = await getCurrentUser()
 
   // 1. Charge dossier (RLS s'occupe de l'auth)
@@ -72,21 +98,24 @@ export default async function MissionFlowPage({
     notFound()
   }
 
-  // 2. Charge la première mission du dossier (scaffold simple — pas de sélection multi-mission)
-  type MissionRow = { id: string; type: string }
-  const { data: missions } = (await supabase
+  // 2. Charge TOUTES les missions du dossier (ordre stable par created_at asc)
+  const { data: missionsRaw } = (await supabase
     .from('missions')
     .select('id, type')
     .eq('dossier_id', dossierId)
     .eq('organization_id', orgId)
-    .order('created_at', { ascending: true })
-    .limit(1)) as unknown as { data: MissionRow[] | null }
+    .order('created_at', { ascending: true })) as unknown as { data: MissionRow[] | null }
 
-  const mission = missions?.[0] ?? null
+  const missions: ReadonlyArray<MissionRow> = missionsRaw ?? []
 
+  // 3. Sélection de la mission active (helper pure-fn testé)
+  const mission = selectMissionById(missions, missionIdParam)
+
+  // 4. Empty state si aucune mission
   if (!mission) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-8 animate-fade-in motion-reduce:animate-none">
+        <MissionFlowBreadcrumb dossierId={dossierId} dossierReference={dossier.reference} />
         <AppPageHeader
           eyebrow="Mode mission"
           title="Flow"
@@ -102,7 +131,7 @@ export default async function MissionFlowPage({
     )
   }
 
-  // 3. Charge l'état persistant (peut être null si jamais initialisé)
+  // 5. Charge l'état persistant (peut être null si jamais initialisé)
   const flowStatesTbl = supabase.from('mission_flow_states' as never) as unknown as {
     select: (q: string) => {
       eq: (
@@ -118,7 +147,7 @@ export default async function MissionFlowPage({
     .eq('mission_id', mission.id)
     .maybeSingle()
 
-  // 4. Charge l'historique d'événements (vide si flow jamais initialisé)
+  // 6. Charge l'historique d'événements (vide si flow jamais initialisé)
   const flowEventsTbl = supabase.from('mission_flow_events' as never) as unknown as {
     select: (q: string) => {
       eq: (
@@ -148,8 +177,16 @@ export default async function MissionFlowPage({
     toPhase: (e.to_phase as MissionFlowPhase | null) ?? null,
   }))
 
+  // 7. Construit la liste des missions pour le picker (si > 1)
+  const missionList = missions.map((m, idx) => ({
+    id: m.id,
+    type: m.type as MissionType,
+    label: buildMissionLabel(m, idx),
+  }))
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 animate-fade-in motion-reduce:animate-none">
+      <MissionFlowBreadcrumb dossierId={dossierId} dossierReference={dossier.reference} />
       <AppPageHeader
         eyebrow="Mode mission"
         title="Flow"
@@ -166,7 +203,7 @@ export default async function MissionFlowPage({
             <form action={initializeMissionFlowAction.bind(null, mission.id)}>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-pill bg-chartreuse px-[22px] py-[11px] text-[13px] font-medium text-ink shadow-[0_6px_18px_rgba(212,245,66,0.35)] transition-all hover:bg-chartreuse-deep hover:-translate-y-px"
+                className="inline-flex items-center justify-center gap-2 rounded-pill bg-chartreuse px-[22px] py-[11px] text-[13px] font-medium text-ink shadow-[0_6px_18px_rgba(212,245,66,0.35)] transition-all hover:bg-chartreuse-deep hover:-translate-y-px motion-reduce:transition-none"
               >
                 Initialiser le flow
               </button>
@@ -175,9 +212,12 @@ export default async function MissionFlowPage({
         />
       ) : (
         <MissionFlowComposer
+          dossierId={dossierId}
           missionId={mission.id}
+          missions={missionList}
           dossierReference={dossier.reference}
           initialState={flowState.current_phase}
+          initialVersion={flowState.version}
           initialEventHistory={eventHistory}
           onTransition={transitionMissionFlowAction}
         />
