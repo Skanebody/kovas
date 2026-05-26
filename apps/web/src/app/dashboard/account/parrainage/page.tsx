@@ -1,4 +1,5 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { SeoScoreWidget } from '@/components/dashboard/widgets/SeoScoreWidget'
 import { ReferralLinkHero } from '@/components/referral/ReferralLinkHero'
 import { ReferralsTable } from '@/components/referral/ReferralsTable'
 import { Badge } from '@/components/ui/badge'
@@ -228,6 +229,9 @@ export default async function ParrainagePage() {
           />
         </dl>
       </Card>
+
+      {/* Widget SEO de ta fiche annuaire (A1.3.12) — Lot B82 */}
+      <SeoScoreWidget />
 
       {/* MENTION LÉGALE */}
       <p className="text-[11px] text-[#0F1419]/55 leading-relaxed pt-4 border-t border-[#0F1419]/[0.08]">

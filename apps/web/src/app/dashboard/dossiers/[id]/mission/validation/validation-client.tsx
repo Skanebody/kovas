@@ -9,6 +9,7 @@
  *   - Droite : checklist "Champs à risque" + CTA export Liciel
  */
 
+import { VisionEquipmentSection } from '@/components/dashboard/widgets/VisionEquipmentSection'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -374,6 +375,9 @@ export function ValidationClient({
           )}
         </Card>
       )}
+
+      {/* Détections Vision IA (A1.3.6) — Lot B82 */}
+      <VisionEquipmentSection photos={photos} />
 
       {/* Layout 3 colonnes */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_1fr_280px]">

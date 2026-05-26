@@ -18,6 +18,7 @@ import {
   Archive,
   BarChart3,
   Bell,
+  Brain,
   Calendar,
   FolderOpen,
   Gift,
@@ -58,6 +59,7 @@ export type SidebarItemId =
   | 'outils'
   | 'affiliation'
   | 'parrainage'
+  | 'algos'
 
 export type SidebarZone = 'main' | 'more'
 
@@ -258,6 +260,18 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     icon: Users,
     defaultZone: 'more',
     defaultPosition: 7,
+    customizable: true,
+  },
+  // B82 (Vague 3A) — Découvrir > Algorithmes : catalogue diag-facing des
+  // 13 algos A1.3.* (pendant interne du SectionAlgosCatalog de la home).
+  {
+    id: 'algos',
+    href: '/dashboard/decouvrir/algos',
+    label: 'Algorithmes',
+    tooltip: 'Découvrir les 13 algorithmes propriétaires KOVAS',
+    icon: Brain,
+    defaultZone: 'more',
+    defaultPosition: 8,
     customizable: true,
   },
 ] as const

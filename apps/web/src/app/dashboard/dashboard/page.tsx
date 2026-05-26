@@ -1,4 +1,6 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { ProfessionStatsWidget } from '@/components/dashboard/widgets/ProfessionStatsWidget'
+import { RenewalsWidget } from '@/components/dashboard/widgets/RenewalsWidget'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { parisDayBounds } from '@/lib/paris-dates'
 import type { Metadata } from 'next'
@@ -57,6 +59,12 @@ export default async function DashboardPage() {
 
         {/* Mini-stats semaine */}
         <CetteSemaineSection />
+
+        {/* Widget renouvellements certifications (A1.3.10) — Lot B82 */}
+        <RenewalsWidget />
+
+        {/* Widget stats secteur 7 jours (GC4 diag-facing) — Lot B82 */}
+        <ProfessionStatsWidget />
       </div>
     </div>
   )
