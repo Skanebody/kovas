@@ -1,29 +1,38 @@
 /**
  * KOVAS — Homepage marketing kovas.fr/
  *
- * Lot B35 (post-pivot SaaS-only) — Refonte 8 sections strictes (B69 → 9 sections) :
- *   1. Hero "Le copilote des diagnostiqueurs"
- *   2. Trust bar (6 sources data + 3 chiffres clés)
- *   3. 3 promesses (35 min/mission · zéro erreur ADEME · leads B2C)
- *   4. Comparaison Liciel seul vs Liciel + KOVAS
- *   5. How it works 3 étapes (Capture → Vérifie → Export Liciel)
- *   6. 13 algorithmes propriétaires (B69 — explique les 13 algos A1.3.*)
- *   7. Pricing teaser transparent
- *   8. FAQ 8 objections principales
- *   9. CTA final essai 30 jours
+ * Lot B74 (refonte stratégique 4 sections Tugan Bara) — 12 sections :
+ *   1.  Hero "Le copilote des diagnostiqueurs"
+ *   2.  Trust bar (6 sources data + 3 chiffres clés)
+ *   3.  3 promesses (35 min/mission · zéro erreur ADEME · leads B2C)
+ *   4.  Comparaison Liciel seul vs Liciel + KOVAS
+ *   5.  How it works 3 étapes (Capture → Vérifie → Export Liciel)
+ *   6.  🆕 Mécanique révélée — pas par magie, par 3 mécaniques précises
+ *   7.  13 algorithmes propriétaires (B69 — explique les 13 algos A1.3.*)
+ *   8.  🆕 Lettre du fondateur (Benjamin Bel — connexion émotionnelle)
+ *   9.  🆕 Anti-pitch (filtre bad-fit — "n'est pas pour toi si…")
+ *   10. Pricing teaser transparent
+ *   11. FAQ 8 objections principales
+ *   12. CTA final essai 30 jours + PS calcul ROI personnalisé
  *
  * Brand strict V5 : sage #F5F7F4 + navy #0F1419 + chartreuse #D4F542 UNIQUEMENT
  * sur CTA conversion et badges validation. Instrument Serif italic réservée
- * Hero + sections 3 & 4. Urbanist body. Aucun gradient, aucune ombre,
+ * Hero + sections 3, 4 & 6. Urbanist body. Aucun gradient, aucune ombre,
  * bordures 1px max.
  *
  * B69 : ajout `<GlossaryTerm>` sur termes jargon (DPE, Liciel, ADEME, 3CL-2021,
  * COFRAC, DHUP, GES). Tooltip discret `ⓘ` Lucide 14px navy/55 %.
  *
- * Avatar : diagnostiqueur 43 ans, ex-cadre reconverti. Ton SOBRE
- * PROFESSIONNEL, vouvoiement, jamais gaming/lifestyle/millennial.
+ * B74 : bascule complète au TUTOIEMENT (code SaaS B2B challenger 2026 : Qonto,
+ * Alan, Pennylane). Ton confrère professionnel sobre — JAMAIS familier
+ * "salut man" / gaming / millennial. Le "tu" est PROFESSIONNEL et DIRECT,
+ * comme entre deux diagnostiqueurs sur un salon RIDI.
  *
- * Authority : prompt orchestration refonte (Update 3 — homepage 8 sections + B69).
+ * Avatar : diagnostiqueur 43 ans, ex-cadre reconverti. Ton SOBRE
+ * PROFESSIONNEL, jamais gaming/lifestyle/millennial.
+ *
+ * Authority : prompt orchestration refonte (Lot B74 — 4 sections Tugan adaptées
+ * + bascule tutoiement).
  */
 
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
@@ -92,8 +101,8 @@ function SectionHero(): React.ReactElement {
         <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
           Compatible <GlossaryTerm term="liciel">Liciel</GlossaryTerm>,{' '}
           <GlossaryTerm term="oris">ORIS</GlossaryTerm>,{' '}
-          <GlossaryTerm term="obbc">OBBC</GlossaryTerm>. Vous capturez sur le terrain, KOVAS vérifie
-          en temps réel, vous exportez vers votre logiciel principal. 1 h 30 gagnée par mission{' '}
+          <GlossaryTerm term="obbc">OBBC</GlossaryTerm>. Tu captures sur le terrain, KOVAS vérifie
+          en temps réel, tu exportes vers ton logiciel principal. 1 h 30 gagnée par mission{' '}
           <GlossaryTerm term="dpe">DPE</GlossaryTerm>.
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -225,6 +234,7 @@ function SectionThreePromises(): React.ReactElement {
         </>
       ),
     },
+
     {
       icon: <Sparkles className="size-5" aria-hidden />,
       title: 'Leads B2C',
@@ -325,7 +335,8 @@ function SectionLicielVsKovas(): React.ReactElement {
           </h2>
           <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
             KOVAS ne remplace pas Liciel. KOVAS supprime la friction terrain et la re-saisie. Le
-            calcul DPE certifié 3CL-2021 et l&apos;envoi ADEME restent dans Liciel.
+            calcul DPE certifié 3CL-2021 et l&apos;envoi ADEME restent dans Liciel. Tu gardes ton
+            workflow réglementaire, tu gagnes 1 h 30 par mission.
           </p>
         </div>
         <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden">
@@ -406,7 +417,7 @@ function SectionHowItWorks(): React.ReactElement {
       n: 2,
       icon: <Shield className="size-5" aria-hidden />,
       title: 'KOVAS vérifie',
-      body: '13 algorithmes contrôlent la cohérence : cadastre vs surface déclarée, classe vs distribution locale, jump suspect, GES incohérent, DPE shopping détecté. Vous corrigez avant export.',
+      body: '13 algorithmes contrôlent la cohérence : cadastre vs surface déclarée, classe vs distribution locale, jump suspect, GES incohérent, DPE shopping détecté. Tu corriges avant export.',
     },
     {
       n: 3,
@@ -421,7 +432,7 @@ function SectionHowItWorks(): React.ReactElement {
         <>
           ZIP V4 généré en un clic, import direct dans Liciel. Le calcul{' '}
           <GlossaryTerm term="3cl-2021">3CL-2021</GlossaryTerm> certifié reste chez Liciel.
-          L&apos;envoi ADEME aussi. Vous gagnez la friction, pas la certification.
+          L&apos;envoi ADEME aussi. Tu gagnes la friction, pas la certification.
         </>
       ),
     },
@@ -463,14 +474,105 @@ function SectionHowItWorks(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* 6. 13 ALGORITHMES PROPRIÉTAIRES (B69)                                       */
+/* 6. MÉCANIQUE RÉVÉLÉE (B74 — Tugan adapté)                                   */
+/*    Complète "Comment ça marche" : pas de magie, mécaniques précises +       */
+/*    gains explicites en minutes par mission.                                 */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SectionMechanismRevealed(): React.ReactElement {
+  const mechanics: ReadonlyArray<{
+    n: string
+    title: string
+    body: React.ReactNode
+    gain: string
+  }> = [
+    {
+      n: '[1]',
+      title: 'Pendant ta mission, tu parles à ton téléphone',
+      body: (
+        <>
+          KOVAS transcrit tes notes vocales (Whisper FR) et identifie automatiquement ce qui
+          correspond à chaque champ de ton rapport <GlossaryTerm term="dpe">DPE</GlossaryTerm>.
+        </>
+      ),
+      gain: 'Gain : 12 min/mission de saisie manuelle évitée',
+    },
+    {
+      n: '[2]',
+      title: 'Tu prends 3 photos de plaques signalétiques',
+      body: 'KOVAS reconnaît la marque, le modèle, la puissance, l’année (Vision IA Claude Sonnet). Tu ne saisis rien.',
+      gain: 'Gain : 8 min/mission',
+    },
+    {
+      n: '[3]',
+      title: 'Avant ton envoi à l’ADEME, KOVAS croise 6 sources publiques',
+      body: (
+        <>
+          Cadastre <GlossaryTerm term="ign">IGN</GlossaryTerm>, DVF, annuaire{' '}
+          <GlossaryTerm term="ademe">ADEME</GlossaryTerm>, Géorisques,{' '}
+          <GlossaryTerm term="ban">BAN</GlossaryTerm>, <GlossaryTerm term="dhup">DHUP</GlossaryTerm>
+          . Si une incohérence existe (DPE shopping, écart cadastre, classe énergie suspecte), KOVAS
+          te le dit AVANT envoi.
+        </>
+      ),
+      gain: 'Gain : 15 min de relecture évitées + zéro mauvaise surprise ADEME',
+    },
+  ]
+  return (
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+      <div className="max-w-[1240px] mx-auto space-y-12">
+        <div className="space-y-3 max-w-2xl">
+          <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+            Comment c&apos;est possible
+          </p>
+          <h2
+            className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+            style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+          >
+            Pas par magie. Par <span className="font-serif italic font-normal">3 mécaniques</span>{' '}
+            précises.
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {mechanics.map((m) => (
+            <div
+              key={m.n}
+              className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-7 space-y-4 flex flex-col"
+            >
+              <p className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55">
+                {m.n}
+              </p>
+              <h3 className="text-lg font-semibold text-[#0F1419] tracking-tight leading-snug">
+                {m.title}
+              </h3>
+              <div className="text-[14px] text-[#0F1419]/72 leading-relaxed flex-1">{m.body}</div>
+              <p className="pt-3 border-t border-[#0F1419]/[0.06] font-mono text-[11px] uppercase tracking-wider text-chartreuse-deep font-semibold">
+                {m.gain}
+              </p>
+            </div>
+          ))}
+        </div>
+        <p
+          className="font-serif italic font-normal text-center text-[#0F1419] leading-snug max-w-3xl mx-auto pt-4"
+          style={{ fontSize: 'clamp(28px, 2.5vw, 40px)' }}
+        >
+          Total : <span className="font-semibold not-italic font-sans">35 minutes</span> récupérées
+          sur chaque mission. Pas une promesse marketing. Une mécanique mesurable.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* 7. 13 ALGORITHMES PROPRIÉTAIRES (B69)                                       */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 /**
  * 13 algorithmes A1.3.* exposés au grand public sur la home.
  *
  * Pour chaque algo : code mono + titre court + "Ce que ça fait" (technique)
- * + "Pour vous" (bénéfice diagnostiqueur). Aucun emoji, ton SOBRE.
+ * + "Pour toi" (bénéfice diagnostiqueur). Aucun emoji, ton SOBRE.
  *
  * Source pure-fn : `apps/web/src/lib/algos/*.ts` (13 fichiers + 13 suites
  * de tests Vitest). Cf. PROGRESS.md §"Algorithmes A1.3.* — 13 / 13 livrés".
@@ -492,9 +594,8 @@ const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
     code: 'A1.3.6',
     icon: <Scan className="size-4" aria-hidden />,
     title: 'Vision équipement',
-    what: 'Reconnaît chaudières, étiquettes énergétiques et matériaux isolants directement depuis vos photos terrain.',
-    forYou:
-      'Les caractéristiques se pré-remplissent toutes seules. Vous validez au lieu de saisir.',
+    what: 'Reconnaît chaudières, étiquettes énergétiques et matériaux isolants directement depuis tes photos terrain.',
+    forYou: 'Les caractéristiques se pré-remplissent toutes seules. Tu valides au lieu de saisir.',
   },
   {
     code: 'A1.3.3',
@@ -503,7 +604,7 @@ const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
     what: 'Note de 0 à 100 sur la cohérence globale du DPE : croisement cadastre, distribution locale, équipements, surface.',
     forYou: (
       <>
-        Vous savez avant export si votre rapport va passer les contrôles{' '}
+        Tu sais avant export si ton rapport va passer les contrôles{' '}
         <GlossaryTerm term="ademe">ADEME</GlossaryTerm> ou pas.
       </>
     ),
@@ -514,11 +615,11 @@ const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
     title: 'Cohérence cadastre',
     what: (
       <>
-        Compare la surface que vous avez saisie avec le cadastre{' '}
+        Compare la surface que tu as saisie avec le cadastre{' '}
         <GlossaryTerm term="ign">IGN</GlossaryTerm> officiel. Alerte si écart supérieur à 10 %.
       </>
     ),
-    forYou: 'Vous évitez les sanctions ADEME pour incohérence métré. Détection en 0,2 seconde.',
+    forYou: 'Tu évites les sanctions ADEME pour incohérence métré. Détection en 0,2 seconde.',
   },
   {
     code: 'A1.3.4',
@@ -532,7 +633,7 @@ const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
       </>
     ),
     forYou:
-      '15 minutes de recherche gagnées par mission. Vous arrivez sur place avec tout le contexte.',
+      '15 minutes de recherche gagnées par mission. Tu arrives sur place avec tout le contexte.',
   },
   {
     code: 'A1.3.1',
@@ -540,21 +641,21 @@ const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
     title: 'DPE shopping detection',
     what: 'Détecte les propriétaires qui multiplient les diagnostics chez plusieurs cabinets en peu de temps pour obtenir la meilleure classe.',
     forYou:
-      'Vous identifiez les clients qui cherchent un diag « arrangeant ». Vous protégez votre certification.',
+      'Tu identifies les clients qui cherchent un diag « arrangeant ». Tu protèges ta certification.',
   },
   {
     code: 'A1.3.9',
     icon: <AlertTriangle className="size-4" aria-hidden />,
     title: 'Anomalies de production',
-    what: 'Détecte les jumps suspects dans votre zone : classe G en 2023 puis A en 2024 sans travaux déclarés.',
-    forYou: 'Vous savez quels biens dans votre secteur risquent de provoquer un signalement.',
+    what: 'Détecte les jumps suspects dans ta zone : classe G en 2023 puis A en 2024 sans travaux déclarés.',
+    forYou: 'Tu sais quels biens dans ton secteur risquent de provoquer un signalement.',
   },
   {
     code: 'A1.3.7',
     icon: <FileSearch className="size-4" aria-hidden />,
     title: 'Tri des documents client',
     what: 'Classe automatiquement les docs uploadés par le propriétaire : factures énergie, anciens DPE, plans, attestations travaux.',
-    forYou: 'Vous arrivez sur place avec un dossier déjà structuré. Zéro tri manuel à faire.',
+    forYou: 'Tu arrives sur place avec un dossier déjà structuré. Zéro tri manuel à faire.',
   },
   {
     code: 'A1.3.10',
@@ -562,9 +663,9 @@ const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
     title: 'Alerte expirations',
     what: (
       <>
-        Prédit la date d&apos;expiration de votre certification{' '}
-        <GlossaryTerm term="cofrac">COFRAC</GlossaryTerm> et de votre RC Pro. Alerte 90, 60 et 30
-        jours avant.
+        Prédit la date d&apos;expiration de ta certification{' '}
+        <GlossaryTerm term="cofrac">COFRAC</GlossaryTerm> et de ta RC Pro. Alerte 90, 60 et 30 jours
+        avant.
       </>
     ),
     forYou: "Aucun risque d'oubli. Plus de mission refusée pour certification expirée.",
@@ -572,8 +673,8 @@ const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
   {
     code: 'A1.3.13',
     icon: <Brain className="size-4" aria-hidden />,
-    title: 'Apprentissage de votre méthode',
-    what: 'Apprend votre façon de saisir au fil des missions : terminologie, ordre des pièces, équipements types.',
+    title: 'Apprentissage de ta méthode',
+    what: 'Apprend ta façon de saisir au fil des missions : terminologie, ordre des pièces, équipements types.',
     forYou:
       'Les suggestions deviennent de plus en plus précises. -60 à -70 % de tokens IA après 6 mois.',
   },
@@ -582,22 +683,21 @@ const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
     icon: <Target className="size-4" aria-hidden />,
     title: 'Lead scoring intent',
     what: "Score d'intention 0-100 sur chaque demande B2C reçue via kovas.fr. Routing Thompson sampling vers le diag le plus pertinent.",
-    forYou:
-      'Vous recevez en priorité les leads qui vont signer. Pas de temps perdu sur les curieux.',
+    forYou: 'Tu reçois en priorité les leads qui vont signer. Pas de temps perdu sur les curieux.',
   },
   {
     code: 'A1.3.11',
     icon: <TrendingDown className="size-4" aria-hidden />,
     title: 'Risque de churn client',
-    what: 'Repère vos clients à risque de revente prochaine (signaux DVF, durée détention, prix marché).',
+    what: 'Repère tes clients à risque de revente prochaine (signaux DVF, durée détention, prix marché).',
     forYou: '+20 % de missions récurrentes grâce aux relances ciblées au bon moment.',
   },
   {
     code: 'A1.3.12',
     icon: <LineChart className="size-4" aria-hidden />,
-    title: 'SEO de votre fiche publique',
-    what: 'Audit en continu de votre fiche kovas.fr/[ville] : title, meta, schema.org, maillage, mots-clés.',
-    forYou: 'Votre fiche annuaire remonte sur Google sans publicité. Leads B2C en pilote auto.',
+    title: 'SEO de ta fiche publique',
+    what: 'Audit en continu de ta fiche kovas.fr/[ville] : title, meta, schema.org, maillage, mots-clés.',
+    forYou: 'Ta fiche annuaire remonte sur Google sans publicité. Leads B2C en pilote auto.',
   },
   {
     code: 'A1.3.8',
@@ -605,13 +705,13 @@ const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
     title: 'Sync annuaire 4 sources',
     what: (
       <>
-        Met à jour votre fiche depuis 4 sources officielles :{' '}
+        Met à jour ta fiche depuis 4 sources officielles :{' '}
         <GlossaryTerm term="dhup">DHUP</GlossaryTerm>, INSEE Sirene,{' '}
         <GlossaryTerm term="cofrac">COFRAC</GlossaryTerm>, Google My Business.
       </>
     ),
     forYou:
-      'Aucun travail manuel. Votre fiche reflète vos certifications réelles 24 h après tout changement.',
+      'Aucun travail manuel. Ta fiche reflète tes certifications réelles 24 h après tout changement.',
   },
 ]
 
@@ -630,9 +730,9 @@ function SectionAlgosCatalog(): React.ReactElement {
             13 <span className="font-serif italic font-normal">algorithmes</span> propriétaires.
           </h2>
           <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
-            Ce que KOVAS calcule pour vous en permanence — et pourquoi ça vous fait gagner du temps,
-            de la sérénité et des leads. Chaque algo est testé (Vitest pure-fn) et exposé dans
-            l&apos;app dès votre première mission.
+            Ce que KOVAS calcule pour toi en permanence — et pourquoi ça te fait gagner du temps, de
+            la sérénité et des leads. Chaque algo est testé (Vitest pure-fn) et exposé dans
+            l&apos;app dès ta première mission.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -655,7 +755,7 @@ function SectionAlgosCatalog(): React.ReactElement {
               </div>
               <div className="pt-2 border-t border-[#0F1419]/[0.06]">
                 <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55 mb-1">
-                  Pour vous
+                  Pour toi
                 </p>
                 <div className="text-[13px] text-[#0F1419] font-medium leading-relaxed">
                   {algo.forYou}
@@ -684,7 +784,163 @@ function SectionAlgosCatalog(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* 7. PRICING TEASER                                                           */
+/* 8. LETTRE DU FONDATEUR (B74 — Tugan adapté)                                 */
+/*    Connexion émotionnelle : Benjamin Bel s'adresse directement au           */
+/*    diagnostiqueur. Ton confrère sobre, vouvoiement converti en tu.          */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SectionFounderLetter(): React.ReactElement {
+  return (
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+      <div className="max-w-[1240px] mx-auto space-y-12">
+        <div className="space-y-3 max-w-2xl">
+          <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+            Le mot du fondateur
+          </p>
+          <h2
+            className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+            style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+          >
+            Pourquoi j&apos;ai <span className="font-serif italic font-normal">construit</span>{' '}
+            KOVAS.
+          </h2>
+        </div>
+        <div className="max-w-[680px] mx-auto rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-8 py-10 sm:px-12 sm:py-14">
+          <div
+            className="w-20 h-20 rounded-full bg-[#0F1419]/[0.08] mx-auto mb-6 flex items-center justify-center"
+            aria-hidden
+          >
+            <span className="font-serif italic text-[#0F1419]/30 text-2xl">B</span>
+          </div>
+          <div className="text-[16px] text-[#0F1419]/82 leading-[1.6] space-y-4">
+            <p>Salut,</p>
+            <p>Je suis Benjamin Bel, le fondateur de KOVAS.</p>
+            <p>
+              Pendant des années, j&apos;ai observé des diagnostiqueurs faire 15 missions par
+              semaine et rentrer à 21 h le soir, épuisés, parce qu&apos;ils passaient{' '}
+              <em>3 h chaque soir</em> à ressaisir leurs données dans Liciel.
+            </p>
+            <p>
+              J&apos;ai vu des solos perdre des nuits de sommeil parce qu&apos;ils avaient un doute
+              sur un DPE qu&apos;ils venaient d&apos;envoyer à l&apos;ADEME.
+            </p>
+            <p>
+              J&apos;ai vu des cabinets stagner parce qu&apos;ils n&apos;avaient pas le temps de
+              prospecter pour trouver de nouveaux clients.
+            </p>
+            <p>
+              Et j&apos;ai vu les éditeurs de logiciels — Liciel, ORIS, les autres — vendre des
+              modules à 200, 300, parfois 400 € par mois sans changer un iota du quotidien terrain
+              depuis 15 ans.
+            </p>
+            <p>Alors j&apos;ai décidé de construire un outil qui te rende ces 3 h par soir.</p>
+            <p>
+              Un outil qui te dise « ton DPE est OK » <em>AVANT</em> que tu envoies à l&apos;ADEME,
+              pas après le contrôle.
+            </p>
+            <p>
+              Un outil qui amène les clients à toi, plutôt que de te laisser dépendant des agences
+              immobilières.
+            </p>
+            <p>KOVAS, c&apos;est ça.</p>
+            <p>
+              Et je le construis avec 10 diagnostiqueurs partenaires en France qui le testent au
+              quotidien et orientent sa roadmap. Pas par un comité produit hors-sol.
+            </p>
+            <p>
+              Si ça te parle, essaie KOVAS gratuitement 30 jours. Tu peux arrêter en 2 clics si ça
+              ne te convient pas.
+            </p>
+          </div>
+          <p className="font-mono text-[12px] uppercase tracking-wider text-[#0F1419]/60 mt-8 pt-6 border-t border-[#0F1419]/[0.06]">
+            — Benjamin Bel · Fondateur · Diagnostiqueur certifié DPE
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* 9. ANTI-PITCH (B74 — Tugan adapté)                                          */
+/*    Filtre bad-fit : "KOVAS n'est pas pour toi si…" + colonne miroir         */
+/*    "Mais KOVAS est fait pour toi si…". Augmente la crédibilité par          */
+/*    auto-exclusion explicite des cas hors cible.                             */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SectionAntiPitch(): React.ReactElement {
+  const notForYou: ReadonlyArray<string> = [
+    'Tu fais moins de 5 missions par mois (le ROI ne sera pas suffisant, reste sur Excel).',
+    'Tu veux remplacer Liciel ou ORIS (KOVAS s’utilise EN PLUS, pas À LA PLACE).',
+    'Tu cherches un logiciel certifié ADEME qui envoie tes DPE (c’est Liciel qui fait l’envoi final).',
+    'Tu refuses d’apprendre un nouvel outil (prévois 15 min d’onboarding la première fois).',
+    'Tu veux une solution gratuite (le tier le moins cher est à 29 €/mois, et la valeur livrée est très au-dessus).',
+  ]
+  const forYou: ReadonlyArray<string> = [
+    'Tu fais 10+ missions par mois et tu veux récupérer 35 minutes sur chacune.',
+    'Tu veux dormir tranquille la nuit avant un envoi ADEME.',
+    'Tu veux que les particuliers de ton département te trouvent automatiquement.',
+  ]
+  return (
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+      <div className="max-w-[1240px] mx-auto space-y-12">
+        <div className="space-y-3 max-w-2xl">
+          <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+            Filtrage radical
+          </p>
+          <h2
+            className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+            style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+          >
+            KOVAS n&apos;est <span className="font-serif italic font-normal">pas pour toi</span> si…
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/60 font-semibold">
+              KOVAS n&apos;est pas pour toi si…
+            </p>
+            <ul className="space-y-3">
+              {notForYou.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-xl border border-[#0F1419]/[0.08] bg-paper px-5 py-4 flex items-start gap-3"
+                >
+                  <XCircle className="size-5 text-[#0F1419]/40 shrink-0 mt-0.5" aria-hidden />
+                  <span className="text-[14px] text-[#0F1419]/72 leading-relaxed">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="space-y-4">
+            <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419] font-semibold">
+              Mais KOVAS est fait pour toi si…
+            </p>
+            <ul className="space-y-3">
+              {forYou.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-xl border border-[#0F1419]/[0.08] bg-paper px-5 py-4 flex items-start gap-3"
+                >
+                  <CheckCircle2
+                    className="size-5 text-chartreuse-deep shrink-0 mt-0.5"
+                    aria-hidden
+                  />
+                  <span className="text-[14px] text-[#0F1419] font-medium leading-relaxed">
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* 10. PRICING TEASER                                                          */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function SectionPricingTeaser(): React.ReactElement {
@@ -762,25 +1018,25 @@ function SectionPricingTeaser(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* 8. FAQ — 8 OBJECTIONS PRINCIPALES                                           */
+/* 11. FAQ — 8 OBJECTIONS PRINCIPALES                                          */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 const HOME_FAQ: ReadonlyArray<{ q: string; a: string }> = [
   {
     q: 'Faut-il abandonner Liciel pour utiliser KOVAS ?',
-    a: "Non, c'est l'inverse. KOVAS est compagnon de Liciel : vous capturez avec KOVAS, le calcul DPE 3CL-2021 certifié reste dans Liciel, l'envoi à l'ADEME aussi. Switching cost zéro. KOVAS supprime la friction terrain et la re-saisie au bureau.",
+    a: "Non, c'est l'inverse. KOVAS est compagnon de Liciel : tu captures avec KOVAS, le calcul DPE 3CL-2021 certifié reste dans Liciel, l'envoi à l'ADEME aussi. Switching cost zéro. KOVAS supprime la friction terrain et la re-saisie au bureau.",
   },
   {
     q: 'KOVAS est-il certifié ADEME pour le calcul DPE ?',
-    a: "Non, et c'est volontaire. Le moteur de calcul certifié 3CL-2021 reste dans Liciel (ou ORIS, OBBC selon votre logiciel). KOVAS n'envoie jamais directement à l'ADEME. Cette séparation des responsabilités protège votre certification et évite tout risque de signalement.",
+    a: "Non, et c'est volontaire. Le moteur de calcul certifié 3CL-2021 reste dans Liciel (ou ORIS, OBBC selon ton logiciel). KOVAS n'envoie jamais directement à l'ADEME. Cette séparation des responsabilités protège ta certification et évite tout risque de signalement.",
   },
   {
     q: "Mes données restent-elles à moi si j'arrête KOVAS ?",
-    a: 'Oui sans condition. Export complet PDF, Word, CSV, JSON ou ZIP Liciel à tout moment. Après résiliation, votre compte reste 90 jours en lecture seule pour récupérer vos dossiers. Aucun verrou propriétaire, aucune négociation de sortie.',
+    a: 'Oui sans condition. Export complet PDF, Word, CSV, JSON ou ZIP Liciel à tout moment. Après résiliation, ton compte reste 90 jours en lecture seule pour récupérer tes dossiers. Aucun verrou propriétaire, aucune négociation de sortie.',
   },
   {
     q: 'Quelles données sont stockées et où ?',
-    a: "Hébergement Supabase EU (Paris). Vos missions, photos, notes vocales sont chiffrées au repos. Conformité RGPD complète depuis le démarrage. Aucune donnée client n'est partagée avec un tiers commercial. Données 100% sous votre contrôle.",
+    a: "Hébergement Supabase EU (Paris). Tes missions, photos, notes vocales sont chiffrées au repos. Conformité RGPD complète depuis le démarrage. Aucune donnée client n'est partagée avec un tiers commercial. Données 100% sous ton contrôle.",
   },
   {
     q: 'Combien gagne réellement un diagnostiqueur par mission ?',
@@ -810,7 +1066,7 @@ function SectionFaq(): React.ReactElement {
             className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
             style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
           >
-            Vos 8 objections principales.
+            Tes 8 objections principales.
           </h2>
         </div>
         <ul className="divide-y divide-[#0F1419]/[0.08] border-y border-[#0F1419]/[0.08]">
@@ -831,7 +1087,7 @@ function SectionFaq(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* 9. CTA FINAL                                                                */
+/* 12. CTA FINAL + PS calcul ROI personnalisé (B74 — Tugan adapté)             */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function SectionFinalCta(): React.ReactElement {
@@ -847,7 +1103,7 @@ function SectionFinalCta(): React.ReactElement {
         </h2>
         <p className="text-lg text-paper/72 max-w-xl mx-auto leading-relaxed">
           Sans engagement. CB requise à l&apos;inscription, aucun débit avant J+30. Résiliation
-          libre depuis votre compte en deux clics.
+          libre depuis ton compte en deux clics.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <Button asChild variant="accent" size="lg">
@@ -866,6 +1122,41 @@ function SectionFinalCta(): React.ReactElement {
             contact@kovas.fr
           </a>
         </p>
+
+        {/* PS final B74 — calcul ROI personnalisé, signature Benjamin */}
+        <div className="border-t border-paper/15 mt-12 pt-12 max-w-[680px] mx-auto text-left space-y-4">
+          <p className="font-mono uppercase tracking-wider text-[11px] text-paper/55">
+            P.S. — un dernier calcul
+          </p>
+          <div className="text-[15px] text-paper/85 leading-relaxed space-y-4">
+            <p>Si tu hésites encore, fais le calcul simple suivant :</p>
+            <p>
+              Combien de missions tu fais par mois ? Multiplie par 35 minutes. Divise par 60.
+              C&apos;est le nombre d&apos;heures que tu vas récupérer chaque mois.
+            </p>
+            <p>
+              Si tu en fais 50, c&apos;est{' '}
+              <span className="font-serif italic text-chartreuse">29 heures</span>. Soit
+              l&apos;équivalent d&apos;une semaine de travail gagnée chaque mois.
+            </p>
+            <p>
+              Sur un an, c&apos;est{' '}
+              <span className="font-serif italic text-chartreuse">12 semaines</span>. Soit 3 mois
+              pleins.
+            </p>
+            <p>
+              3 mois de plus avec ta famille. 3 mois de plus pour développer ton activité. 3 mois de
+              plus à dormir tranquille.
+            </p>
+            <p className="pt-4 text-paper">
+              Tout ça pour <span className="font-serif italic text-chartreuse">29 €/mois</span>.
+              Essai 30 jours gratuit. Résiliation en 2 clics.
+            </p>
+            <p className="pt-2 font-mono text-[12px] uppercase tracking-wider text-paper/55">
+              — Benjamin
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -899,7 +1190,10 @@ export default async function HomePage() {
         <SectionThreePromises />
         <SectionLicielVsKovas />
         <SectionHowItWorks />
+        <SectionMechanismRevealed />
         <SectionAlgosCatalog />
+        <SectionFounderLetter />
+        <SectionAntiPitch />
         <SectionPricingTeaser />
         <SectionFaq />
         <SectionFinalCta />
