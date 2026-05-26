@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DiagChip } from '@/components/ui/diag-chip'
@@ -9,10 +10,9 @@ import Link from 'next/link'
 export const metadata: Metadata = { title: 'Certifications COFRAC' }
 
 /**
- * Onboarding étape 2/4 — Certifications COFRAC (wireframe v4 §2.2).
- * Clear, sélection multi-diagnostics + form par certif (organisme, n°,
- * dates, attestation PDF). Sauvegarde V1.5 — pour l'instant, formulaire
- * visuel + skip.
+ * Onboarding étape 2/4 — Certifications COFRAC (refonte V5 sobre).
+ * Sélection multi-diagnostics + form par certif (organisme, n°, dates,
+ * attestation PDF). Sauvegarde V1.5 — pour l'instant, formulaire visuel + skip.
  */
 export default function OnboardingCertificationsPage() {
   return (
@@ -26,21 +26,17 @@ export default function OnboardingCertificationsPage() {
         <OnboardingProgress current={2} total={4} />
       </div>
 
-      <div className="space-y-3">
-        <h1 className="font-sans font-light text-4xl md:text-5xl tracking-tight text-ink">
-          Vos <span className="font-serif italic">certifications</span> COFRAC.
-        </h1>
-        <p className="text-base text-ink-mute max-w-xl">
-          Pour qu&apos;on s&apos;occupe des alertes d&apos;expiration et qu&apos;on vous évite la
-          surprise du renouvellement à l&apos;arrache.
-        </p>
-      </div>
+      <AppPageHeader
+        title="Tes"
+        accent="certifications COFRAC"
+        description="Pour qu'on s'occupe des alertes d'expiration et qu'on t'évite la surprise du renouvellement à l'arrache."
+      />
 
-      <Card variant="opaque" padding="lg">
+      <Card variant="flat" padding="lg">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <ShieldCheck className="size-4 text-navy-700" />
-            Sélectionnez vos diagnostics certifiés
+            <ShieldCheck className="size-4 text-[#0F1419]" />
+            Sélectionne tes diagnostics certifiés
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -55,10 +51,13 @@ export default function OnboardingCertificationsPage() {
             <DiagChip type="ERP" />
           </div>
 
-          <p className="text-xs text-ink-mute">
+          <p className="text-xs text-[#0F1419]/72">
             Configuration détaillée par certif (organisme, numéro, dates, attestation PDF)
-            disponible depuis votre <Link href="/dashboard/account" className="underline">compte</Link> à
-            tout moment.
+            disponible depuis ton{' '}
+            <Link href="/dashboard/account" className="underline">
+              compte
+            </Link>{' '}
+            à tout moment.
           </p>
         </CardContent>
       </Card>

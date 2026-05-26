@@ -92,27 +92,28 @@ export function ConnectorForm({ initial }: ConnectorFormProps) {
   return (
     <div className="space-y-6">
       {/* Statut actuel */}
-      <div className="rounded-xl border border-rule bg-paper p-4 space-y-3">
+      <div className="rounded-xl border border-[#0F1419]/[0.08] bg-paper p-4 space-y-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <PlugZap className="size-4 text-ink-mute" />
-            <span className="text-sm font-semibold">Statut</span>
+            <PlugZap className="size-4 text-[#0F1419]/72" />
+            <span className="text-sm font-semibold text-[#0F1419]">Statut</span>
           </div>
           <Badge variant={isActive ? 'green' : 'muted'}>
             {isActive ? 'Actif' : initial.status === 'error' ? 'Erreur' : 'Non configuré'}
           </Badge>
         </div>
         {initial.tokenMasked ? (
-          <p className="text-xs text-ink-mute">
-            Token enregistré : <span className="font-mono text-ink">{initial.tokenMasked}</span>
+          <p className="text-xs text-[#0F1419]/72">
+            Token enregistré :{' '}
+            <span className="font-mono text-[#0F1419]">{initial.tokenMasked}</span>
           </p>
         ) : (
-          <p className="text-xs text-ink-mute">
-            Aucun token enregistré. Saisissez le token Pennylane de votre compte ci-dessous.
+          <p className="text-xs text-[#0F1419]/72">
+            Aucun token enregistré. Saisis le token Pennylane de ton compte ci-dessous.
           </p>
         )}
         {initial.lastSyncAt ? (
-          <p className="text-[11px] text-ink-faint">
+          <p className="text-[11px] text-[#0F1419]/55">
             Dernière synchronisation : {new Date(initial.lastSyncAt).toLocaleString('fr-FR')}
           </p>
         ) : null}
@@ -128,7 +129,7 @@ export function ConnectorForm({ initial }: ConnectorFormProps) {
         >
           <div className="flex gap-2 items-start">
             <div className="relative flex-1">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-ink-faint" />
+              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#0F1419]/55" />
               <Input
                 id="apiToken"
                 name="apiToken"
@@ -157,8 +158,8 @@ export function ConnectorForm({ initial }: ConnectorFormProps) {
         </FormField>
 
         {testState.state === 'success' && (
-          <div className="flex items-start gap-2 rounded-md border border-accent-green/30 bg-accent-green/5 p-3 text-xs">
-            <CheckCircle2 className="size-4 text-accent-green shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 rounded-md border border-[#34C759]/30 bg-[#34C759]/5 p-3 text-xs">
+            <CheckCircle2 className="size-4 text-[#34C759] shrink-0 mt-0.5" />
             <span>{testState.message}</span>
           </div>
         )}
@@ -174,7 +175,7 @@ export function ConnectorForm({ initial }: ConnectorFormProps) {
             type="checkbox"
             name="activate"
             defaultChecked
-            className="size-4 rounded border-rule"
+            className="size-4 rounded border-[#0F1419]/[0.08]"
           />
           <span>Activer la synchronisation Pennylane immédiatement après enregistrement</span>
         </label>

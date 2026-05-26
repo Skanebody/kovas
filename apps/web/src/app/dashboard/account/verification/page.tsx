@@ -219,7 +219,7 @@ export default async function VerificationPage() {
             Doctolib a appris en 2022 qu&apos;un délai de tolérance crée une faille pour les
             escrocs. KOVAS applique une validation préalable obligatoire pour protéger les
             particuliers et notre communauté de diagnostiqueurs honnêtes. Dès que les quatre phases
-            sont vert, votre profil apparaît dans l&apos;annuaire public et reçoit des leads du
+            sont vert, ton profil apparaît dans l&apos;annuaire public et reçoit des leads du
             calculateur DPE gratuit.
           </p>
         </aside>

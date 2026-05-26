@@ -81,17 +81,17 @@ export function ReferralLinkHero({ code, shareUrl, referrerDisplayName }: Referr
   return (
     <div className="space-y-5">
       {/* Lien affilié + actions principales */}
-      <div className="rounded-lg border border-rule/60 bg-sage/60 px-4 py-3.5 space-y-3">
+      <div className="rounded-lg border border-[#0F1419]/[0.08] bg-sage/60 px-4 py-3.5 space-y-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute">
-            Votre lien de parrainage
+          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72">
+            Ton lien de parrainage
           </div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-faint">
+          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/55">
             Code · {code}
           </div>
         </div>
         <div
-          className="font-mono text-[14px] sm:text-[15px] text-ink break-all leading-relaxed select-all"
+          className="font-mono text-[14px] sm:text-[15px] text-[#0F1419] break-all leading-relaxed select-all"
           aria-label="Lien de parrainage à copier"
         >
           {shareUrl}
@@ -120,8 +120,8 @@ export function ReferralLinkHero({ code, shareUrl, referrerDisplayName }: Referr
       </div>
 
       {/* Canaux directs */}
-      <div className="pt-4 border-t border-rule/40 space-y-3">
-        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute">
+      <div className="pt-4 border-t border-[#0F1419]/[0.08] space-y-3">
+        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72">
           Envoyer en un clic
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -163,7 +163,7 @@ function ChannelButton({
     <a
       href={href}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      className="inline-flex items-center justify-center gap-2 rounded-md border border-rule/70 bg-paper px-3 py-2 text-[12px] font-medium text-ink hover:bg-cream-deep transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/30"
+      className="inline-flex items-center justify-center gap-2 rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-2 text-[12px] font-medium text-[#0F1419] hover:bg-[#0F1419]/[0.04] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/30"
     >
       {icon}
       {label}
@@ -187,7 +187,7 @@ function QrModal({
     // backdrop cliquable via <button> sous-jacent.
     <dialog
       open
-      className="fixed inset-0 z-[100] bg-ink/40 backdrop-blur-sm m-0 max-w-none max-h-none w-screen h-screen flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] bg-[#0F1419]/40 backdrop-blur-sm m-0 max-w-none max-h-none w-screen h-screen flex items-center justify-center p-4"
       aria-labelledby="qr-modal-title"
     >
       <button
@@ -196,20 +196,20 @@ function QrModal({
         onClick={onClose}
         className="absolute inset-0 cursor-default bg-transparent"
       />
-      <div className="relative bg-paper rounded-xl border border-rule p-6 max-w-sm w-full space-y-4 shadow-lg">
+      <div className="relative bg-paper rounded-xl border border-[#0F1419]/[0.08] p-6 max-w-sm w-full space-y-4 shadow-lg">
         <div className="space-y-1">
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute">
+          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72">
             Code QR · partage IRL
           </div>
-          <h2 id="qr-modal-title" className="font-semibold text-[16px] text-ink">
-            Scannez avec un téléphone
+          <h2 id="qr-modal-title" className="font-semibold text-[16px] text-[#0F1419]">
+            Scanne avec un téléphone
           </h2>
-          <p className="text-[12px] text-ink-mute">
+          <p className="text-[12px] text-[#0F1419]/72">
             Pratique en salon, réunion ou affichage cabinet. Ouvre directement la page d'inscription
-            KOVAS avec votre code {code} appliqué.
+            KOVAS avec ton code {code} appliqué.
           </p>
         </div>
-        <div className="bg-white rounded-md border border-rule/60 p-4 flex items-center justify-center">
+        <div className="bg-white rounded-md border border-[#0F1419]/[0.08] p-4 flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={qrSrc}
@@ -219,7 +219,7 @@ function QrModal({
             className="size-[240px]"
           />
         </div>
-        <div className="font-mono text-[11px] text-ink-mute break-all">{shareUrl}</div>
+        <div className="font-mono text-[11px] text-[#0F1419]/72 break-all">{shareUrl}</div>
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" size="sm" asChild>
             <a href={qrSrc} download={`kovas-parrainage-${code}.svg`}>

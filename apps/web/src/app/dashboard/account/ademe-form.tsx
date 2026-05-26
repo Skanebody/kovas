@@ -59,10 +59,10 @@ export function AdemeForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      <p className="text-xs text-ink-mute leading-relaxed">
-        Renseignez votre numéro de certificat RGE pour activer le monitoring rétroactif de vos
-        DPE publiés sur l'API ADEME. Détection automatique des dépassements de seuils, distances
-        suspectes et incohérences avant que l'ADEME ne vous contacte.
+      <p className="text-xs text-[#0F1419]/72 leading-relaxed">
+        Renseigne ton numéro de certificat RGE pour activer le monitoring rétroactif de tes DPE
+        publiés sur l'API ADEME. Détection automatique des dépassements de seuils, distances
+        suspectes et incohérences avant que l'ADEME ne te contacte.
       </p>
 
       {/* Certificat RGE */}
@@ -80,19 +80,19 @@ export function AdemeForm({
           maxLength={40}
           className="font-mono"
         />
-        <p className="text-[11px] text-ink-mute">
-          Visible sur votre certification de diagnostiqueur. Format libre, généralement
-          alphanumérique 8-20 caractères.
+        <p className="text-[11px] text-[#0F1419]/72">
+          Visible sur ta certification de diagnostiqueur. Format libre, généralement alphanumérique
+          8-20 caractères.
         </p>
       </div>
 
       {/* Toggle monitoring */}
-      <div className="flex items-start justify-between gap-3 rounded-md border border-rule/60 p-3 bg-paper/40">
+      <div className="flex items-start justify-between gap-3 rounded-md border border-[#0F1419]/[0.08] p-3 bg-paper">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-ink">Monitoring rétroactif ADEME</p>
-          <p className="text-xs text-ink-mute leading-snug">
-            Sync quotidien des DPE que vous avez publiés. Génère alertes et KPIs dans le Cockpit
-            ADEME. Requiert un certificat RGE renseigné.
+          <p className="text-sm font-medium text-[#0F1419]">Monitoring rétroactif ADEME</p>
+          <p className="text-xs text-[#0F1419]/72 leading-snug">
+            Sync quotidien des DPE que tu as publiés. Génère alertes et KPIs dans le Cockpit ADEME.
+            Requiert un certificat RGE renseigné.
           </p>
         </div>
         <button
@@ -102,7 +102,7 @@ export function AdemeForm({
           onClick={() => setMonitoringEnabled((v) => !v)}
           disabled={!certificat.trim()}
           className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${
-            monitoringEnabled ? 'bg-[#0F1419]' : 'bg-ink/20'
+            monitoringEnabled ? 'bg-[#0F1419]' : 'bg-[#0F1419]/20'
           }`}
         >
           <span
@@ -115,7 +115,7 @@ export function AdemeForm({
 
       {/* Dernier sync */}
       {formattedLastSync && (
-        <div className="flex items-center gap-2 text-xs text-ink-mute">
+        <div className="flex items-center gap-2 text-xs text-[#0F1419]/72">
           <Radar className="size-3.5" />
           <span>Dernier sync : {formattedLastSync}</span>
         </div>

@@ -128,7 +128,7 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
       <nav
         aria-label="Sections compte"
         role="tablist"
-        className="flex items-center gap-1 overflow-x-auto rounded-pill border border-rule/60 bg-paper/85 p-1 shadow-glass-sm backdrop-blur-xl"
+        className="flex items-center gap-1 overflow-x-auto rounded-pill border border-[#0F1419]/[0.08] bg-paper p-1"
       >
         {TABS.map((t) => {
           const Icon = t.icon
@@ -144,8 +144,8 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
               className={cn(
                 'inline-flex items-center gap-2 whitespace-nowrap rounded-pill px-4 py-1.5 text-sm transition-colors',
                 active
-                  ? 'bg-navy text-paper font-semibold shadow-accent'
-                  : 'text-ink-mute hover:text-ink font-medium',
+                  ? 'bg-[#0F1419] text-[#D4F542] font-semibold'
+                  : 'text-[#0F1419]/72 hover:text-[#0F1419] font-medium',
               )}
             >
               <Icon className="size-4 shrink-0" />
@@ -239,9 +239,9 @@ function SecuriteTab({ props }: { props: AccountSettingsClientProps }) {
       <Card variant="opaque" padding="default" className="space-y-4">
         <SectionTitle icon={KeyRound} title="Authentification" iconColor="#0F1419" />
         <p className="text-[13px] text-[#0F1419]/65 leading-relaxed">
-          Vous êtes connecté avec l'email <strong>{props.profile.email}</strong>. Pour changer votre
-          mot de passe, utilisez le lien de récupération depuis la page de connexion. Pour modifier
-          l'adresse email, contactez le support.
+          Tu es connecté avec l'email <strong>{props.profile.email}</strong>. Pour changer ton mot
+          de passe, utilise le lien de récupération depuis la page de connexion. Pour modifier
+          l'adresse email, contacte le support.
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <Button asChild variant="outline" size="default">
@@ -255,10 +255,9 @@ function SecuriteTab({ props }: { props: AccountSettingsClientProps }) {
       <Card variant="opaque" padding="default" className="space-y-4">
         <SectionTitle icon={Shield} title="Données personnelles · RGPD" iconColor="#48484A" />
         <p className="text-[13px] text-[#0F1419]/65 leading-relaxed">
-          Vous pouvez à tout moment exporter vos données ou demander leur suppression. Conformément
-          au décret 2023-417 et au RGPD, une période de grâce de 90 jours s'applique avant
-          suppression irréversible. Vos factures restent conservées 10 ans (obligation comptable
-          L.123-22).
+          Tu peux à tout moment exporter tes données ou demander leur suppression. Conformément au
+          décret 2023-417 et au RGPD, une période de grâce de 90 jours s'applique avant suppression
+          irréversible. Tes factures restent conservées 10 ans (obligation comptable L.123-22).
         </p>
         <form action="/api/rgpd/request" method="POST">
           <input type="hidden" name="type" value="export" />
@@ -285,8 +284,8 @@ function SecuriteTab({ props }: { props: AccountSettingsClientProps }) {
       >
         <SectionTitle icon={XCircle} title="Zone danger" iconColor="#DC2626" />
         <p className="text-[12px] text-[#0F1419]/55 leading-relaxed">
-          Conformément au décret 2023-417 et au RGPD, vos données sont conservées 90 jours en grâce
-          avant suppression irréversible. Vos factures restent conservées 10 ans (obligation
+          Conformément au décret 2023-417 et au RGPD, tes données sont conservées 90 jours en grâce
+          avant suppression irréversible. Tes factures restent conservées 10 ans (obligation
           comptable L.123-22).
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -317,10 +316,10 @@ function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
       {/* Ribbon de distinction "Abonnement KOVAS" (dépenses) */}
       <div
         className="inline-flex items-center gap-2 rounded-pill border border-[#0F1419]/15 bg-[#0F1419]/[0.06] px-3 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-[#0F1419]"
-        aria-label="Cette section concerne votre abonnement KOVAS"
+        aria-label="Cette section concerne ton abonnement KOVAS"
       >
         <span aria-hidden className="size-1.5 rounded-full bg-[#0F1419]" />
-        Votre abonnement KOVAS · vos dépenses
+        Ton abonnement KOVAS · tes dépenses
       </div>
 
       <Card variant="opaque" padding="default" className="overflow-hidden">
@@ -427,7 +426,7 @@ function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
           />
         </div>
         <p className="text-[12px] text-[#0F1419]/55">
-          Modules activables séparément. Essai gratuit 14 jours, désactivables d'un clic.
+          Modules activables séparément. Essai gratuit 14 jours, désactivable d'un clic.
         </p>
 
         <ul className="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -462,7 +461,7 @@ function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
                 <div className="flex items-center justify-between pt-2 border-t border-[#0F1419]/[0.06]">
                   {included ? (
                     <Badge variant="green" className="text-[10px]">
-                      Inclus dans votre forfait
+                      Inclus dans ton forfait
                     </Badge>
                   ) : (
                     <span className="text-[11px] text-[#0F1419]/55">14 j d'essai gratuit</span>
@@ -564,22 +563,22 @@ function FacturationTab({ props }: { props: AccountSettingsClientProps }) {
       {/* Ribbon de distinction visuelle — navy pour identifier "dépenses KOVAS" */}
       <div
         className="inline-flex items-center gap-2 rounded-pill border border-[#0F1419]/15 bg-[#0F1419]/[0.06] px-3 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-[#0F1419]"
-        aria-label="Cette section concerne votre abonnement KOVAS, pas les factures émises à vos clients"
+        aria-label="Cette section concerne ton abonnement KOVAS, pas les factures émises à tes clients"
       >
         <span aria-hidden className="size-1.5 rounded-full bg-[#0F1419]" />
-        Votre abonnement KOVAS · factures payées par vous à KOVAS
+        Ton abonnement KOVAS · factures payées par toi à KOVAS
       </div>
 
       <Card variant="opaque" padding="default" className="space-y-4">
         <SectionTitle icon={Receipt} title="Historique des factures KOVAS" iconColor="#0F1419" />
         <p className="text-[13px] text-[#0F1419]/65 leading-relaxed">
-          Factures émises par <strong>SASU Nexus 1993</strong> (éditeur KOVAS) pour votre abonnement
-          SaaS et les éventuels dépassements de quota. TVA 20% en sus, déductible si vous êtes
+          Factures émises par <strong>SASU Nexus 1993</strong> (éditeur KOVAS) pour ton abonnement
+          SaaS et les éventuels dépassements de quota. TVA 20% en sus, déductible si tu es
           assujetti. Conservation 10 ans (obligation comptable L.123-22).
         </p>
         <KovasInvoicesEmbedded />
         <p className="text-[11px] text-[#0F1419]/50 leading-snug">
-          Pour vos propres factures clients (revenus), rendez-vous sur la page{' '}
+          Pour tes propres factures clients (revenus), va sur la page{' '}
           <Link
             href="/dashboard/facturation"
             className="underline underline-offset-2 hover:text-[#0F1419]"
@@ -689,7 +688,7 @@ function KovasInvoicesEmbedded() {
   if (state.kind === 'loading') {
     return (
       <div className="rounded-[12px] border border-[#0F1419]/[0.08] bg-[#F5F7F4] px-4 py-6 text-center text-[12px] text-[#0F1419]/55">
-        Chargement de votre historique Stripe…
+        Chargement de ton historique Stripe…
       </div>
     )
   }
@@ -703,7 +702,7 @@ function KovasInvoicesEmbedded() {
   if (state.kind === 'empty') {
     return (
       <div className="rounded-[12px] border border-[#0F1419]/[0.08] bg-[#F5F7F4] px-4 py-6 text-center text-[12px] text-[#0F1419]/55">
-        Aucune facture KOVAS pour l'instant. Vos factures apparaîtront ici après le premier
+        Aucune facture KOVAS pour l'instant. Tes factures apparaîtront ici après le premier
         prélèvement automatique.
       </div>
     )

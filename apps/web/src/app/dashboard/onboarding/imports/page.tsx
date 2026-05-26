@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { OnboardingProgress } from '@/components/ui/onboarding-progress'
@@ -5,11 +6,11 @@ import { ArrowLeft, ArrowRight, Download, FileText, Sparkles, Upload } from 'luc
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Vos modèles & documents' }
+export const metadata: Metadata = { title: 'Tes modèles & documents' }
 
 /**
- * Onboarding étape 3/4 — Imports (wireframe v4 §2.3).
- * Clear, 3 options grid : Liciel / modèles existants / from zero.
+ * Onboarding étape 3/4 — Imports (refonte V5 sobre).
+ * 3 options grid : Liciel / modèles existants / from zero.
  * Sauvegarde V1.5 — pour l'instant, présentation visuelle + skip.
  */
 export default function OnboardingImportsPage() {
@@ -24,28 +25,24 @@ export default function OnboardingImportsPage() {
         <OnboardingProgress current={3} total={4} />
       </div>
 
-      <div className="space-y-3">
-        <h1 className="font-sans font-light text-4xl md:text-5xl tracking-tight text-ink">
-          Vos <span className="font-serif italic">modèles</span> & documents.
-        </h1>
-        <p className="text-base text-ink-mute max-w-xl">
-          On importe vos modèles existants pour démarrer vite. Si vous partez de zéro, KOVAS a ses
-          propres modèles validés.
-        </p>
-      </div>
+      <AppPageHeader
+        title="Tes"
+        accent="modèles & documents"
+        description="On importe tes modèles existants pour démarrer vite. Si tu pars de zéro, KOVAS a ses propres modèles validés."
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ImportCard
           icon={Download}
           title="Depuis Liciel"
-          description="Compatible DPE. Connexion sécurisée à votre compte Liciel."
+          description="Compatible DPE. Connexion sécurisée à ton compte Liciel."
           ctaLabel="Connecter"
           available={false}
         />
         <ImportCard
           icon={Upload}
           title="Mes modèles existants"
-          description="Glissez vos PDF ou Word. KOVAS les analyse et les convertit."
+          description="Glisse tes PDF ou Word. KOVAS les analyse et les convertit."
           ctaLabel="Glisser ici"
           available={false}
         />
@@ -86,24 +83,24 @@ function ImportCard({
   available: boolean
 }) {
   return (
-    <Card variant="opaque" padding="default" className="flex flex-col">
+    <Card variant="flat" padding="default" className="flex flex-col">
       <CardContent className="flex-1 flex flex-col items-start gap-3 pt-2">
         <div
           aria-hidden
-          className="flex size-10 items-center justify-center rounded-full bg-cyan-light text-navy-900"
+          className="flex size-10 items-center justify-center rounded-full bg-[#0F1419]/[0.06] text-[#0F1419]"
         >
           <Icon className="size-5" strokeWidth={1.75} />
         </div>
         <div className="flex-1 space-y-1.5">
-          <h3 className="font-semibold text-base text-ink flex items-center gap-2">
+          <h3 className="font-semibold text-base text-[#0F1419] flex items-center gap-2">
             {title}
             {!available && (
-              <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-rule/50 text-ink-mute">
+              <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-[#0F1419]/[0.06] text-[#0F1419]/72">
                 V1.5
               </span>
             )}
           </h3>
-          <p className="text-sm text-ink-mute">{description}</p>
+          <p className="text-sm text-[#0F1419]/72">{description}</p>
         </div>
         <Button variant={available ? 'default' : 'outline'} size="sm" disabled={!available}>
           <FileText className="size-3.5" />

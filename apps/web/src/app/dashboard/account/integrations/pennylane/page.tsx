@@ -35,28 +35,26 @@ export default async function PennylaneIntegrationPage() {
       <AppPageHeader
         title="Intégration"
         accent="Pennylane"
-        description="Synchronisez vos devis et factures KOVAS vers votre comptabilité Pennylane (PDP DGFiP 2024)."
+        description="Synchronise tes devis et factures KOVAS vers ta comptabilité Pennylane (PDP DGFiP 2024)."
       />
 
       {/* Présentation */}
-      <section className="rounded-xl border border-rule bg-paper p-6 space-y-3">
+      <section className="rounded-xl border border-[#0F1419]/[0.08] bg-paper p-6 space-y-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="text-base font-bold">À propos de Pennylane</h2>
+          <h2 className="text-base font-bold text-[#0F1419]">À propos de Pennylane</h2>
           <Badge variant="muted" className="text-[10px]">
             PDP officielle DGFiP
           </Badge>
         </div>
-        <p className="text-sm text-ink-mute">
+        <p className="text-sm text-[#0F1419]/72">
           Pennylane est une Plateforme de Dématérialisation Partenaire enregistrée auprès de la
           DGFiP. Largement adoptée par les diagnostiqueurs indépendants français pour la tenue
           comptable et la facturation Factur-X.
         </p>
-        <ul className="text-xs text-ink-mute space-y-1.5">
+        <ul className="text-xs text-[#0F1419]/72 space-y-1.5">
           <li>· Création automatique de la fiche client Pennylane (par SIRET ou email)</li>
           <li>· Synchronisation des factures avec finalisation et numérotation officielle</li>
-          <li>
-            · Stockage chiffré AES-256-GCM du token API — vous gardez la main sur la révocation
-          </li>
+          <li>· Stockage chiffré AES-256-GCM du token API — tu gardes la main sur la révocation</li>
         </ul>
         <div>
           <Button variant="outline" size="sm" asChild>
@@ -72,11 +70,13 @@ export default async function PennylaneIntegrationPage() {
       </section>
 
       {/* Procédure */}
-      <section className="rounded-xl border border-rule bg-paper p-6 space-y-3">
-        <h2 className="text-base font-bold">Comment récupérer votre token Pennylane</h2>
-        <ol className="text-sm text-ink-mute space-y-2 list-decimal pl-5">
+      <section className="rounded-xl border border-[#0F1419]/[0.08] bg-paper p-6 space-y-3">
+        <h2 className="text-base font-bold text-[#0F1419]">
+          Comment récupérer ton token Pennylane
+        </h2>
+        <ol className="text-sm text-[#0F1419]/72 space-y-2 list-decimal pl-5">
           <li>
-            Connectez-vous à votre espace{' '}
+            Connecte-toi à ton espace{' '}
             <a
               href="https://app.pennylane.com"
               target="_blank"
@@ -88,24 +88,24 @@ export default async function PennylaneIntegrationPage() {
             (forfait Pro ~22€/mois requis pour l’accès API).
           </li>
           <li>
-            Ouvrez <span className="font-medium text-ink">Paramètres → API → Générer un token</span>
-            .
+            Ouvre{' '}
+            <span className="font-medium text-[#0F1419]">Paramètres → API → Générer un token</span>.
           </li>
-          <li>Donnez-lui un nom explicite (ex. « KOVAS sync »).</li>
+          <li>Donne-lui un nom explicite (ex. « KOVAS sync »).</li>
           <li>
-            Copiez le token affiché une seule fois et collez-le dans le champ ci-dessous, puis
-            cliquez <span className="font-medium text-ink">Tester</span> avant d’enregistrer.
+            Copie le token affiché une seule fois et colle-le dans le champ ci-dessous, puis clique
+            sur <span className="font-medium text-[#0F1419]">Tester</span> avant d’enregistrer.
           </li>
         </ol>
-        <p className="text-[11px] text-ink-faint">
-          Vous pouvez révoquer le token à tout moment depuis Pennylane — la sync KOVAS sera alors
-          mise en pause silencieusement.
+        <p className="text-[11px] text-[#0F1419]/55">
+          Tu peux révoquer le token à tout moment depuis Pennylane — la sync KOVAS sera alors mise
+          en pause silencieusement.
         </p>
       </section>
 
       {/* Formulaire */}
-      <section className="rounded-xl border border-rule bg-paper p-6 space-y-4">
-        <h2 className="text-base font-bold">Configuration du connecteur</h2>
+      <section className="rounded-xl border border-[#0F1419]/[0.08] bg-paper p-6 space-y-4">
+        <h2 className="text-base font-bold text-[#0F1419]">Configuration du connecteur</h2>
         <ConnectorForm
           initial={{
             status: connector?.status ?? null,
@@ -118,7 +118,7 @@ export default async function PennylaneIntegrationPage() {
         />
       </section>
 
-      <p className="text-[11px] text-ink-faint">
+      <p className="text-[11px] text-[#0F1419]/55">
         Une fois le connecteur actif, le bouton « Synchroniser Pennylane » sur chaque facture et
         chaque devis appellera l’API Pennylane et stockera la référence retournée côté KOVAS pour
         traçabilité.

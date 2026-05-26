@@ -85,7 +85,7 @@ function normalizeTab(value: string | undefined): AccountTabKey {
  * (`/dashboard/clients/[id]`).
  *
  * Architecture cohérente avec /dashboard/gain :
- *  1. Sticky header Qonto (paper/95 + backdrop-blur-xl) :
+ *  1. Header V5 sobre (paper + bordure fine) :
  *     breadcrumb + nom + email + bouton "Se déconnecter"
  *  2. 4 KPI cards (Plan actuel / Missions ce mois / Stockage utilisé / Membre depuis)
  *  3. PageTabs (client) : Profil / Sécurité / Abonnement / Cabinet / Facturation
@@ -291,30 +291,30 @@ export default async function AccountPage({
           className="rounded-xl border border-amber-300/80 bg-amber-50 px-4 py-3 sm:px-5 sm:py-4"
         >
           <p className="font-sans text-[15px] font-semibold text-amber-900">
-            Votre essai gratuit est arrivé à échéance.
+            Ton essai gratuit est arrivé à échéance.
           </p>
           <p className="mt-1 text-[13px] text-amber-900/85">
-            Pour continuer à utiliser KOVAS, choisissez un forfait ci-dessous et enregistrez un
-            moyen de paiement. Vos données sont conservées : la réactivation est immédiate.
+            Pour continuer à utiliser KOVAS, choisis un forfait ci-dessous et enregistre un moyen de
+            paiement. Tes données sont conservées : la réactivation est immédiate.
           </p>
         </div>
       ) : null}
 
       {/* ============================================
-          Header sticky — Qonto pattern (idem clients/[id])
+          Header — V5 sobre (plus de glass / backdrop-blur)
           ============================================ */}
-      <section className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+      <section className="-mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-[#0F1419]/[0.08] bg-paper px-4 sm:px-7 py-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 flex-1 space-y-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute">
+            <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#0F1419]/72">
               Compte
             </p>
-            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-[#0F1419] truncate">
               {profile.full_name ?? 'Mon'}{' '}
-              <span className="font-serif italic font-normal text-ink-mute">profil</span>
-              <span className="text-ink-mute">.</span>
+              <span className="font-serif italic font-normal text-[#0F1419]/72">profil</span>
+              <span className="text-[#0F1419]/72">.</span>
             </h1>
-            <p className="text-sm text-ink-mute truncate">{profile.email}</p>
+            <p className="text-sm text-[#0F1419]/72 truncate">{profile.email}</p>
           </div>
           <form action={logoutAction}>
             <Button type="submit" variant="outline" size="sm" className="shrink-0">
@@ -397,20 +397,20 @@ interface KpiTopItem {
 
 function KpiTopCell({ item }: { item: KpiTopItem }) {
   return (
-    <div className="rounded-xl border border-rule/60 bg-paper/85 px-4 py-3 shadow-glass-xs">
-      <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute mb-1">
+    <div className="rounded-xl border border-[#0F1419]/[0.08] bg-paper px-4 py-3">
+      <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#0F1419]/72 mb-1">
         {item.label}
       </div>
       <div
         className={cn(
-          'text-base font-semibold text-ink tabular-nums truncate',
+          'text-base font-semibold text-[#0F1419] tabular-nums truncate',
           item.mono ? 'font-mono' : 'font-sans',
         )}
       >
         {item.value}
       </div>
       {item.hint ? (
-        <div className="font-mono text-[10px] text-ink-mute/80 mt-1 tracking-[0.05em] truncate">
+        <div className="font-mono text-[10px] text-[#0F1419]/72 mt-1 tracking-[0.05em] truncate">
           {item.hint}
         </div>
       ) : null}

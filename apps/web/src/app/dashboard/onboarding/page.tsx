@@ -1,15 +1,10 @@
-import {
-  ArrowRight,
-  CheckCircle2,
-  Plus,
-  Share2,
-  Smartphone,
-} from 'lucide-react'
-import type { Metadata } from 'next'
-import Link from 'next/link'
+import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { ArrowRight, CheckCircle2, Plus, Share2, Smartphone } from 'lucide-react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Bienvenue' }
 
@@ -19,36 +14,29 @@ export default async function OnboardingPage() {
 
   return (
     <div className="max-w-3xl space-y-8 animate-fade-in">
-      {/* Hero onboarding — Drama cyan atténué */}
-      <div className="-mx-4 md:-mx-8 -mt-4 bg-fluid-light px-4 md:px-8 py-10 md:py-14 mb-2 rounded-b-xl">
-        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute mb-3">
-          Bienvenue · 90 secondes pour démarrer
-        </p>
-        <h1 className="font-sans font-light text-display-m md:text-display-l tracking-tight text-ink">
-          Bienvenue <span className="font-serif italic">{firstName}</span>.
-        </h1>
-        <p className="text-base md:text-lg text-ink-mute mt-3 max-w-xl">
-          Vous êtes prêt. Voici les 3 actions à faire dans cet ordre — votre première mission est
-          opérationnelle dès aujourd'hui.
-        </p>
-      </div>
+      <AppPageHeader
+        eyebrow="Bienvenue · 90 secondes pour démarrer"
+        title={firstName ? `Bienvenue ${firstName}` : 'Bienvenue'}
+        accent={firstName ? '' : 'sur KOVAS'}
+        description="Tu es prêt. Voici les 3 actions à faire dans cet ordre — ta première mission est opérationnelle dès aujourd'hui."
+      />
 
       <div className="space-y-4">
         <Step
           n={1}
           icon={Smartphone}
-          title="Installer KOVAS sur votre iPad / iPhone"
-          description="Pour utiliser KOVAS sur le terrain, ajoutez-le à votre écran d'accueil — il fonctionnera comme une vraie app, même sans réseau."
+          title="Installer KOVAS sur ton iPad / iPhone"
+          description="Pour utiliser KOVAS sur le terrain, ajoute-le à ton écran d'accueil — il fonctionnera comme une vraie app, même sans réseau."
           bullets={[
-            'Safari iOS : touchez ⎘ (Partager) → Sur l\'écran d\'accueil',
-            'Chrome Android : menu ⋮ → Installer l\'application',
+            "Safari iOS : touche ⎘ (Partager) → Sur l'écran d'accueil",
+            "Chrome Android : menu ⋮ → Installer l'application",
             "Sur Mac : l'app fonctionne directement dans Safari ou Chrome",
           ]}
         />
         <Step
           n={2}
           icon={Plus}
-          title="Créer votre premier client et votre premier bien"
+          title="Créer ton premier client et ton premier bien"
           description="Le client est le donneur d'ordre (particulier, agence, notaire…). Le bien est l'adresse à diagnostiquer — l'autocomplétion gouv FR remplit tout."
           actions={
             <div className="flex flex-wrap gap-2">
@@ -57,7 +45,7 @@ export default async function OnboardingPage() {
                   Créer un client <ArrowRight className="size-4" />
                 </Link>
               </Button>
-              <Button variant="glass" asChild>
+              <Button variant="outline" asChild>
                 <Link href="/dashboard/properties/new">Ajouter un bien</Link>
               </Button>
             </div>
@@ -67,7 +55,7 @@ export default async function OnboardingPage() {
           n={3}
           icon={Share2}
           title="Lancer une mission test"
-          description="Créez une mission DPE, ajoutez 1 pièce, prenez 2-3 photos et faites une note vocale. Vous verrez en 5 minutes ce que KOVAS change réellement."
+          description="Crée une mission DPE, ajoute 1 pièce, prends 2-3 photos et fais une note vocale. Tu verras en 5 minutes ce que KOVAS change réellement."
           actions={
             <Button asChild variant="accent">
               <Link href="/dashboard/dossiers/new">
@@ -78,15 +66,19 @@ export default async function OnboardingPage() {
         />
       </div>
 
-      <Card variant="opaque" padding="default">
+      <Card variant="flat" padding="default">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <CheckCircle2 className="size-4 text-accent-green" />
+            <CheckCircle2 className="size-4 text-[#34C759]" />
             Une question, un retour ?
           </CardTitle>
           <CardDescription>
             Pendant les 14 premiers jours, Benjamin (fondateur) lit chaque message personnellement.
-            Écrivez à <a href="mailto:contact@kovas.fr" className="underline">contact@kovas.fr</a>.
+            Écris à{' '}
+            <a href="mailto:contact@kovas.fr" className="underline">
+              contact@kovas.fr
+            </a>
+            .
           </CardDescription>
         </CardHeader>
       </Card>
@@ -110,23 +102,23 @@ function Step({
   actions?: React.ReactNode
 }) {
   return (
-    <Card variant="opaque" padding="default">
+    <Card variant="flat" padding="default">
       <CardContent className="pt-6 flex gap-4">
-        <div className="shrink-0 size-9 rounded-full bg-navy text-paper flex items-center justify-center text-sm font-semibold shadow-accent">
+        <div className="shrink-0 size-9 rounded-full bg-[#0F1419] text-[#D4F542] flex items-center justify-center text-sm font-semibold">
           {n}
         </div>
         <div className="flex-1 space-y-3">
           <div className="flex items-center gap-2">
-            <Icon className="size-4 text-ink-mute" />
-            <h2 className="font-semibold">{title}</h2>
+            <Icon className="size-4 text-[#0F1419]/72" />
+            <h2 className="font-semibold text-[#0F1419]">{title}</h2>
           </div>
-          <p className="text-sm text-ink-mute">{description}</p>
+          <p className="text-sm text-[#0F1419]/72">{description}</p>
           {bullets && (
             <ul className="text-sm space-y-1">
               {bullets.map((b) => (
                 <li key={b} className="flex gap-2">
-                  <span className="text-ink-mute">·</span>
-                  <span>{b}</span>
+                  <span className="text-[#0F1419]/72">·</span>
+                  <span className="text-[#0F1419]/82">{b}</span>
                 </li>
               ))}
             </ul>

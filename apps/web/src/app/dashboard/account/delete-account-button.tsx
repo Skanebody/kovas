@@ -48,12 +48,12 @@ export function DeleteAccountButton() {
           return
         }
         toast.success(
-          'Demande enregistrée. 90 jours de grâce avant suppression. Vous recevrez un email de confirmation.',
+          'Demande enregistrée. 90 jours de grâce avant suppression. Tu recevras un email de confirmation.',
         )
         setOpen(false)
         setConfirmText('')
       } catch {
-        toast.error('Erreur réseau. Réessayez dans quelques instants.')
+        toast.error('Erreur réseau. Réessaie dans quelques instants.')
       }
     })
   }
@@ -80,15 +80,15 @@ export function DeleteAccountButton() {
         <DialogHeader>
           <DialogTitle>Supprimer définitivement mon compte ?</DialogTitle>
           <DialogDescription>
-            Conformément au RGPD, vos données seront conservées 90 jours en grâce avant
-            suppression irréversible. Vos factures restent conservées 10 ans (obligation
-            comptable L.123-22 du Code de commerce).
+            Conformément au RGPD, tes données seront conservées 90 jours en grâce avant suppression
+            irréversible. Tes factures restent conservées 10 ans (obligation comptable L.123-22 du
+            Code de commerce).
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-2">
           <p className="text-sm text-[#0F1419]">
-            Pour confirmer, tapez{' '}
+            Pour confirmer, tape{' '}
             <span className="font-mono font-semibold text-[#FF3B30]">SUPPRIMER</span> :
           </p>
           <Input

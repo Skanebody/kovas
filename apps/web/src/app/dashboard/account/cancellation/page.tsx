@@ -13,16 +13,16 @@
  * audit trail via logs serveur).
  */
 
+import { AppPageHeader } from '@/components/app-page-header'
 import { CancellationStep1 } from '@/components/cancellation/CancellationStep1'
 import { CancellationStep2 } from '@/components/cancellation/CancellationStep2'
 import { CancellationStep3 } from '@/components/cancellation/CancellationStep3'
 import { CancellationStep4 } from '@/components/cancellation/CancellationStep4'
-import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
 import { logAdminAction } from '@/lib/admin/audit-log'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { getPlan, type KovasPlanId } from '@/lib/stripe-config'
+import { type KovasPlanId, getPlan } from '@/lib/stripe-config'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -82,9 +82,7 @@ export default async function CancellationPage({
   // 1) Charge subscription active
   const subQuery = (await admin
     .from('subscriptions')
-    .select(
-      'id, plan_code, tier, status, current_period_end, cancel_at_period_end',
-    )
+    .select('id, plan_code, tier, status, current_period_end, cancel_at_period_end')
     .eq('organization_id', orgId)
     .maybeSingle()) as { data: SubscriptionRow | null }
   const subscription = subQuery.data
@@ -94,7 +92,7 @@ export default async function CancellationPage({
   }
 
   // 2) Charge ou crée la cancellation en cours (latest non-confirmed)
-  let cancellation = await getOrCreateCancellation(orgId, user.id, subscription.id)
+  const cancellation = await getOrCreateCancellation(orgId, user.id, subscription.id)
 
   // 3) Pose les timestamps step*_seen_at + audit, en fonction du step affiché.
   if (step === 1 && !cancellation.step1_seen_at) {
@@ -177,7 +175,7 @@ function parseStep(raw: string | undefined): 1 | 2 | 3 | 4 {
 function Stepper({ current }: { current: 1 | 2 | 3 | 4 }) {
   const labels = ['Sûr ?', 'Alternatives', 'Motif', 'Confirmation']
   return (
-    <ol className="flex items-center justify-between gap-2 text-[11px] font-mono uppercase tracking-wider text-ink-mute">
+    <ol className="flex items-center justify-between gap-2 text-[11px] font-mono uppercase tracking-wider text-[#0F1419]/72">
       {labels.map((label, idx) => {
         const n = idx + 1
         const active = n === current
@@ -187,16 +185,16 @@ function Stepper({ current }: { current: 1 | 2 | 3 | 4 }) {
             <span
               className={
                 active
-                  ? 'size-6 rounded-full bg-navy text-paper flex items-center justify-center text-[10px] font-bold'
+                  ? 'size-6 rounded-full bg-[#0F1419] text-[#D4F542] flex items-center justify-center text-[10px] font-bold'
                   : done
-                    ? 'size-6 rounded-full bg-accent-green/20 text-accent-green flex items-center justify-center text-[10px] font-bold'
-                    : 'size-6 rounded-full bg-cream-deep text-ink-mute flex items-center justify-center text-[10px] font-bold'
+                    ? 'size-6 rounded-full bg-[#34C759]/20 text-[#34C759] flex items-center justify-center text-[10px] font-bold'
+                    : 'size-6 rounded-full bg-[#0F1419]/[0.06] text-[#0F1419]/72 flex items-center justify-center text-[10px] font-bold'
               }
               aria-current={active ? 'step' : undefined}
             >
               {n}
             </span>
-            <span className={active ? 'text-ink font-semibold' : ''}>{label}</span>
+            <span className={active ? 'text-[#0F1419] font-semibold' : ''}>{label}</span>
           </li>
         )
       })}
@@ -210,7 +208,7 @@ function planLabelOf(sub: SubscriptionRow): string {
     if (p) return p.label
   }
   if (sub.tier) return sub.tier
-  return 'votre formule'
+  return 'ta formule'
 }
 
 function computeDowngrade(planCode: string | null): {
@@ -261,9 +259,7 @@ async function getOrCreateCancellation(
       }
     }
   )
-    .select(
-      'id, step1_seen_at, step2_seen_at, confirmed_at, effective_end_date',
-    )
+    .select('id, step1_seen_at, step2_seen_at, confirmed_at, effective_end_date')
     .eq('user_id', userId)
     .is('confirmed_at', null)
     .order('initiated_at', { ascending: false })
@@ -275,8 +271,10 @@ async function getOrCreateCancellation(
   // INSERT initial avec feedback bidon temporaire — DB exige length>=50. On
   // crée un row "draft" avec feedback de 50 chars qui sera ÉCRASÉ à step3.
   // C'est OK car aucun confirmed_at posé → row pas comptée comme résiliation.
-  const draftFeedback =
-    '[draft cancellation in progress — to be filled at step 3]___'.padEnd(50, '_')
+  const draftFeedback = '[draft cancellation in progress — to be filled at step 3]___'.padEnd(
+    50,
+    '_',
+  )
 
   const inserted = (await (
     admin.from('cancellations') as unknown as {
@@ -301,9 +299,7 @@ async function getOrCreateCancellation(
     .single()) as { data: CancellationRow | null; error: { message: string } | null }
 
   if (inserted.error || !inserted.data) {
-    throw new Error(
-      `Failed to create cancellation draft: ${inserted.error?.message ?? 'unknown'}`,
-    )
+    throw new Error(`Failed to create cancellation draft: ${inserted.error?.message ?? 'unknown'}`)
   }
 
   await logAudit(userId, 'cancellation_initiated', inserted.data.id, {
@@ -315,10 +311,7 @@ async function getOrCreateCancellation(
 
 async function markStepSeen(
   cancellationId: string,
-  column:
-    | 'step1_seen_at'
-    | 'step2_seen_at'
-    | 'calendly_link_shown_at',
+  column: 'step1_seen_at' | 'step2_seen_at' | 'calendly_link_shown_at',
 ): Promise<void> {
   const admin = createAdminClient()
   await (
@@ -337,7 +330,10 @@ async function loadActiveModules(orgId: string) {
   const res = (await (
     admin.from('user_addons') as unknown as {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           eq: (col2: string, val2: string) => Promise<{ data: ActiveModuleRow[] | null }>
         }
       }

@@ -15,9 +15,7 @@ interface NotificationPrefsFormProps {
  *
  * Style iOS Settings : switch inline + texte d'aide sous la ligne.
  */
-export function NotificationPrefsForm({
-  initialMonthlyReportEnabled,
-}: NotificationPrefsFormProps) {
+export function NotificationPrefsForm({ initialMonthlyReportEnabled }: NotificationPrefsFormProps) {
   const [enabled, setEnabled] = useState(initialMonthlyReportEnabled)
   const [pending, startTransition] = useTransition()
 
@@ -31,9 +29,7 @@ export function NotificationPrefsForm({
         toast.error(result.error)
       } else {
         toast.success(
-          next
-            ? 'Vous recevrez le rapport mensuel d’activité.'
-            : 'Rapport mensuel désactivé.',
+          next ? 'Tu recevras le rapport mensuel d’activité.' : 'Rapport mensuel désactivé.',
         )
       }
     })
@@ -42,9 +38,7 @@ export function NotificationPrefsForm({
   return (
     <div className="space-y-3">
       <div className="rounded-2xl bg-white border border-[#0F1419]/[0.08] px-4 py-3 flex items-center justify-between gap-4">
-        <p className="text-[15px] font-normal text-[#0F1419]">
-          Rapport mensuel d’activité
-        </p>
+        <p className="text-[15px] font-normal text-[#0F1419]">Rapport mensuel d’activité</p>
         <SettingsSwitch
           checked={enabled}
           onChange={handleToggle}
@@ -53,8 +47,8 @@ export function NotificationPrefsForm({
         />
       </div>
       <p className="text-[12px] text-[#0F1419]/55 px-4 leading-relaxed">
-        Envoyé chaque 1er du mois — récapitulatif des missions réalisées, temps économisé et
-        valeur générée. Pas de notification commerciale.
+        Envoyé chaque 1er du mois — récapitulatif des missions réalisées, temps économisé et valeur
+        générée. Pas de notification commerciale.
       </p>
     </div>
   )

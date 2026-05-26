@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/toaster'
 import { AlertCircle, CheckCircle2, Loader2, RefreshCw, Unlink } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, type FormEvent } from 'react'
+import { type FormEvent, useState } from 'react'
 
 type InitialState =
   | { connected: false }
@@ -58,7 +58,12 @@ export function QontoConnectorForm({ initial }: Props) {
     setResyncing(true)
     try {
       const res = await fetch('/api/account/integrations/qonto/resync', { method: 'POST' })
-      const json = (await res.json()) as { ok?: boolean; synced?: number; total?: number; lastError?: string }
+      const json = (await res.json()) as {
+        ok?: boolean
+        synced?: number
+        total?: number
+        lastError?: string
+      }
       if (!res.ok || !json.ok) {
         toast.error(json.lastError ?? 'Resynchronisation échouée')
         return
@@ -117,26 +122,26 @@ export function QontoConnectorForm({ initial }: Props) {
             isError
               ? 'border-danger/30 bg-danger/5'
               : isActive
-                ? 'border-accent-green/30 bg-accent-green/5'
-                : 'border-rule bg-cream-deep/40'
+                ? 'border-[#34C759]/30 bg-[#34C759]/5'
+                : 'border-[#0F1419]/[0.08] bg-paper'
           }`}
         >
           {isError ? (
             <AlertCircle className="size-5 mt-0.5 text-danger shrink-0" />
           ) : (
             <CheckCircle2
-              className={`size-5 mt-0.5 shrink-0 ${isActive ? 'text-accent-green' : 'text-ink-mute'}`}
+              className={`size-5 mt-0.5 shrink-0 ${isActive ? 'text-[#34C759]' : 'text-[#0F1419]/72'}`}
             />
           )}
           <div className="space-y-1 flex-1 min-w-0">
-            <p className="text-sm font-medium text-ink">
+            <p className="text-sm font-medium text-[#0F1419]">
               {isError
                 ? 'Erreur de connexion Qonto'
                 : isActive
                   ? 'Connecté à Qonto'
                   : 'Connecteur Qonto désactivé'}
             </p>
-            <p className="text-xs text-ink-mute">
+            <p className="text-xs text-[#0F1419]/72">
               {initial.lastSyncAt
                 ? `Dernière synchronisation : ${new Date(initial.lastSyncAt).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}`
                 : 'Aucune synchronisation effectuée pour le moment.'}
@@ -230,8 +235,8 @@ export function QontoConnectorForm({ initial }: Props) {
           {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
           Tester et activer
         </Button>
-        <p className="text-xs text-ink-mute">
-          Un test de lecture sur votre organisation Qonto est effectué avant stockage.
+        <p className="text-xs text-[#0F1419]/72">
+          Un test de lecture sur ton organisation Qonto est effectué avant stockage.
         </p>
       </div>
     </form>
