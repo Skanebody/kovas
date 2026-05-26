@@ -279,18 +279,21 @@ Deno.serve(async (req) => {
 
   // Fetch mission + dossier (scheduled_at) + property + client (post-refonte
   // dossiers de mai 2026 : missions.dossier_id → dossiers.{scheduled_at,
-  // property_id, client_id}).
-  const { data: mission, error: missionErr } = await supabase
+  // property_id, client_id}). Typage assigné post-fetch (le générique inline
+  // .maybeSingle<T>() peut échouer au cold start Deno+esm.sh).
+  const { data: missionRaw, error: missionErr } = await supabase
     .from('missions')
     .select(
       'id, organization_id, type, status, notes, dossier_id, dossiers(scheduled_at, properties(address, postal_code, city, insee_code, surface_total, year_built, property_type), clients(display_name, email, phone))',
     )
     .eq('id', body.mission_id)
     .is('deleted_at', null)
-    .maybeSingle<MissionRow>()
+    .maybeSingle()
 
   if (missionErr) return serverError(`DB error: ${missionErr.message}`)
-  if (!mission) return jsonResponse({ ok: false, error: 'Mission not found' }, { status: 404 })
+  if (!missionRaw) return jsonResponse({ ok: false, error: 'Mission not found' }, { status: 404 })
+
+  const mission = missionRaw as unknown as MissionRow
 
   // Build prompt + call Claude
   const prompt = buildPrompt(mission)
