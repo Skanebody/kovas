@@ -476,6 +476,127 @@ function SectionHowItWorks(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/* 5bis. SIGNATURE BOX "Le Cross-Check 6 Sources" (TUGAN-1.5)                  */
+/*       Préambule officiel du mécanisme propriétaire — intro au tableau       */
+/*       des 3 mécaniques qui suit.                                            */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SectionCrossCheckSignature(): React.ReactElement {
+  const sources: ReadonlyArray<{
+    code: string
+    icon: React.ReactElement
+    description: string
+  }> = [
+    {
+      code: 'ADEME',
+      icon: <Database className="size-4" aria-hidden />,
+      description: 'Annuaire DPE officiel (3,2 M+ DPE indexés)',
+    },
+    {
+      code: 'IGN',
+      icon: <Layers className="size-4" aria-hidden />,
+      description: 'Cadastre national (parcelles + bâtiments)',
+    },
+    {
+      code: 'BAN',
+      icon: <Search className="size-4" aria-hidden />,
+      description: 'Adresses françaises (geocoding officiel)',
+    },
+    {
+      code: 'DVF',
+      icon: <LineChart className="size-4" aria-hidden />,
+      description: 'Données de Valeurs Foncières (transactions immobilières)',
+    },
+    {
+      code: 'Géorisques',
+      icon: <ShieldAlert className="size-4" aria-hidden />,
+      description: 'Risques naturels et technologiques',
+    },
+    {
+      code: 'Cadastre',
+      icon: <Building2 className="size-4" aria-hidden />,
+      description: 'Plan cadastral + parcelles',
+    },
+  ]
+  return (
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+      <div className="max-w-[1240px] mx-auto space-y-12">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14 items-start">
+          {/* Colonne gauche : articulation officielle (3/5 ≈ 60%) */}
+          <div className="lg:col-span-3 space-y-6">
+            <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+              Le mécanisme propriétaire
+            </p>
+            <h2
+              className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+              style={{ fontSize: 'clamp(36px, 4.5vw, 64px)' }}
+            >
+              Le <span className="font-serif italic font-normal">Cross-Check 6 Sources</span>.
+            </h2>
+            <p className="text-[16px] sm:text-[17px] text-[#0F1419]/80 leading-relaxed max-w-xl">
+              Avant chaque envoi <GlossaryTerm term="ademe">ADEME</GlossaryTerm>, KOVAS croise
+              simultanément 6 sources publiques officielles pour détecter en 8 secondes les
+              incohérences invisibles à l&apos;œil nu.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#0F1419]/[0.12] bg-chartreuse/30 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#0F1419] font-semibold">
+                <CheckCircle2 className="size-3.5 text-chartreuse-deep" aria-hidden />
+                <span>6 sources publiques</span>
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#0F1419]/[0.12] bg-chartreuse/30 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#0F1419] font-semibold">
+                <CheckCircle2 className="size-3.5 text-chartreuse-deep" aria-hidden />
+                <span>8 secondes de cross-check</span>
+              </span>
+            </div>
+            <p className="font-mono text-[12px] sm:text-[13px] uppercase tracking-wider text-[#0F1419]/72 leading-relaxed pt-4 border-t border-[#0F1419]/[0.08] max-w-xl">
+              Aucun autre logiciel certifié ne combine ces 6 sources simultanément.
+            </p>
+          </div>
+
+          {/* Colonne droite : liste explicite des 6 sources (2/5 ≈ 40%) */}
+          <div className="lg:col-span-2">
+            <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-6 sm:p-7">
+              <p className="font-mono uppercase tracking-wider text-[10px] text-[#0F1419]/55 mb-5">
+                Les 6 sources croisées
+              </p>
+              <ul className="space-y-4">
+                {sources.map((s, idx) => (
+                  <li
+                    key={s.code}
+                    className={
+                      idx === sources.length - 1
+                        ? 'flex items-start gap-3'
+                        : 'flex items-start gap-3 pb-4 border-b border-[#0F1419]/[0.06]'
+                    }
+                  >
+                    <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[#0F1419]/[0.08] bg-[#F5F7F4]/80 text-[#0F1419]/72">
+                      {s.icon}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-[12px] font-semibold uppercase tracking-wide text-[#0F1419]">
+                        {s.code}
+                      </p>
+                      <p className="text-[13px] text-[#0F1419]/72 leading-snug mt-0.5">
+                        {s.description}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Bandeau discret de signature propriétaire */}
+        <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/45 text-center pt-2">
+          Combinaison brevetable · Implémentation propriétaire KOVAS
+        </p>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /* 6. MÉCANIQUE RÉVÉLÉE (B74 — Tugan adapté)                                   */
 /*    Complète "Comment ça marche" : pas de magie, mécaniques précises +       */
 /*    gains explicites en minutes par mission.                                 */
@@ -1197,6 +1318,7 @@ export default async function HomePage() {
         <SectionThreePromises />
         <SectionLicielVsKovas />
         <SectionHowItWorks />
+        <SectionCrossCheckSignature />
         <SectionMechanismRevealed />
         <SectionAlgosCatalog />
         <SectionFounderLetter />
