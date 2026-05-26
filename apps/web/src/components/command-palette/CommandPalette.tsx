@@ -72,11 +72,29 @@ interface MissionRow {
     | null
 }
 
+interface InvoiceRow {
+  id: string
+  reference: string | null
+  status: string | null
+  amount_ttc: number | null
+  issued_at: string | null
+}
+
+interface QuoteRow {
+  id: string
+  reference: string | null
+  status: string | null
+  amount_ttc: number | null
+  issued_at: string | null
+}
+
 interface DbResult {
   dossiers: DossierRow[]
   clients: ClientRow[]
   properties: PropertyRow[]
   missions: MissionRow[]
+  invoices: InvoiceRow[]
+  quotes: QuoteRow[]
 }
 
 interface TodayMission {
@@ -209,6 +227,36 @@ function pickFirst<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? (value[0] ?? null) : value
 }
 
+const EUR_FORMATTER = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+})
+
+function formatEur(amountCents: number | null | undefined): string | null {
+  if (amountCents == null) return null
+  // amount_ttc est stocké en centimes (cf. convention monétaire CLAUDE.md §10)
+  return EUR_FORMATTER.format(amountCents / 100)
+}
+
+const INVOICE_STATUS_LABELS: Record<string, string> = {
+  draft: 'Brouillon',
+  sent: 'Envoyée',
+  paid: 'Payée',
+  partial: 'Partielle',
+  overdue: 'En retard',
+  cancelled: 'Annulée',
+}
+
+const QUOTE_STATUS_LABELS: Record<string, string> = {
+  draft: 'Brouillon',
+  sent: 'Envoyé',
+  accepted: 'Accepté',
+  refused: 'Refusé',
+  expired: 'Expiré',
+}
+
 /* ----------------------------------------------------------------------- */
 /* Composant principal                                                      */
 /* ----------------------------------------------------------------------- */
@@ -233,6 +281,8 @@ export function CommandPalette() {
     clients: [],
     properties: [],
     missions: [],
+    invoices: [],
+    quotes: [],
   })
   const [today, setToday] = useState<TodayMission[]>([])
   const [recentQueries, setRecentQueries] = useState<readonly string[]>([])
@@ -282,34 +332,50 @@ export function CommandPalette() {
     let cancelled = false
     async function load(): Promise<void> {
       const supabase = createClient()
-      const [{ data: dossiers }, { data: clients }, { data: properties }, { data: missions }] =
-        await Promise.all([
-          supabase
-            .from('dossiers')
-            .select('id, reference, properties(address, city)')
-            .is('deleted_at', null)
-            .order('created_at', { ascending: false })
-            .limit(20),
-          supabase
-            .from('clients')
-            .select('id, display_name, email')
-            .is('deleted_at', null)
-            .order('created_at', { ascending: false })
-            .limit(20),
-          supabase
-            .from('properties')
-            .select('id, address, city')
-            .is('deleted_at', null)
-            .order('created_at', { ascending: false })
-            .limit(20),
-          supabase
-            .from('missions')
-            .select('id, type, dossier_id, dossiers(scheduled_at, clients(display_name))')
-            .is('deleted_at', null)
-            .in('status', ['scheduled', 'in_progress'])
-            .order('created_at', { ascending: false })
-            .limit(20),
-        ])
+      const [
+        { data: dossiers },
+        { data: clients },
+        { data: properties },
+        { data: missions },
+        { data: invoices },
+        { data: quotes },
+      ] = await Promise.all([
+        supabase
+          .from('dossiers')
+          .select('id, reference, properties(address, city)')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(20),
+        supabase
+          .from('clients')
+          .select('id, display_name, email')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(20),
+        supabase
+          .from('properties')
+          .select('id, address, city')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(20),
+        supabase
+          .from('missions')
+          .select('id, type, dossier_id, dossiers(scheduled_at, clients(display_name))')
+          .is('deleted_at', null)
+          .in('status', ['scheduled', 'in_progress'])
+          .order('created_at', { ascending: false })
+          .limit(20),
+        supabase
+          .from('invoices')
+          .select('id, reference, status, amount_ttc, issued_at')
+          .order('created_at', { ascending: false })
+          .limit(20),
+        supabase
+          .from('quotes')
+          .select('id, reference, status, amount_ttc, issued_at')
+          .order('created_at', { ascending: false })
+          .limit(20),
+      ])
 
       if (cancelled) return
 
@@ -318,6 +384,8 @@ export function CommandPalette() {
         clients: (clients ?? []) as ClientRow[],
         properties: (properties ?? []) as PropertyRow[],
         missions: (missions ?? []) as MissionRow[],
+        invoices: (invoices ?? []) as InvoiceRow[],
+        quotes: (quotes ?? []) as QuoteRow[],
       })
 
       // Visites aujourd'hui (filtre côté client)
@@ -386,16 +454,23 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 backdrop-blur-sm pt-[12vh] px-4 animate-fade-in"
-      onClick={close}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Recherche rapide"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] px-4 animate-fade-in"
+      aria-labelledby="command-palette-title"
     >
+      {/* Backdrop dismissible — bouton transparent pour conformité a11y biome
+          (useKeyWithClickEvents + useSemanticElements). Esc + focus trap geres par cmdk. */}
+      <button
+        type="button"
+        aria-label="Fermer la recherche"
+        onClick={close}
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-default"
+      />
+      <span id="command-palette-title" className="sr-only">
+        Recherche rapide
+      </span>
       <Command
         label="Command palette"
-        className="w-full max-w-[600px] bg-white border border-sidebar-bg/15 shadow-lg overflow-hidden flex flex-col max-h-[80vh] sm:max-h-[600px]"
-        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-[600px] bg-white border border-sidebar-bg/15 shadow-lg overflow-hidden flex flex-col max-h-[80vh] sm:max-h-[600px]"
         loop
       >
         <div className="flex items-center gap-3 border-b border-sidebar-bg/10 px-4 py-1">
@@ -403,7 +478,7 @@ export function CommandPalette() {
           <Command.Input
             value={search}
             onValueChange={setSearch}
-            placeholder="Rechercher dossiers, clients, biens, actions…"
+            placeholder="Rechercher missions, clients, factures, devis, dossiers…"
             className="flex-1 bg-transparent py-3 font-mono text-[14px] outline-none placeholder:text-ink-mute"
             autoFocus
           />
@@ -548,6 +623,56 @@ export function CommandPalette() {
             </CommandGroup>
           )}
 
+          {/* Factures live — deep-link facturation?tab=factures&q=REF */}
+          {db.invoices.length > 0 && (
+            <CommandGroup heading="Factures">
+              {db.invoices.slice(0, 5).map((inv) => {
+                const ref = inv.reference ?? '(sans ref)'
+                const amount = formatEur(inv.amount_ttc)
+                const statusLabel = inv.status ? INVOICE_STATUS_LABELS[inv.status] : null
+                const subtitleParts = [statusLabel, amount].filter(Boolean) as string[]
+                return (
+                  <CommandRow
+                    key={`invoice-${inv.id}`}
+                    value={`facture ${ref} ${inv.status ?? ''}`}
+                    onSelect={() =>
+                      go(`/dashboard/facturation?tab=factures&q=${encodeURIComponent(ref)}`)
+                    }
+                    icon={<Receipt className="size-4" />}
+                    label={ref}
+                    subtitle={subtitleParts.length > 0 ? subtitleParts.join(' · ') : undefined}
+                    mono
+                  />
+                )
+              })}
+            </CommandGroup>
+          )}
+
+          {/* Devis live — deep-link facturation?tab=devis&q=REF */}
+          {db.quotes.length > 0 && (
+            <CommandGroup heading="Devis">
+              {db.quotes.slice(0, 5).map((q) => {
+                const ref = q.reference ?? '(sans ref)'
+                const amount = formatEur(q.amount_ttc)
+                const statusLabel = q.status ? QUOTE_STATUS_LABELS[q.status] : null
+                const subtitleParts = [statusLabel, amount].filter(Boolean) as string[]
+                return (
+                  <CommandRow
+                    key={`quote-${q.id}`}
+                    value={`devis ${ref} ${q.status ?? ''}`}
+                    onSelect={() =>
+                      go(`/dashboard/facturation?tab=devis&q=${encodeURIComponent(ref)}`)
+                    }
+                    icon={<FileText className="size-4" />}
+                    label={ref}
+                    subtitle={subtitleParts.length > 0 ? subtitleParts.join(' · ') : undefined}
+                    mono
+                  />
+                )
+              })}
+            </CommandGroup>
+          )}
+
           {/* Recherches récentes (depuis localStorage) — visibles si search vide */}
           {search.length === 0 && recentQueries.length > 0 && (
             <CommandGroup heading="Recherches récentes">
@@ -652,12 +777,14 @@ function CommandRow({
       onSelect={disabled ? undefined : onSelect}
       disabled={disabled}
       className={cn(
-        'flex items-center gap-3 rounded-sm px-3 py-2 text-sm cursor-pointer',
-        'data-[selected=true]:bg-sidebar-bg data-[selected=true]:text-white',
+        'flex items-center gap-3 rounded-md px-3 py-2 text-sm cursor-pointer',
+        'border border-transparent transition-colors',
+        // DS v5 — item highlighted : chartreuse #D4F542/15 + bordure subtile chartreuse, texte navy conservé
+        'data-[selected=true]:bg-[#D4F542]/15 data-[selected=true]:border-[#D4F542]/40 data-[selected=true]:text-[#0F1419]',
         'aria-disabled:opacity-50 aria-disabled:cursor-not-allowed',
       )}
     >
-      <span className="text-ink-mute shrink-0 [&_svg]:size-4 data-[selected=true]:text-white">
+      <span className="text-ink-mute shrink-0 [&_svg]:size-4 data-[selected=true]:text-[#0F1419]">
         {icon}
       </span>
       <span className="flex-1 min-w-0">
@@ -670,9 +797,9 @@ function CommandRow({
       </span>
       {shortcut && (
         <span className="flex gap-0.5 shrink-0">
-          {shortcut.split(' ').map((k, i) => (
+          {shortcut.split(' ').map((k) => (
             <kbd
-              key={`${shortcut}-${i}`}
+              key={`${shortcut}-${k}`}
               className="text-[10px] font-mono bg-sage rounded-sm px-1.5 py-0.5 border border-rule"
             >
               {k}
