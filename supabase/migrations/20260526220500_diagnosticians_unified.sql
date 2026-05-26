@@ -43,7 +43,7 @@ RETURNS text
 LANGUAGE sql
 IMMUTABLE PARALLEL SAFE STRICT
 AS $$
-  SELECT unaccent('public.unaccent', $1);
+  SELECT public.unaccent($1);
 $$;
 
 -- ============================================
@@ -156,22 +156,28 @@ ALTER TABLE diagnosticians
   ADD COLUMN IF NOT EXISTS certifications jsonb NOT NULL DEFAULT '[]'::jsonb;
 
 -- Compteur dérivé : nombre de certifs valides (status='valid' ET valid_until>= today)
-DO $$
+-- Note : PostgreSQL n'accepte pas de subquery dans GENERATED ALWAYS AS. On utilise
+-- une colonne classique + trigger BEFORE INSERT/UPDATE pour la maintenir à jour.
+ALTER TABLE diagnosticians ADD COLUMN IF NOT EXISTS certif_valid_count integer DEFAULT 0;
+
+CREATE OR REPLACE FUNCTION compute_certif_valid_count() RETURNS trigger AS $$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'diagnosticians'
-      AND column_name = 'certif_valid_count'
-  ) THEN
-    ALTER TABLE diagnosticians ADD COLUMN certif_valid_count integer
-      GENERATED ALWAYS AS (
-        (
-          SELECT count(*)::int FROM jsonb_array_elements(certifications) c
-          WHERE coalesce(c->>'status', 'valid') = 'valid'
-        )
-      ) STORED;
-  END IF;
-END $$;
+  NEW.certif_valid_count := COALESCE(
+    (SELECT count(*)::int FROM jsonb_array_elements(NEW.certifications) c
+     WHERE COALESCE(c->>'status', 'valid') = 'valid'),
+    0
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_compute_certif_valid_count ON diagnosticians;
+CREATE TRIGGER trg_compute_certif_valid_count
+  BEFORE INSERT OR UPDATE OF certifications ON diagnosticians
+  FOR EACH ROW EXECUTE FUNCTION compute_certif_valid_count();
+
+-- Backfill existant
+UPDATE diagnosticians SET certifications = certifications WHERE certifications IS NOT NULL;
 
 -- Sirene (cross-validation) ───────────────────────────────────────────────
 ALTER TABLE diagnosticians ADD COLUMN IF NOT EXISTS sirene_siret text;

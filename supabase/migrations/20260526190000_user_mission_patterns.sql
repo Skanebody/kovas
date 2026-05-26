@@ -86,7 +86,7 @@ CREATE POLICY user_patterns_select_own
     EXISTS (
       SELECT 1 FROM public.diagnosticians d
       WHERE d.id = data.user_mission_patterns.diagnostician_id
-        AND (d.claimed_by_user_id = auth.uid() OR d.claimed_by = auth.uid())
+        AND d.claimed_by_user_id = auth.uid()
     )
   );
 

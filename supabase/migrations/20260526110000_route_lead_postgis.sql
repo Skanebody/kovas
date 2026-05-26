@@ -33,8 +33,7 @@
 CREATE INDEX IF NOT EXISTS idx_diagnosticians_geog_active
   ON public.diagnosticians
   USING GIST ((ST_MakePoint(geo_lng, geo_lat)::geography))
-  WHERE is_active = true
-    AND geo_lat IS NOT NULL
+  WHERE geo_lat IS NOT NULL
     AND geo_lng IS NOT NULL;
 
 COMMENT ON INDEX public.idx_diagnosticians_geog_active IS
@@ -85,8 +84,7 @@ BEGIN
   --    L'index idx_diagnosticians_geog_active permet le bbox-prefilter GIST.
   SELECT COALESCE(array_agg(d.id), ARRAY[]::uuid[]) INTO v_candidate_ids
   FROM public.diagnosticians d
-  WHERE d.is_active = true
-    AND d.geo_lat IS NOT NULL
+  WHERE d.geo_lat IS NOT NULL
     AND d.geo_lng IS NOT NULL
     AND ST_DWithin(
       ST_MakePoint(d.geo_lng, d.geo_lat)::geography,

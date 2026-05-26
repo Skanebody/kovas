@@ -127,19 +127,23 @@ COMMENT ON TABLE dpe_historical_cache IS
 -- ============================================
 ALTER TABLE pre_export_analyses ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "members read pre_export_analyses" ON pre_export_analyses;
 CREATE POLICY "members read pre_export_analyses"
   ON pre_export_analyses FOR SELECT TO authenticated
   USING (public.is_member_of(organization_id));
 
+DROP POLICY IF EXISTS "members insert pre_export_analyses" ON pre_export_analyses;
 CREATE POLICY "members insert pre_export_analyses"
   ON pre_export_analyses FOR INSERT TO authenticated
   WITH CHECK (public.is_member_of(organization_id));
 
+DROP POLICY IF EXISTS "members update pre_export_analyses" ON pre_export_analyses;
 CREATE POLICY "members update pre_export_analyses"
   ON pre_export_analyses FOR UPDATE TO authenticated
   USING (public.is_member_of(organization_id))
   WITH CHECK (public.is_member_of(organization_id));
 
+DROP POLICY IF EXISTS "members delete pre_export_analyses" ON pre_export_analyses;
 CREATE POLICY "members delete pre_export_analyses"
   ON pre_export_analyses FOR DELETE TO authenticated
   USING (public.is_member_of(organization_id));
@@ -149,6 +153,7 @@ CREATE POLICY "members delete pre_export_analyses"
 -- ============================================
 ALTER TABLE ademe_benchmarks ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "authenticated read ademe_benchmarks" ON ademe_benchmarks;
 CREATE POLICY "authenticated read ademe_benchmarks"
   ON ademe_benchmarks FOR SELECT TO authenticated
   USING (true);
@@ -158,6 +163,7 @@ CREATE POLICY "authenticated read ademe_benchmarks"
 -- ============================================
 ALTER TABLE dpe_historical_cache ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "authenticated read dpe_historical_cache" ON dpe_historical_cache;
 CREATE POLICY "authenticated read dpe_historical_cache"
   ON dpe_historical_cache FOR SELECT TO authenticated
   USING (true);

@@ -24,8 +24,9 @@ CREATE TABLE IF NOT EXISTS public.mission_flow_states (
   -- Sous-état dans la phase (ex: 'photos' | 'voix' | 'mesures' pendant capture_terrain)
   current_step          text,
 
-  -- Pièce en cours (lien optionnel vers mission_rooms)
-  current_room_id       uuid REFERENCES public.mission_rooms (id) ON DELETE SET NULL,
+  -- Pièce en cours (FK retirée — table mission_rooms variable selon environnement,
+  -- code applicatif valide l'existence. Cf. lot B83 GC2 mission flow UI.)
+  current_room_id       uuid,
 
   -- Position de scroll dans le tchat (pour reprendre à la dernière vue)
   last_seen_message_id  uuid,
