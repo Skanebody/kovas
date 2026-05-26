@@ -1,13 +1,13 @@
 'use client'
 
-import { MapPin, Trash2 } from 'lucide-react'
-import Image from 'next/image'
-import { useEffect, useMemo, useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
-import { createClient } from '@/lib/supabase/client'
 import { getViewType } from '@/lib/photo-view-types'
+import { createClient } from '@/lib/supabase/client'
+import { Camera, MapPin, Trash2 } from 'lucide-react'
+import Image from 'next/image'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import { assignPhotoToRoomAction, deletePhotoAction } from './actions'
 
 interface Photo {
@@ -37,7 +37,9 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
     for (const r of rooms) byRoom[r.id] = []
     for (const p of photos) {
       const key = p.room_id ?? '_unassigned'
-      ;(byRoom[key] ?? (byRoom[key] = [])).push(p)
+      const bucket = byRoom[key] ?? []
+      bucket.push(p)
+      byRoom[key] = bucket
     }
     return byRoom
   }, [photos, rooms])
@@ -48,14 +50,16 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
     async function load() {
       if (photos.length === 0) return
       const supabase = createClient()
-      const { data } = await supabase.storage
-        .from('mission-photos')
-        .createSignedUrls(photos.map((p) => p.storage_path), 3600)
+      const { data } = await supabase.storage.from('mission-photos').createSignedUrls(
+        photos.map((p) => p.storage_path),
+        3600,
+      )
       if (!cancelled && data) {
         const map: Record<string, string> = {}
         for (let i = 0; i < photos.length; i++) {
           const url = data[i]?.signedUrl
-          if (url) map[photos[i]!.id] = url
+          const photo = photos[i]
+          if (url && photo) map[photo.id] = url
         }
         setSignedUrls(map)
       }
@@ -81,9 +85,18 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
 
   if (photos.length === 0) {
     return (
-      <p className="text-sm text-ink-mute">
-        Aucune photo. Utilisez le bouton "Prendre photo(s)" ci-dessus.
-      </p>
+      <div className="rounded-xl border border-dashed border-rule/70 bg-paper/60 px-6 py-10 text-center">
+        <div className="mx-auto mb-4 inline-flex size-12 items-center justify-center rounded-full bg-cream-deep">
+          <Camera className="size-5 text-ink-mute" aria-hidden />
+        </div>
+        <h3 className="font-sans font-semibold text-base text-ink mb-1">
+          Aucune photo pour ce dossier.
+        </h3>
+        <p className="mx-auto max-w-md text-sm text-ink-mute">
+          Utilisez le bouton « Prendre photo(s) » ci-dessus. La géolocalisation et
+          l&apos;assignation à une pièce se font automatiquement.
+        </p>
+      </div>
     )
   }
 
@@ -108,7 +121,7 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
               >
                 {signedUrls[p.id] ? (
                   <Image
-                    src={signedUrls[p.id]!}
+                    src={signedUrls[p.id] ?? ''}
                     alt={p.taken_at ?? 'Photo terrain'}
                     fill
                     className="object-cover"
@@ -120,7 +133,10 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
                 )}
                 {p.view_type && (
                   <div className="absolute top-1 left-1">
-                    <Badge variant="default" className="text-[9px] py-0 px-1.5 bg-foreground/80 backdrop-blur-sm">
+                    <Badge
+                      variant="default"
+                      className="text-[9px] py-0 px-1.5 bg-foreground/80 backdrop-blur-sm"
+                    >
                       {getViewType(p.view_type)?.label ?? p.view_type}
                     </Badge>
                   </div>
@@ -134,7 +150,9 @@ export function PhotoGallery({ dossierId, photos, rooms }: PhotoGalleryProps) {
                   >
                     <option value="">— Sans pièce —</option>
                     {rooms.map((r) => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
                     ))}
                   </Select>
                   <div className="flex items-center justify-between text-[10px] text-white/90">

@@ -8,6 +8,8 @@
  * `acceptLeadAssignment` / `declineLeadAssignment`.
  */
 
+import { EmptyState } from '@/components/ui/empty-state'
+import { Inbox } from 'lucide-react'
 import { useMemo, useState, useTransition } from 'react'
 import { acceptLeadAssignment, declineLeadAssignment } from '../actions'
 import { LeadCard } from './LeadCard'
@@ -161,13 +163,19 @@ export function IncomingLeadsList({ initialAssignments }: IncomingLeadsListProps
 
       {/* Liste */}
       {filtered.length === 0 ? (
-        <div className="glass-opaque rounded-lg p-8 text-center">
-          <p className="text-ink-mute">
-            {filter === 'pending'
-              ? 'Aucun lead en attente. Profitez-en pour mettre a jour votre fiche annuaire.'
-              : `Aucun lead ${labelForFilter(filter)}.`}
-          </p>
-        </div>
+        <EmptyState
+          icon={Inbox}
+          title={
+            filter === 'pending'
+              ? 'Aucun lead en attente.'
+              : `Aucun lead ${labelForFilter(filter)}.`
+          }
+          description={
+            filter === 'pending'
+              ? "Profitez-en pour mettre à jour votre fiche annuaire — c'est elle qui amène les prochains prospects."
+              : 'Changez de filtre pour retrouver vos autres assignments.'
+          }
+        />
       ) : (
         <ul className="space-y-3">
           {filtered.map((a) => (

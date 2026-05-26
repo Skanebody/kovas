@@ -13,6 +13,7 @@ import {
   Camera,
   CheckCircle2,
   CircleAlert,
+  FileScan,
   FileText,
   Loader2,
   Sparkles,
@@ -302,9 +303,18 @@ export function ScanWorkspace({ initialScans, clients, properties }: ScanWorkspa
         </CardHeader>
         <CardContent>
           {initialScans.length === 0 ? (
-            <p className="text-sm text-ink-mute py-6 text-center">
-              Aucun scan pour le moment. Importez votre premier diagnostic ci-dessus.
-            </p>
+            <div className="rounded-xl border border-dashed border-rule/70 bg-paper/60 px-6 py-10 text-center">
+              <div className="mx-auto mb-4 inline-flex size-12 items-center justify-center rounded-full bg-cream-deep">
+                <FileScan className="size-5 text-ink-mute" aria-hidden />
+              </div>
+              <h3 className="font-sans font-semibold text-base text-ink mb-1">
+                Aucun scan pour le moment.
+              </h3>
+              <p className="mx-auto max-w-md text-sm text-ink-mute">
+                Importez un PDF de diagnostic ci-dessus — l&apos;OCR extrait la date
+                d&apos;émission, la validité et le type automatiquement.
+              </p>
+            </div>
           ) : (
             <ul className="divide-y divide-rule/60">
               {initialScans.map((s) => (

@@ -18,10 +18,10 @@ export default function MessagesPage() {
   return (
     <EmptyState
       icon={MessagesSquare}
-      title="Boîte vide. Bonne nouvelle."
-      description="La messagerie centralisée arrive en V1.5 : conversations clients, suggestions IA en draft, notifications consolidées. Pour l'instant, utilisez email et SMS depuis vos missions du jour."
+      title="Messagerie centralisée — bientôt disponible."
+      description="Conversations clients, suggestions IA en draft et notifications consolidées arrivent en V1.5. En attendant, l'email et le SMS sont accessibles depuis vos missions du jour."
       action={
-        <Button asChild>
+        <Button asChild variant="accent">
           <Link href="/dashboard/dossiers">Voir mes dossiers</Link>
         </Button>
       }

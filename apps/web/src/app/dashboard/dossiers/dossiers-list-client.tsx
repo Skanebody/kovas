@@ -1,10 +1,11 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { DiagChip } from '@/components/ui/diag-chip'
 import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils'
 import type { MissionType } from '@kovas/shared'
-import { ChevronRight, FolderOpen, Play } from 'lucide-react'
+import { ChevronRight, FolderOpen, Play, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
@@ -220,8 +221,18 @@ export function DossiersListClient({ dossiers, initialTab }: DossiersListClientP
             }
             description={
               active === 'all'
-                ? "Créez votre premier dossier pour regrouper les diagnostics d'une même visite."
+                ? "Profitez-en pour préparer votre prochaine mission — un dossier regroupe tous les diagnostics d'une même visite."
                 : 'Sélectionnez un autre filtre ou créez un nouveau dossier.'
+            }
+            action={
+              active === 'all' ? (
+                <Button asChild variant="accent">
+                  <Link href="/dashboard/dossiers/new">
+                    <Plus className="size-4" />
+                    Créer un dossier
+                  </Link>
+                </Button>
+              ) : undefined
             }
           />
         ) : (

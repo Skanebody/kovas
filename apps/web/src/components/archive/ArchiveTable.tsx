@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/app-list-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   ARCHIVE_KIND_BADGE,
   ARCHIVE_KIND_LABELS,
@@ -20,6 +21,7 @@ import {
   type ArchiveFileKind,
 } from '@/lib/archive/types'
 import {
+  Archive as ArchiveIcon,
   Download,
   ExternalLink,
   FileAudio,
@@ -84,12 +86,16 @@ export function ArchiveTable({
 }: ArchiveTableProps) {
   if (files.length === 0) {
     return (
-      <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-8 text-center">
-        <p className="text-sm text-[#0F1419]/72">
-          Aucun fichier ne correspond à ces filtres. Essaie d&apos;élargir la période ou de retirer
-          un critère.
-        </p>
-      </div>
+      <EmptyState
+        icon={ArchiveIcon}
+        title="Aucun fichier sur cette période."
+        description="Élargissez la fenêtre temporelle ou retirez un filtre pour retrouver vos photos, audio et exports."
+        action={
+          <Button asChild variant="outline">
+            <Link href="/dashboard/archive">Réinitialiser les filtres</Link>
+          </Button>
+        }
+      />
     )
   }
 

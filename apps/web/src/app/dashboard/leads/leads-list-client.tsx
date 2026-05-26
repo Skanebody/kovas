@@ -3,8 +3,15 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Building2, CheckCircle2, Lock, MapPin, Phone, Mail } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Building2, CheckCircle2, Inbox, Lock, Mail, MapPin, Phone } from 'lucide-react'
 import { useState } from 'react'
 
 interface DiagRow {
@@ -62,10 +69,9 @@ export function LeadsListClient({ leads, diags }: Props) {
     setBusy(true)
     setQuotaError(null)
     try {
-      const res = await fetch(
-        `/api/diagnosticians/${diag.id}/leads/${lead.id}/unlock`,
-        { method: 'POST' },
-      )
+      const res = await fetch(`/api/diagnosticians/${diag.id}/leads/${lead.id}/unlock`, {
+        method: 'POST',
+      })
       if (res.status === 402) {
         const body = (await res.json()) as { message?: string }
         setQuotaError(body.message ?? 'Quota atteint.')
@@ -97,9 +103,19 @@ export function LeadsListClient({ leads, diags }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <Card variant="flat" padding="default" className="text-center py-12">
-          <p className="text-ink-mute">Aucun lead {filter !== 'all' ? labelForFilter(filter) : ''}.</p>
-        </Card>
+        <EmptyState
+          icon={Inbox}
+          title={
+            filter === 'all'
+              ? 'Aucun lead pour le moment.'
+              : `Aucun lead ${labelForFilter(filter)}.`
+          }
+          description={
+            filter === 'all'
+              ? "Vos prochains prospects arriveront ici. En attendant, soignez votre fiche annuaire — c'est ce qui les amène."
+              : 'Changez de filtre pour retrouver vos autres leads.'
+          }
+        />
       ) : (
         <ul className="space-y-3">
           {filtered.map((lead) => (
@@ -121,9 +137,7 @@ export function LeadsListClient({ leads, diags }: Props) {
                   <div className="flex items-start gap-4">
                     <div
                       className={`size-10 rounded-full flex items-center justify-center shrink-0 ${
-                        lead.unlocked
-                          ? 'bg-[#D4F542]/20 text-ink'
-                          : 'bg-ink/5 text-ink-mute'
+                        lead.unlocked ? 'bg-[#D4F542]/20 text-ink' : 'bg-ink/5 text-ink-mute'
                       }`}
                       aria-hidden
                     >
@@ -197,9 +211,7 @@ export function LeadsListClient({ leads, diags }: Props) {
                 </DialogTitle>
                 <DialogDescription>
                   {labelForPropertyType(activeLead.property_type)}
-                  {activeLead.property_surface_m2
-                    ? ` · ${activeLead.property_surface_m2} m²`
-                    : ''}{' '}
+                  {activeLead.property_surface_m2 ? ` · ${activeLead.property_surface_m2} m²` : ''}{' '}
                   · {activeLead.property_city ?? '—'}
                 </DialogDescription>
               </DialogHeader>
@@ -290,9 +302,7 @@ function UnlockedView({
   return (
     <div className="space-y-3">
       <div className="rounded-2xl bg-lime-mist/40 border border-lime-mist p-4">
-        <p className="text-xs uppercase tracking-wide text-[#2D4015] font-mono mb-2">
-          Coordonnées
-        </p>
+        <p className="text-xs uppercase tracking-wide text-[#2D4015] font-mono mb-2">Coordonnées</p>
         <p className="font-semibold text-ink">
           {lead.requester_first_name ?? 'Prospect'} {fullLastName ?? ''}
         </p>
@@ -323,9 +333,7 @@ function UnlockedView({
       </div>
       {detail?.message ? (
         <div className="rounded-2xl bg-paper border border-rule p-4">
-          <p className="text-xs uppercase tracking-wide text-ink-mute font-mono mb-2">
-            Message
-          </p>
+          <p className="text-xs uppercase tracking-wide text-ink-mute font-mono mb-2">Message</p>
           <p className="text-sm text-ink leading-relaxed">{detail.message}</p>
         </div>
       ) : null}

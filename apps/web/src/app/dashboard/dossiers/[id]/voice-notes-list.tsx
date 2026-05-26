@@ -1,10 +1,10 @@
 'use client'
 
-import { Mic, Sparkles, Trash2 } from 'lucide-react'
-import { useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { VoiceParsedData } from '@/lib/voice-parser'
+import { Mic, Sparkles, Trash2 } from 'lucide-react'
+import { useTransition } from 'react'
 import { deleteVoiceNoteAction } from './actions'
 
 interface VoiceNote {
@@ -43,9 +43,18 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
 
   if (notes.length === 0) {
     return (
-      <p className="text-sm text-ink-mute">
-        Aucune note vocale. Utilisez le bouton ci-dessus pour enregistrer.
-      </p>
+      <div className="rounded-xl border border-dashed border-rule/70 bg-paper/60 px-6 py-10 text-center">
+        <div className="mx-auto mb-4 inline-flex size-12 items-center justify-center rounded-full bg-cream-deep">
+          <Mic className="size-5 text-ink-mute" aria-hidden />
+        </div>
+        <h3 className="font-sans font-semibold text-base text-ink mb-1">
+          Aucune note vocale pour ce dossier.
+        </h3>
+        <p className="mx-auto max-w-md text-sm text-ink-mute">
+          Lancez un enregistrement depuis le bouton ci-dessus — la transcription et la structuration
+          se font automatiquement.
+        </p>
+      </div>
     )
   }
 
@@ -71,10 +80,7 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
         const isHighConf = confidence >= 0.7
 
         return (
-          <li
-            key={n.id}
-            className="rounded-xl border border-rule/80 glass-opaque p-4 space-y-3"
-          >
+          <li key={n.id} className="rounded-xl border border-rule/80 glass-opaque p-4 space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2 text-sm">
                 <Mic className="size-4 text-ink-mute" />
@@ -97,9 +103,7 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
               </Button>
             </div>
 
-            {n.transcript_raw && (
-              <p className="text-sm whitespace-pre-wrap">{n.transcript_raw}</p>
-            )}
+            {n.transcript_raw && <p className="text-sm whitespace-pre-wrap">{n.transcript_raw}</p>}
 
             {parsed && (parsed.surface_m2 || parsed.year_built || parsed.equipment.length > 0) && (
               <div className="rounded-md bg-sage-alt/60 p-3 space-y-2 text-xs">
@@ -108,14 +112,12 @@ export function VoiceNotesList({ dossierId, notes, rooms }: VoiceNotesListProps)
                   {parsed.surface_m2 && (
                     <Badge variant="blue">Surface : {parsed.surface_m2} m²</Badge>
                   )}
-                  {parsed.year_built && (
-                    <Badge variant="blue">Année : {parsed.year_built}</Badge>
-                  )}
+                  {parsed.year_built && <Badge variant="blue">Année : {parsed.year_built}</Badge>}
                   {parsed.ceiling_height_m && (
                     <Badge variant="blue">H.s.p. : {parsed.ceiling_height_m} m</Badge>
                   )}
-                  {parsed.equipment.map((eq, i) => (
-                    <Badge key={i} variant="muted">
+                  {parsed.equipment.map((eq) => (
+                    <Badge key={`${eq.kind}-${eq.brand ?? ''}`} variant="muted">
                       {KIND_LABELS[eq.kind] ?? eq.kind}
                       {eq.brand ? ` · ${eq.brand}` : ''}
                     </Badge>
