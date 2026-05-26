@@ -116,7 +116,7 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   {
     code: 'solo_light',
     name: 'Solo',
-    tagline: 'Tu démarres ou tu fais ~10 missions par semaine',
+    tagline: 'Vous démarrez ou vous faites environ 10 missions par semaine',
     monthlyPrice: 2900,
     annualPrice: annualPriceWithDiscount(2900),
     caps: {
@@ -140,7 +140,7 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   {
     code: 'solo_pro',
     name: 'Pro',
-    tagline: 'Tu travailles à temps plein, 15 à 25 missions par semaine',
+    tagline: 'Vous travaillez à temps plein, 15 à 25 missions par semaine',
     monthlyPrice: 7900,
     annualPrice: annualPriceWithDiscount(7900),
     caps: {
@@ -167,7 +167,7 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   {
     code: 'cabinet',
     name: 'Cabinet',
-    tagline: 'Tu travailles en équipe de 2 à 5 personnes',
+    tagline: 'Vous travaillez en équipe de 2 à 5 personnes',
     monthlyPrice: 19900,
     annualPrice: annualPriceWithDiscount(19900),
     caps: {
@@ -193,7 +193,7 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   {
     code: 'cabinet_plus',
     name: 'Cabinet+',
-    tagline: 'Tu pilotes 6 à 15 personnes sur un ou plusieurs sites',
+    tagline: 'Vous pilotez 6 à 15 personnes sur un ou plusieurs sites',
     monthlyPrice: 49900,
     annualPrice: annualPriceWithDiscount(49900),
     caps: {
@@ -211,7 +211,7 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
       'White-label complet (logo + couleurs)',
       'Vérification renforcée incluse',
       'Échange direct avec Benjamin, le fondateur',
-      'Onboarding sur-mesure de ton équipe',
+      'Onboarding sur-mesure de votre équipe',
       'Réponse support sous 1 heure ouvrée',
       'Personnalisation avancée du workflow',
     ],
@@ -282,24 +282,24 @@ export const ANNUAIRE_PLANS: readonly AnnuairePlan[] = [
   {
     code: 'annuaire_local',
     name: 'Présence',
-    tagline: 'Tu veux que les particuliers de ton département te trouvent',
+    tagline: 'Les particuliers de votre département vous trouvent en priorité',
     monthlyPrice: 1900,
     annualPrice: annualPriceWithDiscount(1900),
     leadsPerMonth: 5,
     ficheLevel: 'premium',
     features: [
       'Fiche publique sur l’annuaire KOVAS',
-      'Tes 3 derniers avis Google affichés',
+      'Vos 3 derniers avis Google affichés',
       'Indicateur de disponibilité de la semaine',
-      'Statistiques de ta fiche (vues, contacts)',
+      'Statistiques de votre fiche (vues, contacts)',
       'Réception de demandes de devis qualifiés',
-      'Tu paies seulement quand un lead t’intéresse',
+      'Vous payez seulement les leads qui vous intéressent',
     ],
   },
   {
     code: 'annuaire_regional',
     name: 'Boost',
-    tagline: 'Tu veux passer devant tes concurrents dans les résultats',
+    tagline: 'Vous passez devant vos concurrents dans les résultats',
     monthlyPrice: 3900,
     annualPrice: annualPriceWithDiscount(3900),
     leadsPerMonth: 15,
@@ -309,15 +309,15 @@ export const ANNUAIRE_PLANS: readonly AnnuairePlan[] = [
       'Tout Présence, plus :',
       'Position prioritaire (top 5 département)',
       '1 commune mise en avant',
-      'Badge Vérifié bleu sur ta fiche',
+      'Badge Vérifié bleu sur votre fiche',
       'Notifications de leads en temps réel',
-      '−20% sur ton premier lead du mois',
+      '−20% sur votre premier lead du mois',
     ],
   },
   {
     code: 'annuaire_national',
     name: 'Premium',
-    tagline: 'Tu veux capturer tout le marché de ta région',
+    tagline: 'Vous capturez tout le marché de votre région',
     monthlyPrice: 7900,
     annualPrice: annualPriceWithDiscount(7900),
     leadsPerMonth: 30,
@@ -327,7 +327,7 @@ export const ANNUAIRE_PLANS: readonly AnnuairePlan[] = [
       'Visibilité multi-départements (top 3 région)',
       '3 communes mises en avant',
       'Badge Premium doré',
-      '−50% sur tes 3 premiers leads du mois',
+      '−50% sur vos 3 premiers leads du mois',
       'Promesse de réponse client le jour même',
       'Support prioritaire',
     ],
@@ -405,7 +405,7 @@ export const BUNDLES: readonly BundleCombo[] = [
   {
     code: 'bundle_solo_starter',
     name: 'Démarrage',
-    tagline: 'Tu démarres et tu veux te faire connaître',
+    tagline: 'Vous démarrez et vous voulez vous faire connaître',
     annuaireComponent: 'annuaire_local',
     logicielComponent: 'solo_light',
     monthlyPrice: 3900,
