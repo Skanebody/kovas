@@ -1,4 +1,5 @@
 import { BadgeVerified } from '@/components/diagnostician/BadgeVerified'
+import { TrustBadges, type TrustBadgesData } from '@/components/marketplace/TrustBadges'
 import type { DiagnosticianSireneBadge } from '@/lib/data-gouv/recherche-entreprises/diagnostician-badge'
 import type { AvailabilitySignals } from '@/lib/diag-availability'
 import {
@@ -41,6 +42,8 @@ type DiagnosticianPageContentProps = {
   availability?: AvailabilitySignals | null
   /** Badge "Activité diagnostic vérifiée" via API Recherche d'Entreprises (open data INSEE). */
   sireneBadge?: DiagnosticianSireneBadge | null
+  /** Trust badges (Airbnb pattern) — bande sous le hero. Masquée si 0 signal. */
+  trustBadges?: TrustBadgesData | null
 }
 
 const SERVICE_TYPES = [
@@ -66,6 +69,7 @@ export function DiagnosticianPageContent({
   badgeLevel = 'unverified',
   availability = null,
   sireneBadge = null,
+  trustBadges = null,
 }: DiagnosticianPageContentProps) {
   // AUDIT-A — Mapping schéma canonique (post-consolidation FIX-AA) :
   //   full_name canonique (fallback first_name+last_name), postal_code → postcode,
@@ -306,6 +310,9 @@ export function DiagnosticianPageContent({
             </div>
           </div>
         </section>
+
+        {/* Trust Badges (Airbnb pattern) — masqué si 0 signal valide */}
+        {trustBadges ? <TrustBadges data={trustBadges} /> : null}
 
         {/* 01 — Certifications */}
         <section className="border-b border-black/5">

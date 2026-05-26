@@ -71,25 +71,46 @@ async function fetchRelatedDiagnosticians(
 }
 
 /**
- * Fetch verification status — sert à afficher le badge "Vérifié" / "Vérifié+".
- * Lecture via service_role pour bypasser le RLS strict de la table (service role only).
+ * Fetch verification status — sert à afficher le badge "Vérifié" / "Vérifié+"
+ * + la bande Trust Badges (Airbnb pattern) sous le hero.
+ *
+ * Lecture via service_role pour bypasser le RLS strict de la table.
  */
 async function fetchVerificationBadge(diagId: string): Promise<{
   overallStatus: string | null
   badgeLevel: 'unverified' | 'verified' | 'verified_plus'
+  identityVerifiedAt: string | null
+  cofracVerifiedAt: string | null
+  rcproVerifiedAt: string | null
+  sireneVerifiedAt: string | null
 }> {
   const supabase = await createClient()
   // biome-ignore lint/suspicious/noExplicitAny: table cross-schema; types regen pending
   const { data } = await (supabase as any)
     .from('diagnostician_verification_status')
-    .select('overall_status, badge_level')
+    .select(
+      'overall_status, badge_level, identity_verified_at, cofrac_verified_at, rcpro_verified_at, sirene_verified_at',
+    )
     .eq('diagnostician_id', diagId)
     .maybeSingle()
-  if (!data) return { overallStatus: null, badgeLevel: 'unverified' }
+  if (!data) {
+    return {
+      overallStatus: null,
+      badgeLevel: 'unverified',
+      identityVerifiedAt: null,
+      cofracVerifiedAt: null,
+      rcproVerifiedAt: null,
+      sireneVerifiedAt: null,
+    }
+  }
   return {
     overallStatus: (data.overall_status as string | null) ?? null,
     badgeLevel:
       (data.badge_level as 'unverified' | 'verified' | 'verified_plus' | null) ?? 'unverified',
+    identityVerifiedAt: (data.identity_verified_at as string | null) ?? null,
+    cofracVerifiedAt: (data.cofrac_verified_at as string | null) ?? null,
+    rcproVerifiedAt: (data.rcpro_verified_at as string | null) ?? null,
+    sireneVerifiedAt: (data.sirene_verified_at as string | null) ?? null,
   }
 }
 
@@ -371,6 +392,14 @@ export default async function DiagnosticianPage({ params }: PageProps) {
         badgeLevel={verification.badgeLevel}
         availability={availability}
         sireneBadge={sireneBadge}
+        trustBadges={{
+          identityVerifiedAt: verification.identityVerifiedAt,
+          cofracVerifiedAt: verification.cofracVerifiedAt,
+          hasCertifications: Array.isArray(diag.certifications) && diag.certifications.length > 0,
+          rcproVerifiedAt: verification.rcproVerifiedAt,
+          sireneVerified: Boolean(sireneBadge?.isVerified) || Boolean(diagSiret),
+          responseBucketFast: availability?.responseBucket === 'fast',
+        }}
       />
     </>
   )
