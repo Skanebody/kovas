@@ -1,33 +1,38 @@
 /**
- * /tarifs — refonte V5 selon mockup canonique 2026-05-25 (Lot B43).
+ * /tarifs — refonte chrome V5 sobre Synthex/Quora (Lot B70, 2026-05-26).
  *
- * Layout sobre Synthex/Quora :
- *   - Hero "Le logiciel fait pour toi"
- *   - 3 onglets sticky (Logiciel / Annuaire / Bundles) via TarifsTabs (client)
- *   - Section Logiciel : grid 4 tiers (Solo/Pro/Cabinet/Cabinet+) + Enterprise card
- *   - Section Annuaire : grid 3 tiers (Présence/Boost/Premium)
- *   - Section Bundles : grid 5 tiers (Démarrage/Croissance/Acquisition/Cabinet/Cabinet+)
- *   - Section Options (3 add-ons : Utilisateur+, Vérif renforcée, Au-delà quota)
- *   - Section Fidélité progressive (4 items)
- *   - Footer 5 promesses
+ * Adopte le chrome de la home `/` :
+ *   - <PublicHeader /> + <SiteFooter /> partagés
+ *   - bg-sage #F5F7F4 + navy #0F1419 + chartreuse #D4F542 sur CTA/badges accent
+ *   - cards rounded-2xl border 0.08 bg-paper (au lieu de grid border pleine)
+ *   - sections px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]
+ *   - hero clamp(40px, 7vw, 104px) + mot-clé serif italic
+ *   - vouvoiement strict
  *
- * Brand V5 strict :
- *   - background sage #F5F7F4
- *   - texte/border navy #0F1419
- *   - chartreuse #D4F542 réservé : badge "Le plus populaire", CTA hover,
- *     bordure tab active, accent Enterprise. JAMAIS sur fond ni texte secondaire.
- *   - Typography : Urbanist (default) + Instrument Serif italic (prix hero + chiffres)
- *     + JetBrains Mono (eyebrows, tags, navigation).
+ * Préserve intacts (B43 / B67 / B68) :
+ *   - data 4 tiers Logiciel + 3 tiers Annuaire + 5 Bundles + Add-ons + Loyalty
+ *   - composant client TarifsTabs (3 onglets sticky useSearchParams + Suspense)
+ *   - JSON-LD BreadcrumbList + ItemList
+ *   - metadata SEO buildMetadata
+ *   - Enterprise card en bas du panel Logiciel
+ *   - <GlossaryTerm> du glossaire express
+ *   - maillage interne final (4 liens + lien contact)
  *
- * Authority : mockup HTML user 2026-05-25.
+ * Montants pricing canoniques V5 (NE PAS modifier) :
+ *   Logiciel : 29 / 79 / 199 / 499 €
+ *   Annuaire : 19 / 39 / 79 €
+ *   Bundles  : 39 / 99 / 89 / 229 / 529 €
  */
 
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { Button } from '@/components/ui/button'
 import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { ANNUAIRE_PLANS, BUNDLES, LOGICIEL_PLANS } from '@/lib/pricing-plans'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { buildBreadcrumbList, buildPricingItemListSchema } from '@/lib/seo/schema-org'
-import { ArrowRight, Check, Flag } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Flag } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -59,14 +64,14 @@ interface Tier {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* LOGICIEL — 4 tiers + Enterprise (mockup)                                    */
+/* LOGICIEL — 4 tiers + Enterprise                                             */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 const LOGICIEL_TIERS: Tier[] = [
   {
     name: 'Solo',
-    forWho: 'Tu démarres ou tu fais ~10 missions par semaine.',
-    promise: 'Gagne 35 minutes sur chaque mission. Zéro mauvaise surprise ADEME.',
+    forWho: 'Vous démarrez ou vous faites ~10 missions par semaine.',
+    promise: 'Gagnez 35 minutes sur chaque mission. Zéro mauvaise surprise ADEME.',
     price: '29',
     cap: { count: '40', unit: 'missions / mois', overage: 'puis 0,99€ / mission' },
     features: [
@@ -81,8 +86,8 @@ const LOGICIEL_TIERS: Tier[] = [
   },
   {
     name: 'Pro',
-    forWho: 'Tu travailles à temps plein, 15 à 25 missions par semaine.',
-    promise: 'Tout Solo, plus ton tableau de bord pour piloter ton activité.',
+    forWho: 'Vous travaillez à temps plein, 15 à 25 missions par semaine.',
+    promise: 'Tout Solo, plus votre tableau de bord pour piloter votre activité.',
     price: '79',
     cap: { count: '100', unit: 'missions / mois', overage: 'puis 0,79€ / mission' },
     features: [
@@ -100,8 +105,8 @@ const LOGICIEL_TIERS: Tier[] = [
   },
   {
     name: 'Cabinet',
-    forWho: 'Tu travailles en équipe de 2 à 5 personnes.',
-    promise: 'Pilote ton équipe. Rôles, permissions, dashboards par membre.',
+    forWho: 'Vous travaillez en équipe de 2 à 5 personnes.',
+    promise: 'Pilotez votre équipe. Rôles, permissions, dashboards par membre.',
     price: '199',
     cap: { count: '300', unit: 'missions / mois', overage: 'puis 0,59€ / mission' },
     features: [
@@ -118,7 +123,7 @@ const LOGICIEL_TIERS: Tier[] = [
   },
   {
     name: 'Cabinet+',
-    forWho: 'Tu pilotes 6 à 15 personnes sur un ou plusieurs sites.',
+    forWho: 'Vous pilotez 6 à 15 personnes sur un ou plusieurs sites.',
     promise: 'Tout Cabinet, plus multi-site et accompagnement direct fondateur.',
     price: '499',
     cap: { count: '1000', unit: 'missions / mois', overage: 'puis 0,29€ / mission' },
@@ -129,7 +134,7 @@ const LOGICIEL_TIERS: Tier[] = [
       'White-label complet (logo + couleurs)',
       'Vérification renforcée incluse',
       'Échange direct avec Benjamin, le fondateur',
-      'Onboarding sur-mesure de ton équipe',
+      'Onboarding sur-mesure de votre équipe',
       'Réponse support sous 1 heure ouvrée',
       'Personnalisation avancée du workflow',
     ],
@@ -137,45 +142,45 @@ const LOGICIEL_TIERS: Tier[] = [
 ]
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* ANNUAIRE — 3 tiers (mockup)                                                 */
+/* ANNUAIRE — 3 tiers                                                          */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 const ANNUAIRE_TIERS: Tier[] = [
   {
     name: 'Présence',
-    forWho: 'Tu veux que les particuliers de ton département te trouvent.',
-    promise: 'Une fiche professionnelle visible 24/7, avec tes vrais avis Google.',
+    forWho: 'Vous voulez que les particuliers de votre département vous trouvent.',
+    promise: 'Une fiche professionnelle visible 24/7, avec vos vrais avis Google.',
     price: '19',
     cap: { count: 'Visibilité', unit: 'département', overage: '' },
     features: [
       'Fiche publique sur l’annuaire KOVAS',
-      'Tes 3 derniers avis Google affichés',
+      'Vos 3 derniers avis Google affichés',
       'Indicateur de disponibilité de la semaine',
-      'Statistiques de ta fiche (vues, contacts)',
+      'Statistiques de votre fiche (vues, contacts)',
       'Réception de demandes de devis qualifiés',
-      'Tu paies seulement quand un lead t’intéresse',
+      'Vous payez seulement quand un lead vous intéresse',
     ],
   },
   {
     name: 'Boost',
-    forWho: 'Tu veux passer devant tes concurrents dans les résultats.',
-    promise: 'Top 5 de ton département, badge Vérifié bien visible.',
+    forWho: 'Vous voulez passer devant vos concurrents dans les résultats.',
+    promise: 'Top 5 de votre département, badge Vérifié bien visible.',
     price: '39',
     cap: { count: 'Top 5', unit: 'département', overage: '' },
     features: [
       'Tout Présence, plus :',
       'Position prioritaire (top 5 département)',
       '1 commune mise en avant',
-      'Badge Vérifié bleu sur ta fiche',
+      'Badge Vérifié bleu sur votre fiche',
       'Notifications de leads en temps réel',
-      '−20% sur ton premier lead du mois',
+      '−20% sur votre premier lead du mois',
     ],
     highlighted: true,
     badge: 'Recommandé',
   },
   {
     name: 'Premium',
-    forWho: 'Tu veux capturer tout le marché de ta région.',
+    forWho: 'Vous voulez capturer tout le marché de votre région.',
     promise: 'Visibilité maximale multi-départements, badge Premium doré.',
     price: '79',
     cap: { count: 'Top 3', unit: 'région', overage: '' },
@@ -184,7 +189,7 @@ const ANNUAIRE_TIERS: Tier[] = [
       'Visibilité multi-départements',
       '3 communes mises en avant',
       'Badge Premium doré',
-      '−50% sur tes 3 premiers leads du mois',
+      '−50% sur vos 3 premiers leads du mois',
       'Promesse de réponse client le jour même',
       'Support prioritaire',
     ],
@@ -192,7 +197,7 @@ const ANNUAIRE_TIERS: Tier[] = [
 ]
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* BUNDLES — 5 combos (extraits de BUNDLES canonique pour cohérence)           */
+/* BUNDLES — 5 combos (extraits canoniques)                                    */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function formatBundleCents(cents: number): string {
@@ -206,7 +211,7 @@ function bundleByCode(code: string) {
 const BUNDLE_TIERS: Tier[] = [
   {
     name: 'Démarrage',
-    forWho: 'Tu démarres et tu veux te faire connaître.',
+    forWho: 'Vous démarrez et vous voulez vous faire connaître.',
     promise: 'Le logiciel + la fiche publique. Tout pour commencer.',
     price: formatBundleCents(bundleByCode('bundle_solo_starter')?.monthlyPrice ?? 3900),
     cap: { count: 'Solo', unit: '+ Présence', overage: '' },
@@ -220,7 +225,7 @@ const BUNDLE_TIERS: Tier[] = [
   },
   {
     name: 'Croissance',
-    forWho: 'Tu es établi et tu veux accélérer.',
+    forWho: 'Vous êtes établi et vous voulez accélérer.',
     promise: 'Le combo le plus choisi par les diagnostiqueurs en croissance.',
     price: formatBundleCents(bundleByCode('bundle_solo_performance')?.monthlyPrice ?? 9900),
     cap: { count: 'Pro', unit: '+ Boost', overage: '' },
@@ -237,7 +242,7 @@ const BUNDLE_TIERS: Tier[] = [
   },
   {
     name: 'Acquisition',
-    forWho: 'Tu travailles en solo mais tu vises gros sur les leads.',
+    forWho: 'Vous travaillez en solo mais vous visez gros sur les leads.',
     promise: 'Pour ceux qui font de l’annuaire leur source n°1 de clients.',
     price: formatBundleCents(bundleByCode('bundle_solo_regional')?.monthlyPrice ?? 8900),
     cap: { count: 'Solo', unit: '+ Premium', overage: '' },
@@ -284,29 +289,31 @@ const BUNDLE_TIERS: Tier[] = [
 ]
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* TIER CARD — composant atomique partagé                                      */
+/* TIER CARD — composant atomique partagé (refonte V5 sobre)                   */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-function TierCard({ tier }: { tier: Tier }) {
+function TierCard({ tier }: { tier: Tier }): React.ReactElement {
   const isHighlighted = tier.highlighted === true
   return (
     <div
       className={[
-        'relative flex flex-col p-8 border-r border-[#0F1419] last:border-r-0',
-        isHighlighted ? 'bg-[#0F1419] text-[#F5F7F4]' : 'bg-[#F5F7F4]',
+        'relative flex flex-col rounded-2xl border p-8',
+        isHighlighted
+          ? 'bg-[#0F1419] text-paper border-[#0F1419]'
+          : 'bg-paper text-[#0F1419] border-[#0F1419]/[0.08]',
       ].join(' ')}
     >
       {tier.badge ? (
-        <div className="absolute -top-px -left-px -right-px bg-[#D4F542] text-[#0F1419] py-1.5 px-3 font-mono text-[10px] uppercase tracking-[0.15em] font-semibold text-center">
+        <span className="absolute -top-3 left-6 rounded-pill bg-chartreuse text-[#0F1419] px-3 py-1 font-mono text-[10px] uppercase tracking-wider font-semibold">
           {tier.badge}
-        </div>
+        </span>
       ) : null}
 
-      <div className={tier.badge ? 'mt-6' : 'mt-0'}>
+      <div className={tier.badge ? 'mt-4' : 'mt-0'}>
         <p
           className={[
-            'font-mono uppercase tracking-[0.2em] text-xs font-semibold',
-            isHighlighted ? 'text-[#F5F7F4]' : 'text-[#0F1419]',
+            'font-mono uppercase tracking-wider text-[11px] font-semibold',
+            isHighlighted ? 'text-paper' : 'text-[#0F1419]',
           ].join(' ')}
         >
           {tier.name}
@@ -314,7 +321,7 @@ function TierCard({ tier }: { tier: Tier }) {
         <p
           className={[
             'mt-3 text-[13px] leading-[1.4] min-h-[38px]',
-            isHighlighted ? 'text-[#C7CCD1]' : 'text-[#4A525B]',
+            isHighlighted ? 'text-paper/72' : 'text-[#0F1419]/72',
           ].join(' ')}
         >
           {tier.forWho}
@@ -322,7 +329,7 @@ function TierCard({ tier }: { tier: Tier }) {
         <p
           className={[
             'mt-5 font-serif italic text-[22px] leading-[1.2] min-h-[80px]',
-            isHighlighted ? 'text-[#F5F7F4]' : 'text-[#0F1419]',
+            isHighlighted ? 'text-paper' : 'text-[#0F1419]',
           ].join(' ')}
         >
           {tier.promise}
@@ -332,24 +339,26 @@ function TierCard({ tier }: { tier: Tier }) {
       <div className="mt-6">
         <div
           className={[
-            'font-serif italic text-[64px] leading-none font-normal tracking-tight',
-            isHighlighted ? 'text-[#F5F7F4]' : 'text-[#0F1419]',
+            'font-serif italic font-normal leading-none tracking-tight',
+            isHighlighted ? 'text-paper' : 'text-[#0F1419]',
           ].join(' ')}
+          style={{ fontSize: 'clamp(48px, 5vw, 72px)' }}
         >
-          <span className="text-[32px] align-top mr-0.5">€</span>
+          <span className="text-[24px] align-top mr-0.5">€</span>
           {tier.price}
         </div>
         <p
-          className={['mt-1 text-[13px]', isHighlighted ? 'text-[#C7CCD1]' : 'text-[#4A525B]'].join(
-            ' ',
-          )}
+          className={[
+            'mt-1 text-[13px]',
+            isHighlighted ? 'text-paper/72' : 'text-[#0F1419]/55',
+          ].join(' ')}
         >
           par mois
         </p>
         <p
           className={[
-            'mt-3 font-mono text-[10px] uppercase tracking-[0.15em]',
-            isHighlighted ? 'text-[#D4F542]' : 'text-[#4A525B]',
+            'mt-3 font-mono text-[10px] uppercase tracking-wider',
+            isHighlighted ? 'text-chartreuse' : 'text-[#0F1419]/55',
           ].join(' ')}
         >
           {(Number.parseFloat(tier.price) * 0.85).toFixed(2)}€ en annuel · −15%
@@ -359,7 +368,7 @@ function TierCard({ tier }: { tier: Tier }) {
       <div
         className={[
           'mt-6 py-3 border-t border-b text-[15px] font-medium',
-          isHighlighted ? 'border-[#2A3138]' : 'border-[#C7CCD1]',
+          isHighlighted ? 'border-paper/15' : 'border-[#0F1419]/[0.08]',
         ].join(' ')}
       >
         <span className="font-serif italic font-normal">{tier.cap.count}</span> {tier.cap.unit}
@@ -369,7 +378,7 @@ function TierCard({ tier }: { tier: Tier }) {
             <span
               className={[
                 'inline-block mt-1 text-[11px] font-normal',
-                isHighlighted ? 'text-[#C7CCD1]' : 'text-[#4A525B]',
+                isHighlighted ? 'text-paper/72' : 'text-[#0F1419]/55',
               ].join(' ')}
             >
               {tier.cap.overage}
@@ -381,77 +390,82 @@ function TierCard({ tier }: { tier: Tier }) {
       <ul className="mt-6 flex-grow space-y-0">
         {tier.features.map((feature) => (
           <li key={feature} className="flex items-start gap-2.5 py-2 text-[14px]">
-            <Check
+            <CheckCircle2
               className={[
-                'h-3.5 w-3.5 mt-0.5 shrink-0',
-                isHighlighted ? 'text-[#D4F542]' : 'text-[#0F1419]',
+                'size-4 mt-0.5 shrink-0',
+                isHighlighted ? 'text-chartreuse' : 'text-chartreuse-deep',
               ].join(' ')}
-              strokeWidth={3}
+              aria-hidden
             />
-            <span className="leading-[1.4]">{feature}</span>
+            <span className={['leading-[1.4]', isHighlighted ? 'text-paper' : ''].join(' ')}>
+              {feature}
+            </span>
           </li>
         ))}
       </ul>
 
       {tier.bundleSaving ? (
-        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.15em] font-semibold text-[#16A66B]">
+        <p
+          className={[
+            'mt-4 font-mono text-[10px] uppercase tracking-wider font-semibold',
+            isHighlighted ? 'text-chartreuse' : 'text-chartreuse-deep',
+          ].join(' ')}
+        >
           {tier.bundleSaving}
         </p>
       ) : null}
 
-      <Link
-        href="/signup"
-        className={[
-          'mt-8 inline-flex items-center justify-center py-3.5 px-6 border font-mono uppercase tracking-[0.15em] text-[11px] font-medium transition-colors',
-          isHighlighted
-            ? 'bg-[#D4F542] text-[#0F1419] border-[#D4F542] hover:bg-[#F5F7F4] hover:border-[#F5F7F4]'
-            : 'bg-[#0F1419] text-[#F5F7F4] border-[#0F1419] hover:bg-[#D4F542] hover:text-[#0F1419] hover:border-[#D4F542]',
-        ].join(' ')}
-      >
-        Essai 30 jours
-      </Link>
+      <div className="mt-8">
+        <Button asChild variant={isHighlighted ? 'accent' : 'default'} size="lg" className="w-full">
+          <Link href="/signup">
+            Essai 30 jours
+            <ArrowRight className="size-4" />
+          </Link>
+        </Button>
+      </div>
     </div>
   )
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* SECTIONS                                                                    */
+/* SECTIONS PANELS (Logiciel / Annuaire / Bundles)                             */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-function LogicielSection() {
+function LogicielSection(): React.ReactElement {
   return (
-    <div className="py-16">
-      <p className="lg:hidden mb-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[#4A525B]">
-        <span className="text-[#D4F542] font-bold">→ </span>Glisse pour comparer
+    <div className="pt-4">
+      <p className="lg:hidden mb-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+        <span className="text-chartreuse-deep font-bold">→ </span>Faites défiler pour comparer
       </p>
-      <div className="overflow-x-auto pb-4">
-        <div className="grid border border-[#0F1419] min-w-full grid-cols-[repeat(4,minmax(260px,1fr))]">
-          {LOGICIEL_TIERS.map((tier) => (
-            <TierCard key={tier.name} tier={tier} />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {LOGICIEL_TIERS.map((tier) => (
+          <TierCard key={tier.name} tier={tier} />
+        ))}
       </div>
 
-      {/* Enterprise card */}
-      <div className="mt-12 p-12 bg-[#0F1419] text-[#F5F7F4] grid gap-8 lg:grid-cols-[2fr_1fr] items-center">
+      {/* Enterprise card — bg navy plein, chartreuse accent label uniquement */}
+      <div className="mt-10 rounded-2xl bg-[#0F1419] text-paper p-10 sm:p-12 grid gap-8 lg:grid-cols-[2fr_1fr] items-center">
         <div>
-          <p className="font-mono uppercase tracking-[0.2em] text-xs font-semibold text-[#D4F542]">
+          <p className="font-mono uppercase tracking-wider text-[11px] font-semibold text-chartreuse">
             Enterprise
           </p>
-          <h3 className="mt-4 font-serif italic text-[36px] leading-[1.1]">
-            Tu pilotes un réseau, une franchise ou plus de 15 utilisateurs ?
+          <h3
+            className="mt-4 font-serif italic font-normal leading-[1.1] text-paper"
+            style={{ fontSize: 'clamp(28px, 3vw, 40px)' }}
+          >
+            Vous pilotez un réseau, une franchise ou plus de 15 utilisateurs ?
           </h3>
-          <p className="mt-4 text-[15px] text-[#C7CCD1] max-w-[480px]">
+          <p className="mt-4 text-[15px] text-paper/72 max-w-[520px] leading-relaxed">
             Pour les structures qui dépassent Cabinet+ (utilisateurs illimités, intégrations
             sur-mesure, contrat-cadre, account manager dédié, SLA personnalisé), nous construisons
-            une offre adaptée à ton organisation.
+            une offre adaptée à votre organisation.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap gap-2.5">
             {['Utilisateurs illimités', 'SLA dédié', 'SSO', 'Account manager', 'API étendue'].map(
               (feature) => (
                 <span
                   key={feature}
-                  className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#F5F7F4] py-1.5 px-3 border border-[#2A3138]"
+                  className="font-mono text-[10px] uppercase tracking-wider text-paper py-1.5 px-3 rounded-pill border border-paper/15"
                 >
                   {feature}
                 </span>
@@ -459,53 +473,125 @@ function LogicielSection() {
             )}
           </div>
         </div>
-        <Link
-          href="/contact?subject=enterprise"
-          className="inline-flex items-center justify-center py-[18px] px-8 bg-[#D4F542] text-[#0F1419] border border-[#D4F542] font-mono uppercase tracking-[0.15em] text-xs font-semibold hover:bg-[#F5F7F4] transition-colors"
-        >
-          Parlons-en
-        </Link>
-      </div>
-    </div>
-  )
-}
-
-function AnnuaireSection() {
-  return (
-    <div className="py-16">
-      <p className="lg:hidden mb-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[#4A525B]">
-        <span className="text-[#D4F542] font-bold">→ </span>Glisse pour comparer
-      </p>
-      <div className="overflow-x-auto pb-4">
-        <div className="grid border border-[#0F1419] min-w-full grid-cols-[repeat(3,minmax(260px,1fr))]">
-          {ANNUAIRE_TIERS.map((tier) => (
-            <TierCard key={tier.name} tier={tier} />
-          ))}
+        <div className="flex lg:justify-end">
+          <Button asChild variant="accent" size="lg">
+            <Link href="/contact?subject=enterprise">
+              Parlons-en
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
         </div>
       </div>
     </div>
   )
 }
 
-function BundlesSection() {
+function AnnuaireSection(): React.ReactElement {
   return (
-    <div className="py-16">
-      <p className="lg:hidden mb-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[#4A525B]">
-        <span className="text-[#D4F542] font-bold">→ </span>Glisse pour comparer
+    <div className="pt-4">
+      <p className="lg:hidden mb-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+        <span className="text-chartreuse-deep font-bold">→ </span>Faites défiler pour comparer
       </p>
-      <div className="overflow-x-auto pb-4">
-        <div className="grid border border-[#0F1419] min-w-full grid-cols-[repeat(5,minmax(240px,1fr))]">
-          {BUNDLE_TIERS.map((tier) => (
-            <TierCard key={tier.name} tier={tier} />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {ANNUAIRE_TIERS.map((tier) => (
+          <TierCard key={tier.name} tier={tier} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function BundlesSection(): React.ReactElement {
+  return (
+    <div className="pt-4">
+      <p className="lg:hidden mb-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+        <span className="text-chartreuse-deep font-bold">→ </span>Faites défiler pour comparer
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {BUNDLE_TIERS.map((tier) => (
+          <TierCard key={tier.name} tier={tier} />
+        ))}
       </div>
     </div>
   )
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* SECTIONS GLOBALES : Add-ons + Loyalty + Footer                              */
+/* HERO                                                                        */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SectionHero(): React.ReactElement {
+  const metas = ['À partir de 29€/mois', 'Compatible Liciel, ORIS, OBBC', 'Support en français']
+  return (
+    <section className="px-5 sm:px-12 pt-16 sm:pt-24 pb-12 sm:pb-20 animate-fade-in motion-reduce:animate-none">
+      <div className="max-w-[1240px] mx-auto">
+        <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55 mb-6">
+          Tarifs · 3 onglets canoniques
+        </p>
+        <h1
+          className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
+          style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
+        >
+          Le logiciel <span className="font-serif italic font-normal">fait pour vous.</span>
+        </h1>
+        <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
+          Du diagnostiqueur solo au cabinet structuré, chaque tier est calibré pour votre stade
+          d&apos;activité. Essai 30 jours sans engagement, satisfait ou remboursé sous 60 jours.
+        </p>
+        <div className="mt-10 flex flex-wrap gap-x-5 gap-y-2">
+          {metas.map((meta, idx) => (
+            <span
+              key={meta}
+              className="flex items-center gap-2 font-mono text-[12px] tracking-wide text-[#0F1419]/55"
+            >
+              {idx > 0 ? (
+                <span aria-hidden className="text-[#0F1419]/30">
+                  ·
+                </span>
+              ) : null}
+              <span>{meta}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* SECTION TABS CONTAINER                                                      */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SectionTabs(): React.ReactElement {
+  return (
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+      <div className="max-w-[1240px] mx-auto">
+        <div className="mb-12 space-y-3 max-w-2xl">
+          <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+            Catalogue tarifaire
+          </p>
+          <h2
+            className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+            style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+          >
+            Trois produits,{' '}
+            <span className="font-serif italic font-normal">prix transparents.</span>
+          </h2>
+        </div>
+        <Suspense fallback={<LogicielSection />}>
+          <TarifsTabs
+            logiciel={<LogicielSection />}
+            annuaire={<AnnuaireSection />}
+            bundles={<BundlesSection />}
+          />
+        </Suspense>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* SECTION ADD-ONS                                                             */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 interface Addon {
@@ -521,7 +607,7 @@ const ADDONS: Addon[] = [
     name: 'Utilisateur en plus',
     price: '19',
     priceSub: 'par mois et par user',
-    desc: "Ajoute un membre d'équipe au-delà des utilisateurs inclus dans ton plan.",
+    desc: "Ajoutez un membre d'équipe au-delà des utilisateurs inclus dans votre plan.",
   },
   {
     name: 'Vérification renforcée',
@@ -533,68 +619,85 @@ const ADDONS: Addon[] = [
     name: 'Au-delà du quota',
     price: '0,99',
     priceSub: 'à 0,29€ par mission selon tier',
-    desc: "Pas d'angoisse de quota. Tu travailles sans interruption. Les missions au-delà sont débitées en fin de mois sur la carte enregistrée. Plus ton tier est élevé, moins ça coûte par mission.",
+    desc: "Pas d'angoisse de quota. Vous travaillez sans interruption. Les missions au-delà sont débitées en fin de mois sur la carte enregistrée. Plus votre tier est élevé, moins ça coûte par mission.",
     overage: true,
   },
 ]
 
-function AddonsSection() {
+function SectionAddons(): React.ReactElement {
   return (
-    <section className="border-t border-[#0F1419] py-20 lg:py-24">
-      <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#4A525B]">
-            À combiner avec n’importe quel plan
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+      <div className="max-w-[1240px] mx-auto space-y-12">
+        <div className="space-y-3 max-w-2xl">
+          <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+            À combiner avec n&apos;importe quel plan
           </p>
-          <h2 className="mt-2 text-[28px] md:text-[40px] lg:text-[48px] leading-[1.1] font-light tracking-tight">
-            Options <span className="font-serif italic font-normal">en plus</span>
+          <h2
+            className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+            style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+          >
+            Options <span className="font-serif italic font-normal">en plus.</span>
           </h2>
         </div>
-      </div>
-
-      <div className="grid border border-[#0F1419] grid-cols-1 lg:grid-cols-3">
-        {ADDONS.map((addon) => (
-          <div
-            key={addon.name}
-            className={[
-              'p-8 border-r border-b border-[#0F1419] last:border-b-0 lg:border-b-0 lg:last:border-r-0',
-              addon.overage ? 'bg-[#0F1419] text-[#F5F7F4]' : 'bg-[#F5F7F4]',
-            ].join(' ')}
-          >
-            <p
-              className={[
-                'font-mono uppercase tracking-[0.15em] text-[11px] font-semibold',
-                addon.overage ? 'text-[#D4F542]' : 'text-[#0F1419]',
-              ].join(' ')}
-            >
-              {addon.name}
-            </p>
-            <div className="mt-4 font-serif italic text-[36px] leading-none">
-              <span className="text-[20px] align-top">€</span>
-              {addon.price}
-            </div>
-            <p
-              className={[
-                'text-[12px] mt-1',
-                addon.overage ? 'text-[#C7CCD1]' : 'text-[#4A525B]',
-              ].join(' ')}
-            >
-              {addon.priceSub}
-            </p>
-            <p
-              className={[
-                'mt-5 text-[14px] leading-[1.5]',
-                addon.overage ? 'text-[#C7CCD1]' : 'text-[#4A525B]',
-              ].join(' ')}
-            >
-              {addon.desc}
-            </p>
-          </div>
-        ))}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {ADDONS.map((addon) => {
+            const isOverage = addon.overage === true
+            return (
+              <div
+                key={addon.name}
+                className={[
+                  'rounded-2xl border p-8',
+                  isOverage
+                    ? 'bg-[#0F1419] text-paper border-[#0F1419]'
+                    : 'bg-paper text-[#0F1419] border-[#0F1419]/[0.08]',
+                ].join(' ')}
+              >
+                <p
+                  className={[
+                    'font-mono uppercase tracking-wider text-[11px] font-semibold',
+                    isOverage ? 'text-chartreuse' : 'text-[#0F1419]',
+                  ].join(' ')}
+                >
+                  {addon.name}
+                </p>
+                <div
+                  className={[
+                    'mt-4 font-serif italic font-normal leading-none',
+                    isOverage ? 'text-paper' : 'text-[#0F1419]',
+                  ].join(' ')}
+                  style={{ fontSize: 'clamp(32px, 3vw, 44px)' }}
+                >
+                  <span className="text-[18px] align-top mr-0.5">€</span>
+                  {addon.price}
+                </div>
+                <p
+                  className={[
+                    'text-[12px] mt-1',
+                    isOverage ? 'text-paper/72' : 'text-[#0F1419]/55',
+                  ].join(' ')}
+                >
+                  {addon.priceSub}
+                </p>
+                <p
+                  className={[
+                    'mt-5 text-[14px] leading-relaxed',
+                    isOverage ? 'text-paper/72' : 'text-[#0F1419]/72',
+                  ].join(' ')}
+                >
+                  {addon.desc}
+                </p>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </section>
   )
 }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* SECTION LOYALTY                                                             */
+/* ────────────────────────────────────────────────────────────────────────── */
 
 interface LoyaltyItem {
   trigger: string
@@ -627,63 +730,73 @@ const LOYALTY_ITEMS: LoyaltyItem[] = [
   },
 ]
 
-function LoyaltySection() {
+function SectionLoyalty(): React.ReactElement {
   return (
-    <section className="border-t border-[#0F1419] py-20 lg:py-24">
-      <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#4A525B]">
-            Plus tu restes, plus tu économises
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+      <div className="max-w-[1240px] mx-auto space-y-12">
+        <div className="space-y-3 max-w-2xl">
+          <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+            Plus vous restez, plus vous économisez
           </p>
-          <h2 className="mt-2 text-[28px] md:text-[40px] lg:text-[48px] leading-[1.1] font-light tracking-tight">
-            Fidélité <span className="font-serif italic font-normal">progressive</span>
+          <h2
+            className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+            style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+          >
+            Fidélité <span className="font-serif italic font-normal">progressive.</span>
           </h2>
         </div>
-      </div>
-
-      <div className="grid border border-[#0F1419] grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-        {LOYALTY_ITEMS.map((item, i) => (
-          <div
-            key={item.trigger}
-            className={[
-              'p-8 border-r border-b border-[#0F1419]',
-              i === LOYALTY_ITEMS.length - 1 ? 'lg:border-r-0' : '',
-              i >= LOYALTY_ITEMS.length - 2 ? 'lg:border-b-0' : '',
-              item.special ? 'bg-[#0F1419] text-[#F5F7F4]' : 'bg-[#F5F7F4]',
-            ].join(' ')}
-          >
-            <p
-              className={[
-                'font-mono text-[11px] uppercase tracking-[0.15em]',
-                item.special ? 'text-[#C7CCD1]' : 'text-[#4A525B]',
-              ].join(' ')}
-            >
-              {item.trigger}
-            </p>
-            <div
-              className={[
-                'mt-4 font-serif italic text-[48px] leading-none',
-                item.special ? 'text-[#D4F542]' : 'text-[#0F1419]',
-              ].join(' ')}
-            >
-              {item.discount}
-            </div>
-            <p
-              className={[
-                'mt-4 text-[14px]',
-                item.special ? 'text-[#C7CCD1]' : 'text-[#4A525B]',
-              ].join(' ')}
-            >
-              {item.desc}
-            </p>
-          </div>
-        ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {LOYALTY_ITEMS.map((item) => {
+            const isSpecial = item.special === true
+            return (
+              <div
+                key={item.trigger}
+                className={[
+                  'rounded-2xl border p-7',
+                  isSpecial
+                    ? 'bg-[#0F1419] text-paper border-[#0F1419]'
+                    : 'bg-paper text-[#0F1419] border-[#0F1419]/[0.08]',
+                ].join(' ')}
+              >
+                <p
+                  className={[
+                    'font-mono text-[11px] uppercase tracking-wider',
+                    isSpecial ? 'text-paper/72' : 'text-[#0F1419]/55',
+                  ].join(' ')}
+                >
+                  {item.trigger}
+                </p>
+                <div
+                  className={[
+                    'mt-4 font-serif italic font-normal leading-none',
+                    isSpecial ? 'text-chartreuse' : 'text-[#0F1419]',
+                  ].join(' ')}
+                  style={{ fontSize: 'clamp(36px, 3.5vw, 56px)' }}
+                >
+                  {item.discount}
+                </div>
+                <p
+                  className={[
+                    'mt-4 text-[14px] leading-relaxed',
+                    isSpecial ? 'text-paper/72' : 'text-[#0F1419]/72',
+                  ].join(' ')}
+                >
+                  {item.desc}
+                </p>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </section>
   )
 }
 
-const FOOTER_PROMISES: string[] = [
+/* ────────────────────────────────────────────────────────────────────────── */
+/* SECTION ENGAGEMENTS (ex-FOOTER_PROMISES, reskinné V5)                       */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+const ENGAGEMENTS: ReadonlyArray<string> = [
   'Essai 30 jours débit auto',
   'Satisfait ou remboursé 60 jours',
   'Résiliation en 2 clics',
@@ -691,20 +804,107 @@ const FOOTER_PROMISES: string[] = [
   'Hébergement France · RGPD',
 ]
 
-function FooterPromises() {
+function SectionEngagements(): React.ReactElement {
   return (
-    <footer className="border-t border-[#0F1419] py-12 mt-16">
-      <div className="flex flex-wrap gap-8">
-        {FOOTER_PROMISES.map((promise) => (
-          <span
-            key={promise}
-            className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#4A525B] before:content-['✓_'] before:text-[#16A66B] before:font-bold"
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+      <div className="max-w-[1240px] mx-auto space-y-12">
+        <div className="space-y-3 max-w-2xl">
+          <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+            Nos engagements
+          </p>
+          <h2
+            className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+            style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
           >
-            {promise}
-          </span>
-        ))}
+            Cinq promesses <span className="font-serif italic font-normal">sans astérisque.</span>
+          </h2>
+        </div>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {ENGAGEMENTS.map((promise) => (
+            <li
+              key={promise}
+              className="flex items-start gap-2.5 rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-5 py-4"
+            >
+              <CheckCircle2 className="size-3.5 mt-0.5 text-chartreuse-deep shrink-0" aria-hidden />
+              <span className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/72 leading-relaxed">
+                {promise}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
-    </footer>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* SECTION GLOSSAIRE EXPRESS (B67 — préservé, reskinné V5)                     */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SectionGlossary(): React.ReactElement {
+  return (
+    <section className="px-5 sm:px-12 py-16 sm:py-20 border-t border-[#0F1419]/[0.08]">
+      <div className="max-w-[920px] mx-auto space-y-5">
+        <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+          Glossaire express
+        </p>
+        <p className="text-[15px] sm:text-base leading-relaxed text-[#0F1419]/80">
+          Les forfaits intègrent <GlossaryTerm term="Factur-X">Factur-X</GlossaryTerm> conforme
+          2027, les calculs <GlossaryTerm term="Carrez" /> / <GlossaryTerm term="Boutin" /> en
+          location, la rédaction d&apos;
+          <GlossaryTerm term="ERP" /> à jour Géorisques, la détection des{' '}
+          <GlossaryTerm term="passoire-thermique">passoires thermiques</GlossaryTerm> F-G et
+          l&apos;alerte si un <GlossaryTerm term="DPE" /> existe déjà sur le bien. Survolez chaque
+          terme souligné pour la définition officielle.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* SECTION MAILLAGE INTERNE (préservé, reskinné V5)                            */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function SectionInternalLinks(): React.ReactElement {
+  return (
+    <section className="px-5 sm:px-12 py-16 border-t border-[#0F1419]/[0.08]">
+      <div className="max-w-[1240px] mx-auto flex flex-col gap-6 items-center text-center">
+        <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55">
+          <li>
+            <Link href="/aide" className="hover:text-[#0F1419] transition-colors">
+              Centre d&apos;aide
+            </Link>
+          </li>
+          <li aria-hidden>·</li>
+          <li>
+            <Link href="/comparatif" className="hover:text-[#0F1419] transition-colors">
+              Comparatif Liciel
+            </Link>
+          </li>
+          <li aria-hidden>·</li>
+          <li>
+            <Link href="/observatoire" className="hover:text-[#0F1419] transition-colors">
+              Observatoire DPE
+            </Link>
+          </li>
+          <li aria-hidden>·</li>
+          <li>
+            <Link href="/temoignages" className="hover:text-[#0F1419] transition-colors">
+              Témoignages
+            </Link>
+          </li>
+        </ul>
+        <Link
+          href="/contact"
+          className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55 hover:text-[#0F1419] transition-colors"
+        >
+          <Flag className="size-3" aria-hidden />
+          Une question sur la tarification ?
+          <ArrowRight className="size-3" aria-hidden />
+        </Link>
+      </div>
+    </section>
   )
 }
 
@@ -712,7 +912,7 @@ function FooterPromises() {
 /* PAGE                                                                        */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-export default function TarifsPage() {
+export default function TarifsPage(): React.ReactElement {
   const breadcrumb = buildBreadcrumbList([
     { name: 'Accueil', path: '/' },
     { name: 'Tarifs', path: '/tarifs' },
@@ -724,106 +924,19 @@ export default function TarifsPage() {
   })
 
   return (
-    <div className="bg-[#F5F7F4] text-[#0F1419] min-h-dvh font-sans">
+    <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
       <JsonLd data={[breadcrumb, pricingItemList]} id="tarifs" />
-      <div className="mx-auto max-w-[1280px] px-6">
-        {/* Header */}
-        <header className="border-b border-[#0F1419] pt-8 pb-6">
-          <Link
-            href="/"
-            className="font-mono uppercase tracking-[0.4em] font-semibold text-sm hover:opacity-70 transition-opacity"
-          >
-            K · O · V · A · S
-          </Link>
-          <h1 className="mt-14 text-[40px] sm:text-[56px] md:text-[72px] lg:text-[88px] leading-none font-light tracking-tight">
-            Le logiciel <span className="font-serif italic font-normal">fait pour toi.</span>
-          </h1>
-          <p className="mt-6 text-[18px] text-[#4A525B] max-w-[620px]">
-            Du diagnostiqueur solo au cabinet structuré, chaque tier est calibré pour ton stade
-            d’activité. Essai 30 jours sans engagement, satisfait ou remboursé sous 60 jours.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-8">
-            {['À partir de 29€/mois', 'Compatible Liciel, ORIS, OBBC', 'Support en français'].map(
-              (meta) => (
-                <span
-                  key={meta}
-                  className="font-mono text-[11px] uppercase tracking-[0.15em] before:content-['—_'] before:text-[#8B939B]"
-                >
-                  {meta}
-                </span>
-              ),
-            )}
-          </div>
-        </header>
-
-        {/* Tabs + content (Suspense pour useSearchParams Next.js 15) */}
-        <Suspense fallback={<LogicielSection />}>
-          <TarifsTabs
-            logiciel={<LogicielSection />}
-            annuaire={<AnnuaireSection />}
-            bundles={<BundlesSection />}
-          />
-        </Suspense>
-
-        <AddonsSection />
-        <LoyaltySection />
-        <FooterPromises />
-
-        {/* Glossaire express — termes techniques cités dans les forfaits */}
-        <section className="border-t border-[#0F1419]/10 py-10">
-          <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#4A525B]">
-            Glossaire express
-          </p>
-          <p className="mt-3 text-sm leading-relaxed text-[#0F1419] max-w-[720px]">
-            Les forfaits intègrent <GlossaryTerm term="Factur-X">Factur-X</GlossaryTerm> conforme
-            2027, les calculs <GlossaryTerm term="Carrez" /> / <GlossaryTerm term="Boutin" /> en
-            location, la rédaction d&apos;
-            <GlossaryTerm term="ERP" /> à jour Géorisques, la détection des{' '}
-            <GlossaryTerm term="passoire-thermique">passoires thermiques</GlossaryTerm> F-G et
-            l&apos;alerte si un <GlossaryTerm term="DPE" /> existe déjà sur le bien. Survolez chaque
-            terme souligné pour la définition officielle.
-          </p>
-        </section>
-
-        {/* Maillage interne SEO + lien aide/contact */}
-        <div className="border-t border-[#0F1419] py-10">
-          <div className="flex flex-col gap-6 items-center text-center">
-            <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.15em] text-[#4A525B]">
-              <li>
-                <Link href="/aide" className="hover:text-[#0F1419] transition-colors">
-                  Centre d&apos;aide
-                </Link>
-              </li>
-              <li aria-hidden>·</li>
-              <li>
-                <Link href="/comparatif" className="hover:text-[#0F1419] transition-colors">
-                  Comparatif Liciel
-                </Link>
-              </li>
-              <li aria-hidden>·</li>
-              <li>
-                <Link href="/observatoire" className="hover:text-[#0F1419] transition-colors">
-                  Observatoire DPE
-                </Link>
-              </li>
-              <li aria-hidden>·</li>
-              <li>
-                <Link href="/temoignages" className="hover:text-[#0F1419] transition-colors">
-                  Témoignages
-                </Link>
-              </li>
-            </ul>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-[#4A525B] hover:text-[#0F1419] transition-colors"
-            >
-              <Flag className="h-3 w-3" />
-              Une question sur la tarification ?
-              <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-        </div>
-      </div>
+      <PublicHeader />
+      <main className="flex-1">
+        <SectionHero />
+        <SectionTabs />
+        <SectionAddons />
+        <SectionLoyalty />
+        <SectionEngagements />
+        <SectionGlossary />
+        <SectionInternalLinks />
+      </main>
+      <SiteFooter />
     </div>
   )
 }
