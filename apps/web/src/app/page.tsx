@@ -35,6 +35,7 @@
  * + bascule tutoiement).
  */
 
+import { RotatingSoftwareName } from '@/components/marketing/RotatingSoftwareName'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -106,7 +107,14 @@ function SectionHero(): React.ReactElement {
           style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
         >
           <span className="font-serif italic font-normal">Plus jamais</span> 21 h devant{' '}
-          <GlossaryTerm term="liciel">Liciel</GlossaryTerm>.
+          {/* Cyclage dynamique des 4 logiciels concurrents compatibles (Liciel ·
+              OBBC · AnalysImmo · ORIS) — parle aux 100% du marché au lieu des
+              65% Liciel-only. Le GlossaryTerm est conservé sur la première
+              occurrence rendue (Liciel) pour le SEO. */}
+          <GlossaryTerm term="liciel">
+            <RotatingSoftwareName />
+          </GlossaryTerm>
+          .
         </h1>
         <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
           Capture vocale et photos pendant ta mission. Tes données arrivent dans Liciel prêtes à
