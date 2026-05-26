@@ -50,10 +50,10 @@ export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem disabled className="text-ink-mute">
+          <DropdownMenuItem disabled className="text-[#0F1419]/72">
             Dupliquer le dossier (bientôt)
           </DropdownMenuItem>
-          <DropdownMenuItem disabled className="text-ink-mute">
+          <DropdownMenuItem disabled className="text-[#0F1419]/72">
             Archiver (bientôt)
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -67,20 +67,23 @@ export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
       </DropdownMenu>
 
       {confirmOpen && (
+        // biome-ignore lint/a11y/useSemanticElements: pattern fixed+backdrop (pas <dialog>)
+        // biome-ignore lint/a11y/useKeyWithClickEvents: backdrop click pour fermer — pattern modal standard
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Confirmer la suppression"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
           onClick={() => !pending && setConfirmOpen(false)}
         >
+          {/* biome-ignore lint/a11y/useKeyWithClickEvents: stop propagation interne, pas une action keyboard */}
           <div
             className="w-full max-w-sm glass rounded-xl p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-2">
               <h3 className="text-base font-semibold">Supprimer ce dossier ?</h3>
-              <p className="text-sm text-ink-mute">
+              <p className="text-sm text-[#0F1419]/72">
                 Le dossier sera invisible (soft-delete). Les données restent en base 30 jours puis
                 sont purgées. Tapez{' '}
                 <code className="rounded bg-sage-alt px-1 py-0.5 font-mono text-xs">supprimer</code>{' '}
@@ -91,8 +94,9 @@ export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
               type="text"
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-rule bg-paper/80 px-3 text-sm"
+              className="flex h-9 w-full rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 text-sm"
               placeholder="supprimer"
+              // biome-ignore lint/a11y/noAutofocus: confirmation modal — autofocus voulu pour validation rapide
               autoFocus
             />
             <div className="flex justify-end gap-2">

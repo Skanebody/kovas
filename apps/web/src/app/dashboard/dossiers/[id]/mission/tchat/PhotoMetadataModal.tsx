@@ -96,9 +96,9 @@ export function PhotoMetadataModal({
 
       <BottomSheetBody>
         {suggestion ? (
-          <div className="mb-4 rounded-lg border border-rule/60 bg-sage-alt/40 px-3 py-2 flex items-start gap-2">
+          <div className="mb-4 rounded-lg border border-[#0F1419]/[0.08] bg-sage-alt/40 px-3 py-2 flex items-start gap-2">
             <Sparkles className="size-4 shrink-0 mt-0.5 text-chartreuse-deep" aria-hidden />
-            <div className="text-[13px] text-ink-soft leading-relaxed">
+            <div className="text-[13px] text-[#0F1419]/82 leading-relaxed">
               {suggestion.question ?? 'Vérification rapide — confirmez ou corrigez.'}
             </div>
           </div>
@@ -109,7 +109,7 @@ export function PhotoMetadataModal({
           <div>
             <label
               htmlFor="photo-meta-room"
-              className="block font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute mb-1.5"
+              className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#0F1419]/72 mb-1.5"
             >
               Pièce
             </label>
@@ -129,10 +129,10 @@ export function PhotoMetadataModal({
                     type="button"
                     onClick={() => setRoom(r)}
                     className={cn(
-                      'rounded-pill border border-rule bg-paper px-2.5 py-1',
-                      'text-[11px] font-medium text-ink-soft',
-                      'hover:bg-sage-alt hover:border-ink/30 transition-colors',
-                      room === r && 'bg-chartreuse/20 border-chartreuse-deep text-ink',
+                      'rounded-pill border border-[#0F1419]/[0.08] bg-paper px-2.5 py-1',
+                      'text-[11px] font-medium text-[#0F1419]/82',
+                      'hover:bg-sage-alt hover:border-[#0F1419]/30 transition-colors',
+                      room === r && 'bg-chartreuse/20 border-chartreuse-deep text-[#0F1419]',
                     )}
                   >
                     {r}
@@ -146,7 +146,7 @@ export function PhotoMetadataModal({
           <div>
             <label
               htmlFor="photo-meta-equipment"
-              className="block font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute mb-1.5"
+              className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#0F1419]/72 mb-1.5"
             >
               Équipement (optionnel)
             </label>
@@ -157,10 +157,10 @@ export function PhotoMetadataModal({
                   type="button"
                   onClick={() => setEquipment(equipment === opt ? '' : opt)}
                   className={cn(
-                    'rounded-pill border border-rule bg-paper px-2.5 py-1',
-                    'text-[11px] font-medium text-ink-soft',
-                    'hover:bg-sage-alt hover:border-ink/30 transition-colors',
-                    equipment === opt && 'bg-chartreuse/20 border-chartreuse-deep text-ink',
+                    'rounded-pill border border-[#0F1419]/[0.08] bg-paper px-2.5 py-1',
+                    'text-[11px] font-medium text-[#0F1419]/82',
+                    'hover:bg-sage-alt hover:border-[#0F1419]/30 transition-colors',
+                    equipment === opt && 'bg-chartreuse/20 border-chartreuse-deep text-[#0F1419]',
                   )}
                 >
                   {opt}
@@ -173,7 +173,7 @@ export function PhotoMetadataModal({
           <div>
             <label
               htmlFor="photo-meta-note"
-              className="block font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute mb-1.5"
+              className="block font-mono text-[10px] uppercase tracking-[0.14em] text-[#0F1419]/72 mb-1.5"
             >
               Note (optionnel)
             </label>
@@ -184,8 +184,8 @@ export function PhotoMetadataModal({
               placeholder="Détail à retenir sur cette photo…"
               rows={2}
               className={cn(
-                'w-full resize-none rounded-md border border-rule bg-paper px-3 py-2',
-                'text-[14px] text-ink placeholder:text-ink-mute',
+                'w-full resize-none rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-2',
+                'text-[14px] text-[#0F1419] placeholder:text-[#0F1419]/72',
                 'focus:outline-none focus:ring-2 focus:ring-chartreuse/40 focus:border-chartreuse/50',
               )}
             />

@@ -61,7 +61,7 @@ export function PhotoButton({
           'disabled:cursor-not-allowed disabled:opacity-40',
           isEmpty
             ? 'size-[200px] border-2 border-dashed border-[#0F1419]/30 bg-sage-alt/40'
-            : 'size-[160px] border border-rule bg-paper shadow-md',
+            : 'size-[160px] border border-[#0F1419]/[0.08] bg-paper shadow-md',
           'hover:-translate-y-px hover:border-[#0F1419]/50 hover:shadow-lg',
           'active:translate-y-0 active:shadow-sm',
         )}
@@ -69,7 +69,7 @@ export function PhotoButton({
       >
         <Camera
           className={cn(
-            'text-ink transition-colors',
+            'text-[#0F1419] transition-colors',
             isEmpty ? 'size-16' : 'size-12',
             'group-hover:text-[#0F1419]',
           )}
@@ -79,8 +79,8 @@ export function PhotoButton({
 
       <p
         className={cn(
-          'max-w-xs text-center font-medium text-ink',
-          isEmpty ? 'text-base' : 'text-sm text-ink-soft',
+          'max-w-xs text-center font-medium text-[#0F1419]',
+          isEmpty ? 'text-base' : 'text-sm text-[#0F1419]/82',
         )}
       >
         {isEmpty ? 'Tap pour capturer la première photo' : 'Tap pour capturer'}

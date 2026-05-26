@@ -3,7 +3,7 @@
 import { trackSectionViewed } from '@/lib/decouvrir/analytics'
 import { useIntentTracker } from '@/lib/decouvrir/intent-tracker'
 import type { DecouvrirSection } from '@/lib/decouvrir/recommendations'
-import { useEffect, useRef, type ReactNode } from 'react'
+import { type ReactNode, useEffect, useRef } from 'react'
 
 interface SectionTrackerProps {
   section: DecouvrirSection
@@ -98,20 +98,18 @@ export function SectionTracker({
       <header className="mb-6 space-y-1">
         <h2
           id={`heading-${section}`}
-          className="font-sans font-light text-[28px] md:text-display-s tracking-tight text-ink leading-tight"
+          className="font-sans font-light text-[28px] md:text-display-s tracking-tight text-[#0F1419] leading-tight"
         >
           {title}
           {accent ? (
             <>
               {' '}
               <span className="font-serif italic font-normal">{accent}</span>
-              <span className="text-ink-mute">.</span>
+              <span className="text-[#0F1419]/72">.</span>
             </>
           ) : null}
         </h2>
-        {description ? (
-          <p className="text-sm text-ink-mute max-w-2xl">{description}</p>
-        ) : null}
+        {description ? <p className="text-sm text-[#0F1419]/72 max-w-2xl">{description}</p> : null}
       </header>
       {children}
     </section>

@@ -101,10 +101,12 @@ export function RoomPicker({
         onClick={() => setOpen((v) => !v)}
         className="gap-2"
       >
-        <span className="text-xs font-mono uppercase tracking-wider text-ink-mute">Pièce</span>
-        <span className="font-medium text-ink">{currentRoom ? currentRoom.name : 'Choisir'}</span>
+        <span className="text-xs font-mono uppercase tracking-wider text-[#0F1419]/72">Pièce</span>
+        <span className="font-medium text-[#0F1419]">
+          {currentRoom ? currentRoom.name : 'Choisir'}
+        </span>
         <ChevronDown
-          className={cn('h-4 w-4 text-ink-mute transition-transform', open && 'rotate-180')}
+          className={cn('h-4 w-4 text-[#0F1419]/72 transition-transform', open && 'rotate-180')}
           aria-hidden
         />
       </Button>
@@ -113,13 +115,13 @@ export function RoomPicker({
         <div
           className={cn(
             'absolute right-0 top-full z-30 mt-2 w-64',
-            'rounded-xl border border-rule bg-paper shadow-lg',
+            'rounded-xl border border-[#0F1419]/[0.08] bg-paper shadow-lg',
             'p-1',
           )}
           role="menu"
         >
           {rooms.length === 0 && !creating ? (
-            <p className="px-3 py-3 text-sm text-ink-mute">Aucune pièce pour ce dossier.</p>
+            <p className="px-3 py-3 text-sm text-[#0F1419]/72">Aucune pièce pour ce dossier.</p>
           ) : (
             <ul className="max-h-64 overflow-y-auto">
               {rooms.map((room) => {
@@ -134,14 +136,16 @@ export function RoomPicker({
                       }}
                       className={cn(
                         'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2',
-                        'text-left text-sm text-ink',
+                        'text-left text-sm text-[#0F1419]',
                         'transition-colors hover:bg-sage-alt/40',
                       )}
                       role="menuitemradio"
                       aria-checked={selected}
                     >
                       <span>{room.name}</span>
-                      {selected ? <Check className="h-4 w-4 text-ink-soft" aria-hidden /> : null}
+                      {selected ? (
+                        <Check className="h-4 w-4 text-[#0F1419]/82" aria-hidden />
+                      ) : null}
                     </button>
                   </li>
                 )
@@ -149,7 +153,7 @@ export function RoomPicker({
             </ul>
           )}
 
-          <div className="border-t border-rule/60 pt-1">
+          <div className="border-t border-[#0F1419]/[0.08] pt-1">
             {creating ? (
               <form
                 onSubmit={(e) => {
@@ -167,8 +171,8 @@ export function RoomPicker({
                     placeholder="Salon, Chambre 1, Cuisine…"
                     disabled={isPending}
                     className={cn(
-                      'flex-1 rounded-md border border-rule bg-paper px-3 py-1.5',
-                      'text-sm text-ink placeholder:text-ink-ghost',
+                      'flex-1 rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-1.5',
+                      'text-sm text-[#0F1419] placeholder:text-[#0F1419]/40',
                       'focus:outline-none focus:ring-2 focus:ring-[#0F1419]/20',
                       'disabled:opacity-50',
                     )}
@@ -193,7 +197,7 @@ export function RoomPicker({
                 }}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-lg px-3 py-2',
-                  'text-sm font-medium text-ink',
+                  'text-sm font-medium text-[#0F1419]',
                   'transition-colors hover:bg-sage-alt/40',
                 )}
               >

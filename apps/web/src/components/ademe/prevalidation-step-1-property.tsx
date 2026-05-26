@@ -59,8 +59,8 @@ export function PrevalidationStep1Property({
   return (
     <Card variant="opaque" padding="default" className="space-y-6">
       <div className="space-y-1">
-        <h3 className="text-[15px] font-semibold text-ink">Le bien à diagnostiquer</h3>
-        <p className="text-[11px] text-ink-mute">
+        <h3 className="text-[15px] font-semibold text-[#0F1419]">Le bien à diagnostiquer</h3>
+        <p className="text-[11px] text-[#0F1419]/72">
           Adresse et caractéristiques principales — données issues du dossier ou de la pré-visite.
         </p>
       </div>
@@ -92,20 +92,20 @@ export function PrevalidationStep1Property({
                   'flex flex-col items-center justify-center gap-2 rounded-md border-2 px-3 py-4 transition-colors duration-200',
                   'min-h-[88px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-navy/20',
                   selected
-                    ? 'border-navy bg-navy/5 shadow-glass-sm'
-                    : 'border-rule bg-paper hover:border-ink/30',
+                    ? 'border-navy bg-navy/5'
+                    : 'border-[#0F1419]/[0.08] bg-paper hover:border-[#0F1419]/30',
                 )}
               >
                 <Icon
                   className={cn(
                     'size-5 transition-colors',
-                    selected ? 'text-navy' : 'text-ink-mute',
+                    selected ? 'text-navy' : 'text-[#0F1419]/72',
                   )}
                 />
                 <span
                   className={cn(
                     'text-[12px] font-medium',
-                    selected ? 'text-ink' : 'text-ink-mute',
+                    selected ? 'text-[#0F1419]' : 'text-[#0F1419]/72',
                   )}
                 >
                   {label}

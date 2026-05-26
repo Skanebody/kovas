@@ -13,16 +13,16 @@
  * `mission_sessions` (start/end timestamps) + `photos` filtrés contexte.
  */
 
-import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { ArrowLeft, Camera, Clock, FileCheck2, MapPin, ShieldCheck } from 'lucide-react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 import { AppPageHeader } from '@/components/app-page-header'
+import { DefenseGenerateButton } from '@/components/defense/DefenseGenerateButton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { DefenseGenerateButton } from '@/components/defense/DefenseGenerateButton'
 import { getCurrentUser } from '@/lib/auth/current-user'
 
 export const metadata: Metadata = { title: 'Dossier de défense' }
@@ -93,7 +93,7 @@ export default async function DossierDefensePage({
         <BackLink dossierId={id} />
         <AppPageHeader title="Dossier" accent="de défense" />
         <Card variant="opaque" padding="default">
-          <p className="text-sm text-ink-mute">Aucune mission n'est rattachée à ce dossier.</p>
+          <p className="text-sm text-[#0F1419]/72">Aucune mission n'est rattachée à ce dossier.</p>
         </Card>
       </div>
     )
@@ -122,12 +122,10 @@ export default async function DossierDefensePage({
   // Génère les signed URLs (bucket privé)
   const photoUrlMap = new Map<string, string>()
   if (photos.length > 0) {
-    const { data: signed } = await supabase.storage
-      .from('mission-photos')
-      .createSignedUrls(
-        photos.map((p) => p.storage_path),
-        3600,
-      )
+    const { data: signed } = await supabase.storage.from('mission-photos').createSignedUrls(
+      photos.map((p) => p.storage_path),
+      3600,
+    )
     if (signed) {
       photos.forEach((p, idx) => {
         const url = signed[idx]?.signedUrl
@@ -156,34 +154,40 @@ export default async function DossierDefensePage({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card variant="opaque" padding="default" className="space-y-4">
           <div className="flex items-center gap-2.5">
-            <MapPin className="size-5 text-ink" />
-            <h3 className="text-[15px] font-semibold text-ink">Géolocalisation de la visite</h3>
+            <MapPin className="size-5 text-[#0F1419]" />
+            <h3 className="text-[15px] font-semibold text-[#0F1419]">
+              Géolocalisation de la visite
+            </h3>
           </div>
           {defense?.visit_started_at ? (
             <dl className="space-y-2 text-[13px]">
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-mute">Début</dt>
-                <dd className="font-mono text-ink">{formatDateTime(defense.visit_started_at)}</dd>
+                <dt className="text-[#0F1419]/72">Début</dt>
+                <dd className="font-mono text-[#0F1419]">
+                  {formatDateTime(defense.visit_started_at)}
+                </dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-mute">Fin</dt>
-                <dd className="font-mono text-ink">{formatDateTime(defense.visit_ended_at)}</dd>
+                <dt className="text-[#0F1419]/72">Fin</dt>
+                <dd className="font-mono text-[#0F1419]">
+                  {formatDateTime(defense.visit_ended_at)}
+                </dd>
               </div>
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-mute">Durée</dt>
-                <dd className="font-mono text-ink">{visitDuration}</dd>
+                <dt className="text-[#0F1419]/72">Durée</dt>
+                <dd className="font-mono text-[#0F1419]">{visitDuration}</dd>
               </div>
               {defense.visit_lat !== null && defense.visit_lon !== null ? (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-ink-mute">Coordonnées</dt>
-                  <dd className="font-mono text-ink text-[11px]">
+                  <dt className="text-[#0F1419]/72">Coordonnées</dt>
+                  <dd className="font-mono text-[#0F1419] text-[11px]">
                     {defense.visit_lat.toFixed(5)}, {defense.visit_lon.toFixed(5)}
                   </dd>
                 </div>
               ) : null}
             </dl>
           ) : (
-            <p className="text-sm text-ink-mute">
+            <p className="text-sm text-[#0F1419]/72">
               Aucune session de visite horodatée pour cette mission.
             </p>
           )}
@@ -192,13 +196,13 @@ export default async function DossierDefensePage({
         <Card variant="opaque" padding="default" className="space-y-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5">
-              <Camera className="size-5 text-ink" />
-              <h3 className="text-[15px] font-semibold text-ink">Photos contextuelles</h3>
+              <Camera className="size-5 text-[#0F1419]" />
+              <h3 className="text-[15px] font-semibold text-[#0F1419]">Photos contextuelles</h3>
             </div>
             <Badge variant="muted">{photos.length}</Badge>
           </div>
           {photos.length === 0 ? (
-            <p className="text-sm text-ink-mute">Aucune photo contextuelle attachée.</p>
+            <p className="text-sm text-[#0F1419]/72">Aucune photo contextuelle attachée.</p>
           ) : (
             <div className="grid grid-cols-4 gap-2">
               {photos.map((p) => {
@@ -210,9 +214,9 @@ export default async function DossierDefensePage({
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block aspect-square overflow-hidden rounded-md border border-rule bg-sage-alt"
+                    className="block aspect-square overflow-hidden rounded-md border border-[#0F1419]/[0.08] bg-sage-alt"
                   >
-                    {/* biome-ignore lint/performance/noImgElement: galerie defense — pas besoin d'optim Next */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={url}
                       alt={p.caption ?? 'Photo contextuelle'}
@@ -230,14 +234,14 @@ export default async function DossierDefensePage({
       {/* Choix méthodologiques */}
       <Card variant="opaque" padding="default" className="space-y-4">
         <div className="flex items-center gap-2.5">
-          <FileCheck2 className="size-5 text-ink" />
-          <h3 className="text-[15px] font-semibold text-ink">Choix méthodologiques</h3>
+          <FileCheck2 className="size-5 text-[#0F1419]" />
+          <h3 className="text-[15px] font-semibold text-[#0F1419]">Choix méthodologiques</h3>
         </div>
         {defense?.methodological_choices && defense.methodological_choices.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-rule text-left text-ink-mute">
+                <tr className="border-b border-[#0F1419]/[0.08] text-left text-[#0F1419]/72">
                   <th className="font-mono font-medium text-[10px] uppercase tracking-wide pb-2 pr-3">
                     Domaine
                   </th>
@@ -251,51 +255,56 @@ export default async function DossierDefensePage({
               </thead>
               <tbody>
                 {defense.methodological_choices.map((row, idx) => (
-                  <tr key={`${row.domain}-${idx}`} className="border-b border-rule/40 last:border-b-0">
-                    <td className="py-2 pr-3 font-semibold text-ink">{row.domain}</td>
-                    <td className="py-2 pr-3 text-ink">{row.choice}</td>
-                    <td className="py-2 text-ink-mute">{row.justification}</td>
+                  <tr
+                    key={`${row.domain}-${idx}`}
+                    className="border-b border-[#0F1419]/[0.06] last:border-b-0"
+                  >
+                    <td className="py-2 pr-3 font-semibold text-[#0F1419]">{row.domain}</td>
+                    <td className="py-2 pr-3 text-[#0F1419]">{row.choice}</td>
+                    <td className="py-2 text-[#0F1419]/72">{row.justification}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <p className="text-sm text-ink-mute">Aucun choix méthodologique consigné.</p>
+          <p className="text-sm text-[#0F1419]/72">Aucun choix méthodologique consigné.</p>
         )}
       </Card>
 
       {/* Intégrité PDF */}
       <Card variant="opaque" padding="default" className="space-y-4">
         <div className="flex items-center gap-2.5">
-          <ShieldCheck className="size-5 text-ink" />
-          <h3 className="text-[15px] font-semibold text-ink">Intégrité du dossier</h3>
+          <ShieldCheck className="size-5 text-[#0F1419]" />
+          <h3 className="text-[15px] font-semibold text-[#0F1419]">Intégrité du dossier</h3>
         </div>
         {defense ? (
           <dl className="space-y-3 text-[13px]">
             <div className="flex justify-between gap-3">
-              <dt className="text-ink-mute">PDF généré le</dt>
-              <dd className="font-mono text-ink">{formatDateTime(defense.pdf_generated_at)}</dd>
+              <dt className="text-[#0F1419]/72">PDF généré le</dt>
+              <dd className="font-mono text-[#0F1419]">
+                {formatDateTime(defense.pdf_generated_at)}
+              </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-ink-mute">Horodatage</dt>
+              <dt className="text-[#0F1419]/72">Horodatage</dt>
               <dd>
                 <TimestampBadge status={defense.timestamp_status} />
               </dd>
             </div>
             {defense.pdf_sha256 ? (
               <div className="space-y-1">
-                <dt className="text-ink-mute flex items-center gap-1">
+                <dt className="text-[#0F1419]/72 flex items-center gap-1">
                   <Clock className="size-3.5" /> SHA-256
                 </dt>
-                <dd className="font-mono text-[11px] text-ink break-all rounded-md bg-sage-alt/60 border border-rule p-2">
+                <dd className="font-mono text-[11px] text-[#0F1419] break-all rounded-md bg-sage-alt/60 border border-[#0F1419]/[0.08] p-2">
                   {defense.pdf_sha256}
                 </dd>
               </div>
             ) : null}
           </dl>
         ) : (
-          <p className="text-sm text-ink-mute">
+          <p className="text-sm text-[#0F1419]/72">
             Aucun dossier de défense n'a encore été généré pour cette mission.
           </p>
         )}

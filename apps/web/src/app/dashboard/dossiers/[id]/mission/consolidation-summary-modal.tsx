@@ -53,13 +53,13 @@ export function ConsolidationSummaryModal({
     >
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-3xl italic text-ink">
+          <DialogTitle className="font-serif text-3xl italic text-[#0F1419]">
             Consolidation <span className="text-display-serif">terminée</span>
           </DialogTitle>
         </DialogHeader>
 
         {/* Synthèse Claude */}
-        {summary ? <p className="text-sm text-ink-soft leading-relaxed">{summary}</p> : null}
+        {summary ? <p className="text-sm text-[#0F1419]/82 leading-relaxed">{summary}</p> : null}
 
         {/* Stats hero : 3 chiffres */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
@@ -84,18 +84,19 @@ export function ConsolidationSummaryModal({
         </div>
 
         {/* Confidence + coût */}
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-rule bg-paper/40 px-3 py-2 text-xs text-ink-mute">
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-[#0F1419]/[0.08] bg-paper px-3 py-2 text-xs text-[#0F1419]/72">
           <span>
-            Confiance globale : <strong className="font-semibold text-ink">{confidencePct}%</strong>
+            Confiance globale :{' '}
+            <strong className="font-semibold text-[#0F1419]">{confidencePct}%</strong>
           </span>
           <span>
-            Coût IA : <strong className="font-mono text-ink">${costUsd.toFixed(4)}</strong>
+            Coût IA : <strong className="font-mono text-[#0F1419]">${costUsd.toFixed(4)}</strong>
           </span>
         </div>
 
         {/* Warnings */}
         {warnings && warnings.length > 0 ? (
-          <div className="space-y-1 rounded-lg border border-chartreuse/30 bg-chartreuse/10 px-3 py-2 text-xs text-ink-soft">
+          <div className="space-y-1 rounded-lg border border-chartreuse/30 bg-chartreuse/10 px-3 py-2 text-xs text-[#0F1419]/82">
             {warnings.map((w) => (
               <p key={w} className="flex items-start gap-2">
                 <AlertTriangle className="mt-0.5 size-3 shrink-0 text-[#95B11A]" aria-hidden />
@@ -108,24 +109,26 @@ export function ConsolidationSummaryModal({
         {/* Manques */}
         {missingRequired.length > 0 ? (
           <section className="space-y-2">
-            <h3 className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
+            <h3 className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#0F1419]/72">
               Champs obligatoires manquants ({missingRequired.length})
             </h3>
             <ul className="space-y-2">
               {missingRequired.slice(0, 8).map((m) => (
                 <li
                   key={`${m.diagnostic}::${m.field_path}`}
-                  className="rounded-lg border border-rule bg-paper/40 p-3 text-xs"
+                  className="rounded-lg border border-[#0F1419]/[0.08] bg-paper p-3 text-xs"
                 >
                   <div className="flex items-baseline gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72">
                       {m.diagnostic}
                     </span>
-                    <strong className="text-sm font-medium text-ink">{m.label}</strong>
+                    <strong className="text-sm font-medium text-[#0F1419]">{m.label}</strong>
                   </div>
-                  {m.why_required ? <p className="mt-1 text-ink-mute">{m.why_required}</p> : null}
+                  {m.why_required ? (
+                    <p className="mt-1 text-[#0F1419]/72">{m.why_required}</p>
+                  ) : null}
                   {m.suggestion ? (
-                    <p className="mt-1 text-ink-soft">
+                    <p className="mt-1 text-[#0F1419]/82">
                       <span className="font-medium">Suggestion :</span> {m.suggestion}
                     </p>
                   ) : null}
@@ -133,7 +136,7 @@ export function ConsolidationSummaryModal({
               ))}
             </ul>
             {missingRequired.length > 8 ? (
-              <p className="text-xs text-ink-mute">
+              <p className="text-xs text-[#0F1419]/72">
                 + {missingRequired.length - 8} autre{missingRequired.length - 8 > 1 ? 's' : ''}{' '}
                 champ{missingRequired.length - 8 > 1 ? 's' : ''} non affiché
                 {missingRequired.length - 8 > 1 ? 's' : ''}.
@@ -141,7 +144,7 @@ export function ConsolidationSummaryModal({
             ) : null}
           </section>
         ) : (
-          <div className="flex items-center gap-2 rounded-lg border border-rule bg-paper/40 px-3 py-2 text-xs text-ink-soft">
+          <div className="flex items-center gap-2 rounded-lg border border-[#0F1419]/[0.08] bg-paper px-3 py-2 text-xs text-[#0F1419]/82">
             <CheckCircle2 className="size-4 text-chartreuse-deep" aria-hidden />
             <span>Tous les champs obligatoires sont couverts.</span>
           </div>
@@ -150,7 +153,7 @@ export function ConsolidationSummaryModal({
         {/* Conflits — aperçu */}
         {conflicts.length > 0 ? (
           <section className="space-y-2">
-            <h3 className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
+            <h3 className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#0F1419]/72">
               Conflits détectés ({conflicts.length})
             </h3>
             <ul className="space-y-2">
@@ -160,17 +163,19 @@ export function ConsolidationSummaryModal({
                   className="rounded-lg border border-chartreuse/30 bg-chartreuse/5 p-3 text-xs"
                 >
                   <div className="flex items-baseline gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72">
                       {c.diagnostic}
                     </span>
-                    <strong className="text-sm font-medium text-ink">{c.field_path}</strong>
+                    <strong className="text-sm font-medium text-[#0F1419]">{c.field_path}</strong>
                   </div>
-                  <ul className="mt-1 space-y-0.5 text-ink-soft">
+                  <ul className="mt-1 space-y-0.5 text-[#0F1419]/82">
                     {c.candidates.slice(0, 3).map((cand, i) => (
                       <li key={`${i}-${cand.source_type}`} className="flex gap-2">
-                        <span className="font-mono text-ink-mute">{cand.source_type}</span>
-                        <span className="font-medium text-ink">{stringifyValue(cand.value)}</span>
-                        <span className="text-ink-mute">
+                        <span className="font-mono text-[#0F1419]/72">{cand.source_type}</span>
+                        <span className="font-medium text-[#0F1419]">
+                          {stringifyValue(cand.value)}
+                        </span>
+                        <span className="text-[#0F1419]/72">
                           ({Math.round(cand.confidence * 100)}%)
                         </span>
                       </li>
@@ -179,7 +184,7 @@ export function ConsolidationSummaryModal({
                 </li>
               ))}
             </ul>
-            <p className="text-[11px] text-ink-mute italic">
+            <p className="text-[11px] text-[#0F1419]/72 italic">
               La résolution interactive des conflits arrivera en itération 7.
             </p>
           </section>
@@ -211,19 +216,21 @@ function StatCard({ icon, value, label, tone }: StatCardProps) {
     <div
       className={cn(
         'rounded-xl border p-3 text-center',
-        tone === 'ok' ? 'border-rule bg-paper/60' : 'border-chartreuse/30 bg-chartreuse/10',
+        tone === 'ok'
+          ? 'border-[#0F1419]/[0.08] bg-paper'
+          : 'border-chartreuse/30 bg-chartreuse/10',
       )}
     >
       <div
         className={cn(
           'flex items-center justify-center gap-1',
-          tone === 'ok' ? 'text-ink-mute' : 'text-[#95B11A]',
+          tone === 'ok' ? 'text-[#0F1419]/72' : 'text-[#95B11A]',
         )}
       >
         {icon}
       </div>
-      <div className="font-serif text-3xl italic leading-none text-ink mt-1">{value}</div>
-      <div className="mt-1 text-[10px] uppercase tracking-[0.06em] text-ink-mute">{label}</div>
+      <div className="font-serif text-3xl italic leading-none text-[#0F1419] mt-1">{value}</div>
+      <div className="mt-1 text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">{label}</div>
     </div>
   )
 }

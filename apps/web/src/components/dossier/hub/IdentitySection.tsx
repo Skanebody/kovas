@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card'
-import { DiagChip, missionTypeToDiag, type DiagType } from '@/components/ui/diag-chip'
+import { DiagChip, type DiagType, missionTypeToDiag } from '@/components/ui/diag-chip'
 import { Calendar, Home, Mail, MapPin, Phone, User } from 'lucide-react'
 import Link from 'next/link'
 import type { HubClient, HubDossier, HubMission, HubProperty } from './types'
@@ -40,30 +40,34 @@ export function IdentitySection({
   return (
     <Card variant="flat" padding="default" id="identity" className="space-y-5">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[15px] font-semibold text-ink">Carte d&apos;identité</h2>
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-faint">Section 01</p>
+        <h2 className="text-[15px] font-semibold text-[#0F1419]">Carte d&apos;identité</h2>
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/55">
+          Section 01
+        </p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2">
         {/* Client */}
         <div className="space-y-2">
-          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">Client</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
+            Client
+          </p>
           <div className="space-y-1.5 text-[14px]">
             {client.id && client.display_name ? (
               <Link
                 href={`/app/clients/${client.id}`}
-                className="flex items-center gap-2 font-medium text-ink hover:underline"
+                className="flex items-center gap-2 font-medium text-[#0F1419] hover:underline"
               >
-                <User className="size-3.5 text-ink-mute" />
+                <User className="size-3.5 text-[#0F1419]/72" />
                 {client.display_name}
               </Link>
             ) : (
-              <span className="text-ink-faint text-[13px]">Aucun client rattaché</span>
+              <span className="text-[#0F1419]/55 text-[13px]">Aucun client rattaché</span>
             )}
             {client.email ? (
               <a
                 href={`mailto:${client.email}`}
-                className="flex items-center gap-2 text-[13px] text-ink-mute hover:text-ink"
+                className="flex items-center gap-2 text-[13px] text-[#0F1419]/72 hover:text-[#0F1419]"
               >
                 <Mail className="size-3.5" />
                 {client.email}
@@ -72,7 +76,7 @@ export function IdentitySection({
             {client.phone ? (
               <a
                 href={`tel:${client.phone}`}
-                className="flex items-center gap-2 text-[13px] text-ink-mute hover:text-ink"
+                className="flex items-center gap-2 text-[13px] text-[#0F1419]/72 hover:text-[#0F1419]"
               >
                 <Phone className="size-3.5" />
                 {client.phone}
@@ -83,20 +87,22 @@ export function IdentitySection({
 
         {/* Bien */}
         <div className="space-y-2">
-          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">Bien</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
+            Bien
+          </p>
           <div className="space-y-1.5 text-[14px]">
             {fullAddress ? (
               <Link
                 href={`/app/properties/${property.id}`}
-                className="flex items-start gap-2 font-medium text-ink hover:underline"
+                className="flex items-start gap-2 font-medium text-[#0F1419] hover:underline"
               >
-                <MapPin className="size-3.5 text-ink-mute mt-0.5 shrink-0" />
+                <MapPin className="size-3.5 text-[#0F1419]/72 mt-0.5 shrink-0" />
                 <span>{fullAddress}</span>
               </Link>
             ) : (
-              <span className="text-ink-faint text-[13px]">Aucune adresse</span>
+              <span className="text-[#0F1419]/55 text-[13px]">Aucune adresse</span>
             )}
-            <div className="flex flex-wrap items-center gap-2 text-[12px] text-ink-mute">
+            <div className="flex flex-wrap items-center gap-2 text-[12px] text-[#0F1419]/72">
               {property.property_type ? (
                 <span className="flex items-center gap-1">
                   <Home className="size-3" /> {property.property_type}
@@ -110,9 +116,9 @@ export function IdentitySection({
       </div>
 
       {/* Diagnostics + dates */}
-      <div className="grid gap-5 md:grid-cols-2 pt-4 border-t border-rule/60">
+      <div className="grid gap-5 md:grid-cols-2 pt-4 border-t border-[#0F1419]/[0.08]">
         <div className="space-y-2">
-          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
             Diagnostics ({diags.length})
           </p>
           {diags.length > 0 ? (
@@ -122,29 +128,29 @@ export function IdentitySection({
               ))}
             </div>
           ) : (
-            <p className="text-[13px] text-ink-faint">Aucun diagnostic ajouté</p>
+            <p className="text-[13px] text-[#0F1419]/55">Aucun diagnostic ajouté</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
             Dates clés
           </p>
-          <div className="space-y-1.5 text-[13px] text-ink-soft">
+          <div className="space-y-1.5 text-[13px] text-[#0F1419]/82">
             {dateScheduled ? (
               <p className="flex items-center gap-2">
-                <Calendar className="size-3.5 text-ink-mute" />
-                Planifié : <span className="text-ink">{dateScheduled}</span>
+                <Calendar className="size-3.5 text-[#0F1419]/72" />
+                Planifié : <span className="text-[#0F1419]">{dateScheduled}</span>
               </p>
             ) : null}
             {dateCompleted ? (
               <p className="flex items-center gap-2">
-                <Calendar className="size-3.5 text-ink-mute" />
-                Terminé : <span className="text-ink">{dateCompleted}</span>
+                <Calendar className="size-3.5 text-[#0F1419]/72" />
+                Terminé : <span className="text-[#0F1419]">{dateCompleted}</span>
               </p>
             ) : null}
             {!dateScheduled && !dateCompleted ? (
-              <p className="text-ink-faint">Aucune date programmée</p>
+              <p className="text-[#0F1419]/55">Aucune date programmée</p>
             ) : null}
           </div>
         </div>

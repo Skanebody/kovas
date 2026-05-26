@@ -1,10 +1,10 @@
 'use client'
 
+import { updateDossierInfoAction } from '@/app/dashboard/dossiers/[id]/actions'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Check, Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { updateDossierInfoAction } from '@/app/dashboard/dossiers/[id]/actions'
 
 interface NotesSectionProps {
   dossierId: string
@@ -59,8 +59,10 @@ export function NotesSection({ dossierId, initialNotes }: NotesSectionProps) {
   return (
     <Card variant="flat" padding="default" id="notes" className="space-y-3">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[15px] font-semibold text-ink">Notes personnelles</h2>
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-faint">Section 09</p>
+        <h2 className="text-[15px] font-semibold text-[#0F1419]">Notes personnelles</h2>
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/55">
+          Section 09
+        </p>
       </div>
 
       <Textarea
@@ -71,7 +73,7 @@ export function NotesSection({ dossierId, initialNotes }: NotesSectionProps) {
         className="resize-y"
       />
 
-      <div className="flex items-center gap-2 text-[12px] text-ink-mute h-5">
+      <div className="flex items-center gap-2 text-[12px] text-[#0F1419]/72 h-5">
         {status === 'saving' ? (
           <>
             <Loader2 className="size-3 animate-spin" /> Sauvegarde…

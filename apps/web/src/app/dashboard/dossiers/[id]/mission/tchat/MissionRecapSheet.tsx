@@ -186,9 +186,9 @@ function ContradictionsList({
               <AlertTriangle className="size-4 shrink-0 mt-0.5 text-status-amber" aria-hidden />
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] leading-relaxed text-ink">{c.message}</p>
+              <p className="text-[13px] leading-relaxed text-[#0F1419]">{c.message}</p>
               {c.suggestedAction ? (
-                <p className="mt-1 text-[11px] text-ink-mute">
+                <p className="mt-1 text-[11px] text-[#0F1419]/72">
                   <span className="font-mono uppercase tracking-wide">Action :</span>{' '}
                   {c.suggestedAction}
                 </p>
@@ -199,9 +199,9 @@ function ContradictionsList({
                   onClick={() => onGoToField(c.affectedKeys[0])}
                   className={cn(
                     'mt-1.5 inline-flex items-center gap-1 rounded-pill',
-                    'border border-rule/60 bg-paper px-2 py-0.5',
-                    'text-[11px] font-medium text-ink-soft',
-                    'hover:bg-sage-alt hover:text-ink transition-colors',
+                    'border border-[#0F1419]/[0.08] bg-paper px-2 py-0.5',
+                    'text-[11px] font-medium text-[#0F1419]/82',
+                    'hover:bg-sage-alt hover:text-[#0F1419] transition-colors',
                   )}
                 >
                   Aller corriger
@@ -247,17 +247,17 @@ function RiskFlagsList({
           <div className="flex items-start gap-2">
             <Flag className="size-4 shrink-0 mt-0.5 text-status-amber" aria-hidden />
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold text-ink">{flag.label}</p>
-              <p className="mt-0.5 text-[12px] leading-relaxed text-ink-mute">{flag.pitfall}</p>
+              <p className="text-[13px] font-semibold text-[#0F1419]">{flag.label}</p>
+              <p className="mt-0.5 text-[12px] leading-relaxed text-[#0F1419]/72">{flag.pitfall}</p>
               {onGoToField ? (
                 <button
                   type="button"
                   onClick={() => onGoToField(flag.key)}
                   className={cn(
                     'mt-1.5 inline-flex items-center gap-1 rounded-pill',
-                    'border border-rule/60 bg-paper px-2 py-0.5',
-                    'text-[11px] font-medium text-ink-soft',
-                    'hover:bg-sage-alt hover:text-ink transition-colors',
+                    'border border-[#0F1419]/[0.08] bg-paper px-2 py-0.5',
+                    'text-[11px] font-medium text-[#0F1419]/82',
+                    'hover:bg-sage-alt hover:text-[#0F1419] transition-colors',
                   )}
                 >
                   Renseigner maintenant
@@ -269,7 +269,7 @@ function RiskFlagsList({
         </li>
       ))}
       {more > 0 ? (
-        <li className="text-center text-[11px] font-mono uppercase tracking-wide text-ink-mute">
+        <li className="text-center text-[11px] font-mono uppercase tracking-wide text-[#0F1419]/72">
           + {more} autre{more > 1 ? 's' : ''} champ{more > 1 ? 's' : ''} à risque
         </li>
       ) : null}
@@ -320,21 +320,21 @@ export function MissionRecapSheet({
             <div>
               <h3
                 id="recap-progress"
-                className="text-[12px] font-mono uppercase tracking-wide text-ink-mute"
+                className="text-[12px] font-mono uppercase tracking-wide text-[#0F1419]/72"
               >
                 Progression
               </h3>
-              <p className="mt-0.5 font-serif italic text-[28px] leading-none text-ink">
+              <p className="mt-0.5 font-serif italic text-[28px] leading-none text-[#0F1419]">
                 {completionPct}%
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[12px] text-ink-mute">
-                <span className="font-semibold text-ink tabular-nums">{fieldsFilled}</span>
+              <p className="text-[12px] text-[#0F1419]/72">
+                <span className="font-semibold text-[#0F1419] tabular-nums">{fieldsFilled}</span>
                 <span> / </span>
                 <span className="tabular-nums">{fieldsTotal}</span> champs renseignés
               </p>
-              <p className="mt-0.5 text-[11px] font-mono text-ink-mute">
+              <p className="mt-0.5 text-[11px] font-mono text-[#0F1419]/72">
                 {rooms.length} pièce{rooms.length > 1 ? 's' : ''} · {contradictions.length} alerte
                 {contradictions.length > 1 ? 's' : ''}
               </p>
@@ -359,26 +359,26 @@ export function MissionRecapSheet({
         <section aria-labelledby="recap-grid" className="mb-5">
           <h3
             id="recap-grid"
-            className="mb-2 text-[12px] font-mono uppercase tracking-wide text-ink-mute"
+            className="mb-2 text-[12px] font-mono uppercase tracking-wide text-[#0F1419]/72"
           >
             Grille pièces × catégories
           </h3>
           {sortedRooms.length === 0 ? (
-            <p className="rounded-md border border-rule/60 bg-paper px-3 py-3 text-[13px] text-ink-mute">
+            <p className="rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-3 text-[13px] text-[#0F1419]/72">
               Aucune pièce saisie pour l'instant. Démarrez en dictant la première au tchat.
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-md border border-rule/60 bg-paper">
+            <div className="overflow-x-auto rounded-md border border-[#0F1419]/[0.08] bg-paper">
               <table className="w-full text-[12px]">
                 <thead>
-                  <tr className="border-b border-rule/40 bg-sage-alt/40">
-                    <th className="sticky left-0 z-10 bg-sage-alt/40 px-2 py-2 text-left font-mono text-[10px] font-medium uppercase tracking-wide text-ink-mute">
+                  <tr className="border-b border-[#0F1419]/[0.06] bg-sage-alt/40">
+                    <th className="sticky left-0 z-10 bg-sage-alt/40 px-2 py-2 text-left font-mono text-[10px] font-medium uppercase tracking-wide text-[#0F1419]/72">
                       Pièce
                     </th>
                     {GRID_CATEGORIES.map((cat) => (
                       <th
                         key={cat}
-                        className="px-2 py-2 text-center font-mono text-[10px] font-medium uppercase tracking-wide text-ink-mute"
+                        className="px-2 py-2 text-center font-mono text-[10px] font-medium uppercase tracking-wide text-[#0F1419]/72"
                         title={CHECK_CATEGORY_LABEL[cat]}
                       >
                         {CHECK_CATEGORY_SHORT_LABEL[cat]}
@@ -388,16 +388,16 @@ export function MissionRecapSheet({
                 </thead>
                 <tbody>
                   {sortedRooms.map((room) => (
-                    <tr key={room.id} className="border-b border-rule/30 last:border-b-0">
+                    <tr key={room.id} className="border-b border-[#0F1419]/[0.06] last:border-b-0">
                       <td className="sticky left-0 z-10 bg-paper px-2 py-2 text-left">
                         <button
                           type="button"
                           onClick={() => onGoToField?.('piece.surface', room.id)}
-                          className="text-left font-medium text-ink hover:underline"
+                          className="text-left font-medium text-[#0F1419] hover:underline"
                         >
                           {room.name}
                         </button>
-                        <p className="text-[10px] font-mono text-ink-mute tabular-nums">
+                        <p className="text-[10px] font-mono text-[#0F1419]/72 tabular-nums">
                           {room.filledFieldsCount}/{room.requiredFieldsCount}
                         </p>
                       </td>
@@ -420,12 +420,12 @@ export function MissionRecapSheet({
         <section aria-labelledby="recap-global" className="mb-5">
           <h3
             id="recap-global"
-            className="mb-2 text-[12px] font-mono uppercase tracking-wide text-ink-mute"
+            className="mb-2 text-[12px] font-mono uppercase tracking-wide text-[#0F1419]/72"
           >
             Champs globaux
           </h3>
           {globalFields.length === 0 ? (
-            <p className="text-[12px] text-ink-mute">Aucun champ global à renseigner.</p>
+            <p className="text-[12px] text-[#0F1419]/72">Aucun champ global à renseigner.</p>
           ) : (
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
               {globalFields.map((field) => (
@@ -437,7 +437,7 @@ export function MissionRecapSheet({
                       ? 'border-status-green/20 bg-status-green/5'
                       : field.isRequired
                         ? 'border-status-coral/30 bg-status-coral/5'
-                        : 'border-rule/40 bg-paper',
+                        : 'border-[#0F1419]/[0.06] bg-paper',
                   )}
                 >
                   {field.filled ? (
@@ -446,12 +446,12 @@ export function MissionRecapSheet({
                     <Circle
                       className={cn(
                         'size-3 shrink-0',
-                        field.isRequired ? 'text-status-coral' : 'text-ink-ghost',
+                        field.isRequired ? 'text-status-coral' : 'text-[#0F1419]/40',
                       )}
                       aria-hidden
                     />
                   )}
-                  <span className="text-[11px] text-ink-soft truncate">{field.label}</span>
+                  <span className="text-[11px] text-[#0F1419]/82 truncate">{field.label}</span>
                 </div>
               ))}
             </div>
@@ -470,11 +470,11 @@ export function MissionRecapSheet({
         <section aria-labelledby="recap-contradictions" className="mb-5">
           <h3
             id="recap-contradictions"
-            className="mb-2 text-[12px] font-mono uppercase tracking-wide text-ink-mute"
+            className="mb-2 text-[12px] font-mono uppercase tracking-wide text-[#0F1419]/72"
           >
             Contradictions détectées
             {contradictions.length > 0 ? (
-              <span className="ml-2 tabular-nums text-ink">
+              <span className="ml-2 tabular-nums text-[#0F1419]">
                 ({error.length} erreur{error.length > 1 ? 's' : ''} · {warning.length} alerte
                 {warning.length > 1 ? 's' : ''})
               </span>
@@ -487,11 +487,11 @@ export function MissionRecapSheet({
         <section aria-labelledby="recap-risks" className="mb-3">
           <h3
             id="recap-risks"
-            className="mb-2 text-[12px] font-mono uppercase tracking-wide text-ink-mute"
+            className="mb-2 text-[12px] font-mono uppercase tracking-wide text-[#0F1419]/72"
           >
             Champs à risque ({riskFlags.total})
           </h3>
-          <p className="mb-2 text-[11px] text-ink-mute">
+          <p className="mb-2 text-[11px] text-[#0F1419]/72">
             Ces champs obligatoires ne sont pas remplis. Sans saisie, la méthode 3CL applique une
             valeur par défaut souvent pénalisante.
           </p>
@@ -537,8 +537,8 @@ export function MissionRecapButton({
         'inline-flex items-center gap-2',
         'rounded-pill bg-chartreuse px-4 py-2.5',
         'border border-chartreuse-deep/40',
-        'shadow-glass-sm hover:shadow-glass-lg',
-        'text-[13px] font-semibold text-ink',
+        '',
+        'text-[13px] font-semibold text-[#0F1419]',
         'transition-all hover:-translate-y-px active:translate-y-0',
         'lg:bottom-28 lg:right-8',
       )}

@@ -8,7 +8,7 @@
  * bien, progression) + statut connectivité.
  *
  * Hauteur : 40px desktop, 36px mobile.
- * Fond : paper/95 + backdrop-blur-sm + border-b border-rule/40.
+ * Fond : paper sobre + border-b légère V5.
  * Typo : font-mono 12px, séparateurs `·` en ink-mute.
  * Si offline : badge ambre discret "Hors ligne" + icône WifiOff.
  *
@@ -59,14 +59,14 @@ export function MissionContextBar({
       aria-label="Contexte mission"
       className={cn(
         'flex h-9 md:h-10 items-center gap-2 sm:gap-3 shrink-0',
-        'border-b border-rule/40 bg-paper/95 backdrop-blur-sm',
+        'border-b border-[#0F1419]/[0.06] bg-paper',
         'px-3 sm:px-5 z-[5]',
       )}
     >
       {/* Logo discret KOVAS */}
       <span
         aria-hidden
-        className="hidden sm:inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute/70 shrink-0"
+        className="hidden sm:inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[#0F1419]/55 shrink-0"
       >
         <span className="size-1.5 rounded-full bg-chartreuse-deep" />
         KOVAS
@@ -76,7 +76,7 @@ export function MissionContextBar({
       <div
         className={cn(
           'flex flex-1 min-w-0 items-center gap-1.5 sm:gap-2',
-          'font-mono text-[11px] sm:text-[12px] text-ink truncate',
+          'font-mono text-[11px] sm:text-[12px] text-[#0F1419] truncate',
         )}
       >
         <span className="truncate font-medium" title={client.name}>
@@ -85,15 +85,15 @@ export function MissionContextBar({
         {propertySummary ? (
           <>
             <Separator />
-            <span className="hidden sm:inline truncate text-ink-soft">{propertySummary}</span>
+            <span className="hidden sm:inline truncate text-[#0F1419]/82">{propertySummary}</span>
           </>
         ) : null}
         <Separator />
-        <span aria-live="polite" className="shrink-0 text-ink-soft">
+        <span aria-live="polite" className="shrink-0 text-[#0F1419]/82">
           {rooms.completed}/{rooms.total} pièce{rooms.total > 1 ? 's' : ''}
         </span>
         <Separator />
-        <span aria-live="polite" className="shrink-0 text-ink-soft">
+        <span aria-live="polite" className="shrink-0 text-[#0F1419]/82">
           {photosCount} photo{photosCount > 1 ? 's' : ''}
         </span>
       </div>
@@ -124,8 +124,8 @@ export function MissionContextBar({
             }
             className={cn(
               'lg:hidden inline-flex items-center gap-1 rounded-pill',
-              'border border-rule/60 bg-paper hover:bg-sage-alt',
-              'px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-ink-soft',
+              'border border-[#0F1419]/[0.08] bg-paper hover:bg-sage-alt',
+              'px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[#0F1419]/82',
               'transition-colors',
             )}
           >
@@ -140,7 +140,7 @@ export function MissionContextBar({
 
 function Separator(): React.ReactElement {
   return (
-    <span aria-hidden className="text-ink-mute/60 select-none">
+    <span aria-hidden className="text-[#0F1419]/40 select-none">
       ·
     </span>
   )

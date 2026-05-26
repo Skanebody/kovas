@@ -48,7 +48,7 @@ export function PrimaryAction({ action, dossierId }: PrimaryActionProps) {
             }
             router.push(json.redirectTo ?? `/dashboard/dossiers/${dossierId}/mission/tchat`)
           } catch {
-            toast.error('Erreur réseau — vérifiez votre connexion.')
+            toast.error('Erreur réseau — vérifie ta connexion.')
           }
           break
         }

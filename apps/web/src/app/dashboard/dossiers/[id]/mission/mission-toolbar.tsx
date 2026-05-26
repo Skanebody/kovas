@@ -28,26 +28,24 @@ export function MissionToolbar({
   roomPickerSlot,
 }: MissionToolbarProps) {
   return (
-    <header
-      className={cn('sticky top-0 z-20 border-b border-rule', 'bg-paper/95 backdrop-blur-md')}
-    >
+    <header className={cn('sticky top-0 z-20 border-b border-[#0F1419]/[0.08]', 'bg-paper')}>
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link
           href={`/dashboard/dossiers/${dossierId}`}
           className={cn(
             'inline-flex items-center gap-2 rounded-pill px-3 py-2',
-            'text-sm font-medium text-ink',
+            'text-sm font-medium text-[#0F1419]',
             'transition-colors hover:bg-sage-alt/40',
           )}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
-          <span className="font-mono text-xs uppercase tracking-wider text-ink-soft">
+          <span className="font-mono text-xs uppercase tracking-wider text-[#0F1419]/82">
             {dossierReference}
           </span>
         </Link>
 
         <div className="flex flex-1 items-center justify-center px-2">
-          <h1 className="font-serif text-2xl italic text-ink">
+          <h1 className="font-serif text-2xl italic text-[#0F1419]">
             {currentRoomName ?? 'Aucune pièce sélectionnée'}
           </h1>
         </div>

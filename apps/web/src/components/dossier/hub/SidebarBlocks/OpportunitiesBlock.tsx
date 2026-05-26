@@ -22,8 +22,8 @@ export function OpportunitiesBlock({ opportunities }: OpportunitiesBlockProps) {
   return (
     <Card variant="flat" padding="sm" className="space-y-3">
       <div className="flex items-center gap-2">
-        <Sparkles className="size-3.5 text-ink-mute" />
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+        <Sparkles className="size-3.5 text-[#0F1419]/72" />
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
           Opportunités
         </p>
       </div>
@@ -32,10 +32,12 @@ export function OpportunitiesBlock({ opportunities }: OpportunitiesBlockProps) {
         {limited.map((o) => (
           <li
             key={o.id}
-            className="rounded-md border border-rule/50 bg-paper px-2.5 py-2 text-[12px]"
+            className="rounded-md border border-[#0F1419]/[0.08] bg-paper px-2.5 py-2 text-[12px]"
           >
-            <p className="text-ink leading-tight">{o.label}</p>
-            {o.description ? <p className="text-ink-faint text-[11px] mt-0.5">{o.description}</p> : null}
+            <p className="text-[#0F1419] leading-tight">{o.label}</p>
+            {o.description ? (
+              <p className="text-[#0F1419]/55 text-[11px] mt-0.5">{o.description}</p>
+            ) : null}
           </li>
         ))}
       </ul>

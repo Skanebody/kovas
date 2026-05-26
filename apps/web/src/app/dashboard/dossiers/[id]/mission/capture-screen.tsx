@@ -248,14 +248,14 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
               'mb-4 flex items-center justify-between gap-3 rounded-xl border px-4 py-2.5',
               failedCount > 0
                 ? 'border-accent-red/30 bg-accent-red/5'
-                : 'border-rule bg-sage-alt/30',
+                : 'border-[#0F1419]/[0.08] bg-sage-alt/30',
             )}
           >
-            <div className="flex items-center gap-2 text-sm text-ink">
+            <div className="flex items-center gap-2 text-sm text-[#0F1419]">
               {failedCount > 0 ? (
                 <AlertTriangle className="h-4 w-4 text-accent-red" aria-hidden />
               ) : (
-                <Loader2 className="h-4 w-4 animate-spin text-ink-soft" aria-hidden />
+                <Loader2 className="h-4 w-4 animate-spin text-[#0F1419]/82" aria-hidden />
               )}
               <span>
                 {pendingCount > 0 ? (
@@ -286,16 +286,16 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
             {/* Carrousel photos pièce courante */}
             <Card variant="opaque" padding="default" className="space-y-4">
               <header className="flex items-center justify-between">
-                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
+                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#0F1419]/72">
                   Photos pièce courante
                 </p>
-                <span className="text-sm text-ink-soft">
+                <span className="text-sm text-[#0F1419]/82">
                   {photos.length} photo{photos.length > 1 ? 's' : ''}
                 </span>
               </header>
 
               {photos.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-2 py-8 text-ink-mute">
+                <div className="flex flex-col items-center justify-center gap-2 py-8 text-[#0F1419]/72">
                   <ImageOff className="h-8 w-8" aria-hidden />
                   <p className="text-sm">Aucune photo pour cette pièce</p>
                 </div>
@@ -320,14 +320,14 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
                 onPhotoCaptured={handlePhotoCaptured}
               />
               {isProcessing ? (
-                <p className="flex items-center gap-2 text-sm text-ink-soft">
+                <p className="flex items-center gap-2 text-sm text-[#0F1419]/82">
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   Préparation de la photo…
                 </p>
               ) : null}
 
               {currentRoomId === null ? (
-                <p className="max-w-xs text-center text-sm text-ink-mute">
+                <p className="max-w-xs text-center text-sm text-[#0F1419]/72">
                   Sélectionnez ou créez une pièce pour commencer à capturer.
                 </p>
               ) : null}
@@ -378,7 +378,7 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
             </div>
 
             {consolidate.phase === 'loading' ? (
-              <p className="text-center text-xs text-ink-mute">Synthèse en cours, ~30s…</p>
+              <p className="text-center text-xs text-[#0F1419]/72">Synthèse en cours, ~30s…</p>
             ) : null}
             {consolidate.phase === 'error' ? (
               <p className="text-center text-xs text-accent-red" role="alert">
@@ -390,11 +390,13 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
           {/* Colonne cockpit (xl+) */}
           <aside className="hidden xl:col-span-5 xl:block" aria-label="Cockpit progression">
             <Card variant="opaque" padding="lg" className="h-full">
-              <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
+              <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#0F1419]/72">
                 Cockpit progression
               </p>
-              <h2 className="mt-2 font-serif text-2xl italic text-ink">À venir — itération 7</h2>
-              <p className="mt-4 text-sm text-ink-soft">
+              <h2 className="mt-2 font-serif text-2xl italic text-[#0F1419]">
+                À venir — itération 7
+              </h2>
+              <p className="mt-4 text-sm text-[#0F1419]/82">
                 Vue temps réel du remplissage des champs DPE / Amiante, propositions IA et conflits
                 à valider apparaîtront ici une fois la consolidation Vision IA branchée.
               </p>
@@ -481,7 +483,7 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
         <button
           type="button"
           className={cn(
-            'fixed inset-0 z-40 flex items-center justify-center bg-ink/80 backdrop-blur-sm',
+            'fixed inset-0 z-40 flex items-center justify-center bg-[#0F1419]/80',
             'animate-fade-in',
           )}
           onClick={() => setPreviewPhoto(null)}
@@ -494,8 +496,8 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
               alt="Aperçu capture terrain"
               className="max-h-[90vh] max-w-[90vw] rounded-xl object-contain"
             />
-            <div className={cn('absolute top-2 right-2 rounded-full bg-paper/90 p-2', 'shadow-md')}>
-              <X className="h-4 w-4 text-ink" aria-hidden />
+            <div className={cn('absolute top-2 right-2 rounded-full bg-paper p-2', 'shadow-md')}>
+              <X className="h-4 w-4 text-[#0F1419]" aria-hidden />
             </div>
           </div>
         </button>
@@ -527,7 +529,7 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
         'group relative shrink-0 overflow-hidden rounded-xl',
         'h-20 w-20 sm:h-24 sm:w-24',
         'border bg-sage-alt/40',
-        photo.isBlurry ? 'border-accent-warm/60' : 'border-rule',
+        photo.isBlurry ? 'border-accent-warm/60' : 'border-[#0F1419]/[0.08]',
         'transition-transform hover:-translate-y-0.5 hover:shadow-md',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/40',
       )}
@@ -545,9 +547,9 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
         className={cn(
           'absolute right-1 bottom-1 inline-flex items-center justify-center',
           'h-5 w-5 rounded-full border border-paper text-[10px]',
-          'shadow-sm backdrop-blur-sm',
+          'shadow-sm',
           photo.syncStatus === 'uploaded' && 'bg-accent-green text-paper',
-          photo.syncStatus === 'pending_upload' && 'bg-paper/90 text-ink',
+          photo.syncStatus === 'pending_upload' && 'bg-paper text-[#0F1419]',
           photo.syncStatus === 'failed' && 'bg-accent-red text-paper',
         )}
         aria-label={syncStatusLabel(photo.syncStatus)}
@@ -571,7 +573,7 @@ function PhotoThumbnail({ photo, onClick }: PhotoThumbnailProps) {
         <span
           className={cn(
             'absolute bottom-1 left-1 inline-flex items-center gap-0.5',
-            'rounded-full bg-[#0F1419]/90 px-1.5 py-0.5 text-paper shadow-sm backdrop-blur-sm',
+            'rounded-full bg-[#0F1419]/90 px-1.5 py-0.5 text-paper shadow-sm',
             'text-[10px]',
           )}
           aria-label={annotationBadgeLabel(annotations.voiceCount, annotations.textCount)}
@@ -615,7 +617,7 @@ function VisionBadge({ status, fieldsCount }: VisionBadgeProps) {
       <span
         className={cn(
           'absolute top-1 right-1 inline-flex items-center justify-center',
-          'h-5 w-5 rounded-full bg-paper/90 text-ink shadow-sm backdrop-blur-sm',
+          'h-5 w-5 rounded-full bg-paper text-[#0F1419] shadow-sm',
         )}
         aria-label="Analyse Vision IA en cours"
         title="Analyse Vision IA en cours…"
@@ -629,7 +631,7 @@ function VisionBadge({ status, fieldsCount }: VisionBadgeProps) {
       <span
         className={cn(
           'absolute top-1 right-1 inline-flex items-center justify-center',
-          'h-5 w-5 rounded-full bg-chartreuse text-ink shadow-sm',
+          'h-5 w-5 rounded-full bg-chartreuse text-[#0F1419] shadow-sm',
         )}
         aria-label={`Analysée — ${fieldsCount} champ${fieldsCount > 1 ? 's' : ''} détecté${fieldsCount > 1 ? 's' : ''}`}
         title={`Analysée — ${fieldsCount} champ${fieldsCount > 1 ? 's' : ''} détecté${fieldsCount > 1 ? 's' : ''}`}

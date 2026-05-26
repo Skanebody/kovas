@@ -62,8 +62,8 @@ export function OtherDossiersBlock({ dossiers }: OtherDossiersBlockProps) {
   return (
     <Card variant="flat" padding="sm" className="space-y-3">
       <div className="flex items-center gap-2">
-        <Folder className="size-3.5 text-ink-mute" />
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+        <Folder className="size-3.5 text-[#0F1419]/72" />
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
           Autres dossiers du client
         </p>
       </div>
@@ -83,22 +83,24 @@ export function OtherDossiersBlock({ dossiers }: OtherDossiersBlockProps) {
               <li key={d.id}>
                 <Link
                   href={`/app/dossiers/${d.id}`}
-                  className="block rounded-md border border-rule/50 bg-paper hover:border-ink/30 px-2.5 py-2 transition-colors duration-fast"
+                  className="block rounded-md border border-[#0F1419]/[0.08] bg-paper hover:border-[#0F1419]/30 px-2.5 py-2 transition-colors duration-fast"
                 >
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="font-mono text-[10px] text-ink-faint truncate">{d.reference}</p>
+                    <p className="font-mono text-[10px] text-[#0F1419]/55 truncate">
+                      {d.reference}
+                    </p>
                     <StatusPill variant={pill.variant} label={pill.label} size="sm" />
                   </div>
                   {(() => {
                     const when = formatDossierWhen(d)
                     return when ? (
-                      <p className="font-mono text-[10px] text-ink-mute mt-0.5 tabular-nums">
+                      <p className="font-mono text-[10px] text-[#0F1419]/72 mt-0.5 tabular-nums">
                         {when}
                       </p>
                     ) : null
                   })()}
                   {d.address ? (
-                    <p className="text-[11px] text-ink-soft mt-0.5 truncate">{d.address}</p>
+                    <p className="text-[11px] text-[#0F1419]/82 mt-0.5 truncate">{d.address}</p>
                   ) : null}
                 </Link>
               </li>
@@ -106,7 +108,7 @@ export function OtherDossiersBlock({ dossiers }: OtherDossiersBlockProps) {
           })}
         </ul>
       ) : (
-        <p className="text-[11px] text-ink-faint">Aucun autre dossier pour ce client.</p>
+        <p className="text-[11px] text-[#0F1419]/55">Aucun autre dossier pour ce client.</p>
       )}
     </Card>
   )

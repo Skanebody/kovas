@@ -9,8 +9,8 @@
  * projet : on POST une route Next. Si elle n'existe pas, on tombe en mock toast.
  */
 
-import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -75,8 +75,8 @@ export function LitigationCreateForm({ dossierId, missionId }: LitigationCreateF
   return (
     <Card variant="opaque" padding="default" className="space-y-5">
       <div className="space-y-1">
-        <h3 className="text-[15px] font-semibold text-ink">Ouvrir un litige</h3>
-        <p className="text-[11px] text-ink-mute">
+        <h3 className="text-[15px] font-semibold text-[#0F1419]">Ouvrir un litige</h3>
+        <p className="text-[11px] text-[#0F1419]/72">
           KOVAS générera un projet de réponse argumentée et juridiquement référencée.
         </p>
       </div>
@@ -99,7 +99,7 @@ export function LitigationCreateForm({ dossierId, missionId }: LitigationCreateF
             name="client_complaint"
             required
             rows={6}
-            className="flex w-full rounded-md border border-rule bg-paper px-4 py-3 text-[13px] text-ink transition-all duration-fast ease-spring placeholder:text-ink-faint focus-visible:outline-none focus-visible:border-[1.5px] focus-visible:border-navy focus-visible:ring-[5px] focus-visible:ring-navy/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full rounded-md border border-[#0F1419]/[0.08] bg-paper px-4 py-3 text-[13px] text-[#0F1419] transition-all duration-fast ease-spring placeholder:text-[#0F1419]/55 focus-visible:outline-none focus-visible:border-[1.5px] focus-visible:border-navy focus-visible:ring-[5px] focus-visible:ring-navy/10 disabled:cursor-not-allowed disabled:opacity-50"
             placeholder="Le client conteste l'étiquette DPE en arguant que…"
           />
         </FormField>

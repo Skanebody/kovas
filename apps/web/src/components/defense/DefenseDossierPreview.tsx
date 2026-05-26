@@ -8,10 +8,10 @@
  * Server component (composé via les données chargées en amont).
  */
 
-import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ShieldCheck, ArrowRight, Image as ImageIcon, MapPin } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { ArrowRight, Image as ImageIcon, MapPin, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
 export interface DefenseDossierPreviewData {
@@ -42,10 +42,10 @@ export function DefenseDossierPreview({ data }: { data: DefenseDossierPreviewDat
     <Card variant="opaque" padding="default" className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <ShieldCheck className="size-5 text-ink" />
+          <ShieldCheck className="size-5 text-[#0F1419]" />
           <div>
-            <h3 className="text-[15px] font-semibold text-ink">Dossier de défense</h3>
-            <p className="text-[11px] text-ink-mute">
+            <h3 className="text-[15px] font-semibold text-[#0F1419]">Dossier de défense</h3>
+            <p className="text-[11px] text-[#0F1419]/72">
               Preuves contextuelles + horodatage du diagnostic
             </p>
           </div>
@@ -59,7 +59,11 @@ export function DefenseDossierPreview({ data }: { data: DefenseDossierPreviewDat
 
       {hasDossier ? (
         <div className="grid grid-cols-3 gap-3 text-center">
-          <Metric icon={<ImageIcon className="size-3.5" />} label="Photos" value={data.photosCount} />
+          <Metric
+            icon={<ImageIcon className="size-3.5" />}
+            label="Photos"
+            value={data.photosCount}
+          />
           <Metric
             icon={<MapPin className="size-3.5" />}
             label="Géoloc"
@@ -74,12 +78,12 @@ export function DefenseDossierPreview({ data }: { data: DefenseDossierPreviewDat
       ) : null}
 
       {data.sha256 ? (
-        <p className="font-mono text-[10px] text-ink-faint truncate">
+        <p className="font-mono text-[10px] text-[#0F1419]/55 truncate">
           SHA-256 · {data.sha256.slice(0, 24)}…
         </p>
       ) : null}
 
-      <div className="flex items-center justify-end pt-2 border-t border-rule">
+      <div className="flex items-center justify-end pt-2 border-t border-[#0F1419]/[0.08]">
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/dashboard/dossiers/${data.dossierId}/defense`}>
             Ouvrir le dossier <ArrowRight className="size-4" />
@@ -100,12 +104,12 @@ function Metric({
   value: number | string
 }) {
   return (
-    <div className="rounded-md border border-rule bg-paper/60 p-2.5 space-y-1">
-      <div className="flex items-center justify-center gap-1 text-ink-mute">
+    <div className="rounded-md border border-[#0F1419]/[0.08] bg-paper p-2.5 space-y-1">
+      <div className="flex items-center justify-center gap-1 text-[#0F1419]/72">
         {icon}
         <span className="text-[10px] font-mono uppercase tracking-wide">{label}</span>
       </div>
-      <p className="text-[15px] font-semibold text-ink">{value}</p>
+      <p className="text-[15px] font-semibold text-[#0F1419]">{value}</p>
     </div>
   )
 }

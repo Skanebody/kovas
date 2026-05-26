@@ -70,7 +70,7 @@ export function DecouvrirClient({
       <AppPageHeader
         title="Découvrir"
         accent="KOVAS"
-        description="Explorez nos offres logiciel, annuaire et bundles. Les suggestions s'adaptent à votre profil et à votre navigation."
+        description="Explore nos offres logiciel, annuaire et bundles. Les suggestions s'adaptent à ton profil et à ta navigation."
         eyebrow="Catalogue 2026"
       />
 
@@ -83,7 +83,7 @@ export function DecouvrirClient({
         anchorId="decouvrir-recommandations"
         title="Recommandées"
         accent="pour vous"
-        description="Sélection dynamique basée sur votre profil et les sections consultées. Mise à jour automatique après quelques secondes de navigation."
+        description="Sélection dynamique basée sur ton profil et les sections consultées. Mise à jour automatique après quelques secondes de navigation."
       >
         <RecommendedOffersSection track={track} onTopRecommendedChange={setTopRecommendedCode} />
       </SectionTracker>
@@ -94,7 +94,7 @@ export function DecouvrirClient({
         anchorId="decouvrir-logiciel"
         title="Toutes les offres"
         accent="logiciel"
-        description="KOVAS — votre logiciel terrain et bureau. 5 plans calibrés selon votre volume."
+        description="KOVAS — ton logiciel terrain et bureau. 5 plans calibrés selon ton volume."
       >
         <LogicielPlansGrid
           currentCode={currentLogicielCode}
@@ -108,7 +108,7 @@ export function DecouvrirClient({
         anchorId="decouvrir-annuaire"
         title="Toutes les offres"
         accent="annuaire"
-        description="KOVAS Annuaire — votre visibilité auprès des particuliers. 4 plans selon votre couverture."
+        description="KOVAS Annuaire — ta visibilité auprès des particuliers. 4 plans selon ta couverture."
       >
         <AnnuairePlansGrid
           currentCode={currentAnnuaireCode}
@@ -122,7 +122,7 @@ export function DecouvrirClient({
         anchorId="decouvrir-bundle"
         title="Bundles"
         accent="cross-sell"
-        description="Combinez logiciel et annuaire pour profiter d'une remise et d'une synchronisation automatique de votre profil."
+        description="Combine logiciel et annuaire pour profiter d'une remise et d'une synchronisation automatique de ton profil."
       >
         <BundlesGrid recommendedCode={topRecommendedCode ?? undefined} />
       </SectionTracker>
@@ -133,7 +133,7 @@ export function DecouvrirClient({
         anchorId="decouvrir-addons"
         title="Add-ons"
         accent="à la carte"
-        description="Activez uniquement ce dont vous avez besoin. Activation immédiate, résiliation 1 clic."
+        description="Active uniquement ce dont tu as besoin. Activation immédiate, résiliation 1 clic."
       >
         <AddonsGrid recommendedCode={topRecommendedCode ?? undefined} />
       </SectionTracker>

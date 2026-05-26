@@ -38,7 +38,7 @@ export function HubHeader({
   const primary = getPrimaryActionForState(state, dossierId)
 
   return (
-    <header className="sticky top-0 z-30 -mx-4 mb-6 border-b border-rule/70 bg-paper/85 backdrop-blur-md px-4 md:-mx-6 md:px-6">
+    <header className="sticky top-0 z-30 -mx-4 mb-6 border-b border-[#0F1419]/[0.08] bg-paper px-4 md:-mx-6 md:px-6">
       <div className="flex h-auto min-h-[80px] flex-wrap items-center justify-between gap-3 py-3">
         <div className="flex items-center gap-3 min-w-0">
           <Button variant="ghost" size="icon" asChild aria-label="Retour aux dossiers">
@@ -48,15 +48,15 @@ export function HubHeader({
           </Button>
           <div className="min-w-0">
             <div className="flex items-baseline gap-3">
-              <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute shrink-0">
+              <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#0F1419]/72 shrink-0">
                 {reference}
               </p>
-              <h1 className="font-serif italic text-[20px] md:text-[24px] tracking-tight text-ink leading-tight truncate">
+              <h1 className="font-serif italic text-[20px] md:text-[24px] tracking-tight text-[#0F1419] leading-tight truncate">
                 {clientName}
               </h1>
             </div>
             {fullAddress ? (
-              <p className="text-[12px] text-ink-mute truncate mt-0.5">{fullAddress}</p>
+              <p className="text-[12px] text-[#0F1419]/72 truncate mt-0.5">{fullAddress}</p>
             ) : null}
           </div>
         </div>

@@ -94,8 +94,8 @@ export function BillingSection({ items, dossierId, clientId, propertyId }: Billi
   return (
     <Card variant="flat" padding="default" id="billing" className="space-y-4">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[15px] font-semibold text-ink">Documents commerciaux</h2>
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-faint">
+        <h2 className="text-[15px] font-semibold text-[#0F1419]">Documents commerciaux</h2>
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/55">
           Section 07
         </p>
       </div>
@@ -109,7 +109,7 @@ export function BillingSection({ items, dossierId, clientId, propertyId }: Billi
       {/* Devis */}
       <div>
         <div className="mb-2 flex items-baseline justify-between">
-          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
             Devis · {quotes.length}
           </p>
           <Button variant="ghost" size="sm" asChild>
@@ -120,13 +120,13 @@ export function BillingSection({ items, dossierId, clientId, propertyId }: Billi
           </Button>
         </div>
         {quotes.length > 0 ? (
-          <ul className="divide-y divide-rule/60 rounded-md border border-rule/60">
+          <ul className="divide-y divide-[#0F1419]/[0.08] rounded-md border border-[#0F1419]/[0.08]">
             {quotes.map((q) => (
               <BillingRow key={q.id} item={q} detailHref={`/dashboard/devis/${q.id}`} />
             ))}
           </ul>
         ) : (
-          <p className="rounded-md border border-dashed border-rule/60 bg-cream-deep/30 px-3 py-3 text-[12px] text-ink-mute">
+          <p className="rounded-md border border-dashed border-[#0F1419]/[0.08] bg-cream-deep/30 px-3 py-3 text-[12px] text-[#0F1419]/72">
             Aucun devis pour ce dossier.
           </p>
         )}
@@ -135,7 +135,7 @@ export function BillingSection({ items, dossierId, clientId, propertyId }: Billi
       {/* Factures */}
       <div>
         <div className="mb-2 flex items-baseline justify-between">
-          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
             Factures · {invoices.length}
           </p>
           <Button variant="ghost" size="sm" asChild>
@@ -146,13 +146,13 @@ export function BillingSection({ items, dossierId, clientId, propertyId }: Billi
           </Button>
         </div>
         {invoices.length > 0 ? (
-          <ul className="divide-y divide-rule/60 rounded-md border border-rule/60">
+          <ul className="divide-y divide-[#0F1419]/[0.08] rounded-md border border-[#0F1419]/[0.08]">
             {invoices.map((inv) => (
               <BillingRow key={inv.id} item={inv} detailHref={`/dashboard/factures/${inv.id}`} />
             ))}
           </ul>
         ) : (
-          <p className="rounded-md border border-dashed border-rule/60 bg-cream-deep/30 px-3 py-3 text-[12px] text-ink-mute">
+          <p className="rounded-md border border-dashed border-[#0F1419]/[0.08] bg-cream-deep/30 px-3 py-3 text-[12px] text-[#0F1419]/72">
             Aucune facture pour ce dossier.
           </p>
         )}
@@ -170,20 +170,20 @@ function BillingRow({ item, detailHref }: { item: BillingItem; detailHref: strin
       >
         <div className="flex items-center gap-3 min-w-0">
           {item.kind === 'payment' ? (
-            <Euro className="size-4 text-ink-mute shrink-0" />
+            <Euro className="size-4 text-[#0F1419]/72 shrink-0" />
           ) : (
-            <FileText className="size-4 text-ink-mute shrink-0" />
+            <FileText className="size-4 text-[#0F1419]/72 shrink-0" />
           )}
           <div className="min-w-0">
-            <p className="text-[13px] font-medium text-ink truncate">{item.reference}</p>
-            <p className="text-[11px] text-ink-faint">
+            <p className="text-[13px] font-medium text-[#0F1419] truncate">{item.reference}</p>
+            <p className="text-[11px] text-[#0F1419]/55">
               {new Date(item.date).toLocaleDateString('fr-FR', { dateStyle: 'short' })}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <Badge variant={STATUS_VARIANT[item.status]}>{STATUS_LABEL[item.status]}</Badge>
-          <p className="font-mono text-[13px] text-ink">{eur(item.amountCents)}</p>
+          <p className="font-mono text-[13px] text-[#0F1419]">{eur(item.amountCents)}</p>
         </div>
       </Link>
     </li>
@@ -200,10 +200,10 @@ function Stat({
   highlight?: boolean
 }) {
   return (
-    <div className="rounded-md border border-rule/60 bg-cream-deep/30 p-3">
-      <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">{label}</p>
+    <div className="rounded-md border border-[#0F1419]/[0.08] bg-cream-deep/30 p-3">
+      <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">{label}</p>
       <p
-        className={`mt-1 font-serif italic text-[24px] leading-none ${highlight ? 'text-warning' : 'text-ink'}`}
+        className={`mt-1 font-serif italic text-[24px] leading-none ${highlight ? 'text-warning' : 'text-[#0F1419]'}`}
       >
         {value}
       </p>

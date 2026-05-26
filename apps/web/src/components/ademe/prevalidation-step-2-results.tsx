@@ -59,12 +59,7 @@ const CLIMATISATION_OPTIONS: Array<{ value: string; label: string }> = [
  * Step 2 — Résultats DPE prévus issus du calcul Liciel (ou autre).
  * 4 champs : énergie chauffage, climatisation, étiquette DPE, étiquette GES.
  */
-export function PrevalidationStep2Results({
-  values,
-  onChange,
-  onBack,
-  onContinue,
-}: Step2Props) {
+export function PrevalidationStep2Results({ values, onChange, onBack, onContinue }: Step2Props) {
   // Champs select textuels : pré-remplis donc toujours définis ; validation sur étiquettes.
   const canContinue =
     values.type_energie_chauffage.length > 0 &&
@@ -81,8 +76,8 @@ export function PrevalidationStep2Results({
   return (
     <Card variant="opaque" padding="default" className="space-y-6">
       <div className="space-y-1">
-        <h3 className="text-[15px] font-semibold text-ink">Résultats DPE prévus</h3>
-        <p className="text-[11px] text-ink-mute">
+        <h3 className="text-[15px] font-semibold text-[#0F1419]">Résultats DPE prévus</h3>
+        <p className="text-[11px] text-[#0F1419]/72">
           Étiquettes et équipements tels que vous comptez les publier sur l&apos;ADEME.
         </p>
       </div>
@@ -129,7 +124,7 @@ export function PrevalidationStep2Results({
           onChange={(v) => onChange({ etiquette_dpe: v })}
         />
         <FieldHint tooltip="Pour les étiquettes F et G (passoires thermiques), le contrôle ADEME est plus strict — vérifier soigneusement la cohérence avec les factures et la méthode 3CL.">
-          Selon votre méthode 3CL-2021 ou les factures réelles.
+          Selon ta méthode 3CL-2021 ou les factures réelles.
         </FieldHint>
       </FormField>
 
@@ -145,10 +140,10 @@ export function PrevalidationStep2Results({
       </FormField>
 
       {showCalibrationWarning ? (
-        <div className="rounded-md border border-amber/30 bg-amber/5 p-3 text-[12px] text-ink leading-relaxed">
-          <strong className="font-semibold">Étiquette F ou G détectée.</strong> Le contrôle
-          ADEME est plus strict sur les passoires thermiques (arrêté du 31 mars 2021). Pensez à
-          vérifier la cohérence des consommations avec les factures réelles avant publication.
+        <div className="rounded-md border border-amber/30 bg-amber/5 p-3 text-[12px] text-[#0F1419] leading-relaxed">
+          <strong className="font-semibold">Étiquette F ou G détectée.</strong> Le contrôle ADEME
+          est plus strict sur les passoires thermiques (arrêté du 31 mars 2021). Pensez à vérifier
+          la cohérence des consommations avec les factures réelles avant publication.
         </div>
       ) : null}
 
@@ -190,7 +185,7 @@ function LabelRadioGroup({
             key={label}
             className={cn(
               'relative cursor-pointer rounded-md border-2 px-2 py-3 text-center transition-all',
-              selected ? 'shadow-glass-sm scale-[1.02]' : 'border-rule hover:border-ink/30',
+              selected ? ' scale-[1.02]' : 'border-[#0F1419]/[0.08] hover:border-[#0F1419]/30',
             )}
             style={selected ? { borderColor: LABEL_COLOR[label] } : undefined}
           >

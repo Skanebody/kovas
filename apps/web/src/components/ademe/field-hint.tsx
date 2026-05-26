@@ -32,7 +32,7 @@ export function FieldHint({ children, tooltip, className }: FieldHintProps) {
   return (
     <div
       className={cn(
-        'mt-1 flex items-start gap-1.5 text-[11px] italic text-ink-mute leading-snug',
+        'mt-1 flex items-start gap-1.5 text-[11px] italic text-[#0F1419]/72 leading-snug',
         className,
       )}
     >
@@ -50,7 +50,7 @@ export function FieldHint({ children, tooltip, className }: FieldHintProps) {
               e.preventDefault()
               setOpen((v) => !v)
             }}
-            className="inline-flex size-4 items-center justify-center rounded-full text-ink-mute hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/30"
+            className="inline-flex size-4 items-center justify-center rounded-full text-[#0F1419]/72 hover:text-[#0F1419] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/30"
           >
             <Info className="size-3" />
           </button>
@@ -58,8 +58,8 @@ export function FieldHint({ children, tooltip, className }: FieldHintProps) {
             <span
               role="tooltip"
               className={cn(
-                'absolute z-30 right-0 top-5 w-56 rounded-md border border-rule bg-paper p-2.5',
-                'text-[11px] not-italic text-ink leading-relaxed shadow-glass-sm',
+                'absolute z-30 right-0 top-5 w-56 rounded-md border border-[#0F1419]/[0.08] bg-paper p-2.5',
+                'text-[11px] not-italic text-[#0F1419] leading-relaxed ',
                 'animate-in fade-in-0 zoom-in-95 duration-150',
               )}
             >

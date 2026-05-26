@@ -2,11 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { toast } from '@/components/ui/toaster'
-import {
-  ADMIN_DOCS,
-  ADMIN_DOCS_ORDER,
-  type AdminDocKind,
-} from '@/lib/dossier/admin-docs'
+import { ADMIN_DOCS, ADMIN_DOCS_ORDER, type AdminDocKind } from '@/lib/dossier/admin-docs'
 import { downloadAdminDoc } from '@/lib/dossier/admin-docs-client'
 import { FileText } from 'lucide-react'
 
@@ -56,8 +52,8 @@ export function AdminShortcutsBlock({
   return (
     <Card variant="flat" padding="sm" className="space-y-3">
       <div className="flex items-center gap-2">
-        <FileText className="size-3.5 text-ink-mute" />
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+        <FileText className="size-3.5 text-[#0F1419]/72" />
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
           Documents administratifs
         </p>
       </div>
@@ -69,12 +65,12 @@ export function AdminShortcutsBlock({
             <li key={kind}>
               <button
                 type="button"
-                className="w-full flex items-center justify-between rounded-md border border-rule/50 bg-paper hover:border-ink/30 px-2.5 py-1.5 text-[12px] text-ink-soft transition-colors duration-fast"
+                className="w-full flex items-center justify-between rounded-md border border-[#0F1419]/[0.08] bg-paper hover:border-[#0F1419]/30 px-2.5 py-1.5 text-[12px] text-[#0F1419]/82 transition-colors duration-fast"
                 onClick={() => handleGenerate(kind, meta.label)}
                 aria-label={`Générer ${meta.fullTitle} en PDF`}
               >
                 <span>{meta.label}</span>
-                <span className="font-mono text-[10px] text-ink-faint">PDF</span>
+                <span className="font-mono text-[10px] text-[#0F1419]/55">PDF</span>
               </button>
             </li>
           )

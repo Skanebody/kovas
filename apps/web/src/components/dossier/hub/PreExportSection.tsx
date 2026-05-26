@@ -23,21 +23,25 @@ export function PreExportSection({ ademeScore, findings }: PreExportSectionProps
     <Card variant="flat" padding="default" id="pre-export" className="space-y-4">
       <div className="flex items-baseline justify-between gap-3">
         <div>
-          <h2 className="text-[15px] font-semibold text-ink">Pré-vérification ADEME</h2>
-          <p className="text-[12px] text-ink-mute mt-0.5">
+          <h2 className="text-[15px] font-semibold text-[#0F1419]">Pré-vérification ADEME</h2>
+          <p className="text-[12px] text-[#0F1419]/72 mt-0.5">
             Détecte les rejets probables avant envoi.
           </p>
         </div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-faint">Section 04</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/55">
+          Section 04
+        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        <div className="rounded-md border border-rule/60 bg-cream-deep/30 p-4 min-w-[140px]">
-          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">Score</p>
-          <p className="mt-1 font-serif italic text-[36px] leading-none text-ink">
+        <div className="rounded-md border border-[#0F1419]/[0.08] bg-cream-deep/30 p-4 min-w-[140px]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
+            Score
+          </p>
+          <p className="mt-1 font-serif italic text-[36px] leading-none text-[#0F1419]">
             {ademeScore != null ? ademeScore : '—'}
           </p>
-          <p className="mt-1 text-[11px] text-ink-mute">/ 100</p>
+          <p className="mt-1 text-[11px] text-[#0F1419]/72">/ 100</p>
           <Badge variant={variant} className="mt-2">
             {ademeScore == null
               ? 'Non calculé'
@@ -55,7 +59,7 @@ export function PreExportSection({ ademeScore, findings }: PreExportSectionProps
               {limited.map((f) => (
                 <li
                   key={f.id}
-                  className="flex items-start gap-2 rounded-md border border-rule/60 bg-paper px-3 py-2 text-[13px] text-ink-soft"
+                  className="flex items-start gap-2 rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-2 text-[13px] text-[#0F1419]/82"
                 >
                   {f.severity === 'block' ? (
                     <AlertTriangle className="size-4 text-danger shrink-0 mt-0.5" />
@@ -69,7 +73,7 @@ export function PreExportSection({ ademeScore, findings }: PreExportSectionProps
               ))}
             </ul>
           ) : (
-            <p className="text-[13px] text-ink-mute">
+            <p className="text-[13px] text-[#0F1419]/72">
               {ademeScore == null
                 ? 'La pré-vérification ADEME complète sera disponible en Phase 2.'
                 : 'Aucun point bloquant détecté.'}

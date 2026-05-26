@@ -79,11 +79,7 @@ type ViewState =
   | { status: 'present'; data: LitigationData }
   | { status: 'error'; message: string }
 
-export function LitigationWorkflow({
-  missionId,
-  initialData,
-  className,
-}: LitigationWorkflowProps) {
+export function LitigationWorkflow({ missionId, initialData, className }: LitigationWorkflowProps) {
   const [view, setView] = useState<ViewState>(
     initialData === null
       ? { status: 'absent' }
@@ -204,8 +200,8 @@ export function LitigationWorkflow({
       <Card variant="opaque" padding="default" className={className}>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <p className="font-serif italic text-[18px] text-ink">Aucun litige en cours</p>
-            <p className="text-[12px] text-ink-mute">
+            <p className="font-serif italic text-[18px] text-[#0F1419]">Aucun litige en cours</p>
+            <p className="text-[12px] text-[#0F1419]/72">
               Ouvrez un dossier si un client conteste le rapport.
             </p>
           </div>
@@ -257,7 +253,7 @@ export function LitigationWorkflow({
       <CardHeader className="p-0 pb-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <CardTitle className="flex items-center gap-2 font-serif italic font-normal text-[20px]">
-            <Scale className="size-4 text-ink-mute" />
+            <Scale className="size-4 text-[#0F1419]/72" />
             Litige #{data.id.slice(0, 8)}
           </CardTitle>
           <Badge
@@ -284,7 +280,7 @@ export function LitigationWorkflow({
                 <span
                   className={cn(
                     'flex size-7 items-center justify-center rounded-full text-[11px] font-semibold',
-                    reached ? 'bg-chartreuse text-ink' : 'bg-cream-deep text-ink-mute',
+                    reached ? 'bg-chartreuse text-[#0F1419]' : 'bg-cream-deep text-[#0F1419]/72',
                   )}
                 >
                   {i + 1}
@@ -292,7 +288,7 @@ export function LitigationWorkflow({
                 <span
                   className={cn(
                     'mt-1.5 text-[10px] uppercase tracking-wider font-mono',
-                    reached ? 'text-ink' : 'text-ink-mute',
+                    reached ? 'text-[#0F1419]' : 'text-[#0F1419]/72',
                   )}
                 >
                   {step.label}
@@ -303,16 +299,16 @@ export function LitigationWorkflow({
         </ol>
 
         <div>
-          <p className="text-[11px] uppercase tracking-wider font-mono text-ink-mute mb-1.5">
+          <p className="text-[11px] uppercase tracking-wider font-mono text-[#0F1419]/72 mb-1.5">
             Motif
           </p>
-          <p className="text-[13px] text-ink-soft leading-relaxed">{data.reason}</p>
+          <p className="text-[13px] text-[#0F1419]/82 leading-relaxed">{data.reason}</p>
         </div>
 
         {/* Réponse IA */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <p className="text-[11px] uppercase tracking-wider font-mono text-ink-mute">
+            <p className="text-[11px] uppercase tracking-wider font-mono text-[#0F1419]/72">
               Réponse IA suggérée
             </p>
             <Button
@@ -339,30 +335,32 @@ export function LitigationWorkflow({
 
         {/* Jurisprudences */}
         <div>
-          <p className="text-[11px] uppercase tracking-wider font-mono text-ink-mute mb-1.5">
+          <p className="text-[11px] uppercase tracking-wider font-mono text-[#0F1419]/72 mb-1.5">
             Jurisprudences pertinentes
           </p>
           {data.jurisprudences.length === 0 ? (
-            <p className="text-[12px] text-ink-mute">Aucune jurisprudence indexée pour ce cas.</p>
+            <p className="text-[12px] text-[#0F1419]/72">
+              Aucune jurisprudence indexée pour ce cas.
+            </p>
           ) : (
             <ul className="space-y-2">
               {data.jurisprudences.map((j) => (
                 <li
                   key={j.id}
-                  className="rounded-md border border-rule/60 bg-paper px-3 py-2 text-[12px]"
+                  className="rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-2 text-[12px]"
                 >
                   <a
                     href={j.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-semibold text-ink hover:underline"
+                    className="font-semibold text-[#0F1419] hover:underline"
                   >
                     {j.title}
                   </a>
-                  <p className="text-ink-mute">
+                  <p className="text-[#0F1419]/72">
                     {j.court} — {j.date}
                   </p>
-                  <p className="mt-1 text-ink-soft">{j.excerpt}</p>
+                  <p className="mt-1 text-[#0F1419]/82">{j.excerpt}</p>
                 </li>
               ))}
             </ul>
@@ -370,22 +368,22 @@ export function LitigationWorkflow({
         </div>
 
         {/* Courrier avocat */}
-        <div className="flex items-center justify-between rounded-md border border-rule/60 bg-paper px-3 py-2">
-          <div className="flex items-center gap-2 text-[12px] text-ink-soft">
-            <FileText className="size-4 text-ink-mute" />
+        <div className="flex items-center justify-between rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-2">
+          <div className="flex items-center gap-2 text-[12px] text-[#0F1419]/82">
+            <FileText className="size-4 text-[#0F1419]/72" />
             Courrier d&apos;avocat (PDF)
           </div>
           {data.lawyerLetterUrl ? (
             <a
               href={data.lawyerLetterUrl}
               download
-              className="inline-flex items-center gap-1.5 text-[12px] text-ink hover:underline"
+              className="inline-flex items-center gap-1.5 text-[12px] text-[#0F1419] hover:underline"
             >
               <Download className="size-3.5" />
               Télécharger
             </a>
           ) : (
-            <span className="text-[11px] text-ink-mute">non généré</span>
+            <span className="text-[11px] text-[#0F1419]/72">non généré</span>
           )}
         </div>
 
@@ -418,8 +416,7 @@ export function LitigationWorkflow({
             <DialogTitle>Escalader le litige</DialogTitle>
             <DialogDescription>
               Passe le litige en mode "judiciaire". Cette action notifie l&apos;assurance RC pro
-              (Hiscox) et déclenche la procédure d&apos;envoi du dossier complet à
-              l&apos;avocat.
+              (Hiscox) et déclenche la procédure d&apos;envoi du dossier complet à l&apos;avocat.
             </DialogDescription>
           </DialogHeader>
           <Textarea

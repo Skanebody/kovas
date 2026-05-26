@@ -45,7 +45,7 @@ export function QuickActionsBlock({ dossierId, clientPhone, clientEmail }: Quick
   const prevalidationUrl = `/dashboard/dossiers/${dossierId}/prevalidation`
   return (
     <Card variant="flat" padding="sm" className="space-y-3">
-      <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+      <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
         Actions rapides
       </p>
       <div className="grid grid-cols-3 gap-2">
@@ -61,7 +61,7 @@ export function QuickActionsBlock({ dossierId, clientPhone, clientEmail }: Quick
 }
 
 const BASE_CLASS =
-  'flex aspect-square flex-col items-center justify-center rounded-md border border-rule/60 bg-paper hover:border-ink/30 hover:bg-cream-deep/30 transition-all duration-fast cursor-pointer'
+  'flex aspect-square flex-col items-center justify-center rounded-md border border-[#0F1419]/[0.08] bg-paper hover:border-[#0F1419]/30 hover:bg-cream-deep/30 transition-all duration-fast cursor-pointer'
 
 interface IconProps {
   className?: string
@@ -78,8 +78,8 @@ function ActionLink({
 }) {
   return (
     <Link href={href} prefetch={false} className={BASE_CLASS} aria-label={label}>
-      <Icon className="size-4 text-ink" />
-      <span className="text-[10px] font-medium text-ink-soft mt-1.5 leading-tight text-center">
+      <Icon className="size-4 text-[#0F1419]" />
+      <span className="text-[10px] font-medium text-[#0F1419]/82 mt-1.5 leading-tight text-center">
         {label}
       </span>
     </Link>
@@ -100,8 +100,8 @@ function ActionMail({
         className={BASE_CLASS}
         aria-label={`Envoyer un email à ${clientEmail}`}
       >
-        <Mail className="size-4 text-ink" />
-        <span className="text-[10px] font-medium text-ink-soft mt-1.5 leading-tight text-center">
+        <Mail className="size-4 text-[#0F1419]" />
+        <span className="text-[10px] font-medium text-[#0F1419]/82 mt-1.5 leading-tight text-center">
           Email
         </span>
       </a>
@@ -117,8 +117,8 @@ function ActionMail({
         })
       }
     >
-      <Mail className="size-4 text-ink-faint" />
-      <span className="text-[10px] font-medium text-ink-faint mt-1.5 leading-tight text-center">
+      <Mail className="size-4 text-[#0F1419]/55" />
+      <span className="text-[10px] font-medium text-[#0F1419]/55 mt-1.5 leading-tight text-center">
         Email
       </span>
     </button>
@@ -129,8 +129,8 @@ function ActionPhone({ clientPhone }: { clientPhone: string | null }) {
   if (clientPhone) {
     return (
       <a href={`tel:${clientPhone}`} className={BASE_CLASS} aria-label={`Appeler ${clientPhone}`}>
-        <Phone className="size-4 text-ink" />
-        <span className="text-[10px] font-medium text-ink-soft mt-1.5 leading-tight text-center">
+        <Phone className="size-4 text-[#0F1419]" />
+        <span className="text-[10px] font-medium text-[#0F1419]/82 mt-1.5 leading-tight text-center">
           Appeler
         </span>
       </a>
@@ -146,8 +146,8 @@ function ActionPhone({ clientPhone }: { clientPhone: string | null }) {
         })
       }
     >
-      <Phone className="size-4 text-ink-faint" />
-      <span className="text-[10px] font-medium text-ink-faint mt-1.5 leading-tight text-center">
+      <Phone className="size-4 text-[#0F1419]/55" />
+      <span className="text-[10px] font-medium text-[#0F1419]/55 mt-1.5 leading-tight text-center">
         Appeler
       </span>
     </button>
@@ -173,12 +173,12 @@ function ActionShare({
     try {
       await navigator.clipboard.writeText(shareUrl)
       toast.success('Lien copié', {
-        description: 'Le lien du dossier est dans votre presse-papiers.',
+        description: 'Le lien du dossier est dans ton presse-papiers.',
       })
       setOpen(false)
     } catch (_e) {
       toast.error('Copie impossible', {
-        description: "Votre navigateur a refusé l'accès au presse-papiers.",
+        description: "Ton navigateur a refusé l'accès au presse-papiers.",
       })
     }
   }
@@ -187,8 +187,8 @@ function ActionShare({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button type="button" className={BASE_CLASS} aria-label="Partager le dossier">
-          <Share2 className="size-4 text-ink" />
-          <span className="text-[10px] font-medium text-ink-soft mt-1.5 leading-tight text-center">
+          <Share2 className="size-4 text-[#0F1419]" />
+          <span className="text-[10px] font-medium text-[#0F1419]/82 mt-1.5 leading-tight text-center">
             Partager
           </span>
         </button>
@@ -197,7 +197,7 @@ function ActionShare({
         <DialogHeader>
           <DialogTitle>Partager le dossier</DialogTitle>
           <DialogDescription>
-            Trois modes de partage. Le lien envoyé renvoie vers votre espace KOVAS — accessible
+            Trois modes de partage. Le lien envoyé renvoie vers ton espace KOVAS — accessible
             uniquement aux comptes autorisés.
           </DialogDescription>
         </DialogHeader>
@@ -205,30 +205,30 @@ function ActionShare({
           <button
             type="button"
             onClick={() => void copyLink()}
-            className="w-full flex items-center justify-between rounded-md border border-rule/60 bg-paper px-3 py-2.5 text-[13px] text-ink-soft hover:border-ink/30 transition-colors"
+            className="w-full flex items-center justify-between rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-2.5 text-[13px] text-[#0F1419]/82 hover:border-[#0F1419]/30 transition-colors"
           >
             <span className="flex items-center gap-2">
-              <Link2 className="size-4 text-ink-mute" />
+              <Link2 className="size-4 text-[#0F1419]/72" />
               Copier le lien du dossier
             </span>
-            <span className="font-mono text-[10px] text-ink-faint">URL</span>
+            <span className="font-mono text-[10px] text-[#0F1419]/55">URL</span>
           </button>
           {clientEmail ? (
             <a
               href={`mailto:${clientEmail}?subject=${encodeURIComponent('Votre dossier KOVAS')}&body=${encodeURIComponent(
                 `Bonjour,\n\nVoici le lien d'accès à votre dossier :\n${shareUrl}\n\nCordialement,`,
               )}`}
-              className="w-full flex items-center justify-between rounded-md border border-rule/60 bg-paper px-3 py-2.5 text-[13px] text-ink-soft hover:border-ink/30 transition-colors"
+              className="w-full flex items-center justify-between rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-2.5 text-[13px] text-[#0F1419]/82 hover:border-[#0F1419]/30 transition-colors"
               onClick={() => setOpen(false)}
             >
               <span className="flex items-center gap-2">
-                <Mail className="size-4 text-ink-mute" />
+                <Mail className="size-4 text-[#0F1419]/72" />
                 Envoyer par email au client
               </span>
-              <span className="font-mono text-[10px] text-ink-faint">{clientEmail}</span>
+              <span className="font-mono text-[10px] text-[#0F1419]/55">{clientEmail}</span>
             </a>
           ) : (
-            <div className="w-full rounded-md border border-dashed border-rule/60 bg-paper/60 px-3 py-2.5 text-[12px] text-ink-faint">
+            <div className="w-full rounded-md border border-dashed border-[#0F1419]/[0.08] bg-paper px-3 py-2.5 text-[12px] text-[#0F1419]/55">
               Aucun email client renseigné — ajoutez-en un dans la fiche client pour activer
               l&apos;envoi direct.
             </div>
@@ -237,13 +237,13 @@ function ActionShare({
             href={`/api/dossiers/${dossierId}/export/zip`}
             download
             onClick={() => setOpen(false)}
-            className="w-full flex items-center justify-between rounded-md border border-rule/60 bg-paper px-3 py-2.5 text-[13px] text-ink-soft hover:border-ink/30 transition-colors"
+            className="w-full flex items-center justify-between rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-2.5 text-[13px] text-[#0F1419]/82 hover:border-[#0F1419]/30 transition-colors"
           >
             <span className="flex items-center gap-2">
-              <Download className="size-4 text-ink-mute" />
+              <Download className="size-4 text-[#0F1419]/72" />
               Télécharger le ZIP complet
             </span>
-            <span className="font-mono text-[10px] text-ink-faint">ZIP</span>
+            <span className="font-mono text-[10px] text-[#0F1419]/55">ZIP</span>
           </a>
         </div>
       </DialogContent>

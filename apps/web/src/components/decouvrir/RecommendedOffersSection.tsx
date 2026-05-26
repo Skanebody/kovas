@@ -68,12 +68,12 @@ export function RecommendedOffersSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2 text-ink font-mono text-[11px] uppercase tracking-[0.1em]">
+        <div className="flex items-center gap-2 text-[#0F1419] font-mono text-[11px] uppercase tracking-[0.1em]">
           <Sparkles className="size-3.5 text-chartreuse-deep" />
           Recommandées pour vous
         </div>
         <Badge variant="muted" className="text-[10px]">
-          Mis à jour selon votre navigation
+          Mis à jour selon ta navigation
         </Badge>
       </div>
 
@@ -98,9 +98,7 @@ function RecommendedCard({ scored, isTop }: { scored: ScoredOffer; isTop: boolea
         recommended={isTop}
         position="recommended"
         ctaHref={scored.offer.priceMonthlyCents === 0 ? '/signup' : '/app/account'}
-        secondaryCtaLabel={
-          scored.reasons[0] ?? 'Pourquoi cette offre ?'
-        }
+        secondaryCtaLabel={scored.reasons[0] ?? 'Pourquoi cette offre ?'}
       />
     </div>
   )

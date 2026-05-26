@@ -284,7 +284,7 @@ export function VoiceRecorderModal({
       aria-label="Enregistrement vocal"
       className={cn(
         'fixed inset-0 z-50 flex items-center justify-center',
-        'bg-paper/95 backdrop-blur-sm',
+        'bg-paper',
         'animate-in fade-in duration-200',
       )}
     >
@@ -302,7 +302,7 @@ export function VoiceRecorderModal({
       <div className="relative z-10 w-full max-w-md px-4">
         <div
           className={cn(
-            'rounded-2xl border border-rule/80 bg-paper px-6 py-8',
+            'rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-8',
             'shadow-xl',
             'flex flex-col items-center gap-6',
           )}
@@ -311,8 +311,10 @@ export function VoiceRecorderModal({
             <>
               <div className="flex flex-col items-center gap-2 text-center">
                 <X className="size-10 text-accent-red" aria-hidden />
-                <h2 className="font-serif text-xl italic text-ink">Impossible d'enregistrer</h2>
-                <p className="text-sm text-ink-soft">{error}</p>
+                <h2 className="font-serif text-xl italic text-[#0F1419]">
+                  Impossible d'enregistrer
+                </h2>
+                <p className="text-sm text-[#0F1419]/82">{error}</p>
               </div>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" size="default" onClick={handleCancel}>
@@ -327,11 +329,11 @@ export function VoiceRecorderModal({
                 <span
                   className={cn(
                     'inline-block size-3 rounded-full',
-                    phase === 'recording' ? 'animate-pulse-soft bg-accent-red' : 'bg-ink-mute/30',
+                    phase === 'recording' ? 'animate-pulse-soft bg-accent-red' : 'bg-[#0F1419]/30',
                   )}
                   aria-hidden
                 />
-                <span className="font-mono text-[11px] tracking-[0.08em] text-ink-mute uppercase">
+                <span className="font-mono text-[11px] tracking-[0.08em] text-[#0F1419]/72 uppercase">
                   {phase === 'starting'
                     ? 'Initialisation…'
                     : phase === 'finishing'
@@ -342,10 +344,10 @@ export function VoiceRecorderModal({
 
               {/* Compteur */}
               <div className="flex flex-col items-center gap-1">
-                <span className="font-mono text-3xl sm:text-5xl font-semibold text-ink tabular-nums">
+                <span className="font-mono text-3xl sm:text-5xl font-semibold text-[#0F1419] tabular-nums">
                   {counterLabel}
                 </span>
-                <span className="text-xs text-ink-mute">{remainingLabel}</span>
+                <span className="text-xs text-[#0F1419]/72">{remainingLabel}</span>
               </div>
 
               {/* Waveform canvas-like (barres) */}
@@ -362,8 +364,8 @@ export function VoiceRecorderModal({
 
               {/* Micro-copy si silence prolongé */}
               {silencePrompt && phase === 'recording' ? (
-                <p className="text-center text-xs text-ink-soft">
-                  Toujours là ? Vous pouvez parler.
+                <p className="text-center text-xs text-[#0F1419]/82">
+                  Toujours là ? Tu peux parler.
                 </p>
               ) : null}
 
@@ -423,7 +425,7 @@ function Waveform({ bars, active }: WaveformProps) {
             aria-hidden
             className={cn(
               'w-1.5 rounded-full transition-[height,background-color] duration-100',
-              active ? 'bg-accent-red' : 'bg-ink-mute/40',
+              active ? 'bg-accent-red' : 'bg-[#0F1419]/40',
             )}
             style={{ height: `${heightPct}%` }}
           />

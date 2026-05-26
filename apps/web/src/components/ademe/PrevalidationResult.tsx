@@ -16,8 +16,8 @@
  * la logique côté DB est posée par l'Edge Function lors du prevalidate).
  */
 
-import { useState } from 'react'
 import { AlertTriangle, ArrowRight, CheckCircle2, Info, XCircle } from 'lucide-react'
+import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -114,7 +114,7 @@ export function PrevalidationResult({
       if (!res.ok) throw new Error(`${res.status}`)
       toast.success('Décision enregistrée')
     } catch {
-      toast.error("Décision non enregistrée — réessayez")
+      toast.error('Décision non enregistrée — réessayez')
     } finally {
       setDecisionPending(null)
     }
@@ -123,14 +123,20 @@ export function PrevalidationResult({
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Verdict hero */}
-      <Card variant="opaque" padding="default" className={cn('flex flex-col gap-4 border', meta.classes)}>
+      <Card
+        variant="opaque"
+        padding="default"
+        className={cn('flex flex-col gap-4 border', meta.classes)}
+      >
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <Badge variant={verdict === 'green' ? 'green' : verdict === 'yellow' ? 'yellow' : 'red'}>
+            <Badge
+              variant={verdict === 'green' ? 'green' : verdict === 'yellow' ? 'yellow' : 'red'}
+            >
               {meta.label}
             </Badge>
             <p className="font-serif italic text-4xl md:text-5xl leading-none">{meta.serif}</p>
-            <p className="text-[12px] text-ink-mute">Score global {globalScore} / 100</p>
+            <p className="text-[12px] text-[#0F1419]/72">Score global {globalScore} / 100</p>
           </div>
           <div className={cn('shrink-0', meta.iconColor)}>
             {verdict === 'green' ? (
@@ -202,14 +208,17 @@ export function PrevalidationResult({
 
       {/* Sous-scores par axe */}
       <Card variant="opaque" padding="default" className="space-y-4">
-        <h3 className="text-[15px] font-semibold text-ink">Détail par axe</h3>
+        <h3 className="text-[15px] font-semibold text-[#0F1419]">Détail par axe</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {(['volume', 'distance', 'coherence', 'statistical', 'history'] as const).map((axis) => {
             const score = axisScores[axis]
             const tone = score >= 70 ? 'red' : score >= 40 ? 'yellow' : 'green'
             return (
-              <div key={axis} className="rounded-md border border-rule bg-paper/60 p-3 space-y-1">
-                <p className="text-[10px] uppercase tracking-wider font-mono text-ink-mute">
+              <div
+                key={axis}
+                className="rounded-md border border-[#0F1419]/[0.08] bg-paper p-3 space-y-1"
+              >
+                <p className="text-[10px] uppercase tracking-wider font-mono text-[#0F1419]/72">
                   {AXIS_LABEL[axis]}
                 </p>
                 <p
@@ -231,7 +240,9 @@ export function PrevalidationResult({
       {/* Warnings */}
       {warnings.length > 0 ? (
         <Card variant="opaque" padding="default" className="space-y-3">
-          <h3 className="text-[15px] font-semibold text-ink">{warnings.length} avertissement{warnings.length > 1 ? 's' : ''}</h3>
+          <h3 className="text-[15px] font-semibold text-[#0F1419]">
+            {warnings.length} avertissement{warnings.length > 1 ? 's' : ''}
+          </h3>
           <ul className="space-y-2">
             {warnings.map((w, idx) => {
               const sev = SEVERITY_META[w.severity]
@@ -239,19 +250,21 @@ export function PrevalidationResult({
               return (
                 <li
                   key={`${w.code}-${idx}`}
-                  className="rounded-md border border-rule bg-paper/60 p-3 space-y-2"
+                  className="rounded-md border border-[#0F1419]/[0.08] bg-paper p-3 space-y-2"
                 >
                   <div className="flex items-start gap-2.5">
-                    <Icon className="size-4 shrink-0 mt-0.5 text-ink-mute" />
+                    <Icon className="size-4 shrink-0 mt-0.5 text-[#0F1419]/72" />
                     <div className="flex-1 min-w-0 space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant={sev.variant}>{w.severity}</Badge>
-                        <span className="text-[10px] font-mono text-ink-mute">{AXIS_LABEL[w.axis] ?? w.axis}</span>
-                        <span className="text-[10px] font-mono text-ink-faint">{w.code}</span>
+                        <span className="text-[10px] font-mono text-[#0F1419]/72">
+                          {AXIS_LABEL[w.axis] ?? w.axis}
+                        </span>
+                        <span className="text-[10px] font-mono text-[#0F1419]/55">{w.code}</span>
                       </div>
-                      <p className="text-[13px] text-ink">{w.message}</p>
+                      <p className="text-[13px] text-[#0F1419]">{w.message}</p>
                       {w.suggested_fix ? (
-                        <p className="text-[11px] text-ink-mute">
+                        <p className="text-[11px] text-[#0F1419]/72">
                           <span className="font-semibold">Correction : </span>
                           {w.suggested_fix}
                         </p>

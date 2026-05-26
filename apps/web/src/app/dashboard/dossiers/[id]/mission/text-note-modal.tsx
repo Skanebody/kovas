@@ -111,7 +111,7 @@ export function TextNoteModal({
       aria-label="Saisie d'une note"
       className={cn(
         'fixed inset-0 z-50 flex items-center justify-center',
-        'bg-paper/95 backdrop-blur-sm',
+        'bg-paper',
         'animate-in fade-in duration-200',
         'p-4',
       )}
@@ -130,7 +130,7 @@ export function TextNoteModal({
       <div className="relative z-10 w-full max-w-md">
         <div
           className={cn(
-            'rounded-2xl border border-rule/80 bg-paper px-5 py-5',
+            'rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-5 py-5',
             'shadow-xl',
             'flex flex-col gap-4',
           )}
@@ -143,20 +143,20 @@ export function TextNoteModal({
                 <img
                   src={thumbnailUrl}
                   alt="Capture terrain"
-                  className="size-10 shrink-0 rounded-lg border border-rule object-cover"
+                  className="size-10 shrink-0 rounded-lg border border-[#0F1419]/[0.08] object-cover"
                 />
               ) : null}
               <div>
-                <p className="font-mono text-[11px] tracking-[0.08em] text-ink-mute uppercase">
+                <p className="font-mono text-[11px] tracking-[0.08em] text-[#0F1419]/72 uppercase">
                   Annotation photo
                 </p>
-                <h2 className="font-serif text-lg italic text-ink">Note sur cette photo</h2>
+                <h2 className="font-serif text-lg italic text-[#0F1419]">Note sur cette photo</h2>
               </div>
             </div>
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-full p-1.5 text-ink-mute hover:bg-ink/5 hover:text-ink"
+              className="rounded-full p-1.5 text-[#0F1419]/72 hover:bg-[#0F1419]/5 hover:text-[#0F1419]"
               aria-label="Fermer"
             >
               <X className="size-4" aria-hidden />
@@ -174,15 +174,15 @@ export function TextNoteModal({
             enterKeyHint="done"
             rows={5}
             className={cn(
-              'w-full resize-none rounded-xl border border-rule bg-paper px-3 py-2.5',
-              'text-base text-ink placeholder:text-ink-ghost',
+              'w-full resize-none rounded-xl border border-[#0F1419]/[0.08] bg-paper px-3 py-2.5',
+              'text-base text-[#0F1419] placeholder:text-[#0F1419]/40',
               'focus-visible:border-[#0F1419]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/20',
             )}
             disabled={submitting}
           />
 
           {/* Compteur + suggestions */}
-          <div className="flex flex-col gap-2 text-xs text-ink-mute">
+          <div className="flex flex-col gap-2 text-xs text-[#0F1419]/72">
             <div className="flex items-center justify-between">
               <span>
                 Suggestions :{' '}
@@ -197,7 +197,7 @@ export function TextNoteModal({
               <span
                 className={cn(
                   'font-mono tabular-nums',
-                  remaining < 50 ? 'text-accent-warm' : 'text-ink-mute',
+                  remaining < 50 ? 'text-accent-warm' : 'text-[#0F1419]/72',
                 )}
               >
                 {remaining}

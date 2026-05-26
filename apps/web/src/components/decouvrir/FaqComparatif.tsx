@@ -26,7 +26,7 @@ export function FaqComparatif() {
     },
     {
       q: 'Les bundles sont-ils résiliables séparément ?',
-      a: 'Oui, vous pouvez résilier le volet logiciel ou annuaire indépendamment. La remise est conservée sur les 30 jours suivants pour vous laisser le temps de décider.',
+      a: 'Oui, tu peux résilier le volet logiciel ou annuaire indépendamment. La remise est conservée sur les 30 jours suivants pour te laisser le temps de décider.',
     },
     {
       q: 'KOVAS remplace-t-il Liciel ?',
@@ -38,35 +38,35 @@ export function FaqComparatif() {
     <div className="space-y-8">
       {/* Tableau comparatif */}
       <Card variant="flat" padding="default" className="overflow-x-auto">
-        <h3 className="font-display font-semibold text-base mb-4 text-ink">
+        <h3 className="font-sans font-semibold tracking-tight text-base mb-4 text-[#0F1419]">
           Comparatif des plans KOVAS
         </h3>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-rule/60">
-              <th className="text-left font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute py-2 pr-4">
+            <tr className="border-b border-[#0F1419]/[0.08]">
+              <th className="text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72 py-2 pr-4">
                 Plan
               </th>
               {LOGICIEL_OFFERS.map((offer) => (
                 <th
                   key={offer.code}
-                  className="text-left font-display font-semibold text-[12px] text-ink py-2 px-3 whitespace-nowrap"
+                  className="text-left font-sans font-semibold tracking-tight text-[12px] text-[#0F1419] py-2 px-3 whitespace-nowrap"
                 >
                   {offer.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="text-[12px] text-ink-soft">
-            <tr className="border-b border-rule/30">
+          <tbody className="text-[12px] text-[#0F1419]/82">
+            <tr className="border-b border-[#0F1419]/[0.06]">
               <td className="py-2 pr-4 font-medium">Prix</td>
               {LOGICIEL_OFFERS.map((offer) => (
-                <td key={offer.code} className="py-2 px-3 text-ink">
+                <td key={offer.code} className="py-2 px-3 text-[#0F1419]">
                   {offer.priceLabel}
                 </td>
               ))}
             </tr>
-            <tr className="border-b border-rule/30">
+            <tr className="border-b border-[#0F1419]/[0.06]">
               <td className="py-2 pr-4 font-medium">Saisie vocale</td>
               {LOGICIEL_OFFERS.map((offer) => (
                 <td key={offer.code} className="py-2 px-3">
@@ -74,7 +74,7 @@ export function FaqComparatif() {
                 </td>
               ))}
             </tr>
-            <tr className="border-b border-rule/30">
+            <tr className="border-b border-[#0F1419]/[0.06]">
               <td className="py-2 pr-4 font-medium">Exports universels</td>
               {LOGICIEL_OFFERS.map((offer) => (
                 <td key={offer.code} className="py-2 px-3">
@@ -82,26 +82,26 @@ export function FaqComparatif() {
                 </td>
               ))}
             </tr>
-            <tr className="border-b border-rule/30">
+            <tr className="border-b border-[#0F1419]/[0.06]">
               <td className="py-2 pr-4 font-medium">Conformité ADEME</td>
               {LOGICIEL_OFFERS.map((offer) => (
                 <td key={offer.code} className="py-2 px-3">
                   {offer.priceMonthlyCents !== null && offer.priceMonthlyCents >= 7900 ? (
                     <Check className="size-3.5 text-accent-green" />
                   ) : (
-                    <Minus className="size-3.5 text-ink-ghost" />
+                    <Minus className="size-3.5 text-[#0F1419]/40" />
                   )}
                 </td>
               ))}
             </tr>
-            <tr className="border-b border-rule/30">
+            <tr className="border-b border-[#0F1419]/[0.06]">
               <td className="py-2 pr-4 font-medium">Utilisateurs multiples</td>
               {LOGICIEL_OFFERS.map((offer) => (
                 <td key={offer.code} className="py-2 px-3">
                   {offer.code === 'logiciel_cabinet_plus' ? (
                     <Check className="size-3.5 text-accent-green" />
                   ) : (
-                    <Minus className="size-3.5 text-ink-ghost" />
+                    <Minus className="size-3.5 text-[#0F1419]/40" />
                   )}
                 </td>
               ))}
@@ -113,7 +113,7 @@ export function FaqComparatif() {
                   {offer.code === 'logiciel_cabinet_plus' ? (
                     <Check className="size-3.5 text-accent-green" />
                   ) : (
-                    <Minus className="size-3.5 text-ink-ghost" />
+                    <Minus className="size-3.5 text-[#0F1419]/40" />
                   )}
                 </td>
               ))}
@@ -124,22 +124,24 @@ export function FaqComparatif() {
 
       {/* FAQ */}
       <div className="space-y-3">
-        <h3 className="font-display font-semibold text-base text-ink">Questions fréquentes</h3>
+        <h3 className="font-sans font-semibold tracking-tight text-base text-[#0F1419]">
+          Questions fréquentes
+        </h3>
         {faqs.map((f) => (
           <details
             key={f.q}
-            className="group rounded-lg border border-rule/60 bg-paper/60 px-4 py-3 transition-colors hover:bg-paper"
+            className="group rounded-lg border border-[#0F1419]/[0.08] bg-paper px-4 py-3 transition-colors hover:bg-paper"
           >
-            <summary className="cursor-pointer list-none flex items-center justify-between gap-3 text-sm font-medium text-ink">
+            <summary className="cursor-pointer list-none flex items-center justify-between gap-3 text-sm font-medium text-[#0F1419]">
               <span>{f.q}</span>
               <span
                 aria-hidden
-                className="font-mono text-[18px] text-ink-mute group-open:rotate-45 transition-transform"
+                className="font-mono text-[18px] text-[#0F1419]/72 group-open:rotate-45 transition-transform"
               >
                 +
               </span>
             </summary>
-            <p className="text-xs text-ink-mute mt-2 leading-relaxed">{f.a}</p>
+            <p className="text-xs text-[#0F1419]/72 mt-2 leading-relaxed">{f.a}</p>
           </details>
         ))}
       </div>

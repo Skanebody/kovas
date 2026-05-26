@@ -453,7 +453,7 @@ export function PhotoCaptureButton({
           'size-10 rounded-full transition-all duration-150',
           'hover:bg-sage-alt focus:outline-none focus:ring-2 focus:ring-chartreuse/40',
           'disabled:opacity-40 disabled:cursor-not-allowed',
-          isBursting && 'bg-chartreuse text-ink scale-110 shadow-glass',
+          isBursting && 'bg-chartreuse text-[#0F1419] scale-110',
         )}
       >
         <Camera className={cn('size-4 transition-transform', isBursting && 'scale-110')} />
@@ -461,10 +461,9 @@ export function PhotoCaptureButton({
           <span
             className={cn(
               'absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5',
-              'rounded-full bg-ink text-chartreuse',
+              'rounded-full bg-[#0F1419] text-chartreuse',
               'font-mono text-[10px] font-semibold',
               'inline-flex items-center justify-center',
-              'shadow-glass-sm',
             )}
             aria-hidden
           >

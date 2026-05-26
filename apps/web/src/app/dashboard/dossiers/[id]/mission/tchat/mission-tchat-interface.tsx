@@ -238,7 +238,7 @@ function MarkdownInline({ text }: MarkdownInlineProps): React.ReactElement {
           return (
             <code
               key={key}
-              className="font-mono text-[0.9em] bg-ink/10 px-1.5 py-0.5 rounded text-ink"
+              className="font-mono text-[0.9em] bg-[#0F1419]/10 px-1.5 py-0.5 rounded text-[#0F1419]"
             >
               {n.value}
             </code>
@@ -321,7 +321,7 @@ function MarkdownBlock({ content }: { content: string }): React.ReactElement {
     // Header H3
     if (/^###\s+/.test(line)) {
       blocks.push(
-        <h4 key={`h-${key++}`} className="mt-2 mb-1 text-[14px] font-semibold text-ink">
+        <h4 key={`h-${key++}`} className="mt-2 mb-1 text-[14px] font-semibold text-[#0F1419]">
           <MarkdownInline text={line.replace(/^###\s+/, '')} />
         </h4>,
       )
@@ -478,8 +478,8 @@ export function MissionTchatInterface({
         role: 'assistant' as const,
         content:
           existingRooms.length > 0
-            ? `Bonjour. ${existingRooms.length} pièce${existingRooms.length > 1 ? 's' : ''} déjà saisie${existingRooms.length > 1 ? 's' : ''} dans ce dossier. On peut reprendre où vous en étiez, ou attaquer une nouvelle pièce. **Que souhaitez-vous faire ?**`
-            : `Bonjour Benjamin. Je suis votre assistant terrain pour cette mission chez **${clientName}**. Je peux vous **guider pas à pas**, **répondre à vos questions métier** (méthodo, réglementation, particularités du bien), et **enregistrer vos données** au fur et à mesure.\n\nDites-moi simplement par où vous voulez commencer, ou posez-moi une question.`,
+            ? `Bonjour. ${existingRooms.length} pièce${existingRooms.length > 1 ? 's' : ''} déjà saisie${existingRooms.length > 1 ? 's' : ''} dans ce dossier. On peut reprendre où tu en étais, ou attaquer une nouvelle pièce. **Que souhaites-tu faire ?**`
+            : `Bonjour Benjamin. Je suis ton assistant terrain pour cette mission chez **${clientName}**. Je peux te **guider pas à pas**, **répondre à tes questions métier** (méthodo, réglementation, particularités du bien), et **enregistrer tes données** au fur et à mesure.\n\nDis-moi simplement par où tu veux commencer, ou pose-moi une question.`,
         createdAt: Date.now(),
       },
     ]
@@ -930,7 +930,7 @@ export function MissionTchatInterface({
     })
     if (!ctrl.isSupported) {
       setErrorMsg(
-        'Reconnaissance vocale non supportée par ce navigateur — utilisez Chrome/Edge ou tapez votre réponse.',
+        'Reconnaissance vocale non supportée par ce navigateur — utilise Chrome/Edge ou tape ta réponse.',
       )
       return
     }
@@ -1754,7 +1754,7 @@ export function MissionTchatInterface({
       />
 
       {/* Header sticky 56px (simplifié — info déjà dans ContextBar) */}
-      <header className="relative flex h-14 items-center justify-between gap-3 border-b border-rule/70 bg-paper/95 px-3 sm:px-5 backdrop-blur-md shrink-0 z-10">
+      <header className="relative flex h-14 items-center justify-between gap-3 border-b border-[#0F1419]/[0.08] bg-paper px-3 sm:px-5 shrink-0 z-10">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Button
             variant="ghost"
@@ -1768,11 +1768,11 @@ export function MissionTchatInterface({
             </Link>
           </Button>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] text-[#0F1419]/72">
               <span>{reference}</span>
             </div>
-            <p className="text-[13px] font-semibold text-ink truncate leading-tight">
-              <span className="font-normal text-ink-mute">{fullAddress}</span>
+            <p className="text-[13px] font-semibold text-[#0F1419] truncate leading-tight">
+              <span className="font-normal text-[#0F1419]/72">{fullAddress}</span>
             </p>
           </div>
         </div>
@@ -1834,7 +1834,7 @@ export function MissionTchatInterface({
               <button
                 type="button"
                 onClick={() => scrollToBottom('smooth')}
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-pill border border-rule bg-paper px-3 py-1.5 text-[12px] font-medium text-ink shadow-glass-sm hover:bg-sage-alt transition-colors"
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-pill border border-[#0F1419]/[0.08] bg-paper px-3 py-1.5 text-[12px] font-medium text-[#0F1419] hover:bg-sage-alt transition-colors"
                 aria-label="Voir les nouveaux messages"
               >
                 <ArrowDown className="size-3.5" />
@@ -1845,7 +1845,7 @@ export function MissionTchatInterface({
 
           {/* Quick replies (Conversation IA) OU bouton Analyser (Capture) */}
           {captureMode === 'conversation' ? (
-            <div className="border-t border-rule/40 bg-paper/60 px-3 sm:px-6 py-2 shrink-0 overflow-x-auto">
+            <div className="border-t border-[#0F1419]/[0.06] bg-paper px-3 sm:px-6 py-2 shrink-0 overflow-x-auto">
               <div className="mx-auto max-w-3xl flex items-center gap-2 min-w-fit">
                 {quickReplies.map((qr) => (
                   <button
@@ -1854,9 +1854,9 @@ export function MissionTchatInterface({
                     onClick={() => void sendMessage(qr.message)}
                     disabled={isStreaming || isPaused}
                     className={cn(
-                      'shrink-0 rounded-pill border border-rule bg-paper px-3 py-1.5',
-                      'text-[12px] font-medium text-ink',
-                      'hover:bg-sage-alt hover:border-ink/30 transition-colors',
+                      'shrink-0 rounded-pill border border-[#0F1419]/[0.08] bg-paper px-3 py-1.5',
+                      'text-[12px] font-medium text-[#0F1419]',
+                      'hover:bg-sage-alt hover:border-[#0F1419]/30 transition-colors',
                       'disabled:opacity-40 disabled:cursor-not-allowed',
                     )}
                   >
@@ -1869,9 +1869,9 @@ export function MissionTchatInterface({
             // MISSION-H lot 2 : bouton "Terminer et analyser" en mode Capture
             // Toujours visible — Benjamin décide quand sa session est terminée.
             // Désactivé uniquement si AUCUN message user n'a été capturé.
-            <div className="border-t border-rule/40 bg-paper/60 px-3 sm:px-6 py-2 shrink-0">
+            <div className="border-t border-[#0F1419]/[0.06] bg-paper px-3 sm:px-6 py-2 shrink-0">
               <div className="mx-auto max-w-3xl flex items-center justify-between gap-2">
-                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
+                <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#0F1419]/72">
                   Mode capture silencieuse · vos messages ne déclenchent pas d'IA
                 </p>
                 <Button
@@ -1904,7 +1904,7 @@ export function MissionTchatInterface({
           )}
 
           {/* Input bar sticky bottom */}
-          <div className="border-t border-rule/70 bg-paper px-3 sm:px-5 py-3 shrink-0">
+          <div className="border-t border-[#0F1419]/[0.08] bg-paper px-3 sm:px-5 py-3 shrink-0">
             {/* MISSION-E niveau 4 (local) : banner cross-check metier */}
             {pendingCoherenceIssues.length > 0 ? (
               <div className="mx-auto max-w-3xl mb-2">
@@ -1963,19 +1963,19 @@ export function MissionTchatInterface({
                     isStreaming
                       ? "L'assistant rédige sa réponse…"
                       : captureMode === 'capture'
-                        ? 'Dictez ou écrivez votre observation…'
-                        : 'Tapez votre message — ou utilisez le micro'
+                        ? 'Dicte ou écris ton observation…'
+                        : 'Tape ton message — ou utilise le micro'
                   }
                   disabled={isStreaming || isPaused}
                   rows={1}
                   className={cn(
-                    'flex-1 resize-none rounded-2xl border border-rule bg-sage-alt/40 px-4 py-2.5',
-                    'text-[14px] text-ink placeholder:text-ink-mute',
+                    'flex-1 resize-none rounded-2xl border border-[#0F1419]/[0.08] bg-sage-alt/40 px-4 py-2.5',
+                    'text-[14px] text-[#0F1419] placeholder:text-[#0F1419]/72',
                     'focus:outline-none focus:ring-2 focus:ring-chartreuse/40 focus:border-chartreuse/50',
                     'disabled:opacity-50 transition-colors',
                     'min-h-[40px] max-h-[180px]',
                   )}
-                  aria-label="Votre message"
+                  aria-label="Ton message"
                 />
               )}
 
@@ -1994,14 +1994,14 @@ export function MissionTchatInterface({
                 onRecordCancel={cancelVoiceMessage}
               />
             </div>
-            <div className="mx-auto max-w-3xl mt-1.5 flex items-center justify-between text-[10px] font-mono text-ink-mute">
+            <div className="mx-auto max-w-3xl mt-1.5 flex items-center justify-between text-[10px] font-mono text-[#0F1419]/72">
               <span>Entrée pour envoyer · Maj+Entrée pour saut de ligne</span>
               <Button
                 type="button"
                 variant="link"
                 size="sm"
                 onClick={() => router.push(`/dashboard/dossiers/${dossierId}`)}
-                className="text-[10px] font-mono text-ink-mute hover:text-ink h-auto p-0"
+                className="text-[10px] font-mono text-[#0F1419]/72 hover:text-[#0F1419] h-auto p-0"
               >
                 Quitter la mission
               </Button>
@@ -2220,7 +2220,7 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
     return (
       <div className="my-2 flex items-center justify-center gap-1.5">
         <CheckCircle2 className="size-3 text-chartreuse-deep" />
-        <span className="text-[11px] font-mono text-ink-faint">{message.content}</span>
+        <span className="text-[11px] font-mono text-[#0F1419]/55">{message.content}</span>
       </div>
     )
   }
@@ -2236,7 +2236,7 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
       {/* Avatar IA (gauche) */}
       {isAssistant ? (
         <div
-          className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-ink shadow-glass-sm"
+          className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#0F1419]"
           aria-hidden
         >
           <Sparkles className="size-4 text-chartreuse" />
@@ -2248,8 +2248,8 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
         className={cn(
           'max-w-[78%] sm:max-w-[72%] px-4 py-2.5',
           isAssistant &&
-            'bg-paper border border-rule/60 text-ink rounded-2xl rounded-bl-md shadow-glass-sm',
-          isUser && 'bg-chartreuse text-ink rounded-2xl rounded-br-md',
+            'bg-paper border border-[#0F1419]/[0.08] text-[#0F1419] rounded-2xl rounded-bl-md',
+          isUser && 'bg-chartreuse text-[#0F1419] rounded-2xl rounded-br-md',
         )}
       >
         {message.photoUrl ? (
@@ -2296,7 +2296,7 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
               ) : null}
             </>
           ) : message.isTranscribing ? (
-            <span className="italic text-ink/70">{message.content}</span>
+            <span className="italic text-[#0F1419]/70">{message.content}</span>
           ) : message.audioSegments && message.audioSegments.length > 0 ? (
             // Rendu segments annotés Whisper : inaudible/douteux/fiable (MISSION-E)
             <TranscriptSegments
@@ -2311,7 +2311,7 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
         <div
           className={cn(
             'mt-1 flex items-center gap-1.5 text-[10px] font-mono',
-            isAssistant ? 'text-ink-mute' : 'text-ink/60',
+            isAssistant ? 'text-[#0F1419]/72' : 'text-[#0F1419]/60',
             isUser && 'justify-end',
           )}
         >
@@ -2367,7 +2367,7 @@ function PhotoSyncStatusBadge({ localId }: { localId: string }): React.ReactElem
     pending: {
       icon: <Hourglass className="size-3" />,
       label: 'En attente de sync',
-      className: 'bg-ink/80 text-paper',
+      className: 'bg-[#0F1419]/80 text-paper',
     },
     uploading: {
       icon: <CloudUpload className="size-3 animate-pulse" />,
@@ -2390,7 +2390,7 @@ function PhotoSyncStatusBadge({ localId }: { localId: string }): React.ReactElem
     <span
       className={cn(
         'absolute bottom-1.5 right-1.5 inline-flex items-center gap-1 px-1.5 py-0.5',
-        'rounded-full text-[10px] font-mono shadow-glass-sm backdrop-blur',
+        'rounded-full text-[10px] font-mono',
         conf.className,
       )}
       title={conf.label}

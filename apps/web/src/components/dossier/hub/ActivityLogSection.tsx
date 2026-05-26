@@ -2,13 +2,13 @@ import { Card } from '@/components/ui/card'
 import {
   Activity,
   Camera,
-  FileText,
   FilePlus,
+  FileText,
   Mic,
   Receipt,
   Send,
-  UserCog,
   Upload,
+  UserCog,
   Workflow,
 } from 'lucide-react'
 
@@ -117,16 +117,18 @@ export function ActivityLogSection({ events }: ActivityLogSectionProps) {
   return (
     <Card variant="flat" padding="default" id="activity-log" className="space-y-4">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[15px] font-semibold text-ink">Historique d'activité</h2>
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-faint">Section 09</p>
+        <h2 className="text-[15px] font-semibold text-[#0F1419]">Historique d'activité</h2>
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/55">
+          Section 09
+        </p>
       </div>
 
       {sorted.length === 0 ? (
-        <p className="rounded-md border border-dashed border-rule/60 bg-cream-deep/30 px-3 py-3 text-[13px] text-ink-mute">
+        <p className="rounded-md border border-dashed border-[#0F1419]/[0.08] bg-cream-deep/30 px-3 py-3 text-[13px] text-[#0F1419]/72">
           Aucun événement enregistré pour ce dossier.
         </p>
       ) : (
-        <ol className="relative space-y-3 border-l border-rule/60 pl-5">
+        <ol className="relative space-y-3 border-l border-[#0F1419]/[0.08] pl-5">
           {sorted.map((ev) => {
             const style = EVENT_STYLES[ev.event_type] ?? {
               icon: Activity,
@@ -136,13 +138,13 @@ export function ActivityLogSection({ events }: ActivityLogSectionProps) {
             const label = style.label(ev.event_data)
             return (
               <li key={ev.id} className="relative">
-                <span className="absolute -left-[26px] flex size-5 items-center justify-center rounded-full border border-rule/60 bg-paper">
-                  <Icon className="size-2.5 text-ink-mute" />
+                <span className="absolute -left-[26px] flex size-5 items-center justify-center rounded-full border border-[#0F1419]/[0.08] bg-paper">
+                  <Icon className="size-2.5 text-[#0F1419]/72" />
                 </span>
-                <div className="rounded-md border border-rule/50 bg-paper px-3 py-2">
+                <div className="rounded-md border border-[#0F1419]/[0.08] bg-paper px-3 py-2">
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="text-[12px] font-medium text-ink">{label}</p>
-                    <p className="font-mono text-[10px] text-ink-faint">
+                    <p className="text-[12px] font-medium text-[#0F1419]">{label}</p>
+                    <p className="font-mono text-[10px] text-[#0F1419]/55">
                       {formatRelative(ev.occurred_at)}
                     </p>
                   </div>

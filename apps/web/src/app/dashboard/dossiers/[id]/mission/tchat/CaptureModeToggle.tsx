@@ -32,8 +32,8 @@ export function CaptureModeToggle({
     <fieldset
       aria-label="Mode de tchat mission"
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-pill border border-rule/60 bg-paper p-0.5',
-        'shadow-glass-sm m-0',
+        'inline-flex items-center gap-0.5 rounded-pill border border-[#0F1419]/[0.08] bg-paper p-0.5',
+        'm-0',
       )}
     >
       <ToggleButton
@@ -83,7 +83,9 @@ function ToggleButton({
       className={cn(
         'inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1',
         'font-mono text-[10px] uppercase tracking-[0.1em] transition-colors',
-        active ? 'bg-ink text-paper' : 'text-ink-mute hover:text-ink hover:bg-sage-alt',
+        active
+          ? 'bg-[#0F1419] text-paper'
+          : 'text-[#0F1419]/72 hover:text-[#0F1419] hover:bg-sage-alt',
         'disabled:opacity-40 disabled:cursor-not-allowed',
       )}
     >

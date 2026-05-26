@@ -100,8 +100,8 @@ export function PostPhotoActionBar({
       <div
         className={cn(
           'mx-auto flex max-w-md items-center gap-3 overflow-hidden',
-          'rounded-2xl border border-rule/80 bg-paper/95 px-3 py-2.5',
-          'shadow-lg backdrop-blur',
+          'rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-3 py-2.5',
+          'shadow-lg',
           'relative',
         )}
       >
@@ -111,10 +111,10 @@ export function PostPhotoActionBar({
           <img
             src={thumbnailUrl}
             alt="Capture terrain"
-            className="size-10 shrink-0 rounded-lg border border-rule object-cover"
+            className="size-10 shrink-0 rounded-lg border border-[#0F1419]/[0.08] object-cover"
           />
         ) : (
-          <div className="size-10 shrink-0 rounded-lg border border-rule bg-sage-alt/40" />
+          <div className="size-10 shrink-0 rounded-lg border border-[#0F1419]/[0.08] bg-sage-alt/40" />
         )}
 
         {/* Boutons */}

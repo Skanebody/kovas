@@ -3,10 +3,10 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 import { trackCtaClicked } from '@/lib/decouvrir/analytics'
 import { useIntentTracker } from '@/lib/decouvrir/intent-tracker'
 import type { OfferDescriptor } from '@/lib/decouvrir/recommendations'
+import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
@@ -72,7 +72,7 @@ export function OfferCard({
       className={cn(
         'relative flex flex-col gap-4 transition-all duration-base ease-spring',
         recommended && 'ring-2 ring-chartreuse/70 shadow-md -translate-y-0.5',
-        current && 'border-rule/40 opacity-90',
+        current && 'border-[#0F1419]/[0.06] opacity-90',
         className,
       )}
       onMouseEnter={onMouseEnter}
@@ -84,7 +84,7 @@ export function OfferCard({
       {recommended && (
         <Badge
           variant="default"
-          className="absolute -top-3 left-4 bg-chartreuse text-ink shadow-sm"
+          className="absolute -top-3 left-4 bg-chartreuse text-[#0F1419] shadow-sm"
         >
           Recommandé pour vous
         </Badge>
@@ -97,7 +97,7 @@ export function OfferCard({
 
       <div className="space-y-1.5">
         <div className="flex items-baseline justify-between gap-3 flex-wrap">
-          <h3 className="font-display font-semibold text-[17px] leading-tight tracking-tight text-ink">
+          <h3 className="font-sans font-semibold tracking-tight text-[17px] leading-tight tracking-tight text-[#0F1419]">
             {offer.label}
           </h3>
           {offer.bundleSavingLabel && (
@@ -106,10 +106,10 @@ export function OfferCard({
             </span>
           )}
         </div>
-        <p className="text-xs text-ink-mute">{offer.tagline}</p>
+        <p className="text-xs text-[#0F1419]/72">{offer.tagline}</p>
       </div>
 
-      <div className="text-2xl font-extrabold tracking-tight text-ink">
+      <div className="text-2xl font-extrabold tracking-tight text-[#0F1419]">
         {offer.priceLabel}
       </div>
 
@@ -117,29 +117,18 @@ export function OfferCard({
         {offer.features.map((feature) => (
           <li key={feature} className="flex items-start gap-2">
             <Check className="size-3.5 mt-0.5 shrink-0 text-accent-green" />
-            <span className="text-ink-soft">{feature}</span>
+            <span className="text-[#0F1419]/82">{feature}</span>
           </li>
         ))}
       </ul>
 
       <div className="flex flex-col gap-2 pt-2">
         {current ? (
-          <Button
-            variant="outline"
-            size="sm"
-            disabled
-            className="w-full"
-            aria-disabled="true"
-          >
+          <Button variant="outline" size="sm" disabled className="w-full" aria-disabled="true">
             Plan actuel
           </Button>
         ) : ctaHref ? (
-          <Button
-            asChild
-            variant={recommended ? 'accent' : 'default'}
-            size="sm"
-            className="w-full"
-          >
+          <Button asChild variant={recommended ? 'accent' : 'default'} size="sm" className="w-full">
             <Link href={ctaHref} onClick={onPrimaryCtaClick}>
               {offer.priceMonthlyCents === 0 ? 'Activer gratuitement' : 'Choisir cette offre'}
             </Link>
@@ -157,7 +146,7 @@ export function OfferCard({
         <button
           type="button"
           onClick={onSecondaryCtaClick}
-          className="text-[11px] text-ink-mute hover:text-ink underline-offset-2 hover:underline transition-colors"
+          className="text-[11px] text-[#0F1419]/72 hover:text-[#0F1419] underline-offset-2 hover:underline transition-colors"
         >
           {secondaryCtaLabel}
         </button>

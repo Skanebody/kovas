@@ -1,6 +1,6 @@
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Download, FileArchive, FileText, FileSpreadsheet, FileJson } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Download, FileArchive, FileJson, FileSpreadsheet, FileText } from 'lucide-react'
 
 interface ExportItem {
   id: string
@@ -33,23 +33,27 @@ export function ExportsSection({ dossierId, exports }: ExportsSectionProps) {
   return (
     <Card variant="flat" padding="default" id="exports" className="space-y-4">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[15px] font-semibold text-ink">Exports & fichiers</h2>
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-faint">Section 05</p>
+        <h2 className="text-[15px] font-semibold text-[#0F1419]">Exports & fichiers</h2>
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/55">
+          Section 05
+        </p>
       </div>
 
       {exports.length > 0 ? (
-        <ul className="divide-y divide-rule/60 rounded-md border border-rule/60">
+        <ul className="divide-y divide-[#0F1419]/[0.08] rounded-md border border-[#0F1419]/[0.08]">
           {exports.map((ex) => {
             const Icon = KIND_ICON[ex.kind]
             return (
               <li key={ex.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
                 <div className="flex items-center gap-3 min-w-0">
-                  <Icon className="size-4 text-ink-mute shrink-0" />
+                  <Icon className="size-4 text-[#0F1419]/72 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[13px] font-medium text-ink truncate">{ex.label}</p>
-                    <p className="text-[11px] text-ink-faint">
+                    <p className="text-[13px] font-medium text-[#0F1419] truncate">{ex.label}</p>
+                    <p className="text-[11px] text-[#0F1419]/55">
                       {ex.generatedAt
-                        ? new Date(ex.generatedAt).toLocaleDateString('fr-FR', { dateStyle: 'short' })
+                        ? new Date(ex.generatedAt).toLocaleDateString('fr-FR', {
+                            dateStyle: 'short',
+                          })
                         : 'Non généré'}
                       {ex.size ? ` · ${ex.size}` : ''}
                     </p>
@@ -72,7 +76,7 @@ export function ExportsSection({ dossierId, exports }: ExportsSectionProps) {
           })}
         </ul>
       ) : (
-        <div className="rounded-md border border-dashed border-rule/60 bg-cream-deep/30 p-4 text-center text-[13px] text-ink-mute">
+        <div className="rounded-md border border-dashed border-[#0F1419]/[0.08] bg-cream-deep/30 p-4 text-center text-[13px] text-[#0F1419]/72">
           Aucun export généré. Les exports seront disponibles après validation du dossier.
         </div>
       )}

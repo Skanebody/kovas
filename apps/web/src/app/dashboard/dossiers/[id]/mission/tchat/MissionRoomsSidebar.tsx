@@ -102,17 +102,17 @@ export function MissionRoomsSidebar({
     variant === 'desktop'
       ? cn(
           'hidden lg:flex flex-col shrink-0',
-          'w-[280px] border-l border-rule/40 bg-paper/70 backdrop-blur-sm',
+          'w-[280px] border-l border-[#0F1419]/[0.06] bg-paper',
         )
       : 'flex flex-col w-full bg-paper'
 
   return (
     <aside aria-label="Liste des pièces du bien" className={containerClass}>
       {/* Header */}
-      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-rule/40 shrink-0">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-[#0F1419]/[0.06] shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <Home className="size-4 text-ink-mute shrink-0" aria-hidden />
-          <h2 className="text-[13px] font-semibold text-ink truncate">Pièces du bien</h2>
+          <Home className="size-4 text-[#0F1419]/72 shrink-0" aria-hidden />
+          <h2 className="text-[13px] font-semibold text-[#0F1419] truncate">Pièces du bien</h2>
         </div>
         <button
           type="button"
@@ -120,9 +120,9 @@ export function MissionRoomsSidebar({
           aria-label="Ajouter une pièce"
           className={cn(
             'inline-flex items-center gap-1 rounded-pill',
-            'border border-rule/60 bg-paper px-2 py-1',
-            'text-[11px] font-medium text-ink-soft',
-            'hover:bg-sage-alt hover:border-ink/30 hover:text-ink',
+            'border border-[#0F1419]/[0.08] bg-paper px-2 py-1',
+            'text-[11px] font-medium text-[#0F1419]/82',
+            'hover:bg-sage-alt hover:border-[#0F1419]/30 hover:text-[#0F1419]',
             'transition-colors',
           )}
         >
@@ -134,7 +134,7 @@ export function MissionRoomsSidebar({
       {/* Liste pièces — scrollable */}
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {rooms.length === 0 ? (
-          <p className="px-3 py-6 text-center text-[12px] text-ink-mute">
+          <p className="px-3 py-6 text-center text-[12px] text-[#0F1419]/72">
             Aucune pièce — démarrez en dictant la première au tchat.
           </p>
         ) : (
@@ -152,13 +152,13 @@ export function MissionRoomsSidebar({
       </div>
 
       {/* Footer — progression globale */}
-      <div className="border-t border-rule/40 px-4 py-3 shrink-0 space-y-1.5">
-        <div className="flex items-center justify-between text-[11px] font-mono text-ink-mute">
+      <div className="border-t border-[#0F1419]/[0.06] px-4 py-3 shrink-0 space-y-1.5">
+        <div className="flex items-center justify-between text-[11px] font-mono text-[#0F1419]/72">
           <span aria-live="polite">
             {completedCount}/{totalCount} pièce{totalCount > 1 ? 's' : ''} complétée
             {completedCount > 1 ? 's' : ''}
           </span>
-          <span className="text-ink-soft tabular-nums">{ratio}%</span>
+          <span className="text-[#0F1419]/82 tabular-nums">{ratio}%</span>
         </div>
         {/* Barre de progression purement visuelle — l'info textuelle au-dessus
             (aria-live="polite") est lue par les screen readers. */}
@@ -193,7 +193,7 @@ function RoomListItem({ room, isActive, onSelect }: RoomListItemProps): React.Re
       ? 'ring-2 ring-chartreuse-deep ring-offset-2 ring-offset-paper'
       : room.completionStatus === 'partial'
         ? 'ring-2 ring-status-amber ring-offset-2 ring-offset-paper'
-        : 'ring-1 ring-rule/40'
+        : 'ring-1 ring-[#0F1419]/[0.08]'
 
   const statusIcon =
     room.completionStatus === 'complete' ? (
@@ -201,7 +201,7 @@ function RoomListItem({ room, isActive, onSelect }: RoomListItemProps): React.Re
     ) : room.completionStatus === 'partial' ? (
       <CircleDot className="size-3 text-status-amber" aria-hidden />
     ) : (
-      <Circle className="size-3 text-ink-ghost" aria-hidden />
+      <Circle className="size-3 text-[#0F1419]/40" aria-hidden />
     )
 
   const statusLabel =
@@ -222,7 +222,7 @@ function RoomListItem({ room, isActive, onSelect }: RoomListItemProps): React.Re
           'w-full flex items-center gap-3 rounded-md px-2 py-2',
           'text-left transition-all duration-200',
           isActive
-            ? 'bg-sage-alt border border-ink/20'
+            ? 'bg-sage-alt border border-[#0F1419]/20'
             : 'border border-transparent hover:bg-sage-alt/60',
         )}
       >
@@ -235,22 +235,22 @@ function RoomListItem({ room, isActive, onSelect }: RoomListItemProps): React.Re
           )}
           aria-hidden
         >
-          <Icon className="size-4 text-ink-soft" />
+          <Icon className="size-4 text-[#0F1419]/82" />
         </div>
 
         {/* Info pièce */}
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-[13px] font-medium text-ink truncate">{room.name}</span>
+            <span className="text-[13px] font-medium text-[#0F1419] truncate">{room.name}</span>
             {room.surfaceSqm != null ? (
-              <span className="text-[11px] font-mono text-ink-mute shrink-0">
+              <span className="text-[11px] font-mono text-[#0F1419]/72 shrink-0">
                 · {room.surfaceSqm}m²
               </span>
             ) : null}
           </div>
           <div className="flex items-center gap-1 mt-0.5">
             {statusIcon}
-            <span className="text-[11px] font-mono text-ink-mute tabular-nums">
+            <span className="text-[11px] font-mono text-[#0F1419]/72 tabular-nums">
               {room.filledFields}/{room.requiredFields}
             </span>
           </div>

@@ -328,7 +328,7 @@ export function ValidationClient({
             <div className="flex items-start gap-2 text-red-700">
               <AlertTriangle className="size-4 mt-0.5" />
               <div>
-                Échec de synchronisation. Vous pouvez relancer le pipeline.
+                Échec de synchronisation. Tu peux relancer le pipeline.
                 {session.sync_error && (
                   <div className="mt-1 text-xs text-muted-foreground">
                     {session.sync_error.slice(0, 200)}

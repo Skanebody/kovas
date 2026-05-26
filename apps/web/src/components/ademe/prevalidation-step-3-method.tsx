@@ -8,8 +8,8 @@ import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
-import type { Etiquette } from './prevalidation-step-2-results'
 import { FieldHint } from './field-hint'
+import type { Etiquette } from './prevalidation-step-2-results'
 
 export type DpeMethod = '3CL-2021' | 'factures'
 
@@ -75,8 +75,8 @@ export function PrevalidationStep3Method({
     <div className="space-y-5">
       <Card variant="opaque" padding="default" className="space-y-6">
         <div className="space-y-1">
-          <h3 className="text-[15px] font-semibold text-ink">Cohérence terrain & méthode</h3>
-          <p className="text-[11px] text-ink-mute">
+          <h3 className="text-[15px] font-semibold text-[#0F1419]">Cohérence terrain & méthode</h3>
+          <p className="text-[11px] text-[#0F1419]/72">
             Dernières données nécessaires au scoring de risque ADEME.
           </p>
         </div>
@@ -97,8 +97,8 @@ export function PrevalidationStep3Method({
             }
             placeholder="250"
           />
-          <FieldHint tooltip="Cep (consommation d'énergie primaire 5 usages) : chauffage + ECS + refroidissement + auxiliaires + éclairage. Valeur affichée par votre logiciel de calcul.">
-            Énergie primaire — visible sur votre logiciel de calcul.
+          <FieldHint tooltip="Cep (consommation d'énergie primaire 5 usages) : chauffage + ECS + refroidissement + auxiliaires + éclairage. Valeur affichée par ton logiciel de calcul.">
+            Énergie primaire — visible sur ton logiciel de calcul.
           </FieldHint>
         </FormField>
 
@@ -128,36 +128,36 @@ export function PrevalidationStep3Method({
       {/* Récap visuel des étapes 1 + 2 */}
       <Card variant="opaque" padding="default" className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-[13px] font-semibold text-ink">Récapitulatif</h3>
+          <h3 className="text-[13px] font-semibold text-[#0F1419]">Récapitulatif</h3>
           <button
             type="button"
             onClick={onEditStep2}
-            className="text-[11px] font-medium text-ink-mute hover:text-ink underline-offset-2 hover:underline"
+            className="text-[11px] font-medium text-[#0F1419]/72 hover:text-[#0F1419] underline-offset-2 hover:underline"
           >
             ← Modifier
           </button>
         </div>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-[12px]">
           <div>
-            <dt className="font-mono uppercase tracking-[0.08em] text-[10px] text-ink-faint">
+            <dt className="font-mono uppercase tracking-[0.08em] text-[10px] text-[#0F1419]/55">
               Adresse
             </dt>
-            <dd className="mt-0.5 text-ink leading-snug">
-              {recap.addressLabel || <span className="italic text-ink-faint">non saisie</span>}
+            <dd className="mt-0.5 text-[#0F1419] leading-snug">
+              {recap.addressLabel || <span className="italic text-[#0F1419]/55">non saisie</span>}
             </dd>
           </div>
           <div>
-            <dt className="font-mono uppercase tracking-[0.08em] text-[10px] text-ink-faint">
+            <dt className="font-mono uppercase tracking-[0.08em] text-[10px] text-[#0F1419]/55">
               Type
             </dt>
-            <dd className="mt-0.5 text-ink">
+            <dd className="mt-0.5 text-[#0F1419]">
               {BATIMENT_LABELS[recap.typeBatiment] ?? recap.typeBatiment} ·{' '}
               {recap.surface !== null ? `${recap.surface} m²` : '—'} ·{' '}
               {recap.annee !== null ? recap.annee : '—'}
             </dd>
           </div>
           <div>
-            <dt className="font-mono uppercase tracking-[0.08em] text-[10px] text-ink-faint">
+            <dt className="font-mono uppercase tracking-[0.08em] text-[10px] text-[#0F1419]/55">
               Étiquette DPE
             </dt>
             <dd className="mt-0.5">
@@ -173,7 +173,7 @@ export function PrevalidationStep3Method({
             </dd>
           </div>
           <div>
-            <dt className="font-mono uppercase tracking-[0.08em] text-[10px] text-ink-faint">
+            <dt className="font-mono uppercase tracking-[0.08em] text-[10px] text-[#0F1419]/55">
               Étiquette GES
             </dt>
             <dd className="mt-0.5">
@@ -192,13 +192,7 @@ export function PrevalidationStep3Method({
       </Card>
 
       <div className="flex items-center justify-between">
-        <Button
-          type="button"
-          variant="ghost"
-          size="lg"
-          onClick={onBack}
-          disabled={submitting}
-        >
+        <Button type="button" variant="ghost" size="lg" onClick={onBack} disabled={submitting}>
           <ArrowLeft className="size-4" />
           Retour
         </Button>
@@ -241,8 +235,8 @@ function MethodRadio({
       className={cn(
         'cursor-pointer rounded-md border-2 px-3.5 py-3 transition-colors duration-200',
         checked
-          ? 'border-navy bg-navy/5 shadow-glass-sm'
-          : 'border-rule bg-paper hover:border-ink/30',
+          ? 'border-navy bg-navy/5 '
+          : 'border-[#0F1419]/[0.08] bg-paper hover:border-[#0F1419]/30',
       )}
     >
       <input
@@ -258,12 +252,12 @@ function MethodRadio({
           aria-hidden
           className={cn(
             'mt-0.5 size-3.5 shrink-0 rounded-full border-2 transition-colors duration-200',
-            checked ? 'border-navy bg-navy' : 'border-ink-mute bg-transparent',
+            checked ? 'border-navy bg-navy' : 'border-[#0F1419]/72 bg-transparent',
           )}
         />
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-semibold text-ink leading-tight">{label}</div>
-          <div className="text-[11px] text-ink-mute mt-0.5 leading-snug">{caption}</div>
+          <div className="text-[13px] font-semibold text-[#0F1419] leading-tight">{label}</div>
+          <div className="text-[11px] text-[#0F1419]/72 mt-0.5 leading-snug">{caption}</div>
         </div>
       </div>
     </label>

@@ -76,7 +76,7 @@ export function HistoricalDocumentsUploader({ dossierId }: HistoricalDocumentsUp
       <div className="flex flex-wrap items-center gap-3">
         <label
           htmlFor="historical-doc-category"
-          className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute"
+          className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72"
         >
           Catégorie
         </label>
@@ -102,11 +102,11 @@ export function HistoricalDocumentsUploader({ dossierId }: HistoricalDocumentsUp
         className={`flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-6 transition-colors ${
           isDragging
             ? 'border-foreground/40 bg-foreground/[0.04]'
-            : 'border-rule/60 bg-cream-deep/30'
+            : 'border-[#0F1419]/[0.08] bg-cream-deep/30'
         }`}
       >
-        <UploadCloud className="size-6 text-ink-mute" />
-        <p className="text-center text-[13px] text-ink">
+        <UploadCloud className="size-6 text-[#0F1419]/72" />
+        <p className="text-center text-[13px] text-[#0F1419]">
           Glissez un fichier ici ou
           <button
             type="button"
@@ -117,7 +117,7 @@ export function HistoricalDocumentsUploader({ dossierId }: HistoricalDocumentsUp
             parcourir
           </button>
         </p>
-        <p className="font-mono text-[10px] text-ink-faint">
+        <p className="font-mono text-[10px] text-[#0F1419]/55">
           PDF · JPG · PNG · WebP · HEIC (50 Mo max)
         </p>
         <input
@@ -129,7 +129,7 @@ export function HistoricalDocumentsUploader({ dossierId }: HistoricalDocumentsUp
           disabled={pending}
         />
         {pending ? (
-          <p className="mt-1 inline-flex items-center gap-1 text-[12px] text-ink-mute">
+          <p className="mt-1 inline-flex items-center gap-1 text-[12px] text-[#0F1419]/72">
             <Loader2 className="size-3 animate-spin" />
             Envoi en cours…
           </p>

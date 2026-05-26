@@ -86,13 +86,13 @@ export function HistoricalDocumentsSection({
   return (
     <Card variant="flat" padding="default" id="historical-documents" className="space-y-5">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[15px] font-semibold text-ink">Documents historiques du bien</h2>
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-faint">
+        <h2 className="text-[15px] font-semibold text-[#0F1419]">Documents historiques du bien</h2>
+        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/55">
           Section 04 bis
         </p>
       </div>
 
-      <p className="text-[12px] text-ink-mute">
+      <p className="text-[12px] text-[#0F1419]/72">
         Scans des anciens diagnostics, plans, factures d'énergie, actes notariés. Pour les anciens
         DPE et amiante, l'extraction automatique peut pré-remplir le nouveau dossier.
       </p>
@@ -100,7 +100,7 @@ export function HistoricalDocumentsSection({
       <HistoricalDocumentsUploader dossierId={dossierId} />
 
       {documents.length === 0 ? (
-        <div className="rounded-md border border-dashed border-rule/60 bg-cream-deep/30 p-6 text-center text-[13px] text-ink-mute">
+        <div className="rounded-md border border-dashed border-[#0F1419]/[0.08] bg-cream-deep/30 p-6 text-center text-[13px] text-[#0F1419]/72">
           Aucun document historique pour le moment.
         </div>
       ) : (
@@ -110,19 +110,19 @@ export function HistoricalDocumentsSection({
             if (items.length === 0) return null
             return (
               <div key={cat.value}>
-                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.06em] text-[#0F1419]/72">
                   {CATEGORY_LABEL[cat.value]} · {items.length}
                 </p>
-                <ul className="divide-y divide-rule/60 rounded-md border border-rule/60">
+                <ul className="divide-y divide-[#0F1419]/[0.08] rounded-md border border-[#0F1419]/[0.08]">
                   {items.map((d) => (
                     <li key={d.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
                       <div className="flex items-center gap-3 min-w-0">
-                        <FileText className="size-4 text-ink-mute shrink-0" />
+                        <FileText className="size-4 text-[#0F1419]/72 shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-[13px] font-medium text-ink truncate">
+                          <p className="text-[13px] font-medium text-[#0F1419] truncate">
                             {d.original_filename ?? 'Document'}
                           </p>
-                          <p className="font-mono text-[10px] text-ink-faint">
+                          <p className="font-mono text-[10px] text-[#0F1419]/55">
                             {new Date(d.uploaded_at).toLocaleDateString('fr-FR', {
                               dateStyle: 'short',
                             })}
@@ -131,7 +131,7 @@ export function HistoricalDocumentsSection({
                             {d.ai_extraction_status === 'done' && d.ai_extracted_data ? (
                               <span className="ml-2 text-accent-green">IA extraite</span>
                             ) : d.ai_extraction_status === 'running' ? (
-                              <span className="ml-2 text-ink-mute">IA en cours…</span>
+                              <span className="ml-2 text-[#0F1419]/72">IA en cours…</span>
                             ) : null}
                           </p>
                         </div>
@@ -142,7 +142,7 @@ export function HistoricalDocumentsSection({
                             href={d.signed_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[12px] text-ink hover:underline"
+                            className="text-[12px] text-[#0F1419] hover:underline"
                           >
                             Ouvrir
                           </a>

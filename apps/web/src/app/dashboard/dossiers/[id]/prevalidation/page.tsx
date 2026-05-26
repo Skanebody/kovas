@@ -1,6 +1,6 @@
-import { AppPageHeader } from '@/components/app-page-header'
 import { PrevalidationForm } from '@/components/ademe/PrevalidationForm'
 import type { PrevalidationInitialValues } from '@/components/ademe/PrevalidationForm'
+import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowLeft, Radar } from 'lucide-react'
@@ -60,8 +60,7 @@ export default async function DossierPrevalidationPage({
     address: addressLabel ? { label: addressLabel } : undefined,
     type_batiment: buildingType,
     annee_construction: typeof prop?.year_built === 'number' ? prop.year_built : undefined,
-    surface_habitable_m2:
-      typeof prop?.surface_total === 'number' ? prop.surface_total : undefined,
+    surface_habitable_m2: typeof prop?.surface_total === 'number' ? prop.surface_total : undefined,
     source_dossier_id: dossier.id,
   }
 
@@ -82,13 +81,13 @@ export default async function DossierPrevalidationPage({
             ? `Évalue le risque ADEME avant publication du DPE pour ${addressLabel}.`
             : 'Évalue le risque ADEME avant publication du DPE.'
         }
-        action={<Radar className="size-5 text-ink-mute" aria-hidden />}
+        action={<Radar className="size-5 text-[#0F1419]/72" aria-hidden />}
       />
 
-      <p className="text-xs text-ink-mute leading-relaxed">
+      <p className="text-xs text-[#0F1419]/72 leading-relaxed">
         Les champs adresse, type bâtiment, année et surface sont pré-remplis depuis le dossier.
-        Complétez les champs DPE (étiquettes, conso, chauffage) avec les résultats issus de
-        votre logiciel de calcul (Liciel, AnalysImmo…) avant d'évaluer le risque.
+        Complétez les champs DPE (étiquettes, conso, chauffage) avec les résultats issus de ton
+        logiciel de calcul (Liciel, AnalysImmo…) avant d'évaluer le risque.
       </p>
 
       <PrevalidationForm initialValues={initialValues} />

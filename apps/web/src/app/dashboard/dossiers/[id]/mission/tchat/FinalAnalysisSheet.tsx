@@ -69,16 +69,16 @@ export function FinalAnalysisSheet({
 }: FinalAnalysisSheetProps): React.ReactElement {
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} maxHeight="92vh">
-      <BottomSheetTitle>Analyse de votre session</BottomSheetTitle>
+      <BottomSheetTitle>Analyse de ta session</BottomSheetTitle>
 
       <BottomSheetBody>
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <Loader2 className="size-6 animate-spin text-ink-mute" aria-hidden />
-            <p className="text-[13px] text-ink-soft text-center max-w-sm">
+            <Loader2 className="size-6 animate-spin text-[#0F1419]/72" aria-hidden />
+            <p className="text-[13px] text-[#0F1419]/82 text-center max-w-sm">
               L'assistant analyse vos captures…
               <br />
-              <span className="text-ink-mute text-[12px]">
+              <span className="text-[#0F1419]/72 text-[12px]">
                 Synthèse pièce par pièce + détection des champs manquants pour Liciel.
               </span>
             </p>
@@ -88,9 +88,9 @@ export function FinalAnalysisSheet({
             <div className="rounded-lg border border-accent-red/30 bg-accent-red/5 px-4 py-3">
               <div className="flex items-start gap-2">
                 <AlertCircle className="size-4 shrink-0 mt-0.5 text-accent-red" aria-hidden />
-                <div className="text-[13px] text-ink">
+                <div className="text-[13px] text-[#0F1419]">
                   <p className="font-medium mb-1">Analyse impossible</p>
-                  <p className="text-ink-soft">{error}</p>
+                  <p className="text-[#0F1419]/82">{error}</p>
                 </div>
               </div>
             </div>
@@ -102,13 +102,13 @@ export function FinalAnalysisSheet({
           <div className="space-y-6">
             {/* Synthèse globale */}
             <section>
-              <h3 className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute mb-2">
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#0F1419]/72 mb-2">
                 Synthèse
               </h3>
-              <p className="text-[14px] text-ink leading-relaxed whitespace-pre-wrap">
+              <p className="text-[14px] text-[#0F1419] leading-relaxed whitespace-pre-wrap">
                 {result.summary || '—'}
               </p>
-              <p className="mt-2 font-mono text-[11px] text-ink-mute">
+              <p className="mt-2 font-mono text-[11px] text-[#0F1419]/72">
                 {result.capturesCount} capture{result.capturesCount > 1 ? 's' : ''} analysée
                 {result.capturesCount > 1 ? 's' : ''}
               </p>
@@ -117,23 +117,23 @@ export function FinalAnalysisSheet({
             {/* Récap par pièce */}
             {result.rooms.length > 0 ? (
               <section>
-                <h3 className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute mb-2">
+                <h3 className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#0F1419]/72 mb-2">
                   Pièce par pièce
                 </h3>
                 <ul className="space-y-3">
                   {result.rooms.map((r) => (
                     <li
                       key={r.room}
-                      className="rounded-lg border border-rule/60 bg-paper px-3 py-2.5"
+                      className="rounded-lg border border-[#0F1419]/[0.08] bg-paper px-3 py-2.5"
                     >
-                      <p className="text-[13px] font-semibold text-ink mb-1">{r.room}</p>
+                      <p className="text-[13px] font-semibold text-[#0F1419] mb-1">{r.room}</p>
                       <ul className="space-y-1">
                         {r.observations.map((obs, idx) => (
                           <li
                             key={`${r.room}-${idx}`}
-                            className="text-[13px] text-ink-soft leading-relaxed flex gap-1.5"
+                            className="text-[13px] text-[#0F1419]/82 leading-relaxed flex gap-1.5"
                           >
-                            <span className="text-ink-mute shrink-0">·</span>
+                            <span className="text-[#0F1419]/72 shrink-0">·</span>
                             <span>{obs}</span>
                           </li>
                         ))}
@@ -146,7 +146,7 @@ export function FinalAnalysisSheet({
 
             {/* Gaps */}
             <section>
-              <h3 className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute mb-2 flex items-center gap-2">
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#0F1419]/72 mb-2 flex items-center gap-2">
                 À compléter pour finaliser
                 {result.gaps.length > 0 ? (
                   <span
@@ -163,8 +163,8 @@ export function FinalAnalysisSheet({
               {result.gaps.length === 0 ? (
                 <div className="rounded-lg border border-accent-green/30 bg-accent-green/5 px-3 py-2.5 flex items-start gap-2">
                   <CheckCircle2 className="size-4 shrink-0 mt-0.5 text-accent-green" aria-hidden />
-                  <p className="text-[13px] text-ink">
-                    Aucun champ manquant détecté. Votre session est prête pour l'export Liciel.
+                  <p className="text-[13px] text-[#0F1419]">
+                    Aucun champ manquant détecté. Ta session est prête pour l'export Liciel.
                   </p>
                 </div>
               ) : (
@@ -172,25 +172,25 @@ export function FinalAnalysisSheet({
                   {result.gaps.map((gap) => (
                     <li
                       key={gap.field}
-                      className="rounded-lg border border-rule/60 bg-paper px-3 py-2.5"
+                      className="rounded-lg border border-[#0F1419]/[0.08] bg-paper px-3 py-2.5"
                     >
                       <div className="flex items-start justify-between gap-3 mb-1">
                         <div className="min-w-0">
-                          <p className="text-[13px] font-semibold text-ink leading-tight">
+                          <p className="text-[13px] font-semibold text-[#0F1419] leading-tight">
                             {gap.label}
                           </p>
                           {gap.diagnostic ? (
-                            <p className="font-mono text-[10px] uppercase tracking-wide text-ink-mute mt-0.5">
+                            <p className="font-mono text-[10px] uppercase tracking-wide text-[#0F1419]/72 mt-0.5">
                               {gap.diagnostic} · {gap.field}
                             </p>
                           ) : (
-                            <p className="font-mono text-[10px] text-ink-mute mt-0.5">
+                            <p className="font-mono text-[10px] text-[#0F1419]/72 mt-0.5">
                               {gap.field}
                             </p>
                           )}
                         </div>
                       </div>
-                      <p className="text-[13px] text-ink-soft leading-relaxed mb-2">
+                      <p className="text-[13px] text-[#0F1419]/82 leading-relaxed mb-2">
                         {gap.suggestion}
                       </p>
                       <Button

@@ -205,7 +205,7 @@ export function DossierHubClient({
         {visibleSections.followup ? followup : null}
         {visibleSections.activityLog ? activityLog : null}
         {notes}
-        <div className="pt-4 border-t border-rule/60">{sidebar}</div>
+        <div className="pt-4 border-t border-[#0F1419]/[0.08]">{sidebar}</div>
       </div>
 
       {/* Mobile : tabs bottom */}
@@ -218,7 +218,7 @@ export function DossierHubClient({
 
       {/* Bottom nav mobile */}
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-rule/70 bg-paper/95 backdrop-blur-md"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-[#0F1419]/[0.08] bg-paper"
         role="tablist"
         aria-label="Navigation dossier"
       >
@@ -266,7 +266,7 @@ function MobileTabBtn({
       aria-selected={active}
       onClick={onClick}
       className={`rounded-none h-12 ${
-        active ? 'text-ink border-t-2 border-t-ink' : 'text-ink-mute'
+        active ? 'text-[#0F1419] border-t-2 border-t-[#0F1419]' : 'text-[#0F1419]/72'
       }`}
     >
       {label}
