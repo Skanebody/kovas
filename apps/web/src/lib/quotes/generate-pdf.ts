@@ -303,6 +303,20 @@ export function generateQuotePdf(input: QuotePdfInput): Buffer {
     `Devis valable jusqu'au ${formatDateLong(input.expiresAt)}. Signature pour acceptation par retour email ou courrier.`,
   )
   doc.text(footerLines, margin, footerY)
+
+  // Network effect viral (Doctolib §17 mécanique #2) : ligne discrète tout en
+  // bas mentionnant KOVAS + lien annuaire. Le particulier qui reçoit le devis
+  // peut découvrir l'annuaire et chercher d'autres diagnostiqueurs ailleurs en
+  // France. Ratio attendu : 1 diagnostiqueur = 80-150 devis/an = 80-150
+  // particuliers exposés à kovas.fr/trouver-un-diagnostiqueur.
+  doc.setFontSize(6)
+  doc.setTextColor(170, 170, 170)
+  doc.text(
+    'Devis généré avec KOVAS · Trouver un diagnostiqueur immobilier sur kovas.fr/trouver-un-diagnostiqueur',
+    pageWidth / 2,
+    pageHeight - 16,
+    { align: 'center' },
+  )
   doc.setTextColor(0, 0, 0)
 
   return Buffer.from(doc.output('arraybuffer'))

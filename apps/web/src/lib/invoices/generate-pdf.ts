@@ -428,12 +428,17 @@ export async function generateInvoicePdf(input: GenerateInvoicePdfInput): Promis
   }
 
   doc.setFontSize(6)
+  doc.setTextColor(170, 170, 170)
+  // Doctolib network effect §17 #2 : pointer vers l'annuaire dans le footer
+  // du document client. Chaque facture envoyée = une exposition de kovas.fr
+  // à un particulier qui pourra découvrir d'autres diagnostiqueurs.
   doc.text(
-    `Document généré par KOVAS · kovas.fr · ${formatDateFr(new Date().toISOString().slice(0, 10))}`,
+    `Document généré avec KOVAS · Trouver un diagnostiqueur sur kovas.fr/trouver-un-diagnostiqueur · ${formatDateFr(new Date().toISOString().slice(0, 10))}`,
     pageWidth / 2,
     pageHeight - 8,
     { align: 'center' },
   )
+  doc.setTextColor(0, 0, 0)
 
   // jsPDF retourne ArrayBuffer en 'arraybuffer'
   const ab = doc.output('arraybuffer') as ArrayBuffer
