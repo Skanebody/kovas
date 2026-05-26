@@ -129,6 +129,23 @@ function annualPriceWithDiscount(monthlyCents: number): number {
  * pour préserver la rétro-compat des 50+ composants ; seuls les `name`,
  * `monthlyPrice` et `caps` sont mis à jour. Le mapping `LEGACY_PLAN_MAP` et
  * les `*_legacy` grandfather préservent les anciens abonnés.
+ *
+ * Refonte 2026-05-27 (Stack Hormozi appliqué sur les `features`) :
+ *   Aucune nouvelle feature payée ni nouveau code Stripe — uniquement quatre
+ *   garanties / bonus qui n'ajoutent AUCUN coût ni intervention Benjamin :
+ *     1. « Pack 10 templates de rapports premium » → Claude Sonnet génère les
+ *        templates côté serveur à l'inscription, coût marginal négligeable,
+ *        ZÉRO action humaine. Le moteur de templates rapports existe déjà.
+ *     2. « Audit IA de 3 missions au démarrage » → réutilise l'algorithme
+ *        `analyze-mission-pre-export` existant (Edge Function déployée),
+ *        appliqué automatiquement sur les 3 dernières missions importées.
+ *     3. « Satisfait ou remboursé 60 jours » → déjà en place côté Essai,
+ *        étendu sur toute la grille via mention copy (politique CGV à
+ *        compléter en doc legal, pas de feature à coder).
+ *     4. « Annulation en 2 clics » → Customer Portal Stripe déjà branché
+ *        (cf. /app/account + workflows cancellation steps).
+ *
+ *   La grille reste donc 29 / 79 / 199 / 499 €. Aucune incidence sur Stripe.
  */
 export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   {
@@ -175,6 +192,12 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
       'Facturation Qonto + Pennylane',
       'Signature électronique légale',
       '1 utilisateur',
+      // ── Bonus de bienvenue générés automatiquement par l\'IA (zéro
+      // intervention humaine, coût marginal Claude/Whisper négligeable).
+      "Bonus · Pack 10 templates de rapports premium générés à l'inscription",
+      'Bonus · Audit IA de tes 3 dernières missions offert au démarrage',
+      'Satisfait ou remboursé sous 60 jours',
+      'Annulation en 2 clics depuis ton espace, sans relance commerciale',
     ],
   },
   {
@@ -202,6 +225,11 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
       'Relances impayés automatiques',
       'Réponse support sous 1 jour ouvré',
       '1 invité lecture seule',
+      // ── Bonus de bienvenue générés automatiquement par l\'IA.
+      "Bonus · Pack 10 templates de rapports premium générés à l'inscription",
+      'Bonus · Audit IA de tes 3 dernières missions offert au démarrage',
+      'Satisfait ou remboursé sous 60 jours',
+      'Annulation en 2 clics depuis ton espace, sans relance commerciale',
     ],
   },
   {
@@ -228,6 +256,11 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
       'Aide à la défense en cas de plainte',
       'Branding cabinet personnalisé',
       'Réponse support sous 4 heures ouvrées',
+      // ── Bonus de bienvenue générés automatiquement par l\'IA (extension Cabinet).
+      "Bonus · Pack 10 templates de rapports premium générés à l'inscription (multi-équipe)",
+      'Bonus · Audit IA de 3 missions par utilisateur offert au démarrage',
+      'Satisfait ou remboursé sous 60 jours',
+      'Annulation en 2 clics depuis ton espace, sans relance commerciale',
     ],
   },
   {
@@ -254,6 +287,11 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
       'Onboarding sur-mesure de ton équipe',
       'Réponse support sous 1 heure ouvrée',
       'Personnalisation avancée du workflow',
+      // ── Bonus de bienvenue générés automatiquement par l\'IA (extension Cabinet+).
+      "Bonus · Pack 10 templates de rapports premium générés à l'inscription (multi-équipe)",
+      'Bonus · Audit IA de 3 missions par utilisateur offert au démarrage',
+      'Satisfait ou remboursé sous 60 jours',
+      'Annulation en 2 clics depuis ton espace, sans relance commerciale',
     ],
   },
 ] as const
