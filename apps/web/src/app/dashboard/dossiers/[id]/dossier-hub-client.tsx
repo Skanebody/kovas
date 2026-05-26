@@ -24,6 +24,8 @@ interface DossierHubClientProps {
   historicalDocs: ReactNode | null
   /** Chantier E (FIX-KK §E) — timeline activité dossier. */
   activityLog: ReactNode | null
+  /** Lot Géorisques étendu — Radon / PPRI / Argiles / Cavités (peut être null). */
+  extendedRisks: ReactNode | null
   sidebar: ReactNode
 }
 
@@ -51,6 +53,7 @@ export function DossierHubClient({
   notes,
   historicalDocs,
   activityLog,
+  extendedRisks,
   sidebar,
 }: DossierHubClientProps) {
   const router = useRouter()
@@ -148,6 +151,7 @@ export function DossierHubClient({
       {visibleSections.capture ? capture : null}
       {visibleSections.dataQuality ? dataQuality : null}
       {visibleSections.preExport ? preExport : null}
+      {extendedRisks}
       {visibleSections.exports ? exports : null}
       {visibleSections.historicalDocs ? historicalDocs : null}
     </div>
@@ -181,6 +185,7 @@ export function DossierHubClient({
           {visibleSections.capture ? capture : null}
           {visibleSections.dataQuality ? dataQuality : null}
           {visibleSections.preExport ? preExport : null}
+          {extendedRisks}
           {visibleSections.exports ? exports : null}
           {visibleSections.historicalDocs ? historicalDocs : null}
           {visibleSections.communication ? communication : null}
@@ -198,6 +203,7 @@ export function DossierHubClient({
         {visibleSections.capture ? capture : null}
         {visibleSections.dataQuality ? dataQuality : null}
         {visibleSections.preExport ? preExport : null}
+        {extendedRisks}
         {visibleSections.exports ? exports : null}
         {visibleSections.historicalDocs ? historicalDocs : null}
         {visibleSections.communication ? communication : null}

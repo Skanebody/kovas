@@ -20,9 +20,12 @@ import type { Opportunity } from '@/components/dossier/hub/SidebarBlocks/Opportu
 import type { OtherDossier } from '@/components/dossier/hub/SidebarBlocks/OtherDossiersBlock'
 import type { PropertyHistoryItem } from '@/components/dossier/hub/SidebarBlocks/PropertyHistoryBlock'
 import type { VigilanceSignal } from '@/components/dossier/hub/SidebarBlocks/VigilanceBlock'
+import { ExtendedRisksSection } from '@/components/dossier/hub/ExtendedRisksSection'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { runCoherenceChecks } from '@/lib/coherence-validation'
 import { getVisibleSections, resolveDossierState } from '@/lib/dossier/states'
+import { buildExtendedRisksFindings } from '@/lib/opendata/extended-risks-findings'
+import { getExtendedRisks } from '@/lib/opendata/georisques-cache'
 import type { VoiceParsedData } from '@/lib/voice-parser'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -65,7 +68,7 @@ export default async function DossierDetailPage({
   const { data: dossier } = await supabase
     .from('dossiers')
     .select(
-      'id, reference, status, scheduled_at, started_at, completed_at, notes, metadata, client_upload_token, client_upload_expires_at, property_id, client_id, properties(id, address, postal_code, city, surface_total, year_built, property_type), clients(id, display_name, email, phone)',
+      'id, reference, status, scheduled_at, started_at, completed_at, notes, metadata, client_upload_token, client_upload_expires_at, property_id, client_id, properties(id, address, postal_code, city, insee_code, surface_total, year_built, property_type, location), clients(id, display_name, email, phone)',
     )
     .eq('id', id)
     .eq('organization_id', orgId)
@@ -397,6 +400,31 @@ export default async function DossierDetailPage({
   )
 
   // -------------------------------------------------------------
+  // 6quinquies. Géorisques étendu (Radon / PPRI / Argiles / Cavités)
+  // Lecture cache 30j avec fallback réseau gracieux. JAMAIS bloquant.
+  // -------------------------------------------------------------
+  const propRaw = prop as
+    | (typeof prop & {
+        insee_code?: string | null
+        location?: { coordinates?: [number, number] } | string | null
+      })
+    | null
+  let propLat: number | null = null
+  let propLng: number | null = null
+  if (propRaw?.location && typeof propRaw.location === 'object') {
+    const coords = (propRaw.location as { coordinates?: [number, number] }).coordinates
+    if (Array.isArray(coords) && coords.length === 2) {
+      propLng = coords[0] ?? null
+      propLat = coords[1] ?? null
+    }
+  }
+  const propInseeCode = propRaw?.insee_code ?? null
+  const extendedRisksBundle =
+    propInseeCode || (propLat !== null && propLng !== null)
+      ? await getExtendedRisks(propInseeCode, propLat, propLng).catch(() => null)
+      : null
+
+  // -------------------------------------------------------------
   // 7. Render — assemble sections et passe au Client orchestrateur
   // -------------------------------------------------------------
   const client = {
@@ -488,6 +516,8 @@ export default async function DossierDetailPage({
                       message: 'Surface totale manquante sur le bien.',
                     },
                   ]),
+              // Lot Géorisques étendu — vérifications IAL (Information Acquéreur/Locataire)
+              ...buildExtendedRisksFindings(extendedRisksBundle, meta),
             ]}
           />
         ) : null
@@ -514,6 +544,17 @@ export default async function DossierDetailPage({
       }
       activityLog={
         visibleSections.activityLog ? <ActivityLogSection events={activityEvents} /> : null
+      }
+      extendedRisks={
+        extendedRisksBundle ? (
+          <ExtendedRisksSection
+            radon={extendedRisksBundle.radon}
+            ppri={extendedRisksBundle.ppri}
+            argiles={extendedRisksBundle.argiles}
+            cavites={extendedRisksBundle.cavites}
+            dossierRisquesHref={`/dashboard/dossiers/${dossier.id}/risques`}
+          />
+        ) : null
       }
       notes={<NotesSection dossierId={dossier.id} initialNotes={dossier.notes} />}
       sidebar={
