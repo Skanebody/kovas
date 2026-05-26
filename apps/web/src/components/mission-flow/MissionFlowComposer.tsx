@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * KOVAS — GC2 Mission Flow Continu : composer racine (Lot B83 scaffold).
+ * KOVAS — GC2 Mission Flow Continu : composer racine.
  *
  * Assemble <MissionFlowTimeline> + <MissionFlowTransitionPicker> + header
  * d'état métier dans un layout 2 colonnes (sticky right sidebar sur lg,
@@ -10,8 +10,10 @@
  * Reçoit une server action pré-bindée pour déclencher les transitions via la
  * RPC `mission_flow_transition`.
  *
- * SCAFFOLD MINIMAL — pas d'animation des changements d'état, pas de
- * Realtime subscription. Le founder validera l'archi avant.
+ * Lot B89 (polish round 1) — branchement Supabase Realtime via
+ * `useMissionFlowRealtime` : INSERT mission_flow_events + UPDATE
+ * mission_flow_states, router.refresh() débouncé, indicateur connexion sobre,
+ * graceful degradation si env vars manquantes.
  *
  * Authority : CLAUDE.md Design System v5 + REFONTE-ACQUI-TARGET-V2 §6.2 (GC2).
  */
@@ -22,6 +24,7 @@ import {
   phaseLabel,
   progressPercent,
 } from '@/lib/mission-flow/state-machine'
+import { useMissionFlowRealtime } from '@/lib/mission-flow/use-realtime'
 import { cn } from '@/lib/utils'
 import { type MissionFlowEvent, MissionFlowTimeline } from './MissionFlowTimeline'
 import {
@@ -64,6 +67,11 @@ export function MissionFlowComposer({
   const availableTransitionsCodes = availableTransitions.map((t) => t.event)
   const progress = progressPercent(initialState)
 
+  // Realtime subscription — INSERT mission_flow_events + UPDATE mission_flow_states.
+  // Le router.refresh() débouncé est intégré au hook ; ici on récupère juste
+  // l'état de connexion pour afficher un indicateur sobre.
+  const { isConnected } = useMissionFlowRealtime(missionId)
+
   async function handleTransition(event: string) {
     // L'event est la phase cible (cf. mapping ci-dessus).
     return onTransition(missionId, event as MissionFlowPhase)
@@ -82,11 +90,40 @@ export function MissionFlowComposer({
               Phase : <span className="font-serif italic">{phaseLabel(initialState)}</span>
             </h2>
           </div>
-          <div className="shrink-0 text-right">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-              Progression
-            </p>
-            <p className="font-mono text-sm text-[#0F1419]">{progress}%</p>
+          <div className="flex shrink-0 items-end gap-4">
+            {/* Indicateur Realtime sobre — dot chartreuse si connecté, gris sinon */}
+            <div
+              className="flex items-center gap-1.5"
+              title={
+                isConnected
+                  ? 'Synchronisation temps réel active'
+                  : 'Synchronisation temps réel inactive'
+              }
+              aria-label={
+                isConnected
+                  ? 'Synchronisation temps réel active'
+                  : 'Synchronisation temps réel inactive'
+              }
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  'inline-block size-2 rounded-full transition-colors',
+                  isConnected
+                    ? 'bg-chartreuse-deep shadow-[0_0_0_3px_rgba(212,245,66,0.25)]'
+                    : 'bg-[#0F1419]/25',
+                )}
+              />
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+                {isConnected ? 'Synchro live' : 'Hors ligne'}
+              </span>
+            </div>
+            <div className="text-right">
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+                Progression
+              </p>
+              <p className="font-mono text-sm text-[#0F1419]">{progress}%</p>
+            </div>
           </div>
         </div>
         {/* Barre de progression sobre */}
