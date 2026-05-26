@@ -1,12 +1,13 @@
 /**
  * KOVAS — Page /a-propos
  *
- * Refonte FIX-Y (2026-05-23) : remplacement du discours générique "ex-cadre"
- * par le vrai parcours de Benjamin Bel, recoupé depuis :
- *   - LinkedIn public (titre : Directeur & Associé Maison Belvar)
+ * Refonte FIX-Y (2026-05-23) puis enrichie 2026-05-27 depuis le CV LinkedIn
+ * officiel fourni par Benjamin (12 pages), sources croisées :
+ *   - CV LinkedIn complet (formations KEDGE/AMOS/Coventry + Matmut + SG +
+ *     Citya + HostnClean + Maison Belvar bar à huîtres mars 2026 +
+ *     coordonnées WhatsApp pro)
  *   - societe.com manager (NEXUS 1993, BUBBLE ROUEN, Monsieur Benjamin Bel
  *     indépendant immobilier 2020-2025, SIREN 810268755, Ouville-la-Rivière 76)
- *   - benjamin-maisonbel.fr (offre de vente immobilière sans agence en Normandie)
  *   - CLAUDE.md (fondateur SASU Nexus 1993, basé à Dieppe Normandie)
  *
  * Ton SOBRE PROFESSIONNEL strict (avatar diagnostiqueur 43 ans) :
