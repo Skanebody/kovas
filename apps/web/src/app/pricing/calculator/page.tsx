@@ -64,7 +64,10 @@ export default function PricingCalculatorPage() {
           <p className="font-mono text-[13px] uppercase tracking-[0.18em] text-[#0F1419]/55 font-medium mb-6">
             Constructeur d'offre
           </p>
-          <h1 className="font-sans font-semibold text-[40px] sm:text-[56px] md:text-[72px] leading-[1.02] tracking-[-0.035em] mb-6">
+          <h1
+            className="font-sans font-semibold leading-[1.02] tracking-[-0.035em] mb-6"
+            style={{ fontSize: 'clamp(32px, 6vw, 72px)' }}
+          >
             Composez votre KOVAS.
             <span className="block text-[#0F1419]/35">À l'euro près.</span>
           </h1>

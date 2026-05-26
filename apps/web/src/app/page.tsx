@@ -373,50 +373,59 @@ function SectionLicielVsKovas(): React.ReactElement {
           </p>
         </div>
         <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden">
-          <table className="w-full text-[13px] sm:text-[14px]">
-            <thead className="bg-[#0F1419] text-paper">
-              <tr>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wide font-medium">
-                  Critère
-                </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wide font-medium">
-                  Liciel seul
-                </th>
-                <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wide font-medium bg-chartreuse text-ink">
-                  Liciel + KOVAS
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {lines.map((line, idx) => (
-                <tr
-                  key={line.label}
-                  className={
-                    idx % 2 === 0
-                      ? 'border-b border-[#0F1419]/[0.06] last:border-b-0'
-                      : 'border-b border-[#0F1419]/[0.06] last:border-b-0 bg-[#F5F7F4]/40'
-                  }
-                >
-                  <td className="px-4 py-3 font-medium text-[#0F1419]">{line.label}</td>
-                  <td className="px-4 py-3 text-[#0F1419]/72">
-                    <div className="flex items-start gap-2">
-                      <XCircle className="size-4 mt-0.5 text-[#0F1419]/40 shrink-0" aria-hidden />
-                      <span>{line.seul}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-[#0F1419]">
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2
-                        className="size-4 mt-0.5 text-chartreuse-deep shrink-0"
-                        aria-hidden
-                      />
-                      <span className="font-medium">{line.combo}</span>
-                    </div>
-                  </td>
+          {/* Hint scroll horizontal mobile (caché >=sm). Le wrapper overflow-x-auto
+              empêche tout débordement de la page sur écrans <640px. */}
+          <p className="sm:hidden px-4 pt-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+            <span className="text-chartreuse-deep font-bold">→ </span>Fais défiler le tableau
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-[13px] sm:text-[14px]">
+              <thead className="bg-[#0F1419] text-paper">
+                <tr>
+                  <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wide font-medium">
+                    Critère
+                  </th>
+                  <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wide font-medium">
+                    Liciel seul
+                  </th>
+                  <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wide font-medium bg-chartreuse text-ink">
+                    Liciel + KOVAS
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {lines.map((line, idx) => (
+                  <tr
+                    key={line.label}
+                    className={
+                      idx % 2 === 0
+                        ? 'border-b border-[#0F1419]/[0.06] last:border-b-0'
+                        : 'border-b border-[#0F1419]/[0.06] last:border-b-0 bg-[#F5F7F4]/40'
+                    }
+                  >
+                    <td className="px-4 py-3 font-medium text-[#0F1419] whitespace-normal">
+                      {line.label}
+                    </td>
+                    <td className="px-4 py-3 text-[#0F1419]/72">
+                      <div className="flex items-start gap-2">
+                        <XCircle className="size-4 mt-0.5 text-[#0F1419]/40 shrink-0" aria-hidden />
+                        <span>{line.seul}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-[#0F1419]">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2
+                          className="size-4 mt-0.5 text-chartreuse-deep shrink-0"
+                          aria-hidden
+                        />
+                        <span className="font-medium">{line.combo}</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -960,7 +969,7 @@ function SectionFounderLetter(): React.ReactElement {
             KOVAS.
           </h2>
         </div>
-        <div className="max-w-[680px] mx-auto rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-8 py-10 sm:px-12 sm:py-14">
+        <div className="max-w-[680px] mx-auto rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-8 sm:px-12 sm:py-14">
           <div
             className="w-20 h-20 rounded-full bg-[#0F1419]/[0.08] mx-auto mb-6 flex items-center justify-center"
             aria-hidden

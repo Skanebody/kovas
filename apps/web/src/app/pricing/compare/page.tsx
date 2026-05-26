@@ -26,7 +26,10 @@ export default function PricingComparePage() {
           <p className="font-mono text-[13px] uppercase tracking-[0.18em] text-[#0F1419]/55 font-medium mb-6">
             Comparatif détaillé
           </p>
-          <h1 className="font-sans font-semibold text-[40px] sm:text-[64px] md:text-[80px] leading-[1.02] tracking-[-0.035em] mb-6">
+          <h1
+            className="font-sans font-semibold leading-[1.02] tracking-[-0.035em] mb-6"
+            style={{ fontSize: 'clamp(32px, 6.5vw, 80px)' }}
+          >
             Douze forfaits.
             <span className="block text-[#0F1419]/35">Une vue d'ensemble.</span>
           </h1>
@@ -42,7 +45,10 @@ export default function PricingComparePage() {
         </section>
 
         <section className="px-5 sm:px-12 py-16 sm:py-24 text-center border-t border-[#0F1419]/[0.08]">
-          <h2 className="font-sans font-semibold text-[32px] sm:text-[48px] md:text-[60px] leading-[1.05] tracking-[-0.03em] mb-6 max-w-[760px] mx-auto">
+          <h2
+            className="font-sans font-semibold leading-[1.05] tracking-[-0.03em] mb-6 max-w-[760px] mx-auto"
+            style={{ fontSize: 'clamp(28px, 5vw, 60px)' }}
+          >
             Toujours hésitant ?
             <span className="block text-[#0F1419]/35">Composez votre offre.</span>
           </h2>
