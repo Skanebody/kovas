@@ -172,10 +172,12 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
   const handlePickSuggestion = useCallback(
     (feature: BanFeature) => {
       const label = feature.properties.label
+      // L'UI conserve le label complet dans l'input pour le retour visuel,
+      // mais le `q` envoyé au serveur est nettoyé (cf. ci-dessous).
       setValue(label)
       setShowSuggest(false)
       const postcode = feature.properties.postcode
-      // Si on a un code postal, on extrait le dept (2 premiers chars, sauf DROM 97x)
+      // Si on a un code postal, on extrait le dept (2 premiers chars, sauf DROM 97x/98x)
       const dept = postcode
         ? postcode.startsWith('97') || postcode.startsWith('98')
           ? postcode.slice(0, 3)
@@ -185,9 +187,19 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
       // la recherche serveur applique le pipeline d'élargissement progressif
       // (20 km → 50 → 100 → dept → national, garantit toujours ≥1 résultat).
       const [lng, lat] = feature.geometry.coordinates
+      // BUG-FIX (recherche par adresse vide) : on NE POUSSE PAS le `label` complet
+      // dans `?q=` car la RPC `search_diagnosticians` filtre texte sur
+      // full_name/city/address/postcode avec ILIKE. Le label BAN ressemble à
+      // "12 Rue de la Paix, 76540 Ouville-La-Rivière" et aucun diag n'a un de
+      // ces champs qui contient cette string entière → 0 résultat même au
+      // niveau national. Avec lat/lng disponibles, le filtre géo suffit ; on
+      // utilise au mieux `feature.properties.city` pour aider à l'affinage.
+      const cityForQuery = feature.properties.city ?? undefined
       router.push(
         buildHref({
-          q: label,
+          // q optionnel : la ville (propre) si dispo, sinon rien — la géoloc
+          // pilote la recherche, l'élargissement progressif fait le reste.
+          q: cityForQuery,
           dept,
           lat: Number.isFinite(lat) ? lat.toFixed(5) : undefined,
           lng: Number.isFinite(lng) ? lng.toFixed(5) : undefined,

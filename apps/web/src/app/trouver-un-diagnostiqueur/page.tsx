@@ -336,6 +336,15 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
     /**
      * Exécute une tentative de recherche unique. Retourne soit la liste des
      * rows, soit `null` si la RPC est absente (déclenche fallback table).
+     *
+     * `dropQuery` : utilisé par les paliers d'élargissement département /
+     * national pour ignorer le filtre texte ILIKE. Quand l'utilisateur a
+     * sélectionné une adresse BAN ("12 Rue X, 75008 Paris, Île-de-France"),
+     * le `q` arrivant en URL peut contenir des fragments qui ne matchent
+     * AUCUN champ full_name/city/address/postcode → le widening était cassé
+     * silencieusement (la requête nationale renvoyait toujours 0). Les
+     * paliers d'élargissement priorisent maintenant la garantie B2C ≥1
+     * résultat sur le matching textuel exact.
      */
     async function runRpc(params: {
       lat?: number
@@ -344,9 +353,11 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
       dept?: string
       limit?: number
       offset?: number
+      dropQuery?: boolean
     }): Promise<{ rows: RpcDiagRow[]; missing: boolean; errMsg: string | null }> {
+      const queryArg = params.dropQuery ? null : args.q || null
       const { data: rpcData, error: rpcError } = await client.rpc('search_diagnosticians', {
-        p_query: args.q || null,
+        p_query: queryArg,
         p_city_slug: null,
         p_dept_code: params.dept ?? null,
         p_certs: args.certs.length > 0 ? args.certs : null,
@@ -432,11 +443,15 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
     }
 
     // Étape 2 — élargissement au département (si géoloc épuisée + dept connu)
+    // À ce palier on drop le filtre texte : la sélection d'une adresse BAN
+    // pousse en `q` un label qui ne matche AUCUN diag par texte (ex. "12 Rue
+    // de la Paix, 76540 Ouville-La-Rivière"), le widening était stérile.
     if (rpcRows.length === 0 && args.dept) {
       const attempt = await runRpc({
         dept: args.dept,
         limit: PAGE_SIZE,
         offset,
+        dropQuery: true,
       })
       if (attempt.missing) return fallbackTableQuery(client, args, offset)
       if (attempt.errMsg) return mkErr(attempt.errMsg)
@@ -447,19 +462,19 @@ async function fetchDiagnosticians(args: FetchArgs): Promise<FetchResult> {
       }
     }
 
-    // Étape 3 — élargissement national (dernier filet)
+    // Étape 3 — élargissement national (dernier filet B2C ≥1 résultat).
+    // On drop ici aussi le filtre texte ET les certifs si rien remonte, pour
+    // garantir qu'un particulier ait au moins 1 contact à afficher.
     if (rpcRows.length === 0) {
+      // Premier essai national : garde les certifs (respect intent) mais drop q
       const attempt = await runRpc({
-        // Pas de dept : on cherche partout en FR. Garde les filtres texte
-        // et certifs pour respecter l'intent utilisateur, mais ignore lat/lng.
         limit: PAGE_SIZE,
         offset: 0,
+        dropQuery: true,
       })
       if (attempt.missing) return fallbackTableQuery(client, args, offset)
       if (attempt.errMsg) return mkErr(attempt.errMsg)
       rpcRows = attempt.rows
-      // Si on a fini par trouver quelque chose, c'est du national. Sinon
-      // base réellement vide pour ces filtres.
       widened = rpcRows.length > 0 ? 'national' : 'all'
       effectiveRadiusKm = null
     }
