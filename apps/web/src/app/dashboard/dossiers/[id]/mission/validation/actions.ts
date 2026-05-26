@@ -15,6 +15,7 @@
  */
 
 import { type BuildingGlobals3CL, type Room3CLData, buildXml3CL } from '@/lib/3cl/xml-3cl-builder'
+import { analyzeEquipmentPhoto } from '@/lib/algos/vision-equipment'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
@@ -357,5 +358,206 @@ export async function exportToLicielAction(
     exportId: exportRow.id,
     storagePath,
     warnings,
+  }
+}
+
+// ============================================
+// 4. analyzePhotoVisionAction — Lot B98
+// ============================================
+// Déclenche l'algo A1.3.6 (`analyzeEquipmentPhoto`) à la demande sur une photo
+// existante du dossier. Persiste le résultat dans `photos.vision_analysis` +
+// `photos.vision_confidence` pour que le widget se rafraîchisse au prochain
+// rendu (revalidatePath sur la page validation).
+//
+// Stratégie de fallback : si `ANTHROPIC_API_KEY` est manquante (env dev/test),
+// on retourne un MOCK crédible pour permettre l'UI flow sans coût ni dépendance
+// Claude. Le mock est marqué `_mock: true` côté DB pour distinguer en obs.
+//
+// TODO B98+ : brancher la vraie URL signée Supabase Storage (createSignedUrl)
+// et passer en `imageUrl` à `analyzeEquipmentPhoto`. Pour l'instant on génère
+// une signed URL si bucket dispo, sinon on retombe sur le mock.
+
+interface AnalyzePhotoOk {
+  ok: true
+  photoId: string
+  equipmentType: string
+  brand: string | null
+  model: string | null
+  confidence: number
+  mocked: boolean
+}
+
+interface AnalyzePhotoErr {
+  error: string
+}
+
+const analyzePhotoSchema = z.object({
+  photoId: z.string().uuid(),
+})
+
+/**
+ * Mock vision analysis crédible — utilisé quand Claude Vision n'est pas dispo
+ * (clé API manquante, env test). Rotation déterministe basée sur l'UUID pour
+ * que des appels successifs sur des photos différentes donnent des résultats
+ * variés (utile pour démos / tests).
+ */
+function buildMockVisionAnalysis(photoId: string): {
+  equipment_type: string
+  brand: { value: string; confidence: number }
+  model: { value: string; confidence: number }
+  manufacture_year: { value: number; confidence: number }
+  energy_type: { value: string; confidence: number }
+  overall_confidence: number
+  needs_manual_validation: boolean
+  raw_ocr_text: string
+  _mock: true
+} {
+  const samples = [
+    {
+      equipment_type: 'chaudiere',
+      brand: 'Saunier Duval',
+      model: 'ThemaPlus Condens F25E',
+      year: 2019,
+      energy: 'gaz',
+    },
+    {
+      equipment_type: 'pompe_chaleur',
+      brand: 'Daikin',
+      model: 'Altherma 3 H HT',
+      year: 2022,
+      energy: 'pompe_chaleur',
+    },
+    {
+      equipment_type: 'vmc',
+      brand: 'Aldes',
+      model: 'EasyHOME PureAir Connect',
+      year: 2020,
+      energy: 'electricite',
+    },
+    {
+      equipment_type: 'chauffe_eau',
+      brand: 'Atlantic',
+      model: 'Linéo Connecté 200L',
+      year: 2021,
+      energy: 'electricite',
+    },
+  ]
+  // Hash déterministe simple basé sur les premiers caractères de l'UUID
+  const seed = photoId.charCodeAt(0) + photoId.charCodeAt(1)
+  const sample = samples[seed % samples.length] ?? samples[0]
+  if (!sample) {
+    throw new Error('mock vision samples vides — invariant cassé')
+  }
+  return {
+    equipment_type: sample.equipment_type,
+    brand: { value: sample.brand, confidence: 0.92 },
+    model: { value: sample.model, confidence: 0.85 },
+    manufacture_year: { value: sample.year, confidence: 0.88 },
+    energy_type: { value: sample.energy, confidence: 0.95 },
+    overall_confidence: 0.89,
+    needs_manual_validation: false,
+    raw_ocr_text: `${sample.brand} ${sample.model} — analyse mockée Lot B98`,
+    _mock: true,
+  }
+}
+
+export async function analyzePhotoVisionAction(
+  photoId: string,
+): Promise<AnalyzePhotoOk | AnalyzePhotoErr> {
+  const parsed = analyzePhotoSchema.safeParse({ photoId })
+  if (!parsed.success) return { error: 'Photo ID invalide' }
+
+  const { orgId } = await getCurrentUser()
+  const admin = adminClient()
+
+  // 1. Charger la photo + vérifier le tenant
+  const photosTable = admin.from('photos') as unknown as {
+    select: (q: string) => {
+      eq: (
+        k: string,
+        v: string,
+      ) => {
+        single: () => Promise<{
+          data: {
+            id: string
+            storage_path: string
+            organization_id: string
+            dossier_id: string
+          } | null
+          error: { message: string } | null
+        }>
+      }
+    }
+    update: (p: Record<string, unknown>) => {
+      eq: (k: string, v: string) => Promise<{ error: { message: string } | null }>
+    }
+  }
+
+  const { data: photo, error: photoErr } = await photosTable
+    .select('id, storage_path, organization_id, dossier_id')
+    .eq('id', photoId)
+    .single()
+
+  if (photoErr || !photo) return { error: 'Photo introuvable' }
+  if (photo.organization_id !== orgId) return { error: 'Accès refusé' }
+
+  // 2. Tenter d'obtenir une signed URL ; si Claude API key dispo ET URL OK,
+  //    on appelle l'algo réel. Sinon → fallback mock.
+  const hasApiKey = !!process.env.ANTHROPIC_API_KEY
+  let analysisJson: Record<string, unknown>
+  let mocked = true
+
+  if (hasApiKey) {
+    const { data: signed } = await admin.storage
+      .from('mission-photos')
+      .createSignedUrl(photo.storage_path, 60 * 5) // 5 min suffisant pour 1 call Vision
+
+    if (signed?.signedUrl) {
+      const result = await analyzeEquipmentPhoto({ imageUrl: signed.signedUrl })
+      if ('error' in result) {
+        // L'algo a échoué → fallback mock pour ne pas bloquer l'UX,
+        // mais on log côté server pour observabilité.
+        console.warn('[analyzePhotoVisionAction] Claude Vision failed:', result.error)
+        analysisJson = buildMockVisionAnalysis(photoId)
+      } else {
+        analysisJson = result as unknown as Record<string, unknown>
+        mocked = false
+      }
+    } else {
+      analysisJson = buildMockVisionAnalysis(photoId)
+    }
+  } else {
+    analysisJson = buildMockVisionAnalysis(photoId)
+  }
+
+  // 3. Persister
+  const confidence =
+    typeof analysisJson.overall_confidence === 'number' ? analysisJson.overall_confidence : 0.85
+
+  const { error: updateErr } = await photosTable
+    .update({
+      vision_analysis: analysisJson,
+      vision_confidence: confidence,
+    })
+    .eq('id', photoId)
+
+  if (updateErr) return { error: updateErr.message }
+
+  revalidatePath(`/dashboard/dossiers/${photo.dossier_id}/mission/validation`)
+
+  const brandField = analysisJson.brand as { value?: string } | string | undefined
+  const modelField = analysisJson.model as { value?: string } | string | undefined
+  const brand = typeof brandField === 'string' ? brandField : (brandField?.value ?? null)
+  const model = typeof modelField === 'string' ? modelField : (modelField?.value ?? null)
+
+  return {
+    ok: true,
+    photoId,
+    equipmentType:
+      typeof analysisJson.equipment_type === 'string' ? analysisJson.equipment_type : 'autre',
+    brand,
+    model,
+    confidence,
+    mocked,
   }
 }
