@@ -1,5 +1,21 @@
+/**
+ * /temoignages — Témoignages diagnostiqueurs KOVAS (15 témoignages).
+ *
+ * B71 (2026-05-26) : harmonisation chrome au style home V5 sobre :
+ *   - PublicHeader + SiteFooter
+ *   - bg-sage + ink #0F1419 + sections px-5 sm:px-12 py-20 sm:py-28
+ *   - H1 clamp(40,7vw,104) Urbanist medium + serif italic accent
+ *   - eyebrow font-mono uppercase tracking-wider text-[11px]
+ *   - vouvoiement strict (avatar SOBRE PROFESSIONNEL)
+ *
+ * Préserve : JSON-LD CollectionPage + ItemList Quotation (B68), les 15
+ * témoignages, le client component TestimonialsExplorer (filtres profil +
+ * région).
+ */
+
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { KOVAS_BASE_URL, buildBreadcrumbList } from '@/lib/seo/schema-org'
@@ -304,56 +320,83 @@ export default function TemoignagesPage() {
   }
 
   return (
-    <div className="px-6 py-16">
+    <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
       <JsonLd data={[collectionPage, testimonialsItemList, breadcrumb]} id="temoignages" />
-      <div className="mx-auto max-w-6xl space-y-12">
-        <div className="mx-auto max-w-2xl space-y-3 text-center">
-          <Badge variant="muted">Témoignages</Badge>
-          <h1 className="font-display text-display-m font-light tracking-tight text-ink sm:text-display-l">
-            Ils sont passés à <span className="text-display-serif text-chartreuse-deep">KOVAS</span>
-          </h1>
-          <p className="text-ink-mute">
-            Quinze diagnostiqueurs partagent leur expérience. Solo, cabinet, toutes régions.
-            Métriques chiffrées, citations authentiques.
-          </p>
-          <p className="mx-auto max-w-xl font-mono text-[11px] uppercase tracking-wide text-ink-faint">
-            Témoignages illustratifs V1 — exemples-types issus de la phase de recherche
-            utilisateurs. Les retours bêta-testeurs réels seront publiés à partir de l'ouverture au
-            public (M9).
-          </p>
-        </div>
-
-        <TestimonialsExplorer testimonials={TESTIMONIALS} regions={REGIONS_ORDER} />
-
-        <div className="mx-auto max-w-3xl space-y-4 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">À votre tour ?</h2>
-          <p className="text-ink-mute">
-            Essai 30 jours, sans engagement. Si KOVAS ne vous convient pas, résiliation en deux
-            clics.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" variant="accent" asChild>
-              <Link href="/signup">
-                Démarrer mon essai gratuit <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/tarifs">Voir les tarifs</Link>
-            </Button>
+      <PublicHeader />
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="px-5 sm:px-12 pt-16 sm:pt-24 pb-12 sm:pb-20 animate-fade-in motion-reduce:animate-none">
+          <div className="max-w-[1240px] mx-auto">
+            <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55 mb-6">
+              Témoignages
+            </p>
+            <h1
+              className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
+              style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
+            >
+              Ils sont passés à <span className="font-serif italic font-normal">KOVAS</span>.
+            </h1>
+            <p className="mt-8 max-w-2xl text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
+              Quinze diagnostiqueurs partagent leur expérience. Solo, cabinet, toutes régions.
+              Métriques chiffrées, citations authentiques.
+            </p>
+            <p className="mt-4 max-w-2xl font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55">
+              Témoignages illustratifs V1 — exemples-types issus de la phase de recherche
+              utilisateurs. Les retours bêta-testeurs réels seront publiés à partir de
+              l&apos;ouverture au public (M9).
+            </p>
           </div>
-          <p className="pt-4 text-sm text-ink-mute">
-            Voir aussi le{' '}
-            <Link href="/comparatif" className="underline underline-offset-2 hover:text-ink">
-              comparatif KOVAS vs Liciel
-            </Link>{' '}
-            ou demander une{' '}
-            <Link href="/demo" className="underline underline-offset-2 hover:text-ink">
-              démo personnalisée
-            </Link>
-            .
-          </p>
-        </div>
-      </div>
+        </section>
+
+        {/* Explorer + cards */}
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+          <div className="max-w-[1240px] mx-auto space-y-10">
+            <TestimonialsExplorer testimonials={TESTIMONIALS} regions={REGIONS_ORDER} />
+          </div>
+        </section>
+
+        {/* CTA final */}
+        <section className="px-5 sm:px-12 py-24 sm:py-32 border-t border-[#0F1419]/[0.08] bg-[#0F1419] text-paper">
+          <div className="max-w-[920px] mx-auto text-center space-y-8">
+            <p className="font-mono uppercase tracking-wider text-[11px] text-paper/55">
+              À votre tour
+            </p>
+            <h2
+              className="font-sans font-medium tracking-tight text-paper leading-[1.05]"
+              style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+            >
+              Essai <span className="font-serif italic font-normal text-chartreuse">30 jours</span>{' '}
+              sans engagement.
+            </h2>
+            <p className="text-lg text-paper/72 max-w-xl mx-auto leading-relaxed">
+              Si KOVAS ne vous convient pas, résiliation en deux clics depuis le Customer Portal.
+              Carte bancaire requise, aucun débit avant J+30.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <Button size="lg" variant="accent" asChild>
+                <Link href="/signup">
+                  Démarrer mon essai gratuit <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/tarifs">Voir les tarifs</Link>
+              </Button>
+            </div>
+            <p className="text-[12px] text-paper/55 pt-2">
+              Voir aussi le{' '}
+              <Link href="/comparatif" className="text-paper underline underline-offset-2">
+                comparatif KOVAS vs Liciel
+              </Link>{' '}
+              ou demander une{' '}
+              <Link href="/demo" className="text-paper underline underline-offset-2">
+                démo personnalisée
+              </Link>
+              .
+            </p>
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
     </div>
   )
 }

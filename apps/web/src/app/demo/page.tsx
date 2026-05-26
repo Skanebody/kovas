@@ -1,8 +1,22 @@
+/**
+ * /demo — Réservation démo personnalisée KOVAS.
+ *
+ * B71 (2026-05-26) : harmonisation chrome au style home V5 sobre :
+ *   - PublicHeader + SiteFooter
+ *   - bg-sage + ink #0F1419 + sections px-5 sm:px-12 py-20 sm:py-28
+ *   - H1 clamp(40,7vw,104) + H2 clamp(32,4vw,56) Urbanist medium + serif italic
+ *   - eyebrow font-mono uppercase tracking-wider text-[11px]
+ *   - cards rounded-2xl border [#0F1419]/[0.08] bg-paper
+ *   - vouvoiement strict
+ *
+ * Préserve : JSON-LD WebPage + ReserveAction (B68), DemoForm client.
+ */
+
+import { SiteFooter } from '@/components/public/footer/SiteFooter'
+import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { DemoForm } from '@/components/public/pros/DemoForm'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { KOVAS_BASE_URL, buildBreadcrumbList } from '@/lib/seo/schema-org'
 import { ArrowRight, Calendar, Clock, Headset } from 'lucide-react'
@@ -44,81 +58,137 @@ export default function DemoPage() {
     },
   }
 
+  const cards: ReadonlyArray<{
+    icon: React.ReactElement
+    title: string
+    body: string
+  }> = [
+    {
+      icon: <Calendar className="size-5" aria-hidden />,
+      title: '48 h ouvrées',
+      body: 'Délai de planification garanti à compter de votre demande.',
+    },
+    {
+      icon: <Clock className="size-5" aria-hidden />,
+      title: '45 minutes',
+      body: 'Durée standard, ajustable selon vos questions. Présentation puis Q&R.',
+    },
+    {
+      icon: <Headset className="size-5" aria-hidden />,
+      title: 'Sans engagement',
+      body: "Aucune obligation à l'issue de la démo. Vous repartez avec vos questions répondues.",
+    },
+  ]
+
   return (
-    <div className="px-6 py-16">
+    <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
       <JsonLd data={[webPageSchema, breadcrumb]} id="demo" />
-      <div className="mx-auto max-w-5xl space-y-12">
-        <div className="mx-auto max-w-2xl space-y-3 text-center">
-          <Badge variant="muted">Démo personnalisée</Badge>
-          <h1 className="font-display text-display-m font-light tracking-tight text-ink sm:text-display-l">
-            Voir KOVAS en{' '}
-            <span className="text-display-serif text-chartreuse-deep">situation réelle</span>
-          </h1>
-          <p className="text-ink-mute">
-            45 minutes en visio avec un membre de notre équipe. Démonstration adaptée à votre
-            cabinet, vos diagnostics types, votre logiciel actuel.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Card variant="opaque" padding="sm" className="space-y-2">
-            <Calendar className="size-5 text-ink-mute" />
-            <h2 className="text-base font-semibold leading-tight">48h ouvrées</h2>
-            <p className="text-sm text-ink-mute">
-              Délai de planification garanti à compter de votre demande.
+      <PublicHeader />
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="px-5 sm:px-12 pt-16 sm:pt-24 pb-12 sm:pb-20 animate-fade-in motion-reduce:animate-none">
+          <div className="max-w-[1240px] mx-auto">
+            <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55 mb-6">
+              Démo personnalisée
             </p>
-          </Card>
-          <Card variant="opaque" padding="sm" className="space-y-2">
-            <Clock className="size-5 text-ink-mute" />
-            <h2 className="text-base font-semibold leading-tight">45 minutes</h2>
-            <p className="text-sm text-ink-mute">
-              Durée standard, ajustable selon vos questions. Présentation puis Q&amp;R.
+            <h1
+              className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
+              style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
+            >
+              Voir KOVAS en <span className="font-serif italic font-normal">situation réelle</span>.
+            </h1>
+            <p className="mt-8 max-w-2xl text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
+              45 minutes en visio avec un membre de notre équipe. Démonstration adaptée à votre
+              cabinet, vos diagnostics types, votre logiciel actuel.
             </p>
-          </Card>
-          <Card variant="opaque" padding="sm" className="space-y-2">
-            <Headset className="size-5 text-ink-mute" />
-            <h2 className="text-base font-semibold leading-tight">Sans engagement</h2>
-            <p className="text-sm text-ink-mute">
-              Aucune obligation à l&apos;issue de la démo. Vous repartez avec vos questions
-              répondues.
+          </div>
+        </section>
+
+        {/* 3 caractéristiques */}
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+          <div className="max-w-[1240px] mx-auto">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              {cards.map((c) => (
+                <div
+                  key={c.title}
+                  className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-7 space-y-3"
+                >
+                  <div className="text-[#0F1419]/55">{c.icon}</div>
+                  <h2 className="text-lg font-semibold text-[#0F1419] tracking-tight">{c.title}</h2>
+                  <p className="text-[14px] text-[#0F1419]/72 leading-relaxed">{c.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Formulaire réservation */}
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+          <div className="max-w-[920px] mx-auto space-y-10">
+            <div className="space-y-3 max-w-2xl">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+                Réservation
+              </p>
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Réservez <span className="font-serif italic font-normal">votre démo</span>.
+              </h2>
+              <p className="text-[15px] text-[#0F1419]/72 leading-relaxed">
+                Vous recevez une confirmation par email sous 48 h ouvrées avec un créneau adapté à
+                votre agenda. Vous gardez la main pour reporter ou annuler.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-7 sm:px-8 sm:py-9">
+              <DemoForm />
+            </div>
+          </div>
+        </section>
+
+        {/* CTA final */}
+        <section className="px-5 sm:px-12 py-24 sm:py-32 border-t border-[#0F1419]/[0.08] bg-[#0F1419] text-paper">
+          <div className="max-w-[920px] mx-auto text-center space-y-8">
+            <p className="font-mono uppercase tracking-wider text-[11px] text-paper/55">
+              Pas le temps d&apos;attendre
             </p>
-          </Card>
-        </div>
-
-        <Card variant="opaque" padding="lg" className="mx-auto max-w-3xl">
-          <DemoForm />
-        </Card>
-
-        <div className="mx-auto max-w-2xl space-y-4 text-center">
-          <h2 className="text-xl font-semibold tracking-tight">
-            Pas le temps d&apos;attendre une démo ?
-          </h2>
-          <p className="text-ink-mute">
-            Vous pouvez tester KOVAS gratuitement pendant 30 jours, sans assistance commerciale.
-            Carte bancaire à l&apos;inscription, aucun débit avant J+30.
-          </p>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/signup">
-              Essayez gratuitement 30 jours <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-          <p className="pt-4 text-sm text-ink-mute">
-            Voir aussi les{' '}
-            <Link href="/tarifs" className="underline underline-offset-2 hover:text-ink">
-              tarifs détaillés
-            </Link>
-            , le{' '}
-            <Link href="/comparatif" className="underline underline-offset-2 hover:text-ink">
-              comparatif Liciel
-            </Link>{' '}
-            ou les{' '}
-            <Link href="/temoignages" className="underline underline-offset-2 hover:text-ink">
-              témoignages diagnostiqueurs
-            </Link>
-            .
-          </p>
-        </div>
-      </div>
+            <h2
+              className="font-sans font-medium tracking-tight text-paper leading-[1.05]"
+              style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+            >
+              Testez KOVAS pendant{' '}
+              <span className="font-serif italic font-normal text-chartreuse">30 jours</span> dès
+              maintenant.
+            </h2>
+            <p className="text-lg text-paper/72 max-w-xl mx-auto leading-relaxed">
+              Sans assistance commerciale. Carte bancaire requise à l&apos;inscription, aucun débit
+              avant J+30.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <Button size="lg" variant="accent" asChild>
+                <Link href="/signup">
+                  Démarrer mon essai 30 jours <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/tarifs">Voir les tarifs</Link>
+              </Button>
+            </div>
+            <p className="text-[12px] text-paper/55 pt-2">
+              Voir aussi le{' '}
+              <Link href="/comparatif" className="text-paper underline underline-offset-2">
+                comparatif Liciel
+              </Link>{' '}
+              ou les{' '}
+              <Link href="/temoignages" className="text-paper underline underline-offset-2">
+                témoignages diagnostiqueurs
+              </Link>
+              .
+            </p>
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
     </div>
   )
 }
