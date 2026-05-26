@@ -27,6 +27,10 @@ export interface ConsolidationSummaryModalProps {
   missingRequired: MissingField[]
   globalConfidence: number
   summary: string
+  /**
+   * Coût en USD côté serveur. Plus exposé dans l'UX client (cf. audit P2-18).
+   * Conservé en prop pour compat callers / future page admin obs.
+   */
   costUsd: number
   warnings?: string[]
 }
@@ -39,7 +43,7 @@ export function ConsolidationSummaryModal({
   missingRequired,
   globalConfidence,
   summary,
-  costUsd,
+  costUsd: _costUsd,
   warnings,
 }: ConsolidationSummaryModalProps) {
   const confidencePct = Math.round(globalConfidence * 100)
@@ -83,14 +87,13 @@ export function ConsolidationSummaryModal({
           />
         </div>
 
-        {/* Confidence + coût */}
+        {/* Confidence — coût IA retiré de l'UX client (cf. audit P2-18 mode mission).
+            Exposer un coût en $ à un diagnostiqueur FR est confus et n'apporte
+            rien fonctionnellement — c'est une métrique admin / observabilité. */}
         <div className="flex items-center justify-between gap-3 rounded-lg border border-[#0F1419]/[0.08] bg-paper px-3 py-2 text-xs text-[#0F1419]/72">
           <span>
             Confiance globale :{' '}
             <strong className="font-semibold text-[#0F1419]">{confidencePct}%</strong>
-          </span>
-          <span>
-            Coût IA : <strong className="font-mono text-[#0F1419]">${costUsd.toFixed(4)}</strong>
           </span>
         </div>
 

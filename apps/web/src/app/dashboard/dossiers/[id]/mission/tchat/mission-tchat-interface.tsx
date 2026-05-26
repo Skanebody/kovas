@@ -1652,30 +1652,55 @@ export function MissionTchatInterface({
     [recap, sendMessage],
   )
 
-  const handleFinishMission = useCallback(() => {
+  // Helper dev-only logger (cf. audit P2-1 — pas de console en prod)
+  const devLog = useCallback((...args: unknown[]) => {
+    if (process.env.NODE_ENV !== 'production') console.info(...args)
+  }, [])
+
+  const handleFinishMission = useCallback(async () => {
     recap.close()
-    // V1.5 : déclencher l'action serveur "terminer mission" + redirect dossier
-    void fetch(`/api/dossiers/${dossierId}/actions/finish_mission`, { method: 'POST' }).catch(
-      () => undefined,
-    )
-    router.push(`/dashboard/dossiers/${dossierId}`)
+    // Cf. audit P1-10 : avant on faisait void fetch + router.push immédiat — si le
+    // POST échouait (RLS, network), l'utilisateur partait quand même vers le hub
+    // dossier où le statut était incohérent. Maintenant on await + toast d'erreur
+    // si échec, et on ne redirige qu'en cas de succès.
+    try {
+      const res = await fetch(`/api/dossiers/${dossierId}/actions/finish_mission`, {
+        method: 'POST',
+      })
+      if (!res.ok) {
+        setErrorMsg('Impossible de terminer la mission. Vérifiez votre connexion.')
+        return
+      }
+      router.push(`/dashboard/dossiers/${dossierId}`)
+    } catch {
+      setErrorMsg('Impossible de terminer la mission. Vérifiez votre connexion.')
+    }
   }, [recap, dossierId, router])
 
   // ----- MISSION-H lot 2 : déclenche l'analyse finale -----
   const runFinalAnalysis = useCallback(async () => {
     const url = `/api/mission/${dossierId}/finalize-analysis`
-    console.info('[finalize-analysis] click → POST', url, { sessionId })
+    devLog('[finalize-analysis] click → POST', url, { sessionId })
     setAnalysisLoading(true)
     setAnalysisError(null)
     setAnalysisResult(null)
     setAnalysisOpen(true)
+
+    // AbortController + timeout 60s (cf. audit P1-9). Vercel timeout serveur est
+    // 60s aussi — le client doit pouvoir abort proprement sinon la sheet reste en
+    // spinner à vie pour l'utilisateur. Si Claude prend > 60s, on affiche un
+    // message clair et le user peut "Réessayer".
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 60_000)
+
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ sessionId }),
+        signal: controller.signal,
       })
-      console.info('[finalize-analysis] response', { status: res.status, ok: res.ok })
+      devLog('[finalize-analysis] response', { status: res.status, ok: res.ok })
 
       // Lecture du body avec fallback texte (au cas où non-JSON)
       const rawText = await res.text()
@@ -1683,16 +1708,16 @@ export function MissionTchatInterface({
       try {
         data = JSON.parse(rawText)
       } catch {
-        console.error('[finalize-analysis] non-JSON response', {
-          status: res.status,
-          rawText: rawText.slice(0, 500),
-        })
-        setAnalysisError(
-          `Réponse serveur invalide (HTTP ${res.status}). Voir la console pour le détail.`,
-        )
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('[finalize-analysis] non-JSON response', {
+            status: res.status,
+            rawText: rawText.slice(0, 500),
+          })
+        }
+        setAnalysisError(`Réponse serveur invalide (HTTP ${res.status}).`)
         return
       }
-      console.info('[finalize-analysis] parsed body', data)
+      devLog('[finalize-analysis] parsed body', data)
 
       if (!res.ok) {
         const errMsg =
@@ -1724,13 +1749,22 @@ export function MissionTchatInterface({
         capturesCount: d.capturesCount ?? 0,
       })
     } catch (err) {
-      const msg = err instanceof Error ? `${err.name}: ${err.message}` : 'Erreur réseau'
-      console.error('[finalize-analysis] fetch threw', err)
+      // AbortError = timeout 60s ; autres erreurs = réseau
+      const isAbort = err instanceof DOMException && err.name === 'AbortError'
+      const msg = isAbort
+        ? "L'analyse a dépassé 60 secondes. Réessayez ou simplifiez le contenu."
+        : err instanceof Error
+          ? `${err.name}: ${err.message}`
+          : 'Erreur réseau'
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('[finalize-analysis] fetch threw', err)
+      }
       setAnalysisError(msg)
     } finally {
+      clearTimeout(timeoutId)
       setAnalysisLoading(false)
     }
-  }, [dossierId, sessionId])
+  }, [dossierId, sessionId, devLog])
 
   const handleAddVoiceNoteForGap = useCallback((gap: FinalAnalysisGap) => {
     setAnalysisOpen(false)
@@ -1901,7 +1935,7 @@ export function MissionTchatInterface({
                     key={qr.label}
                     type="button"
                     onClick={() => void sendMessage(qr.message)}
-                    disabled={isStreaming || isPaused}
+                    disabled={isStreaming || isPaused || !isOnline}
                     className={cn(
                       'shrink-0 rounded-pill border border-[#0F1419]/[0.08] bg-paper px-3 py-1.5',
                       'text-[12px] font-medium text-[#0F1419]',

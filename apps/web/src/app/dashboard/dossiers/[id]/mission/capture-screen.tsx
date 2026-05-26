@@ -188,10 +188,18 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
   async function handleConsolidate() {
     if (consolidate.phase === 'loading') return
     setConsolidate({ phase: 'loading' })
+
+    // AbortController + timeout 60s (cf. audit P0-4 mode mission). Le call
+    // consolidate peut prendre 30s+ (Claude). Sans abort, l'utilisateur reste
+    // bloqué en spinner si le réseau lâche en cours de route.
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 60_000)
+
     try {
       const res = await fetch(`/api/missions/${dossier.id}/consolidate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
       })
       const json = (await res.json()) as ConsolidateApiResponse
       if (!res.ok || !json.ok) {
@@ -213,10 +221,17 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
         },
       })
     } catch (e) {
+      const isAbort = e instanceof DOMException && e.name === 'AbortError'
       setConsolidate({
         phase: 'error',
-        message: e instanceof Error ? e.message : 'Erreur réseau',
+        message: isAbort
+          ? 'La consolidation a dépassé 60 secondes. Réessayez avec moins de pièces ou vérifiez votre connexion.'
+          : e instanceof Error
+            ? e.message
+            : 'Erreur réseau',
       })
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 

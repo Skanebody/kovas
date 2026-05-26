@@ -296,7 +296,6 @@ export function MissionRecapSheet({
 }: MissionRecapSheetProps): React.ReactElement {
   const errorCount = countErrors(contradictions)
   const { warning, error } = groupBySeverity(contradictions)
-  const canFinish = completionPct >= 90 && errorCount === 0
 
   // Tri pièces : incomplètes en premier
   const sortedRooms = useMemo(() => {
@@ -308,6 +307,11 @@ export function MissionRecapSheet({
   }, [rooms])
 
   const missingGlobalRequired = globalFields.filter((f) => f.isRequired && !f.filled)
+
+  // canFinish doit inclure missingGlobalRequired (cf. audit P1-8 mode mission).
+  // Avant : on pouvait "Terminer la mission" avec 90% de complétude pièces mais
+  // un champ global obligatoire manquant → DPE incomplet à l'export.
+  const canFinish = completionPct >= 90 && errorCount === 0 && missingGlobalRequired.length === 0
 
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} maxHeight="92vh">

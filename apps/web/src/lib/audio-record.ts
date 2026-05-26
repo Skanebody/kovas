@@ -54,22 +54,30 @@ export class AudioRecorder {
 
   async start(): Promise<void> {
     this.stream = await getOptimalMicrophoneStream()
-    this.mimeType = pickMimeType()
-    this.recorder = new MediaRecorder(
-      this.stream,
-      this.mimeType ? { mimeType: this.mimeType } : undefined,
-    )
-    this.chunks = []
-    this.startTime = Date.now()
+    try {
+      this.mimeType = pickMimeType()
+      this.recorder = new MediaRecorder(
+        this.stream,
+        this.mimeType ? { mimeType: this.mimeType } : undefined,
+      )
+      this.chunks = []
+      this.startTime = Date.now()
 
-    this.recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) this.chunks.push(e.data)
+      this.recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) this.chunks.push(e.data)
+      }
+      // Pas de timeslice : MediaRecorder.start() sans argument → un seul chunk
+      // produit au stop, blob garanti valide (sinon les fragments WebM/MP4
+      // intermédiaires ne forment pas un fichier complet — bug Safari + bug Chrome
+      // avec certains codecs opus → <audio> renvoie NotSupportedError).
+      this.recorder.start()
+    } catch (err) {
+      // Si MediaRecorder constructeur throw (codec non supporté, etc.), le
+      // getUserMedia stream est déjà ouvert → on doit le libérer manuellement
+      // sinon le micro reste actif (cf. audit P0-3 mode mission, fix défensif).
+      this.cleanup()
+      throw err
     }
-    // Pas de timeslice : MediaRecorder.start() sans argument → un seul chunk
-    // produit au stop, blob garanti valide (sinon les fragments WebM/MP4
-    // intermédiaires ne forment pas un fichier complet — bug Safari + bug Chrome
-    // avec certains codecs opus → <audio> renvoie NotSupportedError).
-    this.recorder.start()
   }
 
   async stop(): Promise<AudioRecording> {
