@@ -4,6 +4,7 @@ import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { TrialBannerLoader } from '@/components/billing/TrialBannerLoader'
 import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
+import { NotificationsBell } from '@/components/dashboard/NotificationsBell'
 import { SyncStatusBadge } from '@/components/dashboard/SyncStatusBadge'
 import { MissionFabMobile } from '@/components/mission/MissionFabMobile'
 import { RegulatoryNotificationsBadge } from '@/components/regulatory/RegulatoryNotificationsBadge'
@@ -16,6 +17,7 @@ import { UserMenu } from '@/components/user-menu'
 import { getUserTrackAccess } from '@/lib/access/track-access'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { checkTrialGuard, isPathWhitelisted } from '@/lib/billing/trial-guard'
+import { getMockNotifications } from '@/lib/notifications/mock'
 import { saveSidebarPreferencesAction } from '@/lib/sidebar/actions'
 import { loadSidebarBadgeCounts } from '@/lib/sidebar/badge-counts'
 import { loadSidebarPreferences } from '@/lib/sidebar/preferences-server'
@@ -98,6 +100,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               <SyncIndicator organizationId={orgId} />
               <CommandPaletteTrigger />
               <UsageWidget />
+              <NotificationsBell initialNotifications={getMockNotifications()} />
               <RegulatoryNotificationsBadge />
               <UserMenu displayName={displayName} email={profile.email} onLogout={logoutAction} />
             </div>
