@@ -29,10 +29,17 @@ import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { Button } from '@/components/ui/button'
 import { GlossaryTerm } from '@/components/ui/glossary-term'
-import { ANNUAIRE_PLANS, BUNDLES, LOGICIEL_PLANS } from '@/lib/pricing-plans'
+import {
+  ANNUAIRE_PLANS,
+  BUNDLES,
+  LIFETIME_DEAL,
+  LOGICIEL_PLANS,
+  getLifetimeDealSpotsRemaining,
+  isLifetimeDealAvailable,
+} from '@/lib/pricing-plans'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { buildBreadcrumbList, buildPricingItemListSchema } from '@/lib/seo/schema-org'
-import { ArrowRight, CheckCircle2, Flag } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Flag, Sparkles } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -793,6 +800,134 @@ function SectionLoyalty(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/* SECTION PARTENAIRE FONDATEUR (Tugan v3.0 §13 — Lifetime Deal scarce)        */
+/* Affichage conditionnel : ne s'affiche que si des spots sont encore dispo.   */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+const PARTENAIRE_FONDATEUR_BENEFITS: ReadonlyArray<string> = [
+  '3 ans d’accès Cabinet inclus (valeur 7 164 €)',
+  'Influence directe sur la roadmap',
+  'Accès Benjamin DM 24/7',
+  'Mention publique sur kovas.fr (témoignage)',
+  'Tarif lock à vie après les 3 ans (option renouvellement)',
+]
+
+function SectionPartenaireFondateur(): React.ReactElement | null {
+  if (!isLifetimeDealAvailable()) return null
+  const remaining = getLifetimeDealSpotsRemaining()
+  const total = LIFETIME_DEAL.spotsTotal
+  const taken = total - remaining
+  const progressPct = Math.round((taken / total) * 100)
+  const mailtoHref = `mailto:${LIFETIME_DEAL.contactEmail}?subject=${encodeURIComponent(
+    'Partenaire Fondateur KOVAS — Lifetime Deal',
+  )}&body=${encodeURIComponent(
+    'Bonjour Benjamin,\n\nJe souhaite réserver un spot Partenaire Fondateur KOVAS (2000 € — 3 ans d’accès Cabinet).\n\nMon SIRET : \nMa zone d’activité : \nVolume missions / mois : \n\nMerci de me confirmer la disponibilité d’un spot.\n\nCordialement,\n',
+  )}`
+  return (
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#0F1419] text-paper">
+      <div className="max-w-[1240px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-12 lg:gap-20 items-start">
+          {/* Colonne gauche : titre + bénéfices */}
+          <div className="space-y-8">
+            <div className="space-y-3">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-chartreuse flex items-center gap-2">
+                <Sparkles className="size-3.5" aria-hidden /> Offre scarce ·{' '}
+                {LIFETIME_DEAL.windowLabel}
+              </p>
+              <h2
+                className="font-sans font-medium tracking-tight text-paper leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4.5vw, 64px)' }}
+              >
+                Partenaire{' '}
+                <span className="font-serif italic font-normal text-chartreuse">Fondateur.</span>
+              </h2>
+              <p className="text-[15px] text-paper/72 max-w-xl leading-relaxed">
+                Tu crois au projet KOVAS. Tu veux verrouiller un tarif et peser sur la roadmap. On
+                ouvre {total} spots Partenaire Fondateur sur l’ensemble du{' '}
+                {LIFETIME_DEAL.windowLabel.toLowerCase()}. Une fois pris, c’est fermé.
+              </p>
+            </div>
+            <ul className="space-y-3">
+              {PARTENAIRE_FONDATEUR_BENEFITS.map((b) => (
+                <li key={b} className="flex items-start gap-3 text-[14px] text-paper/85">
+                  <CheckCircle2
+                    className="size-5 text-chartreuse-deep shrink-0 mt-0.5"
+                    aria-hidden
+                  />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Colonne droite : prix + compteur + CTA */}
+          <div className="rounded-2xl border border-paper/15 bg-[#0F1419] p-8 space-y-7">
+            <div>
+              <p className="font-mono uppercase tracking-wider text-[11px] text-paper/55">
+                Tarif unique
+              </p>
+              <div className="mt-3 flex items-baseline gap-2">
+                <span
+                  className="font-serif italic font-normal text-chartreuse leading-none"
+                  style={{ fontSize: 'clamp(56px, 6vw, 96px)' }}
+                >
+                  2 000 €
+                </span>
+                <span className="text-[14px] text-paper/55 font-mono">HT · une fois</span>
+              </div>
+              <p className="mt-2 text-[13px] text-paper/72">
+                {LIFETIME_DEAL.durationMonths} mois d’accès Cabinet (199 € / mois) ={' '}
+                {((LIFETIME_DEAL.durationMonths * 19900) / 100).toLocaleString('fr-FR')} €
+                économisés sur 3 ans.
+              </p>
+            </div>
+
+            {/* Compteur visuel spots restants */}
+            <div className="space-y-2">
+              <div className="flex items-baseline justify-between text-[13px]">
+                <span className="text-paper/72">
+                  Spots restants {LIFETIME_DEAL.windowLabel.toLowerCase()}
+                </span>
+                <span className="font-mono font-semibold text-chartreuse tabular-nums">
+                  {remaining} / {total}
+                </span>
+              </div>
+              <div
+                role="progressbar"
+                tabIndex={-1}
+                aria-valuenow={taken}
+                aria-valuemin={0}
+                aria-valuemax={total}
+                aria-label="Progression des spots Partenaire Fondateur"
+                className="h-2 rounded-full bg-paper/10 overflow-hidden"
+              >
+                <div
+                  className="h-full bg-chartreuse transition-all duration-500"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+
+            <Button asChild variant="accent" size="lg" className="w-full justify-center">
+              <a href={mailtoHref}>
+                Devenir Partenaire Fondateur
+                <ArrowRight className="size-4" />
+              </a>
+            </Button>
+
+            <p className="text-[11px] text-paper/55 leading-relaxed">
+              Tu m’écris à {LIFETIME_DEAL.contactEmail}. Je valide ton dossier sous 24 h ouvrées, tu
+              paies en virement ou Stripe Checkout one-time. Ton accès Cabinet est activé
+              instantanément pour {LIFETIME_DEAL.durationMonths} mois.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /* SECTION ENGAGEMENTS (ex-FOOTER_PROMISES, reskinné V5)                       */
 /* ────────────────────────────────────────────────────────────────────────── */
 
@@ -932,6 +1067,7 @@ export default function TarifsPage(): React.ReactElement {
         <SectionTabs />
         <SectionAddons />
         <SectionLoyalty />
+        <SectionPartenaireFondateur />
         <SectionEngagements />
         <SectionGlossary />
         <SectionInternalLinks />

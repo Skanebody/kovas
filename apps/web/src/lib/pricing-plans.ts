@@ -33,6 +33,46 @@
 const SECONDS_PER_HOUR = 3600
 
 // ════════════════════════════════════════════════════════════════
+// LIFETIME DEAL — Partenaire Fondateur (Tugan v3.0)
+// ════════════════════════════════════════════════════════════════
+//
+// Offre scarce H1 2026 : 2 000 € one-time → 3 ans d'accès Cabinet
+// inclus + influence directe roadmap + accès Benjamin DM 24/7 +
+// mention publique sur sales page kovas.fr.
+//
+// Cf. docs Tugan v3.0 §13 + tarifs/page.tsx SectionPartenaireFondateur.
+//
+// Compteur `spotsRemaining` géré statiquement V1. V2 : table DB
+// `lifetime_deal_purchases` avec compteur Realtime.
+//
+export const LIFETIME_DEAL = {
+  /** Code Stripe one-time. */
+  code: 'lifetime_deal_founder' as const,
+  /** Prix unique HT en centimes. */
+  priceCents: 200_000,
+  /** Durée d'accès Cabinet incluse (mois). */
+  durationMonths: 36,
+  /** Plan auto-activé pour la durée. */
+  grantsPlan: 'cabinet' as const,
+  /** Spots totaux ouverts H1 2026. */
+  spotsTotal: 10,
+  /** Spots déjà pris (compteur manuel, à incrémenter au fil des achats). */
+  spotsTaken: 0,
+  /** Période de souscription. */
+  windowLabel: 'Premier semestre 2026',
+  /** Email contact pour souscrire (V1 — V2 : Stripe Checkout direct). */
+  contactEmail: 'contact@kovas.fr',
+} as const
+
+export function getLifetimeDealSpotsRemaining(): number {
+  return Math.max(0, LIFETIME_DEAL.spotsTotal - LIFETIME_DEAL.spotsTaken)
+}
+
+export function isLifetimeDealAvailable(): boolean {
+  return getLifetimeDealSpotsRemaining() > 0
+}
+
+// ════════════════════════════════════════════════════════════════
 // 1. TRACK LOGICIEL — 5 plans officiels V5 (29 / 79 / 199 / 499 €)
 // ════════════════════════════════════════════════════════════════
 
