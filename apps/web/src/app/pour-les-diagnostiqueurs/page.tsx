@@ -1,3 +1,4 @@
+import { CrossCheck6Sources } from '@/components/marketing/CrossCheck6Sources'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { B2BFeatures } from '@/components/public/landing/B2BFeatures'
@@ -203,6 +204,32 @@ export default function PourLesDiagnostiqueursPage() {
       <main className="flex-1">
         <HeroB2B />
         <PainPoints />
+        {/* Mécanisme unique propriétaire — Cross-Check 6 sources data.gouv
+            Le différenciateur Tugan : aucun autre logiciel certifié ne
+            combine ces 6 sources avant envoi ADEME. Mode static (server-
+            friendly, pas d'animation au scroll). */}
+        <section className="px-5 sm:px-12 py-20 sm:py-24 border-t border-[#0F1419]/[0.08] bg-sage">
+          <div className="max-w-[1240px] mx-auto space-y-10">
+            <div className="space-y-3 max-w-2xl">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+                02bis · Mécanisme unique
+              </p>
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 52px)' }}
+              >
+                Avant chaque envoi ADEME, KOVAS croise{' '}
+                <span className="font-serif italic font-normal">6 sources publiques</span>.
+              </h2>
+              <p className="text-[16px] sm:text-[17px] text-[#0F1419]/80 leading-relaxed max-w-xl">
+                Cadastre, DVF, ADEME historique, BAN, IGN, Géorisques. Si une incohérence existe
+                (DPE shopping, écart cadastre, classe énergie suspecte), KOVAS vous le signale AVANT
+                envoi. Aucun autre logiciel certifié ne combine ces 6 sources simultanément.
+              </p>
+            </div>
+            <CrossCheck6Sources mode="static" />
+          </div>
+        </section>
         <B2BFeatures />
         <ComparisonTable
           eyebrow="03 · Comparatif"

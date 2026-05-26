@@ -35,6 +35,7 @@
  * + bascule tutoiement).
  */
 
+import { CrossCheck6Sources } from '@/components/marketing/CrossCheck6Sources'
 import { RotatingSoftwareName } from '@/components/marketing/RotatingSoftwareName'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
@@ -592,33 +593,25 @@ function SectionCrossCheckSignature(): React.ReactElement {
             </p>
           </div>
 
-          {/* Colonne droite : liste explicite des 6 sources (2/5 ≈ 40%) */}
+          {/* Colonne droite : composant CrossCheck6Sources animé (2/5 ≈ 40%)
+              Lot B+ — bascule du markup inline vers le composant réutilisable
+              `<CrossCheck6Sources mode="animated" />` : ticks chartreuse en
+              cascade (300ms initial + 150ms par source) qui matérialisent
+              visuellement le contrôle automatique avant ADEME. Respect
+              `prefers-reduced-motion`. La constante `sources` ci-dessus
+              reste utilisée pour le ledger SEO (sr-only) mais l'UI passe
+              par le composant. */}
           <div className="lg:col-span-2">
             <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-6 sm:p-7">
               <p className="font-mono uppercase tracking-wider text-[10px] text-[#0F1419]/55 mb-5">
                 Les 6 sources croisées
               </p>
-              <ul className="space-y-4">
-                {sources.map((s, idx) => (
-                  <li
-                    key={s.code}
-                    className={
-                      idx === sources.length - 1
-                        ? 'flex items-start gap-3'
-                        : 'flex items-start gap-3 pb-4 border-b border-[#0F1419]/[0.06]'
-                    }
-                  >
-                    <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[#0F1419]/[0.08] bg-[#F5F7F4]/80 text-[#0F1419]/72">
-                      {s.icon}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-mono text-[12px] font-semibold uppercase tracking-wide text-[#0F1419]">
-                        {s.code}
-                      </p>
-                      <p className="text-[13px] text-[#0F1419]/72 leading-snug mt-0.5">
-                        {s.description}
-                      </p>
-                    </div>
+              <CrossCheck6Sources mode="animated" />
+              {/* Ledger SEO : conserve les anciennes descriptions pour le crawl */}
+              <ul className="sr-only">
+                {sources.map((s) => (
+                  <li key={s.code}>
+                    {s.code} — {s.description}
                   </li>
                 ))}
               </ul>
