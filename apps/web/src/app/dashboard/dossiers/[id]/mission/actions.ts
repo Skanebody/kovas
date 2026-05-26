@@ -34,48 +34,43 @@ export async function createRoomAction(
   }
   const { supabase, orgId } = await getCurrentUser()
 
-  // Vérifier que le dossier appartient bien à l'org (RLS le bloquerait sinon,
-  // mais on retourne un message clair).
-  const { data: dossier, error: dossierErr } = await supabase
-    .from('dossiers')
-    .select('id')
-    .eq('id', parsed.data.dossierId)
-    .eq('organization_id', orgId)
-    .is('deleted_at', null)
-    .single()
+  // RPC atomique `create_or_get_dossier_room` (migration 20260615100000) :
+  //   - check is_member_of(org_id) côté DB
+  //   - SELECT existing room (case-insensitive) ou INSERT atomique
+  //   - en cas de race (2 inserts simultanés offline-sync), retourne la row
+  //     qui a gagné grâce au UNIQUE INDEX partial (cf. audit P1-1 mode mission).
+  const rpc = supabase.rpc as unknown as (
+    fn: 'create_or_get_dossier_room',
+    args: {
+      p_dossier_id: string
+      p_org_id: string
+      p_name: string
+      p_room_type?: string | null
+    },
+  ) => Promise<{
+    data: Array<{ id: string; position: number; name: string; created: boolean }> | null
+    error: { message: string; code?: string } | null
+  }>
 
-  if (dossierErr || !dossier) {
-    return { error: 'Dossier introuvable ou accès refusé' }
+  const { data, error } = await rpc('create_or_get_dossier_room', {
+    p_dossier_id: parsed.data.dossierId,
+    p_org_id: orgId,
+    p_name: parsed.data.name,
+  })
+
+  if (error || !data || data.length === 0) {
+    // Mapping des codes d'erreur SQL vers messages user-friendly
+    if (error?.code === '42501') return { error: 'Accès refusé à cette organisation' }
+    if (error?.code === 'P0002') return { error: 'Dossier introuvable ou accès refusé' }
+    return { error: error?.message ?? 'Création de pièce impossible' }
   }
 
-  // Position = max(position) + 1
-  const { data: maxRow } = await supabase
-    .from('dossier_rooms')
-    .select('position')
-    .eq('dossier_id', parsed.data.dossierId)
-    .order('position', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  const nextPosition = (maxRow?.position ?? -1) + 1
-
-  const { data: room, error } = await supabase
-    .from('dossier_rooms')
-    .insert({
-      dossier_id: parsed.data.dossierId,
-      organization_id: orgId,
-      name: parsed.data.name,
-      position: nextPosition,
-    })
-    .select('id')
-    .single()
-
-  if (error || !room) {
-    return { error: error?.message ?? 'Insert room failed' }
+  const row = data[0]
+  if (!row) {
+    return { error: 'Création de pièce impossible' }
   }
-
   revalidatePath(`/dashboard/dossiers/${parsed.data.dossierId}/mission`)
-  return { roomId: room.id as string }
+  return { roomId: row.id }
 }
 
 // ============================================
@@ -169,42 +164,34 @@ export async function uploadCapturePhotoAction(
   }
 
   if (!resolvedRoomId && parsed.data.roomName) {
-    const { data: existing } = await supabase
-      .from('dossier_rooms')
-      .select('id')
-      .eq('dossier_id', dossierId)
-      .eq('organization_id', orgId)
-      .ilike('name', parsed.data.roomName)
-      .limit(1)
-      .maybeSingle()
+    // RPC atomique (migration 20260615100000) — résout case-insensitive ou crée.
+    // En mode photos rafale offline, N appels parallèles avec le même roomName
+    // ne créent plus N doublons grâce au UNIQUE INDEX partial (cf. audit P1-2).
+    const rpc = supabase.rpc as unknown as (
+      fn: 'create_or_get_dossier_room',
+      args: {
+        p_dossier_id: string
+        p_org_id: string
+        p_name: string
+        p_room_type?: string | null
+      },
+    ) => Promise<{
+      data: Array<{ id: string; position: number; name: string; created: boolean }> | null
+      error: { message: string; code?: string } | null
+    }>
 
-    if (existing) {
-      resolvedRoomId = existing.id as string
-    } else {
-      const { data: maxRow } = await supabase
-        .from('dossier_rooms')
-        .select('position')
-        .eq('dossier_id', dossierId)
-        .order('position', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      const nextPosition = (maxRow?.position ?? -1) + 1
+    const { data: rpcData, error: rpcErr } = await rpc('create_or_get_dossier_room', {
+      p_dossier_id: dossierId,
+      p_org_id: orgId,
+      p_name: parsed.data.roomName,
+    })
 
-      const { data: created, error: createErr } = await supabase
-        .from('dossier_rooms')
-        .insert({
-          dossier_id: dossierId,
-          organization_id: orgId,
-          name: parsed.data.roomName,
-          position: nextPosition,
-        })
-        .select('id')
-        .single()
-      if (createErr || !created) {
-        return { error: createErr?.message ?? 'Insert room failed' }
-      }
-      resolvedRoomId = created.id as string
+    if (rpcErr || !rpcData || rpcData.length === 0) {
+      return { error: rpcErr?.message ?? 'Résolution de pièce impossible' }
     }
+    const firstRoom = rpcData[0]
+    if (!firstRoom) return { error: 'Résolution de pièce impossible' }
+    resolvedRoomId = firstRoom.id
   }
 
   // 3. Construction location PostGIS si GPS fourni

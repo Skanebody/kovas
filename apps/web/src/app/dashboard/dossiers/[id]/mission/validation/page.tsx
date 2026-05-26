@@ -13,7 +13,6 @@
  */
 
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ValidationClient } from './validation-client'
@@ -108,22 +107,25 @@ export default async function MissionValidationPage({
 
   if (!dossier) notFound()
 
-  // Charger les rooms 3CL (admin client pour éviter pb RLS sur la nouvelle table)
-  const admin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  )
-
+  // Charger les rooms 3CL via le client user-context — la RLS
+  // `is_member_of(organization_id)` est en place (migration 20260524600000:48-54),
+  // donc adminClient bypass n'est PAS nécessaire et serait une fuite cross-tenant
+  // (cf. audit P1-7 mode mission). Note : on filtre aussi explicitement par
+  // organization_id pour defense-in-depth.
   let rooms: Room3CLRow[] = []
   if (session?.id) {
-    const tbl = admin.from('mission_rooms_3cl_data') as unknown as {
+    const tbl = supabase.from('mission_rooms_3cl_data' as never) as unknown as {
       select: (q: string) => {
         eq: (
           k: string,
           v: string,
         ) => {
-          order: (k: string, o: { ascending: boolean }) => Promise<{ data: Room3CLRow[] | null }>
+          eq: (
+            k: string,
+            v: string,
+          ) => {
+            order: (k: string, o: { ascending: boolean }) => Promise<{ data: Room3CLRow[] | null }>
+          }
         }
       }
     }
@@ -132,6 +134,7 @@ export default async function MissionValidationPage({
         'id, mission_session_id, room_name, room_type, surface_sqm, ceiling_height_m, orientation, data_3cl, ai_confidence_score, source, validated_by_user, created_at',
       )
       .eq('mission_session_id', session.id)
+      .eq('organization_id', orgId)
       .order('created_at', { ascending: true })
     rooms = data ?? []
   }

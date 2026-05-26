@@ -20,6 +20,7 @@ import { getCurrentUser } from '@/lib/auth/current-user'
 import type { MissionFlowPhase } from '@/lib/mission-flow/state-machine'
 import { isTransitionAllowed } from '@/lib/mission-flow/state-machine'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 interface TransitionResult {
   success: boolean
@@ -59,9 +60,41 @@ export async function transitionMissionFlowAction(
   expectedVersion: number | null = null,
 ): Promise<TransitionResult> {
   // 1. Auth + récupération supabase user-context
-  const { supabase } = await getCurrentUser()
+  const { supabase, orgId } = await getCurrentUser()
 
-  // 2. Récupère la phase courante + version pour valider la transition côté code
+  // 2. SÉCURITÉ — Vérifier que la mission appartient à l'org de l'user
+  //    AVANT toute autre lecture (cf. audit P1-4). Sans ce check, un attaquant
+  //    pouvait énumérer les UUIDs valides via timing oracle (mission_not_found
+  //    vs version_mismatch) car la RPC ne re-check pas l'ownership cross-org.
+  type MissionOwnershipRow = { id: string }
+  const missionTbl = supabase.from('missions' as never) as unknown as {
+    select: (q: string) => {
+      eq: (
+        k: string,
+        v: string,
+      ) => {
+        eq: (
+          k: string,
+          v: string,
+        ) => {
+          maybeSingle: () => Promise<{ data: MissionOwnershipRow | null }>
+        }
+      }
+    }
+  }
+  const { data: missionRow } = await missionTbl
+    .select('id')
+    .eq('id', missionId)
+    .eq('organization_id', orgId)
+    .maybeSingle()
+
+  if (!missionRow) {
+    // Message constant-time (pas de différence avec un autre code) pour
+    // ne pas leaker l'existence de missions d'autres orgs.
+    return { success: false, code: 'mission_not_found', error: 'Mission introuvable.' }
+  }
+
+  // 3. Récupère la phase courante + version pour valider la transition côté code
   //    avant le round-trip RPC (early-fail UX).
   type FlowStateRow = { current_phase: MissionFlowPhase; mission_id: string; version: number }
   const flowTbl = supabase.from('mission_flow_states' as never) as unknown as {
@@ -141,11 +174,21 @@ export async function transitionMissionFlowAction(
 /**
  * Initialise le flow pour une mission donnée — première transition
  * preparation → capture_terrain. Utilisé par le formulaire EmptyState.
- * Signature `void` pour compatibilité directe avec `<form action>`.
+ *
+ * Cf. audit P1-5 : la signature `void` perdait les erreurs RPC, l'utilisateur
+ * voyait juste la page rechargée avec l'EmptyState toujours là (zéro feedback).
+ * Maintenant, en cas d'échec on redirige avec `?flow_error=…` que le caller
+ * peut lire pour afficher un toast / banner.
  */
 export async function initializeMissionFlowAction(
   missionId: string,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<void> {
-  await transitionMissionFlowAction(missionId, 'capture_terrain', null)
+  const result = await transitionMissionFlowAction(missionId, 'capture_terrain', null)
+  // Le dossierId vient du form action côté caller (`<input type=hidden name=dossierId>`)
+  const dossierId = formData.get('dossierId')
+  if (!result.success && typeof dossierId === 'string' && dossierId.length > 0) {
+    const errorCode = result.code ?? 'unknown'
+    redirect(`/dashboard/dossiers/${dossierId}/mission/flow?flow_error=${errorCode}`)
+  }
 }

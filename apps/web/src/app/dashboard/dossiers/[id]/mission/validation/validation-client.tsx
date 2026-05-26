@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { toast } from '@/components/ui/toaster'
 import { cn } from '@/lib/utils'
 import {
   AlertTriangle,
@@ -231,8 +232,13 @@ export function ValidationClient({
     startSync(async () => {
       const res = await triggerProcessMissionPayloadAction(session.id)
       if ('error' in res) {
-        // afficher erreur (toast minimal via alert pour ne pas dépendre d'une lib)
-        console.error(res.error)
+        // Toast utilisateur (cf. audit P1-9 mode mission). Avant : console.error
+        // muet → l'utilisateur cliquait 5x sans feedback puis spammait l'API.
+        toast.error('Synchronisation impossible', {
+          description: res.error,
+        })
+      } else {
+        toast.success('Synchronisation lancée — vous serez notifié à la fin.')
       }
     })
   }
@@ -263,6 +269,12 @@ export function ValidationClient({
             : r,
         ),
       )
+    } else {
+      // Toast d'erreur (cf. audit P1-8). Avant : aucun feedback, le champ revenait
+      // silencieusement à sa valeur initiale, l'utilisateur croyait avoir sauvegardé.
+      toast.error('Modification non sauvegardée', {
+        description: res.error,
+      })
     }
   }
 
