@@ -1657,7 +1657,7 @@ export function MissionTchatInterface({
           )}
 
           {/* Input bar sticky bottom */}
-          <div className="border-t border-[#0F1419]/[0.08] bg-paper px-3 sm:px-5 py-3 shrink-0">
+          <div className="border-t border-[#0F1419]/[0.08] bg-paper px-3 sm:px-5 py-3 shrink-0 pb-[max(env(safe-area-inset-bottom),12px)]">
             {/* MISSION-E niveau 4 (local) : banner cross-check metier */}
             {pendingCoherenceIssues.length > 0 ? (
               <div className="mx-auto max-w-3xl mb-2">

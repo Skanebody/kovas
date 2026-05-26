@@ -137,7 +137,7 @@ export function TrendsChart({ title, series, defaultPeriod = '1y', hint }: Trend
 
   return (
     <Card variant="opaque" padding="none" className="rounded-[24px] overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-[#0F1419]/[0.08] px-6 py-4 flex-wrap">
+      <div className="flex items-center justify-between gap-3 border-b border-[#0F1419]/[0.08] px-4 sm:px-6 py-4 flex-wrap">
         <p className="font-sans font-semibold text-[14px] text-[#0F1419]">{title}</p>
 
         <div className="flex items-center gap-1 rounded-pill border border-[#0F1419]/[0.08] p-0.5 bg-paper">
@@ -158,7 +158,7 @@ export function TrendsChart({ title, series, defaultPeriod = '1y', hint }: Trend
       </div>
 
       {/* Légende */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 px-6 pt-4">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 px-4 sm:px-6 pt-4">
         {series.map((s) => (
           <span
             key={s.id}
@@ -281,7 +281,7 @@ export function TrendsChart({ title, series, defaultPeriod = '1y', hint }: Trend
 
       {/* Tooltip valeurs hover */}
       {hoverIdx != null ? (
-        <div className="border-t border-[#0F1419]/[0.08] px-6 py-3 flex flex-wrap gap-x-5 gap-y-1.5">
+        <div className="border-t border-[#0F1419]/[0.08] px-4 sm:px-6 py-3 flex flex-wrap gap-x-5 gap-y-1.5">
           <p className="font-mono text-[11px] text-[#0F1419] font-semibold tracking-[0.05em]">
             {formatShortMonth(months[hoverIdx] ?? '')}
           </p>
@@ -299,7 +299,7 @@ export function TrendsChart({ title, series, defaultPeriod = '1y', hint }: Trend
       ) : null}
 
       {hint ? (
-        <div className="border-t border-[#0F1419]/[0.08] px-6 py-3">
+        <div className="border-t border-[#0F1419]/[0.08] px-4 sm:px-6 py-3">
           <p className="font-mono text-[10px] text-[#0F1419]/72 leading-relaxed">{hint}</p>
         </div>
       ) : null}

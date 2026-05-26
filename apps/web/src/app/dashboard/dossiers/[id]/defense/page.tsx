@@ -204,7 +204,7 @@ export default async function DossierDefensePage({
           {photos.length === 0 ? (
             <p className="text-sm text-[#0F1419]/72">Aucune photo contextuelle attachée.</p>
           ) : (
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
               {photos.map((p) => {
                 const url = photoUrlMap.get(p.id)
                 if (!url) return null

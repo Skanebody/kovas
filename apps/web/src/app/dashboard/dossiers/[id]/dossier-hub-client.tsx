@@ -230,7 +230,7 @@ export function DossierHubClient({
 
       {/* Bottom nav mobile */}
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-[#0F1419]/[0.08] bg-paper"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-[#0F1419]/[0.08] bg-paper pb-[env(safe-area-inset-bottom)]"
         role="tablist"
         aria-label="Navigation dossier"
       >

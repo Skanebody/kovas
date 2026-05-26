@@ -79,6 +79,7 @@ export function MissionFocusDrawer({
   }
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: drawer mission plein écran non-modal HTML natif (z-index custom + animation)
     <div
       role="dialog"
       aria-modal="true"
@@ -99,7 +100,10 @@ export function MissionFocusDrawer({
         <div className="flex-1 min-w-0 text-center">
           <div className="flex items-center justify-center gap-2 flex-wrap">
             <span className="text-sm font-semibold truncate text-paper">{label}</span>
-            <Badge variant="muted" className="text-[10px] py-0 bg-paper/15 text-paper border-paper/20">
+            <Badge
+              variant="muted"
+              className="text-[10px] py-0 bg-paper/15 text-paper border-paper/20"
+            >
               {percentage}%
             </Badge>
           </div>
@@ -161,7 +165,7 @@ export function MissionFocusDrawer({
         </section>
       </main>
 
-      <footer className="glass-dark fixed bottom-4 inset-x-4 mx-auto max-w-lg rounded-pill px-3 py-2 flex items-center justify-between gap-2 border border-paper/15 shadow-lg">
+      <footer className="glass-dark fixed bottom-[max(env(safe-area-inset-bottom),16px)] inset-x-4 mx-auto max-w-lg rounded-pill px-3 py-2 flex items-center justify-between gap-2 border border-paper/15 shadow-lg">
         <div className="flex items-center gap-1">
           <Button
             variant="outline"

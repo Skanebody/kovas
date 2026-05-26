@@ -65,7 +65,7 @@ export function BenchmarkComparison({
 
   return (
     <Card variant="opaque" padding="none" className="rounded-[24px] overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-[#0F1419]/[0.08] px-6 py-4">
+      <div className="flex items-center justify-between gap-3 border-b border-[#0F1419]/[0.08] px-4 sm:px-6 py-4">
         <p className="font-sans font-semibold text-[14px] text-[#0F1419]">{title}</p>
         <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#0F1419]/72">
           {rows.length} métrique{rows.length > 1 ? 's' : ''}

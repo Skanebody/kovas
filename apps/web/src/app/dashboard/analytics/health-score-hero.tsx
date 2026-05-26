@@ -120,7 +120,7 @@ export function HealthScoreHero({
 
   return (
     <Card variant="opaque" padding="none" className="rounded-[24px] overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-[#0F1419]/[0.08] px-6 py-4">
+      <div className="flex items-center justify-between gap-3 border-b border-[#0F1419]/[0.08] px-4 sm:px-6 py-4">
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] font-semibold text-[#0F1419]">
           Santé du cabinet
         </p>
@@ -136,13 +136,13 @@ export function HealthScoreHero({
         </span>
       </div>
 
-      <div className="px-6 py-8 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-8 items-center">
+      <div className="px-4 sm:px-6 py-8 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 md:gap-8 items-center">
         {/* Score en gros */}
         <div className="flex flex-col items-start">
           <div className="flex items-baseline gap-2">
             <span
               className={cn(
-                'font-serif italic font-normal text-[88px] sm:text-[112px] leading-none tracking-tight',
+                'font-serif italic font-normal text-[72px] sm:text-[88px] md:text-[112px] leading-none tracking-tight',
                 colors.text,
               )}
             >
