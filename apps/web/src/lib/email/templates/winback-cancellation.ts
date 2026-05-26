@@ -5,8 +5,9 @@
  * Ne s'exécute que pour les cancellations confirmed_at <= now() - 7 jours et
  * winback_email_sent_at IS NULL.
  *
- * Ton : sobre, professionnel, signature humaine Benjamin. Aucun emoji. Aucun
- * gimmick gaming. Cf. avatar client docs/avatar-client.md.
+ * Ton : sobre, professionnel, tutoiement (sweep B86), signature humaine
+ * Benjamin. Aucun emoji. Aucun gimmick gaming. Cf. avatar client
+ * docs/avatar-client.md.
  *
  * Le lien `reactivate` est unique (winback_code) et expire 6 mois après la
  * résiliation. Réutilisable seulement 1 fois (winback_code_used_at NULL).
@@ -45,23 +46,23 @@ export function buildWinbackEmail(vars: WinbackEmailVars): WinbackEmailPayload {
   const firstNameClean = (vars.firstName || '').trim().split(' ')[0] || 'bonjour'
   const reactivateUrl = `${vars.appUrl.replace(/\/+$/, '')}/dashboard/account?reactivate=${encodeURIComponent(vars.winbackCode)}`
 
-  const subject = `On regrette de vous voir partir, ${firstNameClean}`
+  const subject = `On regrette de te voir partir, ${firstNameClean}`
 
   const feedbackPart = vars.feedbackExcerpt
-    ? `Vous nous avez écrit : « ${vars.feedbackExcerpt}${vars.feedbackExcerpt.length >= 100 ? '…' : ''} ». Nous l'avons lu attentivement.`
-    : 'Nous avons relu votre retour attentivement.'
+    ? `Tu nous as écrit : « ${vars.feedbackExcerpt}${vars.feedbackExcerpt.length >= 100 ? '…' : ''} ». Nous l'avons lu attentivement.`
+    : 'Nous avons relu ton retour attentivement.'
 
   const text = `${firstNameClean},
 
-Cela fait une semaine que vous avez quitté KOVAS. Pas de relance — juste un mot rapide.
+Cela fait une semaine que tu as quitté KOVAS. Pas de relance — juste un mot rapide.
 
 ${feedbackPart}
 
-Si vous souhaitez revenir, voici un code unique valide 6 mois :
+Si tu souhaites revenir, voici un code unique valide 6 mois :
 
   ${vars.winbackCode}
 
-Il vous donne accès à votre formule précédente avec -${vars.discountPercent}% pendant ${vars.discountDurationMonths} mois.
+Il te donne accès à ta formule précédente avec -${vars.discountPercent}% pendant ${vars.discountDurationMonths} mois.
 
 Réactiver mon compte :
 ${reactivateUrl}
@@ -83,11 +84,11 @@ contact@kovas.fr
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="background:#FDFBF6;border:1px solid #D5CDB8;border-radius:18px;padding:32px;max-width:600px;">
         <tr><td style="font-size:15px;line-height:1.6;color:#0F1E3D;">
           <p style="margin:0 0 16px 0;">${escapeHtml(firstNameClean)},</p>
-          <p style="margin:0 0 16px 0;">Cela fait une semaine que vous avez quitté KOVAS. Pas de relance — juste un mot rapide.</p>
+          <p style="margin:0 0 16px 0;">Cela fait une semaine que tu as quitté KOVAS. Pas de relance — juste un mot rapide.</p>
           <p style="margin:0 0 16px 0;color:#4A5878;font-style:italic;">${escapeHtml(feedbackPart)}</p>
-          <p style="margin:0 0 8px 0;">Si vous souhaitez revenir, voici un code unique valide 6 mois :</p>
+          <p style="margin:0 0 8px 0;">Si tu souhaites revenir, voici un code unique valide 6 mois :</p>
           <p style="margin:0 0 16px 0;font-family:'JetBrains Mono',monospace;font-size:16px;background:#F8F5EE;border:1px solid #D5CDB8;border-radius:8px;padding:10px 16px;display:inline-block;">${escapeHtml(vars.winbackCode)}</p>
-          <p style="margin:0 0 24px 0;">Il vous donne accès à votre formule précédente avec <strong>-${vars.discountPercent}% pendant ${vars.discountDurationMonths} mois</strong>.</p>
+          <p style="margin:0 0 24px 0;">Il te donne accès à ta formule précédente avec <strong>-${vars.discountPercent}% pendant ${vars.discountDurationMonths} mois</strong>.</p>
           <p style="margin:24px 0;">
             <a href="${escapeHtml(reactivateUrl)}" style="display:inline-block;background:#0F1E3D;color:#F8F5EE;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:600;">Réactiver mon compte</a>
           </p>

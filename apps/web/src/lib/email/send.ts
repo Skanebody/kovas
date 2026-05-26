@@ -53,7 +53,7 @@ export async function sendEmail(payload: EmailPayload): Promise<EmailResult> {
 
   if (!apiKey) {
     // Mode dev / staging sans clé — stub success + log
-    console.log('[email:stub]', {
+    console.info('[email:stub]', {
       to: payload.to,
       subject: payload.subject,
       category: payload.category,
@@ -77,10 +77,7 @@ export async function sendEmail(payload: EmailPayload): Promise<EmailResult> {
         html: payload.html,
         text: payload.text,
         reply_to: payload.replyTo,
-        tags: [
-          { name: 'category', value: payload.category },
-          ...(payload.tags ?? []),
-        ],
+        tags: [{ name: 'category', value: payload.category }, ...(payload.tags ?? [])],
       }),
     })
 
@@ -149,7 +146,8 @@ Fondateur KOVAS
  * Email de notification — déblocage d'un nouveau statut professionnel.
  *
  * Ton SOBRE PROFESSIONNEL (cf. docs/avatar-client.md) :
- *   vouvoiement, aucun emoji marketing, signature humaine Benjamin.
+ *   tutoiement professionnel sobre (sweep B86), aucun emoji marketing,
+ *   signature humaine Benjamin.
  *
  * Max 1 email / mois côté caller (anti-spam).
  */
@@ -163,14 +161,14 @@ export async function sendLevelUnlockedEmail(opts: {
 
   const text = `Bonjour ${firstName},
 
-Vous venez de débloquer le statut "${levelLabel}" sur KOVAS.
+Tu viens de débloquer le statut "${levelLabel}" sur KOVAS.
 
 ${levelDescription}
 
-Ce statut reconnaît votre engagement et votre activité sur la plateforme. Il est consultable depuis votre tableau de bord :
+Ce statut reconnaît ton engagement et ton activité sur la plateforme. Il est consultable depuis ton tableau de bord :
 https://kovas.fr/app/account/progression
 
-Aucune action n'est requise de votre part. Ce statut ne donne accès à aucun avantage tarifaire — il s'agit d'une marque de reconnaissance.
+Aucune action n'est requise de ta part. Ce statut ne donne accès à aucun avantage tarifaire — il s'agit d'une marque de reconnaissance.
 
 Cordialement,
 Benjamin Bel

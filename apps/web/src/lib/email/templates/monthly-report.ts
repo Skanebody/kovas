@@ -3,7 +3,8 @@
  *
  * Ton SOBRE PROFESSIONNEL OBLIGATOIRE — avatar diagnostiqueur 35-55 ans,
  * ex-cadre reconverti. Pas d'émojis fun, pas de "Hero/Légende/Wrapped",
- * vouvoiement, chiffres précis, signature humaine "— Benjamin / KOVAS".
+ * tutoiement professionnel sobre (sweep B86), chiffres précis,
+ * signature humaine "— Benjamin / KOVAS".
  *
  * Format HTML inline minimal (compatible Gmail/Outlook/Apple Mail) +
  * version texte pour clients qui n'affichent pas l'HTML.
@@ -66,7 +67,7 @@ function formatDuration(minutes: number): string {
 /** Format "2 350 €" sobre, sans décimales (centimes implicites). */
 function formatEuros(cents: number): string {
   const euros = Math.round(cents / 100)
-  return new Intl.NumberFormat('fr-FR').format(euros) + ' €'
+  return `${new Intl.NumberFormat('fr-FR').format(euros)} €`
 }
 
 /** Mapping diag enum → label lisible (court, sobre). */
@@ -134,7 +135,7 @@ function renderHtml(d: MonthlyReportData): string {
                 KOVAS — Rapport mensuel
               </p>
               <h1 style="margin:0; font-size:24px; font-weight:700; letter-spacing:-0.01em; color:${COLOR_INK};">
-                Votre activité de ${monthLabel.toLowerCase()} ${d.periodYear}
+                Ton activité de ${monthLabel.toLowerCase()} ${d.periodYear}
               </h1>
             </td>
           </tr>
@@ -144,7 +145,7 @@ function renderHtml(d: MonthlyReportData): string {
             <td style="padding:24px 32px 8px 32px;">
               <p style="margin:0 0 20px 0; font-size:15px; line-height:1.55; color:${COLOR_INK};">
                 Bonjour ${firstName},<br /><br />
-                Voici le récapitulatif de votre activité enregistrée dans KOVAS pour le mois de ${monthLabel.toLowerCase()} ${d.periodYear}.
+                Voici le récapitulatif de ton activité enregistrée dans KOVAS pour le mois de ${monthLabel.toLowerCase()} ${d.periodYear}.
               </p>
 
               <!-- KPI principaux -->
@@ -261,7 +262,7 @@ function renderText(d: MonthlyReportData): string {
 
   return `Bonjour ${firstName},
 
-Voici le récapitulatif de votre activité enregistrée dans KOVAS pour le mois de ${monthLabel.toLowerCase()} ${d.periodYear}.
+Voici le récapitulatif de ton activité enregistrée dans KOVAS pour le mois de ${monthLabel.toLowerCase()} ${d.periodYear}.
 
 Missions réalisées : ${d.missionsCount}${trend}
 Temps économisé estimé : ${formatDuration(d.timeSavedMinutes)} (basé sur 1 h 30 par mission)

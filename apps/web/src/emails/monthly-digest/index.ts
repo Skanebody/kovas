@@ -8,6 +8,7 @@
  *   - Lien préférences notifications email
  *
  * Pas de glow, pas de gradient fancy, pas d'emoji marketing.
+ * Tutoiement professionnel sobre (sweep B86).
  * Cf. docs/avatar-client.md — ton SOBRE PROFESSIONNEL.
  */
 
@@ -72,7 +73,7 @@ export function renderMonthlyDigestHtml(data: MonthlyDigestData): string {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Votre activité du mois — KOVAS</title>
+<title>Ton activité du mois — KOVAS</title>
 </head>
 <body style="margin:0;padding:0;background:#F8F5EE;font-family:'Manrope',Arial,sans-serif;color:#0F1E3D;">
 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#F8F5EE;padding:32px 0;">
@@ -86,7 +87,7 @@ export function renderMonthlyDigestHtml(data: MonthlyDigestData): string {
           ${escapeHtml(monthLabel)}
         </h1>
         <p style="font-family:'Manrope',sans-serif;font-size:14px;color:#4A5878;line-height:1.5;margin:0 0 28px 0;">
-          Bonjour ${escapeHtml(recipientFirstName)}, voici un aperçu de votre activité du mois.
+          Bonjour ${escapeHtml(recipientFirstName)}, voici un aperçu de ton activité du mois.
         </p>
 
         <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top:1px solid #E5DECB;margin-bottom:8px;">
@@ -125,7 +126,7 @@ export function renderMonthlyDigestHtml(data: MonthlyDigestData): string {
         <p style="font-family:'Manrope',sans-serif;font-size:12px;color:#4A5878;margin:0;">Fondateur · KOVAS</p>
 
         <p style="font-family:'Manrope',sans-serif;font-size:11px;color:#7E8AA4;margin:24px 0 0 0;line-height:1.5;">
-          Vous recevez ce mail parce que vous avez activé les rapports mensuels d&apos;activité.
+          Tu reçois ce mail parce que tu as activé les rapports mensuels d&apos;activité.
           <a href="${escapeHtml(unsubscribeUrl)}" style="color:#7E8AA4;text-decoration:underline;">Préférences de notification</a>.
         </p>
       </td></tr>
