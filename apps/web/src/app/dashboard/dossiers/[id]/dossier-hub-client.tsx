@@ -26,6 +26,8 @@ interface DossierHubClientProps {
   activityLog: ReactNode | null
   /** Lot Géorisques étendu — Radon / PPRI / Argiles / Cavités (peut être null). */
   extendedRisks: ReactNode | null
+  /** Lot Mes Aides Réno — bannière visible quand DPE F/G détecté (peut être null). */
+  aidesBanner: ReactNode | null
   sidebar: ReactNode
 }
 
@@ -54,6 +56,7 @@ export function DossierHubClient({
   historicalDocs,
   activityLog,
   extendedRisks,
+  aidesBanner,
   sidebar,
 }: DossierHubClientProps) {
   const router = useRouter()
@@ -148,6 +151,7 @@ export function DossierHubClient({
   )
   const detailsBlock = (
     <div className="space-y-3">
+      {aidesBanner}
       {visibleSections.capture ? capture : null}
       {visibleSections.dataQuality ? dataQuality : null}
       {visibleSections.preExport ? preExport : null}
@@ -181,6 +185,7 @@ export function DossierHubClient({
       {/* Desktop / tablette : grid 12 cols (8+4) */}
       <div className="hidden lg:grid gap-6 lg:grid-cols-12 pb-12">
         <div className="lg:col-span-8 space-y-4">
+          {aidesBanner}
           {visibleSections.identity ? identity : null}
           {visibleSections.capture ? capture : null}
           {visibleSections.dataQuality ? dataQuality : null}
@@ -199,6 +204,7 @@ export function DossierHubClient({
 
       {/* Tablette portrait (md) : empilé 1 colonne, sidebar en bas */}
       <div className="hidden md:block lg:hidden space-y-4 pb-24">
+        {aidesBanner}
         {visibleSections.identity ? identity : null}
         {visibleSections.capture ? capture : null}
         {visibleSections.dataQuality ? dataQuality : null}

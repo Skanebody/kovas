@@ -1,14 +1,15 @@
-import { ActivityLogSection, type ActivityEvent } from '@/components/dossier/hub/ActivityLogSection'
-import { BillingSection, type BillingItem } from '@/components/dossier/hub/BillingSection'
+import { type ActivityEvent, ActivityLogSection } from '@/components/dossier/hub/ActivityLogSection'
+import { type BillingItem, BillingSection } from '@/components/dossier/hub/BillingSection'
 import { CaptureSection } from '@/components/dossier/hub/CaptureSection'
 import { CommunicationSection } from '@/components/dossier/hub/CommunicationSection'
 import { DataQualitySection } from '@/components/dossier/hub/DataQualitySection'
 import { ExportsSection } from '@/components/dossier/hub/ExportsSection'
+import { ExtendedRisksSection } from '@/components/dossier/hub/ExtendedRisksSection'
 import { FollowupSection } from '@/components/dossier/hub/FollowupSection'
 import {
-  HistoricalDocumentsSection,
   type HistoricalDocumentCategory,
   type HistoricalDocumentItem,
+  HistoricalDocumentsSection,
 } from '@/components/dossier/hub/HistoricalDocumentsSection'
 import { HubHeader } from '@/components/dossier/hub/HubHeader'
 import { IdentitySection } from '@/components/dossier/hub/IdentitySection'
@@ -20,15 +21,16 @@ import type { Opportunity } from '@/components/dossier/hub/SidebarBlocks/Opportu
 import type { OtherDossier } from '@/components/dossier/hub/SidebarBlocks/OtherDossiersBlock'
 import type { PropertyHistoryItem } from '@/components/dossier/hub/SidebarBlocks/PropertyHistoryBlock'
 import type { VigilanceSignal } from '@/components/dossier/hub/SidebarBlocks/VigilanceBlock'
-import { ExtendedRisksSection } from '@/components/dossier/hub/ExtendedRisksSection'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { runCoherenceChecks } from '@/lib/coherence-validation'
+import type { AideResult } from '@/lib/data-gouv/mes-aides-reno'
 import { getVisibleSections, resolveDossierState } from '@/lib/dossier/states'
 import { buildExtendedRisksFindings } from '@/lib/opendata/extended-risks-findings'
 import { getExtendedRisks } from '@/lib/opendata/georisques-cache'
 import type { VoiceParsedData } from '@/lib/voice-parser'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { AidesBanner } from './aides-banner'
 import { DossierHubClient } from './dossier-hub-client'
 import { DossierMoreMenu } from './dossier-more-menu'
 
@@ -231,26 +233,40 @@ export default async function DossierDetailPage({
     })
   }
 
-  const otherDossiers: OtherDossier[] = (otherDossiersData ?? []).map(
-    (d): OtherDossier => {
-      const dProp = Array.isArray((d as { properties?: unknown }).properties)
-        ? ((d as { properties?: Array<{ address: string | null; city: string | null; postal_code: string | null }> }).properties?.[0] ?? null)
-        : ((d as { properties?: { address: string | null; city: string | null; postal_code: string | null } | null }).properties ?? null)
-      return {
-        id: String((d as { id: string }).id),
-        reference: String((d as { reference: string }).reference),
-        status: String((d as { status: string }).status),
-        scheduled_at: (d as { scheduled_at: string | null }).scheduled_at ?? null,
-        started_at: (d as { started_at: string | null }).started_at ?? null,
-        completed_at: (d as { completed_at: string | null }).completed_at ?? null,
-        metadata: ((d as { metadata?: Record<string, unknown> | null }).metadata ?? null) as Record<
-          string,
-          unknown
-        > | null,
-        address: dProp ? compactAddress(dProp) : null,
-      }
-    },
-  )
+  const otherDossiers: OtherDossier[] = (otherDossiersData ?? []).map((d): OtherDossier => {
+    const dProp = Array.isArray((d as { properties?: unknown }).properties)
+      ? ((
+          d as {
+            properties?: Array<{
+              address: string | null
+              city: string | null
+              postal_code: string | null
+            }>
+          }
+        ).properties?.[0] ?? null)
+      : ((
+          d as {
+            properties?: {
+              address: string | null
+              city: string | null
+              postal_code: string | null
+            } | null
+          }
+        ).properties ?? null)
+    return {
+      id: String((d as { id: string }).id),
+      reference: String((d as { reference: string }).reference),
+      status: String((d as { status: string }).status),
+      scheduled_at: (d as { scheduled_at: string | null }).scheduled_at ?? null,
+      started_at: (d as { started_at: string | null }).started_at ?? null,
+      completed_at: (d as { completed_at: string | null }).completed_at ?? null,
+      metadata: ((d as { metadata?: Record<string, unknown> | null }).metadata ?? null) as Record<
+        string,
+        unknown
+      > | null,
+      address: dProp ? compactAddress(dProp) : null,
+    }
+  })
 
   const propertyHistory: PropertyHistoryItem[] = []
 
@@ -425,6 +441,38 @@ export default async function DossierDetailPage({
       : null
 
   // -------------------------------------------------------------
+  // 6sexies. Lot Mes Aides Réno — bannière dossier si DPE F/G détecté
+  // La table dossier_export_annexes n'est pas encore typée ; on caste
+  // localement pour rester strict côté lecture.
+  // -------------------------------------------------------------
+  interface AidesAnnexePayload {
+    mission_id?: string
+    mission_reference?: string
+    dpe_actuel?: string
+    dpe_projete?: string
+    aides?: AideResult[]
+  }
+  const { data: rawAidesAnnexe } = await supabase
+    .from('dossier_export_annexes' as never)
+    .select('payload')
+    .eq('dossier_id', id)
+    .eq('annexe_type', 'aides_renovation')
+    .order('generated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const aidesPayload = (rawAidesAnnexe as unknown as { payload: AidesAnnexePayload } | null)
+    ?.payload
+  const aidesDpeClass =
+    aidesPayload?.dpe_actuel === 'F' || aidesPayload?.dpe_actuel === 'G'
+      ? (aidesPayload.dpe_actuel as 'F' | 'G')
+      : null
+  const aidesEstimatedTotal = aidesPayload?.aides
+    ? aidesPayload.aides.reduce((acc, a) => acc + (a.montant_eur ?? 0), 0)
+    : null
+  const aidesMissionRef = aidesPayload?.mission_reference ?? null
+
+  // -------------------------------------------------------------
   // 7. Render — assemble sections et passe au Client orchestrateur
   // -------------------------------------------------------------
   const client = {
@@ -522,7 +570,9 @@ export default async function DossierDetailPage({
           />
         ) : null
       }
-      exports={visibleSections.exports ? <ExportsSection dossierId={dossier.id} exports={[]} /> : null}
+      exports={
+        visibleSections.exports ? <ExportsSection dossierId={dossier.id} exports={[]} /> : null
+      }
       communication={
         visibleSections.communication ? <CommunicationSection events={communicationEvents} /> : null
       }
@@ -553,6 +603,16 @@ export default async function DossierDetailPage({
             argiles={extendedRisksBundle.argiles}
             cavites={extendedRisksBundle.cavites}
             dossierRisquesHref={`/dashboard/dossiers/${dossier.id}/risques`}
+          />
+        ) : null
+      }
+      aidesBanner={
+        aidesDpeClass && aidesMissionRef ? (
+          <AidesBanner
+            dossierId={dossier.id}
+            missionReference={aidesMissionRef}
+            dpeClass={aidesDpeClass}
+            estimatedTotalEur={aidesEstimatedTotal}
           />
         ) : null
       }
