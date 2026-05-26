@@ -17,20 +17,15 @@ import type { AddonCode, PricingPlanCode } from '@/lib/pricing-plans'
 import {
   Archive,
   BarChart3,
-  Bell,
   Brain,
   Calendar,
   FolderOpen,
-  Gift,
   HelpCircle,
   Home,
-  Inbox,
-  KeyRound,
   LayoutGrid,
   MessageSquare,
   Receipt,
   Settings,
-  Sparkle,
   Sparkles,
   Users,
   Wrench,
@@ -50,14 +45,9 @@ export type SidebarItemId =
   | 'capture'
   | 'facturation'
   | 'analytics'
-  | 'coach'
   | 'messages'
-  | 'notifications'
-  | 'annuaire'
   | 'archive'
-  | 'coffre'
   | 'outils'
-  | 'affiliation'
   | 'parrainage'
   | 'algos'
 
@@ -177,15 +167,6 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     defaultPosition: 6,
     customizable: true,
   },
-  {
-    id: 'coach',
-    href: '/dashboard/coach',
-    label: 'Coach IA',
-    icon: Sparkle,
-    defaultZone: 'main',
-    defaultPosition: 7,
-    customizable: true,
-  },
 
   // Zone 4 — Menu "Plus" (positions 0..n)
   {
@@ -199,40 +180,12 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     badgeKey: 'unread_messages',
   },
   {
-    id: 'notifications',
-    href: '/dashboard/notifications',
-    label: 'Notifications',
-    icon: Bell,
-    defaultZone: 'more',
-    defaultPosition: 1,
-    customizable: true,
-    badgeKey: 'unread_notifications',
-  },
-  {
-    id: 'annuaire',
-    href: '/dashboard/annuaire',
-    label: 'Mon annuaire',
-    icon: Inbox,
-    defaultZone: 'more',
-    defaultPosition: 2,
-    customizable: true,
-  },
-  {
     id: 'archive',
     href: '/dashboard/archive',
     label: 'Archives',
     icon: Archive,
     defaultZone: 'more',
-    defaultPosition: 3,
-    customizable: true,
-  },
-  {
-    id: 'coffre',
-    href: '/dashboard/coffre',
-    label: 'Coffre-fort certifications',
-    icon: KeyRound,
-    defaultZone: 'more',
-    defaultPosition: 4,
+    defaultPosition: 1,
     customizable: true,
   },
   {
@@ -241,16 +194,7 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     label: 'Outils',
     icon: Wrench,
     defaultZone: 'more',
-    defaultPosition: 5,
-    customizable: true,
-  },
-  {
-    id: 'affiliation',
-    href: '/dashboard/affiliation',
-    label: 'Affiliation rénovation',
-    icon: Gift,
-    defaultZone: 'more',
-    defaultPosition: 6,
+    defaultPosition: 2,
     customizable: true,
   },
   {
@@ -259,7 +203,7 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     label: 'Parrainage',
     icon: Users,
     defaultZone: 'more',
-    defaultPosition: 7,
+    defaultPosition: 3,
     customizable: true,
   },
   // B82 (Vague 3A) — Découvrir > Algorithmes : catalogue diag-facing des
@@ -271,7 +215,7 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     tooltip: 'Découvrir les 13 algorithmes propriétaires KOVAS',
     icon: Brain,
     defaultZone: 'more',
-    defaultPosition: 8,
+    defaultPosition: 4,
     customizable: true,
   },
 ] as const

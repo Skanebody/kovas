@@ -25,13 +25,13 @@ export interface ProfilePreset {
 
 /**
  * Solo terrain — diagnostiqueur indépendant majoritairement en visite.
- * Capture en tête, accès rapide dossiers/calendrier/clients, Coach IA proche.
+ * Capture en tête, accès rapide dossiers/calendrier/clients.
  */
 export const PROFILE_SOLO_TERRAIN: ProfilePreset = {
   code: 'solo_terrain',
   label: 'Solo terrain',
   description: 'Capture et dossiers en tête. Idéal si tu es principalement en visite client.',
-  mainOrder: ['capture', 'dossiers', 'calendar', 'clients', 'coach', 'facturation', 'home'],
+  mainOrder: ['capture', 'dossiers', 'calendar', 'clients', 'facturation', 'home'],
 }
 
 /**
@@ -43,7 +43,7 @@ export const PROFILE_SOLO_ADMIN: ProfilePreset = {
   label: 'Solo administratif',
   description:
     'Accueil, dossiers et facturation en tête. Idéal pour un solo orienté bureau et suivi cabinet.',
-  mainOrder: ['home', 'dossiers', 'calendar', 'facturation', 'analytics', 'clients', 'coach'],
+  mainOrder: ['home', 'dossiers', 'calendar', 'facturation', 'analytics', 'clients'],
 }
 
 /**
@@ -53,8 +53,7 @@ export const PROFILE_SOLO_ADMIN: ProfilePreset = {
 export const PROFILE_MANAGER_CABINET: ProfilePreset = {
   code: 'manager_cabinet',
   label: 'Manager Cabinet',
-  description:
-    'Vue équipe, planning collectif et facturation cabinet. Capture et Coach IA basculent dans Plus.',
+  description: 'Vue équipe, planning collectif et facturation cabinet. Capture bascule dans Plus.',
   mainOrder: ['home', 'dossiers', 'calendar', 'facturation', 'analytics', 'clients'],
 }
 
