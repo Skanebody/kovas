@@ -191,7 +191,7 @@ export default async function ObservatoirePage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col bg-sage text-ink font-sans">
+    <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
       {/* JSON-LD — un seul <script> par schéma, en clair pour Googlebot */}
       <script
         type="application/ld+json"
@@ -212,30 +212,33 @@ export default async function ObservatoirePage() {
 
       <main className="flex-1">
         {/* ============ HERO ============ */}
-        <section className="bg-paper border-b border-rule/40">
-          <div className="max-w-[1200px] mx-auto px-6 pt-16 sm:pt-24 pb-16">
-            <div className="flex flex-wrap items-center gap-3 mb-8">
-              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium">
+        <section className="px-5 sm:px-12 pt-16 sm:pt-24 pb-12 sm:pb-20 animate-fade-in motion-reduce:animate-none">
+          <div className="max-w-[1240px] mx-auto">
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <span className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
                 Observatoire public
               </span>
-              <span className="font-mono text-[11px] text-ink-mute">·</span>
-              <span className="inline-flex items-center gap-2 rounded-pill bg-chartreuse-soft px-3 py-1 font-mono text-[11px] text-ink">
+              <span className="font-mono text-[11px] text-[#0F1419]/55">·</span>
+              <span className="inline-flex items-center gap-2 rounded-pill bg-chartreuse-soft px-3 py-1 font-mono text-[11px] text-[#0F1419]">
                 <span className="size-1.5 rounded-full bg-chartreuse-deep" aria-hidden />
                 {stats.isLive
                   ? `Mis à jour : ${stats.lastUpdatedLabel}`
                   : 'Données en cours de mise à jour'}
               </span>
               {!stats.isLive && (
-                <span className="font-mono text-[11px] text-ink/55">
+                <span className="font-mono text-[11px] text-[#0F1419]/55">
                   · Source temporaire référentiel ADEME 2024 — refresh DB en attente
                 </span>
               )}
             </div>
-            <h1 className="font-sans font-semibold text-[44px] sm:text-[64px] md:text-[80px] leading-[1.02] tracking-[-0.03em] mb-8 max-w-[1000px]">
-              L’observatoire <span className="text-display-serif text-chartreuse-deep">KOVAS</span>{' '}
-              du diagnostic immobilier.
+            <h1
+              className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
+              style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
+            >
+              L’<span className="font-serif italic font-normal">observatoire</span> du diagnostic
+              immobilier.
             </h1>
-            <p className="text-[17px] sm:text-[19px] text-ink/72 max-w-[760px] leading-relaxed">
+            <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
               Toutes les data publiques du diagnostic immobilier en France métropolitaine, mises à
               jour chaque mois. Prix médians, distribution énergétique régionale, évolution de la
               rénovation et classement des villes en transition. Sources ADEME, Géorisques, INSEE et
@@ -245,8 +248,8 @@ export default async function ObservatoirePage() {
         </section>
 
         {/* ============ 3 KPI HERO ============ */}
-        <section className="border-b border-rule/40">
-          <div className="max-w-[1200px] mx-auto px-6 py-20 sm:py-28">
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+          <div className="max-w-[1240px] mx-auto">
             <HeroStats
               stats={[
                 {
@@ -271,17 +274,20 @@ export default async function ObservatoirePage() {
         </section>
 
         {/* ============ SECTION 2 — PRIX PAR RÉGION ============ */}
-        <section className="border-b border-rule/40">
-          <div className="max-w-[1200px] mx-auto px-6 py-20">
-            <div className="mb-12 max-w-[760px]">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium mb-3">
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+          <div className="max-w-[1240px] mx-auto">
+            <div className="mb-12 max-w-2xl space-y-3">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
                 Section 2 · Prix
               </p>
-              <h2 className="font-sans font-semibold text-[32px] sm:text-[44px] leading-[1.05] tracking-[-0.02em] mb-4">
-                Prix médian par <span className="text-display-serif">diagnostic</span> et par
-                région.
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Prix médian par <span className="font-serif italic font-normal">diagnostic</span> et
+                par région.
               </h2>
-              <p className="text-[15px] sm:text-[17px] text-ink/72 leading-relaxed">
+              <p className="text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
                 Tarifs médians TTC observés sur douze mois glissants, pour les huit diagnostics
                 réglementaires en vigueur. Les écarts régionaux reflètent le coût du foncier, la
                 densité du tissu professionnel et les contraintes d’accès terrain.
@@ -292,16 +298,20 @@ export default async function ObservatoirePage() {
         </section>
 
         {/* ============ SECTION 3 — DISTRIBUTION ÉNERGÉTIQUE ============ */}
-        <section className="border-b border-rule/40">
-          <div className="max-w-[1200px] mx-auto px-6 py-20">
-            <div className="mb-12 max-w-[760px]">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium mb-3">
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+          <div className="max-w-[1240px] mx-auto">
+            <div className="mb-12 max-w-2xl space-y-3">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
                 Section 3 · Distribution énergétique
               </p>
-              <h2 className="font-sans font-semibold text-[32px] sm:text-[44px] leading-[1.05] tracking-[-0.02em] mb-4">
-                Classes énergétiques A-G par <span className="text-display-serif">région</span>.
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Classes énergétiques A-G par{' '}
+                <span className="font-serif italic font-normal">région</span>.
               </h2>
-              <p className="text-[15px] sm:text-[17px] text-ink/72 leading-relaxed">
+              <p className="text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
                 Distribution en pourcentage du parc diagnostiqué sur douze mois. Les régions
                 septentrionales présentent les parts F-G les plus élevées, reflet d’un parc ancien
                 plus exposé à la déperdition thermique.
@@ -312,16 +322,20 @@ export default async function ObservatoirePage() {
         </section>
 
         {/* ============ SECTION 4 — ÉVOLUTION RÉNOVATION ============ */}
-        <section className="border-b border-rule/40">
-          <div className="max-w-[1200px] mx-auto px-6 py-20">
-            <div className="mb-12 max-w-[760px]">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium mb-3">
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+          <div className="max-w-[1240px] mx-auto">
+            <div className="mb-12 max-w-2xl space-y-3">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
                 Section 4 · Évolution
               </p>
-              <h2 className="font-sans font-semibold text-[32px] sm:text-[44px] leading-[1.05] tracking-[-0.02em] mb-4">
-                Évolution de la <span className="text-display-serif">rénovation</span> énergétique.
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Évolution de la <span className="font-serif italic font-normal">rénovation</span>{' '}
+                énergétique.
               </h2>
-              <p className="text-[15px] sm:text-[17px] text-ink/72 leading-relaxed">
+              <p className="text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
                 Nombre de rénovations énergétiques engagées chaque mois sur l’ensemble du territoire
                 métropolitain, lissé en moyenne mobile trois mois pour neutraliser la saisonnalité.
               </p>
@@ -331,17 +345,20 @@ export default async function ObservatoirePage() {
         </section>
 
         {/* ============ SECTION 5 — TOP 10 VILLES ============ */}
-        <section className="border-b border-rule/40">
-          <div className="max-w-[1200px] mx-auto px-6 py-20">
-            <div className="mb-12 max-w-[760px]">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium mb-3">
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+          <div className="max-w-[1240px] mx-auto">
+            <div className="mb-12 max-w-2xl space-y-3">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
                 Section 5 · Classement
               </p>
-              <h2 className="font-sans font-semibold text-[32px] sm:text-[44px] leading-[1.05] tracking-[-0.02em] mb-4">
-                Top 10 des villes en <span className="text-display-serif">transition</span>{' '}
-                énergétique.
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Top 10 des villes en{' '}
+                <span className="font-serif italic font-normal">transition</span> énergétique.
               </h2>
-              <p className="text-[15px] sm:text-[17px] text-ink/72 leading-relaxed">
+              <p className="text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
                 Score composite (0-100) calculé à partir du ratio rénovations / 1000 habitants, de
                 la variation annuelle de la part F-G et du taux de bénéficiaires MaPrimeRénov.
               </p>
@@ -351,33 +368,38 @@ export default async function ObservatoirePage() {
         </section>
 
         {/* ============ SECTION 6 — PRESSE ============ */}
-        <section className="border-b border-rule/40 bg-paper/40">
-          <div className="max-w-[1200px] mx-auto px-6 py-20">
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium mb-3 text-center">
-              Section 6 · Presse
-            </p>
-            <h2 className="font-sans font-semibold text-[28px] sm:text-[36px] leading-[1.1] tracking-[-0.02em] mb-12 text-center max-w-[760px] mx-auto">
-              Des données reprises par la <span className="text-display-serif">presse</span>{' '}
-              nationale.
-            </h2>
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+          <div className="max-w-[1240px] mx-auto">
+            <div className="mb-12 max-w-2xl space-y-3 mx-auto text-center">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+                Section 6 · Presse
+              </p>
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Des données reprises par la{' '}
+                <span className="font-serif italic font-normal">presse</span> nationale.
+              </h2>
+            </div>
             <PressMentions />
           </div>
         </section>
 
         {/* ============ SECTION 7 — LEAD MAGNET PDF ============ */}
-        <section>
-          <div className="max-w-[1200px] mx-auto px-6 py-20 sm:py-28">
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+          <div className="max-w-[1240px] mx-auto">
             <LeadMagnet editionLabel={stats.lastUpdatedLabel} />
           </div>
         </section>
 
         {/* ============ MÉTHODOLOGIE — glossaire express ============ */}
-        <section className="border-t border-rule/40 bg-paper">
-          <div className="max-w-[1200px] mx-auto px-6 py-14">
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium mb-3">
+        <section className="px-5 sm:px-12 py-16 sm:py-20 border-t border-[#0F1419]/[0.08]">
+          <div className="max-w-[1240px] mx-auto space-y-4">
+            <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
               Méthodologie
             </p>
-            <p className="text-[14px] text-ink/72 max-w-[860px] leading-relaxed">
+            <p className="text-[14px] text-[#0F1419]/72 max-w-3xl leading-relaxed">
               Données agrégées à partir des bases publiques ADEME (
               <GlossaryTerm term="DPE" /> · <GlossaryTerm term="3CL-2021">3CL-2021</GlossaryTerm>),
               Géorisques (<GlossaryTerm term="ERP" />

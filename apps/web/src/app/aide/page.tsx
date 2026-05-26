@@ -1,8 +1,25 @@
+/**
+ * KOVAS — Page /aide
+ *
+ * Refonte chrome Lot B72 (2026-05-26) : harmonisation au style home V5 sobre.
+ * Sage `#F5F7F4` + navy `#0F1419` + chartreuse `#D4F542` UNIQUEMENT sur CTA
+ * conversion. Vouvoiement strict, ton SOBRE PROFESSIONNEL. Préservation des
+ * tooltips B67 (GlossaryTerm 9 termes) + JSON-LD WebPage + FAQPage B68.
+ *
+ * Sections :
+ *   1. Hero "Aide & support"
+ *   2. Démarrage rapide (3 cards)
+ *   3. Questions fréquentes (5 FAQ)
+ *   4. Tutoriels vidéo (teaser)
+ *   5. Nous écrire (contact direct chartreuse)
+ *   6. Glossaire express (9 termes GlossaryTerm B67)
+ *   7. Aller plus loin (navigation interne)
+ */
+
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { buildBreadcrumbList } from '@/lib/seo/schema-org'
@@ -122,26 +139,25 @@ export default function AidePage() {
   )
 
   return (
-    <div className="min-h-dvh flex flex-col bg-background">
+    <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
       <JsonLd data={[webPageSchema, breadcrumbSchema, faqSchema]} id="aide" />
 
       <PublicHeader />
 
       <main className="flex-1">
-        {/* Hero — palette sage + navy, accent chartreuse réservé CTA contact */}
-        <section className="border-b border-rule/40 bg-sage">
-          <div className="mx-auto max-w-screen-xl px-4 py-16 md:px-6 md:py-24">
-            <p className="mb-4 font-mono text-[11px] font-medium uppercase tracking-wider text-ink-mute">
+        {/* HERO */}
+        <section className="px-5 sm:px-12 pt-16 sm:pt-24 pb-12 sm:pb-20 animate-fade-in motion-reduce:animate-none">
+          <div className="max-w-[1240px] mx-auto">
+            <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55 mb-6">
               Centre d&apos;aide
             </p>
             <h1
-              className="font-sans font-medium tracking-tight text-ink leading-[1.05]"
-              style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}
+              className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
+              style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
             >
-              Aide &amp;{' '}
-              <span className="font-serif italic font-normal text-ink-soft">support</span>.
+              Aide &amp; <span className="font-serif italic font-normal">support</span>.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-mute">
+            <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
               Démarrer en quelques minutes, retrouver les réponses aux questions récurrentes, suivre
               les tutoriels vidéo ou nous écrire directement. Une équipe humaine basée en France
               répond à chaque demande.
@@ -149,36 +165,43 @@ export default function AidePage() {
           </div>
         </section>
 
-        {/* Démarrage rapide */}
-        <section className="py-16 md:py-20">
-          <div className="mx-auto max-w-screen-xl px-4 md:px-6">
-            <div className="mb-10 flex items-center gap-3">
-              <LifeBuoy className="size-5 text-ink-mute" aria-hidden />
-              <h2 className="font-display text-2xl font-bold text-ink md:text-3xl">
+        {/* DÉMARRAGE RAPIDE */}
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+          <div className="max-w-[1240px] mx-auto space-y-12">
+            <div className="space-y-3 max-w-2xl">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+                <LifeBuoy className="inline size-3.5 mr-1 -mt-px" aria-hidden />
                 Démarrage rapide
+              </p>
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Premiers pas en{' '}
+                <span className="font-serif italic font-normal">trente minutes</span>.
               </h2>
             </div>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {QUICK_START.map((item) => {
                 const Icon = item.icon
                 return (
-                  <Card
+                  <div
                     key={item.title}
-                    variant="opaque"
-                    padding="lg"
-                    className="group flex h-full flex-col transition-all hover:-translate-y-px hover:shadow-md"
+                    className="group flex h-full flex-col rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-7 space-y-3"
                   >
                     <span
                       aria-hidden
-                      className="flex size-11 items-center justify-center rounded-full bg-ink/10 text-ink"
+                      className="flex size-11 items-center justify-center rounded-full bg-[#0F1419]/[0.06] text-[#0F1419]/72"
                     >
                       <Icon className="size-5" />
                     </span>
-                    <h3 className="mt-5 font-display text-xl font-bold leading-tight text-ink">
+                    <h3 className="text-lg font-semibold text-[#0F1419] tracking-tight">
                       {item.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-ink-soft">{item.description}</p>
-                    <div className="mt-6 flex-1" />
+                    <p className="text-[14px] text-[#0F1419]/72 leading-relaxed">
+                      {item.description}
+                    </p>
+                    <div className="mt-2 flex-1" />
                     <Button asChild variant="ghost" size="sm" className="self-start">
                       <Link href={item.href}>
                         {item.cta}
@@ -188,39 +211,43 @@ export default function AidePage() {
                         />
                       </Link>
                     </Button>
-                  </Card>
+                  </div>
                 )
               })}
             </div>
           </div>
         </section>
 
-        {/* FAQ rapide */}
-        <section className="border-y border-rule/40 bg-sage-alt py-16 md:py-20">
-          <div className="mx-auto max-w-screen-xl px-4 md:px-6">
-            <div className="mb-10 flex items-center gap-3">
-              <HelpCircle className="size-5 text-ink-mute" aria-hidden />
-              <h2 className="font-display text-2xl font-bold text-ink md:text-3xl">
+        {/* FAQ */}
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+          <div className="max-w-[1240px] mx-auto space-y-12">
+            <div className="space-y-3 max-w-2xl">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+                <HelpCircle className="inline size-3.5 mr-1 -mt-px" aria-hidden />
                 Questions fréquentes
+              </p>
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Vos <span className="font-serif italic font-normal">objections</span> principales.
               </h2>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {FAQ_KEY.map((item) => (
-                <Card
+                <div
                   key={item.question}
-                  variant="opaque"
-                  padding="lg"
-                  className="flex h-full flex-col"
+                  className="flex h-full flex-col rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-7 space-y-3"
                 >
-                  <h3 className="font-display text-base font-bold leading-tight text-ink">
+                  <h3 className="text-base font-semibold text-[#0F1419] tracking-tight leading-snug">
                     {item.question}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-ink-soft">{item.answer}</p>
-                </Card>
+                  <p className="text-[14px] text-[#0F1419]/72 leading-relaxed">{item.answer}</p>
+                </div>
               ))}
             </div>
-            <div className="mt-10 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-ink-mute">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-[#0F1419]/55">
                 Plus de 40 questions couvertes par thématique sur la page FAQ complète.
               </p>
               <Button asChild variant="ghost" size="sm">
@@ -233,28 +260,35 @@ export default function AidePage() {
           </div>
         </section>
 
-        {/* Tutoriels vidéo */}
-        <section className="py-16 md:py-20">
-          <div className="mx-auto max-w-screen-xl px-4 md:px-6">
-            <div className="mb-10 flex items-center gap-3">
-              <Play className="size-5 text-ink-mute" aria-hidden />
-              <h2 className="font-display text-2xl font-bold text-ink md:text-3xl">
+        {/* TUTORIELS VIDÉO */}
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+          <div className="max-w-[1240px] mx-auto space-y-12">
+            <div className="space-y-3 max-w-2xl">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+                <Play className="inline size-3.5 mr-1 -mt-px" aria-hidden />
                 Tutoriels vidéo
+              </p>
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Une <span className="font-serif italic font-normal">chaîne dédiée</span>{' '}
+                diagnostiqueurs.
               </h2>
             </div>
-            <Card variant="opaque" padding="lg" className="max-w-3xl">
-              <p className="font-mono text-[11px] font-medium uppercase tracking-wider text-ink-mute">
+            <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-7 max-w-3xl space-y-3">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
                 Bientôt disponible
               </p>
-              <h3 className="mt-3 font-display text-xl font-bold leading-tight text-ink">
-                Une chaîne dédiée diagnostiqueurs
+              <h3 className="text-lg font-semibold text-[#0F1419] tracking-tight">
+                Démos terrain et captures commentées
               </h3>
-              <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+              <p className="text-[14px] text-[#0F1419]/72 leading-relaxed">
                 Démonstrations terrain, captures d&apos;écran commentées, passerelles Liciel,
                 raccourcis productivité. La chaîne YouTube KOVAS ouvre lors du lancement public en
                 septembre 2026.
               </p>
-              <div className="mt-6">
+              <div className="pt-2">
                 <Button asChild variant="ghost" size="sm">
                   <Link href="https://youtube.com/@kovas-fr" target="_blank" rel="noreferrer">
                     S&apos;abonner à la chaîne
@@ -262,93 +296,100 @@ export default function AidePage() {
                   </Link>
                 </Button>
               </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Contact — CTA chartreuse autorisé (1 par écran) */}
-        <section className="border-t border-rule/40 bg-sage py-16 md:py-20">
-          <div className="mx-auto max-w-screen-xl px-4 md:px-6">
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
-              <div>
-                <div className="mb-6 flex items-center gap-3">
-                  <Mail className="size-5 text-ink-mute" aria-hidden />
-                  <h2 className="font-display text-2xl font-bold text-ink md:text-3xl">
-                    Nous écrire
-                  </h2>
-                </div>
-                <p className="max-w-xl text-base leading-relaxed text-ink-soft">
-                  Une question, un retour terrain, une demande commerciale ou un besoin de support :
-                  une seule adresse, une équipe humaine basée en France qui lit chaque message.
-                </p>
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <Button asChild variant="accent" size="lg">
-                    <Link href="mailto:contact@kovas.fr">contact@kovas.fr</Link>
-                  </Button>
-                  <Button asChild variant="ghost" size="lg">
-                    <Link href="/contact">
-                      Ouvrir le formulaire
-                      <ArrowRight className="size-3.5" aria-hidden />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-
-              <Card variant="opaque" padding="lg">
-                <h3 className="font-display text-base font-bold leading-tight text-ink">
-                  Horaires &amp; délais de réponse
-                </h3>
-                <dl className="mt-5 space-y-4 text-sm">
-                  <div className="flex items-start gap-3">
-                    <Clock className="mt-0.5 size-4 text-ink-mute" aria-hidden />
-                    <div>
-                      <dt className="font-medium text-ink">Horaires</dt>
-                      <dd className="text-ink-mute">
-                        Lundi au vendredi, 9 h – 18 h (heure de Paris). Fermé les jours fériés
-                        français.
-                      </dd>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <BookOpen className="mt-0.5 size-4 text-ink-mute" aria-hidden />
-                    <div>
-                      <dt className="font-medium text-ink">Délais garantis</dt>
-                      <dd className="text-ink-mute">
-                        24 h ouvrées sur le tier Découverte, 4 h sur Standard et Volume, 1 h en
-                        priorité Volume avec dossier critique signalé.
-                      </dd>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 size-4 text-ink-mute" aria-hidden />
-                    <div>
-                      <dt className="font-medium text-ink">Éditeur</dt>
-                      <dd className="text-ink-mute">
-                        SASU Nexus 1993, siège Paris 8. Hébergement données en France (Supabase
-                        Paris eu-west-3).
-                      </dd>
-                    </div>
-                  </div>
-                </dl>
-              </Card>
             </div>
           </div>
         </section>
 
-        {/* Glossaire express — termes techniques avec définition au survol/clic */}
-        <section className="border-t border-rule/40 bg-paper py-12 md:py-16">
-          <div className="mx-auto max-w-screen-xl px-4 md:px-6">
-            <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-wider text-ink-mute">
-              Glossaire express
-            </p>
-            <h2 className="font-display text-2xl font-bold leading-tight text-ink md:text-3xl">
-              Comprendre le jargon en un coup d&apos;œil
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-mute">
-              Survolez ou touchez chaque terme souligné pour afficher la définition courte et la
-              source officielle (Légifrance, ADEME, INSEE).
-            </p>
-            <ul className="mt-8 grid grid-cols-1 gap-x-8 gap-y-3 text-sm leading-relaxed text-ink-soft sm:grid-cols-2 lg:grid-cols-3">
+        {/* NOUS ÉCRIRE */}
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+          <div className="max-w-[1240px] mx-auto grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">
+            <div className="space-y-6">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+                <Mail className="inline size-3.5 mr-1 -mt-px" aria-hidden />
+                Nous écrire
+              </p>
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Une seule <span className="font-serif italic font-normal">adresse</span>.
+              </h2>
+              <p className="max-w-xl text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
+                Une question, un retour terrain, une demande commerciale ou un besoin de support :
+                une seule adresse, une équipe humaine basée en France qui lit chaque message.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button asChild variant="accent" size="lg">
+                  <Link href="mailto:contact@kovas.fr">contact@kovas.fr</Link>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link href="/contact">
+                    Ouvrir le formulaire
+                    <ArrowRight className="size-3.5" aria-hidden />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-7 space-y-4">
+              <h3 className="text-base font-semibold text-[#0F1419] tracking-tight">
+                Horaires &amp; délais de réponse
+              </h3>
+              <dl className="space-y-4 text-sm">
+                <div className="flex items-start gap-3">
+                  <Clock className="mt-0.5 size-4 text-[#0F1419]/55 shrink-0" aria-hidden />
+                  <div>
+                    <dt className="font-medium text-[#0F1419]">Horaires</dt>
+                    <dd className="text-[#0F1419]/72 leading-relaxed">
+                      Lundi au vendredi, 9 h – 18 h (heure de Paris). Fermé les jours fériés
+                      français.
+                    </dd>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <BookOpen className="mt-0.5 size-4 text-[#0F1419]/55 shrink-0" aria-hidden />
+                  <div>
+                    <dt className="font-medium text-[#0F1419]">Délais garantis</dt>
+                    <dd className="text-[#0F1419]/72 leading-relaxed">
+                      24 h ouvrées sur le tier Découverte, 4 h sur Standard et Volume, 1 h en
+                      priorité Volume avec dossier critique signalé.
+                    </dd>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <MapPin className="mt-0.5 size-4 text-[#0F1419]/55 shrink-0" aria-hidden />
+                  <div>
+                    <dt className="font-medium text-[#0F1419]">Éditeur</dt>
+                    <dd className="text-[#0F1419]/72 leading-relaxed">
+                      SASU Nexus 1993, siège Paris 8. Hébergement données en France (Supabase Paris
+                      eu-west-3).
+                    </dd>
+                  </div>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        {/* GLOSSAIRE EXPRESS */}
+        <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+          <div className="max-w-[1240px] mx-auto space-y-10">
+            <div className="space-y-3 max-w-2xl">
+              <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+                Glossaire express
+              </p>
+              <h2
+                className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+                style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+              >
+                Comprendre le <span className="font-serif italic font-normal">jargon</span>.
+              </h2>
+              <p className="text-[15px] text-[#0F1419]/72 leading-relaxed">
+                Survolez ou touchez chaque terme souligné pour afficher la définition courte et la
+                source officielle (Légifrance, ADEME, INSEE).
+              </p>
+            </div>
+            <ul className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm leading-relaxed text-[#0F1419]/72 sm:grid-cols-2 lg:grid-cols-3">
               <li>
                 Le <GlossaryTerm term="DPE" /> est obligatoire à la vente et la location.
               </li>
@@ -381,50 +422,65 @@ export default function AidePage() {
           </div>
         </section>
 
-        {/* Footer navigation interne — pas un footer global, c'est un sous-footer thématique */}
-        <section className="border-t border-rule/40 bg-sage-alt py-12">
-          <div className="mx-auto max-w-screen-xl px-4 md:px-6">
-            <p className="mb-6 font-mono text-[11px] font-medium uppercase tracking-wider text-ink-mute">
+        {/* ALLER PLUS LOIN */}
+        <section className="px-5 sm:px-12 py-16 sm:py-20 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+          <div className="max-w-[1240px] mx-auto">
+            <p className="mb-6 font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
               Aller plus loin
             </p>
             <ul className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm md:grid-cols-4">
               <li>
-                <Link href="/guide" className="text-ink-soft transition-colors hover:text-ink">
+                <Link
+                  href="/guide"
+                  className="text-[#0F1419]/72 transition-colors hover:text-[#0F1419]"
+                >
                   Guides du diagnostic →
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-ink-soft transition-colors hover:text-ink">
+                <Link
+                  href="/faq"
+                  className="text-[#0F1419]/72 transition-colors hover:text-[#0F1419]"
+                >
                   FAQ complète →
                 </Link>
               </li>
               <li>
-                <Link href="/tarifs" className="text-ink-soft transition-colors hover:text-ink">
+                <Link
+                  href="/tarifs"
+                  className="text-[#0F1419]/72 transition-colors hover:text-[#0F1419]"
+                >
                   Tarifs &amp; forfaits →
                 </Link>
               </li>
               <li>
-                <Link href="/comparatif" className="text-ink-soft transition-colors hover:text-ink">
+                <Link
+                  href="/comparatif"
+                  className="text-[#0F1419]/72 transition-colors hover:text-[#0F1419]"
+                >
                   Comparatif Liciel →
                 </Link>
               </li>
               <li>
                 <Link
                   href="/temoignages"
-                  className="text-ink-soft transition-colors hover:text-ink"
+                  className="text-[#0F1419]/72 transition-colors hover:text-[#0F1419]"
                 >
                   Témoignages diagnostiqueurs →
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-ink-soft transition-colors hover:text-ink">
+                <Link
+                  href="/contact"
+                  className="text-[#0F1419]/72 transition-colors hover:text-[#0F1419]"
+                >
                   Formulaire contact →
                 </Link>
               </li>
               <li>
                 <Link
                   href="/observatoire"
-                  className="text-ink-soft transition-colors hover:text-ink"
+                  className="text-[#0F1419]/72 transition-colors hover:text-[#0F1419]"
                 >
                   Observatoire DPE →
                 </Link>
@@ -432,7 +488,7 @@ export default function AidePage() {
               <li>
                 <Link
                   href="/api-publique"
-                  className="text-ink-soft transition-colors hover:text-ink"
+                  className="text-[#0F1419]/72 transition-colors hover:text-[#0F1419]"
                 >
                   API publique →
                 </Link>
