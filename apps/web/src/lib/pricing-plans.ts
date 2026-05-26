@@ -151,7 +151,8 @@ export const LOGICIEL_PLANS: readonly LogicielPlan[] = [
   {
     code: 'essai',
     name: 'Essai gratuit',
-    tagline: 'Pour découvrir KOVAS · 30 jours · CB enregistrée, débit auto à J+30',
+    tagline:
+      '30 jours pour décider · CB enregistrée mais pas débitée · annulation en 2 clics avant J+30',
     monthlyPrice: 0,
     annualPrice: 0,
     caps: {
@@ -372,6 +373,10 @@ export const ANNUAIRE_PLANS: readonly AnnuairePlan[] = [
       'Statistiques de ta fiche (vues, contacts)',
       'Réception de demandes de devis qualifiés',
       'Tu paies seulement les leads qui t’intéressent',
+      // ── Bonus IA-auto à l\'activation (zéro intervention humaine).
+      "Bonus · Bio professionnelle rédigée et optimisée SEO par l'IA à l'activation",
+      'Satisfait ou remboursé sous 60 jours',
+      'Annulation en 2 clics depuis ton espace',
     ],
   },
   {
@@ -390,6 +395,8 @@ export const ANNUAIRE_PLANS: readonly AnnuairePlan[] = [
       'Badge Vérifié bleu sur ta fiche',
       'Notifications de leads en temps réel',
       '−20% sur ton premier lead du mois',
+      // ── Bonus IA-auto mensuel (réutilise pipeline SEO Amandine Bart).
+      'Bonus · Audit SEO mensuel de ta fiche annuaire avec suggestions IA',
     ],
   },
   {
@@ -408,6 +415,10 @@ export const ANNUAIRE_PLANS: readonly AnnuairePlan[] = [
       '−50% sur tes 3 premiers leads du mois',
       'Promesse de réponse client le jour même',
       'Support prioritaire',
+      // ── Bonus IA-auto (réponses suggérées par Claude Haiku, validation
+      // par l\'utilisateur côté UI, zéro intervention Benjamin requise).
+      "Bonus · Réponses suggérées par l'IA pour chaque avis Google reçu",
+      'Bonus · Audit SEO mensuel de ta fiche annuaire avec suggestions IA',
     ],
   },
 ] as const
