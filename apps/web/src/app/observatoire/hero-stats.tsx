@@ -29,7 +29,7 @@ interface HeroStatsProps {
  */
 export function HeroStats({ stats }: HeroStatsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
       {stats.map((stat, idx) => (
         <AnimatedStat key={`hero-${stat.label.slice(0, 20)}`} stat={stat} delay={idx * 120} />
       ))}
@@ -48,8 +48,7 @@ function AnimatedStat({ stat, delay }: { stat: HeroStat; delay: number }) {
 
     // Respect prefers-reduced-motion
     const reduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduced) {
       setDisplayValue(stat.value)
       return
@@ -72,7 +71,7 @@ function AnimatedStat({ stat, delay }: { stat: HeroStat; delay: number }) {
               }
               const t = Math.min(1, (now - start) / duration)
               // easeOutCubic
-              const eased = 1 - Math.pow(1 - t, 3)
+              const eased = 1 - (1 - t) ** 3
               const current = startValue + (endValue - startValue) * eased
               setDisplayValue(current)
               if (t < 1) {
@@ -101,12 +100,12 @@ function AnimatedStat({ stat, delay }: { stat: HeroStat; delay: number }) {
     <div ref={ref} className="flex flex-col">
       <p
         className="font-serif italic font-normal text-ink leading-none tracking-[-0.02em]"
-        style={{ fontSize: 'clamp(60px, 10vw, 120px)' }}
+        style={{ fontSize: 'clamp(54px, 8vw, 92px)' }}
       >
         {formatted}
         <span className="text-ink/72">{stat.suffix}</span>
       </p>
-      <p className="mt-5 text-[15px] sm:text-[17px] text-ink/72 leading-relaxed max-w-[280px]">
+      <p className="mt-4 text-[14px] sm:text-[15px] text-ink/72 leading-relaxed max-w-[280px]">
         {stat.label}
       </p>
     </div>

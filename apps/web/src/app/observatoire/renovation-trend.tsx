@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/card'
+import { ChartCaption } from './chart-caption'
 
 interface RenovationPoint {
   label: string
@@ -9,6 +10,8 @@ interface RenovationPoint {
 
 interface RenovationTrendProps {
   data: readonly RenovationPoint[]
+  /** Période courante affichée par le ChartCaption */
+  periodLabel: string
 }
 
 /**
@@ -23,7 +26,7 @@ interface RenovationTrendProps {
  * signaler la mise à jour la plus récente + ligne de tendance moyenne mobile
  * 3 mois en gris clair pointillé.
  */
-export function RenovationTrend({ data }: RenovationTrendProps) {
+export function RenovationTrend({ data, periodLabel }: RenovationTrendProps) {
   if (data.length === 0) return null
 
   const lastValue = data[data.length - 1]?.count ?? 0
@@ -38,12 +41,13 @@ export function RenovationTrend({ data }: RenovationTrendProps) {
   })
 
   // ============ SVG dimensions ============
+  // Hauteur réduite : 240 (vs 280) pour rester compact sur desktop large.
   const W = 1000
-  const H = 280
-  const PAD_LEFT = 50
+  const H = 240
+  const PAD_LEFT = 56
   const PAD_RIGHT = 16
-  const PAD_TOP = 20
-  const PAD_BOTTOM = 36
+  const PAD_TOP = 16
+  const PAD_BOTTOM = 32
   const chartW = W - PAD_LEFT - PAD_RIGHT
   const chartH = H - PAD_TOP - PAD_BOTTOM
 
@@ -73,15 +77,15 @@ export function RenovationTrend({ data }: RenovationTrendProps) {
   const xLabelStep = Math.ceil(data.length / 8)
 
   return (
-    <Card variant="flat" padding="default" className="flex flex-col gap-6">
+    <Card variant="flat" padding="default" className="flex flex-col gap-5">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium mb-2">
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/55 font-medium mb-1.5">
             Évolution 24 mois glissants
           </p>
-          <p className="font-serif italic text-4xl sm:text-5xl text-ink leading-none">
+          <p className="font-serif italic text-[34px] sm:text-[40px] text-ink leading-none">
             {lastValue.toLocaleString('fr-FR')}
-            <span className="text-base text-ink-mute font-sans not-italic ml-2">
+            <span className="text-[14px] sm:text-[15px] text-ink-mute font-sans not-italic ml-2">
               rénovations le mois dernier
             </span>
           </p>
@@ -102,6 +106,24 @@ export function RenovationTrend({ data }: RenovationTrendProps) {
           className="block"
         >
           <title>Évolution mensuelle des rénovations énergétiques sur 24 mois</title>
+
+          {/* Axe Y label */}
+          <text
+            x={12}
+            y={PAD_TOP - 4}
+            style={{ fontSize: '10px', fontFamily: 'monospace', fill: '#5B7088' }}
+          >
+            Rénovations (milliers)
+          </text>
+          {/* Axe X label */}
+          <text
+            x={W - PAD_RIGHT}
+            y={H - 4}
+            textAnchor="end"
+            style={{ fontSize: '10px', fontFamily: 'monospace', fill: '#5B7088' }}
+          >
+            Mois
+          </text>
 
           {/* Grid horizontal */}
           {yTicks.map((v) => (
@@ -190,10 +212,13 @@ export function RenovationTrend({ data }: RenovationTrendProps) {
           />
         </svg>
       </div>
-      <p className="text-[12px] text-ink-mute">
-        Source : agrégation données ADEME, ANAH MaPrimeRénov et missions KOVAS anonymisées.
-        Tendance lissée en moyenne mobile 3 mois.
-      </p>
+      <ChartCaption
+        howToRead="La courbe pleine navy retrace le nombre mensuel de rénovations énergétiques engagées au niveau national. La ligne pointillée grise est la moyenne mobile 3 mois qui neutralise la saisonnalité (creux estival juillet-août). Le point chartreuse marque la valeur la plus récente."
+        source="Agrégation ADEME (DPE) + ANAH MaPrimeRénov + missions KOVAS anonymisées"
+        dataStatus="fallback"
+        periodLabel={periodLabel}
+        axes={{ x: 'Mois (24 derniers mois glissants)', y: 'Nombre de rénovations engagées' }}
+      />
     </Card>
   )
 }

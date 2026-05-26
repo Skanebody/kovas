@@ -8,12 +8,9 @@
  * Response : { url: string, sizeBytes: number }
  */
 
-import { generateObservatoireReportPdf } from '@/lib/observatoire/pdf-generator'
-import {
-  getObservatoireStats,
-  getTopCities,
-} from '@/lib/observatoire/stats-aggregator'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
+import { generateObservatoireReportPdf } from '@/lib/observatoire/pdf-generator'
+import { getObservatoireStats, getTopCities } from '@/lib/observatoire/stats-aggregator'
 import { type NextRequest, NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
@@ -50,12 +47,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const [stats, topCities] = await Promise.all([
-      getObservatoireStats(),
-      getTopCities(),
-    ])
+    const [stats, topCitiesResult] = await Promise.all([getObservatoireStats(), getTopCities()])
 
-    const pdfBytes = generateObservatoireReportPdf({ stats, topCities })
+    const pdfBytes = generateObservatoireReportPdf({
+      stats,
+      topCities: topCitiesResult.cities,
+    })
     const slug = body.periodLabel.toLowerCase().replace(/\s+/g, '-')
     const filename = `rapport-${slug}.pdf`
 
@@ -70,15 +67,10 @@ export async function POST(req: NextRequest) {
 
     if (uploadErr) {
       console.error('observatoire pdf upload error:', uploadErr.message)
-      return NextResponse.json(
-        { error: `upload failed: ${uploadErr.message}` },
-        { status: 500 },
-      )
+      return NextResponse.json({ error: `upload failed: ${uploadErr.message}` }, { status: 500 })
     }
 
-    const { data: publicData } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(filename)
+    const { data: publicData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filename)
 
     return NextResponse.json({
       url: publicData.publicUrl,

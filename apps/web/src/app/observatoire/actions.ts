@@ -75,7 +75,7 @@ export async function requestObservatoireReport(input: {
   let stats: Awaited<ReturnType<typeof getObservatoireStats>>
   try {
     stats = await getObservatoireStats()
-    const topCities = await getTopCities()
+    const { cities: topCities } = await getTopCities()
     pdfBytes = generateObservatoireReportPdf({ stats, topCities })
   } catch (err) {
     console.error('[observatoire] PDF generation failed', err)

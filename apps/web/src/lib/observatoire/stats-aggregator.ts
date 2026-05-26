@@ -277,29 +277,38 @@ const FALLBACK_TOP_CITIES: readonly TopCity[] = [
   },
 ]
 
+export interface TopCitiesResult {
+  cities: readonly TopCity[]
+  isLive: boolean
+}
+
 /**
  * Top 10 villes en transition énergétique.
  * Lit la DB en priorité (national row → top_transition_cities jsonb), fallback
- * sur le référentiel statique sinon.
+ * sur le référentiel statique sinon. Renvoie `isLive` pour permettre à l'UI
+ * d'afficher honnêtement l'origine de la donnée.
  */
-export async function getTopCities(): Promise<readonly TopCity[]> {
+export async function getTopCities(): Promise<TopCitiesResult> {
   const snapshot = await getLiveSnapshotOnce()
   const dbList = snapshot?.national?.topTransitionCities ?? []
 
   if (dbList.length > 0) {
-    return dbList.map((c) => ({
-      rank: c.rank,
-      name: c.name,
-      department: c.department,
-      slug: c.slug,
-      score: c.score,
-      renovRatio: c.renov_ratio,
-      fgYoy: c.fg_yoy,
-      primeRenov: c.prime_renov,
-    }))
+    return {
+      cities: dbList.map((c) => ({
+        rank: c.rank,
+        name: c.name,
+        department: c.department,
+        slug: c.slug,
+        score: c.score,
+        renovRatio: c.renov_ratio,
+        fgYoy: c.fg_yoy,
+        primeRenov: c.prime_renov,
+      })),
+      isLive: true,
+    }
   }
 
-  return FALLBACK_TOP_CITIES
+  return { cities: FALLBACK_TOP_CITIES, isLive: false }
 }
 
 /**
@@ -308,14 +317,16 @@ export async function getTopCities(): Promise<readonly TopCity[]> {
  * Live : surcharge le prix DPE par la valeur DB si disponible.
  * Fallback : prix mockés depuis regions-data.ts.
  */
-export async function getPriceMatrix(): Promise<
-  readonly {
-    region: string
-    regionCode: string
-    diagnosticsCount: number
-    prices: Readonly<Record<DiagnosticType, number>>
-  }[]
-> {
+export interface PriceMatrixRow {
+  region: string
+  regionCode: string
+  diagnosticsCount: number
+  prices: Readonly<Record<DiagnosticType, number>>
+  /** True si le prix DPE provient de la DB pour cette région */
+  dpeIsLive: boolean
+}
+
+export async function getPriceMatrix(): Promise<readonly PriceMatrixRow[]> {
   const snapshot = await getLiveSnapshotOnce()
 
   return REGIONS.map((r) => {
@@ -332,6 +343,52 @@ export async function getPriceMatrix(): Promise<
       regionCode: r.code,
       diagnosticsCount: liveCount && liveCount > 0 ? liveCount * 12 : r.diagnosticsCount,
       prices,
+      dpeIsLive: livePrice !== null,
+    }
+  })
+}
+
+export interface EnergyDistributionRow {
+  regionCode: string
+  regionName: string
+  distribution: Readonly<{
+    a: number
+    b: number
+    c: number
+    d: number
+    e: number
+    f: number
+    g: number
+  }>
+  /** True si cette région a sa distribution lue depuis la DB */
+  isLive: boolean
+}
+
+/**
+ * Renvoie la distribution énergétique A-G par région.
+ * Lit la DB en priorité (`dpe_distribution` jsonb), fallback sur le mock pour
+ * les régions absentes du snapshot live.
+ */
+export async function getEnergyDistribution(): Promise<readonly EnergyDistributionRow[]> {
+  const snapshot = await getLiveSnapshotOnce()
+
+  return REGIONS.map((r) => {
+    const live = snapshot?.regions.get(r.code)
+    const liveDist = live?.dpeDistribution ?? null
+
+    if (liveDist) {
+      return {
+        regionCode: r.code,
+        regionName: r.name,
+        distribution: liveDist,
+        isLive: true,
+      }
+    }
+    return {
+      regionCode: r.code,
+      regionName: r.name,
+      distribution: r.energyDistribution,
+      isLive: false,
     }
   })
 }
