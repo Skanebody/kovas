@@ -242,13 +242,22 @@ export default async function DossierDefensePage({
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-[#0F1419]/[0.08] text-left text-[#0F1419]/72">
-                  <th className="font-mono font-medium text-[10px] uppercase tracking-wide pb-2 pr-3">
+                  <th
+                    scope="col"
+                    className="font-mono font-medium text-[10px] uppercase tracking-wide pb-2 pr-3"
+                  >
                     Domaine
                   </th>
-                  <th className="font-mono font-medium text-[10px] uppercase tracking-wide pb-2 pr-3">
+                  <th
+                    scope="col"
+                    className="font-mono font-medium text-[10px] uppercase tracking-wide pb-2 pr-3"
+                  >
                     Choix
                   </th>
-                  <th className="font-mono font-medium text-[10px] uppercase tracking-wide pb-2">
+                  <th
+                    scope="col"
+                    className="font-mono font-medium text-[10px] uppercase tracking-wide pb-2"
+                  >
                     Justification
                   </th>
                 </tr>

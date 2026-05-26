@@ -372,11 +372,15 @@ export function MissionRecapSheet({
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="border-b border-[#0F1419]/[0.06] bg-sage-alt/40">
-                    <th className="sticky left-0 z-10 bg-sage-alt/40 px-2 py-2 text-left font-mono text-[10px] font-medium uppercase tracking-wide text-[#0F1419]/72">
+                    <th
+                      scope="col"
+                      className="sticky left-0 z-10 bg-sage-alt/40 px-2 py-2 text-left font-mono text-[10px] font-medium uppercase tracking-wide text-[#0F1419]/72"
+                    >
                       Pièce
                     </th>
                     {GRID_CATEGORIES.map((cat) => (
                       <th
+                        scope="col"
                         key={cat}
                         className="px-2 py-2 text-center font-mono text-[10px] font-medium uppercase tracking-wide text-[#0F1419]/72"
                         title={CHECK_CATEGORY_LABEL[cat]}

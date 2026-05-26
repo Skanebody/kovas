@@ -76,22 +76,40 @@ export function BenchmarkComparison({
         <table className="w-full text-[12px]">
           <thead className="bg-sage-alt/40">
             <tr className="text-left">
-              <th className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-6 py-2.5">
+              <th
+                scope="col"
+                className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-6 py-2.5"
+              >
                 Métrique
               </th>
-              <th className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-3 py-2.5 text-right">
+              <th
+                scope="col"
+                className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-3 py-2.5 text-right"
+              >
                 Toi
               </th>
-              <th className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-3 py-2.5 text-right hidden sm:table-cell">
+              <th
+                scope="col"
+                className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-3 py-2.5 text-right hidden sm:table-cell"
+              >
                 Région
               </th>
-              <th className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-3 py-2.5 text-right">
+              <th
+                scope="col"
+                className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-3 py-2.5 text-right"
+              >
                 FR
               </th>
-              <th className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-3 py-2.5 text-right">
+              <th
+                scope="col"
+                className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-3 py-2.5 text-right"
+              >
                 Top 10%
               </th>
-              <th className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-6 py-2.5 hidden md:table-cell">
+              <th
+                scope="col"
+                className="font-mono text-[10px] uppercase tracking-[0.1em] font-medium text-[#0F1419]/72 px-6 py-2.5 hidden md:table-cell"
+              >
                 Position
               </th>
             </tr>

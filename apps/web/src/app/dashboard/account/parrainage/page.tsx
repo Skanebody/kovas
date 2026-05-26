@@ -113,13 +113,22 @@ export default async function ParrainagePage() {
           <table className="w-full text-[13px]">
             <thead className="bg-sage/60">
               <tr>
-                <th className="text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72 py-2.5 px-4">
+                <th
+                  scope="col"
+                  className="text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72 py-2.5 px-4"
+                >
                   Étape filleul
                 </th>
-                <th className="text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72 py-2.5 px-4">
+                <th
+                  scope="col"
+                  className="text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72 py-2.5 px-4"
+                >
                   Tu gagnes
                 </th>
-                <th className="text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72 py-2.5 px-4">
+                <th
+                  scope="col"
+                  className="text-left font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72 py-2.5 px-4"
+                >
                   Délai
                 </th>
               </tr>

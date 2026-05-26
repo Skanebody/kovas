@@ -157,7 +157,7 @@ function AgendaRow({ event, onClick }: AgendaRowProps) {
           <div className="font-mono font-semibold tabular-nums text-[#0F1419] text-[12px] leading-tight">
             {timeStart}
           </div>
-          <div className="font-mono tabular-nums text-[#0F1419]/55 text-[10px] leading-tight">
+          <div className="font-mono tabular-nums text-[#0F1419]/72 text-[10px] leading-tight">
             → {timeEnd}
           </div>
         </div>
@@ -206,7 +206,7 @@ function AgendaRow({ event, onClick }: AgendaRowProps) {
             </div>
           )}
 
-          <div className="font-mono text-[9px] text-[#0F1419]/55 uppercase tracking-wider">
+          <div className="font-mono text-[9px] text-[#0F1419]/72 uppercase tracking-wider">
             {event.reference}
           </div>
         </div>

@@ -334,7 +334,7 @@ function CoordCell({ icon: Icon, label, value, secondary, href, mono }: CoordCel
             </div>
           )
         ) : (
-          <div className="text-sm text-[#0F1419]/55 italic">Non renseigné</div>
+          <div className="text-sm text-[#0F1419]/72 italic">Non renseigné</div>
         )}
         {secondary ? <div className="truncate text-xs text-[#0F1419]/72">{secondary}</div> : null}
       </div>

@@ -322,6 +322,7 @@ function Step2Export({
                   onClick={() => onChangeSource(s)}
                   className={cn(
                     'inline-flex items-center gap-1.5 rounded-pill border px-3 py-1.5 text-xs font-medium transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/40 focus-visible:ring-offset-1',
                     active
                       ? 'bg-[#0F1419] text-paper border-[#0F1419]'
                       : 'bg-paper text-ink border-rule hover:border-[#0F1419]/40 hover:bg-sage-alt/40',

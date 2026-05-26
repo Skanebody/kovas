@@ -76,7 +76,13 @@ export function SettingsRow({
 
   if (href) {
     return (
-      <Link href={href} className={baseClass}>
+      <Link
+        href={href}
+        className={cn(
+          baseClass,
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/40 focus-visible:ring-offset-1',
+        )}
+      >
         {content}
       </Link>
     )
@@ -84,7 +90,15 @@ export function SettingsRow({
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className={cn(baseClass, 'w-full text-left')}>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          baseClass,
+          'w-full text-left',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/40 focus-visible:ring-offset-1',
+        )}
+      >
         {content}
       </button>
     )

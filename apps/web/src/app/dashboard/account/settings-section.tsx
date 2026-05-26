@@ -40,7 +40,7 @@ export function SettingsSection({
       {(title || headerAction) && (
         <div className="flex items-baseline justify-between gap-3 px-4">
           {title && (
-            <h2 className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#0F1419]/55 font-medium">
+            <h2 className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#0F1419]/72 font-medium">
               {title}
             </h2>
           )}
@@ -58,7 +58,7 @@ export function SettingsSection({
         {children}
       </div>
       {helperText && (
-        <p className="px-4 text-[12px] text-[#0F1419]/55 leading-relaxed">{helperText}</p>
+        <p className="px-4 text-[12px] text-[#0F1419]/72 leading-relaxed">{helperText}</p>
       )}
     </section>
   )

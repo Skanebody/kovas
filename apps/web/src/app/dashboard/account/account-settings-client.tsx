@@ -205,7 +205,7 @@ function ProfilTab({ props }: { props: AccountSettingsClientProps }) {
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#0F1419]/55">
+            <p className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#0F1419]/72">
               Identité
             </p>
             <p className="text-[18px] font-semibold text-[#0F1419] truncate mt-0.5">
@@ -712,14 +712,26 @@ function KovasInvoicesEmbedded() {
     <div className="rounded-[12px] border border-[#0F1419]/[0.08] overflow-hidden bg-white">
       <div className="overflow-x-auto">
         <table className="w-full text-[13px] min-w-[320px]">
-          <thead className="bg-[#F5F7F4] text-[#0F1419]/55 text-[10px] font-mono uppercase tracking-[0.1em]">
+          <thead className="bg-[#F5F7F4] text-[#0F1419]/72 text-[10px] font-mono uppercase tracking-[0.1em]">
             <tr>
-              <th className="text-left px-3 py-2.5">Date</th>
-              <th className="text-left px-3 py-2.5 hidden md:table-cell">Numéro</th>
-              <th className="text-left px-3 py-2.5 hidden lg:table-cell">Période</th>
-              <th className="text-left px-3 py-2.5 hidden sm:table-cell">Statut</th>
-              <th className="text-right px-3 py-2.5">Total TTC</th>
-              <th className="text-right px-3 py-2.5">PDF</th>
+              <th scope="col" className="text-left px-3 py-2.5">
+                Date
+              </th>
+              <th scope="col" className="text-left px-3 py-2.5 hidden md:table-cell">
+                Numéro
+              </th>
+              <th scope="col" className="text-left px-3 py-2.5 hidden lg:table-cell">
+                Période
+              </th>
+              <th scope="col" className="text-left px-3 py-2.5 hidden sm:table-cell">
+                Statut
+              </th>
+              <th scope="col" className="text-right px-3 py-2.5">
+                Total TTC
+              </th>
+              <th scope="col" className="text-right px-3 py-2.5">
+                PDF
+              </th>
             </tr>
           </thead>
           <tbody>

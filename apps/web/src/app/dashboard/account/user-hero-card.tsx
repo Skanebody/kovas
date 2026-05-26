@@ -31,6 +31,7 @@ export function UserHeroCard({ fullName, email, planName, onClick }: UserHeroCar
         'p-4 flex items-center gap-4 text-left',
         'hover:bg-[#0F1419]/[0.02] active:bg-[#0F1419]/[0.04]',
         'transition-colors duration-150',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/40 focus-visible:ring-offset-1',
       )}
     >
       <span
@@ -45,7 +46,7 @@ export function UserHeroCard({ fullName, email, planName, onClick }: UserHeroCar
         <p className="text-[17px] font-semibold text-[#0F1419] leading-tight truncate">
           {fullName || 'Profil sans nom'}
         </p>
-        <p className="text-[13px] text-[#0F1419]/55 leading-snug truncate mt-0.5">{email}</p>
+        <p className="text-[13px] text-[#0F1419]/72 leading-snug truncate mt-0.5">{email}</p>
         {planName && (
           <Badge
             variant="muted"

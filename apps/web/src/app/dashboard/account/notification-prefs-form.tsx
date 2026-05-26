@@ -46,7 +46,7 @@ export function NotificationPrefsForm({ initialMonthlyReportEnabled }: Notificat
           label="Activer le rapport mensuel d’activité par email"
         />
       </div>
-      <p className="text-[12px] text-[#0F1419]/55 px-4 leading-relaxed">
+      <p className="text-[12px] text-[#0F1419]/72 px-4 leading-relaxed">
         Envoyé chaque 1er du mois — récapitulatif des missions réalisées, temps économisé et valeur
         générée. Pas de notification commerciale.
       </p>
