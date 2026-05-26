@@ -4,6 +4,7 @@ import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { TrialBannerLoader } from '@/components/billing/TrialBannerLoader'
 import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
+import { SyncStatusBadge } from '@/components/dashboard/SyncStatusBadge'
 import { MissionFabMobile } from '@/components/mission/MissionFabMobile'
 import { RegulatoryNotificationsBadge } from '@/components/regulatory/RegulatoryNotificationsBadge'
 import { CommandK } from '@/components/shared/CommandK'
@@ -93,6 +94,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             </Link>
             <AppNavTabs access={access} />
             <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+              <SyncStatusBadge organizationId={orgId} />
               <SyncIndicator organizationId={orgId} />
               <CommandPaletteTrigger />
               <UsageWidget />

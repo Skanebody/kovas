@@ -51,28 +51,34 @@ interface RequestBody {
   mission_id: string
 }
 
+/**
+ * Schéma prod (post-refonte dossiers) :
+ *   missions.dossier_id → dossiers.{scheduled_at, property_id, client_id}
+ *   Donc on JOIN via dossier pour récupérer l'horaire prévu + bien + client.
+ */
 interface MissionRow {
   id: string
   organization_id: string
-  scheduled_at: string | null
   type: string
   status: string
-  property_id: string
-  client_id: string | null
   notes: string | null
-  properties: {
-    address: string | null
-    postal_code: string | null
-    city: string | null
-    insee_code: string | null
-    surface_total: number | null
-    year_built: number | null
-    property_type: string | null
-  } | null
-  clients: {
-    display_name: string | null
-    email: string | null
-    phone: string | null
+  dossier_id: string
+  dossiers: {
+    scheduled_at: string | null
+    properties: {
+      address: string | null
+      postal_code: string | null
+      city: string | null
+      insee_code: string | null
+      surface_total: number | null
+      year_built: number | null
+      property_type: string | null
+    } | null
+    clients: {
+      display_name: string | null
+      email: string | null
+      phone: string | null
+    } | null
   } | null
 }
 
@@ -115,17 +121,22 @@ function serverError(message: string): Response {
   return jsonResponse({ ok: false, error: message }, { status: 500 })
 }
 
-function formatAddress(p: NonNullable<MissionRow['properties']>): string {
+type PropertyRow = NonNullable<NonNullable<MissionRow['dossiers']>['properties']>
+type ClientRow = NonNullable<NonNullable<MissionRow['dossiers']>['clients']>
+
+function formatAddress(p: PropertyRow): string {
   const parts = [p.address, [p.postal_code, p.city].filter(Boolean).join(' ')]
   return parts.filter(Boolean).join(', ')
 }
 
 function buildPrompt(mission: MissionRow): string {
-  const p = mission.properties
-  const c = mission.clients
+  const dossier = mission.dossiers
+  const p: PropertyRow | null = dossier?.properties ?? null
+  const c: ClientRow | null = dossier?.clients ?? null
   const address = p ? formatAddress(p) : 'Adresse inconnue'
-  const scheduledDate = mission.scheduled_at
-    ? new Date(mission.scheduled_at).toLocaleString('fr-FR', {
+  const scheduledAt = dossier?.scheduled_at ?? null
+  const scheduledDate = scheduledAt
+    ? new Date(scheduledAt).toLocaleString('fr-FR', {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
@@ -266,11 +277,13 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: authHeader } },
   })
 
-  // Fetch mission + property + client
+  // Fetch mission + dossier (scheduled_at) + property + client (post-refonte
+  // dossiers de mai 2026 : missions.dossier_id → dossiers.{scheduled_at,
+  // property_id, client_id}).
   const { data: mission, error: missionErr } = await supabase
     .from('missions')
     .select(
-      'id, organization_id, scheduled_at, type, status, property_id, client_id, notes, properties(address, postal_code, city, insee_code, surface_total, year_built, property_type), clients(display_name, email, phone)',
+      'id, organization_id, type, status, notes, dossier_id, dossiers(scheduled_at, properties(address, postal_code, city, insee_code, surface_total, year_built, property_type), clients(display_name, email, phone))',
     )
     .eq('id', body.mission_id)
     .is('deleted_at', null)
