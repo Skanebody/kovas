@@ -109,7 +109,10 @@ export function mapToPrefillResult(
     rnb_id: rnb.rnb_id,
     meta: {
       rnb_fetched_at: meta.rnbFetchedAt,
-      bdnb_fetched_at: meta.bdnbFetchedAt,
+      // Invariant : si pas d'enrichissement BDNB, le timestamp BDNB doit être
+      // null — l'orchestrateur applique déjà cette règle, on la verrouille
+      // ici pour blinder les appels directs au mapping (tests, debug).
+      bdnb_fetched_at: bdnb ? meta.bdnbFetchedAt : null,
       degraded: meta.degraded,
     },
   }
