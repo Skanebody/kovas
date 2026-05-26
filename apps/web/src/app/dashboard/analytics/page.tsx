@@ -741,7 +741,7 @@ export default async function AnalyticsPage() {
       />
 
       {/* 4 KPI cards alignés sur pattern fiche client */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
         <KpiHero
           value={formatEur(currentRevenue)}
           label="CA HT ce mois"

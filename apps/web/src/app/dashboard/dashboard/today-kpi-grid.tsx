@@ -278,7 +278,7 @@ export async function TodayKpiGrid() {
           <div
             key={k.label}
             className={cn(
-              'p-5',
+              'p-4 sm:p-5 min-w-0',
               !isLast &&
                 (idx % 2 === 0 ? 'md:border-r border-rule/60' : 'md:border-r border-rule/60'),
               idx < 2 && 'border-b md:border-b-0 border-rule/60',
@@ -287,14 +287,14 @@ export async function TodayKpiGrid() {
               idx === 2 && 'border-r md:border-r-0 md:border-r border-rule/60',
             )}
           >
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-mute mb-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-mute mb-3 truncate">
               {k.label}
             </p>
-            <div className="flex items-baseline">
+            <div className="flex items-baseline min-w-0">
               <p
                 className={cn(
-                  'font-serif italic font-normal leading-none tracking-tight text-ink',
-                  isText ? 'text-2xl' : 'text-4xl',
+                  'font-serif italic font-normal leading-none tracking-tight text-ink break-words min-w-0',
+                  isText ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl md:text-4xl',
                 )}
               >
                 {k.value}

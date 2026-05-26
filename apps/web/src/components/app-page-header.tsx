@@ -38,10 +38,7 @@ export function AppPageHeader({
 }: AppPageHeaderProps) {
   return (
     <div
-      className={cn(
-        'flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
-        className,
-      )}
+      className={cn('flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between', className)}
     >
       <div className="space-y-2 min-w-0">
         {eyebrow ? (
@@ -49,7 +46,7 @@ export function AppPageHeader({
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="font-sans font-light text-display-m md:text-display-l tracking-tight text-ink leading-[1.05]">
+        <h1 className="font-sans font-light text-[36px] sm:text-display-m md:text-display-l tracking-tight text-ink leading-[1.05] break-words">
           {title}
           {accent ? (
             <>

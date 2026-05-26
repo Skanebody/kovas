@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 interface QuickAction {
   num: string
@@ -27,7 +27,7 @@ const ACTIONS: QuickAction[] = [
   {
     num: '→ 03',
     title: 'Nouvelle facture',
-    sub: "Depuis une mission terminée",
+    sub: 'Depuis une mission terminée',
     href: '/dashboard/facturation',
   },
   {
@@ -51,21 +51,19 @@ export function QuickActions() {
         const isLast = idx === ACTIONS.length - 1
         const inner = (
           <>
-            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute mb-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute mb-3 truncate">
               {a.num}
             </p>
-            <p className="text-sm font-medium text-ink leading-tight mb-1">{a.title}</p>
-            <p className="text-[11px] text-ink-mute leading-snug">{a.sub}</p>
+            <p className="text-sm font-medium text-ink leading-tight mb-1 break-words">{a.title}</p>
+            <p className="text-[11px] text-ink-mute leading-snug break-words">{a.sub}</p>
           </>
         )
         const baseClass = cn(
-          'p-5 text-left transition-colors',
+          'p-4 sm:p-5 text-left transition-colors min-w-0',
           !isLast && idx % 2 === 0 && 'border-r border-rule/60',
           !isLast && idx % 2 === 1 && 'md:border-r border-rule/60',
           idx < 2 && 'border-b md:border-b-0 border-rule/60',
-          a.disabled
-            ? 'bg-paper/60 opacity-50 cursor-not-allowed'
-            : 'bg-paper hover:bg-sage/60',
+          a.disabled ? 'bg-paper/60 opacity-50 cursor-not-allowed' : 'bg-paper hover:bg-sage/60',
         )
         if (a.disabled) {
           return (
