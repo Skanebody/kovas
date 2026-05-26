@@ -1,42 +1,36 @@
 'use client'
 
 /**
- * KOVAS — Hook React `useLocalWhisper()` (Lot B93, refonte acqui-target 2026-05).
+ * KOVAS — Hook React `useLocalWhisper()` (Lot B99, refonte acqui-target 2026-05).
  *
  * Source : `docs/refonte-2026-05/AI_ECONOMICS.md` (technique 6 — "Whisper hybride
  * local WASM + API") + JSDoc B58 `transcription-router.ts` §IMPORTANT.
  *
- * Objectif : exposer à un composant React l'accès à un moteur Whisper local
- * (whisper.cpp compilé en WebAssembly ou `@xenova/transformers` ONNX Web) qui
- * tourne ON-DEVICE pour les audios courts/silencieux (cf. router B58 décision
- * `local_wasm`). Coût marginal 0 EUR par transcription. Gain attendu : -15%
- * du coût transcription total une fois branché (cf. AI_ECONOMICS §3).
+ * Objectif : exécuter Whisper côté navigateur via `@xenova/transformers` v2 LTS
+ * (pipeline `automatic-speech-recognition` + modèle `Xenova/whisper-tiny`,
+ * ~75 Mo quantisé). Coût marginal 0 EUR par transcription. Gain attendu :
+ * -15% du coût transcription total une fois branché (cf. AI_ECONOMICS §3).
  *
- * ─── État actuel — Scaffold uniquement ─────────────────────────────────────
- * Aucune lib WASM Whisper n'est installée dans le monorepo au moment de ce
- * lot. Le hook expose une API React PROPRE (`isReady`, `transcribe`, `error`,
- * `isSupported`) qui permet à `client-transcribe.ts` de router intelligemment
- * sans crasher, mais `transcribe()` throw immédiatement `WHISPER_LOCAL_NOT_AVAILABLE`.
+ * ─── État B99 — Branchement effectif ────────────────────────────────────────
+ * Le scaffold B93 (throw `WHISPER_LOCAL_NOT_AVAILABLE`) est remplacé par le
+ * vrai pipeline. Le modèle est lazy-loaded via dynamic import au mount, donc
+ * la lib WASM (`@xenova/transformers`) ne pollue PAS le main bundle JS
+ * initial (le code-split Next.js auto-chunke).
  *
- * Le helper `client-transcribe.ts` traite ce throw comme un fallback gracieux
- * vers `/api/transcribe` avec le header `X-Transcription-Engine:
- * local_wasm_attempted_failed` — l'observabilité serveur compte les retombées
- * pour pouvoir prioriser le branchement réel.
+ * Cache : `@xenova/transformers` utilise nativement IndexedDB (`browserCache`)
+ * pour stocker le modèle après le premier download — les usages suivants
+ * n'ont plus de download (cache hit ~instantané).
  *
- * Pour brancher pour de vrai :
- *   1. `pnpm add @xenova/transformers@^3` (ou `whisper.cpp-wasm`, à benchmarker)
- *   2. Remplacer le body de `loadWhisperModel()` ci-dessous par le `pipeline()`
- *      de `@xenova/transformers` ('automatic-speech-recognition', 'Xenova/whisper-tiny')
- *   3. Implémenter `runWhisperOnAudio()` (resample 16kHz, mono PCM, callback).
- *   4. Activer le cache IndexedDB via la convention Hugging Face Hub
- *      (`@xenova/transformers` le fait nativement via `transformers.env.cacheDir`).
- *   5. Mettre à jour les tests de fallback (`use-local-whisper.test.ts`).
+ * Fallback : si la lib n'est pas installée (`pnpm add` jamais lancé) ou si
+ * le dynamic import échoue (CSP, network, browser trop vieux), le hook
+ * stocke l'erreur dans `error` et `client-transcribe.ts` retombe
+ * silencieusement sur `/api/transcribe` avec le header
+ * `X-Transcription-Engine: local_wasm_attempted_failed`.
  *
- * TODO B93+1 : installer `@xenova/transformers` v3.x et brancher pour de vrai.
  * Authority : CLAUDE.md §3 feature #1 (saisie vocale terrain hybride FR).
  */
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 /* ─── Types publics ─────────────────────────────────────────────────────── */
 
@@ -61,20 +55,46 @@ export interface UseLocalWhisperReturn {
   isReady: boolean
   /**
    * Capacité matérielle du navigateur à exécuter WASM SIMD (prérequis pour
-   * whisper.cpp-wasm rapide). Devient `false` sur navigateurs trop vieux
-   * (Safari < 16.4, etc.) — dans ce cas, on ne tente même pas le download
+   * @xenova/transformers performant). Devient `false` sur navigateurs trop
+   * vieux (Safari < 16.4, etc.) — dans ce cas, on ne tente même pas le download
    * du modèle (économie de bande passante).
    */
   isSupported: boolean
   /** Erreur de chargement éventuelle (model fetch failed, WASM crash, etc.). */
   error: Error | null
   /**
-   * Lance la transcription locale. Throw si la lib n'est pas dispo (scaffold)
-   * ou si une erreur survient pendant l'inference. Le caller (helper) est
-   * responsable du fallback API.
+   * Lance la transcription locale. Throw `WHISPER_LOCAL_NOT_AVAILABLE` si le
+   * modèle n'est pas encore chargé, ou `WHISPER_LOCAL_NOT_SUPPORTED` si WASM
+   * indisponible. Le caller (helper) est responsable du fallback API.
    */
   transcribe: (audioBlob: Blob) => Promise<LocalWhisperResult>
 }
+
+/* ─── Constantes internes ──────────────────────────────────────────────── */
+
+/**
+ * Nom du modèle Hugging Face. Whisper-tiny multilingue (~75 Mo quantisé int8),
+ * gère le FR avec qualité acceptable pour audios courts (< 180s) — cf. critère
+ * d'éligibilité du router B58. Pour la qualité supérieure, le router bascule
+ * sur l'API serveur (`whisper-1` ou `gpt-4o-mini-transcribe`).
+ */
+const MODEL_NAME = 'Xenova/whisper-tiny'
+
+/**
+ * Sample rate attendu par Whisper. Le modèle est entrainé sur 16kHz mono PCM
+ * — il faut resampler tous les audios (browsers enregistrent souvent en
+ * 44.1kHz ou 48kHz via MediaRecorder). On utilise OfflineAudioContext pour
+ * le resampling natif et performant.
+ */
+const WHISPER_SAMPLE_RATE = 16_000
+
+/**
+ * Confidence par défaut. Whisper-tiny ne retourne pas de probabilité log par
+ * token au format @xenova/transformers v2 — on fixe une valeur raisonnable
+ * pour les consommateurs UI. La qualité du local est mesurée empiriquement
+ * par le delta d'édition utilisateur (tracking PostHog).
+ */
+const DEFAULT_LOCAL_CONFIDENCE = 0.85
 
 /* ─── Helpers internes ──────────────────────────────────────────────────── */
 
@@ -83,8 +103,8 @@ export interface UseLocalWhisperReturn {
  *
  * - `WebAssembly` global présent (~tous les navigateurs depuis 2018).
  * - WASM SIMD valide (instruction `v128.const` minimale) → requis pour
- *   whisper.cpp et @xenova/transformers performants. Si pas SIMD on pourrait
- *   tomber sur un mode "scalar" 5-10× plus lent : on préfère router API.
+ *   `@xenova/transformers` (onnxruntime-web utilise SIMD pour les ops vectorisées).
+ *   Sans SIMD on tomberait sur un mode scalar 5-10× plus lent : on préfère router API.
  *
  * Exporté pour les tests + pour le helper `client-transcribe.ts` qui veut
  * tester côté caller sans monter le hook.
@@ -137,35 +157,124 @@ export function detectWasmSupport(): boolean {
 }
 
 /**
- * Charge dynamiquement la lib WASM Whisper.
+ * Type opaque du pipeline `@xenova/transformers`. La lib n'exporte pas de type
+ * strict pour le pipeline ASR — on utilise `unknown` côté API publique et
+ * on isole les casts à un seul endroit (la fonction `transcribe` ci-dessous).
+ */
+type WhisperPipeline = (
+  audio: Float32Array,
+  options: {
+    language?: string
+    task?: 'transcribe' | 'translate'
+    return_timestamps?: boolean
+    chunk_length_s?: number
+    stride_length_s?: number
+  },
+) => Promise<{ text?: string } | { text?: string }[]>
+
+/**
+ * Charge dynamiquement le pipeline Whisper depuis `@xenova/transformers`.
  *
- * Scaffold-only — throw explicite tant que la dep n'est pas installée. Voir
- * le JSDoc d'en-tête pour la procédure de branchement réelle.
+ * - Dynamic import : la lib (~3-5 Mo gzippé) reste HORS du main bundle JS
+ *   initial. Code-splitting Next.js auto-chunke.
+ * - Si la dep n'est pas installée (`pnpm add @xenova/transformers` jamais
+ *   lancé), l'import throw → caller catch et fallback API.
+ * - `quantized: true` : modèle int8 ~75 Mo (vs ~150 Mo float32). Qualité OK
+ *   pour FR sur audios courts/silencieux (cf. critères router B58).
+ * - Cache IndexedDB automatique : `@xenova/transformers` détecte le browser
+ *   et utilise `caches` + IndexedDB pour stocker le modèle après le 1er
+ *   download. Cache hit sur les usages suivants (~instantané).
  *
  * Exporté pour permettre aux tests de mocker le chargement model.
  */
-export async function loadWhisperModel(): Promise<{
-  transcribe: (audio: Blob) => Promise<{ text: string; confidence: number }>
-}> {
-  // TODO B93+1 : remplacer par le pipeline @xenova/transformers réel
-  //
-  //   const { pipeline, env } = await import('@xenova/transformers')
-  //   env.allowLocalModels = false
-  //   env.useBrowserCache = true  // IndexedDB automatic
-  //   const asr = await pipeline(
-  //     'automatic-speech-recognition',
-  //     'Xenova/whisper-tiny',
-  //     { quantized: true }, // ~40 Mo model, OK mobile
-  //   )
-  //   return {
-  //     transcribe: async (audio) => {
-  //       const arrayBuffer = await audio.arrayBuffer()
-  //       const result = await asr(arrayBuffer, { language: 'french', task: 'transcribe' })
-  //       return { text: result.text, confidence: result.confidence ?? 0.8 }
-  //     },
-  //   }
-  //
-  throw new Error('WHISPER_LOCAL_NOT_AVAILABLE')
+export async function loadWhisperModel(): Promise<WhisperPipeline> {
+  // Dynamic import : isolé dans une variable typée `unknown` pour éviter
+  // que TypeScript ne s'attende à des types stricts (@xenova/transformers
+  // n'expose pas de typings exhaustifs pour le pipeline ASR).
+  const transformers = (await import('@xenova/transformers')) as unknown as {
+    pipeline: (
+      task: string,
+      model: string,
+      options?: { quantized?: boolean },
+    ) => Promise<WhisperPipeline>
+    env?: { allowLocalModels?: boolean; useBrowserCache?: boolean }
+  }
+
+  // Config env : pas de modèles locaux (CDN HF Hub uniquement) + cache
+  // navigateur activé (IndexedDB). Les flags par défaut depuis v2.6 sont
+  // déjà OK mais on les force pour être explicite et défensif.
+  if (transformers.env) {
+    transformers.env.allowLocalModels = false
+    transformers.env.useBrowserCache = true
+  }
+
+  const asr = await transformers.pipeline('automatic-speech-recognition', MODEL_NAME, {
+    quantized: true,
+  })
+
+  return asr
+}
+
+/**
+ * Décode un Blob audio en Float32Array mono 16kHz, format attendu par Whisper.
+ *
+ * Étapes :
+ *   1. Lecture du Blob en ArrayBuffer.
+ *   2. Décodage via AudioContext (gère webm/opus, mp4/aac, wav, ogg…).
+ *   3. Resampling vers 16kHz via OfflineAudioContext (natif, performant).
+ *   4. Downmix stéréo → mono (moyenne des canaux).
+ *
+ * Exporté pour les tests + pour les composants qui veulent pré-décoder en
+ * background (Web Worker dédié, par exemple).
+ */
+export async function decodeAudioToMono16khz(blob: Blob): Promise<Float32Array> {
+  const arrayBuffer = await blob.arrayBuffer()
+
+  // Browser support : Safari préfixait webkitAudioContext jusqu'en iOS 14.
+  // On garde le fallback pour les navigateurs iPad 14-15 que KOVAS peut
+  // cibler (parc diagnostiqueurs FR pas toujours à jour).
+  const AudioCtx =
+    (typeof window !== 'undefined' &&
+      ((window as unknown as { AudioContext?: typeof AudioContext }).AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)) ||
+    undefined
+
+  if (!AudioCtx) {
+    throw new Error('WHISPER_LOCAL_NO_AUDIO_CONTEXT')
+  }
+
+  // 1er decodage : on garde le sample rate natif du blob pour préserver
+  // la qualité. Le resampling vient ensuite via OfflineAudioContext.
+  const decodeCtx = new AudioCtx()
+  let audioBuffer: AudioBuffer
+  try {
+    audioBuffer = await decodeCtx.decodeAudioData(arrayBuffer.slice(0))
+  } finally {
+    // Free decoded buffer ASAP, on aura un nouveau context pour le resampling.
+    void decodeCtx.close().catch(() => {
+      /* ignore close errors */
+    })
+  }
+
+  const targetSampleRate = WHISPER_SAMPLE_RATE
+  const targetDuration = audioBuffer.duration
+
+  // OfflineAudioContext fait le resampling natif via SRC haute qualité.
+  // Pas besoin de DSP manuel ni de lib externe (gain bundle ~150kB).
+  const offline = new OfflineAudioContext({
+    numberOfChannels: 1, // forces le downmix mono (browser averages channels)
+    length: Math.ceil(targetDuration * targetSampleRate),
+    sampleRate: targetSampleRate,
+  })
+
+  const source = offline.createBufferSource()
+  source.buffer = audioBuffer
+  source.connect(offline.destination)
+  source.start(0)
+
+  const resampled = await offline.startRendering()
+  // OfflineAudioContext + numberOfChannels:1 → getChannelData(0) est déjà mono.
+  return resampled.getChannelData(0)
 }
 
 /* ─── Hook public ───────────────────────────────────────────────────────── */
@@ -175,13 +284,19 @@ export async function loadWhisperModel(): Promise<{
  *
  * Comportement :
  *   1. Au mount, détecte le support WASM SIMD (synchrone, pas d'I/O).
- *   2. Si supporté, tente de lazy-load la lib WASM (dynamic import, hors
- *      bundle principal). Scaffold-only aujourd'hui → throw fallback API.
- *   3. Expose `transcribe(audioBlob)` qui lance l'inference on-device.
+ *   2. Si supporté, lazy-load le pipeline `@xenova/transformers` via dynamic
+ *      import + télécharge `Xenova/whisper-tiny` (~75 Mo, mis en cache
+ *      IndexedDB pour les sessions suivantes).
+ *   3. Expose `transcribe(audioBlob)` qui décode le blob en Float32Array
+ *      16kHz mono et lance l'inference on-device.
  *
  * Le caller (helper `client-transcribe.ts`) DOIT vérifier `isReady` ET
  * `isSupported` avant d'appeler `transcribe`. En cas de throw, il bascule
  * automatiquement sur `/api/transcribe` avec le header signalant le fail.
+ *
+ * Cleanup : si le composant unmount AVANT la fin du download/init, le hook
+ * annule proprement le state update via un ref `cancelled` pour éviter le
+ * warning React "Can't perform state update on unmounted component".
  *
  * @example
  * ```tsx
@@ -199,12 +314,15 @@ export function useLocalWhisper(): UseLocalWhisperReturn {
   const [isReady, setIsReady] = useState(false)
   const [isSupported, setIsSupported] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const [model, setModel] = useState<{
-    transcribe: (audio: Blob) => Promise<{ text: string; confidence: number }>
-  } | null>(null)
+  /**
+   * Ref (pas state) pour le pipeline : éviter une re-render à chaque update
+   * et permettre l'accès synchrone depuis `transcribe()` sans stale closure.
+   */
+  const pipelineRef = useRef<WhisperPipeline | null>(null)
+  const cancelledRef = useRef(false)
 
   useEffect(() => {
-    let cancelled = false
+    cancelledRef.current = false
 
     const wasmOk = detectWasmSupport()
     setIsSupported(wasmOk)
@@ -212,24 +330,22 @@ export function useLocalWhisper(): UseLocalWhisperReturn {
     if (!wasmOk) {
       // Pas la peine de tenter le download — le caller fera API direct.
       return () => {
-        cancelled = true
+        cancelledRef.current = true
       }
     }
 
     // Lazy import : ne JAMAIS importer la lib WASM au top-level — elle
-    // explose le bundle principal de plusieurs Mo. Le `loadWhisperModel`
-    // utilise `await import(...)` côté implémentation réelle.
+    // explose le bundle principal de plusieurs Mo.
     void (async () => {
       try {
         const loaded = await loadWhisperModel()
-        if (!cancelled) {
-          setModel(loaded)
+        if (!cancelledRef.current) {
+          pipelineRef.current = loaded
           setIsReady(true)
         }
       } catch (err) {
-        if (!cancelled) {
-          // Pas un crash : le scaffold throw `WHISPER_LOCAL_NOT_AVAILABLE`.
-          // On stocke l'erreur pour debug mais on laisse le caller fallback.
+        if (!cancelledRef.current) {
+          // Stockage erreur pour debug + caller fallback API.
           setError(err instanceof Error ? err : new Error('whisper_load_failed'))
           setIsReady(false)
         }
@@ -237,32 +353,74 @@ export function useLocalWhisper(): UseLocalWhisperReturn {
     })()
 
     return () => {
-      cancelled = true
+      cancelledRef.current = true
+      pipelineRef.current = null
     }
   }, [])
+
+  const transcribe = useCallback(
+    async (audioBlob: Blob): Promise<LocalWhisperResult> => {
+      if (!isSupported) {
+        throw new Error('WHISPER_LOCAL_NOT_SUPPORTED')
+      }
+      const pipe = pipelineRef.current
+      if (!pipe) {
+        throw new Error('WHISPER_LOCAL_NOT_AVAILABLE')
+      }
+
+      const t0 =
+        typeof performance !== 'undefined' && typeof performance.now === 'function'
+          ? performance.now()
+          : Date.now()
+
+      // Décodage Blob → Float32Array 16kHz mono (requis par Whisper).
+      const audioData = await decodeAudioToMono16khz(audioBlob)
+
+      // Inference on-device. Paramètres :
+      //   - language: 'french' → biais sur les tokens FR (sinon Whisper essaye
+      //     d'auto-détecter, ce qui rate parfois sur audios courts).
+      //   - task: 'transcribe' (pas 'translate' qui force EN).
+      //   - chunk_length_s: 30 → découpage interne pour audios > 30s (Whisper
+      //     n'accepte que des fenêtres 30s natives).
+      //   - return_timestamps: false → on n'utilise pas les segments côté UI
+      //     V1, et ça simplifie le shape de sortie.
+      const raw = await pipe(audioData, {
+        language: 'french',
+        task: 'transcribe',
+        chunk_length_s: 30,
+        stride_length_s: 5,
+        return_timestamps: false,
+      })
+
+      // Le pipeline ASR peut retourner un objet OU un array de chunks selon
+      // la version de @xenova/transformers et la durée de l'audio. On
+      // normalise les deux formats.
+      const text = Array.isArray(raw)
+        ? raw
+            .map((c) => c.text ?? '')
+            .join(' ')
+            .trim()
+        : (raw.text ?? '').trim()
+
+      const durationMs =
+        (typeof performance !== 'undefined' && typeof performance.now === 'function'
+          ? performance.now()
+          : Date.now()) - t0
+
+      return {
+        text,
+        confidence: DEFAULT_LOCAL_CONFIDENCE,
+        engine: 'local_wasm',
+        durationMs,
+      }
+    },
+    [isSupported],
+  )
 
   return {
     isReady,
     isSupported,
     error,
-    transcribe: async (audioBlob: Blob): Promise<LocalWhisperResult> => {
-      if (!isSupported) {
-        throw new Error('WHISPER_LOCAL_NOT_SUPPORTED')
-      }
-      if (!isReady || !model) {
-        throw new Error('WHISPER_LOCAL_NOT_AVAILABLE')
-      }
-
-      const t0 = Date.now()
-      const raw = await model.transcribe(audioBlob)
-      const durationMs = Date.now() - t0
-
-      return {
-        text: raw.text,
-        confidence: raw.confidence,
-        engine: 'local_wasm',
-        durationMs,
-      }
-    },
+    transcribe,
   }
 }

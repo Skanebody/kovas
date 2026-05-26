@@ -22,6 +22,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // ─── B99 — Whisper local WASM ────────────────────────────────────
+      // En mode test, `@xenova/transformers` est aliasé vers un stub local
+      // pour permettre à Vite de résoudre l'import statique même si la dep
+      // n'est pas installée (CI fresh, sandbox sans pnpm). Les tests qui
+      // veulent un comportement réaliste utilisent `vi.mock(...)` qui
+      // s'applique par-dessus cet alias. Cf. JSDoc du stub pour le contexte.
+      '@xenova/transformers': fileURLToPath(
+        new URL('./src/lib/audio/__mocks__/xenova-transformers-stub.ts', import.meta.url),
+      ),
     },
   },
   // JSX runtime "automatic" : permet d'écrire des tests `.test.tsx` sans

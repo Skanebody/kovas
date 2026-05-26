@@ -73,6 +73,29 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react'],
   },
   transpilePackages: ['@kovas/shared', '@kovas/database', '@kovas/ai', '@kovas/liciel-bridge'],
+  // ─── B99 — Whisper local WASM via @xenova/transformers ────────────────
+  // La lib embarque `onnxruntime-node` (binaire Node-only) et `sharp`
+  // (image processing) qui ne doivent JAMAIS finir dans le bundle client.
+  // L'option `serverExternalPackages` les marque comme externals serveur
+  // pour les Server Actions / Route Handlers (sinon Vercel timeout deploy
+  // sur l'analyse du .so).
+  serverExternalPackages: ['@xenova/transformers', 'sharp', 'onnxruntime-node'],
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Côté client : alias false sur les binaires Node-only que
+      // @xenova/transformers conditionnellement require. Sans ça, webpack
+      // tente de bundler le .node natif → erreur résolution module.
+      config.resolve = config.resolve ?? {}
+      config.resolve.alias = {
+        ...(typeof config.resolve.alias === 'object' && config.resolve.alias !== null
+          ? config.resolve.alias
+          : {}),
+        'onnxruntime-node$': false,
+        sharp$: false,
+      }
+    }
+    return config
+  },
   images: {
     remotePatterns: [
       {
