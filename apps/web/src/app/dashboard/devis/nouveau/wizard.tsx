@@ -13,6 +13,11 @@
  *   - Envoyer au client → enchaîne createDraft + sendQuote
  */
 
+import { QuoteCatalogPicker } from '@/components/quotes/QuoteCatalogPicker'
+import type { PricingPackOption } from '@/components/quotes/QuoteCatalogPicker'
+import { QuoteLineItemRow } from '@/components/quotes/QuoteLineItemRow'
+import { QuoteLivePreview } from '@/components/quotes/QuoteLivePreview'
+import { QuoteLiveTotals } from '@/components/quotes/QuoteLiveTotals'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -26,16 +31,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { QuoteCatalogPicker } from '@/components/quotes/QuoteCatalogPicker'
-import { QuoteLineItemRow } from '@/components/quotes/QuoteLineItemRow'
-import { QuoteLivePreview } from '@/components/quotes/QuoteLivePreview'
-import { QuoteLiveTotals } from '@/components/quotes/QuoteLiveTotals'
-import { type PricingPackOption } from '@/components/quotes/QuoteCatalogPicker'
-import {
-  buildMajorationLine,
-  buildTravelLine,
-  haversineKm,
-} from '@/lib/quotes/build-pricing-line'
 import type {
   DiagnosticPricing,
   MajorationsConfig,
@@ -43,6 +38,7 @@ import type {
   TravelFeesConfig,
 } from '@/lib/pricing/pricing-templates'
 import { calculateTravelFees } from '@/lib/pricing/travel-fees-calculator'
+import { buildMajorationLine, buildTravelLine, haversineKm } from '@/lib/quotes/build-pricing-line'
 import type {
   QuoteClientSnapshot,
   QuoteDiagnosticType,
@@ -258,7 +254,7 @@ export function QuoteWizard(props: QuoteWizardProps) {
   function autoAddTravelFromEstimate() {
     if (!travelEstimate) return
     if (travelEstimate.amountHt <= 0) {
-      toast.info(`Bien situé dans la zone incluse — pas de frais.`)
+      toast.info('Bien situé dans la zone incluse — pas de frais.')
       return
     }
     addLine(
@@ -279,9 +275,7 @@ export function QuoteWizard(props: QuoteWizardProps) {
     if (enabled) {
       const amount =
         kind === 'urgency' ? cfg.urgency48h : kind === 'weekend' ? cfg.weekend : cfg.evening
-      addLine(
-        buildMajorationLine({ kind, amountHt: amount, tvaRate: props.pricingConfig.vatRate }),
-      )
+      addLine(buildMajorationLine({ kind, amountHt: amount, tvaRate: props.pricingConfig.vatRate }))
     } else {
       setState((prev) => ({
         ...prev,
@@ -360,9 +354,7 @@ export function QuoteWizard(props: QuoteWizardProps) {
   // Filtre properties par client si client sélectionné
   const filteredProperties = useMemo(() => {
     if (!state.clientId) return props.properties
-    return props.properties.filter(
-      (p) => p.client_id === null || p.client_id === state.clientId,
-    )
+    return props.properties.filter((p) => p.client_id === null || p.client_id === state.clientId)
   }, [props.properties, state.clientId])
 
   return (
@@ -398,8 +390,7 @@ export function QuoteWizard(props: QuoteWizardProps) {
           </div>
           {selectedClient ? (
             <p className="text-[12px] text-ink-mute mt-2">
-              {selectedClient.email ?? 'Aucun email'} ·{' '}
-              {selectedClient.phone ?? 'Aucun téléphone'}
+              {selectedClient.email ?? 'Aucun email'} · {selectedClient.phone ?? 'Aucun téléphone'}
               {selectedClient.siret ? ` · SIRET ${selectedClient.siret}` : ''}
             </p>
           ) : null}
@@ -443,8 +434,8 @@ export function QuoteWizard(props: QuoteWizardProps) {
           </div>
           {state.lines.length === 0 ? (
             <p className="text-[13px] text-ink-faint italic text-center py-6">
-              Aucune prestation — utilisez le bouton ci-dessus pour ajouter un diagnostic, un
-              pack ou une ligne libre.
+              Aucune prestation — utilisez le bouton ci-dessus pour ajouter un diagnostic, un pack
+              ou une ligne libre.
             </p>
           ) : (
             <ul className="space-y-2">
@@ -471,8 +462,8 @@ export function QuoteWizard(props: QuoteWizardProps) {
             </p>
           ) : !selectedProperty ? (
             <p className="text-[13px] text-ink-mute">
-              Sélectionnez un bien (étape 2) pour calculer automatiquement les frais, ou ajoutez
-              une ligne libre.
+              Sélectionnez un bien (étape 2) pour calculer automatiquement les frais, ou ajoutez une
+              ligne libre.
             </p>
           ) : distanceKm === null ? (
             <p className="text-[13px] text-ink-mute">
@@ -481,9 +472,7 @@ export function QuoteWizard(props: QuoteWizardProps) {
             </p>
           ) : (
             <div className="flex items-center gap-3 flex-wrap">
-              <p className="text-[13px] text-ink-soft">
-                {travelEstimate?.description ?? '—'}
-              </p>
+              <p className="text-[13px] text-ink-soft">{travelEstimate?.description ?? '—'}</p>
               <Button
                 type="button"
                 variant="outline"
@@ -681,12 +670,7 @@ export function QuoteWizard(props: QuoteWizardProps) {
               {formatEur(computeQuoteTotals(state.lines).totalTtc)}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPreviewOpen(true)}
-            type="button"
-          >
+          <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)} type="button">
             <Eye className="size-4" /> Aperçu
           </Button>
         </div>
@@ -768,9 +752,7 @@ function Section({
 }) {
   return (
     <Card variant="opaque" padding="default">
-      <p className="font-mono text-[10px] uppercase tracking-wider text-ink-mute mb-1">
-        {eyebrow}
-      </p>
+      <p className="font-mono text-[10px] uppercase tracking-wider text-ink-mute mb-1">{eyebrow}</p>
       <h2 className="font-sans font-medium text-[18px] text-ink mb-4">{title}</h2>
       <div>{children}</div>
     </Card>
@@ -871,7 +853,7 @@ function QuickClientDialog({
               onChange={(e) => setForm((p) => ({ ...p, displayName: e.target.value }))}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="qc-email">Email</Label>
               <Input

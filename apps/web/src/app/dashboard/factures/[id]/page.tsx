@@ -1,21 +1,21 @@
+import { hasActiveFollowUpSequenceAction } from '@/app/dashboard/relances/actions'
 import { AppPageHeader } from '@/components/app-page-header'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { InvoiceLivePreview } from '@/components/invoices/InvoiceLivePreview'
-import { InvoiceStatusPill } from '@/components/invoices/InvoiceStatusPill'
 import { InvoiceReminderHistory } from '@/components/invoices/InvoiceReminderHistory'
+import { InvoiceStatusPill } from '@/components/invoices/InvoiceStatusPill'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import {
-  parseLineItems,
   type InvoiceClientSnapshot,
   type InvoiceIssuerSnapshot,
   type InvoiceStatus,
+  parseLineItems,
 } from '@/lib/invoices/types'
-import { hasActiveFollowUpSequenceAction } from '@/app/dashboard/relances/actions'
 import { hasFeatureAccess } from '@/lib/upsell/access-control'
 import { loadUserAccess } from '@/lib/upsell/load-access'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { InvoiceDetailActions } from './InvoiceDetailActions'
 
 export const metadata: Metadata = { title: 'Facture' }
@@ -156,7 +156,7 @@ export default async function FactureDetailPage({ params }: PageProps) {
             : undefined
         }
         action={
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <InvoiceStatusPill status={status} />
             <InvoiceDetailActions
               invoiceId={invoice.id}
@@ -246,11 +246,15 @@ export default async function FactureDetailPage({ params }: PageProps) {
               ) : null}
               <div className="flex justify-between border-t border-rule pt-3">
                 <span className="text-ink-mute">Montant HT</span>
-                <span className="tabular-nums text-ink">{formatEur(Number(invoice.amount_ht))}</span>
+                <span className="tabular-nums text-ink">
+                  {formatEur(Number(invoice.amount_ht))}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-ink-mute">TVA</span>
-                <span className="tabular-nums text-ink">{formatEur(Number(invoice.amount_tva))}</span>
+                <span className="tabular-nums text-ink">
+                  {formatEur(Number(invoice.amount_tva))}
+                </span>
               </div>
               <div className="flex justify-between font-semibold">
                 <span className="text-ink">Total TTC</span>

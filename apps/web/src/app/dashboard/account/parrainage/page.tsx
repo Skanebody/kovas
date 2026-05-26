@@ -109,8 +109,8 @@ export default async function ParrainagePage() {
         <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[#0F1419]/72">
           <Gift className="size-3.5" /> Tes récompenses, étape par étape
         </div>
-        <div className="overflow-hidden rounded-lg border border-[#0F1419]/[0.08]">
-          <table className="w-full text-[13px]">
+        <div className="overflow-x-auto rounded-lg border border-[#0F1419]/[0.08]">
+          <table className="w-full text-[13px] min-w-[480px]">
             <thead className="bg-sage/60">
               <tr>
                 <th

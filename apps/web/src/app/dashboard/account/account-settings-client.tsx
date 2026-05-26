@@ -394,7 +394,7 @@ function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
               <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#0F1419]/55">
                 Missions ce mois
               </p>
-              <p className="font-serif italic text-[44px] leading-none text-[#0F1419]">
+              <p className="font-serif italic text-[36px] sm:text-[44px] leading-none text-[#0F1419]">
                 {props.missionsCount}
               </p>
               <p className="text-[11px] text-[#0F1419]/55">Forfait illimité</p>
