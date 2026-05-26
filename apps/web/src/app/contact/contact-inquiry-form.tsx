@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -59,7 +59,7 @@ export function ContactInquiryForm() {
     if (!consentChecked) {
       setState({
         status: 'error',
-        message: 'Vous devez accepter la politique de confidentialité pour envoyer le message.',
+        message: 'Tu dois accepter la politique de confidentialité pour envoyer le message.',
       })
       return
     }
@@ -83,14 +83,13 @@ export function ContactInquiryForm() {
           ...base,
           inquiry_type: 'particulier',
           city: (formData.get('city') as string) || undefined,
-          project_type:
-            ((formData.get('project_type') as string) || undefined) as
-              | 'vente'
-              | 'location'
-              | 'renovation'
-              | 'achat'
-              | 'curiosite'
-              | undefined,
+          project_type: ((formData.get('project_type') as string) || undefined) as
+            | 'vente'
+            | 'location'
+            | 'renovation'
+            | 'achat'
+            | 'curiosite'
+            | undefined,
         }
         break
       case 'diagnostiqueur':
@@ -116,14 +115,13 @@ export function ContactInquiryForm() {
           ...base,
           inquiry_type: 'partenariat',
           company: String(formData.get('company') ?? ''),
-          partnership_type:
-            ((formData.get('partnership_type') as string) || undefined) as
-              | 'notaires'
-              | 'agences-immobilieres'
-              | 'banques-courtiers'
-              | 'fournisseurs-energie'
-              | 'autre'
-              | undefined,
+          partnership_type: ((formData.get('partnership_type') as string) || undefined) as
+            | 'notaires'
+            | 'agences-immobilieres'
+            | 'banques-courtiers'
+            | 'fournisseurs-energie'
+            | 'autre'
+            | undefined,
         }
         break
     }
@@ -184,8 +182,7 @@ export function ContactInquiryForm() {
       {/* Bandeau redirection pour journaliste / partenariat */}
       {inquiryType === 'journaliste' ? (
         <Card variant="warm" padding="sm" className="text-sm text-[#0F1419]/80">
-          Pour les sujets de fond, communiqués officiels et kit médias, vous pouvez consulter
-          notre{' '}
+          Pour les sujets de fond, communiqués officiels et kit médias, tu peux consulter notre{' '}
           <Link href="/presse" className="underline underline-offset-4 font-medium">
             espace presse
           </Link>
@@ -243,7 +240,7 @@ export function ContactInquiryForm() {
             <Field name="city" label="Ville du bien (optionnel)" />
             <SelectField
               name="project_type"
-              label="Votre projet (optionnel)"
+              label="Ton projet (optionnel)"
               options={[
                 { value: '', label: 'Sans précision' },
                 { value: 'vente', label: 'Vente' },
@@ -321,7 +318,7 @@ export function ContactInquiryForm() {
             name="message"
             required
             rows={6}
-            placeholder="Décrivez votre demande en quelques lignes."
+            placeholder="Décris ta demande en quelques lignes."
             className={cn(
               'w-full rounded-md border bg-paper/70 px-3.5 py-2.5 text-sm text-[#0F1419] placeholder:text-[#0F1419]/40 leading-relaxed',
               'focus:outline-none focus:ring-4 focus:ring-navy/15 focus:border-[#0F1419]/40',
@@ -351,12 +348,7 @@ export function ContactInquiryForm() {
         ) : null}
 
         <div>
-          <Button
-            type="submit"
-            variant="accent"
-            size="lg"
-            disabled={state.status === 'submitting'}
-          >
+          <Button type="submit" variant="accent" size="lg" disabled={state.status === 'submitting'}>
             {state.status === 'submitting' ? 'Envoi en cours…' : 'Envoyer'}
           </Button>
         </div>

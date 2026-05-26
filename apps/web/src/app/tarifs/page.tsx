@@ -70,8 +70,8 @@ interface Tier {
 const LOGICIEL_TIERS: Tier[] = [
   {
     name: 'Solo',
-    forWho: 'Vous démarrez ou vous faites ~10 missions par semaine.',
-    promise: 'Gagnez 35 minutes sur chaque mission. Zéro mauvaise surprise ADEME.',
+    forWho: 'Tu démarres ou tu fais ~10 missions par semaine.',
+    promise: 'Gagne 35 minutes sur chaque mission. Zéro mauvaise surprise ADEME.',
     price: '29',
     cap: { count: '40', unit: 'missions / mois', overage: 'puis 0,99€ / mission' },
     features: [
@@ -86,8 +86,8 @@ const LOGICIEL_TIERS: Tier[] = [
   },
   {
     name: 'Pro',
-    forWho: 'Vous travaillez à temps plein, 15 à 25 missions par semaine.',
-    promise: 'Tout Solo, plus votre tableau de bord pour piloter votre activité.',
+    forWho: 'Tu travailles à temps plein, 15 à 25 missions par semaine.',
+    promise: 'Tout Solo, plus ton tableau de bord pour piloter ton activité.',
     price: '79',
     cap: { count: '100', unit: 'missions / mois', overage: 'puis 0,79€ / mission' },
     features: [
@@ -105,8 +105,8 @@ const LOGICIEL_TIERS: Tier[] = [
   },
   {
     name: 'Cabinet',
-    forWho: 'Vous travaillez en équipe de 2 à 5 personnes.',
-    promise: 'Pilotez votre équipe. Rôles, permissions, dashboards par membre.',
+    forWho: 'Tu travailles en équipe de 2 à 5 personnes.',
+    promise: 'Pilote ton équipe. Rôles, permissions, dashboards par membre.',
     price: '199',
     cap: { count: '300', unit: 'missions / mois', overage: 'puis 0,59€ / mission' },
     features: [
@@ -123,7 +123,7 @@ const LOGICIEL_TIERS: Tier[] = [
   },
   {
     name: 'Cabinet+',
-    forWho: 'Vous pilotez 6 à 15 personnes sur un ou plusieurs sites.',
+    forWho: 'Tu pilotes 6 à 15 personnes sur un ou plusieurs sites.',
     promise: 'Tout Cabinet, plus multi-site et accompagnement direct fondateur.',
     price: '499',
     cap: { count: '1000', unit: 'missions / mois', overage: 'puis 0,29€ / mission' },
@@ -134,7 +134,7 @@ const LOGICIEL_TIERS: Tier[] = [
       'White-label complet (logo + couleurs)',
       'Vérification renforcée incluse',
       'Échange direct avec Benjamin, le fondateur',
-      'Onboarding sur-mesure de votre équipe',
+      'Onboarding sur-mesure de ton équipe',
       'Réponse support sous 1 heure ouvrée',
       'Personnalisation avancée du workflow',
     ],
@@ -148,39 +148,39 @@ const LOGICIEL_TIERS: Tier[] = [
 const ANNUAIRE_TIERS: Tier[] = [
   {
     name: 'Présence',
-    forWho: 'Vous voulez que les particuliers de votre département vous trouvent.',
-    promise: 'Une fiche professionnelle visible 24/7, avec vos vrais avis Google.',
+    forWho: 'Tu veux que les particuliers de ton département te trouvent.',
+    promise: 'Une fiche professionnelle visible 24/7, avec tes vrais avis Google.',
     price: '19',
     cap: { count: 'Visibilité', unit: 'département', overage: '' },
     features: [
       'Fiche publique sur l’annuaire KOVAS',
-      'Vos 3 derniers avis Google affichés',
+      'Tes 3 derniers avis Google affichés',
       'Indicateur de disponibilité de la semaine',
-      'Statistiques de votre fiche (vues, contacts)',
+      'Statistiques de ta fiche (vues, contacts)',
       'Réception de demandes de devis qualifiés',
-      'Vous payez seulement quand un lead vous intéresse',
+      'Tu paies seulement quand un lead t’intéresse',
     ],
   },
   {
     name: 'Boost',
-    forWho: 'Vous voulez passer devant vos concurrents dans les résultats.',
-    promise: 'Top 5 de votre département, badge Vérifié bien visible.',
+    forWho: 'Tu veux passer devant tes concurrents dans les résultats.',
+    promise: 'Top 5 de ton département, badge Vérifié bien visible.',
     price: '39',
     cap: { count: 'Top 5', unit: 'département', overage: '' },
     features: [
       'Tout Présence, plus :',
       'Position prioritaire (top 5 département)',
       '1 commune mise en avant',
-      'Badge Vérifié bleu sur votre fiche',
+      'Badge Vérifié bleu sur ta fiche',
       'Notifications de leads en temps réel',
-      '−20% sur votre premier lead du mois',
+      '−20% sur ton premier lead du mois',
     ],
     highlighted: true,
     badge: 'Recommandé',
   },
   {
     name: 'Premium',
-    forWho: 'Vous voulez capturer tout le marché de votre région.',
+    forWho: 'Tu veux capturer tout le marché de ta région.',
     promise: 'Visibilité maximale multi-départements, badge Premium doré.',
     price: '79',
     cap: { count: 'Top 3', unit: 'région', overage: '' },
@@ -189,7 +189,7 @@ const ANNUAIRE_TIERS: Tier[] = [
       'Visibilité multi-départements',
       '3 communes mises en avant',
       'Badge Premium doré',
-      '−50% sur vos 3 premiers leads du mois',
+      '−50% sur tes 3 premiers leads du mois',
       'Promesse de réponse client le jour même',
       'Support prioritaire',
     ],
@@ -211,7 +211,7 @@ function bundleByCode(code: string) {
 const BUNDLE_TIERS: Tier[] = [
   {
     name: 'Démarrage',
-    forWho: 'Vous démarrez et vous voulez vous faire connaître.',
+    forWho: 'Tu démarres et tu veux te faire connaître.',
     promise: 'Le logiciel + la fiche publique. Tout pour commencer.',
     price: formatBundleCents(bundleByCode('bundle_solo_starter')?.monthlyPrice ?? 3900),
     cap: { count: 'Solo', unit: '+ Présence', overage: '' },
@@ -225,7 +225,7 @@ const BUNDLE_TIERS: Tier[] = [
   },
   {
     name: 'Croissance',
-    forWho: 'Vous êtes établi et vous voulez accélérer.',
+    forWho: 'Tu es établi et tu veux accélérer.',
     promise: 'Le combo le plus choisi par les diagnostiqueurs en croissance.',
     price: formatBundleCents(bundleByCode('bundle_solo_performance')?.monthlyPrice ?? 9900),
     cap: { count: 'Pro', unit: '+ Boost', overage: '' },
@@ -242,7 +242,7 @@ const BUNDLE_TIERS: Tier[] = [
   },
   {
     name: 'Acquisition',
-    forWho: 'Vous travaillez en solo mais vous visez gros sur les leads.',
+    forWho: 'Tu travailles en solo mais tu vises gros sur les leads.',
     promise: 'Pour ceux qui font de l’annuaire leur source n°1 de clients.',
     price: formatBundleCents(bundleByCode('bundle_solo_regional')?.monthlyPrice ?? 8900),
     cap: { count: 'Solo', unit: '+ Premium', overage: '' },
@@ -435,7 +435,7 @@ function LogicielSection(): React.ReactElement {
   return (
     <div className="pt-4">
       <p className="lg:hidden mb-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-        <span className="text-chartreuse-deep font-bold">→ </span>Faites défiler pour comparer
+        <span className="text-chartreuse-deep font-bold">→ </span>Fais défiler pour comparer
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {LOGICIEL_TIERS.map((tier) => (
@@ -453,12 +453,12 @@ function LogicielSection(): React.ReactElement {
             className="mt-4 font-serif italic font-normal leading-[1.1] text-paper"
             style={{ fontSize: 'clamp(28px, 3vw, 40px)' }}
           >
-            Vous pilotez un réseau, une franchise ou plus de 15 utilisateurs ?
+            Tu pilotes un réseau, une franchise ou plus de 15 utilisateurs ?
           </h3>
           <p className="mt-4 text-[15px] text-paper/72 max-w-[520px] leading-relaxed">
             Pour les structures qui dépassent Cabinet+ (utilisateurs illimités, intégrations
             sur-mesure, contrat-cadre, account manager dédié, SLA personnalisé), nous construisons
-            une offre adaptée à votre organisation.
+            une offre adaptée à ton organisation.
           </p>
           <div className="mt-6 flex flex-wrap gap-2.5">
             {['Utilisateurs illimités', 'SLA dédié', 'SSO', 'Account manager', 'API étendue'].map(
@@ -490,7 +490,7 @@ function AnnuaireSection(): React.ReactElement {
   return (
     <div className="pt-4">
       <p className="lg:hidden mb-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-        <span className="text-chartreuse-deep font-bold">→ </span>Faites défiler pour comparer
+        <span className="text-chartreuse-deep font-bold">→ </span>Fais défiler pour comparer
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {ANNUAIRE_TIERS.map((tier) => (
@@ -505,7 +505,7 @@ function BundlesSection(): React.ReactElement {
   return (
     <div className="pt-4">
       <p className="lg:hidden mb-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-        <span className="text-chartreuse-deep font-bold">→ </span>Faites défiler pour comparer
+        <span className="text-chartreuse-deep font-bold">→ </span>Fais défiler pour comparer
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {BUNDLE_TIERS.map((tier) => (
@@ -532,10 +532,10 @@ function SectionHero(): React.ReactElement {
           className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
           style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
         >
-          Le logiciel <span className="font-serif italic font-normal">fait pour vous.</span>
+          Le logiciel <span className="font-serif italic font-normal">fait pour toi.</span>
         </h1>
         <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
-          Du diagnostiqueur solo au cabinet structuré, chaque tier est calibré pour votre stade
+          Du diagnostiqueur solo au cabinet structuré, chaque tier est calibré pour ton stade
           d&apos;activité. Essai 30 jours sans engagement, satisfait ou remboursé sous 60 jours.
         </p>
         <div className="mt-10 flex flex-wrap gap-x-5 gap-y-2">
@@ -607,7 +607,7 @@ const ADDONS: Addon[] = [
     name: 'Utilisateur en plus',
     price: '19',
     priceSub: 'par mois et par user',
-    desc: "Ajoutez un membre d'équipe au-delà des utilisateurs inclus dans votre plan.",
+    desc: "Ajoute un membre d'équipe au-delà des utilisateurs inclus dans ton plan.",
   },
   {
     name: 'Vérification renforcée',
@@ -619,7 +619,7 @@ const ADDONS: Addon[] = [
     name: 'Au-delà du quota',
     price: '0,99',
     priceSub: 'à 0,29€ par mission selon tier',
-    desc: "Pas d'angoisse de quota. Vous travaillez sans interruption. Les missions au-delà sont débitées en fin de mois sur la carte enregistrée. Plus votre tier est élevé, moins ça coûte par mission.",
+    desc: "Pas d'angoisse de quota. Tu travailles sans interruption. Les missions au-delà sont débitées en fin de mois sur la carte enregistrée. Plus ton tier est élevé, moins ça coûte par mission.",
     overage: true,
   },
 ]
@@ -736,7 +736,7 @@ function SectionLoyalty(): React.ReactElement {
       <div className="max-w-[1240px] mx-auto space-y-12">
         <div className="space-y-3 max-w-2xl">
           <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
-            Plus vous restez, plus vous économisez
+            Plus tu restes, plus tu économises
           </p>
           <h2
             className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
@@ -854,7 +854,7 @@ function SectionGlossary(): React.ReactElement {
           location, la rédaction d&apos;
           <GlossaryTerm term="ERP" /> à jour Géorisques, la détection des{' '}
           <GlossaryTerm term="passoire-thermique">passoires thermiques</GlossaryTerm> F-G et
-          l&apos;alerte si un <GlossaryTerm term="DPE" /> existe déjà sur le bien. Survolez chaque
+          l&apos;alerte si un <GlossaryTerm term="DPE" /> existe déjà sur le bien. Survole chaque
           terme souligné pour la définition officielle.
         </p>
       </div>

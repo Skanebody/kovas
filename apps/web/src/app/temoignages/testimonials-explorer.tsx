@@ -161,7 +161,7 @@ export function TestimonialsExplorer({ testimonials, regions }: TestimonialsExpl
         {filtered.length === 0 ? (
           <div className="md:col-span-2 lg:col-span-3 rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-7 text-center">
             <p className="text-[14px] text-[#0F1419]/72">
-              Aucun témoignage ne correspond à ces critères. Essayez de retirer un filtre.
+              Aucun témoignage ne correspond à ces critères. Essaie de retirer un filtre.
             </p>
           </div>
         ) : (

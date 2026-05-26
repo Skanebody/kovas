@@ -11,18 +11,13 @@ import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 
-import {
-  checkRateLimit,
-  emailKey,
-  ipKey,
-  recordRateLimitHit,
-} from '@/lib/anti-spam/rate-limits'
+import { checkRateLimit, emailKey, ipKey, recordRateLimitHit } from '@/lib/anti-spam/rate-limits'
 import { sendEmail } from '@/lib/email/send'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import {
-  spontaneousApplicationSchema,
   type SpontaneousApplicationInput,
   type SpontaneousApplicationResult,
+  spontaneousApplicationSchema,
 } from './schemas'
 
 async function getClientIp(): Promise<string | null> {
@@ -52,19 +47,19 @@ export async function submitSpontaneousApplication(
     }
     return {
       ok: false,
-      error: 'Vérifiez les champs en erreur.',
+      error: 'Vérifie les champs en erreur.',
       fieldErrors,
     }
   }
   const data = parsed.data
 
   if ((data.honeypot ?? '').length > 0) {
-    return { ok: true, message: 'Votre candidature a bien été reçue.' }
+    return { ok: true, message: 'Ta candidature a bien été reçue.' }
   }
 
   const admin = createAdminClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
@@ -76,7 +71,7 @@ export async function submitSpontaneousApplication(
     if (!ipVerdict.allowed) {
       return {
         ok: false,
-        error: 'Trop de demandes depuis votre connexion. Réessayez dans une heure.',
+        error: 'Trop de demandes depuis ta connexion. Réessaie dans une heure.',
       }
     }
   }
@@ -89,33 +84,28 @@ export async function submitSpontaneousApplication(
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: table non typée
-  const { error: insertError } = await (admin as any)
-    .from('spontaneous_applications')
-    .insert({
-      first_name: data.first_name,
-      last_name: data.last_name,
-      email: data.email,
-      linkedin_url: data.linkedin_url ?? null,
-      target_role: data.target_role,
-      message: data.message,
-      source_ip: clientIp,
-      user_agent: userAgent,
-      honeypot_value: data.honeypot ?? null,
-    })
+  const { error: insertError } = await (admin as any).from('spontaneous_applications').insert({
+    first_name: data.first_name,
+    last_name: data.last_name,
+    email: data.email,
+    linkedin_url: data.linkedin_url ?? null,
+    target_role: data.target_role,
+    message: data.message,
+    source_ip: clientIp,
+    user_agent: userAgent,
+    honeypot_value: data.honeypot ?? null,
+  })
 
   if (insertError) {
     console.error('[carrieres:insert] error', insertError)
     return {
       ok: false,
-      error: "Impossible d'enregistrer votre candidature. Réessayez dans un instant.",
+      error: "Impossible d'enregistrer ta candidature. Réessaie dans un instant.",
     }
   }
 
   try {
-    await recordRateLimitHit(admin, [
-      emailKey(data.email),
-      ...(clientIp ? [ipKey(clientIp)] : []),
-    ])
+    await recordRateLimitHit(admin, [emailKey(data.email), ...(clientIp ? [ipKey(clientIp)] : [])])
   } catch (err) {
     console.warn('[carrieres:rate-limit-hit] failed', err)
   }
@@ -147,13 +137,13 @@ export async function submitSpontaneousApplication(
   try {
     await sendEmail({
       to: data.email,
-      subject: 'Votre candidature spontanée a bien été reçue — KOVAS',
+      subject: 'Ta candidature spontanée a bien été reçue — KOVAS',
       text: [
         `Bonjour ${data.first_name},`,
         '',
-        "Nous avons bien reçu votre candidature spontanée et la conservons en réserve. Aucune offre n'est ouverte actuellement, mais nous reviendrons vers vous dès qu'un poste correspondant à votre profil sera créé.",
+        "Nous avons bien reçu ta candidature spontanée et la conservons en réserve. Aucune offre n'est ouverte actuellement, mais nous reviendrons vers toi dès qu'un poste correspondant à ton profil sera créé.",
         '',
-        "Si votre situation évolue, n'hésitez pas à actualiser votre LinkedIn ou à nous écrire à contact@kovas.fr.",
+        "Si ta situation évolue, n'hésite pas à actualiser ton LinkedIn ou à nous écrire à contact@kovas.fr.",
         '',
         'Cordialement,',
         "L'équipe KOVAS",
@@ -167,6 +157,6 @@ export async function submitSpontaneousApplication(
   return {
     ok: true,
     message:
-      'Votre candidature a bien été enregistrée. Nous la conservons en réserve et reviendrons vers vous si un poste correspondant s’ouvre.',
+      'Ta candidature a bien été enregistrée. Nous la conservons en réserve et reviendrons vers toi si un poste correspondant s’ouvre.',
   }
 }

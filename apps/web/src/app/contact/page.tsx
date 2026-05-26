@@ -32,7 +32,7 @@ export default function ContactPage() {
               <span className="font-serif italic font-normal">Nous</span> contacter.
             </h1>
             <p className="mt-8 max-w-2xl text-base sm:text-lg text-[#0F1419]/72 leading-relaxed">
-              Quatre canaux dédiés selon votre profil. Nous répondons à tous les messages sous
+              Quatre canaux dédiés selon ton profil. Nous répondons à tous les messages sous
               vingt-quatre heures ouvrées.
             </p>
           </div>
@@ -103,8 +103,8 @@ export default function ContactPage() {
                   >
                     {COMPANY_IDENTITY.emails.contactGeneral}
                   </a>
-                  . Indiquez votre profil dans le formulaire ci-contre pour un routage prioritaire
-                  sous 24 heures ouvrées.
+                  . Indique ton profil dans le formulaire ci-contre pour un routage prioritaire sous
+                  24 heures ouvrées.
                 </p>
               </Card>
             </aside>

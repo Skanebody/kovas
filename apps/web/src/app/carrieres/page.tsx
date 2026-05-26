@@ -51,9 +51,9 @@ export default function CarrieresPage() {
                 Petite équipe, ambition forte, impact concret.
               </p>
               <p>
-                Vous travaillerez sur un produit utilisé chaque jour par des diagnostiqueurs
+                Tu travailleras sur un produit utilisé chaque jour par des diagnostiqueurs
                 indépendants pour gagner du temps sur leurs missions. Pas de couche
-                d&apos;abstraction entre votre code et l&apos;utilisateur final. Pas de roadmap
+                d&apos;abstraction entre ton code et l&apos;utilisateur final. Pas de roadmap
                 imposée par un département marketing à six mille kilomètres. Les décisions produit
                 se prennent vite et se mesurent en quelques semaines.
               </p>
@@ -121,8 +121,8 @@ export default function CarrieresPage() {
                 Candidature spontanée
               </p>
               <p className="text-sm text-[#0F1419]/72 leading-relaxed">
-                Si votre profil correspond à notre veille, votre candidature sera conservée et relue
-                dès qu&apos;un poste s&apos;ouvre. Nous répondons à chaque message.
+                Si ton profil correspond à notre veille, ta candidature sera conservée et relue dès
+                qu&apos;un poste s&apos;ouvre. Nous répondons à chaque message.
               </p>
             </div>
             <SpontaneousApplicationForm />
@@ -133,7 +133,7 @@ export default function CarrieresPage() {
         <section className="px-5 sm:px-12 py-12 sm:py-16 border-t border-[#0F1419]/[0.08]">
           <div className="max-w-3xl mx-auto text-center space-y-4">
             <p className="text-base text-[#0F1419]/72">
-              Pas le bon moment ? Suivez-nous sur LinkedIn pour être informé des prochaines
+              Pas le bon moment ? Suis-nous sur LinkedIn pour être informé des prochaines
               ouvertures.
             </p>
             <a

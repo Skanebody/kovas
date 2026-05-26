@@ -19,7 +19,7 @@ export const spontaneousApplicationSchema = z.object({
     .optional()
     .refine(
       (v) => !v || /^https?:\/\/(www\.)?linkedin\.com\//i.test(v),
-      'Renseignez une URL LinkedIn valide.',
+      'Renseigne une URL LinkedIn valide.',
     ),
   target_role: z.string().trim().min(2).max(120),
   message: z.string().trim().min(30).max(3000),

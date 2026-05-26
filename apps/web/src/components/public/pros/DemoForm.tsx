@@ -90,8 +90,8 @@ export function DemoForm() {
         <CheckCircle2 className="mx-auto size-10 text-chartreuse-deep" />
         <h2 className="text-2xl font-semibold tracking-tight">Demande bien reçue</h2>
         <p className="text-ink-mute">
-          Nous vous recontactons sous 48h ouvrées pour planifier votre démo. Un email de
-          confirmation vient de partir vers votre boîte.
+          Nous te recontactons sous 48h ouvrées pour planifier ta démo. Un email de
+          confirmation vient de partir vers ta boîte.
         </p>
       </output>
     )

@@ -26,7 +26,7 @@ import Link from 'next/link'
 export const metadata: Metadata = buildMetadata({
   title: 'Démo KOVAS personnalisée pour diagnostiqueur immobilier | KOVAS',
   description:
-    'Réservez votre démo KOVAS personnalisée en visio 45 min avec un membre de l’équipe. Démonstration adaptée à votre cabinet et votre logiciel actuel. Réponse sous 48 h ouvrées.',
+    'Réserve ta démo KOVAS personnalisée en visio 45 min avec un membre de l’équipe. Démonstration adaptée à ton cabinet et ton logiciel actuel. Réponse sous 48 h ouvrées.',
   path: '/demo',
   ogImage: '/og-images/demo.png',
 })
@@ -44,7 +44,7 @@ export default function DemoPage() {
     url: `${KOVAS_BASE_URL}/demo`,
     name: 'Démo KOVAS personnalisée pour diagnostiqueur immobilier',
     description:
-      "Réservez une démo personnalisée de KOVAS en visio (45 min) avec un membre de l'équipe.",
+      "Réserve une démo personnalisée de KOVAS en visio (45 min) avec un membre de l'équipe.",
     inLanguage: 'fr-FR' as const,
     isPartOf: { '@id': `${KOVAS_BASE_URL}/#website` },
     primaryImageOfPage: {
@@ -66,17 +66,17 @@ export default function DemoPage() {
     {
       icon: <Calendar className="size-5" aria-hidden />,
       title: '48 h ouvrées',
-      body: 'Délai de planification garanti à compter de votre demande.',
+      body: 'Délai de planification garanti à compter de ta demande.',
     },
     {
       icon: <Clock className="size-5" aria-hidden />,
       title: '45 minutes',
-      body: 'Durée standard, ajustable selon vos questions. Présentation puis Q&R.',
+      body: 'Durée standard, ajustable selon tes questions. Présentation puis Q&R.',
     },
     {
       icon: <Headset className="size-5" aria-hidden />,
       title: 'Sans engagement',
-      body: "Aucune obligation à l'issue de la démo. Vous repartez avec vos questions répondues.",
+      body: "Aucune obligation à l'issue de la démo. Tu repars avec tes questions répondues.",
     },
   ]
 
@@ -98,8 +98,8 @@ export default function DemoPage() {
               Voir KOVAS en <span className="font-serif italic font-normal">situation réelle</span>.
             </h1>
             <p className="mt-8 max-w-2xl text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
-              45 minutes en visio avec un membre de notre équipe. Démonstration adaptée à votre
-              cabinet, vos diagnostics types, votre logiciel actuel.
+              45 minutes en visio avec un membre de notre équipe. Démonstration adaptée à ton
+              cabinet, tes diagnostics types, ton logiciel actuel.
             </p>
           </div>
         </section>
@@ -133,11 +133,11 @@ export default function DemoPage() {
                 className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
                 style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
               >
-                Réservez <span className="font-serif italic font-normal">votre démo</span>.
+                Réserve <span className="font-serif italic font-normal">ta démo</span>.
               </h2>
               <p className="text-[15px] text-[#0F1419]/72 leading-relaxed">
-                Vous recevez une confirmation par email sous 48 h ouvrées avec un créneau adapté à
-                votre agenda. Vous gardez la main pour reporter ou annuler.
+                Tu reçois une confirmation par email sous 48 h ouvrées avec un créneau adapté à ton
+                agenda. Tu gardes la main pour reporter ou annuler.
               </p>
             </div>
             <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-7 sm:px-8 sm:py-9">

@@ -16,17 +16,14 @@
  */
 
 import { generateObservatoireReportPdf } from '@/lib/observatoire/pdf-generator'
-import {
-  getObservatoireStats,
-  getTopCities,
-} from '@/lib/observatoire/stats-aggregator'
+import { getObservatoireStats, getTopCities } from '@/lib/observatoire/stats-aggregator'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 const RESEND_FROM_DEFAULT = process.env.RESEND_FROM ?? 'KOVAS <contact@kovas.fr>'
 
 const RequestSchema = z.object({
-  email: z.string().email("Adresse email invalide").max(254),
+  email: z.string().email('Adresse email invalide').max(254),
   newsletterOptIn: z.boolean().optional().default(false),
 })
 
@@ -56,16 +53,14 @@ export async function requestObservatoireReport(input: {
   try {
     const supabase = await createClient()
     // biome-ignore lint/suspicious/noExplicitAny: types Database non régénérés pour cette table jeune
-    const { error } = await (supabase as any)
-      .from('observatoire_subscribers')
-      .upsert(
-        {
-          email: normalizedEmail,
-          newsletter_opt_in: newsletterOptIn,
-          last_sent_at: new Date().toISOString(),
-        },
-        { onConflict: 'email' },
-      )
+    const { error } = await (supabase as any).from('observatoire_subscribers').upsert(
+      {
+        email: normalizedEmail,
+        newsletter_opt_in: newsletterOptIn,
+        last_sent_at: new Date().toISOString(),
+      },
+      { onConflict: 'email' },
+    )
     if (error) {
       console.error('[observatoire] upsert error', error)
       // On continue : le rapport peut être envoyé même si l'insert échoue
@@ -99,7 +94,7 @@ export async function requestObservatoireReport(input: {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
     // Mode dev / staging sans clé Resend — log + retour stub success
-    console.log('[observatoire:email-stub]', {
+    console.info('[observatoire:email-stub]', {
       to: normalizedEmail,
       subject: `Observatoire KOVAS · Édition ${stats.lastUpdatedLabel}`,
       pdfSize: pdfBytes.byteLength,
@@ -143,8 +138,8 @@ export async function requestObservatoireReport(input: {
       return {
         success: false,
         message: errText.toLowerCase().includes('rate')
-          ? 'Trop de demandes — veuillez réessayer dans quelques minutes.'
-          : "L'envoi a échoué. Vérifiez votre adresse email et réessayez.",
+          ? 'Trop de demandes — réessaie dans quelques minutes.'
+          : "L'envoi a échoué. Vérifie ton adresse email et réessaie.",
       }
     }
 
@@ -168,7 +163,7 @@ export async function requestObservatoireReport(input: {
 function buildEmailText(edition: string): string {
   return `Bonjour,
 
-Vous trouverez ci-joint l'édition ${edition} de l'Observatoire KOVAS du Diagnostic Immobilier.
+Tu trouveras ci-joint l'édition ${edition} de l'Observatoire KOVAS du Diagnostic Immobilier.
 
 Ce rapport mensuel contient :
 - Les prix médians des 8 diagnostics réglementaires, par région
@@ -176,9 +171,9 @@ Ce rapport mensuel contient :
 - L'évolution de la rénovation énergétique sur 24 mois
 - Le classement des villes en transition
 
-Les données sont publiées sous licence CC BY 4.0 : vous pouvez les citer librement à condition de mentionner la source (kovas.fr/observatoire).
+Les données sont publiées sous licence CC BY 4.0 : tu peux les citer librement à condition de mentionner la source (kovas.fr/observatoire).
 
-Si vous souhaitez recevoir automatiquement les prochaines éditions, conservez cet email — vous êtes désormais inscrit à la liste de diffusion mensuelle (un email par mois maximum, désinscription possible à tout moment).
+Si tu souhaites recevoir automatiquement les prochaines éditions, conserve cet email — tu es désormais inscrit à la liste de diffusion mensuelle (un email par mois maximum, désinscription possible à tout moment).
 
 Cordialement,
 L'équipe KOVAS
@@ -193,7 +188,7 @@ function buildEmailHtml(edition: string): string {
   <p style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #5B7088; margin: 0 0 16px 0;">Observatoire KOVAS</p>
   <h1 style="font-size: 24px; font-weight: 600; margin: 0 0 24px 0;">Édition ${edition}</h1>
   <p>Bonjour,</p>
-  <p>Vous trouverez en pièce jointe l'édition ${edition} de l'<strong>Observatoire KOVAS du Diagnostic Immobilier</strong>.</p>
+  <p>Tu trouveras en pièce jointe l'édition ${edition} de l'<strong>Observatoire KOVAS du Diagnostic Immobilier</strong>.</p>
   <p>Ce rapport mensuel contient&nbsp;:</p>
   <ul>
     <li>Les prix médians des 8 diagnostics réglementaires, par région</li>
@@ -201,11 +196,11 @@ function buildEmailHtml(edition: string): string {
     <li>L'évolution de la rénovation énergétique sur 24 mois</li>
     <li>Le classement des villes en transition</li>
   </ul>
-  <p>Les données sont publiées sous licence <strong>CC BY 4.0</strong>&nbsp;: vous pouvez les citer librement à condition de mentionner la source (<a href="https://kovas.fr/observatoire">kovas.fr/observatoire</a>).</p>
-  <p>Si vous souhaitez recevoir automatiquement les prochaines éditions, conservez cet email — vous êtes désormais inscrit à la liste de diffusion mensuelle (un email par mois maximum).</p>
+  <p>Les données sont publiées sous licence <strong>CC BY 4.0</strong>&nbsp;: tu peux les citer librement à condition de mentionner la source (<a href="https://kovas.fr/observatoire">kovas.fr/observatoire</a>).</p>
+  <p>Si tu souhaites recevoir automatiquement les prochaines éditions, conserve cet email — tu es désormais inscrit à la liste de diffusion mensuelle (un email par mois maximum).</p>
   <p style="margin-top: 32px;">Cordialement,<br/>L'équipe KOVAS</p>
   <hr style="border: none; border-top: 1px solid #E7E2D2; margin: 32px 0 16px 0;" />
-  <p style="font-size: 12px; color: #5B7088;">Désinscription&nbsp;: répondez simplement « STOP » à cet email.<br/><a href="https://kovas.fr/observatoire">kovas.fr/observatoire</a></p>
+  <p style="font-size: 12px; color: #5B7088;">Désinscription&nbsp;: réponds simplement « STOP » à cet email.<br/><a href="https://kovas.fr/observatoire">kovas.fr/observatoire</a></p>
 </body>
 </html>`
 }

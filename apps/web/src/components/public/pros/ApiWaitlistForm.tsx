@@ -59,7 +59,7 @@ export function ApiWaitlistForm() {
         <CheckCircle2 className="mx-auto size-9 text-chartreuse-deep" />
         <h2 className="text-xl font-semibold tracking-tight">Inscription confirmée</h2>
         <p className="text-ink-mute">
-          Vous serez prévenu(e) en priorité lors de l&apos;ouverture des accès anticipés API.
+          Tu seras prévenu en priorité lors de l&apos;ouverture des accès anticipés API.
         </p>
       </output>
     )

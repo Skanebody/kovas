@@ -21,18 +21,13 @@ import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 
-import {
-  checkRateLimit,
-  emailKey,
-  ipKey,
-  recordRateLimitHit,
-} from '@/lib/anti-spam/rate-limits'
+import { checkRateLimit, emailKey, ipKey, recordRateLimitHit } from '@/lib/anti-spam/rate-limits'
 import { sendEmail } from '@/lib/email/send'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import {
-  contactInquirySchema,
   type ContactInquiryInput,
   type ContactInquiryResult,
+  contactInquirySchema,
 } from './schemas'
 
 async function getClientIp(): Promise<string | null> {
@@ -93,7 +88,7 @@ export async function submitContactInquiry(
     }
     return {
       ok: false,
-      error: 'Vérifiez les champs en erreur.',
+      error: 'Vérifie les champs en erreur.',
       fieldErrors,
     }
   }
@@ -101,13 +96,13 @@ export async function submitContactInquiry(
 
   // 2. Honeypot — succès silencieux
   if ((data.honeypot ?? '').length > 0) {
-    return { ok: true, message: 'Votre message a bien été reçu.' }
+    return { ok: true, message: 'Ton message a bien été reçu.' }
   }
 
   // 3. Admin client (service role)
   const admin = createAdminClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
@@ -120,7 +115,7 @@ export async function submitContactInquiry(
     if (!ipVerdict.allowed) {
       return {
         ok: false,
-        error: 'Trop de demandes depuis votre connexion. Réessayez dans une heure.',
+        error: 'Trop de demandes depuis ta connexion. Réessaie dans une heure.',
       }
     }
   }
@@ -134,27 +129,25 @@ export async function submitContactInquiry(
 
   // 5. Insert
   // biome-ignore lint/suspicious/noExplicitAny: table publique non typée encore
-  const { error: insertError } = await (admin as any)
-    .from('contact_inquiries')
-    .insert({
-      inquiry_type: data.inquiry_type,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      email: data.email,
-      phone: data.phone ?? null,
-      company: data.inquiry_type === 'partenariat' ? data.company : null,
-      context: buildContext(data),
-      message: data.message,
-      source_ip: clientIp,
-      user_agent: userAgent,
-      honeypot_value: data.honeypot ?? null,
-    })
+  const { error: insertError } = await (admin as any).from('contact_inquiries').insert({
+    inquiry_type: data.inquiry_type,
+    first_name: data.first_name,
+    last_name: data.last_name,
+    email: data.email,
+    phone: data.phone ?? null,
+    company: data.inquiry_type === 'partenariat' ? data.company : null,
+    context: buildContext(data),
+    message: data.message,
+    source_ip: clientIp,
+    user_agent: userAgent,
+    honeypot_value: data.honeypot ?? null,
+  })
 
   if (insertError) {
     console.error('[contact:insert] error', insertError)
     return {
       ok: false,
-      error: "Impossible d'enregistrer votre demande. Réessayez dans un instant.",
+      error: "Impossible d'enregistrer ta demande. Réessaie dans un instant.",
     }
   }
 
@@ -198,13 +191,13 @@ export async function submitContactInquiry(
   }
 
   // 8. Auto-reply au demandeur
-  const autoReplySubject = "Nous avons bien reçu votre message — KOVAS"
+  const autoReplySubject = 'Nous avons bien reçu ton message — KOVAS'
   const autoReplyText = [
     `Bonjour ${data.first_name},`,
     '',
-    "Nous avons bien reçu votre message et reviendrons vers vous sous vingt-quatre heures ouvrées.",
+    'Nous avons bien reçu ton message et reviendrons vers toi sous vingt-quatre heures ouvrées.',
     '',
-    "Si votre demande est urgente, vous pouvez nous écrire directement à contact@kovas.fr.",
+    'Si ta demande est urgente, tu peux nous écrire directement à contact@kovas.fr.',
     '',
     'Cordialement,',
     "L'équipe KOVAS",
@@ -227,6 +220,6 @@ export async function submitContactInquiry(
 
   return {
     ok: true,
-    message: 'Votre message a bien été reçu. Nous vous répondons sous 24h ouvrées.',
+    message: 'Ton message a bien été reçu. Nous te répondons sous 24h ouvrées.',
   }
 }

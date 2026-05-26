@@ -58,7 +58,7 @@ import Link from 'next/link'
 export const metadata: Metadata = buildMetadata({
   title: 'Comparatif Liciel, OBBC, AnalysImmo, ORIS | KOVAS',
   description:
-    'Comparatif KOVAS vs Liciel, OBBC, AnalysImmo, ORIS : KOVAS est leur couche terrain compagnon (saisie vocale, pré-vérif ADEME). Votre logiciel certifié reste votre moteur. 1h30 gagnée par DPE.',
+    'Comparatif KOVAS vs Liciel, OBBC, AnalysImmo, ORIS : KOVAS est leur couche terrain compagnon (saisie vocale, pré-vérif ADEME). Ton logiciel certifié reste ton moteur. 1h30 gagnée par DPE.',
   path: '/comparatif',
   ogImage: '/og-images/comparatif.png',
 })
@@ -164,14 +164,13 @@ const COMPARISON_ROWS: readonly ComparisonRow[] = [
   },
   {
     step: '2. Saisie terrain',
-    without: 'Calepin papier ou app mobile basique de votre éditeur (saisie manuelle)',
+    without: 'Calepin papier ou app mobile basique de ton éditeur (saisie manuelle)',
     with: 'Saisie vocale FR structurée par pièce + photos géolocalisées + détection IA des équipements',
     isRegulatory: false,
   },
   {
     step: '3. Retour bureau',
-    without:
-      '30 à 45 minutes de re-saisie complète dans votre logiciel (Liciel, OBBC, AnalysImmo…)',
+    without: '30 à 45 minutes de re-saisie complète dans ton logiciel (Liciel, OBBC, AnalysImmo…)',
     with: 'Bouton Partager 3 modes : email / GDrive auto-sync / téléchargement direct → 30 secondes',
     isRegulatory: false,
   },
@@ -184,13 +183,13 @@ const COMPARISON_ROWS: readonly ComparisonRow[] = [
   {
     step: '5. Calcul DPE',
     without: 'Liciel, OBBC, AnalysImmo ou ORIS — moteur 3CL-2021 certifié ADEME',
-    with: 'Votre logiciel certifié reste le moteur 3CL-2021 ADEME',
+    with: 'Ton logiciel certifié reste le moteur 3CL-2021 ADEME',
     isRegulatory: true,
   },
   {
     step: '6. Soumission ADEME',
-    without: 'Votre logiciel certifié → ADEME',
-    with: 'Votre logiciel certifié → ADEME (inchangé)',
+    without: 'Ton logiciel certifié → ADEME',
+    with: 'Ton logiciel certifié → ADEME (inchangé)',
     isRegulatory: true,
   },
   {
@@ -284,17 +283,17 @@ const FAQ_ENTRIES: readonly FaqEntry[] = [
   {
     question: "J'utilise OBBC / AnalysImmo / ORIS, pas Liciel. KOVAS marche aussi ?",
     answer:
-      "Oui. KOVAS exporte vers les quatre éditeurs majeurs du marché : Liciel (Imports spécifiques XML + Excel + ZIP), OBBC (Imports spécifiques XML), AnalysImmo (XML CII + ZIP générique), ORIS (ZIP générique + JSON). Le reframing s'applique exactement de la même façon : votre logiciel certifié reste votre moteur ADEME, KOVAS amplifie le terrain.",
+      "Oui. KOVAS exporte vers les quatre éditeurs majeurs du marché : Liciel (Imports spécifiques XML + Excel + ZIP), OBBC (Imports spécifiques XML), AnalysImmo (XML CII + ZIP générique), ORIS (ZIP générique + JSON). Le reframing s'applique exactement de la même façon : ton logiciel certifié reste ton moteur ADEME, KOVAS amplifie le terrain.",
   },
   {
     question: 'Est-ce que je perds mon paramétrage logiciel ?',
     answer:
-      "Non. KOVAS exporte EN PLUS — votre logiciel (Liciel, OBBC, AnalysImmo ou ORIS) reste votre référence. Aucun fichier de votre éditeur n'est modifié, votre paramétrage local (entêtes, signatures, gabarits) est intact.",
+      "Non. KOVAS exporte EN PLUS — ton logiciel (Liciel, OBBC, AnalysImmo ou ORIS) reste ta référence. Aucun fichier de ton éditeur n'est modifié, ton paramétrage local (entêtes, signatures, gabarits) est intact.",
   },
   {
     question: 'ADEME accepte-t-elle les rapports passés par KOVAS ?',
     answer:
-      "Le calcul DPE et la soumission ADEME sont faits par votre logiciel certifié, pas par KOVAS. ADEME voit du Liciel, OBBC, AnalysImmo ou ORIS à l'arrivée — exactement comme avant. KOVAS n'apparaît jamais dans le circuit officiel.",
+      "Le calcul DPE et la soumission ADEME sont faits par ton logiciel certifié, pas par KOVAS. ADEME voit du Liciel, OBBC, AnalysImmo ou ORIS à l'arrivée — exactement comme avant. KOVAS n'apparaît jamais dans le circuit officiel.",
   },
   {
     question: "Que se passe-t-il si mon éditeur change son format d'import ?",
@@ -304,17 +303,17 @@ const FAQ_ENTRIES: readonly FaqEntry[] = [
   {
     question: 'Et si KOVAS ferme ?',
     answer:
-      "Vos données restent exportables en formats universels (PDF, Word, CSV, JSON) à tout moment, sans dépendance. Vous gardez l'intégralité de vos missions. Votre logiciel certifié continue de fonctionner avec ses propres données — KOVAS n'est pas un point de défaillance unique.",
+      "Tes données restent exportables en formats universels (PDF, Word, CSV, JSON) à tout moment, sans dépendance. Tu gardes l'intégralité de tes missions. Ton logiciel certifié continue de fonctionner avec ses propres données — KOVAS n'est pas un point de défaillance unique.",
   },
   {
     question: "Je n'ai pas le temps de me former à un nouveau logiciel.",
     answer:
-      'Comptez 30 minutes de prise en main. La saisie vocale apprend votre vocabulaire au fil des missions. Aucun changement à apporter dans votre logiciel principal : votre routine bureau reste identique.',
+      'Compte 30 minutes de prise en main. La saisie vocale apprend ton vocabulaire au fil des missions. Aucun changement à apporter dans ton logiciel principal : ta routine bureau reste identique.',
   },
   {
     question: 'Combien de fois par jour vais-je devoir basculer entre KOVAS et mon logiciel ?',
     answer:
-      'Une seule fois : à la fin de la mission, vous cliquez « Partager vers mon logiciel ». KOVAS reste sur mobile (ou tablette) sur le terrain, votre éditeur reste au bureau pour le calcul. Pas de va-et-vient en cours de mission.',
+      'Une seule fois : à la fin de la mission, tu cliques « Partager vers mon logiciel ». KOVAS reste sur mobile (ou tablette) sur le terrain, ton éditeur reste au bureau pour le calcul. Pas de va-et-vient en cours de mission.',
   },
   {
     question: 'Est-ce que je peux essayer sans engagement ?',
@@ -374,9 +373,9 @@ function SectionHero(): React.ReactElement {
           AnalysImmo ou ORIS.
         </h1>
         <p className="mt-8 max-w-2xl text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
-          C&apos;est leur couche terrain commune. Vous gardez votre logiciel certifié pour le calcul{' '}
+          C&apos;est leur couche terrain commune. Tu gardes ton logiciel certifié pour le calcul{' '}
           <GlossaryTerm term="DPE" /> <GlossaryTerm term="3CL-2021">3CL-2021</GlossaryTerm> et la
-          soumission ADEME. KOVAS vous fait gagner 1h30 par mission avant d&apos;arriver dans votre
+          soumission ADEME. KOVAS te fait gagner 1h30 par mission avant d&apos;arriver dans ton
           éditeur. Aucune migration. Aucun risque réglementaire.
         </p>
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[820px]">
@@ -391,7 +390,7 @@ function SectionHero(): React.ReactElement {
               1h30
             </p>
             <p className="text-[14px] text-[#0F1419]/72">
-              gagnée par mission DPE avant votre logiciel certifié
+              gagnée par mission DPE avant ton logiciel certifié
             </p>
           </div>
           <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-7 text-center space-y-2">
@@ -405,7 +404,7 @@ function SectionHero(): React.ReactElement {
               0&nbsp;€
             </p>
             <p className="text-[14px] text-[#0F1419]/72">
-              de migration. Votre éditeur reste votre moteur ADEME.
+              de migration. Ton éditeur reste ton moteur ADEME.
             </p>
           </div>
         </div>
@@ -429,7 +428,7 @@ function SectionWorkflow(): React.ReactElement {
             Qui fait quoi, <span className="font-serif italic font-normal">étape par étape</span>.
           </h2>
           <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
-            Sept étapes pour livrer un DPE conforme. KOVAS amplifie les quatre premières. Votre
+            Sept étapes pour livrer un DPE conforme. KOVAS amplifie les quatre premières. Ton
             logiciel certifié (Liciel, OBBC, AnalysImmo, ORIS) et ADEME pilotent les trois dernières
             — et ne changent pas.
           </p>
@@ -488,7 +487,7 @@ function SectionWorkflow(): React.ReactElement {
                         <ToolBadge tool={step.tool} />
                         {step.isRegulatory && (
                           <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-                            Reste votre outil officiel
+                            Reste ton outil officiel
                           </div>
                         )}
                       </td>
@@ -517,8 +516,8 @@ function SectionLossAversion(): React.ReactElement {
             className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
             style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
           >
-            Ce que vous <span className="font-serif italic font-normal">perdez</span> dans votre
-            logiciel sans le savoir.
+            Ce que tu <span className="font-serif italic font-normal">perds</span> dans ton logiciel
+            sans le savoir.
           </h2>
           <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
             Base de calcul : un diagnostiqueur typique qui réalise 75 missions par mois, dont 90
@@ -538,7 +537,7 @@ function SectionLossAversion(): React.ReactElement {
               112h
             </p>
             <p className="text-[14px] text-[#0F1419]/72 leading-snug">
-              perdues par an à re-saisir le terrain dans votre logiciel (75 missions/mois × 1h30
+              perdues par an à re-saisir le terrain dans ton logiciel (75 missions/mois × 1h30
               économisable).
             </p>
           </div>
@@ -578,10 +577,10 @@ function SectionLossAversion(): React.ReactElement {
             Le vendredi soir à 19h
           </p>
           <p className="text-[15px] text-[#0F1419] leading-relaxed">
-            Re-saisir dans votre logiciel certifié pendant que les enfants attendent à table : vous
-            connaissez. KOVAS ne change rien à Liciel, OBBC, AnalysImmo ou ORIS. Il vous fait
-            arriver dans votre éditeur avec tout déjà prêt. Vous cliquez sur «&nbsp;Importer le
-            ZIP&nbsp;», votre logiciel ouvre la mission complète, et vous fermez l&apos;ordinateur.
+            Re-saisir dans ton logiciel certifié pendant que les enfants attendent à table : tu
+            connais. KOVAS ne change rien à Liciel, OBBC, AnalysImmo ou ORIS. Il te fait arriver
+            dans ton éditeur avec tout déjà prêt. Tu cliques sur «&nbsp;Importer le ZIP&nbsp;», ton
+            logiciel ouvre la mission complète, et tu fermes l&apos;ordinateur.
           </p>
         </div>
       </div>
@@ -606,7 +605,7 @@ function SectionComparisonTable(): React.ReactElement {
           </h2>
           <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
             Pas de comparaison &laquo;&nbsp;X versus Y&nbsp;&raquo;. Une lecture honnête de ce qui
-            change concrètement quand KOVAS s&apos;ajoute à votre logiciel certifié.
+            change concrètement quand KOVAS s&apos;ajoute à ton logiciel certifié.
           </p>
         </div>
 
@@ -631,7 +630,7 @@ function SectionComparisonTable(): React.ReactElement {
                     scope="col"
                     className="px-5 py-4 text-left font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55"
                   >
-                    Avec KOVAS + votre logiciel
+                    Avec KOVAS + ton logiciel
                   </th>
                 </tr>
               </thead>
@@ -673,8 +672,8 @@ function SectionComparisonTable(): React.ReactElement {
           </p>
           <p className="text-paper text-[15px] sm:text-[18px] leading-relaxed">
             Les trois étapes réglementaires — calcul DPE, soumission ADEME, validation officielle —
-            restent inchangées. Votre logiciel certifié (Liciel, OBBC, AnalysImmo ou ORIS) reste
-            votre référence ADEME. KOVAS amplifie tout ce qui se trouve autour.
+            restent inchangées. Ton logiciel certifié (Liciel, OBBC, AnalysImmo ou ORIS) reste ta
+            référence ADEME. KOVAS amplifie tout ce qui se trouve autour.
           </p>
         </div>
       </div>
@@ -694,12 +693,12 @@ function SectionCompatibility(): React.ReactElement {
             className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
             style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
           >
-            Compatible avec votre <span className="font-serif italic font-normal">éditeur</span>,
-            dès J0.
+            Compatible avec ton <span className="font-serif italic font-normal">éditeur</span>, dès
+            J0.
           </h2>
           <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
             KOVAS exporte vers les principaux logiciels du marché diagnostic. Pas de fichier
-            propriétaire qui vous enferme — vous gardez la liberté de changer ou de rester.
+            propriétaire qui t&apos;enferme — tu gardes la liberté de changer ou de rester.
           </p>
         </div>
 
@@ -759,8 +758,8 @@ function SectionCompatibility(): React.ReactElement {
         </div>
 
         <p className="text-[13px] text-[#0F1419]/55">
-          Exports universels également disponibles à tout moment : PDF, Word (.docx), CSV, JSON. Vos
-          données vous appartiennent.
+          Exports universels également disponibles à tout moment : PDF, Word (.docx), CSV, JSON. Tes
+          données t&apos;appartiennent.
         </p>
       </div>
     </section>
@@ -867,9 +866,9 @@ function SectionFinalCta(): React.ReactElement {
           className="font-sans font-medium tracking-tight text-paper leading-[1.05]"
           style={{ fontSize: 'clamp(40px, 5vw, 80px)' }}
         >
-          Restez sur votre logiciel certifié.{' '}
+          Reste sur ton logiciel certifié.{' '}
           <span className="font-serif italic font-normal text-chartreuse">
-            Gagnez 1h30 par mission.
+            Gagne 1h30 par mission.
           </span>
         </h2>
         <p className="text-lg text-paper/72 max-w-xl mx-auto leading-relaxed">
@@ -892,7 +891,7 @@ function SectionFinalCta(): React.ReactElement {
         </div>
         <p className="flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-wider text-paper/55 pt-2">
           <CheckCircle2 className="size-3" aria-hidden /> Liciel · OBBC · AnalysImmo · ORIS restent
-          votre moteur ADEME — aucun risque
+          ton moteur ADEME — aucun risque
         </p>
       </div>
     </section>

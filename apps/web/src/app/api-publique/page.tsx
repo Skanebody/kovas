@@ -203,7 +203,7 @@ export default function ApiPage() {
               L&apos;API publique <span className="font-serif italic font-normal">KOVAS</span>.
             </h1>
             <p className="mt-8 max-w-2xl text-[15px] sm:text-[18px] text-[#0F1419]/72 leading-relaxed">
-              Connectez vos outils tiers aux données KOVAS. Open data en libre accès
+              Connecte tes outils tiers aux données KOVAS. Open data en libre accès
               aujourd&apos;hui, endpoints comptes authentifiés en Phase 2.
             </p>
           </div>
@@ -320,7 +320,7 @@ export default function ApiPage() {
                 <span className="font-serif italic font-normal">authentifiés</span>.
               </h2>
               <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
-                Les endpoints sur vos missions, photos, exports — sous token Bearer — arriveront en{' '}
+                Les endpoints sur tes missions, photos, exports — sous token Bearer — arriveront en{' '}
                 <strong>Phase 2 (M10+)</strong>, après la certification ADEME 3CL-2021. Lecture
                 seule d&apos;abord, écriture en Phase 3. Liste indicative ci-dessous, endpoints
                 stables documentés via OpenAPI au lancement V2.

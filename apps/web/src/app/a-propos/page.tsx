@@ -265,10 +265,10 @@ export default function AProposPage() {
                 alerte de cohérence en temps réel.
               </p>
               <p>
-                KOVAS ne remplace pas votre logiciel principal. KOVAS se positionne comme la couche
-                terrain mobile, indépendante, qui prépare votre dossier pendant la visite puis
-                l&apos;exporte vers le logiciel principal de votre choix — ou en PDF, Word, CSV,
-                JSON si vous travaillez en autonomie. L&apos;objectif mesurable est l&apos;économie
+                KOVAS ne remplace pas ton logiciel principal. KOVAS se positionne comme la couche
+                terrain mobile, indépendante, qui prépare ton dossier pendant la visite puis
+                l&apos;exporte vers le logiciel principal de ton choix — ou en PDF, Word, CSV, JSON
+                si tu travailles en autonomie. L&apos;objectif mesurable est l&apos;économie
                 d&apos;environ une heure trente par mission DPE typique, soit vingt-cinq à trente
                 missions supplémentaires par mois à capacité égale pour un cabinet solo.
               </p>
@@ -293,7 +293,7 @@ export default function AProposPage() {
             <div className="space-y-6 max-w-3xl text-[#0F1419]/80 leading-relaxed">
               <p>
                 KOVAS est édité par la SASU Nexus 1993, société par actions simplifiée
-                unipersonnelle de droit français. Vous trouverez ci-dessous les éléments
+                unipersonnelle de droit français. Tu trouveras ci-dessous les éléments
                 d&apos;identité légale qui figurent également sur nos mentions légales, CGV et
                 factures.
               </p>
@@ -422,10 +422,10 @@ export default function AProposPage() {
                     Indépendance
                   </span>
                   <span>
-                    Aucun verrouillage propriétaire : vos dossiers s&apos;exportent au format ZIP
+                    Aucun verrouillage propriétaire : tes dossiers s&apos;exportent au format ZIP
                     officiel des quatre éditeurs majeurs (Liciel, OBBC, AnalysImmo, ORIS) et en PDF,
-                    Word, CSV, JSON. Si vous quittez KOVAS, vos données partent avec vous, sans
-                    frais ni délai.
+                    Word, CSV, JSON. Si tu quittes KOVAS, tes données partent avec toi, sans frais
+                    ni délai.
                   </span>
                 </li>
                 <li className="flex gap-3">
@@ -435,7 +435,7 @@ export default function AProposPage() {
                   <span>
                     Tarification publique, lisible et stable. Pas de surprise à la facture, pas
                     d&apos;option cachée. Le détail de chaque tier figure sur la page tarifs et sur
-                    vos factures mensuelles.
+                    tes factures mensuelles.
                   </span>
                 </li>
               </ul>
@@ -496,12 +496,12 @@ export default function AProposPage() {
               className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.1]"
               style={{ fontSize: 'clamp(36px, 4.5vw, 64px)' }}
             >
-              Découvrez{' '}
+              Découvre{' '}
               <span className="font-serif italic font-normal">KOVAS pour diagnostiqueurs</span>.
             </h2>
             <p className="text-base sm:text-lg text-[#0F1419]/72 max-w-xl mx-auto">
               Trente jours d&apos;essai complet, sans engagement, pour mesurer le temps économisé
-              sur vos premières missions terrain.
+              sur tes premières missions terrain.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Button asChild variant="accent" size="lg">

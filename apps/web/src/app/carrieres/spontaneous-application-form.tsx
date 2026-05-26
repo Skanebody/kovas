@@ -33,7 +33,7 @@ export function SpontaneousApplicationForm() {
     if (formData.get('consent_rgpd') !== 'on') {
       setState({
         status: 'error',
-        message: 'Vous devez accepter la politique de confidentialité pour envoyer la candidature.',
+        message: 'Tu dois accepter la politique de confidentialité pour envoyer la candidature.',
       })
       return
     }
@@ -65,18 +65,14 @@ export function SpontaneousApplicationForm() {
   if (state.status === 'success') {
     return (
       <Card variant="opaque" padding="lg" className="max-w-3xl space-y-3">
-        <h3 className="text-lg font-semibold text-[#0F1419]">Merci pour votre candidature.</h3>
+        <h3 className="text-lg font-semibold text-[#0F1419]">Merci pour ta candidature.</h3>
         <p className="text-sm text-[#0F1419]/72 leading-relaxed">{state.message}</p>
       </Card>
     )
   }
 
   return (
-    <form
-      action={handleSubmit}
-      className="max-w-3xl space-y-5"
-      noValidate
-    >
+    <form action={handleSubmit} className="max-w-3xl space-y-5" noValidate>
       {/* Honeypot — caché aux humains, visible aux bots */}
       <div className="hidden" aria-hidden="true">
         <label>
@@ -92,12 +88,7 @@ export function SpontaneousApplicationForm() {
           required
           error={state.fieldErrors?.first_name}
         />
-        <FieldText
-          name="last_name"
-          label="Nom"
-          required
-          error={state.fieldErrors?.last_name}
-        />
+        <FieldText name="last_name" label="Nom" required error={state.fieldErrors?.last_name} />
       </div>
 
       <FieldText
@@ -126,8 +117,8 @@ export function SpontaneousApplicationForm() {
 
       <FieldTextarea
         name="message"
-        label="Votre message"
-        placeholder="Présentez-vous en quelques lignes et expliquez ce qui vous attire chez KOVAS."
+        label="Ton message"
+        placeholder="Présente-toi en quelques lignes et explique ce qui t’attire chez KOVAS."
         required
         rows={6}
         error={state.fieldErrors?.message}
@@ -142,8 +133,8 @@ export function SpontaneousApplicationForm() {
         />
         <span>
           J&apos;accepte que mes informations soient conservées pour le suivi de ma candidature
-          spontanée, conformément à la politique de confidentialité KOVAS. Je peux demander
-          leur suppression à tout moment à contact@kovas.fr.
+          spontanée, conformément à la politique de confidentialité KOVAS. Je peux demander leur
+          suppression à tout moment à contact@kovas.fr.
         </span>
       </label>
 
@@ -152,12 +143,7 @@ export function SpontaneousApplicationForm() {
       ) : null}
 
       <div>
-        <Button
-          type="submit"
-          variant="accent"
-          size="lg"
-          disabled={state.status === 'submitting'}
-        >
+        <Button type="submit" variant="accent" size="lg" disabled={state.status === 'submitting'}>
           {state.status === 'submitting' ? 'Envoi en cours…' : 'Envoyer ma candidature'}
         </Button>
       </div>

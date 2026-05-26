@@ -42,7 +42,11 @@ export function LeadMagnet({ editionLabel }: { editionLabel: string }) {
         // PostHog est browser-only — import dynamique pour ne pas casser SSR
         try {
           const mod = await import('posthog-js')
-          const ph = (mod as { default?: { capture?: (event: string, props?: Record<string, unknown>) => void } }).default
+          const ph = (
+            mod as {
+              default?: { capture?: (event: string, props?: Record<string, unknown>) => void }
+            }
+          ).default
           if (ph?.capture) {
             ph.capture('observatoire.report.requested', {
               edition: editionLabel,
@@ -61,7 +65,7 @@ export function LeadMagnet({ editionLabel }: { editionLabel: string }) {
         message:
           err instanceof Error
             ? err.message
-            : "Une erreur est survenue, merci de réessayer dans un instant.",
+            : 'Une erreur est survenue, merci de réessayer dans un instant.',
       })
     } finally {
       setSubmitting(false)
@@ -75,7 +79,9 @@ export function LeadMagnet({ editionLabel }: { editionLabel: string }) {
           Rapport mensuel — Édition {editionLabel}
         </p>
         <h2 className="font-sans text-[32px] sm:text-[44px] font-semibold leading-[1.05] tracking-[-0.02em] text-paper">
-          Téléchargez l’<span className="font-serif italic font-normal text-chartreuse">intégralité</span> des données en PDF.
+          Télécharge l’
+          <span className="font-serif italic font-normal text-chartreuse">intégralité</span> des
+          données en PDF.
         </h2>
         <p className="text-[15px] sm:text-[17px] text-paper/80 leading-relaxed">
           6 à 8 pages d’analyse synthétique&nbsp;: prix médians par région, distribution énergétique
@@ -85,12 +91,7 @@ export function LeadMagnet({ editionLabel }: { editionLabel: string }) {
 
         {!expanded ? (
           <div>
-            <Button
-              variant="accent"
-              size="lg"
-              onClick={() => setExpanded(true)}
-              type="button"
-            >
+            <Button variant="accent" size="lg" onClick={() => setExpanded(true)} type="button">
               Recevoir le rapport mensuel (PDF)
             </Button>
           </div>
@@ -101,7 +102,7 @@ export function LeadMagnet({ editionLabel }: { editionLabel: string }) {
                 htmlFor="observatoire-email"
                 className="font-mono text-[11px] uppercase tracking-[0.14em] text-paper/70 font-medium"
               >
-                Votre adresse email professionnelle
+                Ton adresse email professionnelle
               </label>
               <Input
                 id="observatoire-email"
@@ -111,7 +112,7 @@ export function LeadMagnet({ editionLabel }: { editionLabel: string }) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="vous@exemple.fr"
+                placeholder="toi@exemple.fr"
                 className="bg-paper text-ink h-12 text-base"
                 disabled={submitting}
               />
@@ -146,17 +147,16 @@ export function LeadMagnet({ editionLabel }: { editionLabel: string }) {
             </div>
 
             {result ? (
-              <p
-                className={`text-[13px] leading-snug rounded-md px-3 py-2 ${
+              <output
+                className={`block text-[13px] leading-snug rounded-md px-3 py-2 ${
                   result.success
                     ? 'bg-chartreuse-soft/15 text-chartreuse-soft'
                     : 'bg-status-coral/15 text-status-coral'
                 }`}
-                role="status"
                 aria-live="polite"
               >
                 {result.message}
-              </p>
+              </output>
             ) : null}
           </form>
         )}

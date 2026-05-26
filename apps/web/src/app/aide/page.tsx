@@ -59,7 +59,7 @@ interface QuickStartCard {
 const QUICK_START: ReadonlyArray<QuickStartCard> = [
   {
     icon: Play,
-    title: 'Votre premier diagnostic',
+    title: 'Ton premier diagnostic',
     description:
       'Créer un dossier, ajouter le bien, lancer la saisie terrain et exporter le rapport en moins de 30 minutes. Le parcours type guidé pas à pas.',
     href: '/guide',
@@ -69,7 +69,7 @@ const QUICK_START: ReadonlyArray<QuickStartCard> = [
     icon: Upload,
     title: 'Importer un dossier Liciel',
     description:
-      'Reprendre une mission existante depuis votre logiciel principal : import XML, Excel ou ZIP, mapping automatique des pièces et des équipements.',
+      'Reprendre une mission existante depuis ton logiciel principal : import XML, Excel ou ZIP, mapping automatique des pièces et des équipements.',
     href: '/fonctionnalites',
     cta: 'Voir les passerelles',
   },
@@ -97,12 +97,12 @@ const FAQ_KEY: ReadonlyArray<FaqItem> = [
   {
     question: "Comment fonctionne l'essai gratuit ?",
     answer:
-      '30 jours d’accès complet à toutes les fonctionnalités du forfait choisi. La carte bancaire est demandée à l’inscription via Stripe Checkout ; aucun débit avant J+30. Vous pouvez résilier à tout moment depuis votre espace abonnement.',
+      '30 jours d’accès complet à toutes les fonctionnalités du forfait choisi. La carte bancaire est demandée à l’inscription via Stripe Checkout ; aucun débit avant J+30. Tu peux résilier à tout moment depuis ton espace abonnement.',
   },
   {
     question: 'Puis-je résilier à tout moment ?',
     answer:
-      'Oui. La résiliation est accessible en deux clics depuis votre espace abonnement, sans frais ni durée d’engagement. Votre forfait reste actif jusqu’à la fin de la période payée puis votre compte passe en lecture seule (90 jours de rétention).',
+      'Oui. La résiliation est accessible en deux clics depuis ton espace abonnement, sans frais ni durée d’engagement. Ton forfait reste actif jusqu’à la fin de la période payée puis ton compte passe en lecture seule (90 jours de rétention).',
   },
   {
     question: 'Comment contacter le support ?',
@@ -112,7 +112,7 @@ const FAQ_KEY: ReadonlyArray<FaqItem> = [
   {
     question: 'Mes données sont-elles bien protégées ?',
     answer:
-      'Hébergement Supabase exclusivement en France (région Paris eu-west-3). Conformité RGPD complète : consentements explicites, export complet et droit à l’oubli en un clic depuis votre espace. Aucune revente ni partage commercial des données métier.',
+      'Hébergement Supabase exclusivement en France (région Paris eu-west-3). Conformité RGPD complète : consentements explicites, export complet et droit à l’oubli en un clic depuis ton espace. Aucune revente ni partage commercial des données métier.',
   },
 ] as const
 
@@ -230,7 +230,7 @@ export default function AidePage() {
                 className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
                 style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
               >
-                Vos <span className="font-serif italic font-normal">objections</span> principales.
+                Tes <span className="font-serif italic font-normal">objections</span> principales.
               </h2>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -385,7 +385,7 @@ export default function AidePage() {
                 Comprendre le <span className="font-serif italic font-normal">jargon</span>.
               </h2>
               <p className="text-[15px] text-[#0F1419]/72 leading-relaxed">
-                Survolez ou touchez chaque terme souligné pour afficher la définition courte et la
+                Survole ou touche chaque terme souligné pour afficher la définition courte et la
                 source officielle (Légifrance, ADEME, INSEE).
               </p>
             </div>

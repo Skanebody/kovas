@@ -359,7 +359,7 @@ export default function TemoignagesPage() {
         <section className="px-5 sm:px-12 py-24 sm:py-32 border-t border-[#0F1419]/[0.08] bg-[#0F1419] text-paper">
           <div className="max-w-[920px] mx-auto text-center space-y-8">
             <p className="font-mono uppercase tracking-wider text-[11px] text-paper/55">
-              À votre tour
+              À ton tour
             </p>
             <h2
               className="font-sans font-medium tracking-tight text-paper leading-[1.05]"
@@ -369,7 +369,7 @@ export default function TemoignagesPage() {
               sans engagement.
             </h2>
             <p className="text-lg text-paper/72 max-w-xl mx-auto leading-relaxed">
-              Si KOVAS ne vous convient pas, résiliation en deux clics depuis le Customer Portal.
+              Si KOVAS ne te convient pas, résiliation en deux clics depuis le Customer Portal.
               Carte bancaire requise, aucun débit avant J+30.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">

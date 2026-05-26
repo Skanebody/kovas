@@ -105,7 +105,7 @@ export default async function PressePage() {
               <span className="font-serif italic font-normal">Espace</span> presse.
             </h1>
             <p className="mt-8 max-w-2xl text-base sm:text-lg text-[#0F1419]/72 leading-relaxed">
-              Communiqués, kit médias, statistiques marché et contact direct. Tout ce dont vous avez
+              Communiqués, kit médias, statistiques marché et contact direct. Tout ce dont tu as
               besoin pour parler de KOVAS et du marché du diagnostic immobilier français.
             </p>
           </div>
