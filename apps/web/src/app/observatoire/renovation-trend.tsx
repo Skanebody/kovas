@@ -12,6 +12,12 @@ interface RenovationTrendProps {
   data: readonly RenovationPoint[]
   /** Période courante affichée par le ChartCaption */
   periodLabel: string
+  /** True si au moins un mois provient de l'ingestion ADEME réelle */
+  isLive?: boolean
+  /** True si TOUS les mois proviennent de l'ingestion ADEME (pas de fallback) */
+  isFullyLive?: boolean
+  /** True si mix donnée réelle + extrapolation */
+  isMixed?: boolean
 }
 
 /**
@@ -26,7 +32,13 @@ interface RenovationTrendProps {
  * signaler la mise à jour la plus récente + ligne de tendance moyenne mobile
  * 3 mois en gris clair pointillé.
  */
-export function RenovationTrend({ data, periodLabel }: RenovationTrendProps) {
+export function RenovationTrend({
+  data,
+  periodLabel,
+  isLive = false,
+  isFullyLive = false,
+  isMixed = false,
+}: RenovationTrendProps) {
   if (data.length === 0) return null
 
   const lastValue = data[data.length - 1]?.count ?? 0
@@ -213,9 +225,15 @@ export function RenovationTrend({ data, periodLabel }: RenovationTrendProps) {
         </svg>
       </div>
       <ChartCaption
-        howToRead="La courbe pleine navy retrace le nombre mensuel de rénovations énergétiques engagées au niveau national. La ligne pointillée grise est la moyenne mobile 3 mois qui neutralise la saisonnalité (creux estival juillet-août). Le point chartreuse marque la valeur la plus récente."
-        source="Agrégation ADEME (DPE) + ANAH MaPrimeRénov + missions KOVAS anonymisées"
-        dataStatus="fallback"
+        howToRead="La courbe pleine navy retrace le nombre mensuel de rénovations énergétiques engagées au niveau national, mesuré par les DPE émis en classe A-C sur la fenêtre. La ligne pointillée grise est la moyenne mobile 3 mois qui neutralise la saisonnalité (creux estival juillet-août). Le point chartreuse marque la valeur la plus récente."
+        source={
+          isFullyLive
+            ? 'Agrégation directe ADEME DPE v2 logements existants (open data, mise à jour mensuelle)'
+            : isMixed
+              ? 'Agrégation ADEME DPE v2 (mois disponibles) complétée par extrapolation déterministe sur les mois manquants'
+              : 'Référentiel extrapolé KOVAS — baseline ADEME 2024 + croissance progressive saisonnalisée'
+        }
+        dataStatus={isLive ? 'live' : 'fallback'}
         periodLabel={periodLabel}
         axes={{ x: 'Mois (24 derniers mois glissants)', y: 'Nombre de rénovations engagées' }}
       />

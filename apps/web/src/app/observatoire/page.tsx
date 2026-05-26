@@ -356,7 +356,13 @@ export default async function ObservatoirePage() {
                 métropolitain, lissé en moyenne mobile trois mois pour neutraliser la saisonnalité.
               </p>
             </div>
-            <RenovationTrend data={renovationData} periodLabel={periodLabel} />
+            <RenovationTrend
+              data={renovationData.data}
+              periodLabel={periodLabel}
+              isLive={renovationData.isLive}
+              isFullyLive={renovationData.isFullyLive}
+              isMixed={renovationData.isMixed}
+            />
           </div>
         </section>
 

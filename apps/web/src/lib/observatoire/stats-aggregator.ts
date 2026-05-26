@@ -11,6 +11,7 @@
  * Toutes les fonctions sont signées en `async` pour permettre la lecture DB.
  */
 
+import { createClient } from '@/lib/supabase/server'
 import { type LiveStatsSnapshot, formatPeriodLabel, loadLiveStatsSnapshot } from './live-stats'
 import { type DiagnosticType, REGIONS, getFGRateFrance, getMedianPriceFrance } from './regions-data'
 
@@ -106,57 +107,144 @@ export async function getObservatoireStats(): Promise<ObservatoireStats> {
   }
 }
 
+export interface RenovationDataPoint {
+  readonly month: string
+  readonly year: number
+  readonly count: number
+  readonly label: string
+}
+
+export interface RenovationTrendResult {
+  readonly data: readonly RenovationDataPoint[]
+  /** True si au moins un mois provient de la table live ADEME. */
+  readonly isLive: boolean
+  /** True si tous les mois disponibles sont issus de l'ingestion ADEME réelle. */
+  readonly isFullyLive: boolean
+  /** True si le jeu de données contient un mix réel + extrapolé. */
+  readonly isMixed: boolean
+}
+
+const MONTHS_FR: readonly string[] = [
+  'Janv',
+  'Févr',
+  'Mars',
+  'Avr',
+  'Mai',
+  'Juin',
+  'Juil',
+  'Août',
+  'Sept',
+  'Oct',
+  'Nov',
+  'Déc',
+]
+
+interface RenovationRowRaw {
+  period_year: number
+  period_month: number
+  renovations_count: number
+  source: string
+}
+
+function buildSyntheticPoint(_year: number, monthIndex: number, baseGrowthIdx: number): number {
+  const baseline = 22_000
+  const seasonal =
+    monthIndex === 6 || monthIndex === 7
+      ? 0.82
+      : monthIndex === 2 || monthIndex === 3 || monthIndex === 4
+        ? 1.08
+        : monthIndex === 8 || monthIndex === 9
+          ? 1.05
+          : 1.0
+  const growth = 1 + baseGrowthIdx * 0.018
+  return Math.round(baseline * growth * seasonal)
+}
+
+function formatLabel(monthIndex: number, year: number): { month: string; label: string } {
+  const month = MONTHS_FR[monthIndex] ?? ''
+  return { month, label: `${month} ${String(year).slice(2)}` }
+}
+
+/**
+ * Charge les 24 derniers mois de la table `observatoire_renovations_monthly`
+ * pour la ligne nationale (region_code IS NULL). Retourne null en cas
+ * d'erreur DB / table absente pour permettre un fallback gracieux.
+ */
+async function loadRenovationRows(): Promise<readonly RenovationRowRaw[] | null> {
+  try {
+    const supabase = await createClient()
+    // biome-ignore lint/suspicious/noExplicitAny: table pas dans Database.types
+    const { data, error } = await (supabase as any)
+      .from('observatoire_renovations_monthly')
+      .select('period_year, period_month, renovations_count, source')
+      .is('region_code', null)
+      .order('period_year', { ascending: false })
+      .order('period_month', { ascending: false })
+      .limit(24)
+    if (error) return null
+    if (!Array.isArray(data) || data.length === 0) return null
+    return data as RenovationRowRaw[]
+  } catch {
+    return null
+  }
+}
+
 /**
  * Renvoie l'évolution mensuelle du nombre de rénovations énergétiques (24 mois
- * glissants). Tendance + ~5%/mois avec saisonnalité légère (creux estival).
+ * glissants).
  *
- * V2 (post-cron live) : interpolation entre snapshots `observatoire_live_stats`
- * disponibles + extrapolation pour les mois manquants. V1 : référentiel
- * déterministe inchangé (utilisé en fallback).
+ * Stratégie de lecture :
+ *   1. Lit la table `observatoire_renovations_monthly` (national,
+ *      `region_code IS NULL`) sur les 24 derniers mois.
+ *   2. Si la table est vide ou en erreur, retombe sur un référentiel
+ *      synthétique déterministe (baseline 22k + saisonnalité + croissance).
+ *   3. Si la table contient moins de 24 mois, comble les mois manquants
+ *      avec le référentiel synthétique (mode "mixed").
+ *
+ * Le flag `isLive` indique si AU MOINS un mois provient de la DB réelle.
+ * Le flag `isFullyLive` indique si TOUS les mois proviennent de la source
+ * `ademe` (donnée réelle ADEME, pas synthetic_seed).
  */
-export async function getRenovationTrend(): Promise<
-  readonly { month: string; year: number; count: number; label: string }[]
-> {
-  const monthsFr = [
-    'Janv',
-    'Févr',
-    'Mars',
-    'Avr',
-    'Mai',
-    'Juin',
-    'Juil',
-    'Août',
-    'Sept',
-    'Oct',
-    'Nov',
-    'Déc',
-  ]
-  const result: { month: string; year: number; count: number; label: string }[] = []
+export async function getRenovationTrend(): Promise<RenovationTrendResult> {
+  const rows = await loadRenovationRows()
   const now = new Date()
-  const baseline = 22_000 // rénovations / mois il y a 24 mois
+
+  // Map (year-month) → { count, source } pour lookup rapide
+  const liveMap = new Map<string, { count: number; source: string }>()
+  if (rows) {
+    for (const row of rows) {
+      const key = `${row.period_year}-${row.period_month}`
+      liveMap.set(key, { count: row.renovations_count, source: row.source })
+    }
+  }
+
+  const result: RenovationDataPoint[] = []
+  let ademeRealCount = 0
 
   for (let i = 23; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const monthIdx = d.getMonth()
-    // Saisonnalité : creux Juillet/Août, pic Mars-Mai et Sept-Oct
-    const seasonal =
-      monthIdx === 6 || monthIdx === 7
-        ? 0.82
-        : monthIdx === 2 || monthIdx === 3 || monthIdx === 4
-          ? 1.08
-          : monthIdx === 8 || monthIdx === 9
-            ? 1.05
-            : 1.0
-    const growth = 1 + (23 - i) * 0.018 // +1,8% / mois cumulés
-    const count = Math.round(baseline * growth * seasonal)
-    result.push({
-      month: monthsFr[monthIdx] ?? '',
-      year: d.getFullYear(),
-      count,
-      label: `${monthsFr[monthIdx] ?? ''} ${String(d.getFullYear()).slice(2)}`,
-    })
+    const year = d.getFullYear()
+    const monthIdx = d.getMonth() // 0-indexed
+    const monthHuman = monthIdx + 1
+    const key = `${year}-${monthHuman}`
+
+    const live = liveMap.get(key)
+    const baseGrowthIdx = 23 - i
+    const count = live ? live.count : buildSyntheticPoint(year, monthIdx, baseGrowthIdx)
+
+    if (live && live.source === 'ademe') {
+      ademeRealCount += 1
+    }
+
+    const { month, label } = formatLabel(monthIdx, year)
+    result.push({ month, year, count, label })
   }
-  return result
+
+  const isLive = ademeRealCount > 0
+  const isFullyLive = ademeRealCount === 24
+  const isMixed = isLive && !isFullyLive
+
+  return { data: result, isLive, isFullyLive, isMixed }
 }
 
 export interface TopCity {
@@ -314,17 +402,37 @@ export async function getTopCities(): Promise<TopCitiesResult> {
 /**
  * Renvoie le tableau prix médian × région × diagnostic (matrice complète).
  *
- * Live : surcharge le prix DPE par la valeur DB si disponible.
- * Fallback : prix mockés depuis regions-data.ts.
+ * Live : surcharge chaque prix de la matrice par sa valeur DB si disponible
+ * (via `prices_by_type` jsonb). Fallback gracieux par cellule sur le
+ * référentiel `regions-data.ts` quand la valeur live est absente.
+ *
+ * Pour la compat ascendante, si `prices_by_type` est NULL mais
+ * `median_price_eur` est présent (rows antérieures à la migration
+ * 20260626100000), on n'écrase plus que la cellule DPE — comme avant.
  */
 export interface PriceMatrixRow {
   region: string
   regionCode: string
   diagnosticsCount: number
   prices: Readonly<Record<DiagnosticType, number>>
-  /** True si le prix DPE provient de la DB pour cette région */
+  /** True si le prix DPE provient de la DB pour cette région (compat ascendante) */
   dpeIsLive: boolean
+  /** Pour chaque diagnostic : true si la valeur provient de la DB live, false si fallback */
+  isLiveByDiag: Readonly<Record<DiagnosticType, boolean>>
+  /** Nombre de cellules live sur 8 — utile pour stats agrégées en footer UI */
+  liveCellCount: number
 }
+
+const DIAG_CODES: readonly DiagnosticType[] = [
+  'dpe',
+  'amiante',
+  'plomb',
+  'gaz',
+  'electricite',
+  'termites',
+  'carrez',
+  'erp',
+] as const
 
 export async function getPriceMatrix(): Promise<readonly PriceMatrixRow[]> {
   const snapshot = await getLiveSnapshotOnce()
@@ -332,18 +440,50 @@ export async function getPriceMatrix(): Promise<readonly PriceMatrixRow[]> {
   return REGIONS.map((r) => {
     const live = snapshot?.regions.get(r.code)
     const livePrice = live?.medianPriceEur ?? null
+    const livePrices = live?.pricesByType ?? null
     const liveCount = live?.diagnosticsCount ?? null
 
-    // Si on a un prix DPE live, on l'écrase ; les autres diagnostics restent
-    // sur le référentiel (le live ne calcule pas encore les 7 autres types).
-    const prices = livePrice !== null ? { ...r.prices, dpe: Math.round(livePrice) } : r.prices
+    // Construction cellule par cellule : on préfère prices_by_type[diag],
+    // sinon on garde la valeur mockée. Pour le DPE seulement, on tolère
+    // l'ancien format (`median_price_eur` sans prices_by_type) en
+    // compatibilité ascendante.
+    const prices: Record<DiagnosticType, number> = { ...r.prices }
+    const isLiveByDiag: Record<DiagnosticType, boolean> = {
+      dpe: false,
+      amiante: false,
+      plomb: false,
+      gaz: false,
+      electricite: false,
+      termites: false,
+      carrez: false,
+      erp: false,
+    }
+
+    for (const diag of DIAG_CODES) {
+      const liveValue = livePrices?.[diag]
+      if (typeof liveValue === 'number' && Number.isFinite(liveValue)) {
+        prices[diag] = Math.round(liveValue)
+        isLiveByDiag[diag] = true
+      }
+    }
+
+    // Compat ascendante : DPE peut être live via median_price_eur même sans
+    // prices_by_type (rows seedées avant migration 20260626).
+    if (!isLiveByDiag.dpe && livePrice !== null) {
+      prices.dpe = Math.round(livePrice)
+      isLiveByDiag.dpe = true
+    }
+
+    const liveCellCount = DIAG_CODES.reduce((s, d) => s + (isLiveByDiag[d] ? 1 : 0), 0)
 
     return {
       region: r.name,
       regionCode: r.code,
       diagnosticsCount: liveCount && liveCount > 0 ? liveCount * 12 : r.diagnosticsCount,
       prices,
-      dpeIsLive: livePrice !== null,
+      dpeIsLive: isLiveByDiag.dpe,
+      isLiveByDiag,
+      liveCellCount,
     }
   })
 }
