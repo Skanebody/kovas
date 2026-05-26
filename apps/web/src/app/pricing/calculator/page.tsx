@@ -29,7 +29,7 @@ import { useMemo, useState } from 'react'
  *   1. Choix du forfait KOVAS parmi 5 (mini-cards radio)
  *   2. Sélection des 4 add-ons (toggle)
  *   3. Récap sticky : plan + modules + total HT / mois
- *   4. CTA "Démarrer l'essai 14 jours" → /signup avec params
+ *   4. CTA "Démarrer l'essai 30 jours" → /signup avec params
  */
 export default function PricingCalculatorPage() {
   const defaultPlan: LogicielPlanCode =
@@ -244,10 +244,10 @@ function RecapPanel({
 
       <Link
         href={signupHref}
-        aria-label="Démarrer l'essai 14 jours avec la configuration choisie"
+        aria-label="Démarrer l'essai 30 jours avec la configuration choisie"
         className="mt-6 block w-full text-center py-4 px-5 rounded-[16px] bg-chartreuse text-[#0F1419] font-semibold text-[15px] hover:bg-chartreuse-deep transition-colors"
       >
-        Démarrer l'essai 14 jours
+        Démarrer l'essai 30 jours
       </Link>
       <p className="text-center mt-3 text-[11px] text-[#0F1419]/55 leading-snug">
         CB enregistrée à la souscription, débit automatique à J+30. Annulable à tout moment.

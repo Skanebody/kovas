@@ -82,7 +82,7 @@ export function OtherDossiersBlock({ dossiers }: OtherDossiersBlockProps) {
             return (
               <li key={d.id}>
                 <Link
-                  href={`/app/dossiers/${d.id}`}
+                  href={`/dashboard/dossiers/${d.id}`}
                   className="block rounded-md border border-[#0F1419]/[0.08] bg-paper hover:border-[#0F1419]/30 px-2.5 py-2 transition-colors duration-fast"
                 >
                   <div className="flex items-baseline justify-between gap-2">

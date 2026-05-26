@@ -80,7 +80,7 @@ export function DiagnosticValidityCard({ scans, title, emptyHint }: Props) {
         </CardTitle>
         <p className="text-xs text-ink-mute mt-1">
           Issus des scans confirmés via{' '}
-          <Link href="/app/outils/verification-validite" className="underline hover:text-ink">
+          <Link href="/dashboard/outils/verification-validite" className="underline hover:text-ink">
             Vérification de validité
           </Link>
           .

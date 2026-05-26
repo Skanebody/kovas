@@ -17,13 +17,13 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import {
+  type AutoUpdateChangeType,
+  type AutoUpdateRiskLevel,
+  type AutoUpdateStatus,
   CHANGE_TYPE_LABEL,
   RISK_BADGE,
   STATUS_BADGE,
   STATUS_LABEL,
-  type AutoUpdateChangeType,
-  type AutoUpdateRiskLevel,
-  type AutoUpdateStatus,
   type SystemAutoUpdateRow,
 } from '@/lib/regulatory/types'
 import type { Metadata } from 'next'
@@ -46,19 +46,14 @@ interface PageProps {
 }
 
 interface RawAutoUpdate extends SystemAutoUpdateRow {
-  regulatory_documents:
-    | { id: string; title: string }
-    | { id: string; title: string }[]
-    | null
+  regulatory_documents: { id: string; title: string } | { id: string; title: string }[] | null
 }
 
 interface AutoUpdatesQueryBuilder {
   select: (cols: string) => AutoUpdatesQueryBuilder
   in: (col: string, vals: string[]) => AutoUpdatesQueryBuilder
   order: (col: string, opts: { ascending: boolean }) => AutoUpdatesQueryBuilder
-  limit: (
-    n: number,
-  ) => Promise<{ data: RawAutoUpdate[] | null; error: { message: string } | null }>
+  limit: (n: number) => Promise<{ data: RawAutoUpdate[] | null; error: { message: string } | null }>
 }
 
 function parseList(value: string | undefined): string[] {
@@ -73,7 +68,7 @@ function unwrapDoc(
   value: { id: string; title: string } | { id: string; title: string }[] | null,
 ): { id: string; title: string } | null {
   if (!value) return null
-  return Array.isArray(value) ? value[0] ?? null : value
+  return Array.isArray(value) ? (value[0] ?? null) : value
 }
 
 function formatDateTime(iso: string | null): string {
@@ -136,8 +131,8 @@ export default async function AdminAutoUpdatesPage({ searchParams }: PageProps) 
           Auto-updates.
         </h1>
         <p className="text-sm text-ink-mute max-w-xl">
-          Propositions de mise à jour générées par la veille IA. Approbation admin
-          obligatoire avant exécution.
+          Propositions de mise à jour générées par la veille IA. Approbation admin obligatoire avant
+          exécution.
         </p>
       </div>
 
@@ -151,9 +146,7 @@ export default async function AdminAutoUpdatesPage({ searchParams }: PageProps) 
       {/* Liste */}
       {rows.length === 0 ? (
         <Card variant="flat" padding="default">
-          <p className="text-sm text-ink-mute">
-            Aucune auto-update à afficher pour ces filtres.
-          </p>
+          <p className="text-sm text-ink-mute">Aucune auto-update à afficher pour ces filtres.</p>
         </Card>
       ) : (
         <ul className="space-y-4">
@@ -209,10 +202,7 @@ function FilterBar({ currentStatus, currentChangeType, currentRisk }: FilterBarP
     risk_level: currentRisk,
   }
   return (
-    <section
-      aria-label="Filtres"
-      className="rounded-xl border border-rule bg-paper p-4 space-y-3"
-    >
+    <section aria-label="Filtres" className="rounded-xl border border-rule bg-paper p-4 space-y-3">
       <FilterGroup label="Statut">
         {STATUS_FILTERS.map((s) => {
           const on = currentStatus.includes(s)
@@ -313,7 +303,7 @@ function AutoUpdateCard({ row }: { row: RawAutoUpdate }) {
             Source réglementaire
           </p>
           <Link
-            href={`/app/veille/${source.id}`}
+            href={`/dashboard/veille/${source.id}`}
             className="text-[13px] text-ink hover:underline"
           >
             {source.title}
@@ -348,10 +338,7 @@ function AutoUpdateCard({ row }: { row: RawAutoUpdate }) {
           Voir le diff (avant / après)
         </summary>
         <div className="mt-3">
-          <AutoUpdatePayloadDiff
-            proposed={row.proposed_payload}
-            rollback={row.rollback_payload}
-          />
+          <AutoUpdatePayloadDiff proposed={row.proposed_payload} rollback={row.rollback_payload} />
         </div>
       </details>
 

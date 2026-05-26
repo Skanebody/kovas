@@ -25,7 +25,7 @@ export default async function QontoIntegrationPage() {
   return (
     <div className="max-w-3xl space-y-8">
       <Button variant="ghost" size="sm" asChild>
-        <Link href="/app/account">
+        <Link href="/dashboard/account">
           <ArrowLeft className="size-4" /> Mon compte
         </Link>
       </Button>

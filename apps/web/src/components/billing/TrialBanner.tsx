@@ -63,9 +63,9 @@ export function TrialBanner({ trialEndsAt, monthlyPriceCents, tierLabel }: Trial
         return
       }
       // Fallback : redirige vers la page Mon compte si Stripe non configuré
-      window.location.href = '/app/account'
+      window.location.href = '/dashboard/account'
     } catch {
-      window.location.href = '/app/account'
+      window.location.href = '/dashboard/account'
     } finally {
       setPortalLoading(false)
     }

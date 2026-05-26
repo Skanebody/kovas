@@ -28,7 +28,7 @@ export default async function IntegrationsPage() {
   return (
     <div className="max-w-4xl space-y-8">
       <Button variant="ghost" size="sm" asChild>
-        <Link href="/app/account">
+        <Link href="/dashboard/account">
           <ArrowLeft className="size-4" /> Mon compte
         </Link>
       </Button>

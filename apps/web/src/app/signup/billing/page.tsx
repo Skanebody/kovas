@@ -7,7 +7,7 @@
  *   - Bullets garanties (0 € aujourd'hui · 30j essai · annulation 2 clics · 60j SOR)
  *   - Order bump Audit Rétrospectif IA (+99 € one-time, composant client)
  *   - Placeholder Stripe Checkout (wiring réel TUGAN-5)
- *   - CTA "Activer mon essai 30 jours" → /signup?plan=X&audit_retro={true|false}
+ *   - CTA "Démarrer mon essai 30 jours" → /signup?plan=X&audit_retro={true|false}
  *
  * CTA pilote la query-param `audit_retro` selon l'état de la checkbox
  * order bump (composant client). La création du compte + Setup Intent

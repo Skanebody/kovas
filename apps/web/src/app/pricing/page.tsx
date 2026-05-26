@@ -192,7 +192,7 @@ export default function PricingPage() {
                     </li>
                   </ul>
                   <Button className="w-full" variant={tier.featured ? 'warm' : 'glass'} asChild>
-                    <Link href="/signup">Commencer {tier.name}</Link>
+                    <Link href="/signup">Démarrer {tier.name}</Link>
                   </Button>
                 </CardContent>
               </Card>

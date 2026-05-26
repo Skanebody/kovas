@@ -72,7 +72,7 @@ export async function AidesRenovationCounterCard() {
       </div>
 
       <Link
-        href="/app/dossiers?dpe=fg"
+        href="/dashboard/dossiers?dpe=fg"
         className="mt-6 inline-flex items-center gap-2 self-start rounded-pill border border-rule bg-paper px-4 py-2 text-sm font-semibold text-ink transition-all hover:-translate-y-px"
       >
         Voir les dossiers <ArrowRight className="size-4" />

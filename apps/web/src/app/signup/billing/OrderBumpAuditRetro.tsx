@@ -5,7 +5,7 @@
  *
  * Checkbox prominent (état local) pour l'add-on "Audit Rétrospectif IA"
  * facturé +99 € one-time. Pilote la query-param `audit_retro=true|false`
- * du CTA principal "Activer mon essai 30 jours".
+ * du CTA principal "Démarrer mon essai 30 jours".
  *
  * Spec : docs Tugan §11 (order bump high-converting B2B SaaS).
  *
@@ -141,7 +141,7 @@ export function OrderBumpAuditRetro({
       <div className="space-y-3">
         <Button asChild variant="accent" size="lg" className="w-full justify-center">
           <Link href={ctaHref}>
-            Activer mon essai 30 jours · Plan {planName}
+            Démarrer mon essai 30 jours · Plan {planName}
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </Button>

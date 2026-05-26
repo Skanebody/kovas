@@ -73,7 +73,7 @@ export async function CaptureSection({
             {thumbs.map((t) => (
               <Link
                 key={t.id}
-                href={`/app/dossiers/${dossierId}#photo-${t.id}`}
+                href={`/dashboard/dossiers/${dossierId}#photo-${t.id}`}
                 className="block aspect-square overflow-hidden rounded-md border border-[#0F1419]/[0.08] bg-cream-deep"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}

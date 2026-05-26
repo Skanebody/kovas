@@ -47,7 +47,7 @@ export function AidesBanner({
         </p>
       </div>
       <Link
-        href={`/app/dossiers/${dossierId}/aides`}
+        href={`/dashboard/dossiers/${dossierId}/aides`}
         className="inline-flex items-center gap-1.5 rounded-pill border border-rule bg-paper px-4 py-2 text-sm font-semibold text-ink transition-all hover:-translate-y-px"
       >
         Consulter l'annexe <ArrowRight className="size-4" />

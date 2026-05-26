@@ -68,7 +68,7 @@ export default async function DossierAidesPage({
     <div className="mx-auto max-w-4xl px-5 py-8 md:px-8">
       <div className="mb-6 flex items-center gap-3">
         <Link
-          href={`/app/dossiers/${id}`}
+          href={`/dashboard/dossiers/${id}`}
           className="inline-flex items-center gap-1.5 text-sm text-ink-mute hover:text-ink"
         >
           <ArrowLeft className="size-4" />
@@ -104,7 +104,7 @@ export default async function DossierAidesPage({
             de classe F ou G. Exportez le rapport DPE pour la créer.
           </p>
           <div className="mt-5">
-            <Link href={`/app/dossiers/${id}`}>
+            <Link href={`/dashboard/dossiers/${id}`}>
               <Button variant="outline">Retour au dossier</Button>
             </Link>
           </div>

@@ -112,7 +112,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
       const d = new Date(ev.scheduledAt)
       const key = d.toDateString()
       if (byDay.has(key)) {
-        byDay.get(key)!.push(ev)
+        byDay.get(key)?.push(ev)
       }
     }
     // Trie par heure dans chaque jour
@@ -161,7 +161,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
           {formatRangeLabel(weekStart, rangeEnd)}
         </div>
         <Button size="sm" variant="accent" asChild className="h-10 md:h-8">
-          <Link href="/app/dossiers/new">
+          <Link href="/dashboard/dossiers/new">
             <Plus className="size-4" /> Nouveau RDV
           </Link>
         </Button>
@@ -224,10 +224,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
               return (
                 <div
                   key={day.toISOString()}
-                  className={cn(
-                    'relative border-l border-rule/60',
-                    isToday && 'bg-navy/[0.03]',
-                  )}
+                  className={cn('relative border-l border-rule/60', isToday && 'bg-navy/[0.03]')}
                 >
                   {/* Traits horaires pleins (chaque heure pleine, sauf la première qui est sous le header) */}
                   {hours.map((h, idx) => (
@@ -265,7 +262,7 @@ export function CalendarWeekView({ events }: CalendarWeekViewProps) {
                     return (
                       <Link
                         key={ev.dossierId}
-                        href={`/app/dossiers/${ev.dossierId}`}
+                        href={`/dashboard/dossiers/${ev.dossierId}`}
                         className={cn(
                           'absolute left-1 right-1 rounded-md p-1.5 text-[11px] overflow-hidden',
                           'bg-navy/[0.08] border-l-2 border-navy hover:bg-navy/[0.14] hover:shadow-glass transition-all',

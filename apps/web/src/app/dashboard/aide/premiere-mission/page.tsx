@@ -188,7 +188,7 @@ export default function AidePremiereMissionPage() {
         <div className="flex justify-center pt-1">
           <Button asChild variant="accent" size="lg">
             <Link href="/dashboard/dossiers/new">
-              Commencer ma première mission
+              Démarrer ma première mission
               <ArrowRight className="size-4" aria-hidden />
             </Link>
           </Button>
