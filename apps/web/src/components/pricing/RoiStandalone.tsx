@@ -195,7 +195,7 @@ export function RoiStandalone() {
               <ArrowRight className="size-4" />
             </Link>
             <p className="text-[12px] text-white/72 mt-3 font-mono">
-              Essai 14 jours · résiliable à tout moment
+              Essai 30 jours · CB enregistrée mais pas débitée · annulation en 2 clics avant J+30
             </p>
           </div>
         )}
