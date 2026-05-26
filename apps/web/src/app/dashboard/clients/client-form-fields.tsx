@@ -1,13 +1,14 @@
 'use client'
 
-import { Building2 } from 'lucide-react'
-import { useState } from 'react'
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { isBusinessClientType, type ClientType } from '@/lib/validation/client'
+import { type ClientType, isBusinessClientType } from '@/lib/validation/client'
+import { Building2, CheckCircle2, Loader2 } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { verifyClientSiretAction } from './actions-sirene'
 
 export type ClientFormDefaults = {
   type?: string
@@ -38,6 +39,42 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
   const [postalCode, setPostalCode] = useState(defaults?.postal_code ?? '')
   const [city, setCity] = useState(defaults?.city ?? '')
   const business = isBusinessClientType(type)
+
+  // SIRET / companyName contrôlés pour permettre le pré-remplissage SIRENE.
+  const [siret, setSiret] = useState(defaults?.siret ?? '')
+  const [companyName, setCompanyName] = useState(defaults?.company_name ?? '')
+  const [sirenePending, startSireneTransition] = useTransition()
+  const [sireneInfo, setSireneInfo] = useState<{
+    found: boolean
+    isActive: boolean
+    nafLabel: string | null
+    error: string | null
+  } | null>(null)
+
+  function handleSiretBlur() {
+    const cleaned = siret.replace(/\s/g, '')
+    if (!/^\d{14}$/.test(cleaned)) {
+      setSireneInfo(null)
+      return
+    }
+    startSireneTransition(async () => {
+      const result = await verifyClientSiretAction(cleaned)
+      if (!result.ok) {
+        setSireneInfo({ found: false, isActive: false, nafLabel: null, error: result.error })
+        return
+      }
+      // Pré-remplit le nom de société uniquement si vide (l'utilisateur reste maître).
+      if (result.found && result.companyName && !companyName.trim()) {
+        setCompanyName(result.companyName)
+      }
+      setSireneInfo({
+        found: result.found,
+        isActive: result.isActive,
+        nafLabel: result.nafLabel,
+        error: null,
+      })
+    })
+  }
 
   return (
     <>
@@ -106,29 +143,68 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
               name="companyName"
               required
               placeholder="SARL Diagnostic Martin"
-              defaultValue={defaults?.company_name ?? ''}
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
             />
           </FormField>
 
           <FormField
             label="SIRET"
             htmlFor="siret"
-            hint="14 chiffres — facturation et mandats professionnels"
+            hint="14 chiffres — vérification automatique au registre SIRENE"
             error={fieldErrors.siret}
           >
-            <Input
-              id="siret"
-              name="siret"
-              inputMode="numeric"
-              autoComplete="off"
-              maxLength={17}
-              placeholder="123 456 789 00012"
-              defaultValue={defaults?.siret ?? ''}
-            />
+            <div className="relative">
+              <Input
+                id="siret"
+                name="siret"
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={17}
+                placeholder="123 456 789 00012"
+                value={siret}
+                onChange={(e) => setSiret(e.target.value)}
+                onBlur={handleSiretBlur}
+              />
+              {sirenePending ? (
+                <Loader2
+                  className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-ink-mute animate-spin"
+                  aria-label="Vérification SIRENE en cours"
+                />
+              ) : sireneInfo?.found && sireneInfo.isActive ? (
+                <CheckCircle2
+                  className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-accent-green"
+                  aria-label="SIRET vérifié au registre SIRENE"
+                />
+              ) : null}
+            </div>
+            {sireneInfo && !sirenePending ? (
+              <p
+                className={`mt-1.5 text-xs ${
+                  sireneInfo.error
+                    ? 'text-ink-mute'
+                    : sireneInfo.found && sireneInfo.isActive
+                      ? 'text-accent-green'
+                      : 'text-accent-red'
+                }`}
+              >
+                {sireneInfo.error
+                  ? sireneInfo.error
+                  : !sireneInfo.found
+                    ? 'SIRET inconnu au registre SIRENE'
+                    : !sireneInfo.isActive
+                      ? 'Établissement fermé au registre SIRENE'
+                      : `Vérifié — ${sireneInfo.nafLabel ?? 'activité enregistrée'}`}
+              </p>
+            ) : null}
           </FormField>
         </>
       ) : (
-        <FormField label="Société (si applicable)" htmlFor="companyName" error={fieldErrors.companyName}>
+        <FormField
+          label="Société (si applicable)"
+          htmlFor="companyName"
+          error={fieldErrors.companyName}
+        >
           <Input id="companyName" name="companyName" defaultValue={defaults?.company_name ?? ''} />
         </FormField>
       )}
@@ -148,7 +224,12 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
             defaultValue={defaults?.email ?? ''}
           />
         </FormField>
-        <FormField label="Téléphone" htmlFor="phone" hint="Au moins email ou téléphone" error={fieldErrors.phone}>
+        <FormField
+          label="Téléphone"
+          htmlFor="phone"
+          hint="Au moins email ou téléphone"
+          error={fieldErrors.phone}
+        >
           <Input
             id="phone"
             name="phone"
@@ -161,9 +242,12 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
       </div>
 
       <fieldset className="space-y-4 rounded-xl border border-rule/80 glass-opaque p-4">
-        <legend className="px-1 text-sm font-medium text-ink">Adresse du cabinet (facturation)</legend>
+        <legend className="px-1 text-sm font-medium text-ink">
+          Adresse du cabinet (facturation)
+        </legend>
         <p className="text-xs text-ink-mute -mt-2">
-          Voie, numéro, appartement, bâtiment — l&apos;adresse du bien diagnostiqué est sur chaque dossier.
+          Voie, numéro, appartement, bâtiment — l&apos;adresse du bien diagnostiqué est sur chaque
+          dossier.
         </p>
 
         <FormField
@@ -212,7 +296,7 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
           <FormField
             label="Appartement / local / porte"
             htmlFor="apartmentDetail"
-            hint='Ex : « Apt 12B », « 3ème étage gauche », « Local 204 »'
+            hint="Ex : « Apt 12B », « 3ème étage gauche », « Local 204 »"
             error={fieldErrors.apartmentDetail}
           >
             <Input
@@ -242,7 +326,12 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
               />
             </FormField>
 
-            <FormField label="Étage" htmlFor="floorNumber" hint="0 = RDC, -1 = sous-sol" error={fieldErrors.floorNumber}>
+            <FormField
+              label="Étage"
+              htmlFor="floorNumber"
+              hint="0 = RDC, -1 = sous-sol"
+              error={fieldErrors.floorNumber}
+            >
               <Input
                 id="floorNumber"
                 name="floorNumber"
