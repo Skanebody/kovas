@@ -109,7 +109,7 @@ function SectionHero(): React.ReactElement {
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <Button asChild variant="accent" size="lg">
-            <Link href="/signup">
+            <Link href="/signup/qualify">
               Essai 30 jours gratuit
               <ArrowRight className="size-4" />
             </Link>
@@ -118,7 +118,7 @@ function SectionHero(): React.ReactElement {
             <Link href="/demo">Voir la démo</Link>
           </Button>
           <p className="text-[12px] text-[#0F1419]/55 ml-1">
-            CB requise · débit auto J+30 · résiliation libre
+            3 questions · 30 secondes · aucun email à cette étape
           </p>
         </div>
       </div>
