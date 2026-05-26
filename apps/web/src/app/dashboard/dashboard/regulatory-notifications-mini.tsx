@@ -64,7 +64,7 @@ export async function RegulatoryNotificationsMini() {
         sectionNumber="05"
         sectionTitle="Veille IA"
         moduleName="Veille réglementaire + chatbot méthodo"
-        description="Surveillance automatique de 9 sources (Légifrance, ADEME, DHUP, Cerema, Quotidiag...) avec analyse Claude. Notifications ciblées sur vos diagnostics + chatbot RAG pour vos questions méthodologiques."
+        description="Surveillance automatique de 9 sources (Légifrance, ADEME, DHUP, Cerema, Quotidiag...) avec analyse IA. Notifications ciblées sur tes diagnostics + assistant méthodologique conversationnel."
         requiredPlanOrAddon="Pack All Inclusive"
         priceLabel="à partir de 49 € HT/mois"
         activateHref="/pricing"
@@ -77,9 +77,18 @@ export async function RegulatoryNotificationsMini() {
     supabase as unknown as {
       from: (t: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
-            is: (col: string, val: null) => {
-              order: (col: string, opts: { ascending: boolean }) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            is: (
+              col: string,
+              val: null,
+            ) => {
+              order: (
+                col: string,
+                opts: { ascending: boolean },
+              ) => {
                 limit: (n: number) => Promise<{ data: NotifRow[] | null }>
               }
             }

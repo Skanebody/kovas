@@ -42,7 +42,7 @@ export function CaptureModeToggle({
         disabled={disabled}
         icon={<MicOff className="size-3" aria-hidden />}
         label="Capture"
-        title="Capture silencieuse — vos messages restent là, sans réponse IA. Idéal terrain."
+        title="Capture silencieuse — tes messages restent là, sans réponse IA. Idéal terrain."
       />
       <ToggleButton
         active={mode === 'conversation'}
@@ -50,7 +50,7 @@ export function CaptureModeToggle({
         disabled={disabled}
         icon={<MessageSquare className="size-3" aria-hidden />}
         label="Conversation"
-        title="Conversation IA — Claude répond à chaque message. Pour les questions, l'onboarding."
+        title="Conversation IA — l'assistant répond à chaque message. Pour les questions, l'onboarding."
       />
     </fieldset>
   )

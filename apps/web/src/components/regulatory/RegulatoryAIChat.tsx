@@ -17,19 +17,12 @@
  * Historique : persisté dans localStorage par sessionId (UUID v4 random).
  */
 
+import { FaqAnswer } from '@/components/faq-answer'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { FaqAnswer } from '@/components/faq-answer'
 import { Loader2, Send, Sparkles, X } from 'lucide-react'
 import Link from 'next/link'
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type FormEvent,
-} from 'react'
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const STORAGE_PREFIX = 'kovas.regulatory.chat.'
 
@@ -83,10 +76,7 @@ function persistSession(sessionId: string, messages: ChatMessage[]): void {
   if (typeof window === 'undefined') return
   try {
     window.localStorage.setItem(`${STORAGE_PREFIX}current`, sessionId)
-    window.localStorage.setItem(
-      `${STORAGE_PREFIX}${sessionId}`,
-      JSON.stringify({ messages }),
-    )
+    window.localStorage.setItem(`${STORAGE_PREFIX}${sessionId}`, JSON.stringify({ messages }))
   } catch {
     // Quota dépassé ou storage indisponible : silencieux.
   }
@@ -115,7 +105,7 @@ export function RegulatoryAIChat({
   // Initialisation : reprise ou nouvelle session.
   useEffect(() => {
     const existing = loadSession()
-    if (existing && existing.sessionId) {
+    if (existing?.sessionId) {
       setSessionId(existing.sessionId)
       setMessages(existing.messages)
     } else {
@@ -132,6 +122,7 @@ export function RegulatoryAIChat({
   }, [sessionId, messages])
 
   // Auto-scroll bas.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll-only effect, deps intentionnellement réduites à length.
   useEffect(() => {
     if (!scrollRef.current) return
     scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -248,7 +239,7 @@ export function RegulatoryAIChat({
                 Assistant veille KOVAS
               </p>
               <p className="text-[11px] text-ink-faint">
-                Réglementation diagnostic — Claude + RAG
+                Réglementation diagnostic — base documentaire augmentée
               </p>
             </div>
           </div>
@@ -282,8 +273,8 @@ export function RegulatoryAIChat({
             <div className="text-center text-ink-mute text-[13px] py-12 max-w-md mx-auto">
               <p className="font-serif italic text-2xl text-ink mb-2">Posez votre question.</p>
               <p>
-                Exemple : « Quelle est la durée de validité d'un DPE résidentiel ? » ou
-                « Quels équipements sont concernés par le diagnostic amiante ? »
+                Exemple : « Quelle est la durée de validité d'un DPE résidentiel ? » ou « Quels
+                équipements sont concernés par le diagnostic amiante ? »
               </p>
             </div>
           )}
@@ -377,9 +368,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             ))}
           </ul>
         )}
-        {message.error && (
-          <p className="text-[12px] text-accent-red">Erreur : {message.error}</p>
-        )}
+        {message.error && <p className="text-[12px] text-accent-red">Erreur : {message.error}</p>}
       </div>
     </div>
   )
@@ -399,7 +388,7 @@ async function readStream(
   const reader = body.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
-  let currentEvent: string = 'message'
+  let currentEvent = 'message'
 
   const appendToken = (delta: string): void => {
     setMessages((prev) =>
@@ -430,7 +419,7 @@ async function readStream(
       const chunk = buffer.slice(0, sepIndex)
       buffer = buffer.slice(sepIndex + 2)
       const lines = chunk.split('\n')
-      let dataLines: string[] = []
+      const dataLines: string[] = []
       currentEvent = 'message'
       for (const line of lines) {
         if (line.startsWith('event:')) {
@@ -470,8 +459,7 @@ async function readStream(
               document_id: documentId,
               title,
               doc_type: typeof p.doc_type === 'string' ? p.doc_type : undefined,
-              published_at:
-                typeof p.published_at === 'string' ? p.published_at : null,
+              published_at: typeof p.published_at === 'string' ? p.published_at : null,
             })
           }
         }
@@ -481,9 +469,7 @@ async function readStream(
             ? String((parsed as { error: unknown }).error)
             : dataStr || 'Erreur du flux'
         setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMsgId ? { ...m, error: msg, isStreaming: false } : m,
-          ),
+          prev.map((m) => (m.id === assistantMsgId ? { ...m, error: msg, isStreaming: false } : m)),
         )
       } else if (currentEvent === 'done') {
         // Stream terminé proprement — le caller set isStreaming=false.

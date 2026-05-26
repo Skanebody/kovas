@@ -124,7 +124,7 @@ export default function AidePremiereMissionPage() {
           Saisie vocale et photos géolocalisées
         </h2>
         <p className="text-[13px] text-ink-soft leading-relaxed">
-          Appuie sur le micro pour dicter pièce par pièce. La transcription Whisper FR structure
+          Appuie sur le micro pour dicter pièce par pièce. La transcription française structure
           automatiquement le texte (« cuisine, surface 12 m², chaudière gaz de 2018 »). Une icône
           appareil photo te permet d&apos;ajouter des photos compressées en WebP et géotaguées
           (latitude / longitude / horodatage).

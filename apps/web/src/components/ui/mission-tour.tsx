@@ -23,7 +23,7 @@ const STEPS: TourStep[] = [
     icon: ListChecks,
     title: 'La checklist guide tout',
     description:
-      "Chaque diagnostic a sa liste de tâches obligatoires. Cochez au fur et à mesure — KOVAS bloque la validation finale tant que les obligatoires ne sont pas faites.",
+      'Chaque diagnostic a sa liste de tâches obligatoires. Cochez au fur et à mesure — KOVAS bloque la validation finale tant que les obligatoires ne sont pas faites.',
     cta: 'Compris, montrer les photos',
   },
   {
@@ -39,8 +39,8 @@ const STEPS: TourStep[] = [
     icon: Mic,
     title: 'Saisie vocale par pièce',
     description:
-      "Dictez vos observations — KOVAS transcrit avec Whisper et structure le texte. Plus rapide que la saisie clavier sur le terrain. Hors ligne, l'audio est gardé en local et synchronisé au retour réseau.",
-    cta: 'C\'est parti',
+      "Dicte tes observations — KOVAS transcrit en français et structure le texte. Plus rapide que la saisie clavier sur le terrain. Hors ligne, l'audio est gardé en local et synchronisé au retour réseau.",
+    cta: "C'est parti",
   },
 ]
 
@@ -108,9 +108,8 @@ export function MissionTour({ forceShow = false, onComplete }: MissionTourProps)
   const Icon = current.icon
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      open
       aria-labelledby="mission-tour-title"
       className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
     >
@@ -149,7 +148,10 @@ export function MissionTour({ forceShow = false, onComplete }: MissionTourProps)
           </p>
 
           {/* Indicateur progression dots */}
-          <div className="flex justify-center gap-1.5 mb-6" aria-label={`Étape ${step + 1} sur ${STEPS.length}`}>
+          <div
+            className="flex justify-center gap-1.5 mb-6"
+            aria-label={`Étape ${step + 1} sur ${STEPS.length}`}
+          >
             {STEPS.map((s, i) => (
               <span
                 key={s.id}
@@ -174,7 +176,7 @@ export function MissionTour({ forceShow = false, onComplete }: MissionTourProps)
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   )
 }
 

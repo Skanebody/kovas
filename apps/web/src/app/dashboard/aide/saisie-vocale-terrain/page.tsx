@@ -19,7 +19,7 @@ import Link from 'next/link'
 export const metadata: Metadata = buildNoindexMetadata({
   title: 'Saisie vocale terrain — économise 1h30 par mission — Aide',
   description:
-    "Le mode mission tchat IA hybride Whisper FR + parser custom JS + Claude Haiku, l'anti-bruit 4 niveaux et les tips terrain pour une saisie fluide.",
+    "Le mode mission tchat IA hybride transcription française + parser métier + assistant cloud, l'anti-bruit 4 niveaux et les tips terrain pour une saisie fluide.",
   path: '/dashboard/aide/saisie-vocale-terrain',
 })
 
@@ -88,23 +88,23 @@ export default function AideSaisieVocaleTerrainPage() {
         </p>
         <ul className="space-y-1.5 text-[13px] text-ink-soft leading-relaxed list-disc list-inside">
           <li>
-            <strong>Whisper FR (OpenAI)</strong> — transcription audio brute, haute précision sur le
-            français technique métier.
+            <strong>Transcription FR</strong> — moteur de reconnaissance vocale haute précision sur
+            le français technique métier.
           </li>
           <li>
-            <strong>Parser custom JavaScript (80 % des cas)</strong> — règles métier propriétaires
-            KOVAS qui structurent automatiquement la transcription (« cuisine, 12 m², chaudière gaz
-            2018 ») sans appel API.
+            <strong>Parser métier propriétaire (80 % des cas)</strong> — règles propriétaires KOVAS
+            qui structurent automatiquement la transcription (« cuisine, 12 m², chaudière gaz 2018
+            ») sans appel cloud.
           </li>
           <li>
-            <strong>Claude Haiku (20 % des cas)</strong> — appel IA uniquement quand le parser
+            <strong>Assistant cloud (20 % des cas)</strong> — appel IA uniquement quand le parser
             n&apos;est pas certain, pour confirmer ou désambigüiser.
           </li>
         </ul>
         <p className="text-[13px] text-ink-soft leading-relaxed">
           Résultat : un coût moyen de <strong>0,01 €/mission</strong> au lieu des 0,15 €/mission
-          qu&apos;aurait coûté un appel Claude pour chaque dictée. C&apos;est ce qui permet à KOVAS
-          de garder une marge brute supérieure à 80 % sur les tiers Solo et Pro.
+          qu&apos;aurait coûté un appel IA pour chaque dictée. C&apos;est ce qui permet à KOVAS de
+          garder une marge brute supérieure à 80 % sur les tiers Solo et Pro.
         </p>
       </section>
 
@@ -128,14 +128,14 @@ export default function AideSaisieVocaleTerrainPage() {
             capte trop ou pas assez. Tu corriges la distance ou l&apos;orientation.
           </li>
           <li>
-            <strong>Confidence Whisper</strong> — chaque transcription porte un score de confiance.
+            <strong>Score de confiance</strong> — chaque transcription porte un score de confiance.
             En dessous d&apos;un seuil, KOVAS te demande de re-dicter au lieu d&apos;enregistrer une
             donnée potentiellement fausse.
           </li>
           <li>
-            <strong>Cross-check Claude</strong> — pour les cas critiques (chiffres, années,
-            étiquettes), Claude Haiku confirme la cohérence et signale les anomalies («
-            j&apos;entends 2018, est-ce bien l&apos;année de la chaudière ? »).
+            <strong>Cross-check IA</strong> — pour les cas critiques (chiffres, années, étiquettes),
+            l&apos;assistant cloud confirme la cohérence et signale les anomalies (« j&apos;entends
+            2018, est-ce bien l&apos;année de la chaudière ? »).
           </li>
         </ol>
       </section>
@@ -179,9 +179,9 @@ export default function AideSaisieVocaleTerrainPage() {
         </h2>
         <p className="text-[13px] text-ink-soft leading-relaxed">
           KOVAS travaille sur l&apos;autonomisation IA progressive sur 36 mois pour basculer 60 à 80
-          % des appels Whisper et Claude vers du compute propre (Whisper self-hosted M18,
-          fine-tuning Llama 3.3 70B M24). Tu ne verras pas la différence côté usage, mais la marge
-          KOVAS passera de 77 % à 85 %, ce qui finance la roadmap Phase 2 (calcul DPE certifié{' '}
+          % des appels cloud vers du compute propre (transcription self-hosted M18, modèle métier
+          fine-tuné M24). Tu ne verras pas la différence côté usage, mais la marge KOVAS passera de
+          77 % à 85 %, ce qui finance la roadmap Phase 2 (calcul DPE certifié{' '}
           <GlossaryTerm term="ademe" />) sans hausse de prix.
         </p>
       </section>

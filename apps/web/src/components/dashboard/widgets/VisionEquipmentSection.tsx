@@ -225,7 +225,7 @@ export function VisionEquipmentSection({ photos }: VisionEquipmentSectionProps) 
                 {unanalyzed.length > 1 ? 's' : ''}
               </p>
               <p className="font-mono text-[11px] text-[#0F1419]/55 truncate">
-                Analyse 1 photo (~4s · Claude Vision A1.3.6)
+                Analyse 1 photo (~4s · Vision IA A1.3.6)
               </p>
             </div>
             <Button

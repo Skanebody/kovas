@@ -83,7 +83,7 @@ const TUTORIALS: ReadonlyArray<Tutorial> = [
     slug: 'saisie-vocale-terrain',
     title: 'Saisie vocale terrain',
     description:
-      'Le mode mission tchat IA hybride Whisper + parser custom + Claude Haiku pour gagner 1h30 par mission.',
+      'Le mode mission tchat IA hybride transcription FR + parser custom + assistant pour gagner 1h30 par mission.',
     readTime: '7 min',
     icon: AudioLines,
   },
