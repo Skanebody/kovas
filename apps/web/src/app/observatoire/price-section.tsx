@@ -20,14 +20,18 @@ interface PriceSectionProps {
  * + mini cards de dispersion par diagnostic (8 cards) montrant min/médian/max
  * inter-régionale.
  *
- * Statut data : la colonne DPE est branchée sur la DB live region par region
- * (`PriceMatrixRow.dpeIsLive`). Les 7 autres diagnostics restent issus du
- * référentiel mocké jusqu'au prochain enrichissement Edge Function (V2).
- * Un puce discrète indique aux journalistes/chercheurs le statut par ligne.
+ * Statut data : chaque cellule (région × diagnostic) est tracée
+ * individuellement via `PriceMatrixRow.isLiveByDiag`. Une puce chartreuse
+ * discrète s'affiche au niveau de chaque cellule lue depuis la DB live ;
+ * les cellules en fallback restent neutres. Le footer agrège la couverture
+ * en pourcentage (X / 104 cellules · Y % live).
  */
 export function PriceSection({ matrix, regions, periodLabel }: PriceSectionProps) {
-  const liveDpeCount = matrix.filter((r) => r.dpeIsLive).length
-  const status: 'live' | 'fallback' = liveDpeCount > 0 ? 'live' : 'fallback'
+  const totalCells = matrix.length * DIAGNOSTICS.length
+  const liveCells = matrix.reduce((s, r) => s + r.liveCellCount, 0)
+  const liveCoveragePct = totalCells > 0 ? Math.round((liveCells / totalCells) * 100) : 0
+  const status: 'live' | 'fallback' = liveCells > 0 ? 'live' : 'fallback'
+  const fullyLiveRegions = matrix.filter((r) => r.liveCellCount === DIAGNOSTICS.length).length
 
   return (
     <div className="space-y-8">
@@ -59,31 +63,46 @@ export function PriceSection({ matrix, regions, periodLabel }: PriceSectionProps
                 key={row.regionCode}
                 className="border-b border-rule/40 hover:bg-paper/60 transition-colors"
               >
-                <td className="py-2.5 px-3 font-medium text-ink">
-                  <span className="inline-flex items-center gap-2">
-                    {row.region}
-                    {row.dpeIsLive ? (
-                      <span
-                        className="size-1.5 rounded-full bg-chartreuse-deep"
-                        aria-label="Région avec DPE en données live"
-                      />
-                    ) : null}
-                  </span>
-                </td>
-                {DIAGNOSTICS.map((d) => (
-                  <td
-                    key={d.code}
-                    className="py-2.5 px-2 text-right font-mono text-[13px] text-ink/85"
-                  >
-                    {row.prices[d.code]} €
-                  </td>
-                ))}
+                <td className="py-2.5 px-3 font-medium text-ink">{row.region}</td>
+                {DIAGNOSTICS.map((d) => {
+                  const isLive = row.isLiveByDiag[d.code]
+                  return (
+                    <td
+                      key={d.code}
+                      className="py-2.5 px-2 text-right font-mono text-[13px] text-ink/85"
+                    >
+                      <span className="inline-flex items-center gap-1.5 justify-end">
+                        {row.prices[d.code]} €
+                        {isLive ? (
+                          <span
+                            className="size-1.5 rounded-full bg-chartreuse-deep shrink-0"
+                            aria-label={`${d.label} ${row.region} — donnée live`}
+                          />
+                        ) : null}
+                      </span>
+                    </td>
+                  )
+                })}
                 <td className="py-2.5 px-3 text-right font-mono text-[13px] text-ink-mute">
                   {row.diagnosticsCount.toLocaleString('fr-FR')}
                 </td>
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr className="border-t border-rule/40">
+              <td
+                colSpan={DIAGNOSTICS.length + 2}
+                className="pt-3 px-3 font-mono text-[11px] text-ink-mute"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <span className="size-1.5 rounded-full bg-chartreuse-deep shrink-0" />
+                  {DIAGNOSTICS.length} diagnostics × {matrix.length} régions = {totalCells} cellules
+                  · {liveCells} live ({liveCoveragePct} %)
+                </span>
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
@@ -92,29 +111,38 @@ export function PriceSection({ matrix, regions, periodLabel }: PriceSectionProps
         {matrix.map((row) => (
           <Card key={row.regionCode} variant="flat" padding="sm">
             <div className="flex items-baseline justify-between mb-2.5">
-              <h3 className="text-[15px] font-semibold text-ink inline-flex items-center gap-2">
-                {row.region}
-                {row.dpeIsLive ? (
-                  <span
-                    className="size-1.5 rounded-full bg-chartreuse-deep"
-                    aria-label="DPE live"
-                  />
-                ) : null}
-              </h3>
+              <h3 className="text-[15px] font-semibold text-ink">{row.region}</h3>
               <span className="font-mono text-[11px] text-ink-mute">
                 {row.diagnosticsCount.toLocaleString('fr-FR')} diags / an
               </span>
             </div>
             <dl className="grid grid-cols-2 gap-x-3 gap-y-1">
-              {DIAGNOSTICS.map((d) => (
-                <div key={d.code} className="flex justify-between text-[13px]">
-                  <dt className="text-ink-mute">{d.label}</dt>
-                  <dd className="font-mono font-medium text-ink">{row.prices[d.code]} €</dd>
-                </div>
-              ))}
+              {DIAGNOSTICS.map((d) => {
+                const isLive = row.isLiveByDiag[d.code]
+                return (
+                  <div key={d.code} className="flex justify-between text-[13px]">
+                    <dt className="text-ink-mute">{d.label}</dt>
+                    <dd className="font-mono font-medium text-ink inline-flex items-center gap-1.5">
+                      {row.prices[d.code]} €
+                      {isLive ? (
+                        <span
+                          className="size-1.5 rounded-full bg-chartreuse-deep shrink-0"
+                          aria-label={`${d.label} ${row.region} — donnée live`}
+                        />
+                      ) : null}
+                    </dd>
+                  </div>
+                )
+              })}
             </dl>
           </Card>
         ))}
+        <p className="font-mono text-[11px] text-ink-mute px-1">
+          <span className="inline-flex items-center gap-2">
+            <span className="size-1.5 rounded-full bg-chartreuse-deep shrink-0" />
+            {liveCells} / {totalCells} cellules en données live ({liveCoveragePct} %)
+          </span>
+        </p>
       </div>
 
       {/* Cards dispersion par diagnostic */}
@@ -130,10 +158,10 @@ export function PriceSection({ matrix, regions, periodLabel }: PriceSectionProps
       </div>
 
       <ChartCaption
-        howToRead={`La colonne avec un point chartreuse à côté du nom de région indique un prix DPE issu de la base live (${liveDpeCount}/${matrix.length} régions). Les 7 autres diagnostics (amiante, plomb, gaz, électricité, termites, Carrez, ERP) restent des médians de référence du marché 2024 en attendant l'enrichissement progressif. Les écarts régionaux reflètent le coût du foncier et la densité du tissu professionnel.`}
+        howToRead={`Chaque cellule du tableau avec une puce chartreuse correspond à un prix issu de la base de données live (${liveCells} / ${totalCells} cellules, soit ${liveCoveragePct} %). Les cellules neutres reposent encore sur le référentiel marché 2024 le temps que le volume KOVAS permette une mesure fiable. ${fullyLiveRegions} région${fullyLiveRegions > 1 ? 's' : ''} a${fullyLiveRegions > 1 ? 'ffichent' : 'ffiche'} l'ensemble des 8 diagnostics en live. Les écarts régionaux reflètent le coût du foncier et la densité du tissu professionnel.`}
         source={
           status === 'live'
-            ? 'Missions KOVAS anonymisées (DPE) + référentiel marché ADEME / Que Choisir (autres diagnostics)'
+            ? 'Données mensuelles agrégées et anonymisées + référentiel marché ADEME / Que Choisir pour les cellules sans volume suffisant'
             : 'Référentiel marché ADEME / Que Choisir 2024 — refresh DB en attente'
         }
         dataStatus={status}

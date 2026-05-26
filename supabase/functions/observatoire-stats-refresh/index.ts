@@ -47,9 +47,21 @@ interface TopCity {
   prime_renov: number
 }
 
+interface PricesByType {
+  dpe: number
+  amiante: number
+  plomb: number
+  gaz: number
+  electricite: number
+  termites: number
+  carrez: number
+  erp: number
+}
+
 interface RegionAgg {
   region_code: string | null
   median_price_eur: number
+  prices_by_type: PricesByType
   dpe_distribution: DpeDistribution
   top_transition_cities: TopCity[]
   transactions_count: number
@@ -72,80 +84,248 @@ interface RefreshResult {
 
 const REGION_CODES = ['11', '93', '84', '76', '75', '52', '32', '44', '53', '28', '27', '24', '94']
 
-// Référentiel placeholder déterministe (sync avec apps/web/src/lib/observatoire/regions-data.ts)
+/**
+ * Référentiel placeholder déterministe (sync avec
+ * apps/web/src/lib/observatoire/regions-data.ts).
+ *
+ * `basePrices` contient les 8 diagnostics standards en € TTC. La valeur DPE
+ * est le pivot historique (médian régional). Les 7 autres prix suivent le
+ * même facteur mensuel `trendFactor()` pour rester cohérents.
+ */
 const REGION_REFERENCE: Record<
   string,
   {
     basePrice: number
+    basePrices: PricesByType
     baseDiagnostics: number
     energyDistribution: DpeDistribution
   }
 > = {
   '11': {
     basePrice: 175,
+    basePrices: {
+      dpe: 175,
+      amiante: 145,
+      plomb: 115,
+      gaz: 110,
+      electricite: 115,
+      termites: 95,
+      carrez: 90,
+      erp: 35,
+    },
     baseDiagnostics: 34000,
     energyDistribution: { a: 2, b: 6, c: 18, d: 32, e: 24, f: 12, g: 6 },
   },
   '93': {
     basePrice: 165,
+    basePrices: {
+      dpe: 165,
+      amiante: 135,
+      plomb: 105,
+      gaz: 100,
+      electricite: 105,
+      termites: 95,
+      carrez: 85,
+      erp: 35,
+    },
     baseDiagnostics: 18000,
     energyDistribution: { a: 3, b: 9, c: 22, d: 30, e: 21, f: 10, g: 5 },
   },
   '84': {
     basePrice: 155,
+    basePrices: {
+      dpe: 155,
+      amiante: 125,
+      plomb: 95,
+      gaz: 95,
+      electricite: 100,
+      termites: 85,
+      carrez: 80,
+      erp: 30,
+    },
     baseDiagnostics: 25000,
     energyDistribution: { a: 2, b: 7, c: 19, d: 31, e: 23, f: 12, g: 6 },
   },
   '76': {
     basePrice: 145,
+    basePrices: {
+      dpe: 145,
+      amiante: 120,
+      plomb: 90,
+      gaz: 90,
+      electricite: 95,
+      termites: 90,
+      carrez: 75,
+      erp: 30,
+    },
     baseDiagnostics: 19500,
     energyDistribution: { a: 3, b: 9, c: 22, d: 30, e: 20, f: 11, g: 5 },
   },
   '75': {
     basePrice: 140,
+    basePrices: {
+      dpe: 140,
+      amiante: 115,
+      plomb: 90,
+      gaz: 85,
+      electricite: 90,
+      termites: 95,
+      carrez: 75,
+      erp: 30,
+    },
     baseDiagnostics: 20400,
     energyDistribution: { a: 2, b: 8, c: 20, d: 30, e: 22, f: 12, g: 6 },
   },
   '52': {
     basePrice: 140,
+    basePrices: {
+      dpe: 140,
+      amiante: 115,
+      plomb: 85,
+      gaz: 85,
+      electricite: 90,
+      termites: 80,
+      carrez: 75,
+      erp: 30,
+    },
     baseDiagnostics: 13200,
     energyDistribution: { a: 2, b: 7, c: 20, d: 32, e: 22, f: 12, g: 5 },
   },
   '32': {
     basePrice: 135,
+    basePrices: {
+      dpe: 135,
+      amiante: 110,
+      plomb: 90,
+      gaz: 80,
+      electricite: 90,
+      termites: 75,
+      carrez: 70,
+      erp: 30,
+    },
     baseDiagnostics: 17900,
     energyDistribution: { a: 1, b: 5, c: 17, d: 30, e: 25, f: 15, g: 7 },
   },
   '44': {
     basePrice: 135,
+    basePrices: {
+      dpe: 135,
+      amiante: 110,
+      plomb: 90,
+      gaz: 85,
+      electricite: 90,
+      termites: 70,
+      carrez: 70,
+      erp: 30,
+    },
     baseDiagnostics: 16500,
     energyDistribution: { a: 1, b: 5, c: 17, d: 30, e: 25, f: 15, g: 7 },
   },
   '53': {
     basePrice: 135,
+    basePrices: {
+      dpe: 135,
+      amiante: 115,
+      plomb: 85,
+      gaz: 80,
+      electricite: 85,
+      termites: 75,
+      carrez: 70,
+      erp: 30,
+    },
     baseDiagnostics: 11800,
     energyDistribution: { a: 2, b: 7, c: 19, d: 31, e: 23, f: 12, g: 6 },
   },
   '28': {
     basePrice: 130,
+    basePrices: {
+      dpe: 130,
+      amiante: 110,
+      plomb: 85,
+      gaz: 80,
+      electricite: 85,
+      termites: 70,
+      carrez: 70,
+      erp: 30,
+    },
     baseDiagnostics: 11200,
     energyDistribution: { a: 1, b: 5, c: 17, d: 30, e: 24, f: 16, g: 7 },
   },
   '27': {
     basePrice: 130,
+    basePrices: {
+      dpe: 130,
+      amiante: 105,
+      plomb: 85,
+      gaz: 80,
+      electricite: 85,
+      termites: 70,
+      carrez: 65,
+      erp: 30,
+    },
     baseDiagnostics: 9300,
     energyDistribution: { a: 1, b: 5, c: 17, d: 30, e: 25, f: 15, g: 7 },
   },
   '24': {
     basePrice: 130,
+    basePrices: {
+      dpe: 130,
+      amiante: 105,
+      plomb: 85,
+      gaz: 80,
+      electricite: 85,
+      termites: 75,
+      carrez: 65,
+      erp: 30,
+    },
     baseDiagnostics: 8700,
     energyDistribution: { a: 1, b: 5, c: 18, d: 31, e: 24, f: 14, g: 7 },
   },
   '94': {
     basePrice: 170,
+    basePrices: {
+      dpe: 170,
+      amiante: 140,
+      plomb: 110,
+      gaz: 105,
+      electricite: 110,
+      termites: 100,
+      carrez: 85,
+      erp: 40,
+    },
     baseDiagnostics: 1500,
     energyDistribution: { a: 3, b: 9, c: 21, d: 29, e: 22, f: 11, g: 5 },
   },
+}
+
+/**
+ * Référence nationale (pondérée par population des 13 régions). Calculée via
+ * la même méthode que getMedianPriceFrance côté TS pour rester cohérente.
+ * Valeurs arrondies à l'unité.
+ */
+const NATIONAL_REFERENCE_PRICES: PricesByType = {
+  dpe: 148,
+  amiante: 122,
+  plomb: 95,
+  gaz: 91,
+  electricite: 96,
+  termites: 85,
+  carrez: 78,
+  erp: 31,
+}
+
+function applyFactor(prices: PricesByType, factor: number): PricesByType {
+  const round2 = (v: number) => Math.round(v * factor * 100) / 100
+  return {
+    dpe: round2(prices.dpe),
+    amiante: round2(prices.amiante),
+    plomb: round2(prices.plomb),
+    gaz: round2(prices.gaz),
+    electricite: round2(prices.electricite),
+    termites: round2(prices.termites),
+    carrez: round2(prices.carrez),
+    erp: round2(prices.erp),
+  }
 }
 
 const DEFAULT_TOP_CITIES: TopCity[] = [
@@ -307,6 +487,10 @@ async function tryAggregateReal(
 /**
  * Génère un agrégat placeholder déterministe.
  * Calibré sur regions-data.ts + tendance mensuelle.
+ *
+ * Les 8 prix `prices_by_type` suivent le MÊME facteur mensuel que le DPE
+ * pour rester cohérents jusqu'à ce que le volume de missions KOVAS permette
+ * un calcul indépendant par diagnostic (V2).
  */
 function buildPlaceholder(year: number, month: number, regionCode: string | null): RegionAgg {
   const factor = trendFactor(year, month)
@@ -314,12 +498,13 @@ function buildPlaceholder(year: number, month: number, regionCode: string | null
   if (regionCode === null) {
     // Agrégation France métropolitaine — pondérée par population
     const totalDiagnostics = Math.round(215000 * factor)
-    const medianPrice = Math.round(148 * factor * 100) / 100
+    const pricesByType = applyFactor(NATIONAL_REFERENCE_PRICES, factor)
     const fgRate = Math.round(18.2 * (2 - factor) * 10) / 10
 
     return {
       region_code: null,
-      median_price_eur: medianPrice,
+      median_price_eur: pricesByType.dpe,
+      prices_by_type: pricesByType,
       dpe_distribution: {
         a: Math.round(2.0 * factor * 10) / 10,
         b: Math.round(6.8 * factor * 10) / 10,
@@ -341,9 +526,11 @@ function buildPlaceholder(year: number, month: number, regionCode: string | null
   // Agrégation régionale
   const ref = REGION_REFERENCE[regionCode]
   if (!ref) {
+    const fallbackPrices = applyFactor(NATIONAL_REFERENCE_PRICES, factor)
     return {
       region_code: regionCode,
-      median_price_eur: Math.round(140 * factor * 100) / 100,
+      median_price_eur: fallbackPrices.dpe,
+      prices_by_type: fallbackPrices,
       dpe_distribution: { a: 2, b: 7, c: 19, d: 31, e: 23, f: 12, g: 6 },
       top_transition_cities: [],
       transactions_count: 5000,
@@ -356,10 +543,12 @@ function buildPlaceholder(year: number, month: number, regionCode: string | null
 
   const dist = ref.energyDistribution
   const fg = dist.f + dist.g
+  const pricesByType = applyFactor(ref.basePrices, factor)
 
   return {
     region_code: regionCode,
-    median_price_eur: Math.round(ref.basePrice * factor * 100) / 100,
+    median_price_eur: pricesByType.dpe,
+    prices_by_type: pricesByType,
     dpe_distribution: dist,
     top_transition_cities: [],
     transactions_count: Math.round(ref.baseDiagnostics * factor * 0.5),
@@ -383,6 +572,7 @@ async function upsertAggregate(
       period_month: month,
       region_code: agg.region_code,
       median_price_eur: agg.median_price_eur,
+      prices_by_type: agg.prices_by_type,
       dpe_distribution: agg.dpe_distribution,
       top_transition_cities: agg.top_transition_cities,
       transactions_count: agg.transactions_count,

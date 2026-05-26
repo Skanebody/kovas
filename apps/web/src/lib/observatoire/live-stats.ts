@@ -32,12 +32,29 @@ export interface LiveTopCity {
   readonly prime_renov: number
 }
 
+/**
+ * Prix médians par type de diagnostic (€ TTC) — alimentés par l'Edge Function
+ * `observatoire-stats-refresh`. Tous les champs sont optionnels pour rester
+ * tolérant aux rows anciennes sans backfill.
+ */
+export interface LivePricesByType {
+  readonly dpe?: number
+  readonly amiante?: number
+  readonly plomb?: number
+  readonly gaz?: number
+  readonly electricite?: number
+  readonly termites?: number
+  readonly carrez?: number
+  readonly erp?: number
+}
+
 export interface LiveStatRow {
   readonly id: string
   readonly periodYear: number
   readonly periodMonth: number
   readonly regionCode: string | null
   readonly medianPriceEur: number | null
+  readonly pricesByType: LivePricesByType | null
   readonly dpeDistribution: LiveDpeDistribution | null
   readonly topTransitionCities: readonly LiveTopCity[]
   readonly transactionsCount: number
@@ -58,12 +75,24 @@ export interface LiveStatsSnapshot {
   readonly previousNational: LiveStatRow | null
 }
 
+interface RawPricesByType {
+  dpe?: number | string | null
+  amiante?: number | string | null
+  plomb?: number | string | null
+  gaz?: number | string | null
+  electricite?: number | string | null
+  termites?: number | string | null
+  carrez?: number | string | null
+  erp?: number | string | null
+}
+
 interface RawRow {
   id: string
   period_year: number
   period_month: number
   region_code: string | null
   median_price_eur: number | string | null
+  prices_by_type: RawPricesByType | null
   dpe_distribution: LiveDpeDistribution | null
   top_transition_cities: LiveTopCity[] | null
   transactions_count: number
@@ -71,6 +100,29 @@ interface RawRow {
   fg_rate_pct: number | string | null
   median_delivery_days: number | null
   generated_at: string
+}
+
+function parseNumeric(v: number | string | null | undefined): number | undefined {
+  if (v === null || v === undefined) return undefined
+  const n = typeof v === 'string' ? Number.parseFloat(v) : v
+  return Number.isFinite(n) ? n : undefined
+}
+
+function mapPricesByType(raw: RawPricesByType | null): LivePricesByType | null {
+  if (!raw || typeof raw !== 'object') return null
+  const out: LivePricesByType = {
+    dpe: parseNumeric(raw.dpe),
+    amiante: parseNumeric(raw.amiante),
+    plomb: parseNumeric(raw.plomb),
+    gaz: parseNumeric(raw.gaz),
+    electricite: parseNumeric(raw.electricite),
+    termites: parseNumeric(raw.termites),
+    carrez: parseNumeric(raw.carrez),
+    erp: parseNumeric(raw.erp),
+  }
+  // Si tous les champs sont undefined → on retourne null pour signaler le fallback
+  const hasAny = Object.values(out).some((v) => typeof v === 'number')
+  return hasAny ? out : null
 }
 
 function mapRow(r: RawRow): LiveStatRow {
@@ -85,6 +137,7 @@ function mapRow(r: RawRow): LiveStatRow {
         : typeof r.median_price_eur === 'string'
           ? Number.parseFloat(r.median_price_eur)
           : r.median_price_eur,
+    pricesByType: mapPricesByType(r.prices_by_type),
     dpeDistribution: r.dpe_distribution,
     topTransitionCities: r.top_transition_cities ?? [],
     transactionsCount: r.transactions_count,
@@ -134,7 +187,7 @@ export async function loadLiveStatsSnapshot(): Promise<LiveStatsSnapshot | null>
     const { data: rows, error: rowsErr } = await (supabase as any)
       .from('observatoire_live_stats')
       .select(
-        'id, period_year, period_month, region_code, median_price_eur, dpe_distribution, top_transition_cities, transactions_count, diagnostics_count, fg_rate_pct, median_delivery_days, generated_at',
+        'id, period_year, period_month, region_code, median_price_eur, prices_by_type, dpe_distribution, top_transition_cities, transactions_count, diagnostics_count, fg_rate_pct, median_delivery_days, generated_at',
       )
       .eq('period_year', latestYear)
       .eq('period_month', latestMonth)
@@ -154,7 +207,7 @@ export async function loadLiveStatsSnapshot(): Promise<LiveStatsSnapshot | null>
     const { data: prevRow } = await (supabase as any)
       .from('observatoire_live_stats')
       .select(
-        'id, period_year, period_month, region_code, median_price_eur, dpe_distribution, top_transition_cities, transactions_count, diagnostics_count, fg_rate_pct, median_delivery_days, generated_at',
+        'id, period_year, period_month, region_code, median_price_eur, prices_by_type, dpe_distribution, top_transition_cities, transactions_count, diagnostics_count, fg_rate_pct, median_delivery_days, generated_at',
       )
       .eq('period_year', prev.year)
       .eq('period_month', prev.month)
