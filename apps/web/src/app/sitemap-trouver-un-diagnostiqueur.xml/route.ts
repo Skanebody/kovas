@@ -1,23 +1,22 @@
 /**
  * /sitemap-trouver-un-diagnostiqueur.xml — fiches publiques diagnostiqueurs.
  *
- * URLs canoniques : /trouver-un-diagnostiqueur/{slug_dept}/{slug_city}/{slug}
+ * URLs canoniques : /trouver-un-diagnostiqueur/{dept_code}/{city_slug}/{slug}
  *
- * Source : table Supabase `diagnosticians` (où `is_published = true` et
- * `withdrawal_requested = false`). RLS doit autoriser le lecture publique
- * de ces colonnes minimales pour permettre l'accès anonyme depuis l'edge.
+ * Source : table Supabase `diagnosticians`. Le sitemap doit refléter ce qui
+ * est réellement visible publiquement (donc les fiches `is_published=true` ET
+ * `withdrawal_requested=false`).
  *
- * Limite stricte : 50 000 URLs / fichier. Au-delà → pagination
- * `sitemap-trouver-un-diagnostiqueur-1.xml`, `-2.xml`, etc. À implémenter quand
- * le volume dépassera 40 000 (réserve 20%). À ce stade, on agrège tout en un.
+ * Important :
+ *  - Bypass RLS via `createAdminClient` (service_role) — la RLS publique exige
+ *    désormais `verification_status='verified'` ce qui exclurait les fiches
+ *    DHUP unclaimed pourtant légitimement publiques.
+ *  - Schéma canonique unifié : `department_code` (alias `dept_code`) +
+ *    `city_slug`. Les anciens `slug_dept`/`slug_city` n'existent plus comme
+ *    colonnes canoniques (legacy).
  *
- * Plan Phase 2 :
- *  - bascule sur un `generateStaticParams` + ISR par dept (94 depts FR)
- *    pour répartir la charge de génération et améliorer le `lastmod` granulaire
- *  - injection `<image:image>` Google Image Sitemap pour les photos profil
+ * Limite : 50 000 URLs/fichier. Au-delà → pagination (Phase 2).
  */
-
-import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 3600
@@ -26,35 +25,38 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kovas.fr'
 
 interface DiagnosticianRow {
   slug: string | null
-  slug_city: string | null
-  slug_dept: string | null
+  city_slug: string | null
+  department_code: string | null
+  dept_code: string | null
   updated_at: string | null
 }
 
 export async function GET(): Promise<Response> {
-  const supabase = await createClient()
+  // Admin client (service_role) — sitemap doit refléter toutes les fiches
+  // publiques (is_published=true) sans être bridé par la RLS verified-only.
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const supabase = createAdminClient()
 
-  // Type-cast `unknown` pour échapper aux types Database (table non encore
-  // typée dans @kovas/database/types — cf. Phase B migrations annuaire).
+  // Type-cast pour échapper aux types Database (régen pending).
   // biome-ignore lint/suspicious/noExplicitAny: shape table non typée Phase 1.
   const { data, error } = await (supabase as any)
     .from('diagnosticians')
-    .select('slug, slug_city, slug_dept, updated_at')
+    .select('slug, city_slug, department_code, dept_code, updated_at')
     .eq('is_published', true)
     .eq('withdrawal_requested', false)
     .order('updated_at', { ascending: false })
     .limit(50000)
 
-  // Table absente ou RLS bloqué → urlset vide accepté par les crawlers.
+  // Table absente ou query qui échoue → urlset vide accepté par les crawlers.
   const rows: DiagnosticianRow[] = error || !data ? [] : (data as DiagnosticianRow[])
 
   const urls = rows
-    .filter(
-      (r): r is { slug: string; slug_city: string; slug_dept: string; updated_at: string | null } =>
-        r.slug !== null && r.slug_city !== null && r.slug_dept !== null,
-    )
     .map((r) => {
-      const loc = `${BASE_URL}/trouver-un-diagnostiqueur/${r.slug_dept}/${r.slug_city}/${r.slug}`
+      const dept = r.department_code ?? r.dept_code
+      const city = r.city_slug
+      const slug = r.slug
+      if (!dept || !city || !slug) return null
+      const loc = `${BASE_URL}/trouver-un-diagnostiqueur/${dept}/${city}/${slug}`
       const lastmod =
         r.updated_at !== null ? new Date(r.updated_at).toISOString() : new Date().toISOString()
       return [
@@ -66,6 +68,7 @@ export async function GET(): Promise<Response> {
         '  </url>',
       ].join('\n')
     })
+    .filter((u): u is string => u !== null)
     .join('\n')
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

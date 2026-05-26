@@ -1,3 +1,4 @@
+import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import type { MetadataRoute } from 'next'
 
@@ -227,6 +228,20 @@ export async function buildConseilsSitemap(): Promise<MetadataRoute.Sitemap> {
 }
 
 /**
+ * Récupère un client Supabase admin (service_role) pour les builders sitemap.
+ * Bypass RLS — nécessaire car la policy `diag_public_read_verified_only`
+ * filtrerait les fiches DHUP unclaimed unverified pourtant légitimement
+ * publiques côté annuaire.
+ *
+ * Le sitemap est généré côté server (jamais bundlé côté client), l'usage du
+ * service_role est légitime ici.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: typage loose post Phase B/C (Database types pas régénérés)
+function getAdminSeoClient(): any {
+  return createAdminClient()
+}
+
+/**
  * Calcule le nombre de sub-sitemaps annuaire nécessaires en fonction
  * du volume actuel de diagnostiqueurs publiés.
  *
@@ -234,7 +249,7 @@ export async function buildConseilsSitemap(): Promise<MetadataRoute.Sitemap> {
  * pour signaler que la chaîne sitemap annuaire est en place.
  */
 export async function generateAnnuaireSitemapIds(): Promise<{ id: string }[]> {
-  const supabase = await getSeoClient()
+  const supabase = getAdminSeoClient()
   const { count, error } = await supabase
     .from('diagnosticians')
     .select('id', { count: 'exact', head: true })
@@ -257,15 +272,20 @@ export async function generateAnnuaireSitemapIds(): Promise<{ id: string }[]> {
  * Pour éviter les doublons, les pages ville et département sont uniquement
  * insérées dans la page d'index 0. Les diagnostiqueurs individuels sont
  * répartis sur toutes les pages.
+ *
+ * Schéma canonique unifié : URLs construites depuis `department_code` (alias
+ * `dept_code` legacy) + `city_slug` + `slug`. Les colonnes `slug_dept` /
+ * `slug_city` legacy ne sont plus utilisées (cf. migration 20260524180000
+ * qui consolide le schéma).
  */
 export async function buildAnnuaireSitemapPage(pageIndex: number): Promise<MetadataRoute.Sitemap> {
-  const supabase = await getSeoClient()
+  const supabase = getAdminSeoClient()
   const from = pageIndex * ANNUAIRE_PAGE_SIZE
   const to = (pageIndex + 1) * ANNUAIRE_PAGE_SIZE - 1
 
   const { data, error } = await supabase
     .from('diagnosticians')
-    .select('slug, slug_city, slug_dept, updated_at')
+    .select('slug, city_slug, department_code, dept_code, updated_at')
     .eq('is_published', true)
     .eq('withdrawal_requested', false)
     .order('id')
@@ -278,8 +298,9 @@ export async function buildAnnuaireSitemapPage(pageIndex: number): Promise<Metad
 
   const diagnosticians = (data ?? []) as Array<{
     slug: string | null
-    slug_city: string | null
-    slug_dept: string | null
+    city_slug: string | null
+    department_code: string | null
+    dept_code: string | null
     updated_at: string | null
   }>
 
@@ -287,11 +308,12 @@ export async function buildAnnuaireSitemapPage(pageIndex: number): Promise<Metad
 
   // Pages individuelles diagnostiqueurs
   for (const diag of diagnosticians) {
-    if (diag.slug === null || diag.slug_city === null || diag.slug_dept === null) {
+    const dept = diag.department_code ?? diag.dept_code
+    if (diag.slug === null || diag.city_slug === null || !dept) {
       continue
     }
     urls.push({
-      url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${diag.slug_dept}/${diag.slug_city}/${diag.slug}`,
+      url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${dept}/${diag.city_slug}/${diag.slug}`,
       lastModified: diag.updated_at !== null ? new Date(diag.updated_at) : new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
@@ -305,13 +327,14 @@ export async function buildAnnuaireSitemapPage(pageIndex: number): Promise<Metad
     const now = new Date()
 
     for (const diag of diagnosticians) {
-      if (diag.slug_dept === null) continue
+      const dept = diag.department_code ?? diag.dept_code
+      if (!dept) continue
 
       // Page département
-      if (!deptKeys.has(diag.slug_dept)) {
-        deptKeys.add(diag.slug_dept)
+      if (!deptKeys.has(dept)) {
+        deptKeys.add(dept)
         urls.push({
-          url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${diag.slug_dept}`,
+          url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${dept}`,
           lastModified: now,
           changeFrequency: 'weekly',
           priority: 0.8,
@@ -319,12 +342,12 @@ export async function buildAnnuaireSitemapPage(pageIndex: number): Promise<Metad
       }
 
       // Page ville
-      if (diag.slug_city !== null) {
-        const cityKey = `${diag.slug_dept}/${diag.slug_city}`
+      if (diag.city_slug !== null) {
+        const cityKey = `${dept}/${diag.city_slug}`
         if (!cityKeys.has(cityKey)) {
           cityKeys.add(cityKey)
           urls.push({
-            url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${diag.slug_dept}/${diag.slug_city}`,
+            url: `${KOVAS_BASE_URL}/trouver-un-diagnostiqueur/${dept}/${diag.city_slug}`,
             lastModified: now,
             changeFrequency: 'weekly',
             priority: 0.7,
