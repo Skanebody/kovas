@@ -1,5 +1,11 @@
-// Java microservice Jackcess pour génération .mdb Jet 4.0
-// Stub — implémentation Sprint MVP J11-J12
+// KOVAS — Microservice Java Jackcess pour génération .mdb Jet 4.0 (format Liciel ZIP V4).
+//
+// Stateless Spring Boot 3 service. Consume JSON pivot validated by
+// apps/web/src/lib/liciel/zip-v4-schema.ts (Zod), produces .mdb bytes.
+//
+// Deploy: Railway (Dockerfile build). Local: ./gradlew bootRun.
+// Tests:  ./gradlew test
+// Build:  ./gradlew bootJar
 
 plugins {
     id 'java'
@@ -8,7 +14,8 @@ plugins {
 }
 
 group = 'fr.kovas'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0'
+description = 'KOVAS MDB writer — JSON pivot → .mdb Jet 4.0 (Liciel ZIP V4)'
 
 java {
     toolchain {
@@ -21,13 +28,35 @@ repositories {
 }
 
 dependencies {
+    // Web layer
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'com.healthmarketscience.jackcess:jackcess:4.0.10'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // JSON pivot ↔ POJO
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // Jackcess writer (.mdb Jet 4.0 — V2003 file format)
+    implementation 'io.github.spannm:jackcess:4.0.10'
+
     implementation 'org.slf4j:slf4j-api'
 
+    // Tests
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
+}
+
+springBoot {
+    buildInfo()
+}
+
+bootJar {
+    archiveFileName = 'app.jar'
 }

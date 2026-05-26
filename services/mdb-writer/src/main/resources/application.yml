@@ -1,0 +1,44 @@
+# KOVAS mdb-writer — Spring Boot config
+#
+# API key is loaded from env var KOVAS_MDB_WRITER_API_KEY (Railway secret).
+# In dev: export KOVAS_MDB_WRITER_API_KEY=dev-only-key-not-for-prod
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/x-msaccess,application/octet-stream
+
+spring:
+  application:
+    name: kovas-mdb-writer
+  mvc:
+    throw-exception-if-no-handler-found: true
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+      base-path: /
+      path-mapping:
+        health: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+kovas:
+  api-key: ${KOVAS_MDB_WRITER_API_KEY:}
+  max-payload-bytes: ${KOVAS_MDB_WRITER_MAX_BYTES:26214400} # 25MB safety cap
+
+logging:
+  level:
+    root: INFO
+    fr.kovas.mdbwriter: INFO

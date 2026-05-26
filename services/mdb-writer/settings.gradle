@@ -1,0 +1,4 @@
+// KOVAS mdb-writer microservice — Gradle settings
+// Service stateless Spring Boot 3 + Jackcess pour génération .mdb Jet 4.0 Liciel.
+
+rootProject.name = 'kovas-mdb-writer'
