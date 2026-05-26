@@ -144,14 +144,44 @@ export default async function MissionTchatPage({
     .order('position', { ascending: true })
 
   // Charge l'historique conversation pour reprise au refresh.
+  // Fusionne 2 sources (cf. audit P0-4 mode mission) :
+  //   - mission_chat_messages : messages user/assistant en mode Conversation IA
+  //   - mission_text_notes    : notes silencieuses du mode Capture (sinon
+  //     elles disparaissaient au refresh)
   type ChatRow = { id: string; role: string; content: string; created_at: string }
-  const { data: chatRaw } = await supabase
-    .from('mission_chat_messages' as never)
-    .select('id, role, content, created_at')
-    .eq('session_id', session.id)
-    .order('created_at', { ascending: true })
-    .limit(60)
-  const chatHistory: ChatRow[] = Array.isArray(chatRaw) ? (chatRaw as unknown as ChatRow[]) : []
+  const [chatRes, notesRes] = await Promise.all([
+    supabase
+      .from('mission_chat_messages' as never)
+      .select('id, role, content, created_at')
+      .eq('session_id', session.id)
+      .order('created_at', { ascending: true })
+      .limit(60),
+    supabase
+      .from('mission_text_notes' as never)
+      .select('id, text, created_at')
+      .eq('dossier_id', id)
+      .order('created_at', { ascending: true })
+      .limit(120),
+  ])
+  const chatRows: ChatRow[] = Array.isArray(chatRes.data)
+    ? (chatRes.data as unknown as ChatRow[])
+    : []
+  const textNoteRows: Array<{ id: string; text: string; created_at: string }> = Array.isArray(
+    notesRes.data,
+  )
+    ? (notesRes.data as unknown as Array<{ id: string; text: string; created_at: string }>)
+    : []
+  // Les notes capture-mode sont mappées en rôle 'user' (ce sont des inputs user
+  // silencieux, pas des réponses IA). On fusionne et tri par created_at.
+  const chatHistory: ChatRow[] = [
+    ...chatRows,
+    ...textNoteRows.map((n) => ({
+      id: `note-${n.id}`,
+      role: 'user' as const,
+      content: n.text,
+      created_at: n.created_at,
+    })),
+  ].sort((a, b) => a.created_at.localeCompare(b.created_at))
 
   // Charge nb photos + nb notes vocales pour la footer "stats".
   const [{ count: photosCount }, { count: voiceCount }] = await Promise.all([

@@ -82,14 +82,18 @@ export async function createRoomAction(
 // uploadCapturePhotoAction — INSERT row photos après upload Storage
 // ============================================
 
+// Limites hard pour empêcher des inserts pathologiques (cf. audit P2-8).
+const MAX_PHOTO_SIZE_BYTES = 20_000_000 // 20 MB — au-delà = soit malicieux soit caméra HDR > raisonnable
+const MAX_PHOTO_PIXELS = 20_000 // 20 000 px max par côté
+
 const uploadCapturePhotoSchema = z.object({
-  storagePath: z.string().min(5),
+  storagePath: z.string().min(5).max(512),
   roomId: z.string().uuid().nullable(),
   roomName: z.string().trim().min(1).max(60).nullable(),
   capturedAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
-  width: z.coerce.number().int().min(1),
-  height: z.coerce.number().int().min(1),
-  sizeBytes: z.coerce.number().int().min(1),
+  width: z.coerce.number().int().min(1).max(MAX_PHOTO_PIXELS),
+  height: z.coerce.number().int().min(1).max(MAX_PHOTO_PIXELS),
+  sizeBytes: z.coerce.number().int().min(1).max(MAX_PHOTO_SIZE_BYTES),
   perceptualHash: z.string().regex(/^[0-9a-f]{16}$/i, 'perceptual_hash must be 16 hex chars'),
   isBlurry: z.boolean(),
   gpsLat: z.number().optional(),
@@ -124,6 +128,14 @@ export async function uploadCapturePhotoAction(
   }
 
   const { supabase, orgId, user } = await getCurrentUser()
+
+  // 0. SÉCURITÉ — Le storagePath DOIT commencer par `${orgId}/...` car la RLS
+  // Storage du bucket mission-photos applique le path tenant. Sans cette
+  // validation, un attaquant authentifié pourrait INSERT une row `photos`
+  // pointant vers le storage d'une autre org (cf. audit P0-5 mode mission).
+  if (!parsed.data.storagePath.startsWith(`${orgId}/`)) {
+    return { error: "Storage path interdit : doit commencer par votre identifiant d'organisation" }
+  }
 
   // 1. Vérifier que le dossier appartient à l'org
   const { data: dossier, error: dossierErr } = await supabase
@@ -276,6 +288,21 @@ export async function createTextNoteAction(
     return { error: 'Dossier introuvable ou accès refusé' }
   }
 
+  // SÉCURITÉ — Si attached_photo_id, vérifier qu'il appartient au même dossier
+  // et à la même org (cf. P1-6).
+  if (parsed.data.attachedPhotoId) {
+    const { data: photo } = await supabase
+      .from('photos')
+      .select('id')
+      .eq('id', parsed.data.attachedPhotoId)
+      .eq('dossier_id', parsed.data.dossierId)
+      .eq('organization_id', orgId)
+      .maybeSingle()
+    if (!photo) {
+      return { error: 'Photo attachée introuvable ou hors dossier' }
+    }
+  }
+
   // La table mission_text_notes n'est pas encore reflétée dans le type généré
   // Supabase (migration capture_first récente). On cast `as never` localement.
   const insertPayload = {
@@ -332,6 +359,11 @@ export async function createCaptureVoiceNoteAction(
   }
   const { supabase, orgId, user } = await getCurrentUser()
 
+  // SÉCURITÉ — Même validation préfix que uploadCapturePhotoAction (cf. P0-6).
+  if (!parsed.data.storagePath.startsWith(`${orgId}/`)) {
+    return { error: "Storage path interdit : doit commencer par votre identifiant d'organisation" }
+  }
+
   // Vérifier accès dossier
   const { data: dossier, error: dossierErr } = await supabase
     .from('dossiers')
@@ -343,6 +375,21 @@ export async function createCaptureVoiceNoteAction(
 
   if (dossierErr || !dossier) {
     return { error: 'Dossier introuvable ou accès refusé' }
+  }
+
+  // SÉCURITÉ — Si attached_photo_id, vérifier qu'il appartient au même dossier
+  // et à la même org (cf. P1-6).
+  if (parsed.data.attachedPhotoId) {
+    const { data: photo } = await supabase
+      .from('photos')
+      .select('id')
+      .eq('id', parsed.data.attachedPhotoId)
+      .eq('dossier_id', parsed.data.dossierId)
+      .eq('organization_id', orgId)
+      .maybeSingle()
+    if (!photo) {
+      return { error: 'Photo attachée introuvable ou hors dossier' }
+    }
   }
 
   // attached_photo_id et transcription_status sont ajoutés par la migration

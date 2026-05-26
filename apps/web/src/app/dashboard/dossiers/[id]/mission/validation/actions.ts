@@ -23,6 +23,12 @@ import { z } from 'zod'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
+// Secret d'invocation Edge Function — DOIT être différent de SERVICE_ROLE_KEY.
+// L'Edge Function `process-mission-payload` vérifie ce secret en début de handler.
+// Fallback dev : on tombe sur SERVICE_ROLE_KEY pour permettre les tests locaux
+// mais en prod le secret distinct DOIT être set (cf. audit P0-1 mode mission).
+const EDGE_INVOKE_SECRET =
+  process.env.MISSION_PAYLOAD_INVOKE_SECRET ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 
 // Client admin non typé — utilisé pour accéder aux nouvelles tables non encore
 // présentes dans `@kovas/database/types` (régen DEPLOY-4).
@@ -132,11 +138,16 @@ export async function triggerProcessMissionPayloadAction(
     .join('\n')
 
   const url = `${SUPABASE_URL}/functions/v1/process-mission-payload`
+  // SÉCURITÉ — On utilise MISSION_PAYLOAD_INVOKE_SECRET et NON le service_role_key.
+  // L'Edge Function vérifie ce header dédié en début de handler. Si le secret est
+  // accidentellement loggé, l'exposition est limitée à l'invocation de cette
+  // Edge Function (et non à l'admin total Postgres). Cf. audit P0-1 mode mission.
   void fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+      Authorization: `Bearer ${EDGE_INVOKE_SECRET}`,
+      'X-Invoke-Source': 'mission-payload-trigger',
     },
     body: JSON.stringify({
       mission_session_id: missionSessionId,
@@ -175,9 +186,12 @@ export async function updateRoom3CLDataAction(
   const parsed = updateRoom3CLSchema.safeParse({ rowId, patch })
   if (!parsed.success) return { error: 'Input invalide' }
 
-  const { user } = await getCurrentUser()
+  const { user, orgId } = await getCurrentUser()
   const admin = adminClient()
 
+  // SÉCURITÉ — Charger la row + joindre mission_sessions pour vérifier ownership
+  // via organization_id (cf. audit P0-2). Sans ce check, l'adminClient bypass RLS
+  // permettrait à n'importe quel user authentifié de modifier n'importe quelle row 3CL.
   const tbl = admin.from('mission_rooms_3cl_data') as unknown as {
     select: (q: string) => {
       eq: (
@@ -185,26 +199,47 @@ export async function updateRoom3CLDataAction(
         v: string,
       ) => {
         single: () => Promise<{
-          data: { id: string; data_3cl: Record<string, unknown>; mission_session_id: string } | null
+          data: {
+            id: string
+            data_3cl: Record<string, unknown>
+            mission_session_id: string
+            mission_sessions: { organization_id: string } | { organization_id: string }[] | null
+          } | null
         }>
       }
     }
     update: (p: Record<string, unknown>) => {
-      eq: (k: string, v: string) => Promise<{ error: { message: string } | null }>
+      eq: (
+        k: string,
+        v: string,
+      ) => {
+        eq: (k: string, v: string) => Promise<{ error: { message: string } | null }>
+      }
     }
   }
 
   const { data: existing } = await tbl
-    .select('id, data_3cl, mission_session_id')
+    .select('id, data_3cl, mission_session_id, mission_sessions!inner(organization_id)')
     .eq('id', rowId)
     .single()
   if (!existing) return { error: 'Pièce introuvable' }
+
+  const session = Array.isArray(existing.mission_sessions)
+    ? existing.mission_sessions[0]
+    : existing.mission_sessions
+  if (!session || session.organization_id !== orgId) {
+    // On retourne le même message que "introuvable" pour ne pas leaker l'existence
+    // de rows d'autres orgs (defense-in-depth : éviter le timing oracle).
+    return { error: 'Pièce introuvable' }
+  }
 
   const mergedData = {
     ...(existing.data_3cl ?? {}),
     ...patch,
   }
 
+  // L'UPDATE inclut un second .eq sur mission_session_id pour refuser silencieusement
+  // toute race condition où la row aurait changé d'org entre le SELECT et l'UPDATE.
   const { error } = await tbl
     .update({
       data_3cl: mergedData,
@@ -214,6 +249,7 @@ export async function updateRoom3CLDataAction(
       validated_by: user.id,
     })
     .eq('id', rowId)
+    .eq('mission_session_id', existing.mission_session_id)
 
   if (error) return { error: error.message }
 
@@ -321,8 +357,16 @@ export async function exportToLicielAction(
       contentType: 'application/xml',
     })
 
+  // ATOMICITÉ (cf. audit P0-4 mode mission) : si l'upload Storage échoue, on
+  // ARRÊTE IMMÉDIATEMENT — sinon on insère une row dossier_exports qui pointe
+  // vers un fichier inexistant et l'utilisateur télécharge 404. Le bucket doit
+  // exister en prod (cf. migration 20260518110000_storage_bucket_photos.sql et
+  // l'analogue dossier-exports).
   if (uploadErr) {
-    console.warn('storage upload failed (bucket might not exist)', uploadErr.message)
+    console.error('[exportToLicielAction] storage upload failed', uploadErr.message)
+    return {
+      error: `Génération du fichier XML impossible : ${uploadErr.message}. Vérifiez que le bucket dossier-exports existe et réessayez.`,
+    }
   }
 
   const expTable = admin.from('dossier_exports') as unknown as {
@@ -348,6 +392,11 @@ export async function exportToLicielAction(
     .single()
 
   if (exportErr || !exportRow) {
+    // Rollback best-effort : on supprime le fichier orphelin si l'INSERT a échoué.
+    void admin.storage
+      .from('dossier-exports')
+      .remove([storagePath])
+      .catch(() => undefined)
     return { error: exportErr?.message ?? 'Insert dossier_exports échoué' }
   }
 

@@ -80,11 +80,12 @@ import {
   Mic,
   MoreVertical,
   Pause,
+  Play,
   Sparkles,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { type CaptureMode, CaptureModeToggle } from './CaptureModeToggle'
 import {
   type FinalAnalysisGap,
@@ -487,7 +488,9 @@ export function MissionTchatInterface({
   const [input, setInput] = useState<string>('')
   const [isListening, setIsListening] = useState<boolean>(false)
   const [isOnline, setIsOnline] = useState<boolean>(true)
-  const [isPaused, setIsPaused] = useState<boolean>(false)
+  // Initialisation depuis l'état serveur — si la session est `paused_at`, on
+  // démarre en pause au refresh (cf. audit P0-2 mode mission).
+  const [isPaused, setIsPaused] = useState<boolean>(() => _sessionPausedAt != null)
   const [stats, setStats] = useState(initialStats)
   const [isStreaming, setIsStreaming] = useState<boolean>(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
@@ -849,7 +852,10 @@ export function MissionTchatInterface({
   }, [])
 
   useEffect(() => {
-    // Auto-scroll uniquement si proche du bas
+    // Auto-scroll uniquement si proche du bas — déclenché à CHAQUE nouveau message
+    // ou token streamé. Sans `messages.length` dans les deps, le scrollToBottom
+    // étant stable (useCallback []), l'effet ne se ré-exécutait JAMAIS et la vue
+    // restait figée pendant le streaming Claude (cf. audit P0-1 mode mission).
     const container = messagesContainerRef.current
     if (!container) return
     const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
@@ -858,7 +864,7 @@ export function MissionTchatInterface({
     } else {
       setShowScrollToBottom(true)
     }
-  }, [scrollToBottom])
+  }, [scrollToBottom, messages])
 
   useEffect(() => {
     const container = messagesContainerRef.current
@@ -872,13 +878,16 @@ export function MissionTchatInterface({
   }, [])
 
   // ----- Auto-resize textarea -----
+  // Doit dépendre de `input` pour se redimensionner sur pré-remplissage (gap analyse,
+  // pendingDraft) ainsi que sur frappe. Sans cette dep, l'effet ne tournait qu'au
+  // montage et le textarea restait à 40px pour les inputs setés via setInput().
   useEffect(() => {
     const ta = textareaRef.current
     if (!ta) return
     ta.style.height = 'auto'
     const newHeight = Math.min(ta.scrollHeight, 180) // max 180px ~ 6 lignes
     ta.style.height = `${newHeight}px`
-  }, [])
+  }, [input])
 
   // ----- Speech Recognition + AudioRecorder + VU-mètre anti-bruit -----
   // FIX-WA : le micro stream est ouvert UNE SEULE FOIS via l'AudioRecorder, et
@@ -980,8 +989,10 @@ export function MissionTchatInterface({
   const commitVoiceMessage = useCallback(async () => {
     if (recognitionRef.current) recognitionRef.current.stop()
 
+    // ATTENTION (cf. audit P0-6) : on NE doit PAS null la ref avant l'await stop()
+    // sinon un re-tap micro pendant le settle peut créer un 2e recorder + getUserMedia
+    // simultané (Chrome reject) + corruption blob. On nullifie SEULEMENT après stop().
     const recorder = audioRecorderRef.current
-    audioRecorderRef.current = null
     const webSpeechTranscript = (voiceTranscriptRef.current || input).trim()
     voiceTranscriptRef.current = ''
 
@@ -1000,10 +1011,13 @@ export function MissionTchatInterface({
     try {
       rec = await recorder.stop()
     } catch {
+      audioRecorderRef.current = null
       // Recording cassé — on garde quand même le transcript text Web Speech si dispo
       if (webSpeechTranscript) void sendMessageRef.current?.(webSpeechTranscript)
       return
     }
+    // Maintenant que stop() a résolu, on libère le slot pour autoriser un nouveau record
+    audioRecorderRef.current = null
 
     // ── 1) Bulle USER optimiste avec objectURL local + spinner ─────────────
     const messageId = `voice-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -1476,7 +1490,11 @@ export function MissionTchatInterface({
   )
 
   // Sync forward-ref (utilisé par commitVoiceMessage déclaré plus haut).
-  useEffect(() => {
+  // useLayoutEffect garantit que la ref est synchronisée AVANT le paint suivant —
+  // sinon sur un voice commit arrivant juste après un sendMessage en cours, le
+  // ref pointait sur l'ancienne closure et l'appel était silencieusement ignoré
+  // (cf. audit P0-7 mode mission).
+  useLayoutEffect(() => {
     sendMessageRef.current = sendMessage
   }, [sendMessage])
 
@@ -1484,10 +1502,17 @@ export function MissionTchatInterface({
   const handleSubmit = useCallback(() => {
     const text = input.trim()
     if (!text) return
-    // Check incoherences metier (surface > 1000m2, annee < 1800, etc.) AVANT
-    // l'envoi serveur. Si OK -> envoi normal. Si NOK -> banner + attente choix.
-    // Le check est leger (regex sur le texte) et ne coute rien sur les requetes
-    // sans donnees structurees.
+    // En mode Capture, le message n'est pas envoyé à Claude — c'est une note
+    // silencieuse de terrain. Le cross-check coherence ne doit donc PAS bloquer
+    // la prise de note (cf. audit P0-3 mode mission : "capture silencieuse · tes
+    // messages restent là").
+    if (captureMode === 'capture') {
+      void sendMessage(text)
+      return
+    }
+    // Mode Conversation : check incohérences métier (surface > 1000m², année <
+    // 1800, etc.) AVANT l'envoi. Si OK → envoi normal. Si NOK → banner + attente
+    // choix utilisateur.
     const issues = checkTranscriptCoherence(text)
     if (issues.length > 0) {
       setPendingCoherenceIssues(issues)
@@ -1495,7 +1520,7 @@ export function MissionTchatInterface({
       return
     }
     void sendMessage(text)
-  }, [input, sendMessage])
+  }, [input, sendMessage, captureMode])
 
   // ----- Handlers banner coherence -----
   const handleCoherenceIgnore = useCallback(() => {
@@ -1565,13 +1590,37 @@ export function MissionTchatInterface({
     [isOnline],
   )
 
-  // ----- Pause -----
+  // ----- Pause / Reprendre -----
+  // Toggle bidirectionnel. Sans le handleResume, une session pausée restait
+  // figée à vie (cf. audit P0-2 mode mission). L'état optimiste local est
+  // appliqué immédiatement ; un rollback est fait en cas d'échec serveur.
   const handlePause = useCallback(async () => {
     setIsPaused(true)
     try {
-      await fetch(`/api/dossiers/${dossierId}/actions/pause_mission`, { method: 'POST' })
+      const res = await fetch(`/api/dossiers/${dossierId}/actions/pause_mission`, {
+        method: 'POST',
+      })
+      if (!res.ok) {
+        setIsPaused(false)
+        setErrorMsg('Impossible de mettre la mission en pause.')
+      }
     } catch {
-      // Offline — sera sync plus tard
+      // Offline — on garde l'état optimiste, sera sync plus tard
+    }
+  }, [dossierId])
+
+  const handleResume = useCallback(async () => {
+    setIsPaused(false)
+    try {
+      const res = await fetch(`/api/dossiers/${dossierId}/actions/resume_mission`, {
+        method: 'POST',
+      })
+      if (!res.ok) {
+        setIsPaused(true)
+        setErrorMsg('Impossible de reprendre la mission.')
+      }
+    } catch {
+      // Offline — on garde l'état optimiste
     }
   }, [dossierId])
 
@@ -1788,12 +1837,12 @@ export function MissionTchatInterface({
             type="button"
             variant="ghost"
             size="icon"
-            onClick={handlePause}
-            disabled={isPaused}
-            aria-label="Mettre en pause"
+            onClick={isPaused ? handleResume : handlePause}
+            aria-label={isPaused ? 'Reprendre la mission' : 'Mettre en pause'}
+            title={isPaused ? 'Reprendre la mission' : 'Mettre en pause'}
             className="size-9"
           >
-            <Pause className="size-4" />
+            {isPaused ? <Play className="size-4" /> : <Pause className="size-4" />}
           </Button>
           <Button
             type="button"
