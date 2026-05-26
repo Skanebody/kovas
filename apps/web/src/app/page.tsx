@@ -74,9 +74,9 @@ import {
 import Link from 'next/link'
 
 export const metadata = buildMetadata({
-  title: 'Logiciel diagnostic immobilier compagnon Liciel | KOVAS',
+  title: 'La pré-vérification ADEME que Liciel ne pourra jamais construire | KOVAS',
   description:
-    'Logiciel SaaS pour diagnostiqueurs immobiliers, compagnon Liciel, ORIS, OBBC. Saisie vocale terrain, photos géolocalisées, exports ZIP. 1h30 gagnée par DPE. Essai 30 jours.',
+    'Avant chaque envoi ADEME, KOVAS croise 6 sources publiques pour détecter les incohérences invisibles à l’œil nu. 35 min gagnées par mission. Compagnon Liciel, ORIS, OBBC. Essai 30 jours.',
   path: '/',
   // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
@@ -94,16 +94,18 @@ function SectionHero(): React.ReactElement {
         </p>
         <h1
           className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
-          style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
+          style={{ fontSize: 'clamp(36px, 6vw, 88px)' }}
         >
-          Le <span className="font-serif italic font-normal">copilote</span> des diagnostiqueurs.
+          La <span className="font-serif italic font-normal">pré-vérification</span>{' '}
+          <GlossaryTerm term="ademe">ADEME</GlossaryTerm> que{' '}
+          <GlossaryTerm term="liciel">Liciel</GlossaryTerm> ne pourra jamais construire.
         </h1>
         <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
-          Compatible <GlossaryTerm term="liciel">Liciel</GlossaryTerm>,{' '}
-          <GlossaryTerm term="oris">ORIS</GlossaryTerm>,{' '}
-          <GlossaryTerm term="obbc">OBBC</GlossaryTerm>. Tu captures sur le terrain, KOVAS vérifie
-          en temps réel, tu exportes vers ton logiciel principal. 1 h 30 gagnée par mission{' '}
-          <GlossaryTerm term="dpe">DPE</GlossaryTerm>.
+          35 minutes gagnées par mission. Zéro mauvaise surprise au contrôle ADEME. KOVAS croise 6
+          sources publiques officielles avant chaque envoi pour détecter les incohérences invisibles
+          à l’œil nu. Compagnon Liciel, <GlossaryTerm term="oris">ORIS</GlossaryTerm>,{' '}
+          <GlossaryTerm term="obbc">OBBC</GlossaryTerm> — Liciel reste ton moteur certifié, KOVAS
+          s’installe en couche au-dessus.
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <Button asChild variant="accent" size="lg">
