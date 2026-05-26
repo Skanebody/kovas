@@ -4,9 +4,9 @@ import { AppMobileNav, AppSidebar } from '@/components/app-sidebar'
 import { TrialBannerLoader } from '@/components/billing/TrialBannerLoader'
 import { CommandPalette } from '@/components/command-palette'
 import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
+import { MissionFabMobile } from '@/components/mission/MissionFabMobile'
 import { RegulatoryNotificationsBadge } from '@/components/regulatory/RegulatoryNotificationsBadge'
 import { CommandK } from '@/components/shared/CommandK'
-import { MissionFabMobile } from '@/components/mission/MissionFabMobile'
 import { MobileQuickActionsFab } from '@/components/ui/mobile-quick-actions'
 import { OfflineBanner } from '@/components/ui/offline-banner'
 import { SyncIndicator } from '@/components/ui/sync-indicator'
@@ -76,9 +76,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0">
         <OfflineBanner />
         <TrialBannerLoader />
-        {/* Header app v4 — sans logo (déjà dans sidebar 240px), juste search + usage + user */}
+        {/* Header app V5 sobre — paper opaque + bordure fine 8%, sans glass/blur (Lot B78) */}
         <header className="md:sticky top-0 z-30 px-4 md:px-6 pt-4 pb-2 bg-transparent">
-          <div className="glass-opaque rounded-pill px-3 py-2 flex items-center justify-between gap-3">
+          <div className="bg-paper rounded-2xl border border-[#0F1419]/[0.08] px-3 py-2 flex items-center justify-between gap-3">
             {/* Mobile only : logo + nav tabs */}
             <Link
               href="/dashboard/dashboard"
@@ -86,7 +86,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             >
               <div
                 aria-hidden
-                className="size-8 rounded-md bg-navy shadow-accent flex items-center justify-center text-white font-bold text-xs"
+                className="size-8 rounded-md bg-[#0F1419] flex items-center justify-center text-white font-bold text-xs"
               >
                 K
               </div>

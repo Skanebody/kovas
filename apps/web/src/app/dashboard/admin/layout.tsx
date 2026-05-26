@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-rule/60 bg-amber/5 px-4 py-2 text-[11px] font-mono uppercase tracking-[0.1em] text-ink-mute">
+      <div className="rounded-lg border border-[#0F1419]/[0.08] bg-paper px-4 py-2 text-[11px] font-mono uppercase tracking-[0.1em] text-[#0F1419]/72">
         Zone admin · Accès restreint
       </div>
       {children}
