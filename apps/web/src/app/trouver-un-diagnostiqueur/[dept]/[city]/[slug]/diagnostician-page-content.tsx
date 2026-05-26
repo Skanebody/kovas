@@ -369,7 +369,7 @@ export function DiagnosticianPageContent({
                       city={cityLabel}
                     />
                   ) : (
-                    <div className="h-[320px] rounded-2xl border border-dashed border-black/15 flex items-center justify-center text-sm text-black/50">
+                    <div className="h-[240px] sm:h-[280px] md:h-[320px] rounded-2xl border border-dashed border-black/15 flex items-center justify-center text-sm text-black/50 px-4 text-center">
                       Coordonnées géographiques non renseignées
                     </div>
                   )}
@@ -613,10 +613,10 @@ function AvatarBlock({
 
 function SectionHeader({ number, title }: { number: string; title: string }) {
   return (
-    <div className="flex items-baseline gap-4">
+    <div className="flex items-baseline gap-3 sm:gap-4 flex-wrap sm:flex-nowrap">
       <span className="font-mono text-xs text-black/40 uppercase tracking-[0.12em]">{number}</span>
-      <div className="h-px flex-1 bg-black/8" aria-hidden />
-      <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[#0B1D33] shrink-0 ml-4">
+      <div className="hidden sm:block h-px flex-1 bg-black/8" aria-hidden />
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-[#0B1D33] sm:shrink-0 sm:ml-4 w-full sm:w-auto">
         {title}
       </h2>
     </div>

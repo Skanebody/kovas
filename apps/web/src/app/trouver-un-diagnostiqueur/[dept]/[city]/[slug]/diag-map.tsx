@@ -41,11 +41,10 @@ export function DiagMap({ lat, lng, radiusKm, name, city }: DiagMapProps) {
 
       // Dynamic import of Leaflet from CDN via script tag
       // (avoids adding leaflet as npm dep)
-      // biome-ignore lint/suspicious/noExplicitAny: Leaflet global injected dynamically
       const L = await loadLeaflet()
       if (cancelled || !containerRef.current) return
 
-      // biome-ignore lint/suspicious/noExplicitAny: Leaflet types not installed
+      // biome-ignore lint/suspicious/noExplicitAny: Leaflet types not installed (CDN dynamic load)
       const map: any = (L as any).map(containerRef.current, {
         center: [lat, lng],
         zoom: 10,
@@ -53,12 +52,14 @@ export function DiagMap({ lat, lng, radiusKm, name, city }: DiagMapProps) {
         attributionControl: true,
       })
       mapInstance = map
+      // biome-ignore lint/suspicious/noExplicitAny: Leaflet types not installed (CDN dynamic load)
       ;(L as any)
         .tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
           attribution: '© OpenStreetMap',
         })
         .addTo(map)
+      // biome-ignore lint/suspicious/noExplicitAny: Leaflet types not installed (CDN dynamic load)
       ;(L as any)
         .circle([lat, lng], {
           radius: radiusKm * 1000,
@@ -68,6 +69,7 @@ export function DiagMap({ lat, lng, radiusKm, name, city }: DiagMapProps) {
           fillOpacity: 0.08,
         })
         .addTo(map)
+      // biome-ignore lint/suspicious/noExplicitAny: Leaflet types not installed (CDN dynamic load)
       ;(L as any)
         .marker([lat, lng])
         .addTo(map)
@@ -95,7 +97,7 @@ export function DiagMap({ lat, lng, radiusKm, name, city }: DiagMapProps) {
   return (
     <div
       ref={containerRef}
-      className="h-[360px] w-full rounded-2xl border border-black/8 overflow-hidden bg-black/[0.03]"
+      className="h-[260px] sm:h-[320px] md:h-[360px] w-full rounded-2xl border border-black/8 overflow-hidden bg-black/[0.03]"
       aria-label={`Zone d'intervention : ${radiusKm} km autour de ${city}`}
     />
   )

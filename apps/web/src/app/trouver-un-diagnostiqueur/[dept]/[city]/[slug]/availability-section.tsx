@@ -35,12 +35,12 @@ export function AvailabilitySection({ signals, sectionNumber = '04' }: Availabil
 
   return (
     <div>
-      <div className="flex items-baseline gap-4">
+      <div className="flex items-baseline gap-3 sm:gap-4 flex-wrap sm:flex-nowrap">
         <span className="font-mono text-xs text-black/40 uppercase tracking-[0.12em]">
           {sectionNumber}
         </span>
-        <div className="h-px flex-1 bg-black/8" aria-hidden />
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[#0B1D33] shrink-0 ml-4">
+        <div className="hidden sm:block h-px flex-1 bg-black/8" aria-hidden />
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-[#0B1D33] sm:shrink-0 sm:ml-4 w-full sm:w-auto">
           Réactivité & vérification
         </h2>
       </div>

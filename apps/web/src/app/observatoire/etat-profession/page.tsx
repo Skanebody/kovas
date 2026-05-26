@@ -217,54 +217,56 @@ export default async function EtatProfessionPage() {
                 </p>
               </div>
               <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden">
-                <table className="w-full text-[13px]">
-                  <thead className="bg-[#F8F5EE] border-b border-[#0F1419]/[0.08]">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-                        Département
-                      </th>
-                      <th className="text-right px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-                        Total
-                      </th>
-                      <th className="text-right px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-                        Vérifiés
-                      </th>
-                      <th className="text-right px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-                        Revendiqués
-                      </th>
-                      <th className="text-right px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
-                        Activité moy.
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topDepts.map((d) => (
-                      <tr
-                        key={d.departmentCode}
-                        className="border-b border-[#0F1419]/[0.06] last:border-b-0"
-                      >
-                        <td className="px-4 py-3 text-[#0F1419]">
-                          <span className="font-mono text-[11px] text-[#0F1419]/55 mr-2">
-                            {d.departmentCode}
-                          </span>
-                          {DEPT_LABELS[d.departmentCode] ?? ''}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-[#0F1419]">
-                          {d.totalCount.toLocaleString('fr-FR')}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-[#0F1419]/72">
-                          {d.verifiedCount}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-[#0F1419]/72">
-                          {d.claimedCount}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-[#0F1419]/72">
-                          {d.avgActivityScore != null ? d.avgActivityScore.toFixed(2) : '—'}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[13px] min-w-[540px]">
+                    <thead className="bg-[#F8F5EE] border-b border-[#0F1419]/[0.08]">
+                      <tr>
+                        <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+                          Département
+                        </th>
+                        <th className="text-right px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+                          Total
+                        </th>
+                        <th className="text-right px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+                          Vérifiés
+                        </th>
+                        <th className="text-right px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+                          Revendiqués
+                        </th>
+                        <th className="text-right px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+                          Activité moy.
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {topDepts.map((d) => (
+                        <tr
+                          key={d.departmentCode}
+                          className="border-b border-[#0F1419]/[0.06] last:border-b-0"
+                        >
+                          <td className="px-4 py-3 text-[#0F1419]">
+                            <span className="font-mono text-[11px] text-[#0F1419]/55 mr-2">
+                              {d.departmentCode}
+                            </span>
+                            {DEPT_LABELS[d.departmentCode] ?? ''}
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono text-[#0F1419]">
+                            {d.totalCount.toLocaleString('fr-FR')}
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono text-[#0F1419]/72">
+                            {d.verifiedCount}
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono text-[#0F1419]/72">
+                            {d.claimedCount}
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono text-[#0F1419]/72">
+                            {d.avgActivityScore != null ? d.avgActivityScore.toFixed(2) : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </section>

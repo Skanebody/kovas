@@ -1021,8 +1021,8 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
               Trajectoire du prix médian d'un DPE résidentiel à {cityName} sur 5 ans. Données
               indexées sur l'inflation et la complexification 3CL-2021.
             </p>
-            <Card className="p-6">
-              <div className="grid grid-cols-6 gap-3 items-end h-48 mb-4">
+            <Card className="p-4 sm:p-6">
+              <div className="grid grid-cols-6 gap-1.5 sm:gap-3 items-end h-40 sm:h-48 mb-4">
                 {amandineContent.priceEvolution.map((p) => {
                   const maxPrice = Math.max(
                     ...amandineContent.priceEvolution.map((x) => x.priceEur),
@@ -1037,7 +1037,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
                     range > 0 ? 40 + Math.round(((p.priceEur - minPrice) / range) * 60) : 100
                   return (
                     <div key={p.year} className="flex flex-col items-center justify-end h-full">
-                      <span className="font-mono text-xs font-semibold text-ink mb-1.5 tabular-nums">
+                      <span className="font-mono text-[10px] sm:text-xs font-semibold text-ink mb-1 sm:mb-1.5 tabular-nums">
                         {p.priceEur}€
                       </span>
                       <div
@@ -1049,10 +1049,12 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
                   )
                 })}
               </div>
-              <div className="grid grid-cols-6 gap-3">
+              <div className="grid grid-cols-6 gap-1.5 sm:gap-3">
                 {amandineContent.priceEvolution.map((p) => (
                   <div key={`label-${p.year}`} className="text-center space-y-0.5">
-                    <p className="font-mono text-xs text-ink-mute tabular-nums">{p.year}</p>
+                    <p className="font-mono text-[10px] sm:text-xs text-ink-mute tabular-nums">
+                      {p.year}
+                    </p>
                     {p.variationPct !== null ? (
                       <p
                         className={`font-mono text-[11px] font-medium ${
@@ -1086,47 +1088,51 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
               Répartition observée des diagnostics commandés à {cityName} sur les 12 derniers mois.
             </p>
             <Card className="p-0 overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-cream-deep border-b border-rule">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-semibold text-ink">#</th>
-                    <th className="text-left px-4 py-3 font-semibold text-ink">Diagnostic</th>
-                    <th className="text-right px-4 py-3 font-semibold text-ink">Demande locale</th>
-                    <th className="text-right px-4 py-3 font-semibold text-ink">
-                      Tendance 12 mois
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {amandineContent.top5Diagnostics.map((d, idx) => (
-                    <tr
-                      key={d.type}
-                      className="border-b border-rule last:border-b-0 hover:bg-cream-deep/40"
-                    >
-                      <td className="px-4 py-3 text-ink-mute font-mono text-xs">
-                        {String(idx + 1).padStart(2, '0')}
-                      </td>
-                      <td className="px-4 py-3 text-ink font-medium">{d.label}</td>
-                      <td className="px-4 py-3 text-right font-mono text-ink">{d.demandPct}%</td>
-                      <td className="px-4 py-3 text-right">
-                        <span
-                          className={`inline-flex items-center gap-1 font-mono text-xs ${
-                            d.trendPct >= 0 ? 'text-accent-green' : 'text-accent-red'
-                          }`}
-                        >
-                          {d.trendPct >= 0 ? (
-                            <TrendingUp className="size-3" aria-hidden />
-                          ) : (
-                            <TrendingDown className="size-3" aria-hidden />
-                          )}
-                          {d.trendPct >= 0 ? '+' : ''}
-                          {d.trendPct}%
-                        </span>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[480px]">
+                  <thead className="bg-cream-deep border-b border-rule">
+                    <tr>
+                      <th className="text-left px-4 py-3 font-semibold text-ink">#</th>
+                      <th className="text-left px-4 py-3 font-semibold text-ink">Diagnostic</th>
+                      <th className="text-right px-4 py-3 font-semibold text-ink">
+                        Demande locale
+                      </th>
+                      <th className="text-right px-4 py-3 font-semibold text-ink">
+                        Tendance 12 mois
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {amandineContent.top5Diagnostics.map((d, idx) => (
+                      <tr
+                        key={d.type}
+                        className="border-b border-rule last:border-b-0 hover:bg-cream-deep/40"
+                      >
+                        <td className="px-4 py-3 text-ink-mute font-mono text-xs">
+                          {String(idx + 1).padStart(2, '0')}
+                        </td>
+                        <td className="px-4 py-3 text-ink font-medium">{d.label}</td>
+                        <td className="px-4 py-3 text-right font-mono text-ink">{d.demandPct}%</td>
+                        <td className="px-4 py-3 text-right">
+                          <span
+                            className={`inline-flex items-center gap-1 font-mono text-xs ${
+                              d.trendPct >= 0 ? 'text-accent-green' : 'text-accent-red'
+                            }`}
+                          >
+                            {d.trendPct >= 0 ? (
+                              <TrendingUp className="size-3" aria-hidden />
+                            ) : (
+                              <TrendingDown className="size-3" aria-hidden />
+                            )}
+                            {d.trendPct >= 0 ? '+' : ''}
+                            {d.trendPct}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </Card>
           </section>
         ) : null}
@@ -1137,26 +1143,28 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
             Prix moyens diagnostic à {cityName}
           </h2>
           <Card className="p-0 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-cream-deep border-b border-rule">
-                <tr>
-                  <th className="text-left px-4 py-3 font-semibold text-ink">Diagnostic</th>
-                  <th className="text-right px-4 py-3 font-semibold text-ink">
-                    Tarif indicatif (HT)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {DIAG_PRICE_TABLE.map((row) => (
-                  <tr key={row.type} className="border-b border-rule last:border-b-0">
-                    <td className="px-4 py-3 text-ink-soft">{row.type}</td>
-                    <td className="px-4 py-3 text-right font-mono text-ink">
-                      {row.price_min} — {row.price_max} €
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[360px]">
+                <thead className="bg-cream-deep border-b border-rule">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-semibold text-ink">Diagnostic</th>
+                    <th className="text-right px-4 py-3 font-semibold text-ink">
+                      Tarif indicatif (HT)
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {DIAG_PRICE_TABLE.map((row) => (
+                    <tr key={row.type} className="border-b border-rule last:border-b-0">
+                      <td className="px-4 py-3 text-ink-soft">{row.type}</td>
+                      <td className="px-4 py-3 text-right font-mono text-ink whitespace-nowrap">
+                        {row.price_min} — {row.price_max} €
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Card>
           <p className="text-xs text-ink-faint">
             Fourchettes indicatives. Les tarifs varient selon la surface, le type de bien et le

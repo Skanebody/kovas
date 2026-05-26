@@ -113,7 +113,7 @@ export default async function DiagnostiqueursPage({ searchParams }: PageProps) {
       <PublicHeader />
       <main className="flex-1">
         {/* Hero header */}
-        <section className="px-6 py-12 sm:py-16 border-b border-rule/60">
+        <section className="px-4 sm:px-6 py-10 sm:py-16 border-b border-rule/60">
           <div className="mx-auto max-w-6xl space-y-6">
             <div className="space-y-3 max-w-3xl">
               <Badge variant="outline">Annuaire public</Badge>
@@ -145,7 +145,7 @@ export default async function DiagnostiqueursPage({ searchParams }: PageProps) {
         </section>
 
         {/* Results */}
-        <section className="px-6 py-10">
+        <section className="px-4 sm:px-6 py-8 sm:py-10">
           <div className="mx-auto max-w-6xl space-y-6">
             {/* Header résultats */}
             <div className="flex items-end justify-between gap-4">
