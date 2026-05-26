@@ -16,6 +16,7 @@ import { AppShell } from '@/components/app-shell'
 import { DocumentScanButton } from '@/components/documents'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { enqueuePhoto } from '@/lib/mission/local-storage-queue'
 import { preprocessPhoto } from '@/lib/mission/photo-processor'
 import { captureSyncManager } from '@/lib/mission/sync-manager'
@@ -397,8 +398,9 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
                 À venir — itération 7
               </h2>
               <p className="mt-4 text-sm text-[#0F1419]/82">
-                Vue temps réel du remplissage des champs DPE / Amiante, propositions IA et conflits
-                à valider apparaîtront ici une fois la consolidation Vision IA branchée.
+                Vue temps réel du remplissage des champs <GlossaryTerm term="dpe">DPE</GlossaryTerm>{' '}
+                / Amiante, propositions IA et conflits à valider apparaîtront ici une fois la
+                consolidation Vision IA branchée.
               </p>
             </Card>
           </aside>

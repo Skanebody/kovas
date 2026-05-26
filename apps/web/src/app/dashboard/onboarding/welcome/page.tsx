@@ -1,6 +1,7 @@
 import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { OnboardingProgress } from '@/components/ui/onboarding-progress'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowRight } from 'lucide-react'
@@ -41,7 +42,10 @@ export default async function OnboardingWelcomePage() {
           <div className="space-y-3">
             <p className="text-sm text-[#0F1419]/72 leading-relaxed">Tu vas successivement :</p>
             <ol className="space-y-2 text-sm text-[#0F1419]/82 list-decimal pl-5">
-              <li>Renseigner tes certifications COFRAC (pour les alertes d'expiration).</li>
+              <li>
+                Renseigner tes certifications <GlossaryTerm term="cofrac">COFRAC</GlossaryTerm>{' '}
+                (pour les alertes d&apos;expiration).
+              </li>
               <li>Importer ou choisir tes modèles de rapport.</li>
               <li>Créer ton premier dossier (90 secondes chrono).</li>
             </ol>

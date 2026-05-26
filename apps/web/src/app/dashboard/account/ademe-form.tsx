@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/toaster'
@@ -60,9 +61,11 @@ export function AdemeForm({
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       <p className="text-xs text-[#0F1419]/72 leading-relaxed">
-        Renseigne ton numéro de certificat RGE pour activer le monitoring rétroactif de tes DPE
-        publiés sur l'API ADEME. Détection automatique des dépassements de seuils, distances
-        suspectes et incohérences avant que l'ADEME ne te contacte.
+        Renseigne ton numéro de certificat <GlossaryTerm term="rge">RGE</GlossaryTerm> pour activer
+        le monitoring rétroactif de tes <GlossaryTerm term="dpe">DPE</GlossaryTerm> publiés sur
+        l&apos;API <GlossaryTerm term="ademe">ADEME</GlossaryTerm>. Détection automatique des
+        dépassements de seuils, distances suspectes et incohérences avant que l&apos;ADEME ne te
+        contacte.
       </p>
 
       {/* Certificat RGE */}

@@ -2,6 +2,7 @@ import { PrevalidationForm } from '@/components/ademe/PrevalidationForm'
 import type { PrevalidationInitialValues } from '@/components/ademe/PrevalidationForm'
 import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowLeft, Radar } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -86,8 +87,10 @@ export default async function DossierPrevalidationPage({
 
       <p className="text-xs text-[#0F1419]/72 leading-relaxed">
         Les champs adresse, type bâtiment, année et surface sont pré-remplis depuis le dossier.
-        Complétez les champs DPE (étiquettes, conso, chauffage) avec les résultats issus de ton
-        logiciel de calcul (Liciel, AnalysImmo…) avant d'évaluer le risque.
+        Complétez les champs <GlossaryTerm term="dpe">DPE</GlossaryTerm> (étiquettes, conso,
+        chauffage) avec les résultats issus de ton logiciel de calcul (
+        <GlossaryTerm term="liciel">Liciel</GlossaryTerm>, AnalysImmo…) avant d&apos;évaluer le
+        risque.
       </p>
 
       <PrevalidationForm initialValues={initialValues} />

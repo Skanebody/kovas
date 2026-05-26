@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import {
   SOURCE_LOGICIELS,
   SOURCE_LOGICIEL_LABELS,
@@ -102,7 +103,8 @@ function StepperHeader({
               className={cn(
                 'group flex items-center gap-2 rounded-pill border px-2.5 py-1 transition-colors',
                 isCurrent && 'bg-chartreuse text-ink border-chartreuse',
-                isDone && 'bg-[#0F1419] text-paper border-[#0F1419] hover:bg-[#0F1419]/90 cursor-pointer',
+                isDone &&
+                  'bg-[#0F1419] text-paper border-[#0F1419] hover:bg-[#0F1419]/90 cursor-pointer',
                 isFuture && 'bg-paper text-ink-mute border-rule cursor-default',
               )}
             >
@@ -203,15 +205,20 @@ function Step1Prepare({ onNext }: { onNext: () => void }) {
             <li className="flex gap-2">
               <span className="text-ink-mute">·</span>
               <span>
-                <strong className="text-ink">Les paramètres techniques de calcul DPE</strong> —
-                propres à votre logiciel d&apos;origine.
+                <strong className="text-ink">
+                  Les paramètres techniques de calcul <GlossaryTerm term="dpe">DPE</GlossaryTerm>
+                </strong>{' '}
+                — propres à votre logiciel d&apos;origine.
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-ink-mute">·</span>
               <span>
-                <strong className="text-ink">Vos certifications COFRAC</strong> — à saisir
-                séparément dans <code className="font-mono text-xs">Compte → Certifications</code>.
+                <strong className="text-ink">
+                  Vos certifications <GlossaryTerm term="cofrac">COFRAC</GlossaryTerm>
+                </strong>{' '}
+                — à saisir séparément dans{' '}
+                <code className="font-mono text-xs">Compte → Certifications</code>.
               </span>
             </li>
           </ul>

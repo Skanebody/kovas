@@ -1,6 +1,7 @@
 import { AppPageHeader } from '@/components/app-page-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { OnboardingProgress } from '@/components/ui/onboarding-progress'
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -42,11 +43,12 @@ export default function OnboardingFirstDossierPage() {
         <CardContent className="space-y-4">
           <ol className="space-y-3 text-sm text-[#0F1419]/82">
             <Step n={1}>
-              <strong>Adresse du bien</strong> — autocomplétion via la Base Adresse Nationale (BAN)
+              <strong>Adresse du bien</strong> — autocomplétion via la Base Adresse Nationale (
+              <GlossaryTerm term="ban">BAN</GlossaryTerm>)
             </Step>
             <Step n={2}>
-              <strong>Diagnostics à réaliser</strong> — sélection multi-chips colorés (DPE, Amiante,
-              etc.)
+              <strong>Diagnostics à réaliser</strong> — sélection multi-chips colorés (
+              <GlossaryTerm term="dpe">DPE</GlossaryTerm>, Amiante, etc.)
             </Step>
             <Step n={3}>
               <strong>Client</strong> — nom, email, téléphone (existant ou nouveau)

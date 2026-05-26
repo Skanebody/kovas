@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { createAdminClientLoose } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
@@ -220,7 +221,7 @@ export default async function VerificationPage() {
             escrocs. KOVAS applique une validation préalable obligatoire pour protéger les
             particuliers et notre communauté de diagnostiqueurs honnêtes. Dès que les quatre phases
             sont vert, ton profil apparaît dans l&apos;annuaire public et reçoit des leads du
-            calculateur DPE gratuit.
+            calculateur <GlossaryTerm term="dpe">DPE</GlossaryTerm> gratuit.
           </p>
         </aside>
       )}

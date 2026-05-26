@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { planAtLeast } from '@/lib/billing/feature-gates'
 import { cn } from '@/lib/utils'
@@ -123,8 +124,10 @@ export async function AdemeCockpitMini() {
               </div>
             </div>
             <p className="text-[13px] text-ink-mute leading-relaxed">
-              Renseignez votre numéro de certificat RGE pour démarrer la surveillance quotidienne
-              de vos DPE publiés sur l'API ADEME. Configuration en 30 secondes.
+              Renseignez votre numéro de certificat <GlossaryTerm term="rge">RGE</GlossaryTerm> pour
+              démarrer la surveillance quotidienne de vos{' '}
+              <GlossaryTerm term="dpe">DPE</GlossaryTerm> publiés sur l&apos;API{' '}
+              <GlossaryTerm term="ademe">ADEME</GlossaryTerm>. Configuration en 30 secondes.
             </p>
           </div>
           <Button asChild variant="default" size="sm" className="w-full sm:w-auto self-start">
@@ -142,8 +145,14 @@ export async function AdemeCockpitMini() {
     supabase as unknown as {
       from: (t: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
-            order: (col: string, opts: { ascending: boolean }) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
+            order: (
+              col: string,
+              opts: { ascending: boolean },
+            ) => {
               limit: (n: number) => { maybeSingle: () => Promise<{ data: KpiSnapshot | null }> }
             }
           }
@@ -165,7 +174,12 @@ export async function AdemeCockpitMini() {
   // Pas de snapshot : afficher état "première sync en cours"
   if (!snapshot) {
     return (
-      <Card variant="opaque" padding="none" className="bg-[#0F1419] text-white border-[#0F1419] flex flex-col" style={{ minHeight: 420 }}>
+      <Card
+        variant="opaque"
+        padding="none"
+        className="bg-[#0F1419] text-white border-[#0F1419] flex flex-col"
+        style={{ minHeight: 420 }}
+      >
         <header className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] font-semibold text-white">
             <span className="text-white/60">03 ·</span> Cockpit ADEME
@@ -264,7 +278,12 @@ export async function AdemeCockpitMini() {
       />
 
       <footer className="border-t border-white/10 p-4">
-        <Button asChild variant="outline" size="default" className="w-full bg-white text-[#0F1419] hover:bg-white/90 border-white">
+        <Button
+          asChild
+          variant="outline"
+          size="default"
+          className="w-full bg-white text-[#0F1419] hover:bg-white/90 border-white"
+        >
           <Link href="/dashboard/cockpit-ademe">
             Voir le cockpit complet <ArrowRight className="size-3.5" />
           </Link>

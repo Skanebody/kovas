@@ -14,6 +14,7 @@
 import { AppPageHeader } from '@/components/app-page-header'
 import { CockpitFraudeList } from '@/components/cockpit-fraude/CockpitFraudeList'
 import { Button } from '@/components/ui/button'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowLeft, ShieldCheck } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -84,9 +85,9 @@ export default async function CockpitFraudePage() {
         <div>
           <p className="text-[13px] font-semibold text-[#0F1419]">Ton aidant, jamais bloquant</p>
           <p className="text-[13px] text-[#0F1419]/82 leading-relaxed mt-0.5">
-            Ces vérifications restent informatives. Tu décides si l'écart est justifié (travaux
-            récents, annexes, etc.) — KOVAS ne bloque rien, et n'envoie JAMAIS rien à l'ADEME
-            directement.
+            Ces vérifications restent informatives. Tu décides si l&apos;écart est justifié (travaux
+            récents, annexes, etc.) — KOVAS ne bloque rien, et n&apos;envoie JAMAIS rien à l&apos;
+            <GlossaryTerm term="ademe">ADEME</GlossaryTerm> directement.
           </p>
         </div>
       </section>
