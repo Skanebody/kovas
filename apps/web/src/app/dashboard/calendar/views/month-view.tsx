@@ -67,7 +67,7 @@ export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthV
   }, [events, currentMonth])
 
   return (
-    <div className="rounded-2xl border border-rule/70 bg-paper overflow-hidden shadow-glass-sm">
+    <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden ">
       {/* Header bandeau navy noms de jours */}
       <div className="grid grid-cols-7 bg-[#0F1419] h-7">
         {DAY_NAMES_SHORT.map((name) => (
@@ -97,8 +97,8 @@ export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthV
               key={day.toISOString()}
               onClick={() => onSelectDay(day)}
               className={cn(
-                'relative flex flex-col items-stretch text-left min-h-[88px] sm:min-h-[96px] p-2 border-r border-b border-rule/40 transition-all',
-                'hover:bg-sage-alt/40 hover:shadow-glass-sm hover:z-10',
+                'relative flex flex-col items-stretch text-left min-h-[88px] sm:min-h-[96px] p-2 border-r border-b border-[#0F1419]/[0.08] transition-all',
+                'hover:bg-sage-alt/40 hover: hover:z-10',
                 !isInCurrentMonth && 'opacity-50 bg-sage-alt/20',
                 isToday && 'bg-chartreuse/[0.08]',
                 isLastCol && 'border-r-0',
@@ -110,7 +110,7 @@ export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthV
                 {isToday ? (
                   <span
                     aria-hidden
-                    className="inline-flex items-center justify-center size-6 rounded-full bg-ink text-sage font-mono text-[11px] font-semibold tabular-nums"
+                    className="inline-flex items-center justify-center size-6 rounded-full bg-[#0F1419] text-sage font-mono text-[11px] font-semibold tabular-nums"
                   >
                     {day.getDate()}
                   </span>
@@ -118,14 +118,14 @@ export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthV
                   <span
                     className={cn(
                       'font-mono text-[11px] tabular-nums font-medium leading-none pl-0.5',
-                      isInCurrentMonth ? 'text-ink' : 'text-ink-mute',
+                      isInCurrentMonth ? 'text-[#0F1419]' : 'text-[#0F1419]/72',
                     )}
                   >
                     {day.getDate()}
                   </span>
                 )}
                 {dayEvents.length > 0 && (
-                  <span className="text-[9px] font-mono text-ink-mute tabular-nums leading-none pr-0.5">
+                  <span className="text-[9px] font-mono text-[#0F1419]/72 tabular-nums leading-none pr-0.5">
                     {dayEvents.length}
                   </span>
                 )}
@@ -144,7 +144,7 @@ export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthV
                   />
                 ))}
                 {overflow > 0 && (
-                  <div className="text-[10px] font-mono text-ink-mute px-1 pt-0.5">
+                  <div className="text-[10px] font-mono text-[#0F1419]/72 px-1 pt-0.5">
                     +{overflow} autre{overflow > 1 ? 's' : ''}
                   </div>
                 )}
@@ -155,12 +155,12 @@ export function MonthView({ anchor, events, onSelectEvent, onSelectDay }: MonthV
       </div>
 
       {/* Légende basse */}
-      <div className="px-3 py-2 border-t border-rule/60 bg-sage-alt/30 flex items-center justify-between flex-wrap gap-2">
-        <span className="text-[11px] font-mono text-ink-mute tabular-nums">
+      <div className="px-3 py-2 border-t border-[#0F1419]/[0.08] bg-sage-alt/30 flex items-center justify-between flex-wrap gap-2">
+        <span className="text-[11px] font-mono text-[#0F1419]/72 tabular-nums">
           {monthEventCount} RDV ce mois-ci
         </span>
-        <span className="text-[10px] text-ink-mute italic">
-          Cliquez sur un jour pour voir le détail.
+        <span className="text-[10px] text-[#0F1419]/72 italic">
+          Clique sur un jour pour voir le détail.
         </span>
       </div>
     </div>
@@ -189,7 +189,7 @@ function MonthEventPill({ event, onClick }: MonthEventPillProps) {
       )}
       title={`${time} — ${event.clientName ?? 'Sans client'}`}
     >
-      <span className="font-mono text-[10px] tabular-nums text-ink-mute shrink-0">{time}</span>
+      <span className="font-mono text-[10px] tabular-nums text-[#0F1419]/72 shrink-0">{time}</span>
       {mainType ? (
         <MissionTypeTag
           type={mainType}
@@ -197,7 +197,9 @@ function MonthEventPill({ event, onClick }: MonthEventPillProps) {
           className="text-[8px] px-1 py-0 rounded-sm truncate"
         />
       ) : (
-        <span className="text-[10px] text-ink truncate">{event.clientName ?? 'Sans client'}</span>
+        <span className="text-[10px] text-[#0F1419] truncate">
+          {event.clientName ?? 'Sans client'}
+        </span>
       )}
     </button>
   )

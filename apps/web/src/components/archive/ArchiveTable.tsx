@@ -19,7 +19,14 @@ import {
   type ArchiveFile,
   type ArchiveFileKind,
 } from '@/lib/archive/types'
-import { Download, ExternalLink, FileAudio, FileText, Image as ImageIcon, Package } from 'lucide-react'
+import {
+  Download,
+  ExternalLink,
+  FileAudio,
+  FileText,
+  Image as ImageIcon,
+  Package,
+} from 'lucide-react'
 import Link from 'next/link'
 
 interface ArchiveTableProps {
@@ -77,10 +84,10 @@ export function ArchiveTable({
 }: ArchiveTableProps) {
   if (files.length === 0) {
     return (
-      <div className="rounded-2xl border border-rule/80 glass-opaque p-8 text-center shadow-glass-sm">
-        <p className="text-sm text-ink-mute">
-          Aucun fichier ne correspond à ces filtres. Essayez d&apos;élargir la période ou de
-          retirer un critère.
+      <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-8 text-center">
+        <p className="text-sm text-[#0F1419]/72">
+          Aucun fichier ne correspond à ces filtres. Essaie d&apos;élargir la période ou de retirer
+          un critère.
         </p>
       </div>
     )
@@ -90,7 +97,7 @@ export function ArchiveTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between text-[12px] text-ink-mute">
+      <div className="flex items-center justify-between text-[12px] text-[#0F1419]/72">
         <span>
           {(page - 1) * limit + 1}–{lastShown} sur {total}
         </span>
@@ -114,7 +121,7 @@ export function ArchiveTable({
             return (
               <AppListTableRow key={`${file.kind}-${file.id}`}>
                 <AppListTableCell>
-                  <div className="size-12 rounded-md border border-rule bg-sage-alt flex items-center justify-center overflow-hidden">
+                  <div className="size-12 rounded-md border border-[#0F1419]/[0.08] bg-sage-alt flex items-center justify-center overflow-hidden">
                     {file.kind === 'photo' && file.signed_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -124,15 +131,15 @@ export function ArchiveTable({
                         loading="lazy"
                       />
                     ) : (
-                      <Icon className="size-5 text-ink-mute" aria-hidden />
+                      <Icon className="size-5 text-[#0F1419]/72" aria-hidden />
                     )}
                   </div>
                 </AppListTableCell>
                 <AppListTableCell>
-                  <div className="font-mono text-[12px] text-ink truncate max-w-[280px]">
+                  <div className="font-mono text-[12px] text-[#0F1419] truncate max-w-[280px]">
                     {file.name}
                   </div>
-                  <div className="text-[11px] text-ink-mute sm:hidden">
+                  <div className="text-[11px] text-[#0F1419]/72 sm:hidden">
                     {ARCHIVE_KIND_LABELS[file.kind]} · {formatDate(file.created_at)}
                   </div>
                 </AppListTableCell>
@@ -145,18 +152,18 @@ export function ArchiveTable({
                   {file.dossier_id && file.dossier_reference ? (
                     <Link
                       href={`/dashboard/dossiers/${file.dossier_id}`}
-                      className="font-mono text-[11px] font-semibold text-ink hover:underline"
+                      className="font-mono text-[11px] font-semibold text-[#0F1419] hover:underline"
                     >
                       {file.dossier_reference}
                     </Link>
                   ) : (
-                    <span className="text-[11px] text-ink-faint">—</span>
+                    <span className="text-[11px] text-[#0F1419]/55">—</span>
                   )}
                 </AppListTableCell>
                 <AppListTableCell className="hidden lg:table-cell text-[12px]">
                   {formatDate(file.created_at)}
                 </AppListTableCell>
-                <AppListTableCell className="hidden lg:table-cell text-[12px] text-ink-mute">
+                <AppListTableCell className="hidden lg:table-cell text-[12px] text-[#0F1419]/72">
                   {formatBytes(file.file_size_bytes)}
                 </AppListTableCell>
                 <AppListTableCell className="text-right">
@@ -196,7 +203,7 @@ export function ArchiveTable({
               <span />
             )}
           </div>
-          <div className="text-[12px] text-ink-mute">Page {page}</div>
+          <div className="text-[12px] text-[#0F1419]/72">Page {page}</div>
           <div>
             {hasMore ? (
               <Button asChild variant="outline" size="sm">

@@ -5,10 +5,10 @@ import {
   type CalendarEvent,
   DAY_NAMES_LONG,
   MONTH_NAMES,
+  type OriginCoords,
   addDays,
   addMonths,
   endOfDay,
-  type OriginCoords,
   sameDay,
   startOfDay,
   startOfMonth,
@@ -19,7 +19,7 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { type CalendarEventDetail, EventDetailSheet } from './event-detail-sheet'
-import { ViewSwitcher, type CalendarViewMode } from './view-switcher'
+import { type CalendarViewMode, ViewSwitcher } from './view-switcher'
 import { AgendaView } from './views/agenda-view'
 import { DayView } from './views/day-view'
 import { MonthView } from './views/month-view'
@@ -130,7 +130,9 @@ export function CalendarView({ events, origin }: CalendarViewProps) {
     setViewMode('day')
     try {
       window.localStorage.setItem(LOCALSTORAGE_KEY, 'day')
-    } catch {}
+    } catch {
+      // localStorage indisponible (mode privé) — silencieux
+    }
   }
 
   // Agenda : range = semaine (lundi → dimanche).
@@ -144,13 +146,13 @@ export function CalendarView({ events, origin }: CalendarViewProps) {
       {/* Header sticky : période + switcher + nav */}
       <div
         className={cn(
-          'sticky top-2 z-20 rounded-pill border border-rule/70 bg-paper/90 backdrop-blur-md shadow-glass-sm',
+          'sticky top-2 z-20 rounded-pill border border-[#0F1419]/[0.08] bg-paper',
           'px-3 py-2 flex items-center justify-between gap-3 flex-wrap',
         )}
       >
         {/* Gauche : titre période */}
         <div className="min-w-0 flex-1 sm:flex-initial">
-          <h2 className="text-[13px] sm:text-[14px] font-semibold text-ink capitalize truncate">
+          <h2 className="text-[13px] sm:text-[14px] font-semibold text-[#0F1419] capitalize truncate">
             {periodLabel}
           </h2>
         </div>

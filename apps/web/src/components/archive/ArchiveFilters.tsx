@@ -34,7 +34,7 @@ interface ArchiveFiltersProps {
 
 const KIND_OPTIONS: Array<{ value: ArchiveFileKind | 'all'; label: string }> = [
   { value: 'all', label: 'Tous les fichiers' },
-  { value: 'photo', label: ARCHIVE_KIND_LABELS.photo + 's' },
+  { value: 'photo', label: `${ARCHIVE_KIND_LABELS.photo}s` },
   { value: 'audio', label: 'Audio' },
   { value: 'document', label: 'Documents' },
   { value: 'export', label: 'Exports PDF / ZIP' },
@@ -100,11 +100,11 @@ export function ArchiveFilters({ clients }: ArchiveFiltersProps) {
   const currentDiag = searchParams.get('diagnostic') ?? 'all'
 
   return (
-    <div className="rounded-2xl border border-rule/80 glass-opaque p-4 md:p-5 space-y-3 shadow-glass-sm">
+    <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-4 md:p-5 space-y-3">
       {/* Ligne 1 : recherche */}
       <div className="relative">
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-ink-mute pointer-events-none"
+          className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#0F1419]/72 pointer-events-none"
           aria-hidden
         />
         <Input

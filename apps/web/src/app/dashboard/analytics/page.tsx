@@ -18,6 +18,7 @@
  */
 
 import { SectionHeader } from '@/app/dashboard/dashboard/section-header'
+import { AppPageHeader } from '@/components/app-page-header'
 import { Card } from '@/components/ui/card'
 import { KpiHero } from '@/components/ui/kpi-hero'
 import { UpsellEmptyState } from '@/components/upsell/UpsellEmptyState'
@@ -168,21 +169,12 @@ export default async function AnalyticsPage() {
     })
     return (
       <div className="space-y-6 animate-fade-in">
-        <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
-          <div className="space-y-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
-              Analytics avancées
-            </p>
-            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
-              Performance{' '}
-              <span className="font-serif italic font-normal text-ink-mute">cabinet</span>
-              <span className="text-ink-mute">.</span>
-            </h1>
-            <p className="text-sm text-ink-mute max-w-xl">
-              Vision long terme du cabinet — health score, tendances 3 ans, benchmarks FR.
-            </p>
-          </div>
-        </header>
+        <AppPageHeader
+          eyebrow="Analytics avancées"
+          title="Performance"
+          accent="cabinet"
+          description="Vision long terme du cabinet — health score, tendances 3 ans, benchmarks FR."
+        />
         <UpsellEmptyState
           target="pro"
           trigger="analytics_attempted"
@@ -287,7 +279,7 @@ export default async function AnalyticsPage() {
   if (dpeLast12m > 800) {
     diagnostics.push({
       level: 'warning',
-      message: `Vous approchez du seuil ADEME 1000 DPE/an (${dpeLast12m} cumulés sur 12 mois). Surveillez votre cadence.`,
+      message: `Tu approches du seuil ADEME 1000 DPE/an (${dpeLast12m} cumulés sur 12 mois). Surveille ta cadence.`,
     })
   }
   // Conversion devis basse
@@ -301,7 +293,7 @@ export default async function AnalyticsPage() {
   if (current?.top_client_share_pct != null && Number(current.top_client_share_pct) > 40) {
     diagnostics.push({
       level: 'danger',
-      message: `Un client représente plus de ${Math.round(Number(current.top_client_share_pct))}% de votre CA. Diversifiez vos prescripteurs.`,
+      message: `Un client représente plus de ${Math.round(Number(current.top_client_share_pct))}% de ton CA. Diversifie tes prescripteurs.`,
     })
   }
   // Croissance négative 2 mois consécutifs
@@ -313,7 +305,7 @@ export default async function AnalyticsPage() {
   ) {
     diagnostics.push({
       level: 'warning',
-      message: 'CA en baisse 2 mois consécutifs. Vérifiez votre pipeline commercial.',
+      message: 'CA en baisse 2 mois consécutifs. Vérifie ton pipeline commercial.',
     })
   }
 
@@ -741,20 +733,12 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
-        <div className="space-y-1">
-          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
-            {list.length} mois d&apos;historique
-          </p>
-          <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
-            Performance <span className="font-serif italic font-normal text-ink-mute">cabinet</span>
-            <span className="text-ink-mute">.</span>
-          </h1>
-          <p className="text-sm text-ink-mute max-w-xl">
-            Vision long terme — santé du cabinet, tendances, benchmarks anonymisés FR.
-          </p>
-        </div>
-      </header>
+      <AppPageHeader
+        eyebrow={`${list.length} mois d'historique`}
+        title="Performance"
+        accent="cabinet"
+        description="Vision long terme — santé du cabinet, tendances, benchmarks anonymisés FR."
+      />
 
       {/* 4 KPI cards alignés sur pattern fiche client */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -854,7 +838,7 @@ export default async function AnalyticsPage() {
           />
         ) : (
           <Card variant="opaque" padding="default" className="rounded-[24px]">
-            <p className="text-sm text-ink-mute italic">
+            <p className="text-sm text-[#0F1419]/72 italic">
               Health score indisponible — pas encore de snapshot mensuel généré.
             </p>
           </Card>
@@ -874,7 +858,7 @@ export default async function AnalyticsPage() {
 
       {/* Benchmarks FR */}
       <section>
-        <SectionHeader number="03" title="Vous vs marché FR" />
+        <SectionHeader number="03" title="Toi vs marché FR" />
         {benchmark && benchmarkRows.length > 0 ? (
           <BenchmarkComparison
             title="Positionnement vs médiane nationale"
@@ -883,7 +867,7 @@ export default async function AnalyticsPage() {
           />
         ) : (
           <Card variant="opaque" padding="default" className="rounded-[24px]">
-            <p className="text-sm text-ink-mute italic">
+            <p className="text-sm text-[#0F1419]/72 italic">
               Benchmarks indisponibles — moins de {BENCHMARK_MIN_SAMPLE_SIZE} cabinets dans
               l&apos;échantillon de référence ce mois.
             </p>
@@ -893,7 +877,7 @@ export default async function AnalyticsPage() {
 
       {/* Footer méthodo */}
       <section>
-        <p className="font-mono text-[11px] text-ink-mute leading-relaxed border-t border-rule/60 pt-4">
+        <p className="font-mono text-[11px] text-[#0F1419]/72 leading-relaxed border-t border-[#0F1419]/[0.08] pt-4">
           Snapshots calculés par worker mensuel · benchmarks k-anonymity ≥{' '}
           {BENCHMARK_MIN_SAMPLE_SIZE} cabinets · aucune donnée nominative partagée · Health Score
           composite recalculé chaque mois.

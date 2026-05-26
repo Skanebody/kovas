@@ -125,7 +125,7 @@ export function EventDetailSheet({ event, open, onOpenChange }: EventDetailSheet
         <DialogHeader>
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <DialogTitle className="font-serif italic text-2xl text-ink truncate">
+              <DialogTitle className="font-serif italic text-2xl text-[#0F1419] truncate">
                 {event.clientName ?? 'Sans client'}
               </DialogTitle>
               <DialogDescription className="font-mono text-[11px] uppercase tracking-[0.1em]">
@@ -139,21 +139,21 @@ export function EventDetailSheet({ event, open, onOpenChange }: EventDetailSheet
         </DialogHeader>
 
         {/* Date + heure */}
-        <div className="rounded-xl border border-rule bg-paper p-3 space-y-2">
+        <div className="rounded-xl border border-[#0F1419]/[0.08] bg-paper p-3 space-y-2">
           <div className="flex items-start gap-2.5">
-            <Clock className="size-4 text-ink-mute shrink-0 mt-0.5" aria-hidden />
+            <Clock className="size-4 text-[#0F1419]/72 shrink-0 mt-0.5" aria-hidden />
             <div className="space-y-0.5 min-w-0 flex-1">
-              <p className="text-sm font-medium text-ink capitalize">{dateLabel}</p>
-              <p className="text-xs font-mono text-ink-soft tabular-nums">
+              <p className="text-sm font-medium text-[#0F1419] capitalize">{dateLabel}</p>
+              <p className="text-xs font-mono text-[#0F1419]/82 tabular-nums">
                 {timeStart} → {timeEnd}{' '}
-                <span className="text-ink-mute">· {event.durationMinutes} min</span>
+                <span className="text-[#0F1419]/72">· {event.durationMinutes} min</span>
               </p>
             </div>
           </div>
           {fullAddress && (
-            <div className="flex items-start gap-2.5 pt-1 border-t border-rule/40">
-              <MapPin className="size-4 text-ink-mute shrink-0 mt-0.5" aria-hidden />
-              <p className="text-xs text-ink-soft">{fullAddress}</p>
+            <div className="flex items-start gap-2.5 pt-1 border-t border-[#0F1419]/[0.08]">
+              <MapPin className="size-4 text-[#0F1419]/72 shrink-0 mt-0.5" aria-hidden />
+              <p className="text-xs text-[#0F1419]/82">{fullAddress}</p>
             </div>
           )}
         </div>
@@ -161,7 +161,7 @@ export function EventDetailSheet({ event, open, onOpenChange }: EventDetailSheet
         {/* Diagnostics */}
         {event.missionTypes.length > 0 && (
           <div className="space-y-2">
-            <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.1em] text-ink-mute">
+            <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.1em] text-[#0F1419]/72">
               <Tag className="size-3" /> Diagnostics
             </div>
             <div className="flex flex-wrap gap-1.5">

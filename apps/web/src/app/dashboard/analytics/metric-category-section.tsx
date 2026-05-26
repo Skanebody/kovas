@@ -14,10 +14,7 @@
  */
 
 import { Card } from '@/components/ui/card'
-import {
-  type AnalyticsIconName,
-  resolveAnalyticsIcon,
-} from '@/lib/icons/analytics-icon-registry'
+import { type AnalyticsIconName, resolveAnalyticsIcon } from '@/lib/icons/analytics-icon-registry'
 import { cn } from '@/lib/utils'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -48,12 +45,7 @@ export interface MetricRow {
  * (Tailwind ne compile pas `bg-${var}/15`). Chaque variante mappe vers une
  * classe statique connue à la compile.
  */
-export type MetricCategoryAccent =
-  | 'chartreuse'
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'danger'
+export type MetricCategoryAccent = 'chartreuse' | 'info' | 'success' | 'warning' | 'danger'
 
 const ACCENT_BG_CLASS: Record<MetricCategoryAccent, string> = {
   chartreuse: 'bg-chartreuse/20',
@@ -95,11 +87,14 @@ function MiniSparkline({ data, color = 'currentColor' }: { data: number[]; color
   const height = 16
   const stepX = width / (data.length - 1)
   const points = data
-    .map((v, i) => `${(i * stepX).toFixed(1)},${(height - ((v - min) / range) * height).toFixed(1)}`)
+    .map(
+      (v, i) => `${(i * stepX).toFixed(1)},${(height - ((v - min) / range) * height).toFixed(1)}`,
+    )
     .join(' ')
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="presentation">
+      <title>Sparkline</title>
       <polyline
         points={points}
         fill="none"
@@ -118,9 +113,8 @@ function deltaClass(direction: MetricDeltaDirection | undefined): string {
       return 'text-success'
     case 'down':
       return 'text-danger'
-    case 'flat':
     default:
-      return 'text-ink-mute'
+      return 'text-[#0F1419]/72'
   }
 }
 
@@ -157,7 +151,7 @@ export function MetricCategorySection({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-ink/[0.02] transition-colors"
+        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-[#0F1419]/[0.02] transition-colors"
         aria-expanded={isOpen}
       >
         <span
@@ -167,19 +161,19 @@ export function MetricCategorySection({
             ACCENT_BG_CLASS[accentClass],
           )}
         >
-          <Icon className="size-4 text-ink" strokeWidth={1.75} />
+          <Icon className="size-4 text-[#0F1419]" strokeWidth={1.75} />
         </span>
         <span className="flex-1 min-w-0">
-          <span className="font-sans font-semibold text-[14px] text-ink block leading-tight">
+          <span className="font-sans font-semibold text-[14px] text-[#0F1419] block leading-tight">
             {name}
           </span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
+          <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#0F1419]/72">
             {filtered.length} métrique{filtered.length > 1 ? 's' : ''}
           </span>
         </span>
         <ChevronDown
           className={cn(
-            'size-4 text-ink-mute transition-transform',
+            'size-4 text-[#0F1419]/72 transition-transform',
             isOpen ? 'rotate-180' : 'rotate-0',
           )}
           aria-hidden
@@ -187,21 +181,21 @@ export function MetricCategorySection({
       </button>
 
       {isOpen ? (
-        <ul className="border-t border-rule/60 divide-y divide-rule/40">
+        <ul className="border-t border-[#0F1419]/[0.08] divide-y divide-[#0F1419]/[0.08]">
           {filtered.map((m) => {
             const MetricIcon = resolveAnalyticsIcon(m.icon)
             return (
               <li key={m.id}>
-                <div className="flex items-center gap-4 px-5 py-3.5 hover:bg-ink/[0.02] transition-colors">
-                  <MetricIcon className="size-4 text-ink-mute shrink-0" strokeWidth={1.75} />
+                <div className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#0F1419]/[0.02] transition-colors">
+                  <MetricIcon className="size-4 text-[#0F1419]/72 shrink-0" strokeWidth={1.75} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-ink truncate">{m.name}</p>
+                    <p className="text-[13px] font-medium text-[#0F1419] truncate">{m.name}</p>
                     {m.hint ? (
-                      <p className="text-[11px] text-ink-mute truncate">{m.hint}</p>
+                      <p className="text-[11px] text-[#0F1419]/72 truncate">{m.hint}</p>
                     ) : null}
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-mono text-[13px] font-semibold text-ink tabular-nums">
+                    <p className="font-mono text-[13px] font-semibold text-[#0F1419] tabular-nums">
                       {m.value}
                     </p>
                     {m.delta ? (
@@ -215,10 +209,10 @@ export function MetricCategorySection({
                       </p>
                     ) : null}
                   </div>
-                  <div className="text-ink-mute shrink-0 hidden sm:block">
+                  <div className="text-[#0F1419]/72 shrink-0 hidden sm:block">
                     <MiniSparkline data={m.sparkline ?? []} />
                   </div>
-                  <ChevronRight className="size-3.5 text-ink-ghost shrink-0" aria-hidden />
+                  <ChevronRight className="size-3.5 text-[#0F1419]/40 shrink-0" aria-hidden />
                 </div>
               </li>
             )

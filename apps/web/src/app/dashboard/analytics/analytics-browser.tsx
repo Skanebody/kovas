@@ -55,8 +55,8 @@ export function AnalyticsBrowser({ categories }: AnalyticsBrowserProps) {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
-          <Search className="size-8 text-ink-ghost" strokeWidth={1.5} />
-          <p className="text-sm text-ink-mute">
+          <Search className="size-8 text-[#0F1419]/55" strokeWidth={1.5} />
+          <p className="text-sm text-[#0F1419]/72">
             Aucune métrique ne correspond à <span className="font-mono">«{query}»</span>.
           </p>
         </div>

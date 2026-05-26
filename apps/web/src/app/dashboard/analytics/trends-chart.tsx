@@ -74,12 +74,7 @@ function formatNumber(v: number): string {
   return v.toLocaleString('fr-FR')
 }
 
-export function TrendsChart({
-  title,
-  series,
-  defaultPeriod = '1y',
-  hint,
-}: TrendsChartProps) {
+export function TrendsChart({ title, series, defaultPeriod = '1y', hint }: TrendsChartProps) {
   const [period, setPeriod] = useState<TrendsPeriod>(defaultPeriod)
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
 
@@ -142,10 +137,10 @@ export function TrendsChart({
 
   return (
     <Card variant="opaque" padding="none" className="rounded-[24px] overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-rule/60 px-6 py-4 flex-wrap">
-        <p className="font-sans font-semibold text-[14px] text-ink">{title}</p>
+      <div className="flex items-center justify-between gap-3 border-b border-[#0F1419]/[0.08] px-6 py-4 flex-wrap">
+        <p className="font-sans font-semibold text-[14px] text-[#0F1419]">{title}</p>
 
-        <div className="flex items-center gap-1 rounded-pill border border-rule/60 p-0.5 bg-paper">
+        <div className="flex items-center gap-1 rounded-pill border border-[#0F1419]/[0.08] p-0.5 bg-paper">
           {(['6m', '1y', '3y'] as TrendsPeriod[]).map((p) => (
             <button
               key={p}
@@ -153,9 +148,7 @@ export function TrendsChart({
               onClick={() => setPeriod(p)}
               className={cn(
                 'font-mono text-[10px] uppercase tracking-[0.1em] px-3 py-1 rounded-pill transition-colors',
-                period === p
-                  ? 'bg-ink text-paper'
-                  : 'text-ink-mute hover:text-ink',
+                period === p ? 'bg-[#0F1419] text-paper' : 'text-[#0F1419]/72 hover:text-[#0F1419]',
               )}
             >
               {PERIOD_LABEL[p]}
@@ -169,7 +162,7 @@ export function TrendsChart({
         {series.map((s) => (
           <span
             key={s.id}
-            className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute"
+            className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-[#0F1419]/72"
           >
             <span className="size-2 rounded-full" style={{ background: s.color }} aria-hidden />
             {s.label}
@@ -187,8 +180,8 @@ export function TrendsChart({
           aria-label={`Tendances ${title} sur ${PERIOD_LABEL[period]}`}
         >
           {/* Grid horizontal */}
-          {yTicks.map((t, i) => (
-            <g key={i}>
+          {yTicks.map((t) => (
+            <g key={`ytick-${t}`}>
               <line
                 x1={padding.left}
                 x2={width - padding.right}
@@ -241,9 +234,9 @@ export function TrendsChart({
           ))}
 
           {/* Hover overlay */}
-          {months.map((_, i) => (
+          {months.map((k, i) => (
             <rect
-              key={i}
+              key={`hover-${k}`}
               x={xAt(i) - stepX / 2}
               y={padding.top}
               width={stepX}
@@ -288,14 +281,14 @@ export function TrendsChart({
 
       {/* Tooltip valeurs hover */}
       {hoverIdx != null ? (
-        <div className="border-t border-rule/60 px-6 py-3 flex flex-wrap gap-x-5 gap-y-1.5">
-          <p className="font-mono text-[11px] text-ink font-semibold tracking-[0.05em]">
+        <div className="border-t border-[#0F1419]/[0.08] px-6 py-3 flex flex-wrap gap-x-5 gap-y-1.5">
+          <p className="font-mono text-[11px] text-[#0F1419] font-semibold tracking-[0.05em]">
             {formatShortMonth(months[hoverIdx] ?? '')}
           </p>
           {seriesPaths.map((s) => (
             <p
               key={s.id}
-              className="font-mono text-[11px] text-ink-mute tabular-nums"
+              className="font-mono text-[11px] text-[#0F1419]/72 tabular-nums"
               style={{ color: s.color }}
             >
               {s.label} : {formatNumber(s.data[hoverIdx] ?? 0)}
@@ -306,8 +299,8 @@ export function TrendsChart({
       ) : null}
 
       {hint ? (
-        <div className="border-t border-rule/60 px-6 py-3">
-          <p className="font-mono text-[10px] text-ink-mute leading-relaxed">{hint}</p>
+        <div className="border-t border-[#0F1419]/[0.08] px-6 py-3">
+          <p className="font-mono text-[10px] text-[#0F1419]/72 leading-relaxed">{hint}</p>
         </div>
       ) : null}
     </Card>

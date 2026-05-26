@@ -11,6 +11,7 @@
  * Query params : modules, doc_types, importance, date_from, date_to.
  */
 
+import { AppPageHeader } from '@/components/app-page-header'
 import { RegulatoryFiltersBar } from '@/components/regulatory/RegulatoryFiltersBar'
 import { RegulatoryTimeline } from '@/components/regulatory/RegulatoryTimeline'
 import { UpcomingChangesPanel } from '@/components/regulatory/UpcomingChangesPanel'
@@ -93,7 +94,7 @@ function unwrapSource(
     | null,
 ): { id: string; name: string; authority: string } | null {
   if (!value) return null
-  return Array.isArray(value) ? value[0] ?? null : value
+  return Array.isArray(value) ? (value[0] ?? null) : value
 }
 
 function mapRow(r: RawDocRow): RegulatoryDocumentListItem {
@@ -178,27 +179,21 @@ export default async function VeillePage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-7 max-w-7xl mx-auto w-full">
-      {/* Header */}
-      <div className="flex items-end justify-between gap-4 flex-wrap">
-        <div className="space-y-2 min-w-0">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute">
-            Veille · Réglementation diagnostic
-          </p>
-          <h1 className="font-serif italic font-normal text-4xl md:text-5xl tracking-tight text-ink leading-[1.05]">
-            Restez à jour.
-          </h1>
-          <p className="text-sm text-ink-mute max-w-xl">
-            Arrêtés, décrets, guides ADEME et FAQ Cofrac qui impactent vos missions —
-            résumés et analysés par l'IA KOVAS.
-          </p>
-        </div>
-        <Button asChild variant="accent" size="default">
-          <Link href="/dashboard/veille/chat" className="inline-flex items-center gap-2">
-            <Sparkles className="size-4" />
-            Poser une question
-          </Link>
-        </Button>
-      </div>
+      {/* Header — V5 sobre AppPageHeader */}
+      <AppPageHeader
+        eyebrow="Veille · Réglementation diagnostic"
+        title="Reste"
+        accent="à jour"
+        description="Arrêtés, décrets, guides ADEME et FAQ Cofrac qui impactent tes missions — résumés et analysés par l'IA KOVAS."
+        action={
+          <Button asChild variant="accent" size="default">
+            <Link href="/dashboard/veille/chat" className="inline-flex items-center gap-2">
+              <Sparkles className="size-4" />
+              Poser une question
+            </Link>
+          </Button>
+        }
+      />
 
       {/* Grille 3 colonnes desktop / stack vertical mobile */}
       <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)_300px]">

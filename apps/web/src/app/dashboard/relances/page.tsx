@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import type { Metadata } from 'next'
 import { RelancesPageContent } from './page-content'
@@ -30,21 +31,12 @@ export default async function RelancesPage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
-        <div className="space-y-1">
-          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
-            Suivi commercial
-          </p>
-          <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
-            Vos <span className="font-serif italic font-normal text-ink-mute">relances</span>
-            <span className="text-ink-mute">.</span>
-          </h1>
-          <p className="text-sm text-ink-mute max-w-xl">
-            Séquences automatiques pour devis envoyés, factures impayées, missions post-DPE F/G,
-            prescripteurs silencieux et avis clients.
-          </p>
-        </div>
-      </header>
+      <AppPageHeader
+        eyebrow="Suivi commercial"
+        title="Tes"
+        accent="relances"
+        description="Séquences automatiques pour devis envoyés, factures impayées, missions post-DPE F/G, prescripteurs silencieux et avis clients."
+      />
 
       <RelancesPageContent stats={stats} defaultTab={normalizeTab(tab)} />
     </div>
@@ -75,7 +67,7 @@ interface RelancesStats {
 }
 
 async function loadStats(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: Supabase client typing pending typegen regen
   supabase: any,
   orgId: string,
 ): Promise<RelancesStats> {
@@ -94,7 +86,12 @@ async function loadStats(
       .limit(1000)
 
     if (error || !data) {
-      return { activeCount: 0, emailsSentThisMonth: 0, conversionsThisMonth: 0, averageResponseRate: null }
+      return {
+        activeCount: 0,
+        emailsSentThisMonth: 0,
+        conversionsThisMonth: 0,
+        averageResponseRate: null,
+      }
     }
     const rows = data as Array<{
       status: string
@@ -123,6 +120,11 @@ async function loadStats(
 
     return { activeCount, emailsSentThisMonth, conversionsThisMonth, averageResponseRate }
   } catch {
-    return { activeCount: 0, emailsSentThisMonth: 0, conversionsThisMonth: 0, averageResponseRate: null }
+    return {
+      activeCount: 0,
+      emailsSentThisMonth: 0,
+      conversionsThisMonth: 0,
+      averageResponseRate: null,
+    }
   }
 }

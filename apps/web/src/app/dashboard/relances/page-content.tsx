@@ -98,7 +98,7 @@ export function RelancesPageContent({ stats, defaultTab }: RelancesPageContentPr
       <nav
         role="tablist"
         aria-label="Filtres de relances"
-        className="flex flex-wrap gap-1.5 border-b border-rule/60 pb-2"
+        className="flex flex-wrap gap-1.5 border-b border-[#0F1419]/[0.08] pb-2"
       >
         {TABS.map((tab) => {
           const active = tab.key === activeTab
@@ -111,7 +111,9 @@ export function RelancesPageContent({ stats, defaultTab }: RelancesPageContentPr
               onClick={() => setActiveTab(tab.key)}
               className={cn(
                 'px-3.5 py-1.5 rounded-pill text-[12px] font-medium transition-colors',
-                active ? 'bg-navy text-paper' : 'text-ink-mute hover:bg-ink/5 hover:text-ink',
+                active
+                  ? 'bg-navy text-paper'
+                  : 'text-[#0F1419]/72 hover:bg-[#0F1419]/5 hover:text-[#0F1419]',
               )}
             >
               {tab.label}

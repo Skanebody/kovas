@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { CalendarSyncDialog } from '@/components/calendar/calendar-sync-dialog'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { buildCalendarSubscriptionUrl, buildCalendarWebcalUrl } from '@/lib/calendar-token'
@@ -38,7 +39,10 @@ export default async function CalendarPage() {
     scheduled_at: string
     geo_lat: number | string | null
     geo_lng: number | string | null
-    properties: { address: string | null; city: string | null } | { address: string | null; city: string | null }[] | null
+    properties:
+      | { address: string | null; city: string | null }
+      | { address: string | null; city: string | null }[]
+      | null
     clients: { display_name: string | null } | { display_name: string | null }[] | null
     missions: { type: string }[] | null
   }
@@ -90,26 +94,13 @@ export default async function CalendarPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-1 min-w-0">
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
-              Planning
-            </p>
-            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
-              Votre <span className="font-serif italic font-normal text-ink-mute">planning</span>
-              <span className="text-ink-mute">.</span>
-            </h1>
-            <p className="text-sm text-ink-mute max-w-xl">
-              Vue calendrier de vos visites diagnostic. Basculez entre Jour, Semaine, Mois et
-              Agenda.
-            </p>
-          </div>
-          <div className="shrink-0">
-            <CalendarSyncDialog httpsUrl={httpsUrl} webcalUrl={webcalUrl} />
-          </div>
-        </div>
-      </header>
+      <AppPageHeader
+        eyebrow="Planning"
+        title="Ton"
+        accent="planning"
+        description="Vue calendrier de tes visites diagnostic. Bascule entre Jour, Semaine, Mois et Agenda."
+        action={<CalendarSyncDialog httpsUrl={httpsUrl} webcalUrl={webcalUrl} />}
+      />
 
       <CalendarView events={events} origin={origin} />
     </div>

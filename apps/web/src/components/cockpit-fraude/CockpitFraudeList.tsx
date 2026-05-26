@@ -34,10 +34,10 @@ interface DpeShoppingApi {
 export function CockpitFraudeList({ items }: { items: MissionItem[] }): React.ReactElement {
   if (items.length === 0) {
     return (
-      <div className="rounded-2xl border border-rule/60 bg-paper px-6 py-12 text-center">
-        <p className="text-[14px] text-ink-soft">
-          Aucune mission DPE en cours. Quand vous démarrez un nouveau DPE, il apparaîtra ici avec
-          une pré-vérification ADEME automatique.
+      <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-12 text-center">
+        <p className="text-[14px] text-[#0F1419]/82">
+          Aucune mission DPE en cours. Quand tu démarres un nouveau DPE, il apparaîtra ici avec une
+          pré-vérification ADEME automatique.
         </p>
       </div>
     )
@@ -81,14 +81,14 @@ function MissionRow({ item }: { item: MissionItem }): React.ReactElement {
       className={cn(
         'rounded-lg border bg-paper px-3 py-3',
         alertLevel === 'warning' && 'border-accent-warm/40',
-        alertLevel === 'info' && 'border-rule/60',
-        alertLevel === 'none' && 'border-rule/60',
+        alertLevel === 'info' && 'border-[#0F1419]/[0.08]',
+        alertLevel === 'none' && 'border-[#0F1419]/[0.08]',
       )}
     >
       <div className="flex items-start gap-3">
         <div className="mt-1 shrink-0">
           {loading ? (
-            <Loader2 className="size-4 animate-spin text-ink-mute" aria-hidden />
+            <Loader2 className="size-4 animate-spin text-[#0F1419]/72" aria-hidden />
           ) : alertLevel === 'warning' ? (
             <AlertCircle className="size-4 text-accent-warm" aria-hidden />
           ) : alertLevel === 'info' && data?.has_recent_dpe ? (
@@ -100,34 +100,34 @@ function MissionRow({ item }: { item: MissionItem }): React.ReactElement {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5">
-            <MapPin className="size-3 text-ink-mute shrink-0" aria-hidden />
-            <p className="text-[13px] font-medium text-ink truncate">{item.address}</p>
+            <MapPin className="size-3 text-[#0F1419]/72 shrink-0" aria-hidden />
+            <p className="text-[13px] font-medium text-[#0F1419] truncate">{item.address}</p>
           </div>
 
           {loading ? (
-            <p className="font-mono text-[10px] text-ink-mute">Vérification ADEME…</p>
+            <p className="font-mono text-[10px] text-[#0F1419]/72">Vérification ADEME…</p>
           ) : data?.error ? (
-            <p className="font-mono text-[10px] text-ink-mute">Vérification indisponible.</p>
+            <p className="font-mono text-[10px] text-[#0F1419]/72">Vérification indisponible.</p>
           ) : data?.has_recent_dpe ? (
-            <p className="text-[12px] text-ink-soft leading-relaxed">
-              <span className="font-mono text-[10px] uppercase tracking-wide text-ink-mute">
+            <p className="text-[12px] text-[#0F1419]/82 leading-relaxed">
+              <span className="font-mono text-[10px] uppercase tracking-wide text-[#0F1419]/72">
                 DPE existant {data.previous_class ?? '?'} ·{' '}
                 {data.days_since_previous != null
                   ? `il y a ${data.days_since_previous}j`
                   : 'récent'}
               </span>
               {data.user_message ? (
-                <span className="block mt-1 text-ink-soft">{data.user_message}</span>
+                <span className="block mt-1 text-[#0F1419]/82">{data.user_message}</span>
               ) : null}
             </p>
           ) : (
-            <p className="text-[12px] text-ink-mute">Aucun DPE récent détecté sur ce bien.</p>
+            <p className="text-[12px] text-[#0F1419]/72">Aucun DPE récent détecté sur ce bien.</p>
           )}
         </div>
 
         <Link
           href={`/dashboard/dossiers/${item.mission_id}/mission`}
-          className="shrink-0 text-ink-mute hover:text-ink"
+          className="shrink-0 text-[#0F1419]/72 hover:text-[#0F1419]"
           aria-label="Ouvrir la mission"
         >
           <ChevronRight className="size-4" />

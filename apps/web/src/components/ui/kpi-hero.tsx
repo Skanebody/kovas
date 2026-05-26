@@ -41,21 +41,21 @@ export function KpiHero({
   return (
     <div
       className={cn(
-        variant === 'card' && 'rounded-2xl border border-rule/80 glass-opaque p-5 shadow-glass-sm',
+        variant === 'card' && 'rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-5',
         featured && variant === 'card' && 'md:col-span-2 md:row-span-2 md:p-8',
         className,
       )}
     >
-      <p className="label-mono text-ink-mute">{label}</p>
+      <p className="label-mono text-[#0F1419]/72">{label}</p>
       <p
         className={cn(
-          'mt-2 hero-serif tracking-tight text-ink leading-none',
+          'mt-2 hero-serif tracking-tight text-[#0F1419] leading-none',
           featured ? 'text-6xl md:text-7xl lg:text-8xl' : 'text-5xl md:text-6xl',
         )}
       >
         {value}
       </p>
-      {hint ? <p className="mt-3 text-sm text-ink-mute">{hint}</p> : null}
+      {hint ? <p className="mt-3 text-sm text-[#0F1419]/72">{hint}</p> : null}
       {trend !== null && trend !== undefined ? (
         <p
           className={cn(

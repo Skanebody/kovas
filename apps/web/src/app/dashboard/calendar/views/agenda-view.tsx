@@ -55,11 +55,11 @@ export function AgendaView({ rangeStart, rangeEnd, events, onSelectEvent }: Agen
 
   if (groupedDays.length === 0) {
     return (
-      <div className="rounded-2xl border border-rule/70 bg-[#F5F7F4] overflow-hidden">
+      <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-[#F5F7F4] overflow-hidden">
         <EmptyState
           icon={CalendarPlus}
           title="Agenda vide"
-          description="Aucun rendez-vous sur la période sélectionnée. Élargissez la fenêtre ou planifiez un nouveau RDV."
+          description="Aucun rendez-vous sur la période sélectionnée. Élargis la fenêtre ou planifie un nouveau RDV."
           action={
             <Button asChild variant="accent" size="sm">
               <Link href="/dashboard/dossiers/new">
@@ -73,8 +73,8 @@ export function AgendaView({ rangeStart, rangeEnd, events, onSelectEvent }: Agen
   }
 
   return (
-    <div className="rounded-2xl border border-rule/70 bg-paper overflow-hidden">
-      <div className="divide-y divide-rule/40">
+    <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden">
+      <div className="divide-y divide-[#0F1419]/[0.08]">
         {groupedDays.map(({ date, events: dayEvents }) => {
           const isToday = sameDay(date, today)
           const dayLabel = formatDayHeader(date, isToday)
@@ -83,15 +83,15 @@ export function AgendaView({ rangeStart, rangeEnd, events, onSelectEvent }: Agen
             <section key={date.toISOString()}>
               <div
                 className={cn(
-                  'sticky top-0 z-10 px-3 sm:px-4 py-2 border-b border-rule/40 flex items-center justify-between gap-2 flex-wrap',
-                  'bg-sage-alt/80 backdrop-blur-md',
+                  'sticky top-0 z-10 px-3 sm:px-4 py-2 border-b border-[#0F1419]/[0.08] flex items-center justify-between gap-2 flex-wrap',
+                  'bg-sage-alt/80 ',
                   isToday && 'bg-chartreuse/[0.12]',
                 )}
               >
                 <h3
                   className={cn(
                     'text-[13px] font-semibold capitalize',
-                    isToday ? 'text-ink' : 'text-ink-soft',
+                    isToday ? 'text-[#0F1419]' : 'text-[#0F1419]/82',
                   )}
                 >
                   {dayLabel}
@@ -102,12 +102,12 @@ export function AgendaView({ rangeStart, rangeEnd, events, onSelectEvent }: Agen
                       Weekend · majoration +50€
                     </Badge>
                   )}
-                  <span className="text-[10px] font-mono text-ink-mute tabular-nums">
+                  <span className="text-[10px] font-mono text-[#0F1419]/72 tabular-nums">
                     {dayEvents.length} RDV
                   </span>
                 </div>
               </div>
-              <ul className="divide-y divide-rule/30">
+              <ul className="divide-y divide-[#0F1419]/[0.05]">
                 {dayEvents.map((ev) => (
                   <AgendaRow key={ev.dossierId} event={ev} onClick={() => onSelectEvent(ev)} />
                 ))}
@@ -154,16 +154,16 @@ function AgendaRow({ event, onClick }: AgendaRowProps) {
       >
         {/* Heure : pillule mono "08:30 → 10:00" avec séparateur · */}
         <div className="shrink-0 w-20 sm:w-24 pt-0.5">
-          <div className="font-mono font-semibold tabular-nums text-ink text-[12px] leading-tight">
+          <div className="font-mono font-semibold tabular-nums text-[#0F1419] text-[12px] leading-tight">
             {timeStart}
           </div>
-          <div className="font-mono tabular-nums text-ink-mute/80 text-[10px] leading-tight">
+          <div className="font-mono tabular-nums text-[#0F1419]/55 text-[10px] leading-tight">
             → {timeEnd}
           </div>
         </div>
 
         {/* Séparateur visuel · */}
-        <span aria-hidden className="text-ink-mute/40 text-[14px] leading-none select-none pt-0.5">
+        <span aria-hidden className="text-[#0F1419]/40 text-[14px] leading-none select-none pt-0.5">
           ·
         </span>
 
@@ -172,7 +172,7 @@ function AgendaRow({ event, onClick }: AgendaRowProps) {
           <div className="flex items-center gap-2 flex-wrap">
             <span
               className={cn(
-                'font-semibold text-ink text-[13px] truncate',
+                'font-semibold text-[#0F1419] text-[13px] truncate',
                 isCancelled && 'line-through decoration-1',
               )}
             >
@@ -187,7 +187,7 @@ function AgendaRow({ event, onClick }: AgendaRowProps) {
           </div>
 
           {addressLine && (
-            <div className="flex items-center gap-1 text-[11px] text-ink-mute">
+            <div className="flex items-center gap-1 text-[11px] text-[#0F1419]/72">
               <MapPin className="size-3 shrink-0" />
               <span className="truncate">{addressLine}</span>
             </div>
@@ -206,13 +206,13 @@ function AgendaRow({ event, onClick }: AgendaRowProps) {
             </div>
           )}
 
-          <div className="font-mono text-[9px] text-ink-mute/70 uppercase tracking-wider">
+          <div className="font-mono text-[9px] text-[#0F1419]/55 uppercase tracking-wider">
             {event.reference}
           </div>
         </div>
 
         {/* Chevron */}
-        <ChevronRight className="size-4 text-ink-mute/60 shrink-0 mt-1" aria-hidden />
+        <ChevronRight className="size-4 text-[#0F1419]/55 shrink-0 mt-1" aria-hidden />
       </button>
     </li>
   )

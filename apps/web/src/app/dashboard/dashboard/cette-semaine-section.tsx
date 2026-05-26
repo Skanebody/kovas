@@ -65,23 +65,23 @@ export async function CetteSemaineSection() {
 
   return (
     <section>
-      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute mb-3">
+      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#0F1419]/72 mb-3">
         CETTE SEMAINE
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-        <div className="rounded-xl border border-rule/40 bg-paper/60 px-5 py-4">
-          <p className="font-serif italic text-[28px] leading-none text-ink mb-1.5">
+        <div className="rounded-xl border border-[#0F1419]/[0.08] bg-paper px-5 py-4">
+          <p className="font-serif italic text-[28px] leading-none text-[#0F1419] mb-1.5">
             {formatEuros(ca)}
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-mute">
+          <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#0F1419]/72">
             CA prévu
           </p>
         </div>
-        <div className="rounded-xl border border-rule/40 bg-paper/60 px-5 py-4">
-          <p className="font-serif italic text-[28px] leading-none text-ink mb-1.5 tabular-nums">
+        <div className="rounded-xl border border-[#0F1419]/[0.08] bg-paper px-5 py-4">
+          <p className="font-serif italic text-[28px] leading-none text-[#0F1419] mb-1.5 tabular-nums">
             {missionsToFinalize}
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-mute">
+          <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#0F1419]/72">
             Missions à finaliser
           </p>
         </div>

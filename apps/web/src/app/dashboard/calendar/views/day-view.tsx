@@ -48,8 +48,8 @@ interface DayViewProps {
  * Vue Jour — grille horaire style Apple Calendar / Cron / Notion Calendar.
  *
  * Graduation :
- *   - heures pleines : label JetBrains Mono à gauche + ligne pleine `border-rule/60`
- *   - demi-heures : ligne pointillée discrète `border-dashed border-rule/30`
+ *   - heures pleines : label JetBrains Mono à gauche + ligne pleine `border-[#0F1419]/[0.08]`
+ *   - demi-heures : ligne pointillée discrète `border-dashed border-[#0F1419]/[0.05]`
  *   - hauteur 48px par heure (24px par 30min) sur desktop, 40px mobile
  *
  * Ligne "heure courante" :
@@ -140,11 +140,11 @@ export function DayView({ date, events, origin, onSelectEvent }: DayViewProps) {
   const nowVisible = nowOffset >= 0 && nowOffset <= timelineHeight
 
   return (
-    <div className="rounded-2xl border border-rule/70 bg-sage overflow-hidden">
+    <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-sage overflow-hidden">
       <div className="relative flex" style={{ height: `${timelineHeight}px` }}>
         {/* Colonne gauche fixed : labels d'heure */}
         <div
-          className="shrink-0 relative border-r border-rule/40 bg-sage"
+          className="shrink-0 relative border-r border-[#0F1419]/[0.08] bg-sage"
           style={{ width: `${gutter}px` }}
           aria-hidden
         >
@@ -156,7 +156,7 @@ export function DayView({ date, events, origin, onSelectEvent }: DayViewProps) {
                     Pour la première heure, on évite que le label déborde du haut du conteneur. */}
                 <span
                   className={cn(
-                    'absolute right-2 font-mono text-[11px] text-ink-mute tabular-nums',
+                    'absolute right-2 font-mono text-[11px] text-[#0F1419]/72 tabular-nums',
                     i === 0 ? 'top-1' : '-top-2 bg-sage px-1',
                   )}
                 >
@@ -181,19 +181,22 @@ export function DayView({ date, events, origin, onSelectEvent }: DayViewProps) {
                 {i > 0 && (
                   <div
                     aria-hidden
-                    className="absolute left-0 right-0 top-0 border-t border-rule/60"
+                    className="absolute left-0 right-0 top-0 border-t border-[#0F1419]/[0.08]"
                   />
                 )}
                 {/* Trait demi-heure pointillé au milieu */}
                 <div
                   aria-hidden
-                  className="absolute left-0 right-0 border-t border-dashed border-rule/30"
+                  className="absolute left-0 right-0 border-t border-dashed border-[#0F1419]/[0.05]"
                   style={{ top: `${halfHourHeight}px` }}
                 />
               </div>
             ))}
             {/* Trait final en bas */}
-            <div aria-hidden className="absolute left-0 right-0 bottom-0 border-t border-rule/60" />
+            <div
+              aria-hidden
+              className="absolute left-0 right-0 bottom-0 border-t border-[#0F1419]/[0.08]"
+            />
           </div>
 
           {/* Now line rouge — uniquement aujourd'hui */}
@@ -227,7 +230,7 @@ export function DayView({ date, events, origin, onSelectEvent }: DayViewProps) {
               <EmptyState
                 icon={CalendarPlus}
                 title="Journée libre"
-                description="Aucun rendez-vous prévu ce jour. Profitez-en pour traiter le back-office ou planifier de nouvelles missions."
+                description="Aucun rendez-vous prévu ce jour. Profites-en pour traiter le back-office ou planifier de nouvelles missions."
                 action={
                   <Button asChild variant="accent" size="sm">
                     <Link href="/dashboard/dossiers/new">
@@ -302,14 +305,14 @@ function EventBlock({ event, top, height, onClick }: EventBlockProps) {
       style={{ top: `${top}px`, height: `${height}px` }}
       className={cn(
         'absolute left-0 right-0 text-left rounded-md p-2 sm:p-3 transition-all',
-        'bg-paper border border-rule/60 border-l-[3px] shadow-glass-sm',
-        'hover:shadow-glass hover:-translate-y-px',
+        'bg-paper border border-[#0F1419]/[0.08] border-l-[3px]',
+        'hover:-translate-y-px',
         borderColor,
         isCancelled && 'opacity-60',
       )}
     >
       <div className="flex items-center justify-between gap-2 mb-0.5">
-        <span className="font-mono font-semibold tabular-nums text-ink text-[11px] sm:text-[12px]">
+        <span className="font-mono font-semibold tabular-nums text-[#0F1419] text-[11px] sm:text-[12px]">
           {timeStart} → {timeEnd}
         </span>
         <Badge
@@ -321,7 +324,7 @@ function EventBlock({ event, top, height, onClick }: EventBlockProps) {
       </div>
       <div
         className={cn(
-          'font-semibold text-ink truncate text-[12px] sm:text-[13px]',
+          'font-semibold text-[#0F1419] truncate text-[12px] sm:text-[13px]',
           isCancelled && 'line-through decoration-1',
         )}
         title={event.clientName ?? undefined}
@@ -329,7 +332,7 @@ function EventBlock({ event, top, height, onClick }: EventBlockProps) {
         {event.clientName ?? 'Sans client'}
       </div>
       {!isCompact && addressLine && (
-        <div className="text-[11px] text-ink-mute line-clamp-1 mt-0.5">{addressLine}</div>
+        <div className="text-[11px] text-[#0F1419]/72 line-clamp-1 mt-0.5">{addressLine}</div>
       )}
       {!isCompact && event.missionTypes.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1">
@@ -337,13 +340,13 @@ function EventBlock({ event, top, height, onClick }: EventBlockProps) {
             <MissionTypeTag key={t} type={t} size="short" className="text-[9px] px-1.5 py-0.5" />
           ))}
           {event.missionTypes.length > 4 && (
-            <span className="text-[9px] text-ink-mute font-mono px-1 py-0.5">
+            <span className="text-[9px] text-[#0F1419]/72 font-mono px-1 py-0.5">
               +{event.missionTypes.length - 4}
             </span>
           )}
         </div>
       )}
-      <div className="absolute bottom-1 right-2 font-mono text-[9px] text-ink-mute/60 uppercase tracking-wider">
+      <div className="absolute bottom-1 right-2 font-mono text-[9px] text-[#0F1419]/55 uppercase tracking-wider">
         {event.reference}
       </div>
     </button>
@@ -366,7 +369,7 @@ function TrajetBlock({ km, minutes, top }: TrajetBlockProps) {
       style={{ top: `${top}px` }}
       className={cn(
         'absolute left-0 right-0 h-5 flex items-center gap-1.5 px-2',
-        'text-[10px] font-mono text-ink-mute/80 italic z-0',
+        'text-[10px] font-mono text-[#0F1419]/55 italic z-0',
       )}
       aria-hidden
     >

@@ -89,7 +89,7 @@ export async function ATraiterSection() {
 
   return (
     <section>
-      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute mb-3">
+      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#0F1419]/72 mb-3">
         À TRAITER
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -98,18 +98,20 @@ export async function ATraiterSection() {
             key={tile.key}
             asChild
             variant="ghost"
-            className="h-auto justify-between rounded-xl border border-rule/40 bg-paper/60 px-4 py-3 text-left hover:bg-ink/5 hover:border-rule"
+            className="h-auto justify-between rounded-xl border border-[#0F1419]/[0.08] bg-paper px-4 py-3 text-left hover:bg-[#0F1419]/5 hover:border-[#0F1419]/[0.12]"
           >
             <Link href={tile.href}>
               <span className="flex items-center gap-2.5 min-w-0">
-                <tile.icon className="size-4 shrink-0 text-ink-mute" />
-                <span className="text-[13px] text-ink truncate font-normal">{tile.label}</span>
+                <tile.icon className="size-4 shrink-0 text-[#0F1419]/72" />
+                <span className="text-[13px] text-[#0F1419] truncate font-normal">
+                  {tile.label}
+                </span>
               </span>
               <span className="flex items-center gap-1.5 shrink-0">
-                <span className="font-mono tabular-nums text-[18px] font-semibold text-ink">
+                <span className="font-mono tabular-nums text-[18px] font-semibold text-[#0F1419]">
                   {tile.count}
                 </span>
-                <ArrowRight className="size-3.5 text-ink-mute" />
+                <ArrowRight className="size-3.5 text-[#0F1419]/72" />
               </span>
             </Link>
           </Button>

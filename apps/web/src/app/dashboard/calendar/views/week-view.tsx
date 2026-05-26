@@ -115,7 +115,7 @@ export function WeekView({ anchor, events, onSelectEvent, onSelectDay }: WeekVie
             <div
               key={day.toISOString()}
               className={cn(
-                'rounded-lg border border-rule/80 bg-paper overflow-hidden',
+                'rounded-lg border border-[#0F1419]/[0.08] bg-paper overflow-hidden',
                 isToday && 'ring-2 ring-[#0F1419]/30',
               )}
             >
@@ -123,32 +123,32 @@ export function WeekView({ anchor, events, onSelectEvent, onSelectDay }: WeekVie
                 type="button"
                 onClick={() => onSelectDay(day)}
                 className={cn(
-                  'w-full px-3 py-2 border-b border-rule flex items-center justify-between',
+                  'w-full px-3 py-2 border-b border-[#0F1419]/[0.08] flex items-center justify-between',
                   'hover:bg-sage-alt/40 transition-colors',
                   isToday && 'bg-sage-alt/60',
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
+                  <span className="font-mono text-[10px] uppercase tracking-wider font-semibold text-[#0F1419]/72">
                     {DAY_NAMES_SHORT[idx]}
                   </span>
                   <span
                     className={cn(
                       'text-base font-bold tabular-nums',
                       isToday &&
-                        'inline-flex items-center justify-center size-7 rounded-full bg-ink text-sage',
+                        'inline-flex items-center justify-center size-7 rounded-full bg-[#0F1419] text-sage',
                     )}
                   >
                     {day.getDate()}
                   </span>
                 </div>
-                <span className="text-[10px] font-mono text-ink-mute tabular-nums">
+                <span className="text-[10px] font-mono text-[#0F1419]/72 tabular-nums">
                   {dayEvents.length} RDV
                 </span>
               </button>
               <div className="p-1.5 space-y-1.5">
                 {dayEvents.length === 0 ? (
-                  <p className="text-[11px] text-ink-mute/60 text-center py-3 italic">—</p>
+                  <p className="text-[11px] text-[#0F1419]/55 text-center py-3 italic">—</p>
                 ) : (
                   dayEvents.map((ev) => (
                     <WeekEventCard
@@ -170,11 +170,14 @@ export function WeekView({ anchor, events, onSelectEvent, onSelectDay }: WeekVie
   // Desktop : grille horaire 7 colonnes + gutter heures.
   // ---------------------------------------------------------------------------
   return (
-    <div className="rounded-2xl border border-rule/70 bg-sage overflow-hidden">
+    <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-sage overflow-hidden">
       {/* Header sticky : 7 jours */}
-      <div className="sticky top-0 z-20 flex bg-paper/95 backdrop-blur-md border-b border-rule/60">
+      <div className="sticky top-0 z-20 flex bg-paper border-b border-[#0F1419]/[0.08]">
         {/* Spacer aligné sur le gutter */}
-        <div className="shrink-0 border-r border-rule/40" style={{ width: `${gutter}px` }} />
+        <div
+          className="shrink-0 border-r border-[#0F1419]/[0.08]"
+          style={{ width: `${gutter}px` }}
+        />
         {weekDays.map((day, idx) => {
           const isToday = sameDay(day, today)
           return (
@@ -183,18 +186,18 @@ export function WeekView({ anchor, events, onSelectEvent, onSelectDay }: WeekVie
               type="button"
               onClick={() => onSelectDay(day)}
               className={cn(
-                'flex-1 flex flex-col items-center gap-1 py-2 border-r border-rule/30 last:border-r-0',
+                'flex-1 flex flex-col items-center gap-1 py-2 border-r border-[#0F1419]/[0.05] last:border-r-0',
                 'hover:bg-sage-alt/40 transition-colors',
               )}
               aria-label={`Voir la journée du ${day.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}`}
             >
-              <span className="font-mono text-[10px] uppercase tracking-wider font-semibold text-ink-mute">
+              <span className="font-mono text-[10px] uppercase tracking-wider font-semibold text-[#0F1419]/72">
                 {DAY_NAMES_SHORT[idx]}
               </span>
               <span
                 className={cn(
                   'inline-flex items-center justify-center size-7 rounded-full text-[14px] font-semibold tabular-nums',
-                  isToday ? 'bg-ink text-sage' : 'text-ink',
+                  isToday ? 'bg-[#0F1419] text-sage' : 'text-[#0F1419]',
                 )}
               >
                 {day.getDate()}
@@ -208,7 +211,7 @@ export function WeekView({ anchor, events, onSelectEvent, onSelectDay }: WeekVie
       <div className="relative flex" style={{ height: `${timelineHeight}px` }}>
         {/* Gutter heures */}
         <div
-          className="shrink-0 relative border-r border-rule/40 bg-sage"
+          className="shrink-0 relative border-r border-[#0F1419]/[0.08] bg-sage"
           style={{ width: `${gutter}px` }}
           aria-hidden
         >
@@ -218,7 +221,7 @@ export function WeekView({ anchor, events, onSelectEvent, onSelectDay }: WeekVie
               <div key={hour} className="relative" style={{ height: `${hourHeight}px` }}>
                 <span
                   className={cn(
-                    'absolute right-2 font-mono text-[11px] text-ink-mute tabular-nums',
+                    'absolute right-2 font-mono text-[11px] text-[#0F1419]/72 tabular-nums',
                     i === 0 ? 'top-1' : '-top-2 bg-sage px-1',
                   )}
                 >
@@ -242,17 +245,20 @@ export function WeekView({ anchor, events, onSelectEvent, onSelectDay }: WeekVie
                 {i > 0 && (
                   <div
                     aria-hidden
-                    className="absolute left-0 right-0 top-0 border-t border-rule/60"
+                    className="absolute left-0 right-0 top-0 border-t border-[#0F1419]/[0.08]"
                   />
                 )}
                 <div
                   aria-hidden
-                  className="absolute left-0 right-0 border-t border-dashed border-rule/30"
+                  className="absolute left-0 right-0 border-t border-dashed border-[#0F1419]/[0.05]"
                   style={{ top: `${halfHourHeight}px` }}
                 />
               </div>
             ))}
-            <div aria-hidden className="absolute left-0 right-0 bottom-0 border-t border-rule/60" />
+            <div
+              aria-hidden
+              className="absolute left-0 right-0 bottom-0 border-t border-[#0F1419]/[0.08]"
+            />
           </div>
 
           {/* Now line — full-width sur les 7 colonnes (jour actuel uniquement) */}
@@ -286,7 +292,7 @@ export function WeekView({ anchor, events, onSelectEvent, onSelectDay }: WeekVie
               <div
                 key={day.toISOString()}
                 className={cn(
-                  'flex-1 relative border-r border-rule/30 last:border-r-0',
+                  'flex-1 relative border-r border-[#0F1419]/[0.05] last:border-r-0',
                   isToday && 'bg-chartreuse/[0.04]',
                 )}
               >
@@ -349,11 +355,11 @@ function WeekTimelineBlock({ event, top, height, onClick }: WeekTimelineBlockPro
       )}
       title={`${timeStart} — ${event.clientName ?? 'Sans client'}`}
     >
-      <div className="font-mono text-[10px] tabular-nums font-semibold text-ink leading-tight">
+      <div className="font-mono text-[10px] tabular-nums font-semibold text-[#0F1419] leading-tight">
         {timeStart}
       </div>
       {!isCompact && (
-        <div className="text-[11px] font-medium text-ink truncate leading-tight">
+        <div className="text-[11px] font-medium text-[#0F1419] truncate leading-tight">
           {event.clientName ?? 'Sans client'}
         </div>
       )}
@@ -386,14 +392,14 @@ function WeekEventCard({ event, onClick }: WeekEventCardProps) {
       type="button"
       onClick={onClick}
       className={cn(
-        'block w-full text-left rounded-md p-2 text-[11px] hover:shadow-glass transition-all',
+        'block w-full text-left rounded-md p-2 text-[11px] transition-all',
         'bg-[#0F1419]/[0.06] border-l-2 border-[#0F1419] hover:bg-[#0F1419]/[0.1] hover:-translate-y-px',
         isCancelled && 'opacity-60 line-through decoration-1',
         isDone && 'border-l-accent-green bg-accent-green/[0.06] hover:bg-accent-green/[0.1]',
       )}
     >
       <div className="flex items-center justify-between gap-1.5 mb-1">
-        <span className="font-mono font-semibold tabular-nums text-ink text-[11px]">
+        <span className="font-mono font-semibold tabular-nums text-[#0F1419] text-[11px]">
           {timeStart} → {timeEnd}
         </span>
         <Badge
@@ -403,11 +409,11 @@ function WeekEventCard({ event, onClick }: WeekEventCardProps) {
           {STATUS_LABELS[event.status] ?? event.status}
         </Badge>
       </div>
-      <div className="font-semibold text-ink truncate" title={event.clientName ?? undefined}>
+      <div className="font-semibold text-[#0F1419] truncate" title={event.clientName ?? undefined}>
         {event.clientName ?? 'Sans client'}
       </div>
       {addressLine && (
-        <div className="text-ink-mute line-clamp-2 mt-0.5 leading-snug">{addressLine}</div>
+        <div className="text-[#0F1419]/72 line-clamp-2 mt-0.5 leading-snug">{addressLine}</div>
       )}
       {event.missionTypes.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1.5">

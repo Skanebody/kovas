@@ -1,3 +1,11 @@
+import { DangerZone } from '@/components/danger-zone'
+import { Avatar } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { PageTabs } from '@/components/ui/page-tabs'
+import { getCurrentUser } from '@/lib/auth/current-user'
+import { formatFullAddress } from '@/lib/format-address'
+import { isBusinessClientType } from '@/lib/validation/client'
 import {
   ArrowLeft,
   Building2,
@@ -13,20 +21,12 @@ import {
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { deleteClientAction } from '../actions'
+import { ClientDevisTab } from './_tabs/devis-tab'
 import { ClientDocumentsTab } from './_tabs/documents-tab'
 import { ClientDossiersTab } from './_tabs/dossiers-tab'
 import { ClientFacturesTab } from './_tabs/factures-tab'
-import { ClientDevisTab } from './_tabs/devis-tab'
 import { ClientStatsCard } from './_tabs/stats-card'
-import { DangerZone } from '@/components/danger-zone'
-import { Avatar } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { PageTabs } from '@/components/ui/page-tabs'
-import { getCurrentUser } from '@/lib/auth/current-user'
-import { formatFullAddress } from '@/lib/format-address'
-import { isBusinessClientType } from '@/lib/validation/client'
-import { deleteClientAction } from '../actions'
 
 export const metadata: Metadata = { title: 'Détail client' }
 
@@ -144,9 +144,9 @@ export default async function ClientDetailPage({
       </Button>
 
       {/* ============================================
-          Header fiche client — Qonto pattern
+          Header fiche client — V5 sobre, navy KOVAS
           ============================================ */}
-      <section className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
+      <section className="rounded-xl border border-[#0F1419]/[0.08] bg-paper px-4 sm:px-7 py-5">
         <div className="flex flex-col gap-5">
           {/* Ligne identité */}
           <div className="flex items-start gap-4">
@@ -157,7 +157,7 @@ export default async function ClientDetailPage({
             />
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
+                <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-[#0F1419] truncate">
                   {client.display_name}
                 </h1>
                 <Badge variant="muted" className="uppercase tracking-wider">
@@ -170,12 +170,12 @@ export default async function ClientDetailPage({
                 )}
               </div>
               {personName && client.company_name ? (
-                <p className="text-sm text-ink-mute">
-                  Contact : <span className="text-ink">{personName}</span>
+                <p className="text-sm text-[#0F1419]/72">
+                  Contact : <span className="text-[#0F1419]">{personName}</span>
                 </p>
               ) : null}
             </div>
-            <Button variant="glass" size="sm" asChild className="shrink-0">
+            <Button variant="outline" size="sm" asChild className="shrink-0">
               <Link href={`/dashboard/clients/${client.id}/edit`}>
                 <Pencil className="size-4" /> Modifier
               </Link>
@@ -183,7 +183,7 @@ export default async function ClientDetailPage({
           </div>
 
           {/* Grille coordonnées 4 colonnes desktop */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3 border-t border-rule/40 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3 border-t border-[#0F1419]/[0.08] pt-4">
             <CoordCell
               icon={Phone}
               label="Téléphone"
@@ -210,8 +210,8 @@ export default async function ClientDetailPage({
             />
           </div>
 
-          {/* Row actions Qonto-like */}
-          <div className="flex flex-wrap items-center gap-2 border-t border-rule/40 pt-4">
+          {/* Row actions */}
+          <div className="flex flex-wrap items-center gap-2 border-t border-[#0F1419]/[0.08] pt-4">
             {client.phone ? (
               <Button variant="outline" size="sm" asChild>
                 <a href={`tel:${client.phone}`}>
@@ -255,11 +255,7 @@ export default async function ClientDetailPage({
       {/* ============================================
           Statistiques client (4 KPI)
           ============================================ */}
-      <ClientStatsCard
-        clientId={client.id}
-        orgId={orgId}
-        dossierTotal={dossierTotal}
-      />
+      <ClientStatsCard clientId={client.id} orgId={orgId} dossierTotal={dossierTotal} />
 
       {/* ============================================
           Tabs navigation
@@ -279,34 +275,23 @@ export default async function ClientDetailPage({
           Contenu actif (serveur)
           ============================================ */}
       <div className="space-y-6">
-        {activeTab === 'devis' && (
-          <ClientDevisTab clientId={client.id} orgId={orgId} />
-        )}
-        {activeTab === 'factures' && (
-          <ClientFacturesTab clientId={client.id} orgId={orgId} />
-        )}
-        {activeTab === 'dossiers' && (
-          <ClientDossiersTab clientId={client.id} orgId={orgId} />
-        )}
-        {activeTab === 'documents' && (
-          <ClientDocumentsTab clientId={client.id} orgId={orgId} />
-        )}
+        {activeTab === 'devis' && <ClientDevisTab clientId={client.id} orgId={orgId} />}
+        {activeTab === 'factures' && <ClientFacturesTab clientId={client.id} orgId={orgId} />}
+        {activeTab === 'dossiers' && <ClientDossiersTab clientId={client.id} orgId={orgId} />}
+        {activeTab === 'documents' && <ClientDocumentsTab clientId={client.id} orgId={orgId} />}
       </div>
 
       {/* Notes internes — affichage compact si présent */}
       {client.notes ? (
-        <div className="rounded-xl border border-rule/60 bg-paper/85 p-5 shadow-glass-sm">
-          <div className="text-[11px] font-mono uppercase tracking-[0.1em] text-ink-mute mb-2">
+        <div className="rounded-xl border border-[#0F1419]/[0.08] bg-paper p-5">
+          <div className="text-[11px] font-mono uppercase tracking-[0.1em] text-[#0F1419]/72 mb-2">
             Notes internes
           </div>
-          <p className="text-sm whitespace-pre-wrap text-ink-soft">{client.notes}</p>
+          <p className="text-sm whitespace-pre-wrap text-[#0F1419]/82">{client.notes}</p>
         </div>
       ) : null}
 
-      <DangerZone
-        entityLabel="client"
-        onDelete={deleteClientAction.bind(null, client.id)}
-      />
+      <DangerZone entityLabel="client" onDelete={deleteClientAction.bind(null, client.id)} />
     </div>
   )
 }
@@ -327,36 +312,31 @@ function CoordCell({ icon: Icon, label, value, secondary, href, mono }: CoordCel
   return (
     <div className="flex items-start gap-3 min-w-0">
       <div className="shrink-0 size-9 rounded-pill bg-cream-deep flex items-center justify-center">
-        <Icon className="size-4 text-ink-mute" />
+        <Icon className="size-4 text-[#0F1419]/72" />
       </div>
       <div className="min-w-0 flex-1 space-y-0.5">
-        <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
+        <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#0F1419]/72">
           {label}
         </div>
         {value ? (
           href ? (
             <a
               href={href}
-              className={
-                'block truncate text-sm text-ink hover:underline ' +
-                (mono ? 'font-mono tracking-tight' : '')
-              }
+              className={`block truncate text-sm text-[#0F1419] hover:underline ${mono ? 'font-mono tracking-tight' : ''}`}
             >
               {value}
             </a>
           ) : (
             <div
-              className={
-                'block truncate text-sm text-ink ' + (mono ? 'font-mono tracking-tight' : '')
-              }
+              className={`block truncate text-sm text-[#0F1419] ${mono ? 'font-mono tracking-tight' : ''}`}
             >
               {value}
             </div>
           )
         ) : (
-          <div className="text-sm text-ink-ghost italic">Non renseigné</div>
+          <div className="text-sm text-[#0F1419]/55 italic">Non renseigné</div>
         )}
-        {secondary ? <div className="truncate text-xs text-ink-mute">{secondary}</div> : null}
+        {secondary ? <div className="truncate text-xs text-[#0F1419]/72">{secondary}</div> : null}
       </div>
     </div>
   )

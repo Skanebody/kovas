@@ -26,13 +26,11 @@ export async function AujourdhuiSection() {
 
   return (
     <section>
-      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute mb-3">
+      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#0F1419]/72 mb-3">
         AUJOURD&apos;HUI
       </p>
       {rows.length === 0 ? (
-        <p className="text-[14px] text-ink-mute italic py-2">
-          Aucun rendez-vous planifié.
-        </p>
+        <p className="text-[14px] text-[#0F1419]/72 italic py-2">Aucun rendez-vous planifié.</p>
       ) : (
         <ul>
           {rows.map((d, idx) => {
@@ -55,18 +53,18 @@ export async function AujourdhuiSection() {
                   href={`/dashboard/dossiers/${d.id}`}
                   className={cn(
                     'flex items-center gap-3 py-2.5 group',
-                    !isLast && 'border-b border-rule/30',
+                    !isLast && 'border-b border-[#0F1419]/[0.08]',
                   )}
                 >
-                  <span className="font-mono text-[14px] font-medium text-ink tabular-nums w-12 shrink-0">
+                  <span className="font-mono text-[14px] font-medium text-[#0F1419] tabular-nums w-12 shrink-0">
                     {time}
                   </span>
-                  <span className="flex-1 min-w-0 text-[14px] text-ink truncate">
+                  <span className="flex-1 min-w-0 text-[14px] text-[#0F1419] truncate">
                     <span className="font-medium">{client?.display_name ?? 'Sans client'}</span>
-                    <span className="text-ink-mute"> · {address}</span>
+                    <span className="text-[#0F1419]/72"> · {address}</span>
                   </span>
                   <ChevronRight
-                    className="size-4 text-ink-mute group-hover:text-ink transition-colors"
+                    className="size-4 text-[#0F1419]/72 group-hover:text-[#0F1419] transition-colors"
                     aria-hidden
                   />
                 </Link>

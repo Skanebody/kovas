@@ -76,15 +76,15 @@ export default async function CockpitFraudePage() {
       <AppPageHeader
         eyebrow="Avant mission"
         title="Cockpit fraude DPE"
-        description="Pré-vérification ADEME pour vos missions DPE en cours. Détection des écarts de classe potentiels et historique des DPE récents."
+        description="Pré-vérification ADEME pour tes missions DPE en cours. Détection des écarts de classe potentiels et historique des DPE récents."
       />
 
-      <section className="rounded-2xl border border-rule/60 bg-paper px-4 py-3 flex items-start gap-3">
+      <section className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-4 py-3 flex items-start gap-3">
         <ShieldCheck className="size-5 mt-0.5 text-chartreuse-deep shrink-0" aria-hidden />
         <div>
-          <p className="text-[13px] font-semibold text-ink">Ton aidant, jamais bloquant</p>
-          <p className="text-[13px] text-ink-soft leading-relaxed mt-0.5">
-            Ces vérifications restent informatives. Vous décidez si l'écart est justifié (travaux
+          <p className="text-[13px] font-semibold text-[#0F1419]">Ton aidant, jamais bloquant</p>
+          <p className="text-[13px] text-[#0F1419]/82 leading-relaxed mt-0.5">
+            Ces vérifications restent informatives. Tu décides si l'écart est justifié (travaux
             récents, annexes, etc.) — KOVAS ne bloque rien, et n'envoie JAMAIS rien à l'ADEME
             directement.
           </p>

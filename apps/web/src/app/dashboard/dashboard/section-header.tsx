@@ -19,8 +19,8 @@ interface SectionHeaderProps {
 export function SectionHeader({ number, title, action }: SectionHeaderProps) {
   return (
     <div className="flex items-baseline gap-4 mb-4">
-      <span className="font-mono text-[11px] text-ink-mute tracking-[0.1em]">{number}</span>
-      <span className="font-mono text-[11px] font-semibold text-ink tracking-[0.18em] uppercase">
+      <span className="font-mono text-[11px] text-[#0F1419]/72 tracking-[0.1em]">{number}</span>
+      <span className="font-mono text-[11px] font-semibold text-[#0F1419] tracking-[0.18em] uppercase">
         {title}
       </span>
       {action && <div className="ml-auto">{action}</div>}

@@ -26,7 +26,7 @@ interface ActionContent {
 const DEFAULT_ACTION: ActionContent = {
   eyebrow: 'ACTION DU JOUR',
   title: 'Excellent — tout est à jour',
-  subtitle: 'Profitez-en pour préparer la semaine ou avancer sur vos exports.',
+  subtitle: 'Profites-en pour préparer la semaine ou avancer sur tes exports.',
   ctaLabel: 'Voir la semaine',
   href: '/dashboard/calendar',
 }
@@ -72,7 +72,7 @@ export async function ActionDuJour() {
       const propRow = Array.isArray(upcomingToday.properties)
         ? upcomingToday.properties[0]
         : upcomingToday.properties
-      const who = clientRow?.display_name ?? 'votre prochain rendez-vous'
+      const who = clientRow?.display_name ?? 'ton prochain rendez-vous'
       const where = propRow ? [propRow.address, propRow.city].filter(Boolean).join(', ') : ''
       // FIX-JJ — multi-accès mode mission : Card "Action du jour" branche le
       // bouton "Démarrer ma prochaine mission" directement sur le tchat IA.
@@ -85,8 +85,8 @@ export async function ActionDuJour() {
             eyebrow: 'ACTION DU JOUR',
             title: isImminent
               ? `Démarrer la mission ${time} chez ${who}`
-              : `Préparer votre intervention ${time} chez ${who}`,
-            subtitle: where || 'Vérifiez documents propriétaire et matériel avant le départ.',
+              : `Préparer ton intervention ${time} chez ${who}`,
+            subtitle: where || 'Vérifie documents propriétaire et matériel avant le départ.',
             ctaLabel: isImminent ? 'Démarrer ma prochaine mission' : 'Préparer',
             href: isImminent
               ? `/dashboard/dossiers/${upcomingToday.id}/mission/tchat`
@@ -110,13 +110,13 @@ export async function ActionDuJour() {
   if (onSite) {
     const clientRow = Array.isArray(onSite.clients) ? onSite.clients[0] : onSite.clients
     const propRow = Array.isArray(onSite.properties) ? onSite.properties[0] : onSite.properties
-    const who = clientRow?.display_name ?? 'votre mission en cours'
+    const who = clientRow?.display_name ?? 'ta mission en cours'
     const where = propRow ? [propRow.address, propRow.city].filter(Boolean).join(', ') : ''
     return (
       <ActionCard
         content={{
           eyebrow: 'MISSION EN COURS',
-          title: `Reprendre votre mission chez ${who}`,
+          title: `Reprendre ta mission chez ${who}`,
           subtitle: where || 'La mission a été démarrée mais pas encore terminée.',
           ctaLabel: 'Reprendre la mission',
           href: `/dashboard/dossiers/${onSite.id}/mission/tchat`,
@@ -180,7 +180,7 @@ export async function ActionDuJour() {
       const clientRow = Array.isArray(staleQuote.clients)
         ? staleQuote.clients[0]
         : staleQuote.clients
-      const who = clientRow?.display_name ?? 'votre prospect'
+      const who = clientRow?.display_name ?? 'ton prospect'
       return (
         <ActionCard
           content={{
@@ -204,11 +204,15 @@ export async function ActionDuJour() {
 function ActionCard({ content }: { content: ActionContent }) {
   return (
     <Card variant="opaque" padding="lg" className="border-l-4 border-l-chartreuse">
-      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-mute mb-3">
+      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#0F1419]/72 mb-3">
         {content.eyebrow}
       </p>
-      <h2 className="font-serif italic text-[28px] leading-tight text-ink mb-2">{content.title}</h2>
-      <p className="text-[14px] text-ink-mute leading-relaxed mb-6 max-w-2xl">{content.subtitle}</p>
+      <h2 className="font-serif italic text-[28px] leading-tight text-[#0F1419] mb-2">
+        {content.title}
+      </h2>
+      <p className="text-[14px] text-[#0F1419]/72 leading-relaxed mb-6 max-w-2xl">
+        {content.subtitle}
+      </p>
       <Button variant="accent" size="lg" asChild>
         <Link href={content.href}>
           {content.ctaLabel} <ArrowRight className="size-4" />

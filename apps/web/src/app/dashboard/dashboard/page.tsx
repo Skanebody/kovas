@@ -1,3 +1,4 @@
+import { AppPageHeader } from '@/components/app-page-header'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { parisDayBounds } from '@/lib/paris-dates'
 import type { Metadata } from 'next'
@@ -35,19 +36,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 md:space-y-10 animate-fade-in">
-      {/* Salutation contextuelle — header sticky aligné fiche client */}
-      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
-        <div className="space-y-1">
-          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute capitalize">
-            {todayLabel}
-          </p>
-          <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
-            Bonjour{firstName ? ` ${firstName}` : ''}
-            <span className="text-ink-mute">.</span>
-          </h1>
-          <p className="text-sm text-ink-mute">{visitLabel}</p>
-        </div>
-      </header>
+      {/* Salutation contextuelle — V5 sobre, AppPageHeader unifié */}
+      <AppPageHeader
+        eyebrow={todayLabel}
+        title={`Bonjour${firstName ? ` ${firstName}` : ''}`}
+        description={visitLabel}
+      />
 
       {/* Contenu épuré : action du jour + sections minimes (pattern SIMP-2)
           Cap à 800px pour la lecture confortable, dans le max-w-7xl du layout. */}

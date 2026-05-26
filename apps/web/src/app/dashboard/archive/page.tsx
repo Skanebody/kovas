@@ -17,6 +17,7 @@
  * Sécurité : multi-tenant strict via getCurrentUser() + RLS Supabase.
  */
 
+import { AppPageHeader } from '@/components/app-page-header'
 import { ArchiveBulkExportButton } from '@/components/archive/ArchiveBulkExportButton'
 import { ArchiveFilters } from '@/components/archive/ArchiveFilters'
 import { ArchiveTable } from '@/components/archive/ArchiveTable'
@@ -172,25 +173,13 @@ export default async function ArchivePage({ searchParams }: ArchivePageProps) {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <header className="sticky top-0 z-20 -mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-rule/60 bg-paper/95 backdrop-blur-xl px-4 sm:px-7 py-5 shadow-glass-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-1 min-w-0">
-            <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
-              Archive
-            </p>
-            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-ink truncate">
-              Mes <span className="font-serif italic font-normal text-ink-mute">fichiers</span>
-              <span className="text-ink-mute">.</span>
-            </h1>
-            <p className="text-sm text-ink-mute max-w-xl">
-              Vue globale de tous les fichiers du compte. Filtrez, recherchez, exportez.
-            </p>
-          </div>
-          <div className="shrink-0">
-            <ArchiveBulkExportButton />
-          </div>
-        </div>
-      </header>
+      <AppPageHeader
+        eyebrow="Archive"
+        title="Tes"
+        accent="fichiers"
+        description="Vue globale de tous les fichiers du compte. Filtre, recherche, exporte."
+        action={<ArchiveBulkExportButton />}
+      />
 
       {/* Stats hero — 4 KPI cards alignés sur pattern fiche client */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

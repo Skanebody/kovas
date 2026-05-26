@@ -37,7 +37,7 @@ export function ViewSwitcher({ value, onChange }: ViewSwitcherProps) {
         <select
           value={value}
           onChange={(e) => onChange(e.target.value as CalendarViewMode)}
-          className="h-9 rounded-md border border-rule bg-paper/85 px-2 text-xs font-mono text-ink shadow-sm hover:bg-paper transition-colors"
+          className="h-9 rounded-md border border-[#0F1419]/[0.08] bg-paper px-2 text-xs font-mono text-[#0F1419] hover:bg-paper transition-colors"
         >
           {MODES.map((m) => (
             <option key={m.value} value={m.value}>
@@ -51,7 +51,7 @@ export function ViewSwitcher({ value, onChange }: ViewSwitcherProps) {
       <div
         role="tablist"
         aria-label="Vue calendrier"
-        className="hidden sm:inline-flex items-center gap-1 rounded-pill border border-rule bg-sage-alt/40 p-1"
+        className="hidden sm:inline-flex items-center gap-1 rounded-pill border border-[#0F1419]/[0.08] bg-sage-alt/40 p-1"
       >
         {MODES.map((m) => {
           const isActive = value === m.value
@@ -66,8 +66,8 @@ export function ViewSwitcher({ value, onChange }: ViewSwitcherProps) {
               className={cn(
                 'inline-flex items-center rounded-pill px-3.5 py-1 text-[11px] font-medium transition-all duration-fast',
                 isActive
-                  ? 'bg-[#0F1419] text-paper shadow-sm'
-                  : 'text-ink-mute hover:text-ink hover:bg-paper/60',
+                  ? 'bg-[#0F1419] text-paper'
+                  : 'text-[#0F1419]/72 hover:text-[#0F1419] hover:bg-paper/60',
               )}
             >
               {m.label}

@@ -86,7 +86,7 @@ function statusColor(status: HealthScoreStatus): { dot: string; text: string; bg
 function diagnosticLevelClass(level: HealthScoreDiagnostic['level']): string {
   switch (level) {
     case 'info':
-      return 'text-ink-mute'
+      return 'text-[#0F1419]/72'
     case 'warning':
       return 'text-warning'
     case 'danger':
@@ -105,7 +105,8 @@ export function HealthScoreHero({
   const colors = statusColor(status)
   const delta = previousScore != null ? safeScore - Math.round(previousScore) : null
 
-  const TrendIcon = delta == null ? Minus : delta > 0 ? ArrowUpRight : delta < 0 ? ArrowDownRight : Minus
+  const TrendIcon =
+    delta == null ? Minus : delta > 0 ? ArrowUpRight : delta < 0 ? ArrowDownRight : Minus
   const trendLabel =
     delta == null
       ? 'Pas de comparatif disponible'
@@ -119,8 +120,8 @@ export function HealthScoreHero({
 
   return (
     <Card variant="opaque" padding="none" className="rounded-[24px] overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-rule/60 px-6 py-4">
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] font-semibold text-ink">
+      <div className="flex items-center justify-between gap-3 border-b border-[#0F1419]/[0.08] px-6 py-4">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] font-semibold text-[#0F1419]">
           Santé du cabinet
         </p>
         <span
@@ -147,12 +148,18 @@ export function HealthScoreHero({
             >
               {safeScore}
             </span>
-            <span className="font-mono text-[12px] text-ink-mute tracking-[0.05em]">/100</span>
+            <span className="font-mono text-[12px] text-[#0F1419]/72 tracking-[0.05em]">/100</span>
           </div>
           <span
             className={cn(
               'mt-2 inline-flex items-center gap-1 font-mono text-[11px] tracking-[0.05em]',
-              delta == null ? 'text-ink-mute' : delta > 0 ? 'text-success' : delta < 0 ? 'text-danger' : 'text-ink-mute',
+              delta == null
+                ? 'text-[#0F1419]/72'
+                : delta > 0
+                  ? 'text-success'
+                  : delta < 0
+                    ? 'text-danger'
+                    : 'text-[#0F1419]/72',
             )}
           >
             <TrendIcon className="size-3" aria-hidden />
@@ -163,15 +170,15 @@ export function HealthScoreHero({
         {/* Diagnostics auto */}
         <div className="space-y-3 min-w-0">
           {visibleDiagnostics.length === 0 ? (
-            <p className="text-sm text-ink-mute italic">
-              Aucune alerte particulière ce mois. Continuez sur cette dynamique.
+            <p className="text-sm text-[#0F1419]/72 italic">
+              Aucune alerte particulière ce mois. Continue sur cette dynamique.
             </p>
           ) : (
             <ul className="space-y-2.5">
-              {visibleDiagnostics.map((d, i) => (
+              {visibleDiagnostics.map((d) => (
                 <li
-                  key={i}
-                  className="flex items-start gap-2.5 text-[13px] leading-relaxed text-ink"
+                  key={`${d.level}-${d.message}`}
+                  className="flex items-start gap-2.5 text-[13px] leading-relaxed text-[#0F1419]"
                 >
                   <AlertTriangle
                     className={cn('size-3.5 shrink-0 mt-0.5', diagnosticLevelClass(d.level))}
@@ -186,8 +193,10 @@ export function HealthScoreHero({
       </div>
 
       {methodologyHint ? (
-        <div className="border-t border-rule/60 px-6 py-3">
-          <p className="font-mono text-[10px] text-ink-mute leading-relaxed">{methodologyHint}</p>
+        <div className="border-t border-[#0F1419]/[0.08] px-6 py-3">
+          <p className="font-mono text-[10px] text-[#0F1419]/72 leading-relaxed">
+            {methodologyHint}
+          </p>
         </div>
       ) : null}
     </Card>
