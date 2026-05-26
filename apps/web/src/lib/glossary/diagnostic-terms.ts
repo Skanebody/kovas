@@ -218,6 +218,51 @@ export const GLOSSARY: Readonly<Record<string, GlossaryEntry>> = Object.freeze({
     definition:
       'Logiciel de diagnostic immobilier français, positionné sur le segment des cabinets de taille moyenne. Concurrent direct de Liciel et OBBC.',
   },
+  ademe: {
+    title: 'ADEME — Agence de la transition écologique',
+    definition:
+      'Établissement public chargé du DPE en France. Gère l’annuaire officiel des diagnostics énergétiques et publie la méthode 3CL-2021.',
+    source: {
+      label: 'ademe.fr',
+      url: 'https://www.ademe.fr/',
+    },
+  },
+  dhup: {
+    title: 'DHUP — Direction de l’Habitat, de l’Urbanisme et des Paysages',
+    definition:
+      'Service du ministère de la Transition écologique qui supervise la certification des diagnostiqueurs immobiliers et publie leur annuaire officiel.',
+    source: {
+      label: 'ecologie.gouv.fr · DHUP',
+      url: 'https://www.ecologie.gouv.fr/direction-lhabitat-lurbanisme-et-des-paysages-dhup',
+    },
+  },
+  ign: {
+    title: 'IGN — Institut national de l’information géographique et forestière',
+    definition:
+      'Opérateur public qui publie le cadastre numérique national et les référentiels géographiques utilisés pour cross-vérifier les surfaces.',
+    source: {
+      label: 'ign.fr',
+      url: 'https://www.ign.fr/',
+    },
+  },
+  ban: {
+    title: 'BAN — Base Adresse Nationale',
+    definition:
+      'Référentiel officiel des adresses françaises co-produit par l’IGN, l’INSEE et La Poste. Identifiant unique `ban_id` pour chaque adresse.',
+    source: {
+      label: 'adresse.data.gouv.fr',
+      url: 'https://adresse.data.gouv.fr/',
+    },
+  },
+  insee: {
+    title: 'INSEE — Institut national de la statistique',
+    definition:
+      'Diffuse le répertoire Sirene (SIREN/SIRET) qui identifie les entreprises et la nomenclature officielle des communes utilisée par KOVAS.',
+    source: {
+      label: 'insee.fr',
+      url: 'https://www.insee.fr/',
+    },
+  },
 })
 
 /**

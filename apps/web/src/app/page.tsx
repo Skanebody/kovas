@@ -1,25 +1,29 @@
 /**
  * KOVAS — Homepage marketing kovas.fr/
  *
- * Lot B35 (post-pivot SaaS-only) — Refonte 8 sections strictes :
+ * Lot B35 (post-pivot SaaS-only) — Refonte 8 sections strictes (B69 → 9 sections) :
  *   1. Hero "Le copilote des diagnostiqueurs"
  *   2. Trust bar (6 sources data + 3 chiffres clés)
  *   3. 3 promesses (35 min/mission · zéro erreur ADEME · leads B2C)
  *   4. Comparaison Liciel seul vs Liciel + KOVAS
  *   5. How it works 3 étapes (Capture → Vérifie → Export Liciel)
- *   6. Pricing teaser transparent
- *   7. FAQ 8 objections principales
- *   8. CTA final essai 30 jours
+ *   6. 13 algorithmes propriétaires (B69 — explique les 13 algos A1.3.*)
+ *   7. Pricing teaser transparent
+ *   8. FAQ 8 objections principales
+ *   9. CTA final essai 30 jours
  *
  * Brand strict V5 : sage #F5F7F4 + navy #0F1419 + chartreuse #D4F542 UNIQUEMENT
  * sur CTA conversion et badges validation. Instrument Serif italic réservée
  * Hero + sections 3 & 4. Urbanist body. Aucun gradient, aucune ombre,
  * bordures 1px max.
  *
+ * B69 : ajout `<GlossaryTerm>` sur termes jargon (DPE, Liciel, ADEME, 3CL-2021,
+ * COFRAC, DHUP, GES). Tooltip discret `ⓘ` Lucide 14px navy/55 %.
+ *
  * Avatar : diagnostiqueur 43 ans, ex-cadre reconverti. Ton SOBRE
  * PROFESSIONNEL, vouvoiement, jamais gaming/lifestyle/millennial.
  *
- * Authority : prompt orchestration refonte (Update 3 — homepage 8 sections).
+ * Authority : prompt orchestration refonte (Update 3 — homepage 8 sections + B69).
  */
 
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
@@ -27,19 +31,34 @@ import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { getPublicStats } from '@/lib/public-stats'
 import { buildMetadata } from '@/lib/seo/metadata'
 import { buildOrganizationSchema, buildWebSiteSchema } from '@/lib/seo/schema-org'
 import { getFAQPageSchema } from '@/lib/seo/structured-data'
 import {
+  Activity,
+  AlertTriangle,
   ArrowRight,
+  BadgeCheck,
+  Bell,
+  Brain,
   Building2,
   Camera,
   CheckCircle2,
   Database,
+  FileSearch,
+  Layers,
+  LineChart,
   Mic,
+  RefreshCw,
+  Scan,
+  Search,
   Shield,
+  ShieldAlert,
   Sparkles,
+  Target,
+  TrendingDown,
   Upload,
   XCircle,
 } from 'lucide-react'
@@ -71,8 +90,11 @@ function SectionHero(): React.ReactElement {
           Le <span className="font-serif italic font-normal">copilote</span> des diagnostiqueurs.
         </h1>
         <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
-          Compatible Liciel, ORIS, OBBC. Vous capturez sur le terrain, KOVAS vérifie en temps réel,
-          vous exportez vers votre logiciel principal. 1 h 30 gagnée par mission DPE.
+          Compatible <GlossaryTerm term="liciel">Liciel</GlossaryTerm>,{' '}
+          <GlossaryTerm term="oris">ORIS</GlossaryTerm>,{' '}
+          <GlossaryTerm term="obbc">OBBC</GlossaryTerm>. Vous capturez sur le terrain, KOVAS vérifie
+          en temps réel, vous exportez vers votre logiciel principal. 1 h 30 gagnée par mission{' '}
+          <GlossaryTerm term="dpe">DPE</GlossaryTerm>.
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <Button asChild variant="accent" size="lg">
@@ -175,7 +197,12 @@ function SectionTrustBar({ stats }: { stats: PublicStats }): React.ReactElement 
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function SectionThreePromises(): React.ReactElement {
-  const promises = [
+  const promises: ReadonlyArray<{
+    icon: React.ReactElement
+    title: string
+    sub: React.ReactNode
+    body: React.ReactNode
+  }> = [
     {
       icon: <Mic className="size-5" aria-hidden />,
       title: '35 minutes',
@@ -185,8 +212,18 @@ function SectionThreePromises(): React.ReactElement {
     {
       icon: <CheckCircle2 className="size-5" aria-hidden />,
       title: 'Zéro erreur',
-      sub: 'ADEME signalée',
-      body: 'Pré-vérification intelligente avant publication : cohérence cadastre, distribution locale, jump de classe, GES vs énergie. 13 algorithmes contrôlent chaque mission.',
+      sub: (
+        <>
+          <GlossaryTerm term="ademe">ADEME</GlossaryTerm> signalée
+        </>
+      ),
+      body: (
+        <>
+          Pré-vérification intelligente avant publication : cohérence cadastre, distribution locale,
+          jump de classe, <GlossaryTerm term="ges">GES</GlossaryTerm> vs énergie. 13 algorithmes
+          contrôlent chaque mission.
+        </>
+      ),
     },
     {
       icon: <Sparkles className="size-5" aria-hidden />,
@@ -225,7 +262,7 @@ function SectionThreePromises(): React.ReactElement {
                 </p>
                 <p className="text-sm font-medium text-[#0F1419]/80">{p.sub}</p>
               </div>
-              <p className="text-[14px] text-[#0F1419]/72 leading-relaxed pt-2">{p.body}</p>
+              <div className="text-[14px] text-[#0F1419]/72 leading-relaxed pt-2">{p.body}</div>
             </div>
           ))}
         </div>
@@ -347,12 +384,23 @@ function SectionLicielVsKovas(): React.ReactElement {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function SectionHowItWorks(): React.ReactElement {
-  const steps = [
+  const steps: ReadonlyArray<{
+    n: number
+    icon: React.ReactElement
+    title: React.ReactNode
+    body: React.ReactNode
+  }> = [
     {
       n: 1,
       icon: <Camera className="size-5" aria-hidden />,
       title: 'Capture KOVAS',
-      body: 'Sur le terrain : vocal pièce par pièce, photos géolocalisées, check-lists 3CL embarquées. iPhone, iPad ou Web, offline complet.',
+      body: (
+        <>
+          Sur le terrain : vocal pièce par pièce, photos géolocalisées, check-lists{' '}
+          <GlossaryTerm term="3cl-2021">3CL</GlossaryTerm> embarquées. iPhone, iPad ou Web, offline
+          complet.
+        </>
+      ),
     },
     {
       n: 2,
@@ -363,8 +411,19 @@ function SectionHowItWorks(): React.ReactElement {
     {
       n: 3,
       icon: <Upload className="size-5" aria-hidden />,
-      title: 'Export Liciel pour ADEME',
-      body: "ZIP V4 généré en un clic, import direct dans Liciel. Le calcul 3CL-2021 certifié reste chez Liciel. L'envoi ADEME aussi. Vous gagnez la friction, pas la certification.",
+      title: (
+        <>
+          Export <GlossaryTerm term="liciel">Liciel</GlossaryTerm> pour{' '}
+          <GlossaryTerm term="ademe">ADEME</GlossaryTerm>
+        </>
+      ),
+      body: (
+        <>
+          ZIP V4 généré en un clic, import direct dans Liciel. Le calcul{' '}
+          <GlossaryTerm term="3cl-2021">3CL-2021</GlossaryTerm> certifié reste chez Liciel.
+          L&apos;envoi ADEME aussi. Vous gagnez la friction, pas la certification.
+        </>
+      ),
     },
   ]
   return (
@@ -394,7 +453,7 @@ function SectionHowItWorks(): React.ReactElement {
                 <div className="text-[#0F1419]/55">{step.icon}</div>
               </div>
               <h3 className="text-xl font-semibold text-[#0F1419] tracking-tight">{step.title}</h3>
-              <p className="text-[14px] text-[#0F1419]/72 leading-relaxed">{step.body}</p>
+              <div className="text-[14px] text-[#0F1419]/72 leading-relaxed">{step.body}</div>
             </div>
           ))}
         </div>
@@ -404,7 +463,228 @@ function SectionHowItWorks(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* 6. PRICING TEASER                                                           */
+/* 6. 13 ALGORITHMES PROPRIÉTAIRES (B69)                                       */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * 13 algorithmes A1.3.* exposés au grand public sur la home.
+ *
+ * Pour chaque algo : code mono + titre court + "Ce que ça fait" (technique)
+ * + "Pour vous" (bénéfice diagnostiqueur). Aucun emoji, ton SOBRE.
+ *
+ * Source pure-fn : `apps/web/src/lib/algos/*.ts` (13 fichiers + 13 suites
+ * de tests Vitest). Cf. PROGRESS.md §"Algorithmes A1.3.* — 13 / 13 livrés".
+ *
+ * Ordre choisi : du plus visible/utile au diagnostiqueur (Vision IA équipement,
+ * score conformité avant export) au plus stratégique (SEO fiche kovas.fr,
+ * sync annuaire 4 sources).
+ */
+interface AlgoCard {
+  readonly code: string
+  readonly icon: React.ReactElement
+  readonly title: string
+  readonly what: React.ReactNode
+  readonly forYou: React.ReactNode
+}
+
+const ALGOS_CATALOG: ReadonlyArray<AlgoCard> = [
+  {
+    code: 'A1.3.6',
+    icon: <Scan className="size-4" aria-hidden />,
+    title: 'Vision équipement',
+    what: 'Reconnaît chaudières, étiquettes énergétiques et matériaux isolants directement depuis vos photos terrain.',
+    forYou:
+      'Les caractéristiques se pré-remplissent toutes seules. Vous validez au lieu de saisir.',
+  },
+  {
+    code: 'A1.3.3',
+    icon: <Shield className="size-4" aria-hidden />,
+    title: 'Score conformité',
+    what: 'Note de 0 à 100 sur la cohérence globale du DPE : croisement cadastre, distribution locale, équipements, surface.',
+    forYou: (
+      <>
+        Vous savez avant export si votre rapport va passer les contrôles{' '}
+        <GlossaryTerm term="ademe">ADEME</GlossaryTerm> ou pas.
+      </>
+    ),
+  },
+  {
+    code: 'A1.3.2',
+    icon: <Layers className="size-4" aria-hidden />,
+    title: 'Cohérence cadastre',
+    what: (
+      <>
+        Compare la surface que vous avez saisie avec le cadastre{' '}
+        <GlossaryTerm term="ign">IGN</GlossaryTerm> officiel. Alerte si écart supérieur à 10 %.
+      </>
+    ),
+    forYou: 'Vous évitez les sanctions ADEME pour incohérence métré. Détection en 0,2 seconde.',
+  },
+  {
+    code: 'A1.3.4',
+    icon: <Database className="size-4" aria-hidden />,
+    title: 'Profil unifié propriété',
+    what: (
+      <>
+        Agrège <GlossaryTerm term="ademe">ADEME</GlossaryTerm> +{' '}
+        <GlossaryTerm term="ign">IGN</GlossaryTerm> + DVF + Géorisques +{' '}
+        <GlossaryTerm term="ban">BAN</GlossaryTerm> en un seul appel API.
+      </>
+    ),
+    forYou:
+      '15 minutes de recherche gagnées par mission. Vous arrivez sur place avec tout le contexte.',
+  },
+  {
+    code: 'A1.3.1',
+    icon: <Search className="size-4" aria-hidden />,
+    title: 'DPE shopping detection',
+    what: 'Détecte les propriétaires qui multiplient les diagnostics chez plusieurs cabinets en peu de temps pour obtenir la meilleure classe.',
+    forYou:
+      'Vous identifiez les clients qui cherchent un diag « arrangeant ». Vous protégez votre certification.',
+  },
+  {
+    code: 'A1.3.9',
+    icon: <AlertTriangle className="size-4" aria-hidden />,
+    title: 'Anomalies de production',
+    what: 'Détecte les jumps suspects dans votre zone : classe G en 2023 puis A en 2024 sans travaux déclarés.',
+    forYou: 'Vous savez quels biens dans votre secteur risquent de provoquer un signalement.',
+  },
+  {
+    code: 'A1.3.7',
+    icon: <FileSearch className="size-4" aria-hidden />,
+    title: 'Tri des documents client',
+    what: 'Classe automatiquement les docs uploadés par le propriétaire : factures énergie, anciens DPE, plans, attestations travaux.',
+    forYou: 'Vous arrivez sur place avec un dossier déjà structuré. Zéro tri manuel à faire.',
+  },
+  {
+    code: 'A1.3.10',
+    icon: <Bell className="size-4" aria-hidden />,
+    title: 'Alerte expirations',
+    what: (
+      <>
+        Prédit la date d&apos;expiration de votre certification{' '}
+        <GlossaryTerm term="cofrac">COFRAC</GlossaryTerm> et de votre RC Pro. Alerte 90, 60 et 30
+        jours avant.
+      </>
+    ),
+    forYou: "Aucun risque d'oubli. Plus de mission refusée pour certification expirée.",
+  },
+  {
+    code: 'A1.3.13',
+    icon: <Brain className="size-4" aria-hidden />,
+    title: 'Apprentissage de votre méthode',
+    what: 'Apprend votre façon de saisir au fil des missions : terminologie, ordre des pièces, équipements types.',
+    forYou:
+      'Les suggestions deviennent de plus en plus précises. -60 à -70 % de tokens IA après 6 mois.',
+  },
+  {
+    code: 'A1.3.5',
+    icon: <Target className="size-4" aria-hidden />,
+    title: 'Lead scoring intent',
+    what: "Score d'intention 0-100 sur chaque demande B2C reçue via kovas.fr. Routing Thompson sampling vers le diag le plus pertinent.",
+    forYou:
+      'Vous recevez en priorité les leads qui vont signer. Pas de temps perdu sur les curieux.',
+  },
+  {
+    code: 'A1.3.11',
+    icon: <TrendingDown className="size-4" aria-hidden />,
+    title: 'Risque de churn client',
+    what: 'Repère vos clients à risque de revente prochaine (signaux DVF, durée détention, prix marché).',
+    forYou: '+20 % de missions récurrentes grâce aux relances ciblées au bon moment.',
+  },
+  {
+    code: 'A1.3.12',
+    icon: <LineChart className="size-4" aria-hidden />,
+    title: 'SEO de votre fiche publique',
+    what: 'Audit en continu de votre fiche kovas.fr/[ville] : title, meta, schema.org, maillage, mots-clés.',
+    forYou: 'Votre fiche annuaire remonte sur Google sans publicité. Leads B2C en pilote auto.',
+  },
+  {
+    code: 'A1.3.8',
+    icon: <RefreshCw className="size-4" aria-hidden />,
+    title: 'Sync annuaire 4 sources',
+    what: (
+      <>
+        Met à jour votre fiche depuis 4 sources officielles :{' '}
+        <GlossaryTerm term="dhup">DHUP</GlossaryTerm>, INSEE Sirene,{' '}
+        <GlossaryTerm term="cofrac">COFRAC</GlossaryTerm>, Google My Business.
+      </>
+    ),
+    forYou:
+      'Aucun travail manuel. Votre fiche reflète vos certifications réelles 24 h après tout changement.',
+  },
+]
+
+function SectionAlgosCatalog(): React.ReactElement {
+  return (
+    <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08]">
+      <div className="max-w-[1240px] mx-auto space-y-12">
+        <div className="space-y-3 max-w-2xl">
+          <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
+            Sous le capot
+          </p>
+          <h2
+            className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
+            style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
+          >
+            13 <span className="font-serif italic font-normal">algorithmes</span> propriétaires.
+          </h2>
+          <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
+            Ce que KOVAS calcule pour vous en permanence — et pourquoi ça vous fait gagner du temps,
+            de la sérénité et des leads. Chaque algo est testé (Vitest pure-fn) et exposé dans
+            l&apos;app dès votre première mission.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {ALGOS_CATALOG.map((algo) => (
+            <div
+              key={algo.code}
+              className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-5 py-5 space-y-3 flex flex-col"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
+                  {algo.code}
+                </p>
+                <div className="text-[#0F1419]/55">{algo.icon}</div>
+              </div>
+              <h3 className="text-base font-semibold text-[#0F1419] tracking-tight">
+                {algo.title}
+              </h3>
+              <div className="text-[13px] text-[#0F1419]/72 leading-relaxed flex-1">
+                {algo.what}
+              </div>
+              <div className="pt-2 border-t border-[#0F1419]/[0.06]">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55 mb-1">
+                  Pour vous
+                </p>
+                <div className="text-[13px] text-[#0F1419] font-medium leading-relaxed">
+                  {algo.forYou}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+          <p className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55">
+            <BadgeCheck className="inline size-3.5 mr-1 -mt-px" aria-hidden />
+            422 tests Vitest verts en permanence
+          </p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55">
+            <Activity className="inline size-3.5 mr-1 -mt-px" aria-hidden />
+            Aucun appel IA externe sur 9 de ces algos
+          </p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/55">
+            <ShieldAlert className="inline size-3.5 mr-1 -mt-px" aria-hidden />
+            Données 100 % hébergées en EU (Paris)
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* 7. PRICING TEASER                                                           */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function SectionPricingTeaser(): React.ReactElement {
@@ -482,7 +762,7 @@ function SectionPricingTeaser(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* 7. FAQ — 8 OBJECTIONS PRINCIPALES                                           */
+/* 8. FAQ — 8 OBJECTIONS PRINCIPALES                                           */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 const HOME_FAQ: ReadonlyArray<{ q: string; a: string }> = [
@@ -551,7 +831,7 @@ function SectionFaq(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* 8. CTA FINAL                                                                */
+/* 9. CTA FINAL                                                                */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function SectionFinalCta(): React.ReactElement {
@@ -619,6 +899,7 @@ export default async function HomePage() {
         <SectionThreePromises />
         <SectionLicielVsKovas />
         <SectionHowItWorks />
+        <SectionAlgosCatalog />
         <SectionPricingTeaser />
         <SectionFaq />
         <SectionFinalCta />
