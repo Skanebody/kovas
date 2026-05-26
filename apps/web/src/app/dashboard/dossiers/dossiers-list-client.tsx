@@ -226,74 +226,93 @@ export function DossiersListClient({ dossiers, initialTab }: DossiersListClientP
           />
         ) : (
           <ul className="divide-y divide-rule/30">
-            {filtered.map((d) => (
-              <li key={d.id} className="relative">
-                <Link
-                  href={`/dashboard/dossiers/${d.id}`}
-                  className="group flex items-center gap-4 py-4 px-2 -mx-2 rounded-lg hover:bg-ink/5 transition-colors duration-fast min-h-[72px]"
-                >
-                  <span className="font-mono text-[12px] uppercase tracking-[0.05em] text-ink-mute w-[80px] shrink-0 tabular-nums flex flex-col leading-tight">
-                    <span>{formatDate(d.scheduledAt ?? d.createdAt)}</span>
-                    {(() => {
-                      const t = formatTime(d.scheduledAt)
-                      return t ? (
-                        <span className="text-[11px] text-ink font-medium normal-case tracking-normal">
-                          {t}
-                        </span>
-                      ) : null
-                    })()}
-                  </span>
-
-                  <div className="flex-1 min-w-0 flex flex-col">
-                    <span className="text-[15px] font-medium text-ink truncate">
-                      {buildClientLine(d)}
-                    </span>
-                    <span className="text-[13px] text-ink-mute truncate">
-                      {buildAddressLine(d)}
-                    </span>
-                  </div>
-
-                  <div className="hidden sm:flex flex-wrap items-center gap-1 max-w-[200px] justify-end shrink-0">
-                    {d.missionTypes.slice(0, 3).map((type, i) => (
-                      <DiagChip key={`${d.id}-${type}-${i}`} type={type} />
-                    ))}
-                    {d.missionTypes.length > 3 ? (
-                      <span className="font-mono text-[10px] text-ink-mute">
-                        +{d.missionTypes.length - 3}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <span className="hidden md:inline-flex font-mono text-[11px] uppercase tracking-[0.05em] text-ink-mute shrink-0 w-[80px] text-right">
-                    {DOSSIER_STATUS_LABELS[d.status] ?? d.status}
-                  </span>
-
-                  <ChevronRight
-                    aria-hidden
-                    className="size-4 text-ink-mute/60 shrink-0 group-hover:text-ink-mute transition-colors"
-                  />
-                </Link>
-                {/* FIX-JJ multi-accès #4 — bouton "Mission" inline sur les dossiers
-                    en cours / planifiés aujourd'hui. Positionné en absolute pour ne
-                    pas perturber l'a11y du <Link> parent. */}
-                {isMissionEligible(d) ? (
+            {filtered.map((d) => {
+              const missionEligible = isMissionEligible(d)
+              return (
+                <li key={d.id} className="relative">
                   <Link
-                    href={`/dashboard/dossiers/${d.id}/mission/tchat`}
-                    className={cn(
-                      'absolute right-9 top-1/2 -translate-y-1/2',
-                      'hidden sm:inline-flex items-center gap-1 rounded-pill bg-chartreuse',
-                      'px-2.5 py-1 text-[11px] font-semibold text-ink',
-                      'hover:brightness-95 transition-all shadow-sm',
-                    )}
-                    aria-label={`Démarrer la mission ${d.reference}`}
-                    onClick={(e) => e.stopPropagation()}
+                    href={`/dashboard/dossiers/${d.id}`}
+                    className="group flex items-center gap-4 py-4 px-2 -mx-2 rounded-lg hover:bg-ink/5 transition-colors duration-fast min-h-[72px]"
                   >
-                    <Play className="size-3" aria-hidden />
-                    Mission
+                    <span className="font-mono text-[12px] uppercase tracking-[0.05em] text-ink-mute w-[80px] shrink-0 tabular-nums flex flex-col leading-tight">
+                      <span>{formatDate(d.scheduledAt ?? d.createdAt)}</span>
+                      {(() => {
+                        const t = formatTime(d.scheduledAt)
+                        return t ? (
+                          <span className="text-[11px] text-ink font-medium normal-case tracking-normal">
+                            {t}
+                          </span>
+                        ) : null
+                      })()}
+                    </span>
+
+                    <div className="flex-1 min-w-0 flex flex-col">
+                      <span className="text-[15px] font-medium text-ink truncate">
+                        {buildClientLine(d)}
+                      </span>
+                      <span className="text-[13px] text-ink-mute truncate">
+                        {buildAddressLine(d)}
+                      </span>
+                    </div>
+
+                    <div className="hidden sm:flex flex-wrap items-center gap-1 max-w-[200px] justify-end shrink-0">
+                      {d.missionTypes.slice(0, 3).map((type, i) => (
+                        <DiagChip key={`${d.id}-${type}-${i}`} type={type} />
+                      ))}
+                      {d.missionTypes.length > 3 ? (
+                        <span className="font-mono text-[10px] text-ink-mute">
+                          +{d.missionTypes.length - 3}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {/*
+                      Bouton Mission ou statut texte — mutuellement exclusifs pour eviter
+                      le chevauchement sur les dossiers mission-eligibles. Si la mission
+                      est demarrable, le bouton chartreuse remplace le statut texte.
+                    */}
+                    {missionEligible ? (
+                      // biome-ignore lint/a11y/useSemanticElements: <button> interdit dans <a> (Link parent) — fallback span role=button avec a11y manuel (onKeyDown Enter/Space + aria-label).
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          window.location.href = `/dashboard/dossiers/${d.id}/mission/tchat`
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            window.location.href = `/dashboard/dossiers/${d.id}/mission/tchat`
+                          }
+                        }}
+                        className={cn(
+                          'hidden sm:inline-flex items-center gap-1 rounded-pill bg-chartreuse',
+                          'px-3 py-1.5 text-[11px] font-semibold text-ink shrink-0',
+                          'hover:brightness-95 transition-all shadow-sm cursor-pointer',
+                          'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink',
+                        )}
+                        aria-label={`Démarrer la mission ${d.reference}`}
+                      >
+                        <Play className="size-3" aria-hidden />
+                        Mission
+                      </span>
+                    ) : (
+                      <span className="hidden md:inline-flex font-mono text-[11px] uppercase tracking-[0.05em] text-ink-mute shrink-0 w-[80px] text-right">
+                        {DOSSIER_STATUS_LABELS[d.status] ?? d.status}
+                      </span>
+                    )}
+
+                    <ChevronRight
+                      aria-hidden
+                      className="size-4 text-ink-mute/60 shrink-0 group-hover:text-ink-mute transition-colors"
+                    />
                   </Link>
-                ) : null}
-              </li>
-            ))}
+                </li>
+              )
+            })}
           </ul>
         )}
       </div>

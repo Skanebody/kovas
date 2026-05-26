@@ -134,8 +134,13 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     id: 'capture',
     // FIX-JJ — multi-accès #2 : redirect intelligent vers le mode mission selon
     // le contexte (mission en cours / RDV imminent / fallback wizard).
+    // NB : l'id reste 'capture' pour préserver les préférences user en DB.
+    // Le label est passé à "Démarrer" (verbe d'action métier, plus intuitif
+    // que "Capture" qui est un anglicisme technique non natif diagnostiqueur,
+    // cf. KOVAS_COPY_FOUNDATIONS §8.1 vocabulaire interdit en client-facing).
     href: '/dashboard/capture',
-    label: 'Capture',
+    label: 'Démarrer',
+    tooltip: 'Démarrer une nouvelle mission ou reprendre celle en cours',
     icon: Sparkles,
     defaultZone: 'main',
     defaultPosition: 4,

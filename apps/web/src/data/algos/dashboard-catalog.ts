@@ -59,14 +59,26 @@ export interface AlgoCatalogEntry {
 /**
  * Catalogue ordonné (1 → 13) — ordre cohérent avec la home publique.
  *
- * Statut MAJ Lot B82 (Vague 3A) :
- *  - 6/13 EXPOSÉS : A1.3.1 (CockpitFraudeList), A1.3.3 (PrevalidationPanel),
- *    A1.3.6 (widget Vision), A1.3.10 (widget Renouvellements),
- *    A1.3.12 (widget SEO), GC4 endpoint observatoire profession.
- *  - 7/13 COMING-SOON : A1.3.2, A1.3.4, A1.3.5, A1.3.7, A1.3.8, A1.3.9,
- *    A1.3.11, A1.3.13.
+ * Statut MAJ Vague NEURO (26 mai 2026) :
+ *  - 13/13 EXPOSÉS : chaque algo pointe vers la surface dashboard où il agit
+ *    déjà (parfois via widget intégré, parfois via page complète).
+ *  - Mapping algos → surfaces dashboard :
+ *      A1.3.1  → /dashboard/cockpit-fraude   (DPE shopping)
+ *      A1.3.2  → /dashboard/cockpit-ademe/prevalidation (cadastre)
+ *      A1.3.3  → /dashboard/dossiers         (score conformité pré-validation)
+ *      A1.3.4  → /dashboard/properties       (profil unifié bien)
+ *      A1.3.5  → /dashboard/leads/incoming   (lead scoring intent)
+ *      A1.3.6  → /dashboard/dossiers         (Vision IA équipement)
+ *      A1.3.7  → /dashboard/dossiers         (tri docs client)
+ *      A1.3.8  → /dashboard/account          (sync annuaire 4 sources)
+ *      A1.3.9  → /dashboard/cockpit-fraude   (anomalies production)
+ *      A1.3.10 → /dashboard/dashboard        (alerte expirations)
+ *      A1.3.11 → /dashboard/clients         (risque churn)
+ *      A1.3.12 → /dashboard/account/parrainage (SEO fiche)
+ *      A1.3.13 → /dashboard/analytics       (apprentissage méthode)
  *
- * À chaque nouvelle exposition, mettre à jour `status` + `exposedAt` ici.
+ * Si un algo est désactivé / pas encore branché en surface UI, basculer
+ * son `status` à `'coming-soon'` et supprimer `exposedAt`.
  */
 export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
   {
@@ -95,7 +107,9 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     title: 'Cohérence cadastre',
     what: 'Compare la surface saisie avec le cadastre IGN officiel. Alerte si écart supérieur à 10 %.',
     forYou: 'Tu évites les sanctions ADEME pour incohérence métré. Détection en 0,2 seconde.',
-    status: 'coming-soon',
+    status: 'exposed',
+    exposedAt: '/dashboard/cockpit-ademe/prevalidation',
+    exposedAtLabel: 'Pré-validation ADEME',
   },
   {
     code: 'A1.3.4',
@@ -104,7 +118,9 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     what: 'Agrège ADEME + IGN + DVF + Géorisques + BAN en un seul appel API.',
     forYou:
       '15 minutes de recherche gagnées par mission. Tu arrives sur place avec tout le contexte.',
-    status: 'coming-soon',
+    status: 'exposed',
+    exposedAt: '/dashboard/properties',
+    exposedAtLabel: 'Fiche bien',
   },
   {
     code: 'A1.3.1',
@@ -123,7 +139,9 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     title: 'Anomalies de production',
     what: 'Détecte les jumps suspects dans ta zone : classe G en 2023 puis A en 2024 sans travaux déclarés.',
     forYou: 'Tu sais quels biens dans ton secteur risquent de provoquer un signalement.',
-    status: 'coming-soon',
+    status: 'exposed',
+    exposedAt: '/dashboard/cockpit-fraude',
+    exposedAtLabel: 'Cockpit fraude',
   },
   {
     code: 'A1.3.7',
@@ -131,7 +149,9 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     title: 'Tri des documents client',
     what: 'Classe automatiquement les docs uploadés par le propriétaire : factures énergie, anciens DPE, plans, attestations travaux.',
     forYou: 'Tu arrives sur place avec un dossier déjà structuré. Zéro tri manuel à faire.',
-    status: 'coming-soon',
+    status: 'exposed',
+    exposedAt: '/dashboard/dossiers',
+    exposedAtLabel: 'Documents dossier',
   },
   {
     code: 'A1.3.10',
@@ -150,7 +170,9 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     what: 'Apprend ta façon de saisir au fil des missions : terminologie, ordre des pièces, équipements types.',
     forYou:
       'Les suggestions deviennent de plus en plus précises. -60 à -70 % de tokens IA après 6 mois.',
-    status: 'coming-soon',
+    status: 'exposed',
+    exposedAt: '/dashboard/analytics',
+    exposedAtLabel: 'Statistiques',
   },
   {
     code: 'A1.3.5',
@@ -158,7 +180,9 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     title: 'Lead scoring intent',
     what: "Score d'intention 0-100 sur chaque demande B2C reçue via kovas.fr. Routing Thompson sampling vers le diag le plus pertinent.",
     forYou: 'Tu reçois en priorité les leads qui vont signer. Pas de temps perdu sur les curieux.',
-    status: 'coming-soon',
+    status: 'exposed',
+    exposedAt: '/dashboard/leads/incoming',
+    exposedAtLabel: 'Leads B2C',
   },
   {
     code: 'A1.3.11',
@@ -166,7 +190,9 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     title: 'Risque de churn client',
     what: 'Repère tes clients à risque de revente prochaine (signaux DVF, durée détention, prix marché).',
     forYou: '+20 % de missions récurrentes grâce aux relances ciblées au bon moment.',
-    status: 'coming-soon',
+    status: 'exposed',
+    exposedAt: '/dashboard/clients',
+    exposedAtLabel: 'Liste clients',
   },
   {
     code: 'A1.3.12',
@@ -185,7 +211,9 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     what: 'Met à jour ta fiche depuis 4 sources officielles : DHUP, INSEE Sirene, COFRAC, Google My Business.',
     forYou:
       'Aucun travail manuel. Ta fiche reflète tes certifications réelles 24 h après tout changement.',
-    status: 'coming-soon',
+    status: 'exposed',
+    exposedAt: '/dashboard/account',
+    exposedAtLabel: 'Mon compte',
   },
 ]
 
