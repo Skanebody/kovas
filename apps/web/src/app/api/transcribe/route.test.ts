@@ -62,6 +62,14 @@ vi.mock('@/lib/local-ai/vocabulary/diagnostic-jargon', () => ({
   buildWhisperPrompt: vi.fn(() => 'prompt:fixture'),
 }))
 
+// ── Mock trackPerf : passthrough qui exécute fn() — observabilité no-op ─
+// On capture les appels pour vérifier l'opération + metadata transmis.
+const trackPerfMock = vi.fn(async <T>(_params: unknown, fn: () => Promise<T>) => fn())
+
+vi.mock('@/lib/observability/track-perf', () => ({
+  trackPerf: (params: unknown, fn: () => Promise<unknown>) => trackPerfMock(params, fn),
+}))
+
 import { POST } from './route'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -88,11 +96,12 @@ function buildFormData(opts: {
   return fd
 }
 
-function buildRequest(fd: FormData): Request {
+function buildRequest(fd: FormData, headers?: Record<string, string>): Request {
   // NextRequest hérite de Request — un Request standard suffit pour POST handler.
   return new Request('http://localhost/api/transcribe', {
     method: 'POST',
     body: fd,
+    headers,
   })
 }
 
@@ -153,6 +162,7 @@ beforeEach(() => {
   fromMock.mockReset()
   storageFromMock.mockReset()
   getUserMock.mockReset()
+  trackPerfMock.mockClear()
   getUserMock.mockResolvedValue({
     data: { user: { id: 'user-test-1' } },
     error: null,
@@ -282,6 +292,10 @@ describe('POST /api/transcribe — signature JSON préservée', () => {
     expect(json).toHaveProperty('model_used')
     expect(json).toHaveProperty('engineReason')
     expect(json).toHaveProperty('length_seconds')
+
+    // Nouveaux champs B93 (audit ratio local_wasm vs API)
+    expect(json).toHaveProperty('suggested_engine')
+    expect(json).toHaveProperty('local_wasm_attempted_failed')
   })
 })
 
@@ -304,5 +318,94 @@ describe('POST /api/transcribe — gardes auth/validation', () => {
     const json = await res.json()
     expect(res.status).toBe(400)
     expect(json.error).toMatch(/dossierId/)
+  })
+})
+
+/* ============================================================
+   Lot B93 — Audit ratio local_wasm vs API
+   ============================================================ */
+
+describe('POST /api/transcribe — Lot B93 audit local_wasm', () => {
+  it('header X-Transcription-Engine absent → local_wasm_attempted_failed = false', async () => {
+    const fd = buildFormData({
+      meta: JSON.stringify({ length_seconds: 60, noise_level: 0.1 }),
+    })
+    const res = await POST(buildRequest(fd))
+    const json = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(json.local_wasm_attempted_failed).toBe(false)
+  })
+
+  it('header X-Transcription-Engine: local_wasm_attempted_failed → flag remonté', async () => {
+    const fd = buildFormData({
+      meta: JSON.stringify({ length_seconds: 60, noise_level: 0.1 }),
+    })
+    const res = await POST(
+      buildRequest(fd, { 'X-Transcription-Engine': 'local_wasm_attempted_failed' }),
+    )
+    const json = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(json.local_wasm_attempted_failed).toBe(true)
+    // L'engine effectif reste mini (serveur ne peut pas faire WASM)
+    expect(json.engine).toBe('api_whisper_mini')
+  })
+
+  it('audio court silencieux → suggested_engine = local_wasm (would-be local)', async () => {
+    const fd = buildFormData({
+      meta: JSON.stringify({ length_seconds: 60, noise_level: 0.1 }),
+    })
+    const res = await POST(buildRequest(fd))
+    const json = await res.json()
+
+    expect(res.status).toBe(200)
+    // Engine effectif = mini (localAvailable=false côté serveur)
+    expect(json.engine).toBe('api_whisper_mini')
+    // Engine suggéré = local_wasm (si client avait WASM dispo)
+    expect(json.suggested_engine).toBe('local_wasm')
+  })
+
+  it('audio long → suggested_engine = api_whisper_standard (pas de would-be local)', async () => {
+    const fd = buildFormData({
+      meta: JSON.stringify({ length_seconds: 900, noise_level: 0.3 }),
+    })
+    const res = await POST(buildRequest(fd))
+    const json = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(json.engine).toBe('api_whisper_standard')
+    expect(json.suggested_engine).toBe('api_whisper_standard')
+  })
+
+  it('audio bruyant court → suggested_engine = api_whisper_mini (pas éligible local)', async () => {
+    const fd = buildFormData({
+      meta: JSON.stringify({ length_seconds: 60, noise_level: 0.8 }),
+    })
+    const res = await POST(buildRequest(fd))
+    const json = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(json.engine).toBe('api_whisper_mini')
+    expect(json.suggested_engine).toBe('api_whisper_mini')
+  })
+
+  it('trackPerf appelé avec opération ai.whisper.engine.{engine} + metadata cohérente', async () => {
+    const fd = buildFormData({
+      meta: JSON.stringify({ length_seconds: 60, noise_level: 0.1 }),
+    })
+    await POST(buildRequest(fd))
+
+    expect(trackPerfMock).toHaveBeenCalledOnce()
+    const callArgs = trackPerfMock.mock.calls[0]?.[0] as {
+      operation: string
+      organizationId: string
+      metadata: Record<string, unknown>
+    }
+    expect(callArgs.operation).toBe('ai.whisper.engine.api_whisper_mini')
+    expect(callArgs.organizationId).toBe('org-test-1')
+    expect(callArgs.metadata.model).toBe('gpt-4o-mini-transcribe')
+    expect(callArgs.metadata.suggested_engine).toBe('local_wasm')
+    expect(callArgs.metadata.local_wasm_attempted_failed).toBe(false)
   })
 })

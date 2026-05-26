@@ -4,6 +4,7 @@ import {
   decideTranscriptionEngine,
 } from '@/lib/audio/transcription-router'
 import { buildWhisperPrompt } from '@/lib/local-ai/vocabulary/diagnostic-jargon'
+import { trackPerf } from '@/lib/observability/track-perf'
 import { createClient } from '@/lib/supabase/server'
 import {
   type AnnotatedSegment,
@@ -40,7 +41,19 @@ import OpenAI from 'openai'
  * existants intacts). On ajoute uniquement `engine` + `model_used` + `engineReason`
  * en bonus pour l'audit et le futur dashboard "Économies IA".
  *
- * Authority : CLAUDE.md §3 feature #1 + MISSION-E niveau 3 + Lot B58/B60.
+ * Lot B93 (refonte acqui-target 2026-05) :
+ *   - Lit l'optional header `X-Transcription-Engine` envoyé par le helper client
+ *     `lib/audio/client-transcribe.ts` (valeur `local_wasm_attempted_failed`
+ *     si le client a tenté WASM local et a échoué). Sert d'audit pour mesurer
+ *     le ratio local vs API et prioriser le branchement réel de la lib WASM.
+ *   - Calcule `suggested_engine` (ce qu'aurait décidé le router si `localAvailable=true`)
+ *     en plus de `engine` (décision réelle avec localAvailable=false serveur-side).
+ *     Permet de mesurer le "would-be local" sur les audios courts/silencieux.
+ *   - Instrumente l'appel OpenAI via `trackPerf` avec opération
+ *     `ai.whisper.engine.{api_whisper_mini,api_whisper_standard}` → counter
+ *     PostHog/Supabase pour le dashboard "Économies IA".
+ *
+ * Authority : CLAUDE.md §3 feature #1 + MISSION-E niveau 3 + Lot B58/B60/B93.
  */
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -174,6 +187,21 @@ export async function POST(request: Request) {
   const decision = decideTranscriptionEngine(audioMeta, { localAvailable: false })
   const model = mapEngineToOpenAiModel(decision.engine)
 
+  // ── Lot B93 : audit ratio local_wasm vs API ─────────────────────────────
+  // Le client (helper `lib/audio/client-transcribe.ts`) peut envoyer ce header
+  // pour signaler qu'il a tenté la transcription locale WASM et que ça a
+  // échoué (lib pas chargée, hardware incompat, inference crash). Sans le
+  // header, on suppose que le client n'a juste pas tenté local (audio long,
+  // bruyant, browser ne supporte pas WASM SIMD).
+  //
+  // On calcule en parallèle `suggestedEngine` : ce qu'aurait décidé le router
+  // si le client avait du WASM dispo. Permet de mesurer le "would-be local"
+  // (potentiel d'économie une fois la lib WASM réellement branchée).
+  const engineHint = request.headers.get('X-Transcription-Engine')
+  const localAttemptedFailed = engineHint === 'local_wasm_attempted_failed'
+  const suggestedDecision = decideTranscriptionEngine(audioMeta, { localAvailable: true })
+  const suggestedEngine = suggestedDecision.engine
+
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   const prompt = buildWhisperPrompt(missionTypes)
 
@@ -181,14 +209,36 @@ export async function POST(request: Request) {
     const t0 = Date.now()
     // verbose_json + segment granularity → on récupère avg_logprob + no_speech_prob
     // par segment pour exposer la confiance au client (MISSION-E niveau 3).
-    const result = await openai.audio.transcriptions.create({
-      file,
-      model,
-      language: 'fr',
-      response_format: 'verbose_json',
-      timestamp_granularities: ['segment'],
-      prompt,
-    })
+    //
+    // Lot B93 : on wrappe l'appel dans `trackPerf` pour incrémenter un counter
+    // par engine (`ai.whisper.engine.{api_mini,api_standard}`). Best-effort —
+    // si l'insert perf_metrics échoue, on continue (trackPerf swallow l'erreur).
+    const result = await trackPerf(
+      {
+        operation: `ai.whisper.engine.${decision.engine}`,
+        organizationId: orgId,
+        metadata: {
+          model,
+          engine: decision.engine,
+          engine_reason: decision.reason,
+          length_seconds: audioMeta.length_seconds,
+          noise_level: audioMeta.noise_level,
+          // Trace les retombées local→API pour mesurer le potentiel d'économie
+          // (cf. doc AI_ECONOMICS § "Whisper hybride local WASM + API").
+          local_wasm_attempted_failed: localAttemptedFailed,
+          suggested_engine: suggestedEngine,
+        },
+      },
+      () =>
+        openai.audio.transcriptions.create({
+          file,
+          model,
+          language: 'fr',
+          response_format: 'verbose_json',
+          timestamp_granularities: ['segment'],
+          prompt,
+        }),
+    )
     const latencyMs = Date.now() - t0
 
     // Tarif modèle-dépendant : standard ($0.006/min) vs mini ($0.003/min).
@@ -312,6 +362,15 @@ export async function POST(request: Request) {
       model_used: model,
       engineReason: decision.reason,
       length_seconds: audioMeta.length_seconds,
+      // ── Lot B93 : audit ratio local_wasm vs API ─────────────────────
+      // suggested_engine = ce qu'aurait décidé le router si le client avait
+      // eu WASM dispo (utile pour mesurer le "would-be local"). Si égal à
+      // `engine`, pas de différence. Si `local_wasm` mais engine = `api_whisper_mini`,
+      // c'est exactement la tranche où l'on pourrait économiser.
+      suggested_engine: suggestedEngine,
+      // local_wasm_attempted_failed = true si le client a tenté local et
+      // signalé un échec via le header X-Transcription-Engine.
+      local_wasm_attempted_failed: localAttemptedFailed,
     })
   } catch (err) {
     // Log explicite côté serveur (visible dans le terminal `pnpm dev`)
