@@ -15,6 +15,7 @@ import {
 } from '@/lib/press/releases'
 import { KOVAS_SITE_URL, buildMetadata } from '@/lib/seo/metadata'
 import { ArrowDownToLine, ArrowUpRight, Mail, Phone } from 'lucide-react'
+import Image from 'next/image'
 import Script from 'next/script'
 
 // Revalidate hourly — dynamic press releases are admin-published, not real-time.
@@ -302,6 +303,37 @@ export default async function PressePage() {
                 photo officielle du fondateur, la fiche société, les statistiques marché et la
                 charte graphique. Format ZIP, environ 15 Mo.
               </p>
+
+              {/* Portrait officiel du fondateur — usage presse libre */}
+              <div className="flex flex-col sm:flex-row items-start gap-5 pt-2">
+                <div className="size-32 sm:size-36 rounded-2xl overflow-hidden border border-[#0F1419]/[0.1] shadow-glass-sm shrink-0 relative">
+                  <Image
+                    src="/press-kit/photo-benjamin-bel.jpg"
+                    alt="Portrait officiel de Benjamin Bel, fondateur de KOVAS"
+                    fill
+                    sizes="(min-width: 640px) 144px, 128px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="space-y-2 pt-1 min-w-0">
+                  <p className="font-mono uppercase tracking-wider text-[10px] text-[#0F1419]/55">
+                    Photo officielle · format presse
+                  </p>
+                  <p className="text-sm font-medium text-[#0F1419]">Benjamin Bel</p>
+                  <p className="text-sm text-[#0F1419]/72">
+                    Fondateur et président · SASU Nexus 1993
+                  </p>
+                  <a
+                    href="/press-kit/photo-benjamin-bel.jpg"
+                    download="benjamin-bel-fondateur-kovas.jpg"
+                    className="inline-flex items-center gap-1.5 text-xs text-[#0F1419] underline underline-offset-4 hover:no-underline"
+                  >
+                    <ArrowDownToLine className="size-3.5" aria-hidden />
+                    Télécharger la photo (JPG 1000×1000)
+                  </a>
+                </div>
+              </div>
+
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild variant="accent" size="lg">
                   <a href="/presse/kit-medias" download>

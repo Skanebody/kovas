@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowRight, CheckCircle2, Plus, Share2, Smartphone } from 'lucide-react'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Bienvenue' }
@@ -68,18 +69,31 @@ export default async function OnboardingPage() {
 
       <Card variant="flat" padding="default">
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <CheckCircle2 className="size-4 text-[#34C759]" />
-            Une question, un retour ?
-          </CardTitle>
-          <CardDescription>
-            Pendant les 14 premiers jours, Benjamin (fondateur) lit chaque message personnellement.
-            Écris à{' '}
-            <a href="mailto:contact@kovas.fr" className="underline">
-              contact@kovas.fr
-            </a>
-            .
-          </CardDescription>
+          <div className="flex items-start gap-4">
+            <div className="size-12 rounded-full overflow-hidden border border-rule shrink-0 relative">
+              <Image
+                src="/benjamin-bel-fondateur-kovas.jpg"
+                alt="Benjamin Bel, fondateur de KOVAS"
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-base flex items-center gap-2">
+                <CheckCircle2 className="size-4 text-[#34C759]" />
+                Une question, un retour ?
+              </CardTitle>
+              <CardDescription className="mt-1.5">
+                Pendant les 14 premiers jours, Benjamin (fondateur) lit chaque message
+                personnellement. Écris à{' '}
+                <a href="mailto:contact@kovas.fr" className="underline">
+                  contact@kovas.fr
+                </a>
+                .
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
       </Card>
     </div>
