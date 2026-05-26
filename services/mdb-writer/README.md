@@ -84,16 +84,24 @@ est prête. Utilisé par Railway pour le rolling deploy + par `pingMdbWriter` c�
 ## 5. Setup local
 
 ```bash
-# Pré-requis : Java 21 (OpenJDK Temurin recommandé) + Gradle 8.x optionnel
-# (le wrapper sera ajouté la 1ère fois via `gradle wrapper`)
+# Pré-requis : Java 21 (OpenJDK Temurin recommandé)
+# Le scaffold du wrapper (gradlew + gradlew.bat + gradle/wrapper/gradle-wrapper.properties)
+# est déjà commité. Seul `gradle-wrapper.jar` (~62 kB binaire) doit être bootstrap au 1er run.
 
 cd services/mdb-writer
 
 # 1. Set API key locale (jamais commitée)
 export KOVAS_MDB_WRITER_API_KEY="dev-only-key-$(openssl rand -hex 16)"
 
-# 2. Init Gradle wrapper (1ère fois seulement)
+# 2. Bootstrap gradle-wrapper.jar (1ère fois seulement, 2 options)
+#    Option A : si Gradle est installé localement (recommandé)
 gradle wrapper --gradle-version 8.10
+
+#    Option B : si Gradle n'est pas installé (download direct depuis GitHub)
+./scripts/init-wrapper.sh
+
+# 2bis. Sur fresh clone, donner le bit exécutable si nécessaire (UNIX)
+chmod +x gradlew scripts/init-wrapper.sh
 
 # 3. Tests
 ./gradlew test
@@ -102,6 +110,19 @@ gradle wrapper --gradle-version 8.10
 ./gradlew bootRun
 # → http://localhost:8080/health
 # → POST http://localhost:8080/convert
+```
+
+### Depuis la racine du monorepo (orchestration npm)
+
+Des scripts `pnpm` raccourcis sont disponibles à la racine pour éviter le `cd` :
+
+```bash
+pnpm run mdb-writer:build         # ./gradlew build
+pnpm run mdb-writer:run           # ./gradlew bootRun
+pnpm run mdb-writer:test          # ./gradlew test
+pnpm run mdb-writer:docker:build  # docker build -t kovas-mdb-writer:local .
+pnpm run mdb-writer:docker:run    # docker run -p 8080:8080 ...
+pnpm run mdb-writer:ping          # curl /health (returns 'mdb-writer not running' si DOWN)
 ```
 
 ### Smoke test manuel (curl)
@@ -183,6 +204,21 @@ Couvre dans `mdb-writer-client.test.ts` (8 tests, mocked fetch) :
 - Propagation AbortSignal
 - Health-check OK
 - Health-check network error
+
+### Smoke test integration TS ↔ Java (live service)
+
+```bash
+# 1. Démarrer le microservice en local (autre terminal)
+pnpm run mdb-writer:run
+
+# 2. Lancer le test integration (depuis apps/web)
+cd apps/web
+pnpm vitest run src/lib/liciel/mdb-writer-integration.test.ts
+```
+
+Le test (`mdb-writer-integration.test.ts`) utilise `describe.skipIf(!SERVICE_AVAILABLE)` :
+- Si le microservice répond `/health` → run les tests réels (validation magic header `.mdb`)
+- Si DOWN → skip proprement, **ne casse pas la CI**
 
 ---
 

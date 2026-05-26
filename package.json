@@ -40,7 +40,13 @@
     "seo:check-outdated": "tsx scripts/check-outdated.ts",
     "seo:analyze-bundle": "tsx scripts/analyze-bundle.ts",
     "audit:invoices": "node --experimental-strip-types --no-warnings scripts/audit-invoice-compliance.ts",
-    "refonte:validate": "pnpm typecheck && pnpm check && pnpm -F @kovas/web test:unit && echo '✅ Refonte validation passed'"
+    "refonte:validate": "pnpm typecheck && pnpm check && pnpm -F @kovas/web test:unit && echo '✅ Refonte validation passed'",
+    "mdb-writer:build": "cd services/mdb-writer && ./gradlew build",
+    "mdb-writer:run": "cd services/mdb-writer && ./gradlew bootRun",
+    "mdb-writer:test": "cd services/mdb-writer && ./gradlew test",
+    "mdb-writer:docker:build": "cd services/mdb-writer && docker build -t kovas-mdb-writer:local .",
+    "mdb-writer:docker:run": "docker run -p 8080:8080 -e KOVAS_MDB_WRITER_API_KEY=dev-secret kovas-mdb-writer:local",
+    "mdb-writer:ping": "curl -sf http://localhost:8080/health || echo 'mdb-writer not running'"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
