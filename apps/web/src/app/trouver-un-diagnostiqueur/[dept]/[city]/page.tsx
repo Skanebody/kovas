@@ -639,7 +639,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         {/* ── Section 2 : CTA double intent-match ───────────────────── */}
         <section
           aria-label="Actions principales"
-          className="mb-12 grid sm:grid-cols-2 gap-3 max-w-3xl"
+          className="mb-8 grid sm:grid-cols-2 gap-3 max-w-3xl"
         >
           <Card className="p-5 flex items-center justify-between gap-3 hover:shadow-glass transition-shadow">
             <div className="min-w-0">
@@ -668,7 +668,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         </section>
 
         {/* ── Section 3 : Comment ça marche à {city} en 3 étapes ──── */}
-        <section className="mb-12 space-y-4">
+        <section className="mb-8 space-y-4">
           <h2 className="font-sans font-bold text-2xl tracking-tight">
             Comment ça marche à {cityName}
           </h2>
@@ -703,7 +703,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         {localData ? (
           <section
             aria-label={`Statistiques diagnostic immobilier ${cityName}`}
-            className="mb-12 space-y-4"
+            className="mb-8 space-y-4"
           >
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Statistiques locales du diagnostic à {cityName}
@@ -801,7 +801,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
 
         {/* ── Marché local — paragraphe narratif Amandine Bart ──── */}
         {localData ? (
-          <section aria-label="Synthèse marché diagnostic local" className="mb-12 space-y-4">
+          <section aria-label="Synthèse marché diagnostic local" className="mb-8 space-y-4">
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Synthèse du marché diagnostic à {cityName}
             </h2>
@@ -812,7 +812,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         ) : null}
 
         {/* ── ÉLÉMENT UNIQUE 3 : Diagnostiqueurs locaux réels ──── */}
-        <section className="space-y-4 mb-12">
+        <section className="space-y-4 mb-8">
           <div className="flex items-baseline justify-between flex-wrap gap-2">
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Diagnostiqueurs certifiés à {cityName}
@@ -954,7 +954,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         {cityContext ? (
           <section
             aria-label={`Particularités du diagnostic à ${cityName}`}
-            className="mb-12 space-y-4"
+            className="mb-8 space-y-4"
           >
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Particularités du diagnostic immobilier à {cityName}
@@ -993,7 +993,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
 
         {/* ── FAQ 12 questions ville-spécifique ──────────────────── */}
         {faq.length > 0 ? (
-          <section className="max-w-3xl space-y-4 mb-12">
+          <section className="max-w-3xl space-y-4 mb-8">
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Questions fréquentes — Diagnostic à {cityName}
             </h2>
@@ -1012,7 +1012,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         {amandineContent ? (
           <section
             aria-label={`Évolution prix DPE médian ${cityName} 2021-2026`}
-            className="mb-12 space-y-4"
+            className="mb-8 space-y-4"
           >
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Évolution du prix DPE médian à {cityName} (2021-2026)
@@ -1022,19 +1022,26 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
               indexées sur l'inflation et la complexification 3CL-2021.
             </p>
             <Card className="p-6">
-              <div className="grid grid-cols-6 gap-2 items-end h-32 mb-4">
+              <div className="grid grid-cols-6 gap-3 items-end h-48 mb-4">
                 {amandineContent.priceEvolution.map((p) => {
                   const maxPrice = Math.max(
                     ...amandineContent.priceEvolution.map((x) => x.priceEur),
                   )
-                  const heightPct = Math.round((p.priceEur / maxPrice) * 100)
+                  // Échelle visuelle plus contrastée : on étire entre 40% (min) et 100% (max)
+                  // pour amplifier les variations 5 ans (sinon prix proches = barres quasi égales).
+                  const minPrice = Math.min(
+                    ...amandineContent.priceEvolution.map((x) => x.priceEur),
+                  )
+                  const range = maxPrice - minPrice
+                  const heightPct =
+                    range > 0 ? 40 + Math.round(((p.priceEur - minPrice) / range) * 60) : 100
                   return (
                     <div key={p.year} className="flex flex-col items-center justify-end h-full">
-                      <span className="font-mono text-[10px] text-ink mb-1 tabular-nums">
+                      <span className="font-mono text-xs font-semibold text-ink mb-1.5 tabular-nums">
                         {p.priceEur}€
                       </span>
                       <div
-                        className="w-full rounded-t bg-navy"
+                        className="w-full rounded-t-md bg-navy"
                         style={{ height: `${heightPct}%` }}
                         aria-hidden
                       />
@@ -1042,13 +1049,13 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
                   )
                 })}
               </div>
-              <div className="grid grid-cols-6 gap-2">
+              <div className="grid grid-cols-6 gap-3">
                 {amandineContent.priceEvolution.map((p) => (
-                  <div key={`label-${p.year}`} className="text-center">
-                    <p className="font-mono text-[10px] text-ink-mute tabular-nums">{p.year}</p>
+                  <div key={`label-${p.year}`} className="text-center space-y-0.5">
+                    <p className="font-mono text-xs text-ink-mute tabular-nums">{p.year}</p>
                     {p.variationPct !== null ? (
                       <p
-                        className={`font-mono text-[9px] ${
+                        className={`font-mono text-[11px] font-medium ${
                           p.variationPct >= 0 ? 'text-accent-green' : 'text-accent-red'
                         }`}
                       >
@@ -1070,7 +1077,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         {amandineContent ? (
           <section
             aria-label={`Top 5 diagnostics demandés à ${cityName}`}
-            className="mb-12 space-y-4"
+            className="mb-8 space-y-4"
           >
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Top 5 diagnostics demandés à {cityName}
@@ -1125,7 +1132,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         ) : null}
 
         {/* ── Prix moyens ─────────────────────────────────────────── */}
-        <section className="space-y-4 mb-12">
+        <section className="space-y-4 mb-8">
           <h2 className="font-sans font-bold text-2xl tracking-tight">
             Prix moyens diagnostic à {cityName}
           </h2>
@@ -1159,7 +1166,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
 
         {/* ── Internal linking : 8 diagnostics types × {city} ──── */}
         {registryCity ? (
-          <section aria-label="Diagnostics disponibles" className="mb-12 space-y-4">
+          <section aria-label="Diagnostics disponibles" className="mb-8 space-y-4">
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Diagnostics disponibles à {cityName}
             </h2>
@@ -1182,7 +1189,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
 
         {/* ── Internal linking : villes voisines ─────────────────── */}
         {neighborLinks.length > 0 ? (
-          <section aria-label="Diagnostics villes voisines" className="mb-12 space-y-4">
+          <section aria-label="Diagnostics villes voisines" className="mb-8 space-y-4">
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Diagnostiqueurs dans les villes voisines
             </h2>
@@ -1202,7 +1209,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         ) : null}
 
         {/* ── Bloc auteur Benjamin Bel (E-E-A-T Core Update mai 2026) ── */}
-        <section className="mb-12">
+        <section className="mb-8">
           <AuthorBio
             lastUpdatedIso={lastUpdatedIso}
             contextLabel={`le diagnostic immobilier à ${cityName}`}

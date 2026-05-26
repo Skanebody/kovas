@@ -27,7 +27,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import { KOVAS_SITE_URL, buildMetadata } from '@/lib/seo/metadata'
-import { ArrowRight, Building2, Mail, MapPin } from 'lucide-react'
+import { ArrowRight, Building2, Mail, MapPin, MessageCircle } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import Script from 'next/script'
 
@@ -39,6 +40,11 @@ const FOUNDER = {
   email: COMPANY_IDENTITY.emails.contactGeneral,
   linkedinUrl: 'https://www.linkedin.com/in/benjaminbel/',
   maisonBelUrl: 'https://benjamin-maisonbel.fr/',
+  /** WhatsApp uniquement — pas d'appel direct, message texte attendu. */
+  whatsappE164: '+33745025642',
+  whatsappDisplay: '07 45 02 56 42',
+  /** Photo officielle stockée publiquement, format SEO (Lot SITE-POLISH). */
+  photoSrc: '/benjamin-bel-fondateur-kovas.jpg',
 } as const
 
 export const metadata = buildMetadata({
@@ -135,15 +141,17 @@ export default function AProposPage() {
         {/* HERO — identité fondateur */}
         <section className="px-5 sm:px-12 pt-16 sm:pt-24 pb-12 sm:pb-20 animate-fade-in motion-reduce:animate-none">
           <div className="max-w-[1240px] mx-auto grid gap-10 lg:grid-cols-[260px_1fr] lg:items-end">
-            {/* Portrait placeholder (pas d'image inventée) */}
+            {/* Portrait officiel — Benjamin Bel, fondateur KOVAS / NEXUS 1993 */}
             <div className="flex justify-start">
-              <div
-                aria-hidden
-                className="size-44 sm:size-56 rounded-full bg-[#0F1419]/[0.06] border border-[#0F1419]/[0.1] flex items-center justify-center"
-              >
-                <span className="font-serif italic font-normal text-[#0F1419]/72 text-[64px] leading-none">
-                  BB
-                </span>
+              <div className="size-44 sm:size-56 rounded-full overflow-hidden border border-[#0F1419]/[0.1] shadow-glass-sm relative">
+                <Image
+                  src={FOUNDER.photoSrc}
+                  alt="Benjamin Bel, fondateur de KOVAS et président de la SASU Nexus 1993"
+                  fill
+                  sizes="(min-width: 640px) 224px, 176px"
+                  className="object-cover"
+                  priority
+                />
               </div>
             </div>
 
@@ -454,27 +462,50 @@ export default function AProposPage() {
             <div className="space-y-5 max-w-3xl text-[#0F1419]/80 leading-relaxed">
               <p>
                 Pour toute question sur le produit, la roadmap, un partenariat, la presse ou un
-                échange métier, une seule adresse, lue directement par moi-même :
+                échange métier, deux canaux, lus directement par moi-même :
               </p>
-              <Card variant="opaque" padding="default" className="flex items-center gap-4">
-                <div
-                  aria-hidden
-                  className="size-12 rounded-full bg-[#0F1419]/[0.06] flex items-center justify-center"
-                >
-                  <Mail className="size-5 text-[#0F1419]/72" />
-                </div>
-                <div>
-                  <a
-                    href={`mailto:${FOUNDER.email}`}
-                    className="text-lg font-medium text-[#0F1419] hover:underline underline-offset-4"
+              <div className="grid sm:grid-cols-2 gap-3">
+                <Card variant="opaque" padding="default" className="flex items-start gap-4">
+                  <div
+                    aria-hidden
+                    className="size-11 rounded-full bg-[#0F1419]/[0.06] flex items-center justify-center shrink-0"
                   >
-                    {FOUNDER.email}
-                  </a>
-                  <p className="text-sm text-[#0F1419]/55 mt-0.5">
-                    Réponse sous quarante-huit heures ouvrées, en français.
-                  </p>
-                </div>
-              </Card>
+                    <Mail className="size-5 text-[#0F1419]/72" />
+                  </div>
+                  <div className="min-w-0">
+                    <a
+                      href={`mailto:${FOUNDER.email}`}
+                      className="text-base font-medium text-[#0F1419] hover:underline underline-offset-4 break-all"
+                    >
+                      {FOUNDER.email}
+                    </a>
+                    <p className="text-xs text-[#0F1419]/55 mt-1">
+                      Réponse sous 48 h ouvrées, en français.
+                    </p>
+                  </div>
+                </Card>
+                <Card variant="opaque" padding="default" className="flex items-start gap-4">
+                  <div
+                    aria-hidden
+                    className="size-11 rounded-full bg-[#0F1419]/[0.06] flex items-center justify-center shrink-0"
+                  >
+                    <MessageCircle className="size-5 text-[#0F1419]/72" />
+                  </div>
+                  <div className="min-w-0">
+                    <a
+                      href={`https://wa.me/${FOUNDER.whatsappE164.replace('+', '')}`}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="text-base font-medium text-[#0F1419] hover:underline underline-offset-4"
+                    >
+                      WhatsApp · {FOUNDER.whatsappDisplay}
+                    </a>
+                    <p className="text-xs text-[#0F1419]/55 mt-1">
+                      Message uniquement (pas d&apos;appel direct).
+                    </p>
+                  </div>
+                </Card>
+              </div>
               <p className="text-sm text-[#0F1419]/72">
                 Adresse postale et identité légale complète sur les{' '}
                 <Link
