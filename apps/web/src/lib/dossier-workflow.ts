@@ -118,7 +118,7 @@ const STEPS: WorkflowStep[] = [
   {
     id: 'pieces',
     title: 'Pièces du bien',
-    description: 'Listez les pièces — utilisez les templates pour gagner du temps.',
+    description: 'Liste les pièces — utilise les templates pour gagner du temps.',
     items: [
       {
         id: 'rooms_min_one',
@@ -152,8 +152,7 @@ const STEPS: WorkflowStep[] = [
       {
         id: 'field_photos_tagged',
         label: 'Toutes les photos sont taggées à une pièce',
-        autoCheck: (ctx) =>
-          ctx.photos.length === 0 || ctx.photos.every((p) => p.room_id !== null),
+        autoCheck: (ctx) => ctx.photos.length === 0 || ctx.photos.every((p) => p.room_id !== null),
       },
       {
         id: 'field_voice_one_per_room',
@@ -182,7 +181,7 @@ const STEPS: WorkflowStep[] = [
       },
       {
         id: 'spec_dpe_ecs',
-        label: 'Production d\'eau chaude identifiée',
+        label: "Production d'eau chaude identifiée",
         forDiagnostics: ['dpe_vente', 'dpe_location', 'copropriete'],
         required: true,
       },
@@ -231,7 +230,7 @@ const STEPS: WorkflowStep[] = [
       },
       {
         id: 'spec_plomb_ecaillage',
-        label: 'Photos des zones d\'écaillage / dégradation',
+        label: "Photos des zones d'écaillage / dégradation",
         forDiagnostics: ['plomb_crep'],
         required: true,
       },
@@ -244,13 +243,13 @@ const STEPS: WorkflowStep[] = [
       },
       {
         id: 'spec_gaz_robinets',
-        label: 'Robinets d\'arrêt accessibles et fonctionnels',
+        label: "Robinets d'arrêt accessibles et fonctionnels",
         forDiagnostics: ['gaz'],
         required: true,
       },
       {
         id: 'spec_gaz_conduits',
-        label: 'Conduits d\'évacuation vérifiés',
+        label: "Conduits d'évacuation vérifiés",
         forDiagnostics: ['gaz'],
         required: true,
       },
@@ -276,7 +275,7 @@ const STEPS: WorkflowStep[] = [
       },
       {
         id: 'spec_termites_indices',
-        label: 'Recherche d\'indices (galeries, cordonnets, sciure)',
+        label: "Recherche d'indices (galeries, cordonnets, sciure)",
         forDiagnostics: ['termites'],
         required: true,
       },
@@ -290,7 +289,7 @@ const STEPS: WorkflowStep[] = [
       // ERP
       {
         id: 'spec_erp_georisques',
-        label: 'Document Géorisques téléchargé pour l\'adresse exacte',
+        label: "Document Géorisques téléchargé pour l'adresse exacte",
         forDiagnostics: ['erp'],
         required: true,
       },
@@ -299,7 +298,7 @@ const STEPS: WorkflowStep[] = [
   {
     id: 'validation',
     title: 'Validation avant départ',
-    description: 'Dernière vérification — assurez-vous de ne rien oublier.',
+    description: 'Dernière vérification — assure-toi de ne rien oublier.',
     items: [
       {
         id: 'final_data_complete',
@@ -368,9 +367,7 @@ export function runWorkflow(
       }
     })
 
-    const done = runItems.filter(
-      (it) => it.status === 'auto_ok' || it.checked === true,
-    ).length
+    const done = runItems.filter((it) => it.status === 'auto_ok' || it.checked === true).length
     const progress = runItems.length === 0 ? 1 : done / runItems.length
     const completed = progress >= 1
 

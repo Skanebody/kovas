@@ -48,49 +48,54 @@ export const LEVELS: readonly Level[] = [
   {
     id: 1,
     label: 'Utilisateur Pro',
-    description: 'Statut attribué à la création de votre compte. Vous démarrez votre parcours sur KOVAS.',
+    description: 'Statut attribué à la création de ton compte. Tu démarres ton parcours sur KOVAS.',
     unlockCriteria: {},
     iconColor: 'ink-mute',
   },
   {
     id: 2,
     label: 'Confirmé',
-    description: 'Vous avez pris vos repères sur la plateforme. 10 missions ou 30 jours d\'usage suffisent.',
+    description:
+      "Tu as pris tes repères sur la plateforme. 10 missions ou 30 jours d'usage suffisent.",
     unlockCriteria: { missions: 10, subscriptionDays: 30 },
     iconColor: 'ink-soft',
   },
   {
     id: 3,
     label: 'Sénior',
-    description: 'Votre pratique de KOVAS est solidement établie. 50 missions ou 6 mois d\'abonnement.',
+    description: "Ta pratique de KOVAS est solidement établie. 50 missions ou 6 mois d'abonnement.",
     unlockCriteria: { missions: 50, subscriptionDays: 180 },
     iconColor: 'navy',
   },
   {
     id: 4,
     label: 'Premium',
-    description: 'Vous figurez parmi les diagnostiqueurs les plus actifs. 150 missions ou 12 mois d\'abonnement.',
+    description:
+      "Tu figures parmi les diagnostiqueurs les plus actifs. 150 missions ou 12 mois d'abonnement.",
     unlockCriteria: { missions: 150, subscriptionDays: 365 },
     iconColor: 'chartreuse',
   },
   {
     id: 5,
     label: 'Ambassadeur',
-    description: 'Vous contribuez au réseau KOVAS. 300 missions, ou 3 filleuls ayant payé leur 1re facture.',
+    description:
+      'Tu contribues au réseau KOVAS. 300 missions, ou 3 filleuls ayant payé leur 1re facture.',
     unlockCriteria: { missions: 300, referralsPaid: 3 },
     iconColor: 'chartreuse',
   },
   {
     id: 6,
     label: 'Fidèle',
-    description: 'Vous accompagnez KOVAS depuis 18 mois consécutifs. Une marque de confiance durable.',
+    description:
+      'Tu accompagnes KOVAS depuis 18 mois consécutifs. Une marque de confiance durable.',
     unlockCriteria: { subscriptionDays: 540 },
     iconColor: 'chartreuse-deep',
   },
   {
     id: 7,
     label: 'Expert',
-    description: 'Maîtrise confirmée du métier et de la plateforme. 500+ missions, 24+ mois d\'abonnement, score ADEME ≥ 95 %.',
+    description:
+      "Maîtrise confirmée du métier et de la plateforme. 500+ missions, 24+ mois d'abonnement, score ADEME ≥ 95 %.",
     unlockCriteria: {
       missions: 500,
       subscriptionDays: 730,

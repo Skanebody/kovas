@@ -30,7 +30,7 @@ export interface ProfilePreset {
 export const PROFILE_SOLO_TERRAIN: ProfilePreset = {
   code: 'solo_terrain',
   label: 'Solo terrain',
-  description: 'Capture et dossiers en tête. Idéal si vous êtes principalement en visite client.',
+  description: 'Capture et dossiers en tête. Idéal si tu es principalement en visite client.',
   mainOrder: ['capture', 'dossiers', 'calendar', 'clients', 'coach', 'facturation', 'home'],
 }
 
