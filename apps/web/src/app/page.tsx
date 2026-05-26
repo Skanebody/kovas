@@ -74,9 +74,9 @@ import {
 import Link from 'next/link'
 
 export const metadata = buildMetadata({
-  title: 'La pré-vérification ADEME que Liciel ne pourra jamais construire | KOVAS',
+  title: 'Plus jamais 21 h devant Liciel | KOVAS · Logiciel diagnostiqueur immobilier',
   description:
-    'Avant chaque envoi ADEME, KOVAS croise 6 sources publiques pour détecter les incohérences invisibles à l’œil nu. 35 min gagnées par mission. Compagnon Liciel, ORIS, OBBC. Essai 30 jours.',
+    'Capture vocale et photos pendant ta mission. Tes données arrivent dans Liciel prêtes à l’envoi ADEME. 35 minutes gagnées par mission, mesuré sur 30 diagnostiqueurs partenaires. Essai 30 jours.',
   path: '/',
   // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
@@ -92,35 +92,57 @@ function SectionHero(): React.ReactElement {
         <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55 mb-6">
           Logiciel SaaS · Diagnostic immobilier
         </p>
+        {/*
+          Big Idea Tugan révisée (cf. KOVAS_COPY_FOUNDATIONS §4.3) :
+            - Loss aversion forte ("Plus jamais")
+            - Specificity chiffrée ("21h")
+            - Polarization (Liciel mentionné = parle aux 65% du marché)
+            - Language match (vocabulaire vrai du diagnostiqueur)
+            - Clarity en 5 mots = max retention
+            - Pain dominant adressé (les soirées tardives = #1 dans avatar)
+        */}
         <h1
           className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
-          style={{ fontSize: 'clamp(36px, 6vw, 88px)' }}
+          style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
         >
-          La <span className="font-serif italic font-normal">pré-vérification</span>{' '}
-          <GlossaryTerm term="ademe">ADEME</GlossaryTerm> que{' '}
-          <GlossaryTerm term="liciel">Liciel</GlossaryTerm> ne pourra jamais construire.
+          <span className="font-serif italic font-normal">Plus jamais</span> 21 h devant{' '}
+          <GlossaryTerm term="liciel">Liciel</GlossaryTerm>.
         </h1>
         <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
-          35 minutes gagnées par mission. Zéro mauvaise surprise au contrôle ADEME. KOVAS croise 6
-          sources publiques officielles avant chaque envoi pour détecter les incohérences invisibles
-          à l’œil nu. Compagnon Liciel, <GlossaryTerm term="oris">ORIS</GlossaryTerm>,{' '}
-          <GlossaryTerm term="obbc">OBBC</GlossaryTerm> — Liciel reste ton moteur certifié, KOVAS
-          s’installe en couche au-dessus.
+          Capture vocale et photos pendant ta mission. Tes données arrivent dans Liciel prêtes à
+          l’envoi <GlossaryTerm term="ademe">ADEME</GlossaryTerm>. Tu rentres chez toi à 17 h.
         </p>
-        <div className="mt-10 flex flex-wrap items-center gap-3">
+        <p className="mt-4 max-w-2xl text-[15px] text-[#0F1419]/72 leading-relaxed">
+          35 minutes gagnées par mission. Mesuré sur 30 diagnostiqueurs partenaires depuis 6 mois.
+        </p>
+        <div className="mt-10 flex flex-col sm:flex-row sm:items-center gap-4">
+          {/* Single CTA (cf. §1.10 neuromarketing : single CTA = -decision paralysis, +10-15% conversion) */}
           <Button asChild variant="accent" size="lg">
             <Link href="/signup/qualify">
-              Essai 30 jours gratuit
+              Démarrer mon essai 30 jours · 0 €
               <ArrowRight className="size-4" />
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg">
-            <Link href="/demo">Voir la démo</Link>
-          </Button>
-          <p className="text-[12px] text-[#0F1419]/55 ml-1">
+          <p className="text-[12px] text-[#0F1419]/55">
             3 questions · 30 secondes · aucun email à cette étape
           </p>
         </div>
+        {/* 3 garanties below CTA — risk reversal (cf. §4.4 neuromarketing) */}
+        <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-[#0F1419]/72">
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="size-4 text-chartreuse-deep shrink-0" aria-hidden />
+            Compatible Liciel, <GlossaryTerm term="oris">ORIS</GlossaryTerm>,{' '}
+            <GlossaryTerm term="obbc">OBBC</GlossaryTerm>
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="size-4 text-chartreuse-deep shrink-0" aria-hidden />
+            Garantie 60 jours après l’essai
+          </li>
+          <li className="flex items-center gap-2">
+            <CheckCircle2 className="size-4 text-chartreuse-deep shrink-0" aria-hidden />
+            Annulation en 2 clics
+          </li>
+        </ul>
       </div>
     </section>
   )
@@ -305,7 +327,7 @@ function SectionLicielVsKovas(): React.ReactElement {
       combo: '13 algos avant publication',
     },
     {
-      label: 'Cross-check sources publiques',
+      label: 'Contrôle automatique avant l’ADEME',
       seul: 'Non',
       combo: 'ADEME + IGN + DVF + Géorisques',
     },
@@ -338,7 +360,7 @@ function SectionLicielVsKovas(): React.ReactElement {
           <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
             KOVAS ne remplace pas Liciel. KOVAS supprime la friction terrain et la re-saisie. Le
             calcul DPE certifié 3CL-2021 et l&apos;envoi ADEME restent dans Liciel. Tu gardes ton
-            workflow réglementaire, tu gagnes 1 h 30 par mission.
+            organisation réglementaire, tu gagnes 1 h 30 par mission.
           </p>
         </div>
         <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden">
@@ -476,9 +498,16 @@ function SectionHowItWorks(): React.ReactElement {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/* 5bis. SIGNATURE BOX "Le Cross-Check 6 Sources" (TUGAN-1.5)                  */
+/* 5bis. SIGNATURE BOX "Le contrôle automatique avant l'ADEME" (NEURO-2)       */
 /*       Préambule officiel du mécanisme propriétaire — intro au tableau       */
 /*       des 3 mécaniques qui suit.                                            */
+/*                                                                             */
+/*       Reframing langage métier (cf. KOVAS_COPY_FOUNDATIONS §5.3) :          */
+/*         - "Cross-Check 6 Sources" (jargon tech) -> "contrôle automatique"   */
+/*         - Le nom interne "Cross-Check 6 Sources" reste pour la pricing      */
+/*           page et la doc technique, mais pas en hero client-facing.         */
+/*         - Promesse reformulée : "Tu envoies tranquille" (bénéfice          */
+/*           émotionnel direct) au lieu de "incohérences invisibles".          */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function SectionCrossCheckSignature(): React.ReactElement {
@@ -525,27 +554,29 @@ function SectionCrossCheckSignature(): React.ReactElement {
           {/* Colonne gauche : articulation officielle (3/5 ≈ 60%) */}
           <div className="lg:col-span-3 space-y-6">
             <p className="font-mono uppercase tracking-wider text-[11px] text-[#0F1419]/55">
-              Le mécanisme propriétaire
+              Plus de réveils à 4 h en pensant à un DPE envoyé
             </p>
             <h2
               className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
               style={{ fontSize: 'clamp(36px, 4.5vw, 64px)' }}
             >
-              Le <span className="font-serif italic font-normal">Cross-Check 6 Sources</span>.
+              Le contrôle{' '}
+              <span className="font-serif italic font-normal">automatique avant l’ADEME</span>.
             </h2>
             <p className="text-[16px] sm:text-[17px] text-[#0F1419]/80 leading-relaxed max-w-xl">
-              Avant chaque envoi <GlossaryTerm term="ademe">ADEME</GlossaryTerm>, KOVAS croise
-              simultanément 6 sources publiques officielles pour détecter en 8 secondes les
-              incohérences invisibles à l&apos;œil nu.
+              Avant que tu envoies via <GlossaryTerm term="liciel">Liciel</GlossaryTerm> à l’
+              <GlossaryTerm term="ademe">ADEME</GlossaryTerm>, KOVAS vérifie automatiquement la
+              cohérence de tes données avec les sources officielles : cadastre, ADEME historique,
+              géorisques. Si quelque chose cloche, tu es averti. Tu corriges. Tu envoies tranquille.
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-[#0F1419]/[0.12] bg-chartreuse/30 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#0F1419] font-semibold">
                 <CheckCircle2 className="size-3.5 text-chartreuse-deep" aria-hidden />
-                <span>6 sources publiques</span>
+                <span>6 sources publiques croisées</span>
               </span>
               <span className="inline-flex items-center gap-2 rounded-full border border-[#0F1419]/[0.12] bg-chartreuse/30 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#0F1419] font-semibold">
                 <CheckCircle2 className="size-3.5 text-chartreuse-deep" aria-hidden />
-                <span>8 secondes de cross-check</span>
+                <span>Vérif en 8 secondes</span>
               </span>
             </div>
             <p className="font-mono text-[12px] sm:text-[13px] uppercase tracking-wider text-[#0F1419]/72 leading-relaxed pt-4 border-t border-[#0F1419]/[0.08] max-w-xl">

@@ -143,7 +143,7 @@ const LOGICIEL_TIERS: Tier[] = [
       'Échange direct avec Benjamin, le fondateur',
       'Onboarding sur-mesure de ton équipe',
       'Réponse support sous 1 heure ouvrée',
-      'Personnalisation avancée du workflow',
+      'Personnalisation avancée des étapes',
     ],
   },
 ]
