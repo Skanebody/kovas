@@ -28,7 +28,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     'Réserve ta démo KOVAS personnalisée en visio 45 min avec un membre de l’équipe. Démonstration adaptée à ton cabinet et ton logiciel actuel. Réponse sous 48 h ouvrées.',
   path: '/demo',
-  ogImage: '/og-images/demo.png',
+  // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
 
 export default function DemoPage() {
@@ -49,7 +49,8 @@ export default function DemoPage() {
     isPartOf: { '@id': `${KOVAS_BASE_URL}/#website` },
     primaryImageOfPage: {
       '@type': 'ImageObject' as const,
-      url: `${KOVAS_BASE_URL}/og-images/demo.png`,
+      // OG image générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
+      url: `${KOVAS_BASE_URL}/demo/opengraph-image`,
     },
     potentialAction: {
       '@type': 'ReserveAction' as const,

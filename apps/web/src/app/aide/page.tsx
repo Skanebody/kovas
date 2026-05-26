@@ -45,7 +45,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     "Centre d'aide KOVAS : démarrage rapide, FAQ, tutoriels vidéo et contact direct. Réponse garantie 24 h ouvrées, 4 h sur Standard et Volume, 1 h en priorité Volume.",
   path: '/aide',
-  ogImage: '/og-images/aide.png',
+  // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
 
 interface QuickStartCard {

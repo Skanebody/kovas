@@ -46,7 +46,7 @@ export const metadata = buildMetadata({
   description:
     'Benjamin Bel, fondateur de KOVAS et président de la SASU Nexus 1993. Entrepreneur normand basé à Dieppe, opérateur immobilier indépendant depuis 2020, à l’origine de KOVAS.',
   path: '/a-propos',
-  ogImage: '/og-images/a-propos.png',
+  // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
 
 function buildJsonLd() {

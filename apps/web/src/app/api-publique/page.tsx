@@ -40,7 +40,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     'API publique KOVAS open data : adresses BAN, cadastre IGN, DPE ADEME, DVF, risques ERP, observatoire profession. OpenAPI 3.1, CC-BY 4.0, rate-limit 60/600 req/min.',
   path: '/api-publique',
-  ogImage: '/og-images/api-publique.png',
+  // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
 
 interface LiveEndpoint {

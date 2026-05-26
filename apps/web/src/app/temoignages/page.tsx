@@ -30,7 +30,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     'Quinze diagnostiqueurs immobiliers Solo et Cabinet, toutes régions, partagent leur expérience KOVAS : gain de temps, leads B2C, zéro rejet ADEME. Citations chiffrées et authentiques.',
   path: '/temoignages',
-  ogImage: '/og-images/temoignages.png',
+  // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
 
 type Profile = 'Solo' | 'Cabinet'

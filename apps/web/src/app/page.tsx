@@ -78,7 +78,7 @@ export const metadata = buildMetadata({
   description:
     'Logiciel SaaS pour diagnostiqueurs immobiliers, compagnon Liciel, ORIS, OBBC. Saisie vocale terrain, photos géolocalisées, exports ZIP. 1h30 gagnée par DPE. Essai 30 jours.',
   path: '/',
-  ogImage: '/og-images/home.png',
+  // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
 
 /* ────────────────────────────────────────────────────────────────────────── */

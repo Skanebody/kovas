@@ -60,7 +60,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     'Comparatif KOVAS vs Liciel, OBBC, AnalysImmo, ORIS : KOVAS est leur couche terrain compagnon (saisie vocale, pré-vérif ADEME). Ton logiciel certifié reste ton moteur. 1h30 gagnée par DPE.',
   path: '/comparatif',
-  ogImage: '/og-images/comparatif.png',
+  // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
 
 // ───────────────────────────────────────────────────────────────────────────

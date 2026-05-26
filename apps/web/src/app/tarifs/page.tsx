@@ -43,7 +43,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     'Tarifs KOVAS : logiciel SaaS dès 29€/mois (Solo 40 missions), annuaire pro dès 19€/mois, bundles combinés. Essai 30 jours gratuit, satisfait ou remboursé 60 jours.',
   path: '/tarifs',
-  ogImage: '/og-images/tarifs.png',
+  // OG image : générée dynamiquement par `opengraph-image.tsx` collocaté (Lot B88).
 })
 
 /* ────────────────────────────────────────────────────────────────────────── */
