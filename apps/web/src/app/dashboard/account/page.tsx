@@ -275,7 +275,7 @@ export default async function AccountPage({
   ]
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in max-w-5xl mx-auto w-full">
       {winbackValid && (
         <ReactivationModal
           code={winbackValid.code}
