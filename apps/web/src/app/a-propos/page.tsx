@@ -205,17 +205,34 @@ export default function AProposPage() {
             </div>
             <div className="space-y-5 max-w-3xl text-[#0F1419]/80 leading-relaxed">
               <p className="text-xl sm:text-2xl font-medium text-[#0F1419] leading-snug">
-                Trois cycles d&apos;entrepreneuriat : sport, immobilier indépendant, édition
-                logicielle. C&apos;est à l&apos;intersection de ces trois métiers que KOVAS prend
-                son sens.
+                Un parcours pluridisciplinaire — entrepreneuriat sport, études patrimoniales, banque
+                privée, immobilier opérationnel — qui converge aujourd&apos;hui sur l&apos;édition
+                logicielle métier avec KOVAS.
               </p>
               <p>
-                Mon premier cycle d&apos;entrepreneur a démarré en 2015 avec la création de la
-                société Bubble Rouen, dans le secteur des activités sportives, en Seine-Maritime.
-                J&apos;y ai appris la gestion opérationnelle d&apos;une petite structure de services
-                : recrutement, prestation client direct, comptabilité courante, conformité
-                administrative. La structure a été clôturée en 2018 dans un cadre ordonné, après
-                trois années d&apos;exploitation.
+                Formation initiale en sport business (AMOS Bachelor 2013-2016 puis Master 2016-2018,
+                MSc Sport Management à Coventry University en 2014-2015), complétée par un Mastère
+                BAC+6 en Gestion de Patrimoine et Immobilier à KEDGE Business School (2018-2019).
+                Cette double formation a structuré ma capacité à analyser un actif (sportif,
+                immobilier, patrimonial) sous l&apos;angle de la valeur, du risque et de
+                l&apos;exploitation opérationnelle.
+              </p>
+              <p>
+                Premier cycle d&apos;entrepreneur en 2015 avec Bubble Rouen puis Bubble Le Havre,
+                deux structures de loisirs sportifs sous franchise (Bubble Foot), classées numéro un
+                national. J&apos;y ai appris la gestion opérationnelle d&apos;une structure de
+                services : recrutement, prestation client direct (deux cents participants par
+                week-end), comptabilité courante, conformité administrative, community management.
+                Clôture ordonnée en 2018 après trois années d&apos;exploitation.
+              </p>
+              <p>
+                En parallèle de mon Mastère KEDGE, chargé d&apos;études patrimoniales chez{' '}
+                <span className="font-medium text-[#0F1419]">Matmut</span> (DGA Finances &amp;
+                Patrimoine, septembre 2018 — novembre 2019, siège Rouen). Études de marché et
+                benchmarks sectoriels sur l&apos;assurance, l&apos;épargne, la prévoyance,
+                l&apos;assurance-vie ; analyses de partenariats avec des insurtech et fintech ;
+                veille concurrentielle et réglementaire. Cette expérience m&apos;a donné le réflexe
+                d&apos;auditer chaque décision produit sous l&apos;angle conformité et risque.
               </p>
               <p>
                 En octobre 2020, j&apos;ai lancé mon activité indépendante dans l&apos;immobilier
@@ -229,13 +246,36 @@ export default function AProposPage() {
                 outils logiciels utilisés.
               </p>
               <p>
-                En décembre 2023, j&apos;ai créé la SASU Nexus 1993, structure éditrice actuelle de
+                Pour consolider cette expertise immobilière, j&apos;ai exercé en parallèle comme
+                gestionnaire chez{' '}
+                <span className="font-medium text-[#0F1419]">Citya Immobilier</span> (novembre 2021
+                — décembre 2022, Dieppe), avec un portefeuille de six cents lots en location longue
+                durée : baux d&apos;habitation et commerciaux, états des lieux, application de la
+                loi ALUR, coordination notaires-syndics-artisans, assemblées générales de
+                copropriété. Puis fondation de{' '}
+                <span className="font-medium text-[#0F1419]">HostnClean</span> en juillet 2022,
+                gestion locative courte durée et saisonnière (Airbnb, Booking, VRBO) avec
+                conciergerie intégrée et yield management dynamique — ma propre structure
+                d&apos;exploitation.
+              </p>
+              <p>
+                De janvier 2023 à mai 2024, banquier clientèle premium chez{' '}
+                <span className="font-medium text-[#0F1419]">Société Générale</span> (cadre niveau
+                H, agence de Dieppe). Gestion d&apos;un portefeuille de clients haut de gamme :
+                analyse financière complète (bilans, scoring crédit, capacité d&apos;emprunt), vente
+                de crédits et placements, conformité LCB-FT et KYC stricte, accompagnement
+                patrimonial. Cette expérience m&apos;a donné le vocabulaire bancaire et fiscal qui
+                manque souvent aux éditeurs SaaS B2B, et la rigueur de la gestion de portefeuille
+                appliquée à un secteur réglementé.
+              </p>
+              <p>
+                En décembre 2023, création de la SASU Nexus 1993, structure éditrice actuelle de
                 KOVAS, immatriculée au RCS de Paris (siège 66 Avenue des Champs-Élysées). En
-                parallèle, je poursuis aujourd&apos;hui une activité de directeur et associé chez
-                Maison Belvar, marque de vente immobilière sans agence en Normandie. Cette double
-                appartenance — opérateur immobilier sur le terrain ET éditeur logiciel — est le
-                socle de KOVAS : je ne construis pas une plateforme depuis un bureau parisien, je la
-                construis en gardant un pied dans la réalité régionale du métier.
+                parallèle, je poursuis aujourd&apos;hui une activité de directeur et associé chez{' '}
+                <span className="font-medium text-[#0F1419]">Maison Belvar</span> — concept premium
+                de bord de mer à Dieppe, Côte d&apos;Albâtre, ouvert d&apos;avril à octobre (bar à
+                huîtres et champagne, snack burgers maison). Cette activité saisonnière me garde un
+                pied dans le terrain régional et la relation client directe, en dehors des écrans.
               </p>
               <p>
                 Le cycle KOVAS démarre officiellement en avril 2026, en solopreneur, avec un
