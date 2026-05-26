@@ -10,15 +10,15 @@
  *   - upsell_suggestions (status pending) limit 5 best priority
  */
 
-import { cache } from 'react'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import {
+  ADDON_PACKS,
   type AddonCode,
   type AddonPackCode,
   type PricingPlanCode,
-  ADDON_PACKS,
-  PRICING_PLANS,
+  resolveTierToPlanCode,
 } from '@/lib/pricing-plans'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { cache } from 'react'
 import type { UserAccess } from './access-control'
 
 interface SubscriptionRow {
@@ -38,25 +38,15 @@ interface PendingSuggestionRow {
   created_at: string
 }
 
-const PLAN_CODE_SET = new Set<string>(PRICING_PLANS.map((p) => p.code))
 const PACK_CODE_SET = new Set<string>(ADDON_PACKS.map((p) => p.code))
 
-const LEGACY_TIER_TO_PLAN_CODE: Record<string, PricingPlanCode> = {
-  decouverte: 'decouverte',
-  standard: 'pro',
-  volume: 'all_inclusive',
-  founder: 'pro',
-  decouverte_legacy: 'decouverte',
-  standard_legacy: 'pro',
-  volume_legacy: 'all_inclusive',
-  founder_legacy: 'pro',
-}
-
+/**
+ * Normalise un tier brut (DB) vers le code PricingPlanCode canonique.
+ * Délègue au helper centralisé `resolveTierToPlanCode()` de pricing-plans.ts
+ * (cf. §6bis). Toute évolution de la grille tarifaire doit être faite là.
+ */
 function normalizePlanCode(raw: string | null | undefined): PricingPlanCode | null {
-  if (!raw) return null
-  if (PLAN_CODE_SET.has(raw)) return raw as PricingPlanCode
-  const legacy = LEGACY_TIER_TO_PLAN_CODE[raw]
-  return legacy ?? null
+  return resolveTierToPlanCode(raw)
 }
 
 /**
@@ -65,10 +55,7 @@ function normalizePlanCode(raw: string | null | undefined): PricingPlanCode | nu
  * `userId` + `orgId` doivent venir de getCurrentUser() côté caller.
  */
 export const loadUserAccess = cache(
-  async (
-    supabase: SupabaseClient,
-    orgId: string | null | undefined,
-  ): Promise<UserAccess> => {
+  async (supabase: SupabaseClient, orgId: string | null | undefined): Promise<UserAccess> => {
     if (!orgId) {
       return { planCode: null, activeAddons: [], activePacks: [] }
     }
@@ -76,7 +63,10 @@ export const loadUserAccess = cache(
     const sb = supabase as unknown as {
       from(table: 'subscriptions'): {
         select(columns: string): {
-          eq(col: string, val: string): {
+          eq(
+            col: string,
+            val: string,
+          ): {
             maybeSingle(): Promise<{ data: SubscriptionRow | null }>
           }
         }
@@ -86,11 +76,19 @@ export const loadUserAccess = cache(
     const sbAddons = supabase as unknown as {
       from(table: 'user_addons'): {
         select(columns: string): {
-          eq(col: string, val: string): {
-            in(col: string, vals: readonly string[]): Promise<{ data: Array<{
-              status: string
-              addon_modules: { module_code: string } | null
-            }> | null }>
+          eq(
+            col: string,
+            val: string,
+          ): {
+            in(
+              col: string,
+              vals: readonly string[],
+            ): Promise<{
+              data: Array<{
+                status: string
+                addon_modules: { module_code: string } | null
+              }> | null
+            }>
           }
         }
       }
@@ -109,7 +107,9 @@ export const loadUserAccess = cache(
       subData = subWithPlanCode.data
     } else {
       const subTierOnly = await trySelect('tier')
-      subData = subTierOnly.data ? ({ tier: subTierOnly.data.tier ?? null, plan_code: null } as SubscriptionRow) : null
+      subData = subTierOnly.data
+        ? ({ tier: subTierOnly.data.tier ?? null, plan_code: null } as SubscriptionRow)
+        : null
     }
 
     const addonsRes = await sbAddons
@@ -118,8 +118,7 @@ export const loadUserAccess = cache(
       .eq('organization_id', orgId)
       .in('status', ['active', 'trialing'])
 
-    const planCode =
-      normalizePlanCode(subData?.plan_code) ?? normalizePlanCode(subData?.tier)
+    const planCode = normalizePlanCode(subData?.plan_code) ?? normalizePlanCode(subData?.tier)
 
     const activeAddons: AddonCode[] = []
     const activePacks: AddonPackCode[] = []
@@ -143,16 +142,22 @@ export const loadUserAccess = cache(
  * Triées par priority desc. Lecture authentifiée via RLS.
  */
 export const loadPendingSuggestions = cache(
-  async (
-    supabase: SupabaseClient,
-    userId: string,
-  ): Promise<PendingSuggestionRow[]> => {
+  async (supabase: SupabaseClient, userId: string): Promise<PendingSuggestionRow[]> => {
     const sb = supabase as unknown as {
       from(table: 'upsell_suggestions'): {
         select(columns: string): {
-          eq(col: string, val: string): {
-            eq(col: string, val: string): {
-              order(col: string, opts: { ascending: boolean }): {
+          eq(
+            col: string,
+            val: string,
+          ): {
+            eq(
+              col: string,
+              val: string,
+            ): {
+              order(
+                col: string,
+                opts: { ascending: boolean },
+              ): {
                 limit(n: number): Promise<{ data: PendingSuggestionRow[] | null }>
               }
             }

@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { buildCalendarSubscriptionUrl, buildCalendarWebcalUrl } from '@/lib/calendar-token'
 import { parisMonthBounds } from '@/lib/paris-dates'
-import { ADDON_MODULES, PRICING_PLANS, type PricingPlanCode } from '@/lib/pricing-plans'
+import { ADDON_MODULES, type PricingPlanCode, resolveTierToPlan } from '@/lib/pricing-plans'
 import { getStorageUsage } from '@/lib/storage/quota'
 import { cn } from '@/lib/utils'
 import { LogOut } from 'lucide-react'
@@ -203,22 +203,16 @@ export default async function AccountPage({
     typeof linguisticProfile.certificat_rge === 'string' ? linguisticProfile.certificat_rge : null
   const ademeMonitoringEnabled = linguisticProfile.ademe_monitoring_enabled === true
 
-  // Mapping legacy tier → plan_code canonique (5 forfaits post-pivot 2026-05-20)
-  const currentTier = subscription?.tier
-  const legacyToPlanCode: Record<string, PricingPlanCode | string> = {
-    decouverte: 'decouverte',
-    standard: 'pro',
-    volume: 'all_inclusive',
-    founder: 'pro',
-    decouverte_legacy: 'decouverte',
-    standard_legacy: 'pro',
-    volume_legacy: 'all_inclusive',
-    founder_legacy: 'pro',
-  }
-  const resolvedCode = currentTier ? (legacyToPlanCode[currentTier] ?? currentTier) : null
-  const planCode = (resolvedCode &&
-    PRICING_PLANS.find((p) => p.code === resolvedCode)?.code) as PricingPlanCode | null
-  const tier = planCode ? (PRICING_PLANS.find((p) => p.code === planCode) ?? null) : null
+  // Résolution canonique du tier DB → PricingPlan via le helper unique
+  // `resolveTierToPlan()` (cf. lib/pricing-plans.ts §6bis). Cette fonction
+  // gère TOUS les codes historiques : V3 nus (`decouverte`/`standard`/etc.),
+  // V3 suffixés `_legacy`, alias `logiciel_*`, V4/V5 directs.
+  //
+  // PRINCIPE D'OR : ne JAMAIS faire de mapping manuel `tier → plan` dans
+  // une page. Toujours passer par ce helper pour que la mise à jour de la
+  // grille tarifaire dans pricing-plans.ts se propage automatiquement.
+  const tier = resolveTierToPlan(subscription?.tier)
+  const planCode = (tier?.code ?? null) as PricingPlanCode | null
   const missionsCount = monthMissions ?? 0
   const missionsQuota = subscription?.missions_included ?? 0
   const overage = Math.max(0, missionsCount - missionsQuota)

@@ -1100,6 +1100,119 @@ export function isGrandfatherPlan(code: string | null | undefined): code is Gran
 }
 
 // ════════════════════════════════════════════════════════════════
+// 6bis. RESOLVE TIER → PLAN (source unique pour TOUTES les pages)
+// ════════════════════════════════════════════════════════════════
+//
+// PROBLÈME RÉSOLU : la colonne `subscriptions.tier` de la DB contient
+// historiquement des codes V3 nus (`decouverte`, `standard`, `volume`,
+// `founder`) qui n'existent PAS dans `PricingPlanCode` V5. Les pages
+// qui faisaient `PRICING_PLANS.find(p => p.code === tier)` retournaient
+// donc systématiquement `undefined` → affichage "Forfait : Aucun" +
+// prix manquants partout.
+//
+// La table de remapping ci-dessous mappe TOUS les codes historiques
+// (V3 nus + V3 suffixés `_legacy` + alias logiciel_*) vers le code
+// PricingPlan canonique qui existe dans PRICING_PLANS.
+//
+// PRINCIPE D'OR : toute page qui lit un tier DB DOIT passer par
+// `resolveTierToPlan()` et non manipuler le tier brut. Cela garantit
+// que si la grille tarifaire change un jour (V6, V7), un seul fichier
+// est à mettre à jour : ce fichier.
+
+/** Mapping legacy tier DB → code PricingPlan canonique. */
+const TIER_DB_TO_PLAN_CODE: Readonly<Record<string, PricingPlanCode>> = {
+  // V5 directs (passe-through) — au cas où le tier DB est déjà au format V5
+  essai: 'essai',
+  solo_light: 'solo_light',
+  solo_pro: 'solo_pro',
+  cabinet: 'cabinet',
+  cabinet_plus: 'cabinet_plus',
+
+  // Alias V3 logiciel_* → V5
+  logiciel_free: 'essai',
+  logiciel_starter: 'solo_light',
+  logiciel_active: 'solo_pro',
+  logiciel_cabinet: 'cabinet',
+  logiciel_enterprise: 'cabinet_plus',
+
+  // Codes E2c nus (DB historique avant migration `_legacy`)
+  // → mappés vers les `*_legacy` correspondants pour préserver le prix
+  // historique de l'abonné (grandfather).
+  decouverte: 'decouverte_legacy',
+  standard: 'standard_legacy',
+  volume: 'volume_legacy',
+  founder: 'founder_legacy',
+  essential: 'essential_legacy',
+  pro: 'pro_legacy',
+  all_inclusive: 'all_inclusive_legacy',
+
+  // Codes `*_legacy` directs (passe-through)
+  decouverte_legacy: 'decouverte_legacy',
+  standard_legacy: 'standard_legacy',
+  volume_legacy: 'volume_legacy',
+  founder_legacy: 'founder_legacy',
+  essential_legacy: 'essential_legacy',
+  pro_legacy: 'pro_legacy',
+  all_inclusive_legacy: 'all_inclusive_legacy',
+  cabinet_legacy: 'cabinet_legacy',
+}
+
+/**
+ * Résout un tier brut (depuis `subscriptions.tier` en DB) vers le
+ * PricingPlan canonique correspondant.
+ *
+ * Cette fonction est la SOURCE UNIQUE qui doit être appelée par toute
+ * page/composant qui affiche le plan d'un user (nom, prix, caps, etc.).
+ *
+ * @example
+ * ```ts
+ * // Page Compte / Abonnement
+ * const plan = resolveTierToPlan(subscription.tier)
+ * if (plan) {
+ *   <span>{plan.name} — {formatPriceEur(plan.monthlyPrice)} / mois</span>
+ * }
+ * ```
+ *
+ * @param tier  Le tier brut de la DB (peut être null, V3, V4, V5, legacy).
+ * @returns Le PricingPlan correspondant, ou `null` si introuvable.
+ */
+export function resolveTierToPlan(tier: string | null | undefined): PricingPlan | null {
+  if (!tier) return null
+  const canonical = TIER_DB_TO_PLAN_CODE[tier]
+  if (!canonical) {
+    // Fallback : tente la résolution directe (V5 codes inconnus ou nouveaux)
+    return PRICING_PLANS.find((p) => p.code === tier) ?? null
+  }
+  return PRICING_PLANS.find((p) => p.code === canonical) ?? null
+}
+
+/**
+ * Variant qui retourne juste le code canonique (sans charger le plan
+ * complet). Utile pour Stripe checkout, analytics, etc.
+ */
+export function resolveTierToPlanCode(tier: string | null | undefined): PricingPlanCode | null {
+  if (!tier) return null
+  const canonical = TIER_DB_TO_PLAN_CODE[tier]
+  if (canonical) return canonical
+  // Fallback : si le tier matche directement un plan, on le retourne tel quel.
+  return PRICING_PLANS.find((p) => p.code === tier)?.code ?? null
+}
+
+/**
+ * Formatte un prix mensuel (centimes integer → string FR).
+ *
+ * @example
+ * formatMonthlyPriceEur(7900)  // "79,00 € / mois"
+ * formatMonthlyPriceEur(2900)  // "29,00 € / mois"
+ * formatMonthlyPriceEur(null)  // "—"
+ */
+export function formatMonthlyPriceEur(cents: number | null | undefined): string {
+  if (cents === null || cents === undefined || !Number.isFinite(cents)) return '—'
+  const euros = cents / 100
+  return `${euros.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € / mois`
+}
+
+// ════════════════════════════════════════════════════════════════
 // 7. ADDON_PACKS — DEPRECATED V3 (remplacé par BUNDLES)
 // ════════════════════════════════════════════════════════════════
 
