@@ -14,6 +14,7 @@ import JSZip from 'jszip'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Database } from '@kovas/database/types'
 import { applyCsvWatermarkLine } from '@/lib/watermark'
+import { generateAidesAnnexeIfEligible } from './aides-annexe'
 import type { MissionExportData } from './build-mission-data'
 import { generateCsv } from './csv'
 import { generateDocx } from './docx'
@@ -58,6 +59,18 @@ export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
 
   // JSON
   zip.file('donnees.json', generateJson(data))
+
+  // Annexe Aides Rénovation (DPE F/G uniquement)
+  // On l'inclut systématiquement si la mission est éligible. En cas d'échec
+  // du simulateur France Rénov', l'export se poursuit sans annexe (graceful).
+  try {
+    const annexe = await generateAidesAnnexeIfEligible(data)
+    if (annexe) {
+      zip.file('annexe_aides_renovation.pdf', annexe.pdf)
+    }
+  } catch {
+    // Jamais bloquant : l'export DPE reste produit même sans annexe.
+  }
 
   // Photos — download from Supabase Storage, group by room
   if (data.photos.length > 0) {
