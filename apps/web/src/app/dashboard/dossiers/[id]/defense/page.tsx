@@ -144,7 +144,7 @@ export default async function DossierDefensePage({
         eyebrow={`Dossier ${dossier.reference}`}
         title="Dossier"
         accent="de défense"
-        description="Preuves contextuelles horodatées — protection juridique en cas de contestation client ou contrôle ADEME."
+        description="Preuves horodatées — contestation client ou contrôle ADEME."
       />
 
       {/* Bloc actions */}

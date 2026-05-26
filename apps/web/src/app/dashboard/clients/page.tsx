@@ -1,19 +1,19 @@
-import { AppPageHeader } from '@/components/app-page-header'
 import { AppListToolbar } from '@/components/app-list-toolbar'
 import { parseListSearchParams } from '@/components/app-list-toolbar-utils'
+import { AppPageHeader } from '@/components/app-page-header'
 import {
   AppListTable,
   AppListTableCell,
   AppListTableHead,
   AppListTableRow,
 } from '@/components/ui/app-list-table'
-import { Plus, Users } from 'lucide-react'
-import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { Plus, Users } from 'lucide-react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Clients' }
 
@@ -82,11 +82,7 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <AppPageHeader
-        title="Vos"
-        accent="clients"
-        description="Propriétaires, agences, syndics — toute la base contacts."
-      />
+      <AppPageHeader title="Vos" accent="clients" />
 
       <AppListToolbar
         searchPlaceholder="Rechercher un client (nom, email, téléphone)…"

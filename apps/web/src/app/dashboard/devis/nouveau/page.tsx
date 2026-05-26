@@ -106,27 +106,16 @@ export default async function NewQuotePage({ searchParams }: NewQuotePageProps) 
   const { supabase, orgId, user } = await getCurrentUser()
 
   // Parallel fetches : clients, properties, pricing, packs, org, branding
-  const [
-    clientsRes,
-    propertiesRes,
-    pricingRes,
-    packsRes,
-    orgRes,
-    brandingRes,
-  ] = await Promise.all([
+  const [clientsRes, propertiesRes, pricingRes, packsRes, orgRes, brandingRes] = await Promise.all([
     supabase
       .from('clients')
-      .select(
-        'id, display_name, email, phone, company_name, siret, address, city, postal_code',
-      )
+      .select('id, display_name, email, phone, company_name, siret, address, city, postal_code')
       .eq('organization_id', orgId)
       .is('deleted_at', null)
       .order('display_name'),
     supabase
       .from('properties')
-      .select(
-        'id, address, city, postal_code, surface_total, property_type, client_id, location',
-      )
+      .select('id, address, city, postal_code, surface_total, property_type, client_id, location')
       .eq('organization_id', orgId)
       .is('deleted_at', null)
       .order('created_at', { ascending: false }),
@@ -212,7 +201,7 @@ export default async function NewQuotePage({ searchParams }: NewQuotePageProps) 
         title="Nouveau"
         accent="devis"
         eyebrow="DEV-2026 · BROUILLON"
-        description="Composez votre devis, ajustez les prestations puis sauvegardez en brouillon ou envoyez directement au client."
+        description="Composez puis sauvegardez ou envoyez au client."
       />
 
       <QuoteWizard

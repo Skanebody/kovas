@@ -102,9 +102,9 @@ export default function AideHubPage() {
     <div className="space-y-6 animate-fade-in">
       <AppPageHeader
         eyebrow="Centre d'aide"
-        title="Tu n'es jamais"
-        accent="seul"
-        description="Tous les guides pas-à-pas pour maîtriser KOVAS, du premier dossier jusqu'à l'export Liciel."
+        title="Guides"
+        accent="KOVAS"
+        description="Du premier dossier à l'export Liciel."
       />
 
       <section

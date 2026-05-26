@@ -162,7 +162,7 @@ export function PropertyForm({ clients }: PropertyFormProps) {
           <FormField
             label="Identification appartement"
             htmlFor="apartmentDetail"
-            hint="Ex : « Apt 12B », « 3ème étage gauche », « Studio 04 »"
+            hint="Ex : Apt 12B, Studio 04"
           >
             <Input
               id="apartmentDetail"

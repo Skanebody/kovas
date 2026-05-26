@@ -16,11 +16,7 @@ export default function NewClientPage() {
         </Link>
       </Button>
 
-      <AppPageHeader
-        title="Nouveau"
-        accent="client"
-        description="Renseignez le donneur d'ordre — particulier, agence, notaire, syndic…"
-      />
+      <AppPageHeader title="Nouveau" accent="client" />
 
       <ClientForm />
     </div>

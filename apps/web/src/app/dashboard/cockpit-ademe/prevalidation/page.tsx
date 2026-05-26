@@ -36,7 +36,7 @@ export default function PrevalidationPage() {
         eyebrow="Cockpit ADEME"
         title="Pré-valider"
         accent="un DPE"
-        description="Saisissez 10 caractéristiques clés — KOVAS évalue le risque de contrôle ADEME avant publication."
+        description="10 caractéristiques — risque de contrôle évalué avant publication."
       />
 
       <PrevalidationForm />

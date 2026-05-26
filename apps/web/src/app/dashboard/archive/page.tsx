@@ -175,9 +175,8 @@ export default async function ArchivePage({ searchParams }: ArchivePageProps) {
     <div className="space-y-6 animate-fade-in">
       <AppPageHeader
         eyebrow="Archive"
-        title="Tes"
+        title="Vos"
         accent="fichiers"
-        description="Vue globale de tous les fichiers du compte. Filtre, recherche, exporte."
         action={<ArchiveBulkExportButton />}
       />
 

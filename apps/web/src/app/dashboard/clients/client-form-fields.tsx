@@ -98,7 +98,7 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
       <FormField
         label="Nom affiché"
         htmlFor="displayName"
-        hint="Nom ou raison sociale tel qu'il apparaîtra sur les dossiers et rapports"
+        hint="Visible sur dossiers et rapports"
         required
         error={fieldErrors.displayName}
       >
@@ -151,7 +151,7 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
           <FormField
             label="SIRET"
             htmlFor="siret"
-            hint="14 chiffres — vérification automatique au registre SIRENE"
+            hint="14 chiffres — vérifié au registre SIRENE"
             error={fieldErrors.siret}
           >
             <div className="relative">
@@ -254,7 +254,7 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
           label="Voie et numéro"
           htmlFor="address"
           error={fieldErrors.address}
-          hint="Recherche BAN — ex. 12 rue de Rivoli, 75001 Paris"
+          hint="Recherche BAN"
         >
           <AddressAutocomplete
             name="address"
@@ -296,7 +296,7 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
           <FormField
             label="Appartement / local / porte"
             htmlFor="apartmentDetail"
-            hint="Ex : « Apt 12B », « 3ème étage gauche », « Local 204 »"
+            hint="Ex : Apt 12B, Local 204"
             error={fieldErrors.apartmentDetail}
           >
             <Input
@@ -347,7 +347,7 @@ export function ClientFormFields({ defaults, fieldErrors = {} }: ClientFormField
           <FormField
             label="Autre complément"
             htmlFor="addressComplement"
-            hint="Résidence, BP, digicode courrier, nom sur l'interphone…"
+            hint="Résidence, BP, digicode, interphone"
             error={fieldErrors.addressComplement}
           >
             <Input

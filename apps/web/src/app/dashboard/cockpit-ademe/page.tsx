@@ -10,12 +10,12 @@
 
 import type { Metadata } from 'next'
 
-import { AppPageHeader } from '@/components/app-page-header'
-import { AdemeCockpitDashboard } from '@/components/ademe/AdemeCockpitDashboard'
-import { UpsellEmptyState } from '@/components/upsell/UpsellEmptyState'
 import type { AdemeAlertRow } from '@/app/api/ademe/alerts/route'
 import type { AdemeDpeCacheRow } from '@/app/api/ademe/dpe/historique/route'
 import type { AdemeKpiSnapshotRow } from '@/app/api/ademe/kpi/current/route'
+import { AdemeCockpitDashboard } from '@/components/ademe/AdemeCockpitDashboard'
+import { AppPageHeader } from '@/components/app-page-header'
+import { UpsellEmptyState } from '@/components/upsell/UpsellEmptyState'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { planAtLeast } from '@/lib/billing/feature-gates'
 import { trackBehaviorEvent } from '@/lib/upsell/track-event'
@@ -42,7 +42,7 @@ export default async function CockpitAdemePage() {
         <AppPageHeader
           title="Cockpit"
           accent="ADEME"
-          description="Monitoring de vos DPE publiés sur l'API ADEME, alertes anomalies et carte France."
+          description="Monitoring DPE publiés, alertes anomalies, carte France."
         />
         <UpsellEmptyState
           target="pro"
@@ -107,7 +107,7 @@ export default async function CockpitAdemePage() {
         eyebrow="Conformité ADEME"
         title="Cockpit"
         accent="ADEME"
-        description="Surveillez votre exposition aux contrôles ADEME — volume, distribution, géographie, anomalies."
+        description="Volume, distribution, géographie, anomalies."
       />
 
       <AdemeCockpitDashboard

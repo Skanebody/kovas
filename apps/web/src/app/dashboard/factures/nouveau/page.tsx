@@ -1,10 +1,10 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { Card, CardContent } from '@/components/ui/card'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { convertQuoteToInvoiceAction } from '../actions'
 import { InvoiceWizardForm } from './InvoiceWizardForm'
-import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata: Metadata = { title: 'Nouvelle facture' }
 export const dynamic = 'force-dynamic'
@@ -57,11 +57,7 @@ export default async function NouvelleFacturePage({ searchParams }: NouvellePage
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <AppPageHeader
-        title="Nouvelle"
-        accent="facture"
-        description="Renseignez les prestations, vérifiez l'aperçu, puis émettez la facture."
-      />
+      <AppPageHeader title="Nouvelle" accent="facture" />
       <InvoiceWizardForm
         clients={(clients ?? []).map((c) => ({
           id: c.id,

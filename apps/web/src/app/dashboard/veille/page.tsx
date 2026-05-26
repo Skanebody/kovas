@@ -181,10 +181,10 @@ export default async function VeillePage({ searchParams }: PageProps) {
     <div className="space-y-7 max-w-7xl mx-auto w-full">
       {/* Header — V5 sobre AppPageHeader */}
       <AppPageHeader
-        eyebrow="Veille · Réglementation diagnostic"
+        eyebrow="Veille réglementaire"
         title="Reste"
         accent="à jour"
-        description="Arrêtés, décrets, guides ADEME et FAQ Cofrac qui impactent tes missions — résumés et analysés par l'IA KOVAS."
+        description="Arrêtés, décrets, guides ADEME et FAQ Cofrac — résumés par l'IA KOVAS."
         action={
           <Button asChild variant="accent" size="default">
             <Link href="/dashboard/veille/chat" className="inline-flex items-center gap-2">

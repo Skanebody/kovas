@@ -46,7 +46,7 @@ export default async function VerificationValiditePage() {
       <AppPageHeader
         title="Vérification de"
         accent="validité"
-        description="Scannez vos diagnostics existants (DPE, amiante, plomb, gaz, électricité, termites, Carrez, ERP). KOVAS détecte automatiquement le type, la date et l'adresse pour les classer dans vos dossiers."
+        description="Scannez vos diagnostics — KOVAS détecte type, date et adresse pour les classer."
       />
 
       <ScanWorkspace initialScans={scans} clients={clients} properties={properties} />

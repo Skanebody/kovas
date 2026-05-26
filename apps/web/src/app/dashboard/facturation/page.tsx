@@ -50,10 +50,10 @@ export default async function FacturationPage({ searchParams }: FacturationPageP
 
   const headerCopy =
     current === 'devis'
-      ? "Pipeline de devis par ordre d'urgence — à envoyer, en attente de signature, à archiver."
+      ? 'Devis classés par urgence.'
       : current === 'factures'
-        ? "Pipeline de facturation par ordre d'urgence — en retard, à échéance, payées."
-        : 'Catalogue de produits et services réutilisables dans vos devis et factures.'
+        ? 'Factures classées par urgence.'
+        : 'Catalogue de prestations réutilisables.'
 
   return (
     <div className="space-y-6 animate-fade-in max-w-7xl mx-auto w-full">

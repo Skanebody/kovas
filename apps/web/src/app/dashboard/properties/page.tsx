@@ -1,19 +1,19 @@
-import { AppPageHeader } from '@/components/app-page-header'
 import { AppListToolbar } from '@/components/app-list-toolbar'
 import { parseListSearchParams } from '@/components/app-list-toolbar-utils'
+import { AppPageHeader } from '@/components/app-page-header'
 import {
   AppListTable,
   AppListTableCell,
   AppListTableHead,
   AppListTableRow,
 } from '@/components/ui/app-list-table'
-import { Building2, Plus } from 'lucide-react'
-import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { Building2, Plus } from 'lucide-react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Biens' }
 
@@ -83,11 +83,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <AppPageHeader
-        title="Vos"
-        accent="biens"
-        description="Adresses mutualisées entre missions et clients."
-      />
+      <AppPageHeader title="Vos" accent="biens" />
 
       <AppListToolbar
         searchPlaceholder="Rechercher un bien (adresse, ville, code postal)…"
@@ -138,9 +134,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                 </AppListTableCell>
                 <AppListTableCell className="hidden sm:table-cell">
                   {p.property_type ? (
-                    <Badge variant="muted">
-                      {TYPE_LABELS[p.property_type] ?? p.property_type}
-                    </Badge>
+                    <Badge variant="muted">{TYPE_LABELS[p.property_type] ?? p.property_type}</Badge>
                   ) : (
                     <span className="text-ink-mute">—</span>
                   )}

@@ -5,7 +5,7 @@ import type { MissionType } from '@kovas/shared'
 import { Plus } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { DossiersListClient, type DossierListItem, type TabKey } from './dossiers-list-client'
+import { type DossierListItem, DossiersListClient, type TabKey } from './dossiers-list-client'
 
 export const metadata: Metadata = { title: 'Dossiers' }
 
@@ -19,10 +19,7 @@ type RawDossier = {
     | { address: string | null; city: string | null; postal_code: string | null }
     | { address: string | null; city: string | null; postal_code: string | null }[]
     | null
-  clients:
-    | { display_name: string | null }
-    | { display_name: string | null }[]
-    | null
+  clients: { display_name: string | null } | { display_name: string | null }[] | null
   missions: { type: string }[] | null
 }
 
@@ -101,7 +98,7 @@ export default async function DossiersPage({
       <AppPageHeader
         title="Vos"
         accent="dossiers"
-        description={`${count} dossier${count > 1 ? 's' : ''} · regroupant les diagnostics par visite`}
+        description={`${count} dossier${count > 1 ? 's' : ''}`}
         action={
           <Button asChild variant="accent">
             <Link href="/dashboard/dossiers/new">

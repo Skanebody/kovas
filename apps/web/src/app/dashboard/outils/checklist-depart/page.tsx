@@ -11,7 +11,7 @@ export default function ChecklistDepartPage() {
       <AppPageHeader
         title="Avant de"
         accent="partir"
-        description="Photos critiques, mesures et infos à vérifier avant de quitter le site — adapté aux diagnostics actifs."
+        description="Photos, mesures et infos à vérifier avant de quitter le site."
       />
       <PreDepartureChecklist />
     </div>

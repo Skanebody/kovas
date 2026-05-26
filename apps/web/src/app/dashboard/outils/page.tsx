@@ -8,11 +8,7 @@ export const metadata = {
 export default function OutilsPage() {
   return (
     <div className="space-y-8">
-      <AppPageHeader
-        title="Vos"
-        accent="outils"
-        description="5 gadgets pour gagner du temps au quotidien — sans quitter KOVAS."
-      />
+      <AppPageHeader title="Vos" accent="outils" />
       <UtilitiesHub />
     </div>
   )

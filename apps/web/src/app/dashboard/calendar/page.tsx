@@ -96,9 +96,8 @@ export default async function CalendarPage() {
     <div className="space-y-6 animate-fade-in">
       <AppPageHeader
         eyebrow="Planning"
-        title="Ton"
+        title="Votre"
         accent="planning"
-        description="Vue calendrier de tes visites diagnostic. Bascule entre Jour, Semaine, Mois et Agenda."
         action={<CalendarSyncDialog httpsUrl={httpsUrl} webcalUrl={webcalUrl} />}
       />
 

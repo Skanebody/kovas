@@ -173,7 +173,7 @@ export default async function AnalyticsPage() {
           eyebrow="Analytics avancées"
           title="Performance"
           accent="cabinet"
-          description="Vision long terme du cabinet — health score, tendances 3 ans, benchmarks FR."
+          description="Health score, tendances 3 ans, benchmarks FR."
         />
         <UpsellEmptyState
           target="pro"
@@ -737,7 +737,7 @@ export default async function AnalyticsPage() {
         eyebrow={`${list.length} mois d'historique`}
         title="Performance"
         accent="cabinet"
-        description="Vision long terme — santé du cabinet, tendances, benchmarks anonymisés FR."
+        description="Santé, tendances, benchmarks anonymisés FR."
       />
 
       {/* 4 KPI cards alignés sur pattern fiche client */}

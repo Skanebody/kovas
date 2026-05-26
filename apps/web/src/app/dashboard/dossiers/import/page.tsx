@@ -42,8 +42,8 @@ export default function ImportPage() {
       <AppPageHeader
         title="Importer depuis"
         accent="votre logiciel"
-        eyebrow="📥 IMPORT BASE EXISTANTE · 5 MIN"
-        description="Récupérez votre base de clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC, ORIS ou tout autre logiciel de diagnostic — dans le cadre de votre droit à la portabilité (art. 20 RGPD)."
+        eyebrow="Import base existante"
+        description="Clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC, ORIS (droit à la portabilité, art. 20 RGPD)."
         action={
           <Button variant="outline" size="sm" asChild>
             <a

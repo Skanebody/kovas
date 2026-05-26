@@ -37,7 +37,7 @@ export default function AlgosCatalogPage() {
         eyebrow="Sous le capot"
         title="13 algorithmes"
         accent="propriétaires"
-        description="Ce que KOVAS calcule pour toi en permanence — et où le voir dans ton dashboard."
+        description="Ce que KOVAS calcule en continu, et où le voir."
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

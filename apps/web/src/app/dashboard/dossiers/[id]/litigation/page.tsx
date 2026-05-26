@@ -112,7 +112,7 @@ export default async function DossierLitigationPage({
         eyebrow={`Dossier ${dossier.reference}`}
         title="Mise"
         accent="en cause"
-        description="Suivi d'un litige client + projet de réponse argumentée et juridiquement référencée."
+        description="Suivi du litige + projet de réponse argumentée."
         action={
           litigation ? (
             <Badge variant={STATUS_META[litigation.status].variant}>

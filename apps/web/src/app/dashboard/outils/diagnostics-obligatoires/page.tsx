@@ -11,7 +11,7 @@ export default function DiagnosticsObligatoiresPage() {
       <AppPageHeader
         title="Diagnostics"
         accent="obligatoires"
-        description="Quels diagnostics sont réellement requis pour ce bien ? Saisissez les caractéristiques, le calcul s'effectue en direct."
+        description="Saisissez les caractéristiques du bien, le calcul est immédiat."
       />
       <DiagnosticRequirementsCalculator />
     </div>

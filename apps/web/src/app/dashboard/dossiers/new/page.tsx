@@ -40,10 +40,10 @@ export default async function NewDossierPage({
       </Button>
 
       <AppPageHeader
-        title="Nouveau RDV"
+        title="Nouveau"
         accent="dossier"
-        eyebrow="📞 PRISE DE RDV · 90 SECONDES CHRONO"
-        description="Wizard 3 étapes — bien & client, diagnostics & créneau, confirmation. Tout se crée d'un coup à la validation."
+        eyebrow="Prise de RDV"
+        description="3 étapes — bien & client, diagnostics & créneau, confirmation."
       />
 
       <DossierWizard

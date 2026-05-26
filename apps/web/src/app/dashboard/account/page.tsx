@@ -285,11 +285,10 @@ export default async function AccountPage({
           className="rounded-xl border border-amber-300/80 bg-amber-50 px-4 py-3 sm:px-5 sm:py-4"
         >
           <p className="font-sans text-[15px] font-semibold text-amber-900">
-            Ton essai gratuit est arrivé à échéance.
+            Essai gratuit terminé.
           </p>
           <p className="mt-1 text-[13px] text-amber-900/85">
-            Pour continuer à utiliser KOVAS, choisis un forfait ci-dessous et enregistre un moyen de
-            paiement. Tes données sont conservées : la réactivation est immédiate.
+            Choisissez un forfait ci-dessous. Vos données sont conservées, réactivation immédiate.
           </p>
         </div>
       ) : null}
