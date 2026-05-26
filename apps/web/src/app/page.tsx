@@ -491,7 +491,7 @@ function SectionMechanismRevealed(): React.ReactElement {
       title: 'Pendant ta mission, tu parles à ton téléphone',
       body: (
         <>
-          KOVAS transcrit tes notes vocales (Whisper FR) et identifie automatiquement ce qui
+          KOVAS transcrit tes notes vocales en français et identifie automatiquement ce qui
           correspond à chaque champ de ton rapport <GlossaryTerm term="dpe">DPE</GlossaryTerm>.
         </>
       ),
@@ -500,7 +500,7 @@ function SectionMechanismRevealed(): React.ReactElement {
     {
       n: '[2]',
       title: 'Tu prends 3 photos de plaques signalétiques',
-      body: 'KOVAS reconnaît la marque, le modèle, la puissance, l’année (Vision IA Claude Sonnet). Tu ne saisis rien.',
+      body: 'KOVAS reconnaît la marque, le modèle, la puissance et l’année à partir de la photo. Tu ne saisis rien.',
       gain: 'Gain : 8 min/mission',
     },
     {
@@ -880,6 +880,11 @@ function SectionAntiPitch(): React.ReactElement {
     'Tu fais 10+ missions par mois et tu veux récupérer 35 minutes sur chacune.',
     'Tu veux dormir tranquille la nuit avant un envoi ADEME.',
     'Tu veux que les particuliers de ton département te trouvent automatiquement.',
+    'Tu veux importer tes missions passées et les transformer en historique exploitable dès le premier jour.',
+    'Tu fais des DPE F ou G régulièrement et tu sais que ces clients sont des leads audit énergétique qui dorment.',
+    'Tu travailles autant sur le terrain que devant l’ordinateur et tu en as marre de re-saisir les infos au retour.',
+    'Tu sais que ta fiche annuaire et tes avis te ramènent des clients, mais tu n’as plus le temps de les entretenir.',
+    'Tu veux savoir précisément où passe ton temps, ton chiffre d’affaires et ta marge par mission.',
   ]
   return (
     <section className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
@@ -1044,7 +1049,7 @@ const HOME_FAQ: ReadonlyArray<{ q: string; a: string }> = [
   },
   {
     q: "Et si je n'ai pas de réseau sur le terrain ?",
-    a: 'KOVAS fonctionne 100% hors ligne. Saisie vocale traitée localement (Whisper iOS), photos stockées en IndexedDB, validation cohérence en local. Sync différée dès que le réseau revient. Aucune mission perdue, aucune saisie à refaire.',
+    a: 'KOVAS fonctionne 100% hors ligne. Saisie vocale traitée directement sur ton téléphone, photos stockées localement, validation cohérence en local. Sync différée dès que le réseau revient. Aucune mission perdue, aucune saisie à refaire.',
   },
   {
     q: "L'annuaire B2C est-il vraiment qualifié ?",

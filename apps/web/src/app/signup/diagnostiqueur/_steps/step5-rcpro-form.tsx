@@ -81,7 +81,7 @@ export function Step5RcproForm() {
         {extracting && (
           <div className="flex items-center gap-2 rounded-md bg-[#F5F7F4] p-3 text-[13px] text-[#0F1419]/75">
             <Sparkles className="size-4 animate-pulse" />
-            Extraction des données par Claude Vision...
+            Extraction automatique des données en cours...
           </div>
         )}
 

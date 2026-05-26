@@ -124,7 +124,7 @@ const ENDPOINTS: Endpoint[] = [
     method: 'GET',
     path: '/api/v1/missions/:id/voice-notes',
     description:
-      'Notes vocales transcrites et structurées par pièce. Métadonnées Whisper + structuration Claude Haiku.',
+      'Notes vocales transcrites et structurées par pièce. Métadonnées de transcription + structuration métier automatique.',
   },
   {
     icon: Download,

@@ -21,7 +21,7 @@ const FEATURES: Feature[] = [
     number: '01',
     title: 'Saisie vocale terrain → rapport en 1 clic',
     description:
-      'Dictée vocale structurée par pièce. Compatible mode hors-ligne. IA Whisper transcrit, parser local structure les données, exports immédiats.',
+      'Dictée vocale structurée par pièce. Compatible mode hors-ligne. Transcription FR + structuration métier locale, exports immédiats.',
   },
   {
     icon: FileText,

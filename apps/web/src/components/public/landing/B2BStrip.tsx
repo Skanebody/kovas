@@ -26,7 +26,6 @@ const B2B_BULLETS = [
 const B2B_PARTNERS = [
   { name: 'Stripe' },
   { name: 'Brevo' },
-  { name: 'Anthropic' },
   { name: 'Cal.com' },
   { name: 'Supabase' },
 ] as const

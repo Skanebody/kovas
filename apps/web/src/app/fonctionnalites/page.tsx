@@ -34,7 +34,7 @@ const CATEGORIES: CategoryGroup[] = [
       {
         title: 'Saisie vocale terrain FR',
         description:
-          "Whisper + parser hybride. Décrivez l'état d'une pièce, KOVAS structure les champs métier automatiquement.",
+          "Transcription française + structuration métier hybride. Décris l'état d'une pièce, KOVAS organise les champs automatiquement.",
         status: 'Inclus',
       },
       {
@@ -104,7 +104,7 @@ const CATEGORIES: CategoryGroup[] = [
       {
         title: 'Coach IA personnel',
         description:
-          'Claude Haiku contextualisé métier. Vos questions réglementaires trouvent réponse en 3 secondes.',
+          'Assistant conversationnel contextualisé métier. Tes questions réglementaires trouvent réponse en 3 secondes.',
         status: 'Inclus',
       },
       {

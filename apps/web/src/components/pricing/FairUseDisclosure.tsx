@@ -20,8 +20,7 @@ export function FairUseDisclosure() {
             Fair-use, expliqué sans fine print
           </p>
           <h2 className="font-sans font-semibold text-[40px] sm:text-[56px] md:text-[72px] leading-[1.02] tracking-[-0.03em] mb-6">
-            Comment ça marche,{' '}
-            <span className="text-[#0F1419]/35">l'usage illimité ?</span>
+            Comment ça marche, <span className="text-[#0F1419]/35">l'usage illimité ?</span>
           </h2>
           <p className="text-[17px] sm:text-[20px] text-[#0F1419]/72 leading-relaxed">
             Trois règles, qui tiennent en six lignes. Pas de clause cachée, pas de plafond
@@ -45,11 +44,12 @@ export function FairUseDisclosure() {
             </p>
             <ul className="space-y-1.5 text-[12px] text-[#0F1419]/72 font-mono tabular-nums">
               {PRICING_PLANS.map((p) => (
-                <li key={p.code} className="flex justify-between border-b border-[#0F1419]/[0.06] py-1.5">
+                <li
+                  key={p.code}
+                  className="flex justify-between border-b border-[#0F1419]/[0.06] py-1.5"
+                >
                   <span>{p.name}</span>
-                  <span className="text-[#0F1419] font-semibold">
-                    {p.caps.missions} / mois
-                  </span>
+                  <span className="text-[#0F1419] font-semibold">{p.caps.missions} / mois</span>
                 </li>
               ))}
             </ul>
@@ -64,13 +64,16 @@ export function FairUseDisclosure() {
               Stockage cloud
             </h3>
             <p className="text-[14px] text-[#0F1419]/72 leading-relaxed mb-4">
-              Cap dur par tier — photos, audios et exports compressés. Au-delà, on vous prévient
-              au seuil 90 % avec la liste des plus gros fichiers à archiver localement. Pas
+              Cap dur par tier — photos, audios et exports compressés. Au-delà, on vous prévient au
+              seuil 90 % avec la liste des plus gros fichiers à archiver localement. Pas
               d'augmentation automatique de la facture.
             </p>
             <ul className="space-y-1.5 text-[12px] text-[#0F1419]/72 font-mono tabular-nums">
               {PRICING_PLANS.map((p) => (
-                <li key={p.code} className="flex justify-between border-b border-[#0F1419]/[0.06] py-1.5">
+                <li
+                  key={p.code}
+                  className="flex justify-between border-b border-[#0F1419]/[0.06] py-1.5"
+                >
                   <span>{p.name}</span>
                   <span className="text-[#0F1419] font-semibold">{p.caps.storageGb} Go</span>
                 </li>
@@ -87,13 +90,16 @@ export function FairUseDisclosure() {
               Loyauté SIRET
             </h3>
             <p className="text-[14px] text-[#0F1419]/72 leading-relaxed mb-4">
-              Un SIRET = un compte payant. Vous ne pouvez pas ouvrir plusieurs comptes pour
-              partager les caps fair-use entre collègues. Cabinet (3 utilisateurs inclus) est
-              conçu pour ce cas.
+              Un SIRET = un compte payant. Vous ne pouvez pas ouvrir plusieurs comptes pour partager
+              les caps fair-use entre collègues. Cabinet (3 utilisateurs inclus) est conçu pour ce
+              cas.
             </p>
             <ul className="space-y-1.5 text-[12px] text-[#0F1419]/72 font-mono tabular-nums">
               {PRICING_PLANS.map((p) => (
-                <li key={p.code} className="flex justify-between border-b border-[#0F1419]/[0.06] py-1.5">
+                <li
+                  key={p.code}
+                  className="flex justify-between border-b border-[#0F1419]/[0.06] py-1.5"
+                >
                   <span>{p.name}</span>
                   <span className="text-[#0F1419] font-semibold">
                     {p.caps.users} user{p.caps.users > 1 ? 's' : ''}
@@ -105,9 +111,9 @@ export function FairUseDisclosure() {
         </div>
 
         <p className="mt-10 text-center text-[14px] text-[#0F1419]/55 max-w-[680px] mx-auto leading-relaxed">
-          Limites internes IA (transcription Whisper, Vision IA) silencieuses jusqu'au
-          plafonnement mensuel. Si vous atteignez le plafond, vous gardez l'accès aux outils, le
-          mode IA repasse en parser local jusqu'au 1er du mois suivant.
+          Limites internes IA (transcription vocale, reconnaissance d'équipements sur photo)
+          silencieuses jusqu'au plafonnement mensuel. Si tu atteins le plafond, tu gardes l'accès
+          aux outils, le mode IA repasse en parser local jusqu'au 1er du mois suivant.
         </p>
       </div>
     </section>

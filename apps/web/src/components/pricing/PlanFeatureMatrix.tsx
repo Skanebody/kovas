@@ -246,7 +246,7 @@ const LOGICIEL_ROWS: readonly LogicielRow[] = [
       cabinet_plus: true,
     },
   ),
-  buildLogicielRow('IA', 'Saisie vocale Whisper', {
+  buildLogicielRow('IA', 'Saisie vocale FR structurée', {
     essai: '1h/mo',
     solo_light: '5h/mo',
     solo_pro: '10h/mo',
