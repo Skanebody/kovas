@@ -372,14 +372,17 @@ function SectionLicielVsKovas(): React.ReactElement {
             organisation réglementaire, tu gagnes 1 h 30 par mission.
           </p>
         </div>
-        <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden">
+        <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden max-w-full">
           {/* Hint scroll horizontal mobile (caché >=sm). Le wrapper overflow-x-auto
-              empêche tout débordement de la page sur écrans <640px. */}
+              empêche tout débordement de la page sur écrans <640px.
+              `min-w-[560px]` (vs 640px précédent) garantit que le tableau rentre
+              sans scroll dans un viewport iPhone XR/12+ (à partir de 414px le
+              wrapper plus 2× padding section absorbe), et reste lisible. */}
           <p className="sm:hidden px-4 pt-3 font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55">
             <span className="text-chartreuse-deep font-bold">→ </span>Fais défiler le tableau
           </p>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-[13px] sm:text-[14px]">
+          <div className="overflow-x-auto max-w-full">
+            <table className="w-full min-w-[560px] text-[13px] sm:text-[14px]">
               <thead className="bg-[#0F1419] text-paper">
                 <tr>
                   <th className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-wide font-medium">
