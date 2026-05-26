@@ -150,7 +150,24 @@ export function VoiceRecorderModal({
         }
       } catch (err) {
         if (cancelled) return
-        const msg = err instanceof Error ? err.message : 'Permission micro refusée'
+        // Mapping noms d'erreur DOM standard vers messages user-friendly FR
+        // (cf. audit P1-7 mode mission). Les `err.message` bruts genre "Permission
+        // denied" sont opaques pour le diagnostiqueur.
+        let msg = 'Impossible de démarrer le micro.'
+        if (err instanceof DOMException) {
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            msg =
+              'Accès au micro refusé. Autorisez-le dans les paramètres de votre navigateur, puis réessayez.'
+          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            msg = 'Aucun micro détecté sur cet appareil.'
+          } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+            msg = 'Le micro est utilisé par une autre application. Fermez-la et réessayez.'
+          } else if (err.name === 'NotSupportedError') {
+            msg = "L'enregistrement audio n'est pas supporté par ce navigateur."
+          }
+        } else if (err instanceof Error) {
+          msg = err.message
+        }
         setError(msg)
         setPhase('error')
       }

@@ -69,7 +69,7 @@ export function FinalAnalysisSheet({
 }: FinalAnalysisSheetProps): React.ReactElement {
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} maxHeight="92vh">
-      <BottomSheetTitle>Analyse de ta session</BottomSheetTitle>
+      <BottomSheetTitle>Analyse de votre session</BottomSheetTitle>
 
       <BottomSheetBody>
         {isLoading ? (
@@ -109,8 +109,8 @@ export function FinalAnalysisSheet({
                 {result.summary || '—'}
               </p>
               <p className="mt-2 font-mono text-[11px] text-[#0F1419]/72">
-                {result.capturesCount} capture{result.capturesCount > 1 ? 's' : ''} analysée
-                {result.capturesCount > 1 ? 's' : ''}
+                {result.capturesCount} capture{result.capturesCount !== 1 ? 's' : ''} analysée
+                {result.capturesCount !== 1 ? 's' : ''}
               </p>
             </section>
 
@@ -164,14 +164,17 @@ export function FinalAnalysisSheet({
                 <div className="rounded-lg border border-accent-green/30 bg-accent-green/5 px-3 py-2.5 flex items-start gap-2">
                   <CheckCircle2 className="size-4 shrink-0 mt-0.5 text-accent-green" aria-hidden />
                   <p className="text-[13px] text-[#0F1419]">
-                    Aucun champ manquant détecté. Ta session est prête pour l'export Liciel.
+                    Aucun champ manquant détecté. Votre session est prête pour l'export Liciel.
                   </p>
                 </div>
               ) : (
                 <ul className="space-y-2">
-                  {result.gaps.map((gap) => (
+                  {/* Clés : on combine diagnostic + field car Claude peut renvoyer
+                      le même `field` pour 2 diagnostics différents → React warning
+                      duplicate keys + corruption liste (cf. audit P1-11). */}
+                  {result.gaps.map((gap, idx) => (
                     <li
-                      key={gap.field}
+                      key={`${gap.diagnostic ?? 'none'}::${gap.field}::${idx}`}
                       className="rounded-lg border border-[#0F1419]/[0.08] bg-paper px-3 py-2.5"
                     >
                       <div className="flex items-start justify-between gap-3 mb-1">

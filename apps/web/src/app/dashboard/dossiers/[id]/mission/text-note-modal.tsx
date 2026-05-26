@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { enqueueTextNote } from '@/lib/mission/local-storage-queue'
 import { cn } from '@/lib/utils'
 import { Check, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface TextNoteModalProps {
   open: boolean
@@ -87,10 +87,20 @@ export function TextNoteModal({
     }
   }
 
+  // Cancel-with-confirm si du texte est saisi (cf. audit P1-4 : perte de données
+  // silencieuse si fermeture involontaire).
+  const handleCancelWithConfirm = useCallback(() => {
+    if (text.trim().length > 0) {
+      const ok = window.confirm('Voulez-vous abandonner cette note ? Le texte saisi sera perdu.')
+      if (!ok) return
+    }
+    onCancel()
+  }, [text, onCancel])
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Escape') {
       e.preventDefault()
-      onCancel()
+      handleCancelWithConfirm()
     }
     // Cmd/Ctrl + Enter pour valider
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
@@ -98,6 +108,19 @@ export function TextNoteModal({
       void handleSubmit()
     }
   }
+
+  // ESC global même si textarea n'a pas le focus (cf. audit P1-5).
+  useEffect(() => {
+    if (!open) return undefined
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        handleCancelWithConfirm()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [open, handleCancelWithConfirm])
 
   if (!open) return null
 
@@ -155,7 +178,7 @@ export function TextNoteModal({
             </div>
             <button
               type="button"
-              onClick={onCancel}
+              onClick={handleCancelWithConfirm}
               className="rounded-full p-1.5 text-[#0F1419]/72 hover:bg-[#0F1419]/5 hover:text-[#0F1419]"
               aria-label="Fermer"
             >
@@ -217,7 +240,7 @@ export function TextNoteModal({
               type="button"
               variant="ghost"
               size="default"
-              onClick={onCancel}
+              onClick={handleCancelWithConfirm}
               disabled={submitting}
               className="gap-1.5"
             >

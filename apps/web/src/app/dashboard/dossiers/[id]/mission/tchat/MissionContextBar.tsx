@@ -89,12 +89,14 @@ export function MissionContextBar({
           </>
         ) : null}
         <Separator />
+        {/* Accord pluriel FR : `total !== 1` couvre aussi 0 (qui prend le pluriel
+            en français), cf. audit P1-14. */}
         <span aria-live="polite" className="shrink-0 text-[#0F1419]/82">
-          {rooms.completed}/{rooms.total} pièce{rooms.total > 1 ? 's' : ''}
+          {rooms.completed}/{rooms.total} pièce{rooms.total !== 1 ? 's' : ''}
         </span>
         <Separator />
         <span aria-live="polite" className="shrink-0 text-[#0F1419]/82">
-          {photosCount} photo{photosCount > 1 ? 's' : ''}
+          {photosCount} photo{photosCount !== 1 ? 's' : ''}
         </span>
       </div>
 

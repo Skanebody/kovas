@@ -338,9 +338,16 @@ export function MissionRecapSheet({
                 <span> / </span>
                 <span className="tabular-nums">{fieldsTotal}</span> champs renseignés
               </p>
+              {/* Wording cohérent avec section détail plus bas (cf. audit P1-10) :
+                  "alertes" = warnings UNIQUEMENT, "erreurs" = errors. Avant on
+                  affichait "5 alertes" en haut et "3 erreurs · 2 alertes" en bas
+                  → confusion utilisateur. */}
               <p className="mt-0.5 text-[11px] font-mono text-[#0F1419]/72">
-                {rooms.length} pièce{rooms.length > 1 ? 's' : ''} · {contradictions.length} alerte
-                {contradictions.length > 1 ? 's' : ''}
+                {rooms.length} pièce{rooms.length !== 1 ? 's' : ''}
+                {errorCount > 0 ? ` · ${errorCount} erreur${errorCount !== 1 ? 's' : ''}` : ''}
+                {warning.length > 0
+                  ? ` · ${warning.length} alerte${warning.length !== 1 ? 's' : ''}`
+                  : ''}
               </p>
             </div>
           </div>

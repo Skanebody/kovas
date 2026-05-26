@@ -154,9 +154,11 @@ export function MissionRoomsSidebar({
       {/* Footer — progression globale */}
       <div className="border-t border-[#0F1419]/[0.06] px-4 py-3 shrink-0 space-y-1.5">
         <div className="flex items-center justify-between text-[11px] font-mono text-[#0F1419]/72">
+          {/* Accord pluriel FR : "1 pièce" mais "0 pièces" / "2 pièces" (cf. audit P1-13).
+              On utilise `total !== 1` plutôt que `total > 1` car 0 prend aussi le pluriel. */}
           <span aria-live="polite">
-            {completedCount}/{totalCount} pièce{totalCount > 1 ? 's' : ''} complétée
-            {completedCount > 1 ? 's' : ''}
+            {completedCount}/{totalCount} pièce{totalCount !== 1 ? 's' : ''} complétée
+            {completedCount !== 1 ? 's' : ''}
           </span>
           <span className="text-[#0F1419]/82 tabular-nums">{ratio}%</span>
         </div>
