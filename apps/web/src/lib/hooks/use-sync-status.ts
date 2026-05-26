@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { pendingCount, listPending } from '@/lib/sync/queue'
 import type { MutationRow } from '@/lib/sync/db'
+import { listPending, pendingCount } from '@/lib/sync/queue'
+import { useEffect, useState } from 'react'
 
 /**
  * useSyncStatus — agrège l'état de fiabilité sync pour le badge header.
@@ -91,20 +91,32 @@ export function useSyncStatus({
     }
   }, [organizationId])
 
-  // Chargement détail items (à la demande)
+  // Chargement détail items (à la demande). Refresh via event sync-complete
+  // + polling court (1s) tant que le popover est ouvert — la queue peut bouger
+  // sans event si une nouvelle mutation arrive depuis un autre composant.
   useEffect(() => {
     if (!fetchDetails || !organizationId) {
       setItems([])
       return
     }
     let cancelled = false
-    void listPending(organizationId).then((rows) => {
-      if (!cancelled) setItems(rows)
-    })
+
+    function refresh(): void {
+      void listPending(organizationId).then((rows) => {
+        if (!cancelled) setItems(rows)
+      })
+    }
+
+    refresh()
+    const interval = window.setInterval(refresh, 1_000)
+    window.addEventListener('kovas:sync:complete', refresh)
+
     return () => {
       cancelled = true
+      window.clearInterval(interval)
+      window.removeEventListener('kovas:sync:complete', refresh)
     }
-  }, [fetchDetails, organizationId, pending])
+  }, [fetchDetails, organizationId])
 
   // Avant hydration on assume online + synced (évite flicker SSR).
   const safeIsOnline = hydrated ? isOnline : true

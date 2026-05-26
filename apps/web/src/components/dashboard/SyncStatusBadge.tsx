@@ -1,10 +1,10 @@
 'use client'
 
-import { forwardRef, useEffect, useRef, useState } from 'react'
-import { Check, Loader2, WifiOff } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useSyncStatus, type SyncState } from '@/lib/hooks/use-sync-status'
+import { type SyncState, useSyncStatus } from '@/lib/hooks/use-sync-status'
 import type { MutationRow } from '@/lib/sync/db'
+import { cn } from '@/lib/utils'
+import { Check, Loader2, WifiOff } from 'lucide-react'
+import { forwardRef, useEffect, useRef, useState } from 'react'
 
 /**
  * SyncStatusBadge — indicateur permanent de fiabilité (Walter L2 Reliable).
@@ -37,7 +37,7 @@ const STATE_LABEL: Record<SyncState, string> = {
 
 export function SyncStatusBadge({ organizationId, className }: SyncStatusBadgeProps) {
   const [open, setOpen] = useState(false)
-  const popoverRef = useRef<HTMLDivElement | null>(null)
+  const popoverRef = useRef<HTMLElement | null>(null)
   const buttonRef = useRef<HTMLButtonElement | null>(null)
 
   const { state, pending, items } = useSyncStatus({
@@ -82,7 +82,6 @@ export function SyncStatusBadge({ organizationId, className }: SyncStatusBadgePr
         aria-label={ariaLabel}
         aria-live="polite"
         aria-expanded={open}
-        aria-haspopup="dialog"
         className={cn(
           'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
           'transition-colors duration-150',
@@ -100,13 +99,7 @@ export function SyncStatusBadge({ organizationId, className }: SyncStatusBadgePr
       </button>
 
       {open && (
-        <SyncDetailsPopover
-          ref={popoverRef}
-          state={state}
-          pending={pending}
-          items={items}
-          onClose={() => setOpen(false)}
-        />
+        <SyncDetailsPopover ref={popoverRef} state={state} pending={pending} items={items} />
       )}
     </div>
   )
@@ -142,13 +135,25 @@ function BadgeLabel({ state, pending }: { state: SyncState; pending: number }) {
   if (state === 'syncing') {
     return (
       <span>
-        Sync en cours{pending > 0 && <> · <span className="font-mono">{pending}</span></>}
+        Sync en cours
+        {pending > 0 && (
+          <>
+            {' '}
+            · <span className="font-mono">{pending}</span>
+          </>
+        )}
       </span>
     )
   }
   return (
     <span>
-      Hors-ligne{pending > 0 && <> · <span className="font-mono">{pending}</span> en attente</>}
+      Hors-ligne
+      {pending > 0 && (
+        <>
+          {' '}
+          · <span className="font-mono">{pending}</span> en attente
+        </>
+      )}
     </span>
   )
 }
@@ -159,15 +164,13 @@ interface SyncDetailsPopoverProps {
   state: SyncState
   pending: number
   items: MutationRow[]
-  onClose: () => void
 }
 
-const SyncDetailsPopover = forwardRef<HTMLDivElement, SyncDetailsPopoverProps>(
+const SyncDetailsPopover = forwardRef<HTMLElement, SyncDetailsPopoverProps>(
   function SyncDetailsPopover({ state, pending, items }, ref) {
     return (
-      <div
+      <section
         ref={ref}
-        role="dialog"
         aria-label="Détail de la synchronisation"
         className={cn(
           'absolute right-0 top-[calc(100%+8px)] z-40 w-80 max-w-[calc(100vw-2rem)]',
@@ -193,7 +196,7 @@ const SyncDetailsPopover = forwardRef<HTMLDivElement, SyncDetailsPopoverProps>(
                 Connexion réseau perdue.{' '}
                 {pending > 0
                   ? `${pending} ${pending > 1 ? 'modifications seront' : 'modification sera'} synchronisée${pending > 1 ? 's' : ''} au retour du réseau.`
-                  : 'Vos prochaines modifications seront mises en file d\'attente.'}
+                  : "Vos prochaines modifications seront mises en file d'attente."}
               </>
             )}
           </p>
@@ -211,9 +214,7 @@ const SyncDetailsPopover = forwardRef<HTMLDivElement, SyncDetailsPopoverProps>(
                   )}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-ink truncate">
-                    {labelForKind(mut.kind)}
-                  </p>
+                  <p className="text-xs font-medium text-ink truncate">{labelForKind(mut.kind)}</p>
                   <p className="text-[10px] font-mono text-ink-mute mt-0.5">
                     {new Date(mut.createdAt).toLocaleTimeString('fr-FR', {
                       hour: '2-digit',
@@ -234,7 +235,7 @@ const SyncDetailsPopover = forwardRef<HTMLDivElement, SyncDetailsPopoverProps>(
         {state !== 'synced' && items.length === 0 && pending > 0 && (
           <div className="px-4 py-3 text-xs text-ink-mute">Chargement du détail…</div>
         )}
-      </div>
+      </section>
     )
   },
 )
