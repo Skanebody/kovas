@@ -48,36 +48,42 @@ Merci d'utiliser votre adresse email professionnelle (avec votre nom de domaine)
 
 ---
 
-## 3. Protection 2 — Validation SIRET
+## 3. Protection 2 — Validation SIRET réelle au registre SIRENE
 
-### V1 (sprint actuel) : Format Luhn uniquement, pas d'appel API
+### V2 (actuel) — API Recherche d'Entreprises (api.gouv.fr)
 
-**Contrôles** :
-1. Format : exactement 14 chiffres
-2. Algorithme de **Luhn** (checksum validant le SIRET techniquement)
-3. *(Pas de vérification du code NAF côté API tant qu'INSEE Sirene pas configuré)*
+Remplace la simple validation Luhn par un appel réel au registre SIRENE via
+l'API ouverte [api.gouv.fr/les-api/api-recherche-dentreprises](https://recherche-entreprises.api.gouv.fr/docs/).
 
-**Avantage** : aucune dépendance externe, fonctionne dès J3.5.
-**Limite** : un SIRET valide d'une boulangerie passera. Risque acceptable (vérification croisée avec email pro + 1 essai/SIRET).
+**Implémentation** : `apps/web/src/lib/data-gouv/recherche-entreprises/`
++ cache 7j Supabase (`sirene_check_cache`, migration `20260620300000`).
 
-### V1.5 : Branchement INSEE Sirene API
+**Contrôles à l'inscription** :
+1. Format : exactement 14 chiffres (filtre rapide sans appel réseau).
+2. Établissement trouvé au registre (`results.length > 0`).
+3. Établissement actif (`etat_administratif === 'A'`).
+4. Code NAF dans le périmètre diagnostic immobilier :
+   - `71.20B` — Analyses, essais et inspections techniques (coeur de cible).
+   - `71.12B` — Ingénierie, études techniques (cabinets multi-activités).
+   - `71.20A` (Contrôle technique automobile) **exclu** — pas le métier.
 
-API gratuite : https://api.insee.fr/entreprises/sirene/V3
+**Comportement** :
+- Erreur réseau/rate-limit/timeout → blocage avec message "Vérification SIRET
+  temporairement indisponible". Pas de cache négatif, l'utilisateur retente.
+- Établissement introuvable ou inactif → erreur bloquante.
+- NAF hors périmètre → **on laisse passer l'essai** mais on flagge
+  `signup_anomaly='naf_mismatch'` sur `cabinet_trials`. Benjamin valide
+  manuellement via `/admin/signup-anomalies` (Approuver / Rejeter).
 
-**Code NAF autorisés** :
-- `7120B` — Analyses, essais et inspections techniques *(diagnostiqueurs)*
-- `7120A` — Contrôle technique automobile *(à tolérer, profils mixtes)*
-- `7490B` — Autres activités spécialisées scientifiques et techniques
-- `4120A`, `4120B` — Construction (artisans en reconversion diagnostiqueur)
+**Bypass DEV** : `NEXT_PUBLIC_KOVAS_DEV_ALLOW_FAKE_SIRET=1` skip l'appel API
+(utile tests E2E Playwright).
 
-Si SIRET valide mais code NAF non-éligible :
-- Bloquer création compte essai
-- Afficher message :
-  ```
-  Le SIRET fourni ne correspond pas à un cabinet de diagnostic immobilier.
-  Si vous êtes diagnostiqueur en cours d'installation, contactez Benjamin
-  (benjamin@kovas.fr) pour activation manuelle.
-  ```
+**Cache** : 7 jours TTL. Lecture publique RLS (open data INSEE), écriture
+service_role uniquement. Économise la pression sur le service public partagé.
+
+**Légacy** : la fonction `validateSiret` (Luhn) reste exportée pour les
+modules historiques (ex. `/api/sirene/lookup`), mais n'est plus appelée
+dans le flow signup.
 
 Cache résultats INSEE 24h dans Supabase pour éviter rate-limit (30 req/min).
 

@@ -102,6 +102,12 @@ const NAV_GROUPS: NavGroup[] = [
         enabled: true,
       },
       { label: 'Signalements', icon: Flag, href: '/admin/signalements', enabled: true },
+      {
+        label: 'Anomalies SIRET',
+        icon: ShieldCheck,
+        href: '/admin/signup-anomalies',
+        enabled: true,
+      },
     ],
   },
   {

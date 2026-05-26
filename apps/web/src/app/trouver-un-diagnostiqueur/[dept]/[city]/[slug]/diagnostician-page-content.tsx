@@ -1,4 +1,5 @@
 import { BadgeVerified } from '@/components/diagnostician/BadgeVerified'
+import type { DiagnosticianSireneBadge } from '@/lib/data-gouv/recherche-entreprises/diagnostician-badge'
 import type { AvailabilitySignals } from '@/lib/diag-availability'
 import {
   DIAG_CERT_BY_CODE,
@@ -11,6 +12,7 @@ import {
   ChevronRight,
   FileText,
   Flag,
+  Lock,
   Mail,
   MapPin,
   Search,
@@ -37,6 +39,8 @@ type DiagnosticianPageContentProps = {
   badgeLevel?: 'unverified' | 'verified' | 'verified_plus'
   /** Signaux de réactivité/fraîcheur (B37 / GC3). Optionnel : section masquée si null/0 signal. */
   availability?: AvailabilitySignals | null
+  /** Badge "Activité diagnostic vérifiée" via API Recherche d'Entreprises (open data INSEE). */
+  sireneBadge?: DiagnosticianSireneBadge | null
 }
 
 const SERVICE_TYPES = [
@@ -61,6 +65,7 @@ export function DiagnosticianPageContent({
   city,
   badgeLevel = 'unverified',
   availability = null,
+  sireneBadge = null,
 }: DiagnosticianPageContentProps) {
   // AUDIT-A — Mapping schéma canonique (post-consolidation FIX-AA) :
   //   full_name canonique (fallback first_name+last_name), postal_code → postcode,
@@ -203,6 +208,23 @@ export function DiagnosticianPageContent({
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {badgeLevel !== 'unverified' ? (
                     <BadgeVerified level={badgeLevel} size="md" />
+                  ) : null}
+                  {/* Badge "Activité diagnostic vérifiée" via API Recherche
+                       d'Entreprises (api.gouv.fr, open data INSEE). Affiché
+                       UNIQUEMENT si l'établissement est actif au registre
+                       SIRENE ET enregistré sous un code NAF diagnostic
+                       (71.20B Analyses techniques ou 71.12B Ingénierie). */}
+                  {sireneBadge?.isVerified ? (
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[#0B1D33]/5 px-3 py-1 text-xs font-medium text-[#0B1D33]"
+                      title="Vérification effectuée auprès du registre SIRENE de l'INSEE (Open Data)."
+                    >
+                      <Lock className="h-3 w-3" aria-hidden />
+                      Activité diagnostic immobilier vérifiée
+                      {sireneBadge.nafCode ? (
+                        <span className="text-[#0B1D33]/55"> · Code NAF {sireneBadge.nafCode}</span>
+                      ) : null}
+                    </span>
                   ) : null}
                   {/* FIX-RR — Badge premium audit énergétique avec mention (DPE_MENTION) */}
                   {isMentionAudit ? (

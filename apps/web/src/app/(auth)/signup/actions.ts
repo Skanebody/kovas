@@ -1,15 +1,12 @@
 'use server'
 
+import { verifyDiagnosticActivityCached } from '@/lib/data-gouv/recherche-entreprises'
 import { joinFullName } from '@/lib/name-utils'
 import { isValidReferralCodeFormat } from '@/lib/referral/code-generator'
 import { applyReferralOnSignup } from '@/lib/referral/referral-engine'
 import { createClient } from '@/lib/supabase/server'
 import { getEmailValidationMessage, validateProEmail } from '@/lib/validation/email'
-import {
-  getSiretValidationMessage,
-  isFakeSiretAllowed,
-  validateSiret,
-} from '@/lib/validation/siret'
+import { isFakeSiretAllowed } from '@/lib/validation/siret'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
@@ -54,15 +51,15 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     }
   }
 
-  // Protection 2 — Validation SIRET (Luhn, V1 sans INSEE)
+  // Protection 2 — Vérification SIRET réelle au registre SIRENE
+  // (remplace l'ancien check Luhn purement mathématique). On appelle
+  // l'API Recherche d'Entreprises (api.gouv.fr, open data, sans clé)
+  // pour confirmer que l'établissement existe vraiment et qu'il est actif.
   const cleanedSiret = parsed.data.siret.replace(/\s/g, '')
-  if (!isFakeSiretAllowed()) {
-    const siretCheck = validateSiret(cleanedSiret)
-    if (!siretCheck.valid) {
-      return {
-        fieldErrors: { siret: getSiretValidationMessage(siretCheck.reason) },
-      }
-    }
+
+  // Format basique 14 chiffres — première barrière sans appel réseau
+  if (!/^\d{14}$/.test(cleanedSiret)) {
+    return { fieldErrors: { siret: 'Le SIRET doit contenir exactement 14 chiffres.' } }
   }
 
   const admin = createAdminClient<Database>(
@@ -70,6 +67,42 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
+
+  // Bypass DEV (NEXT_PUBLIC_KOVAS_DEV_ALLOW_FAKE_SIRET=1) : on saute
+  // l'appel API mais on continue le signup (utile tests E2E).
+  let sireneVerification: Awaited<ReturnType<typeof verifyDiagnosticActivityCached>> | null = null
+  if (!isFakeSiretAllowed()) {
+    sireneVerification = await verifyDiagnosticActivityCached(admin, cleanedSiret)
+
+    // Erreur réseau / rate-limit / parse → on bloque le signup avec un message
+    // explicite. L'utilisateur peut retenter (le cache ne stockera rien).
+    if (sireneVerification.error === 'network' || sireneVerification.error === 'rate_limit') {
+      return {
+        error:
+          "Vérification SIRET temporairement indisponible. Merci de réessayer dans quelques minutes.",
+      }
+    }
+
+    if (sireneVerification.error === 'not_found' || !sireneVerification.found) {
+      return {
+        fieldErrors: {
+          siret:
+            "Votre SIRET ne correspond pas à un établissement enregistré au registre SIRENE. Vérifiez le numéro saisi ou contactez contact@kovas.fr.",
+        },
+      }
+    }
+
+    if (!sireneVerification.isActive) {
+      return {
+        fieldErrors: {
+          siret:
+            "Votre SIRET ne correspond pas à un établissement actif au registre SIRENE. Vérifiez le numéro saisi ou contactez contact@kovas.fr.",
+        },
+      }
+    }
+    // Si NAF mismatch : on laisse passer mais on flagge pour revue admin.
+    // Cas typique : nouveau cabinet pas encore catégorisé, ou multi-activités.
+  }
 
   // Protection 3 — 1 SIRET = 1 essai à vie
   const { data: existingTrial } = await admin
@@ -125,13 +158,31 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     .eq('id', createdUser.user.id)
     .single()
 
-  // Enregistre le trial dans cabinet_trials
-  const { error: trialError } = await admin.from('cabinet_trials').insert({
+  // Enregistre le trial dans cabinet_trials avec les méta-données SIRENE
+  const signupAnomaly =
+    sireneVerification && sireneVerification.found && !sireneVerification.isDiagnosticNAF
+      ? 'naf_mismatch'
+      : null
+
+  const trialPayload: Record<string, unknown> = {
     siret: cleanedSiret,
     email: parsed.data.email,
     user_id: createdUser.user.id,
     organization_id: profile?.default_org_id ?? null,
-  })
+  }
+  if (sireneVerification?.found) {
+    trialPayload.sirene_verified_naf = sireneVerification.nafCode
+    trialPayload.sirene_verified_at = new Date().toISOString()
+    trialPayload.sirene_company_name = sireneVerification.companyName
+  }
+  if (signupAnomaly) {
+    trialPayload.signup_anomaly = signupAnomaly
+  }
+
+  const { error: trialError } = await admin
+    .from('cabinet_trials')
+    // biome-ignore lint/suspicious/noExplicitAny: colonnes ajoutées par migration 20260620300000, types pas régénérés
+    .insert(trialPayload as any)
 
   if (trialError && !trialError.message.includes('duplicate')) {
     // Non bloquant en V1 — log et continue

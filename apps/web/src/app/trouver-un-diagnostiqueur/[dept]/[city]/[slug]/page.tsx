@@ -1,4 +1,8 @@
 import { JsonLd } from '@/components/seo/JsonLd'
+import {
+  type DiagnosticianSireneBadge,
+  fetchDiagnosticianSireneBadge,
+} from '@/lib/data-gouv/recherche-entreprises/diagnostician-badge'
 import type { AvailabilitySignals } from '@/lib/diag-availability'
 import { fetchAvailabilitySignals as fetchAvailabilitySignalsRpc } from '@/lib/diag-availability-fetch'
 import { getDiagDisplayName } from '@/lib/diag-certifications'
@@ -107,6 +111,17 @@ async function fetchAvailabilitySignals(
   })
 }
 
+/**
+ * Récupère le badge "Activité diagnostic immobilier vérifiée" depuis le cache
+ * SIRENE 7j (table `sirene_check_cache`). Open data INSEE, lecture publique.
+ */
+async function fetchSireneBadge(siret: string | null): Promise<DiagnosticianSireneBadge> {
+  if (!siret) return { isVerified: false, nafCode: null, nafLabel: null }
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const supabase = createAdminClient()
+  return fetchDiagnosticianSireneBadge(supabase, siret)
+}
+
 async function incrementViewCount(id: string): Promise<void> {
   try {
     const supabase = await createClient()
@@ -189,13 +204,21 @@ export default async function DiagnosticianPage({ params }: PageProps) {
   // Fire-and-forget incrément vue (n'attend pas, n'interrompt jamais le rendu)
   void incrementViewCount(String(diag.id))
 
-  const [related, verification, availability] = await Promise.all([
+  // Récupère le SIRET du cabinet — colonne `sirene_siret` (DHUP) ou fallback
+  // `siret` legacy. Utilisé pour le badge "Activité diagnostic vérifiée".
+  const diagSiret: string | null =
+    (typeof diag.sirene_siret === 'string' && diag.sirene_siret) ||
+    (typeof diag.siret === 'string' && diag.siret) ||
+    null
+
+  const [related, verification, availability, sireneBadge] = await Promise.all([
     fetchRelatedDiagnosticians(diag.city ?? '', String(diag.id), 3),
     fetchVerificationBadge(String(diag.id)),
     fetchAvailabilitySignals(String(diag.id), {
       last_verified_at: typeof diag.last_verified_at === 'string' ? diag.last_verified_at : null,
       updated_at: typeof diag.updated_at === 'string' ? diag.updated_at : null,
     }),
+    fetchSireneBadge(diagSiret),
   ])
 
   // Schema.org JSON-LD Person
@@ -347,6 +370,7 @@ export default async function DiagnosticianPage({ params }: PageProps) {
         city={city}
         badgeLevel={verification.badgeLevel}
         availability={availability}
+        sireneBadge={sireneBadge}
       />
     </>
   )
