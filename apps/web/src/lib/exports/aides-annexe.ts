@@ -178,8 +178,8 @@ async function persistAnnexe(
   dpe: 'F' | 'G',
 ): Promise<string> {
   const admin = createAdminClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
@@ -202,7 +202,10 @@ async function persistAnnexe(
     upsert: true,
   })
 
-  await admin.from('dossier_export_annexes').insert({
+  // Cast `as never` car la table `dossier_export_annexes` est créée par la
+  // migration 20260620200000 et pas encore reflétée dans les types DB générés.
+  // Sera remplacée par un typage propre après `pnpm db:gen-types`.
+  await admin.from('dossier_export_annexes' as never).insert({
     organization_id: row.organization_id,
     dossier_id: row.dossier_id,
     annexe_type: 'aides_renovation',

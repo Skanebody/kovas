@@ -60,11 +60,13 @@ export interface AideResult {
  * Erreur typée renvoyée par le client en cas d'échec définitif.
  */
 export class MesAidesRenoError extends Error {
-  constructor(
-    message: string,
-    public readonly cause?: unknown,
-  ) {
+  // `cause` est une propriété native d'Error depuis ES2022 — on doit override
+  // explicitement avec TypeScript strict (lib.es2022.error.d.ts).
+  public override readonly cause?: unknown
+
+  constructor(message: string, cause?: unknown) {
     super(message)
     this.name = 'MesAidesRenoError'
+    this.cause = cause
   }
 }
