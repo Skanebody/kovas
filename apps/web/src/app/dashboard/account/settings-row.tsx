@@ -62,11 +62,7 @@ export function SettingsRow({
       )}
       {rightSlot}
       {!hideChevron && !rightSlot && (
-        <ChevronRight
-          className="size-4 text-[#0F1419]/30 shrink-0"
-          aria-hidden
-          strokeWidth={2.5}
-        />
+        <ChevronRight className="size-4 text-[#0F1419]/30 shrink-0" aria-hidden strokeWidth={2.5} />
       )}
     </>
   )

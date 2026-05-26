@@ -1,13 +1,10 @@
 import { AddToHomeScreen } from '@/components/add-to-home-screen'
 import { QueryProvider } from '@/components/query-provider'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { ThemeProvider } from '@/components/theme-provider'
 import { ToastProvider } from '@/components/shared/Toast'
+import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
-import {
-  buildOrganizationSchema,
-  buildWebSiteSchema,
-} from '@/lib/seo/schema-org'
+import { buildOrganizationSchema, buildWebSiteSchema } from '@/lib/seo/schema-org'
 import type { Metadata, Viewport } from 'next'
 import { instrumentSerif, jetbrainsMono, urbanist } from './fonts'
 import './globals.css'
@@ -90,6 +87,34 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
+/**
+ * Resource hints CWV (B95) — proactive DNS/TLS handshake pour les domaines
+ * critiques sollicités dans les 100 premières ms post-hydratation.
+ *
+ *  - Supabase (data lake) : preconnect TLS car fetch SSR `getPublicStats`
+ *    / `getObservatoireStats` part dans le RSC render. URL lue depuis
+ *    `NEXT_PUBLIC_SUPABASE_URL` (env publique côté client safe) avec fallback
+ *    statique pour le build CI sans secrets.
+ *  - Stripe.js : dns-prefetch only (pas de preconnect car Stripe.js n'est
+ *    chargé qu'au clic CTA signup, pas globalement). Évite un DNS roundtrip
+ *    de 30-80 ms à la conversion essai 30 jours.
+ *
+ * Ne PAS ajouter de preconnect vers `fonts.googleapis.com` ni
+ * `fonts.gstatic.com` — `next/font/google` self-host les fonts au build
+ * (zéro requête tierce, pas besoin de hints).
+ */
+const SUPABASE_PRECONNECT_URL = (() => {
+  const fromEnv = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (fromEnv?.startsWith('https://')) {
+    try {
+      return new URL(fromEnv).origin
+    } catch {
+      return 'https://kovas.supabase.co'
+    }
+  }
+  return 'https://kovas.supabase.co'
+})()
+
 export default function RootLayout({
   children,
 }: {
@@ -101,11 +126,12 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${urbanist.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
     >
+      <head>
+        <link rel="preconnect" href={SUPABASE_PRECONNECT_URL} crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://js.stripe.com" />
+      </head>
       <body className="font-display antialiased">
-        <JsonLd
-          id="root-org-website"
-          data={[buildOrganizationSchema(), buildWebSiteSchema()]}
-        />
+        <JsonLd id="root-org-website" data={[buildOrganizationSchema(), buildWebSiteSchema()]} />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <QueryProvider>
             <ToastProvider>

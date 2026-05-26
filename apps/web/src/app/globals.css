@@ -6,6 +6,13 @@
 
 @layer base {
   :root {
+    /* CWV : color-scheme natif appliqué AVANT premier paint (B95).
+     * Permet au navigateur de rendre scrollbars / form controls / sélection
+     * texte avec le bon thème natif sans attendre l'hydratation JS.
+     * Supprime un mini-FOUC de ~30-80ms côté dark mode et améliore le LCP
+     * sur Lighthouse desktop et mobile. */
+    color-scheme: light;
+
     /* Brand navy v4 — 5 niveaux canoniques */
     --navy-900: 207 38% 14%; /* #0F2436 — sidebar, hero deep */
     --navy-800: 207 47% 17%; /* #163144 — boutons primary */
@@ -20,14 +27,14 @@
 
     /* === v5 final tokens — productivité B2B sobre Synthex === */
     /* Background sage pâle (au lieu de cream Ron) */
-    --bg-surface: 110 18% 96%;   /* #F5F7F4 sage pâle */
+    --bg-surface: 110 18% 96%; /* #F5F7F4 sage pâle */
     --bg-surface-alt: 138 11% 94%;
     /* Sidebar 80px icon-only Synthex */
-    --sidebar-bg: 210 26% 8%;    /* #0F1419 noir bleuté */
+    --sidebar-bg: 210 26% 8%; /* #0F1419 noir bleuté */
     /* ACCENT UNIQUE chartreuse signature v5 */
-    --accent-chartreuse: 73 89% 60%;       /* #D4F542 */
-    --accent-chartreuse-soft: 73 76% 92%;  /* #F4FAD9 */
-    --accent-chartreuse-deep: 73 73% 46%;  /* #A3C920 */
+    --accent-chartreuse: 73 89% 60%; /* #D4F542 */
+    --accent-chartreuse-soft: 73 76% 92%; /* #F4FAD9 */
+    --accent-chartreuse-deep: 73 73% 46%; /* #A3C920 */
 
     /* Cyan */
     --cyan-deep: 198 36% 48%;
@@ -64,25 +71,25 @@
     --info: 217 91% 60%;
 
     /* Status pills v4 — 5 figés (alias sémantique) */
-    --status-amber: 38 92% 50%;   /* en cours (pulse) */
-    --status-blue: 217 91% 60%;   /* programmée */
-    --status-green: 160 84% 39%;  /* terminée */
-    --status-coral: 0 91% 71%;    /* problème, retard */
-    --status-muted: 215 16% 65%;  /* à démarrer */
+    --status-amber: 38 92% 50%; /* en cours (pulse) */
+    --status-blue: 217 91% 60%; /* programmée */
+    --status-green: 160 84% 39%; /* terminée */
+    --status-coral: 0 91% 71%; /* problème, retard */
+    --status-muted: 215 16% 65%; /* à démarrer */
 
     /* Diagnostic chips v4 — 8 types canoniques */
-    --chip-dpe: 214 96% 93%;       /* blue-mist */
-    --chip-amiante: 33 100% 89%;   /* orange-mist */
-    --chip-plomb: 0 86% 94%;       /* coral-mist */
-    --chip-gaz: 78 88% 91%;        /* lime-mist */
-    --chip-elec: 258 81% 92%;      /* violet-mist */
-    --chip-termites: 48 100% 88%;  /* cream */
-    --chip-carrez: 232 91% 94%;    /* indigo-mist */
-    --chip-erp: 333 87% 92%;       /* pink-mist */
+    --chip-dpe: 214 96% 93%; /* blue-mist */
+    --chip-amiante: 33 100% 89%; /* orange-mist */
+    --chip-plomb: 0 86% 94%; /* coral-mist */
+    --chip-gaz: 78 88% 91%; /* lime-mist */
+    --chip-elec: 258 81% 92%; /* violet-mist */
+    --chip-termites: 48 100% 88%; /* cream */
+    --chip-carrez: 232 91% 94%; /* indigo-mist */
+    --chip-erp: 333 87% 92%; /* pink-mist */
 
     /* Clear mode v4 — fond quasi-blanc strict (pour pages Clear) */
-    --clear-bg: 220 17% 98%;       /* #FAFBFC */
-    --clear-elevated: 0 0% 100%;   /* #FFFFFF */
+    --clear-bg: 220 17% 98%; /* #FAFBFC */
+    --clear-elevated: 0 0% 100%; /* #FFFFFF */
 
     /* Aliases rétrocompat */
     --background: var(--cream);
@@ -113,31 +120,40 @@
     --pastel-lavender: 258 52% 92%;
     --pastel-sky: var(--blue-mist);
 
-    --bg-fluid-cyan:
-      radial-gradient(ellipse 1200px 900px at 25% 35%, rgba(127, 181, 199, 0.95) 0%, transparent 55%),
+    --bg-fluid-cyan: radial-gradient(
+        ellipse 1200px 900px at 25% 35%,
+        rgba(127, 181, 199, 0.95) 0%,
+        transparent 55%
+      ),
       radial-gradient(ellipse 900px 700px at 75% 65%, rgba(78, 143, 168, 0.85) 0%, transparent 50%),
       radial-gradient(ellipse 700px 500px at 50% 90%, rgba(168, 208, 220, 0.75) 0%, transparent 60%),
       radial-gradient(ellipse 600px 400px at 90% 20%, rgba(200, 226, 232, 0.95) 0%, transparent 50%),
       linear-gradient(135deg, #b8d4dc 0%, #8fb8c8 40%, #6fa0b5 100%);
 
-    --bg-fluid-light:
-      radial-gradient(ellipse 1000px 700px at 30% 40%, rgba(200, 226, 232, 0.6) 0%, transparent 60%),
+    --bg-fluid-light: radial-gradient(
+        ellipse 1000px 700px at 30% 40%,
+        rgba(200, 226, 232, 0.6) 0%,
+        transparent 60%
+      ),
       radial-gradient(ellipse 800px 600px at 70% 60%, rgba(168, 208, 220, 0.45) 0%, transparent 60%),
       linear-gradient(180deg, #eff5f6 0%, #dce9eb 100%);
 
-    --bg-fluid-navy:
-      radial-gradient(ellipse 1100px 800px at 30% 40%, rgba(40, 75, 100, 1) 0%, transparent 55%),
-      radial-gradient(ellipse 900px 700px at 75% 65%, rgba(20, 45, 65, 1) 0%, transparent 50%),
+    --bg-fluid-navy: radial-gradient(
+        ellipse 1100px 800px at 30% 40%,
+        rgba(40, 75, 100, 1) 0%,
+        transparent 55%
+      ), radial-gradient(ellipse 900px 700px at 75% 65%, rgba(20, 45, 65, 1) 0%, transparent 50%),
       radial-gradient(ellipse 500px 400px at 85% 20%, rgba(217, 119, 6, 0.3) 0%, transparent 55%),
       linear-gradient(135deg, #112739 0%, #0b1d2e 60%, #050f1a 100%);
 
-    --shadow-glass:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 12px 36px rgba(22, 49, 68, 0.1),
-      0 4px 12px rgba(22, 49, 68, 0.06);
+    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 36px rgba(22, 49, 68, 0.1), 0 4px
+      12px rgba(22, 49, 68, 0.06);
   }
 
   .dark {
+    /* CWV : color-scheme natif dark (cf. note sur :root, B95). */
+    color-scheme: dark;
+
     --paper: 220 26% 14%;
     --cream: 222 47% 8%;
     --cream-deep: 220 33% 12%;
@@ -172,7 +188,7 @@
     line-height: 1.55;
     /* v5 final : sage pâle Synthex remplace cream Ron */
     background: hsl(var(--bg-surface));
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
@@ -277,18 +293,14 @@
 .dark .glass {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
   border-color: rgba(255, 255, 255, 0.14);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 12px 36px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 36px rgba(0, 0, 0, 0.4);
 }
 
 .dark .glass-opaque,
 .dark .glass-header {
   background: linear-gradient(135deg, rgba(32, 48, 64, 0.95) 0%, rgba(18, 32, 48, 0.92) 100%);
   border-color: rgba(255, 255, 255, 0.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 12px 36px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 36px rgba(0, 0, 0, 0.45);
 }
 
 .dark .bg-fluid-light {
@@ -303,26 +315,25 @@
 /* Mode terrain (data-field-mode sur <html>)                                 */
 /* Activé via useFieldMode() — police +20%, boutons min 64px               */
 /* ----------------------------------------------------------------------- */
-html[data-field-mode='true'] {
+html[data-field-mode="true"] {
   font-size: 120%;
 }
 
-html[data-field-mode='true'] button,
-html[data-field-mode='true'] [role='button'] {
+html[data-field-mode="true"] button,
+html[data-field-mode="true"] [role="button"] {
   min-height: 64px;
 }
 
 /* Inputs : line-height plus généreux + min-height 56px pour gants */
-html[data-field-mode='true'] input,
-html[data-field-mode='true'] textarea,
-html[data-field-mode='true'] select {
+html[data-field-mode="true"] input,
+html[data-field-mode="true"] textarea,
+html[data-field-mode="true"] select {
   min-height: 56px;
   font-size: 1.05rem;
 }
 
 /* Respect explicite des éléments qui ne doivent pas grandir (badges, icons) */
-html[data-field-mode='true'] [data-field-mode-exempt='true'] {
+html[data-field-mode="true"] [data-field-mode-exempt="true"] {
   min-height: 0;
   font-size: inherit;
 }
-

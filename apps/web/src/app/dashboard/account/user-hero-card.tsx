@@ -55,11 +55,7 @@ export function UserHeroCard({ fullName, email, planName, onClick }: UserHeroCar
           </Badge>
         )}
       </div>
-      <ChevronRight
-        className="size-5 text-[#0F1419]/30 shrink-0"
-        aria-hidden
-        strokeWidth={2.5}
-      />
+      <ChevronRight className="size-5 text-[#0F1419]/30 shrink-0" aria-hidden strokeWidth={2.5} />
     </button>
   )
 }
@@ -68,7 +64,7 @@ function computeInitials(fullName: string | null, email: string): string {
   if (fullName) {
     const tokens = fullName.trim().split(/\s+/).filter(Boolean)
     if (tokens.length >= 2) {
-      return `${tokens[0]![0] ?? ''}${tokens[1]![0] ?? ''}`.toUpperCase()
+      return `${tokens[0]?.[0] ?? ''}${tokens[1]?.[0] ?? ''}`.toUpperCase()
     }
     if (tokens.length === 1 && tokens[0]) {
       return tokens[0].slice(0, 2).toUpperCase()
