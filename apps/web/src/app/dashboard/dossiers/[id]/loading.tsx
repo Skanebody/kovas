@@ -17,7 +17,7 @@ function SkelBlock({ className }: { className?: string }) {
  */
 export default function DossierDetailLoading() {
   return (
-    <div className="max-w-4xl space-y-4" aria-busy="true" aria-live="polite">
+    <div className="max-w-4xl w-full mx-auto space-y-4" aria-busy="true" aria-live="polite">
       <Button variant="ghost" size="sm" disabled>
         <ArrowLeft className="size-4" /> Retour aux dossiers
       </Button>

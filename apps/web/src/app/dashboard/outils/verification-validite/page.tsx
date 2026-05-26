@@ -42,7 +42,7 @@ export default async function VerificationValiditePage() {
   const properties = propertiesRes.data ?? []
 
   return (
-    <div className="max-w-5xl space-y-8 animate-fade-in">
+    <div className="max-w-5xl w-full mx-auto space-y-8 animate-fade-in">
       <AppPageHeader
         title="Vérification de"
         accent="validité"

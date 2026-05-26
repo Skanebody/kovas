@@ -40,7 +40,7 @@ export default async function EditPropertyPage({
   const subtitle = [property.address, property.city].filter(Boolean).join(', ')
 
   return (
-    <div className="max-w-2xl space-y-6 animate-fade-in">
+    <div className="max-w-2xl w-full mx-auto space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href={`/dashboard/properties/${id}`}>
           <ArrowLeft className="size-4" /> Retour au bien

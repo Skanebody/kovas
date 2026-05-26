@@ -1,9 +1,9 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { Button } from '@/components/ui/button'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { PropertyForm } from './property-form'
 
 export const metadata: Metadata = { title: 'Nouveau bien' }
@@ -19,7 +19,7 @@ export default async function NewPropertyPage() {
     .order('display_name')
 
   return (
-    <div className="max-w-2xl space-y-6 animate-fade-in">
+    <div className="max-w-2xl w-full mx-auto space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/dashboard/properties">
           <ArrowLeft className="size-4" /> Retour

@@ -66,7 +66,7 @@ export default async function DossierPrevalidationPage({
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="max-w-4xl w-full mx-auto space-y-6">
       <Button variant="ghost" size="sm" asChild>
         <Link href={`/dashboard/dossiers/${dossier.id}`}>
           <ArrowLeft className="size-4" /> Retour au dossier

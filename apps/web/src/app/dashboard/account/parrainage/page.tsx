@@ -61,7 +61,7 @@ export default async function ParrainagePage() {
   const referrerName = profile.full_name?.trim() || 'un confrère'
 
   return (
-    <div className="max-w-3xl space-y-8">
+    <div className="max-w-3xl w-full mx-auto space-y-8">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/dashboard/account">
           <ArrowLeft className="size-4" /> Mon compte

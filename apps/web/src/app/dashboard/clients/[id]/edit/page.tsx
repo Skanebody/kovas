@@ -1,10 +1,10 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { Button } from '@/components/ui/button'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { EditClientForm } from './edit-form'
 
 export const metadata: Metadata = { title: 'Modifier le client' }
@@ -30,18 +30,14 @@ export default async function EditClientPage({
   if (!client) notFound()
 
   return (
-    <div className="max-w-2xl space-y-6 animate-fade-in">
+    <div className="max-w-2xl w-full mx-auto space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href={`/dashboard/clients/${id}`}>
           <ArrowLeft className="size-4" /> Retour au client
         </Link>
       </Button>
 
-      <AppPageHeader
-        title="Modifier"
-        accent={client.display_name}
-        eyebrow="Client"
-      />
+      <AppPageHeader title="Modifier" accent={client.display_name} eyebrow="Client" />
 
       <EditClientForm client={client} />
     </div>
