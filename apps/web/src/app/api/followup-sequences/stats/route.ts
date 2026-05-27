@@ -26,7 +26,11 @@ export async function GET(): Promise<Response> {
       .limit(5000)
     if (error) {
       const msg = error.message ?? ''
-      if (msg.includes('does not exist') || msg.includes('schema cache') || error.code === '42P01') {
+      if (
+        msg.includes('does not exist') ||
+        msg.includes('schema cache') ||
+        error.code === '42P01'
+      ) {
         return NextResponse.json({ activeCount: 0, averageResponseRate: 0 })
       }
       return NextResponse.json({ error: msg }, { status: 500 })

@@ -18,12 +18,24 @@ export function AppListTable({ children, className }: AppListTableProps) {
 }
 
 export function AppListTableHead({ children }: { children: ReactNode }) {
-  return <thead className="bg-cream-deep/80 text-ink-mute text-[11px] uppercase tracking-wide">{children}</thead>
+  return (
+    <thead className="bg-cream-deep/80 text-ink-mute text-[11px] uppercase tracking-wide">
+      {children}
+    </thead>
+  )
 }
 
-export function AppListTableRow({ children, className }: { children: ReactNode; className?: string }) {
+export function AppListTableRow({
+  children,
+  className,
+}: { children: ReactNode; className?: string }) {
   return (
-    <tr className={cn('border-t border-rule/80 hover:bg-ink/5 transition-colors duration-fast', className)}>
+    <tr
+      className={cn(
+        'border-t border-rule/80 hover:bg-ink/5 transition-colors duration-fast',
+        className,
+      )}
+    >
       {children}
     </tr>
   )

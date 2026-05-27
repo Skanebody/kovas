@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
 import { DiagChip } from '@/components/ui/diag-chip'
+import { cn } from '@/lib/utils'
 import type { MissionType } from '@kovas/shared'
 import { MapPin } from 'lucide-react'
 import Link from 'next/link'
@@ -55,9 +55,7 @@ export function MissionCard({
     <>
       {/* Colonne 1 — Heure typographique */}
       <div className="flex flex-col gap-1 pr-5 border-r border-rule">
-        <span className="font-mono text-2xl font-semibold tracking-tight text-ink">
-          {time}
-        </span>
+        <span className="font-mono text-2xl font-semibold tracking-tight text-ink">{time}</span>
         {day && (
           <span className="font-mono text-[11px] uppercase tracking-wider text-ink-mute">
             {day}
@@ -72,9 +70,7 @@ export function MissionCard({
             <DiagChip key={type} type={type} />
           ))}
         </div>
-        <h3 className="text-lg font-bold tracking-tight text-ink mb-1 truncate">
-          {name}
-        </h3>
+        <h3 className="text-lg font-bold tracking-tight text-ink mb-1 truncate">{name}</h3>
         <p className="text-sm text-ink-mute flex items-center gap-1.5">
           <MapPin className="size-3.5 shrink-0" />
           <span className="truncate">

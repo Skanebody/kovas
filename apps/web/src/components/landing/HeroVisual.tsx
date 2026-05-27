@@ -48,8 +48,8 @@ export function HeroVisual() {
                   <span className="voice-bars" aria-hidden />
                 </div>
                 <p className="text-[#0F1419] leading-snug">
-                  «&nbsp;Cuisine 12 mètres carrés, fenêtre double vitrage PVC, chaudière gaz
-                  Saunier Duval 24 kilowatts, VMC simple flux fonctionnelle…&nbsp;»
+                  «&nbsp;Cuisine 12 mètres carrés, fenêtre double vitrage PVC, chaudière gaz Saunier
+                  Duval 24 kilowatts, VMC simple flux fonctionnelle…&nbsp;»
                 </p>
               </div>
 
@@ -126,9 +126,7 @@ function RoomRow({
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white p-3 rounded-[8px] text-[12px] border border-[#0F1419]/[0.08]">
-      <div className="text-[#0F1419]/55 uppercase tracking-[0.08em] text-[10px] mb-1">
-        {label}
-      </div>
+      <div className="text-[#0F1419]/55 uppercase tracking-[0.08em] text-[10px] mb-1">{label}</div>
       <div className="font-semibold text-sm text-[#0F1419]">{value}</div>
     </div>
   )

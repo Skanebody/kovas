@@ -5,12 +5,12 @@
  *   POST /api/followup-sequences   { kind, targetType, targetId }
  */
 
-import { getCurrentUser } from '@/lib/auth/current-user'
 import type {
   FollowUpKind,
   FollowUpSequence,
   FollowUpStatus,
 } from '@/components/followup/FollowUpSequencesManager'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
@@ -112,9 +112,7 @@ export async function GET(request: Request): Promise<Response> {
     if (kind) {
       // Filtre dual : si la colonne `kind` est présente, ou sequence_template correspond.
       const templates = kindToTemplateFilter(kind)
-      q = q.or(
-        `kind.eq.${kind},sequence_template.in.(${templates.join(',')})`,
-      )
+      q = q.or(`kind.eq.${kind},sequence_template.in.(${templates.join(',')})`)
     }
     if (status) q = q.eq('status', status)
 
@@ -122,7 +120,12 @@ export async function GET(request: Request): Promise<Response> {
     if (error) {
       // Graceful degradation : colonnes absentes (schémas désalignés) → re-essai avec colonnes minimales
       const msg = error.message ?? ''
-      if (msg.includes('does not exist') || msg.includes('schema cache') || error.code === '42P01' || error.code === '42703') {
+      if (
+        msg.includes('does not exist') ||
+        msg.includes('schema cache') ||
+        error.code === '42P01' ||
+        error.code === '42703'
+      ) {
         // Fallback strict aux colonnes garanties par la migration
         const fallback = await supabase
           .from('follow_up_sequences' as never)
@@ -161,12 +164,29 @@ async function enrichWithTargetReferences(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   rows: SequenceRow[],
-): Promise<Map<string, { reference: string | null; clientName: string | null; clientEmail: string | null }>> {
-  const out = new Map<string, { reference: string | null; clientName: string | null; clientEmail: string | null }>()
-  const quoteIds = rows.filter((r) => r.target_entity_type === 'quote' || r.target_entity_type === 'auto_quote').map((r) => r.target_entity_id).filter(Boolean) as string[]
-  const invoiceIds = rows.filter((r) => r.target_entity_type === 'invoice').map((r) => r.target_entity_id).filter(Boolean) as string[]
-  const missionIds = rows.filter((r) => r.target_entity_type === 'mission').map((r) => r.target_entity_id).filter(Boolean) as string[]
-  const contactIds = rows.filter((r) => r.target_entity_type === 'contact').map((r) => r.target_entity_id).filter(Boolean) as string[]
+): Promise<
+  Map<string, { reference: string | null; clientName: string | null; clientEmail: string | null }>
+> {
+  const out = new Map<
+    string,
+    { reference: string | null; clientName: string | null; clientEmail: string | null }
+  >()
+  const quoteIds = rows
+    .filter((r) => r.target_entity_type === 'quote' || r.target_entity_type === 'auto_quote')
+    .map((r) => r.target_entity_id)
+    .filter(Boolean) as string[]
+  const invoiceIds = rows
+    .filter((r) => r.target_entity_type === 'invoice')
+    .map((r) => r.target_entity_id)
+    .filter(Boolean) as string[]
+  const missionIds = rows
+    .filter((r) => r.target_entity_type === 'mission')
+    .map((r) => r.target_entity_id)
+    .filter(Boolean) as string[]
+  const contactIds = rows
+    .filter((r) => r.target_entity_type === 'contact')
+    .map((r) => r.target_entity_id)
+    .filter(Boolean) as string[]
 
   if (quoteIds.length > 0) {
     const { data } = await supabase
@@ -174,7 +194,12 @@ async function enrichWithTargetReferences(
       .select('id, reference, client_snapshot, clients(display_name, email)')
       .in('id', quoteIds)
     if (data) {
-      for (const q of data as Array<{ id: string; reference: string; client_snapshot: { displayName?: string; email?: string } | null; clients: { display_name: string | null; email: string | null } | null }>) {
+      for (const q of data as Array<{
+        id: string
+        reference: string
+        client_snapshot: { displayName?: string; email?: string } | null
+        clients: { display_name: string | null; email: string | null } | null
+      }>) {
         out.set(q.id, {
           reference: q.reference,
           clientName: q.client_snapshot?.displayName ?? q.clients?.display_name ?? null,
@@ -189,7 +214,12 @@ async function enrichWithTargetReferences(
       .select('id, reference, client_snapshot, clients(display_name, email)')
       .in('id', invoiceIds)
     if (data) {
-      for (const inv of data as Array<{ id: string; reference: string; client_snapshot: { display_name?: string; email?: string } | null; clients: { display_name: string | null; email: string | null } | null }>) {
+      for (const inv of data as Array<{
+        id: string
+        reference: string
+        client_snapshot: { display_name?: string; email?: string } | null
+        clients: { display_name: string | null; email: string | null } | null
+      }>) {
         out.set(inv.id, {
           reference: inv.reference,
           clientName: inv.client_snapshot?.display_name ?? inv.clients?.display_name ?? null,
@@ -204,7 +234,11 @@ async function enrichWithTargetReferences(
       .select('id, reference, clients(display_name, email)')
       .in('id', missionIds)
     if (data) {
-      for (const m of data as Array<{ id: string; reference: string; clients: { display_name: string | null; email: string | null } | null }>) {
+      for (const m of data as Array<{
+        id: string
+        reference: string
+        clients: { display_name: string | null; email: string | null } | null
+      }>) {
         out.set(m.id, {
           reference: m.reference,
           clientName: m.clients?.display_name ?? null,
@@ -219,7 +253,11 @@ async function enrichWithTargetReferences(
       .select('id, full_name, email')
       .in('id', contactIds)
     if (data) {
-      for (const c of data as Array<{ id: string; full_name: string | null; email: string | null }>) {
+      for (const c of data as Array<{
+        id: string
+        full_name: string | null
+        email: string | null
+      }>) {
         out.set(c.id, {
           reference: null,
           clientName: c.full_name,
@@ -233,7 +271,10 @@ async function enrichWithTargetReferences(
 
 function normalizeRow(
   r: SequenceRow,
-  enriched: Map<string, { reference: string | null; clientName: string | null; clientEmail: string | null }>,
+  enriched: Map<
+    string,
+    { reference: string | null; clientName: string | null; clientEmail: string | null }
+  >,
 ): FollowUpSequence {
   const ext = r.target_entity_id ? enriched.get(r.target_entity_id) : undefined
   const stepIndex = r.step_index ?? r.current_step ?? 0

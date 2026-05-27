@@ -17,7 +17,17 @@ export interface VoiceParsedData {
   rooms_count?: number
 
   equipment: {
-    kind: 'chaudiere' | 'chauffe_eau' | 'radiateur' | 'pac' | 'climatisation' | 'fenetre' | 'isolation' | 'ventilation' | 'tableau_elec' | 'autre'
+    kind:
+      | 'chaudiere'
+      | 'chauffe_eau'
+      | 'radiateur'
+      | 'pac'
+      | 'climatisation'
+      | 'fenetre'
+      | 'isolation'
+      | 'ventilation'
+      | 'tableau_elec'
+      | 'autre'
     brand?: string
     model?: string
     energy_class?: string
@@ -27,42 +37,73 @@ export interface VoiceParsedData {
 
   observations: string[] // Phrases d'intérêt extraites
   raw_keywords: string[] // Mots-clés repérés
-  confidence: number    // 0-1 heuristique
+  confidence: number // 0-1 heuristique
 }
 
 // Vocabulaire ciblé — sous-ensemble pour parsing rapide
 const BRANDS_CHAUDIERE = [
-  'saunier duval', 'frisquet', 'elm leblanc', 'chappée', 'de dietrich',
-  'atlantic', 'viessmann', 'vaillant', 'buderus', 'unical', 'ariston',
-  'auer', 'styx', 'oertli',
+  'saunier duval',
+  'frisquet',
+  'elm leblanc',
+  'chappée',
+  'de dietrich',
+  'atlantic',
+  'viessmann',
+  'vaillant',
+  'buderus',
+  'unical',
+  'ariston',
+  'auer',
+  'styx',
+  'oertli',
 ]
 
-const BRANDS_PAC = ['daikin', 'mitsubishi', 'toshiba', 'panasonic', 'atlantic', 'hitachi', 'lg', 'samsung']
+const BRANDS_PAC = [
+  'daikin',
+  'mitsubishi',
+  'toshiba',
+  'panasonic',
+  'atlantic',
+  'hitachi',
+  'lg',
+  'samsung',
+]
 
 const ISOLATION_KEYWORDS = [
-  'laine de verre', 'laine de roche', 'polystyrène', 'pse', 'pur',
-  'polyuréthane', 'ouate de cellulose', 'fibre de bois', 'ite', 'iti',
+  'laine de verre',
+  'laine de roche',
+  'polystyrène',
+  'pse',
+  'pur',
+  'polyuréthane',
+  'ouate de cellulose',
+  'fibre de bois',
+  'ite',
+  'iti',
 ]
 
 const VENTILATION_KEYWORDS = [
-  'vmc simple flux', 'vmc double flux', 'vmc hygro', 'vmc hygroréglable',
-  'vmr', 'ventilation naturelle',
+  'vmc simple flux',
+  'vmc double flux',
+  'vmc hygro',
+  'vmc hygroréglable',
+  'vmr',
+  'ventilation naturelle',
 ]
 
 const ENERGY_CLASS_PATTERN = /classe?\s+(?:énergétique\s+|énerg\s+)?([A-G])\b/gi
-const SURFACE_PATTERN = /(\d{1,4}(?:[,.]\d{1,2})?)\s*(?:m²|m2|mètre[s]?\s+carré[s]?|metres?\s+carr[eé]s?)/gi
+const SURFACE_PATTERN =
+  /(\d{1,4}(?:[,.]\d{1,2})?)\s*(?:m²|m2|mètre[s]?\s+carré[s]?|metres?\s+carr[eé]s?)/gi
 const YEAR_PATTERN = /\b(?:constru(?:it|ction)\s+en\s+|année\s+|de\s+)(\d{4})\b/gi
 const YEAR_LOOSE_PATTERN = /\b(1[89]\d{2}|20[012]\d)\b/g
-const CEILING_PATTERN = /(?:hauteur\s+(?:sous\s+plafond|s\.?p\.?)\s+(?:de\s+|:\s*)?)(\d(?:[,.]\d{1,2})?)\s*m(?:\b|ètres?)/gi
+const CEILING_PATTERN =
+  /(?:hauteur\s+(?:sous\s+plafond|s\.?p\.?)\s+(?:de\s+|:\s*)?)(\d(?:[,.]\d{1,2})?)\s*m(?:\b|ètres?)/gi
 
 /**
  * Normalise une chaîne pour matching insensitive (lowercase, sans accents).
  */
 function normalize(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 }
 
 function findBrand(text: string, brands: string[]): string | undefined {
@@ -189,7 +230,11 @@ export function parseVoiceTranscript(transcript: string): VoiceParsedData {
   const sentences = text.split(/[.!?]\s+/).filter(Boolean)
   for (const s of sentences) {
     const lower = normalize(s)
-    if (/fissure|infiltration|humidite|moisissure|degradation|defaut|risque|attention|mauvais\s+etat/.test(lower)) {
+    if (
+      /fissure|infiltration|humidite|moisissure|degradation|defaut|risque|attention|mauvais\s+etat/.test(
+        lower,
+      )
+    ) {
       observations.push(s.trim())
     }
   }

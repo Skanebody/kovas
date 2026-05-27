@@ -122,10 +122,7 @@ export async function getStorageUsage(
   const usagePct =
     quotaBytes === 0n
       ? 0
-      : Math.min(
-          999,
-          Math.max(0, Number((usedBytes * 10000n) / quotaBytes) / 100),
-        )
+      : Math.min(999, Math.max(0, Number((usedBytes * 10000n) / quotaBytes) / 100))
 
   return {
     usedBytes,
@@ -180,11 +177,10 @@ export function formatBytes(bytes: bigint | number): string {
 }
 
 function formatNumberFr(value: number, fractionDigits: number): string {
-  return value
-    .toLocaleString('fr-FR', {
-      minimumFractionDigits: fractionDigits,
-      maximumFractionDigits: fractionDigits,
-    })
+  return value.toLocaleString('fr-FR', {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  })
 }
 
 // ============================================

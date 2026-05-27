@@ -1,7 +1,7 @@
-import Link from 'next/link'
-import { cookies } from 'next/headers'
-import type { Metadata } from 'next'
 import { isValidReferralCodeFormat, normalizeReferralCode } from '@/lib/referral/code-generator'
+import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
+import Link from 'next/link'
 import { SignupForm } from './signup-form'
 
 export const metadata: Metadata = {

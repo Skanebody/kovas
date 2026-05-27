@@ -23,7 +23,8 @@ export function applyCsvWatermarkLine(csv: string, missionReference: string): st
  * Le champ <notes_administratives> est visible dans Liciel après import.
  */
 export function applyZipLicielWatermark(xmlContent: string): string {
-  const watermarkNode = '<notes_administratives>Mission générée via essai KOVAS — kovas.fr</notes_administratives>'
+  const watermarkNode =
+    '<notes_administratives>Mission générée via essai KOVAS — kovas.fr</notes_administratives>'
 
   // Si la balise existe déjà, remplacer son contenu
   if (xmlContent.includes('<notes_administratives>')) {
@@ -54,9 +55,7 @@ export async function applyPdfWatermark(
  * Ajoute le watermark dans un DOCX buffer (stub — implémentation J11-J12).
  */
 export async function applyDocxWatermark(_docxBuffer: Buffer): Promise<Buffer> {
-  throw new Error(
-    'applyDocxWatermark: stub V1. Implémentation J11-J12 via docx (header section).',
-  )
+  throw new Error('applyDocxWatermark: stub V1. Implémentation J11-J12 via docx (header section).')
 }
 
 /**

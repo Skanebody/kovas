@@ -88,9 +88,7 @@ export function ProactiveSuggestionBubble({
         </div>
         <div className="flex-1 min-w-0">
           <p className="label-mono text-ink-mute mb-1">{PRIORITY_LABEL_FR[suggestion.priority]}</p>
-          <p className="text-[14px] font-semibold text-ink leading-snug mb-1">
-            {suggestion.title}
-          </p>
+          <p className="text-[14px] font-semibold text-ink leading-snug mb-1">{suggestion.title}</p>
           <p className="text-[13px] text-ink-soft leading-snug mb-3">{suggestion.message}</p>
           <div className="flex gap-2">
             <Button

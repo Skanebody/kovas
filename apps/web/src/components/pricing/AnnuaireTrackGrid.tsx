@@ -1,14 +1,10 @@
 'use client'
 
+// Type B2 dependency — pricing-plans.ts refonte by parallel agent
+import { ANNUAIRE_PLANS, type AnnuairePlan, type AnnuairePlanCode } from '@/lib/pricing-plans'
 import { cn } from '@/lib/utils'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-// Type B2 dependency — pricing-plans.ts refonte by parallel agent
-import {
-  ANNUAIRE_PLANS,
-  type AnnuairePlan,
-  type AnnuairePlanCode,
-} from '@/lib/pricing-plans'
 
 import type { BillingCycle } from './PricingToggle'
 
@@ -92,10 +88,7 @@ function AnnuaireCard({
           {displayPrice}
         </span>
         <span
-          className={cn(
-            'text-sm',
-            plan.featured === true ? 'text-white/72' : 'text-[#0F1419]/55',
-          )}
+          className={cn('text-sm', plan.featured === true ? 'text-white/72' : 'text-[#0F1419]/55')}
         >
           € HT / mois
         </span>
@@ -110,10 +103,7 @@ function AnnuaireCard({
       </p>
 
       <div
-        className={cn(
-          'h-px mb-5',
-          plan.featured === true ? 'bg-white/15' : 'bg-[#0F1419]/[0.08]',
-        )}
+        className={cn('h-px mb-5', plan.featured === true ? 'bg-white/15' : 'bg-[#0F1419]/[0.08]')}
         aria-hidden
       />
 
@@ -129,9 +119,7 @@ function AnnuaireCard({
             plan.featured === true ? 'text-white' : 'text-[#0F1419]',
           )}
         >
-          {plan.leadsPerMonth === 0
-            ? 'Fiche vérifiée'
-            : `${plan.leadsPerMonth} leads / mois`}
+          {plan.leadsPerMonth === 0 ? 'Fiche vérifiée' : `${plan.leadsPerMonth} leads / mois`}
         </p>
         <p
           className={cn(
@@ -182,7 +170,9 @@ function AnnuaireCard({
             plan.featured === true ? 'text-white/72' : 'text-[#0F1419]/55',
           )}
         >
-          {isFree ? 'Aucune CB · Vérification 24-48h' : 'Débit auto à J+30 · Résiliable à tout moment'}
+          {isFree
+            ? 'Aucune CB · Vérification 24-48h'
+            : 'Débit auto à J+30 · Résiliable à tout moment'}
         </p>
       </div>
     </article>

@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { QontoClient } from '@/lib/qonto/client'
 import {
   deleteConnector,
   getConnector,
-  upsertConnector,
   setConnectorStatus,
+  upsertConnector,
 } from '@/lib/qonto/connector-store'
 import { QontoApiError } from '@/lib/qonto/types'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30

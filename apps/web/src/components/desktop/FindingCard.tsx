@@ -7,12 +7,8 @@
  * Tokens V5 stricts. Pas d'emoji marketing. Ton sobre.
  */
 
+import type { Finding, FindingCategory, FindingSeverity } from '@/lib/pre-export/types'
 import { cn } from '@/lib/utils'
-import type {
-  Finding,
-  FindingSeverity,
-  FindingCategory,
-} from '@/lib/pre-export/types'
 import { AlertCircle, AlertTriangle, Info, Lightbulb } from 'lucide-react'
 
 interface FindingCardProps {
@@ -113,9 +109,7 @@ export function FindingCard({ finding, onAction }: FindingCardProps) {
             >
               {style.pillLabel}
             </span>
-            <span className="label-mono text-ink-mute">
-              {CATEGORY_LABEL[finding.category]}
-            </span>
+            <span className="label-mono text-ink-mute">{CATEGORY_LABEL[finding.category]}</span>
           </div>
 
           {/* Titre */}

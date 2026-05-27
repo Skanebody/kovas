@@ -38,8 +38,7 @@ export function validateConsent(
 
   for (const key of requiredConsents) {
     const value = formData.get(key)
-    const isAccepted =
-      value === 'on' || value === 'true' || value === '1' || value === 'accepted'
+    const isAccepted = value === 'on' || value === 'true' || value === '1' || value === 'accepted'
     if (!isAccepted) {
       missing.push(key)
     }

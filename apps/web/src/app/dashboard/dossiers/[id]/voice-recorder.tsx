@@ -1,12 +1,12 @@
 'use client'
 
-import { Loader2, Mic, MicOff, Square } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { AudioRecorder } from '@/lib/audio-record'
 import { createClient } from '@/lib/supabase/client'
-import { parseVoiceTranscript, VOICE_PARSER_THRESHOLD } from '@/lib/voice-parser'
+import { VOICE_PARSER_THRESHOLD, parseVoiceTranscript } from '@/lib/voice-parser'
+import { Loader2, Mic, MicOff, Square } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { createVoiceNoteAction } from './actions'
 
 interface VoiceRecorderProps {
@@ -155,7 +155,9 @@ export function VoiceRecorder({ dossierId, orgId, rooms }: VoiceRecorderProps) {
   }
 
   const fmt = (s: number) =>
-    `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
+    `${Math.floor(s / 60)
+      .toString()
+      .padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
 
   return (
     <div className="space-y-3">
@@ -168,7 +170,9 @@ export function VoiceRecorder({ dossierId, orgId, rooms }: VoiceRecorderProps) {
           >
             <option value="">— Note libre (sans pièce) —</option>
             {rooms.map((r) => (
-              <option key={r.id} value={r.id}>{r.name}</option>
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
             ))}
           </Select>
         </div>

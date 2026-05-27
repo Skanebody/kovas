@@ -17,7 +17,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit, type RateLimitTier } from './rate-limit'
+import { type RateLimitTier, checkRateLimit } from './rate-limit'
 
 /**
  * Extrait un identifiant pour rate-limiting depuis la requête :
@@ -52,8 +52,7 @@ function buildRateLimitedResponse(result: {
   return NextResponse.json(
     {
       error: 'rate_limited',
-      message:
-        'Trop de requêtes en peu de temps. Veuillez patienter avant de réessayer.',
+      message: 'Trop de requêtes en peu de temps. Veuillez patienter avant de réessayer.',
       retryAfter: retryAfterSeconds,
     },
     {

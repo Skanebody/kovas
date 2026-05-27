@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils'
 import { LEVELS, type LevelId } from '@/lib/gamification/levels'
-import { LevelBadge } from './LevelBadge'
+import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
+import { LevelBadge } from './LevelBadge'
 
 export interface ProgressionTimelineProps {
   currentLevel: LevelId
@@ -15,7 +15,11 @@ export interface ProgressionTimelineProps {
  * Ton sobre, vouvoiement, descriptions courtes (cf. docs/avatar-client.md).
  * Aucune mention d'avantage tarifaire.
  */
-export function ProgressionTimeline({ currentLevel, unlockedAt, className }: ProgressionTimelineProps) {
+export function ProgressionTimeline({
+  currentLevel,
+  unlockedAt,
+  className,
+}: ProgressionTimelineProps) {
   return (
     <ol className={cn('relative space-y-5 pl-1', className)}>
       {LEVELS.map((lvl, idx) => {

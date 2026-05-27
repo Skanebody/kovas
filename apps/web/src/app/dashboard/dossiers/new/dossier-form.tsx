@@ -1,7 +1,5 @@
 'use client'
 
-import { Info, Loader2 } from 'lucide-react'
-import { useActionState, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/ui/form-field'
@@ -9,10 +7,18 @@ import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { Info, Loader2 } from 'lucide-react'
+import { useActionState, useState } from 'react'
 import { type DossierFormState, createDossierAction } from '../actions'
 
 interface DossierFormProps {
-  properties: { id: string; address: string; city: string | null; postal_code: string | null; year_built: number | null }[]
+  properties: {
+    id: string
+    address: string
+    city: string | null
+    postal_code: string | null
+    year_built: number | null
+  }[]
   clients: { id: string; display_name: string }[]
   defaultPropertyId?: string
   defaultClientId?: string
@@ -26,9 +32,24 @@ interface DiagOption {
 }
 
 const DIAG_OPTIONS: DiagOption[] = [
-  { value: 'dpe_vente', label: 'DPE vente', group: 'dpe', hint: 'Performance énergétique pour mise en vente' },
-  { value: 'dpe_location', label: 'DPE location', group: 'dpe', hint: 'Performance énergétique pour mise en location' },
-  { value: 'copropriete', label: 'DPE copropriété', group: 'dpe', hint: 'DPE à l\'échelle de l\'immeuble' },
+  {
+    value: 'dpe_vente',
+    label: 'DPE vente',
+    group: 'dpe',
+    hint: 'Performance énergétique pour mise en vente',
+  },
+  {
+    value: 'dpe_location',
+    label: 'DPE location',
+    group: 'dpe',
+    hint: 'Performance énergétique pour mise en location',
+  },
+  {
+    value: 'copropriete',
+    label: 'DPE copropriété',
+    group: 'dpe',
+    hint: "DPE à l'échelle de l'immeuble",
+  },
   { value: 'amiante_vente', label: 'Amiante vente', group: 'amiante', hint: 'Bâti < 1997' },
   { value: 'amiante_avant_travaux', label: 'Amiante avant travaux', group: 'amiante' },
   { value: 'plomb_crep', label: 'Plomb CREP', group: 'autres', hint: 'Bâti < 1949' },
@@ -122,7 +143,9 @@ export function DossierForm({
           onChange={(e) => setPropertyId(e.target.value)}
           required
         >
-          <option value="" disabled>— Sélectionnez un bien —</option>
+          <option value="" disabled>
+            — Sélectionnez un bien —
+          </option>
           {properties.map((p) => (
             <option key={p.id} value={p.id}>
               {p.address}
@@ -168,7 +191,9 @@ export function DossierForm({
           Diagnostics à effectuer <span className="text-accent-red">*</span>
         </legend>
         {fieldErrors.types && (
-          <p className="text-sm text-accent-red" role="alert">{fieldErrors.types}</p>
+          <p className="text-sm text-accent-red" role="alert">
+            {fieldErrors.types}
+          </p>
         )}
 
         {suggestions.length > 0 && (
@@ -200,9 +225,7 @@ export function DossierForm({
                     key={d.value}
                     className={cn(
                       'flex items-start gap-3 rounded-md border p-3 cursor-pointer transition-colors',
-                      isChecked
-                        ? 'border-rule bg-cream-deep/50'
-                        : 'border-rule hover:bg-ink/5',
+                      isChecked ? 'border-rule bg-cream-deep/50' : 'border-rule hover:bg-ink/5',
                     )}
                   >
                     <input
@@ -216,7 +239,11 @@ export function DossierForm({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{d.label}</span>
-                        {isSuggested && <Badge variant="blue" className="text-[10px]">Suggéré</Badge>}
+                        {isSuggested && (
+                          <Badge variant="blue" className="text-[10px]">
+                            Suggéré
+                          </Badge>
+                        )}
                       </div>
                       {d.hint && <p className="text-xs text-ink-mute">{d.hint}</p>}
                     </div>

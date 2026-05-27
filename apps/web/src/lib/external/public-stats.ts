@@ -26,9 +26,7 @@ export interface LocalStats {
 // Cache mémoire process-local 1h, fallback si Next.js cache miss
 const cache = new Map<string, { data: LocalStats; until: number }>()
 
-export async function fetchPublicLocalStats(
-  inseeCode: string | null,
-): Promise<LocalStats> {
+export async function fetchPublicLocalStats(inseeCode: string | null): Promise<LocalStats> {
   const empty: LocalStats = { dvfMedianEurM2: null, inseePopulation: null, ademeDpeCount: null }
   if (!inseeCode || !/^\d{5}[A-B]?$/.test(inseeCode)) return empty
 
@@ -66,21 +64,21 @@ async function fetchDvfMedian(insee: string): Promise<number | null> {
   // Essai année N-1 puis N-2 (DVF publie avec ~6 mois de retard)
   for (const year of [currentYear - 1, currentYear - 2]) {
     try {
-      const r = await fetch(
-        `https://app.dvf.etalab.gouv.fr/api/mutations3/${insee}/${year}`,
-        { next: { revalidate: 86_400 }, signal: AbortSignal.timeout(8000) },
-      )
+      const r = await fetch(`https://app.dvf.etalab.gouv.fr/api/mutations3/${insee}/${year}`, {
+        next: { revalidate: 86_400 },
+        signal: AbortSignal.timeout(8000),
+      })
       if (!r.ok) continue
       const json = (await r.json()) as DvfResponse
       const muts = json.mutations ?? json.features?.map((f) => f.properties) ?? []
       const filtered = muts.filter(
         (m): m is DvfMutation & { valeur_fonciere: number; surface_reelle_bati: number } =>
-          m !== null
-          && typeof m.valeur_fonciere === 'number'
-          && typeof m.surface_reelle_bati === 'number'
-          && (m.type_local === 'Maison' || m.type_local === 'Appartement')
-          && m.valeur_fonciere > 1000
-          && m.surface_reelle_bati > 5,
+          m !== null &&
+          typeof m.valeur_fonciere === 'number' &&
+          typeof m.surface_reelle_bati === 'number' &&
+          (m.type_local === 'Maison' || m.type_local === 'Appartement') &&
+          m.valeur_fonciere > 1000 &&
+          m.surface_reelle_bati > 5,
       )
       if (filtered.length < 3) continue
       const prices = filtered
@@ -103,10 +101,10 @@ interface GeoApiResponse {
 
 async function fetchInseePopulation(insee: string): Promise<number | null> {
   try {
-    const r = await fetch(
-      `https://geo.api.gouv.fr/communes/${insee}?fields=population`,
-      { next: { revalidate: 604_800 }, signal: AbortSignal.timeout(5000) },
-    )
+    const r = await fetch(`https://geo.api.gouv.fr/communes/${insee}?fields=population`, {
+      next: { revalidate: 604_800 },
+      signal: AbortSignal.timeout(5000),
+    })
     if (!r.ok) return null
     const json = (await r.json()) as GeoApiResponse
     return typeof json.population === 'number' ? json.population : null

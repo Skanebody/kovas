@@ -22,7 +22,13 @@ export interface StatusPillProps
   size?: 'sm' | 'default'
 }
 
-export function StatusPill({ className, variant, label, size = 'default', ...props }: StatusPillProps) {
+export function StatusPill({
+  className,
+  variant,
+  label,
+  size = 'default',
+  ...props
+}: StatusPillProps) {
   return (
     <span
       className={cn(

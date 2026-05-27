@@ -86,7 +86,7 @@ export function computeRequiredDiagnostics(ctx: PropertyContext): DiagnosticSugg
       reason:
         isSale && yearBuilt !== null && yearBuilt < AMIANTE_CUTOFF_YEAR
           ? 'Bâti antérieur à 1997 mis en vente.'
-          : 'Requis seulement pour vente d\'un bâti antérieur à 1997.',
+          : "Requis seulement pour vente d'un bâti antérieur à 1997.",
     })
   }
 
@@ -104,9 +104,7 @@ export function computeRequiredDiagnostics(ctx: PropertyContext): DiagnosticSugg
   suggestions.push({
     type: 'ELEC',
     required: isSale,
-    reason: isSale
-      ? 'Vente : installation potentiellement > 15 ans.'
-      : 'Optionnel hors vente.',
+    reason: isSale ? 'Vente : installation potentiellement > 15 ans.' : 'Optionnel hors vente.',
   })
 
   // GAZ — vente, si présence de gaz. On le marque optionnel par défaut.
@@ -114,7 +112,7 @@ export function computeRequiredDiagnostics(ctx: PropertyContext): DiagnosticSugg
     type: 'GAZ',
     required: false,
     reason: isSale
-      ? 'À cocher si présence d\'une installation gaz > 15 ans.'
+      ? "À cocher si présence d'une installation gaz > 15 ans."
       : 'Optionnel hors vente.',
   })
 
@@ -143,8 +141,8 @@ export function computeRequiredDiagnostics(ctx: PropertyContext): DiagnosticSugg
     required: isFlat && isSale,
     reason:
       isFlat && isSale
-        ? 'Mesurage légal obligatoire pour vente d\'appartement.'
-        : 'Requis seulement pour vente d\'un appartement en copropriété.',
+        ? "Mesurage légal obligatoire pour vente d'appartement."
+        : "Requis seulement pour vente d'un appartement en copropriété.",
   })
 
   // BOUTIN — appartement + location (rare hors copropriété)
@@ -154,7 +152,7 @@ export function computeRequiredDiagnostics(ctx: PropertyContext): DiagnosticSugg
     reason:
       isFlat && isRental
         ? 'Mesurage Boutin pour location vide.'
-        : 'Requis seulement pour location d\'appartement.',
+        : "Requis seulement pour location d'appartement.",
   })
 
   // Filtre maison : pas de Carrez ni Boutin sur maison individuelle

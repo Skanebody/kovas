@@ -61,7 +61,8 @@ export async function generateDocx(data: MissionExportData): Promise<Buffer> {
       )
     }
     if (data.property.property_type) children.push(kvParagraph('Type', data.property.property_type))
-    if (data.property.year_built) children.push(kvParagraph('Année', String(data.property.year_built)))
+    if (data.property.year_built)
+      children.push(kvParagraph('Année', String(data.property.year_built)))
     if (data.property.surface_total)
       children.push(kvParagraph('Surface', `${data.property.surface_total} m²`))
     children.push(new Paragraph({ text: '' }))
@@ -69,7 +70,7 @@ export async function generateDocx(data: MissionExportData): Promise<Buffer> {
 
   // Client
   if (data.client) {
-    children.push(new Paragraph({ text: 'Donneur d\'ordre', heading: HeadingLevel.HEADING_2 }))
+    children.push(new Paragraph({ text: "Donneur d'ordre", heading: HeadingLevel.HEADING_2 }))
     children.push(kvParagraph('Nom', data.client.display_name))
     children.push(kvParagraph('Type', data.client.type))
     if (data.client.email) children.push(kvParagraph('Email', data.client.email))
@@ -108,7 +109,12 @@ export async function generateDocx(data: MissionExportData): Promise<Buffer> {
 
   // Photos summary
   if (data.photos.length > 0) {
-    children.push(new Paragraph({ text: `Photos terrain (${data.photos.length})`, heading: HeadingLevel.HEADING_2 }))
+    children.push(
+      new Paragraph({
+        text: `Photos terrain (${data.photos.length})`,
+        heading: HeadingLevel.HEADING_2,
+      }),
+    )
     children.push(
       new Paragraph({
         text: `${data.photos.length} photos géolocalisées au format WebP, disponibles dans le ZIP de l'export.`,
@@ -143,9 +149,6 @@ export async function generateDocx(data: MissionExportData): Promise<Buffer> {
 
 function kvParagraph(label: string, value: string): Paragraph {
   return new Paragraph({
-    children: [
-      new TextRun({ text: `${label} : `, bold: true }),
-      new TextRun({ text: value }),
-    ],
+    children: [new TextRun({ text: `${label} : `, bold: true }), new TextRun({ text: value })],
   })
 }

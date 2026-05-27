@@ -67,10 +67,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   if ((status === 'completed' || status === 'rejected') && !notes) {
-    return NextResponse.json(
-      { error: 'Note obligatoire pour completed/rejected' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Note obligatoire pour completed/rejected' }, { status: 400 })
   }
 
   const supabase = createAdminClient()
@@ -78,9 +75,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   // Cast typé : dsar_requests pas dans @kovas/database/types.
   const fetchRes = (await supabase
     .from('dsar_requests')
-    .select(
-      'id, user_id, type, status, notes, profiles:profiles!user_id(email)',
-    )
+    .select('id, user_id, type, status, notes, profiles:profiles!user_id(email)')
     .eq('id', id)
     .maybeSingle()) as unknown as {
     data: DsarRow | null

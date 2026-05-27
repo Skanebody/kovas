@@ -14,8 +14,8 @@
  * - Migration V2 : Upstash Redis avec sliding window précis.
  */
 
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 const PER_IP_PER_HOUR = 5
 const PER_DIAG_PER_HOUR = 10

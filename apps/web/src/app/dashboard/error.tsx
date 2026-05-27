@@ -1,9 +1,9 @@
 'use client'
 
-import { AlertTriangle, RefreshCw } from 'lucide-react'
-import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { useEffect } from 'react'
 
 export default function AppError({
   error,
@@ -25,9 +25,7 @@ export default function AppError({
           <p className="text-sm text-ink-mute">
             {error.message || 'Erreur inconnue. Réessayez ou contactez le support.'}
           </p>
-          {error.digest && (
-            <p className="text-xs font-mono text-ink-faint">Réf. {error.digest}</p>
-          )}
+          {error.digest && <p className="text-xs font-mono text-ink-faint">Réf. {error.digest}</p>}
           <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <Button onClick={reset}>
               <RefreshCw className="size-4" /> Réessayer

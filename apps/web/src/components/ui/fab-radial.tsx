@@ -121,11 +121,7 @@ export function FabRadial({
   return (
     <div ref={containerRef} className={cn('z-40', fabPosition, className)}>
       {/* Sous-boutons en arc */}
-      <ul
-        aria-hidden={!open}
-        className="absolute inset-0 pointer-events-none"
-        role="menu"
-      >
+      <ul aria-hidden={!open} className="absolute inset-0 pointer-events-none" role="menu">
         {actions.map((action, idx) => {
           // Angle en degrés : 180° (gauche pure) à 360°/0° (droite pure)
           // On veut un arc qui se déploie vers le haut.

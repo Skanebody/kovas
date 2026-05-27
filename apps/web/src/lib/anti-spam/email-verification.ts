@@ -11,10 +11,10 @@
  *     + déclenchement du multi-envoi vers 5 diag.
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { randomInt } from 'node:crypto'
-import { sendEmail } from '@/lib/email/send'
 import { renderVerificationCodeEmail } from '@/emails/quote-request/verification-code'
+import { sendEmail } from '@/lib/email/send'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 const CODE_TTL_MINUTES = 30
 const MAX_VERIFICATION_ATTEMPTS = 5

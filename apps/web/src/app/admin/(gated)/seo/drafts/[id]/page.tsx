@@ -27,13 +27,7 @@ interface DraftRow {
   slug: string | null
   meta_description: string | null
   content_markdown: string | null
-  status:
-    | 'draft'
-    | 'review'
-    | 'approved'
-    | 'published'
-    | 'archived'
-    | 'rejected'
+  status: 'draft' | 'review' | 'approved' | 'published' | 'archived' | 'rejected'
   eeat_score: number | null
   eeat_validations: Record<string, boolean> | null
   revision_count: number | null
@@ -41,15 +35,13 @@ interface DraftRow {
   target_url: string | null
   keyword_id: string
   updated_at: string | null
-  seo_keywords?:
-    | {
-        id: string
-        keyword_display: string
-        category: string | null
-        geo_scope: string | null
-        score: number | null
-      }
-    | null
+  seo_keywords?: {
+    id: string
+    keyword_display: string
+    category: string | null
+    geo_scope: string | null
+    score: number | null
+  } | null
 }
 
 async function fetchDraft(id: string): Promise<SeoDraftEditorPayload | null> {
@@ -59,7 +51,10 @@ async function fetchDraft(id: string): Promise<SeoDraftEditorPayload | null> {
     supabase as unknown as {
       from: (table: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             maybeSingle: () => Promise<{
               data: DraftRow | null
               error: { message: string } | null
@@ -119,7 +114,10 @@ export default async function SeoDraftPage({
   return (
     <div className="space-y-4 max-w-7xl">
       <div className="text-[12px] text-ink-mute">
-        <Link href="/admin/seo/kanban" className="hover:text-ink underline-offset-2 hover:underline">
+        <Link
+          href="/admin/seo/kanban"
+          className="hover:text-ink underline-offset-2 hover:underline"
+        >
           ← Retour au Kanban
         </Link>
       </div>

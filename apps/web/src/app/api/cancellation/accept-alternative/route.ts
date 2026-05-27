@@ -18,16 +18,13 @@
 import { logAdminAction } from '@/lib/admin/audit-log'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { getPlan, getStripePriceId, type KovasPlanId } from '@/lib/stripe-config'
 import { getStripe, isStripeConfigured } from '@/lib/stripe'
+import { type KovasPlanId, getPlan, getStripePriceId } from '@/lib/stripe-config'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 
-const WINBACK_DISCOUNT_PERCENT = Number.parseInt(
-  process.env.WINBACK_DISCOUNT_PERCENT ?? '50',
-  10,
-)
+const WINBACK_DISCOUNT_PERCENT = Number.parseInt(process.env.WINBACK_DISCOUNT_PERCENT ?? '50', 10)
 const WINBACK_DISCOUNT_DURATION_MONTHS = Number.parseInt(
   process.env.WINBACK_DISCOUNT_DURATION_MONTHS ?? '3',
   10,
@@ -77,7 +74,10 @@ export async function POST(request: Request): Promise<NextResponse<AcceptRespons
   const cancRes = (await (
     admin.from('cancellations') as unknown as {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{
             data: {
               id: string
@@ -108,10 +108,7 @@ export async function POST(request: Request): Promise<NextResponse<AcceptRespons
     return NextResponse.json({ ok: false, error: 'forbidden' }, { status: 403 })
   }
   if (cancRes.data.confirmed_at) {
-    return NextResponse.json(
-      { ok: false, error: 'already confirmed' },
-      { status: 409 },
-    )
+    return NextResponse.json({ ok: false, error: 'already confirmed' }, { status: 409 })
   }
 
   const subRes = (await admin
@@ -181,10 +178,7 @@ export async function POST(request: Request): Promise<NextResponse<AcceptRespons
     }
     const targetPlan = getPlan(body.targetPlanCode)
     if (!targetPlan) {
-      return NextResponse.json(
-        { ok: false, error: 'unknown targetPlanCode' },
-        { status: 400 },
-      )
+      return NextResponse.json({ ok: false, error: 'unknown targetPlanCode' }, { status: 400 })
     }
     await applyDowngrade(sub, targetPlan.id)
     await updateCancellationAlternative(body.cancellationId, {
@@ -250,7 +244,10 @@ async function applyPause(sub: SubscriptionRow, months: 1 | 3): Promise<void> {
   // Stripe pause_collection (Stripe garde l'abonnement actif mais ne facture pas).
   if (isStripeConfigured() && sub.stripe_subscription_id) {
     await getStripe().subscriptions.update(sub.stripe_subscription_id, {
-      pause_collection: { behavior: 'keep_as_draft', resumes_at: Math.floor(ends.getTime() / 1000) },
+      pause_collection: {
+        behavior: 'keep_as_draft',
+        resumes_at: Math.floor(ends.getTime() / 1000),
+      },
     })
   }
 
@@ -322,10 +319,7 @@ async function applyDowngrade(sub: SubscriptionRow, targetPlanId: KovasPlanId): 
 /**
  * Crée le coupon "RETENTION{percent}" s'il n'existe pas déjà, sinon le retourne.
  */
-async function ensureRetentionCoupon(
-  percent: number,
-  durationMonths: number,
-): Promise<string> {
+async function ensureRetentionCoupon(percent: number, durationMonths: number): Promise<string> {
   const couponId = `RETENTION${percent}_${durationMonths}M`
   const stripe = getStripe()
   try {

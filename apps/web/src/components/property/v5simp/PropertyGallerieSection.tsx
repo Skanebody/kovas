@@ -197,7 +197,9 @@ export function PropertyGallerieSection({ photos }: Props) {
             {/* Caption bas */}
             {current?.caption ? (
               <div className="shrink-0 px-4 py-3 text-center">
-                <p className="font-mono text-[12px] text-white/70 line-clamp-2">{current.caption}</p>
+                <p className="font-mono text-[12px] text-white/70 line-clamp-2">
+                  {current.caption}
+                </p>
               </div>
             ) : (
               <div className="shrink-0 py-3" />

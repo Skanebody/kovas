@@ -74,9 +74,7 @@ export function PerfDailyChart({ data }: Props) {
   return (
     <Card variant="opaque" padding="default">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[15px] font-semibold tracking-tight text-ink">
-          Évolution 7 jours
-        </h2>
+        <h2 className="text-[15px] font-semibold tracking-tight text-ink">Évolution 7 jours</h2>
         <div className="flex gap-3 text-[10px] font-mono uppercase tracking-[0.14em]">
           <span className="flex items-center gap-1.5 text-ink-mute">
             <span className="size-2 rounded-full bg-[#5B7088]" /> p50

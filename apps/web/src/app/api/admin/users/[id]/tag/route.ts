@@ -31,11 +31,12 @@ interface UserAdminTagInsertRow {
 }
 
 interface UserAdminTagBuilder {
-  insert: (
-    r: UserAdminTagInsertRow,
-  ) => Promise<{ error: { message: string } | null }>
+  insert: (r: UserAdminTagInsertRow) => Promise<{ error: { message: string } | null }>
   delete: () => {
-    eq: (col: string, val: string) => {
+    eq: (
+      col: string,
+      val: string,
+    ) => {
       eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>
     }
   }
@@ -136,9 +137,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       payload: { tag },
     },
     async () => {
-      const { error } = await (
-        supabase.from('user_admin_tags') as unknown as UserAdminTagBuilder
-      )
+      const { error } = await (supabase.from('user_admin_tags') as unknown as UserAdminTagBuilder)
         .delete()
         .eq('user_id', userId)
         .eq('tag', tag)

@@ -2,11 +2,7 @@
  * Helpers de formatage live des inputs métier (SIRET, téléphone, code postal).
  */
 
-import {
-  isValidPhoneNumber,
-  parsePhoneNumber,
-  type CountryCode,
-} from 'libphonenumber-js'
+import { type CountryCode, isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js'
 
 /**
  * Formate un SIRET en groupe lisible « 123 456 789 00012 ».

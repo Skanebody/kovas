@@ -77,9 +77,7 @@ export function urgencyVariant(days: number): 'red' | 'orange' | 'yellow' | 'gre
   return 'green'
 }
 
-export async function getDsarQueue(
-  supabase: SupabaseClient<Database>,
-): Promise<DsarQueueData> {
+export async function getDsarQueue(supabase: SupabaseClient<Database>): Promise<DsarQueueData> {
   // Cast typé : dsar_requests pas encore dans @kovas/database/types
   // (migration 20260524110000, types à régénérer via `pnpm db:gen-types`).
   const res = (await supabase
@@ -95,23 +93,25 @@ export async function getDsarQueue(
     error: { message: string } | null
   }
 
-  const rows = (res.data ?? []).map((r): DsarRequestRow => ({
-    id: r.id,
-    user_id: r.user_id,
-    organization_id: r.organization_id,
-    type: r.type,
-    status: r.status,
-    requested_at: r.requested_at,
-    deadline: r.deadline,
-    notes: r.notes,
-    completed_by_admin: r.completed_by_admin,
-    completed_at: r.completed_at,
-    created_at: r.created_at,
-    updated_at: r.updated_at,
-    user_email: r.profiles?.email ?? null,
-    user_full_name: r.profiles?.full_name ?? null,
-    organization_name: r.organizations?.name ?? null,
-  }))
+  const rows = (res.data ?? []).map(
+    (r): DsarRequestRow => ({
+      id: r.id,
+      user_id: r.user_id,
+      organization_id: r.organization_id,
+      type: r.type,
+      status: r.status,
+      requested_at: r.requested_at,
+      deadline: r.deadline,
+      notes: r.notes,
+      completed_by_admin: r.completed_by_admin,
+      completed_at: r.completed_at,
+      created_at: r.created_at,
+      updated_at: r.updated_at,
+      user_email: r.profiles?.email ?? null,
+      user_full_name: r.profiles?.full_name ?? null,
+      organization_name: r.organizations?.name ?? null,
+    }),
+  )
 
   const pending = rows.filter((r) => r.status === 'pending')
   const processing = rows.filter((r) => r.status === 'processing')
@@ -129,7 +129,7 @@ export async function getDsarQueue(
       if (!r.completed_at) return sum
       return sum + (new Date(r.completed_at).getTime() - new Date(r.requested_at).getTime())
     }, 0)
-    avgResolutionDays = Math.round((totalMs / completed.length) / (1000 * 60 * 60 * 24))
+    avgResolutionDays = Math.round(totalMs / completed.length / (1000 * 60 * 60 * 24))
   }
 
   return {

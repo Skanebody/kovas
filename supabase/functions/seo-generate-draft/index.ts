@@ -139,8 +139,7 @@ function computeEeatValidations(markdown: string): EeatValidations {
 
   // Expert quote : "selon X Y," + segment guillemets ou citation suivie nom propre + virgule.
   const quoteRegex1 = /[«"«][^»"]{20,300}[»"»]\s*[—\-–]\s*[A-ZÀ-Ý][a-zà-ÿ-]+\s+[A-ZÀ-Ý][a-zà-ÿ-]+/
-  const quoteRegex2 =
-    /selon\s+[A-ZÀ-Ý][a-zà-ÿ-]+\s+[A-ZÀ-Ý][a-zà-ÿ-]+\s*,\s*[a-zà-ÿ]/i
+  const quoteRegex2 = /selon\s+[A-ZÀ-Ý][a-zà-ÿ-]+\s+[A-ZÀ-Ý][a-zà-ÿ-]+\s*,\s*[a-zà-ÿ]/i
   const hasExpertQuote = quoteRegex1.test(markdown) || quoteRegex2.test(markdown)
 
   // Photo : syntaxe markdown ![alt](url) — sera ajoutée par éditeur post-génération.

@@ -1,16 +1,16 @@
 'use client'
 
-import { Download, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   AppListTable,
   AppListTableCell,
   AppListTableHead,
   AppListTableRow,
 } from '@/components/ui/app-list-table'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import type { InvoiceSummary } from '@/lib/stripe/invoices'
+import { ChevronLeft, ChevronRight, Download, ExternalLink } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
 interface InvoicesListProps {
   invoices: InvoiceSummary[]
@@ -70,10 +70,7 @@ function formatAmount(amountCents: number, currency: string): string {
  * Pagination 25 lignes/page. Actions : téléchargement PDF + vue hosted Stripe.
  */
 export function InvoicesList({ invoices }: InvoicesListProps) {
-  const sorted = useMemo(
-    () => [...invoices].sort((a, b) => b.created - a.created),
-    [invoices],
-  )
+  const sorted = useMemo(() => [...invoices].sort((a, b) => b.created - a.created), [invoices])
 
   const [page, setPage] = useState(0)
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))

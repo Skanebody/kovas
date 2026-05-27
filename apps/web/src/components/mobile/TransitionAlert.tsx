@@ -69,10 +69,7 @@ export function TransitionAlert({
               </p>
               <ul className="space-y-1 mb-3">
                 {gaps.slice(0, 5).map((item) => (
-                  <li
-                    key={item.id}
-                    className="flex items-start gap-2 text-[13px] text-ink-soft"
-                  >
+                  <li key={item.id} className="flex items-start gap-2 text-[13px] text-ink-soft">
                     <span
                       className="size-1.5 rounded-full bg-warning mt-1.5 shrink-0"
                       aria-hidden

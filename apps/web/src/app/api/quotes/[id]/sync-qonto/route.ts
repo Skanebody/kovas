@@ -1,17 +1,14 @@
-import { NextResponse } from 'next/server'
-import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { QontoClient } from '@/lib/qonto/client'
 import {
   getConnectorWithCredentials,
   setConnectorStatus,
   touchLastSync,
 } from '@/lib/qonto/connector-store'
-import { QontoClient } from '@/lib/qonto/client'
 import { mapKovasClientToQonto } from '@/lib/qonto/mapper'
-import {
-  QontoApiError,
-  type KovasClientForMapping,
-} from '@/lib/qonto/types'
+import { type KovasClientForMapping, QontoApiError } from '@/lib/qonto/types'
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -27,10 +24,7 @@ export const maxDuration = 60
  * un endpoint dédié, on stocke uniquement la création du client Qonto et on
  * documente l'absence d'objet devis natif.
  */
-export async function POST(
-  _request: Request,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id: quoteId } = await context.params
 
   let orgId: string

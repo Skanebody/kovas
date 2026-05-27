@@ -14,10 +14,7 @@ export function LegalPageShell({ title, children }: LegalPageShellProps) {
     <div className="min-h-dvh flex flex-col bg-sage text-[#0F1419] font-sans">
       <header className="sticky top-0 z-30 bg-[#F5F7F4]/[0.86] backdrop-blur-xl border-b border-[#0F1419]/[0.08]">
         <div className="mx-auto max-w-3xl px-6 h-14 flex items-center justify-between">
-          <Link
-            href="/"
-            className="font-semibold tracking-[0.22em] text-[15px] text-[#0F1419]"
-          >
+          <Link href="/" className="font-semibold tracking-[0.22em] text-[15px] text-[#0F1419]">
             KOVAS
           </Link>
           <Button variant="ghost" size="sm" asChild>
@@ -31,7 +28,9 @@ export function LegalPageShell({ title, children }: LegalPageShellProps) {
         <h1 className="font-serif italic font-normal text-4xl md:text-5xl tracking-tight text-[#0F1419] leading-[1.1]">
           {title}.
         </h1>
-        <div className="prose-legal space-y-4 text-[14px] text-[#0F1419]/72 leading-relaxed">{children}</div>
+        <div className="prose-legal space-y-4 text-[14px] text-[#0F1419]/72 leading-relaxed">
+          {children}
+        </div>
       </main>
       <footer className="border-t border-[#0F1419]/[0.08] px-6 py-8 text-[11px] text-[#0F1419]/55 bg-[#F5F7F4]">
         <div className="mx-auto max-w-3xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

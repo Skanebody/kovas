@@ -1,7 +1,7 @@
-import { AlertTriangle, Info } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { CoherenceWarning } from '@/lib/coherence-validation'
 import { cn } from '@/lib/utils'
+import { AlertTriangle, Info } from 'lucide-react'
 
 interface CoherenceWarningsProps {
   warnings: CoherenceWarning[]

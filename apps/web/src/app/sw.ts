@@ -27,7 +27,9 @@ serwist.addEventListeners()
 
 // Periodic background sync (every 5 days) — bretelle 2 du pivot PWA
 // (PWA pivot decision §4 — persistance iPadOS)
-self.addEventListener('periodicsync', ((event: Event & { tag: string; waitUntil: (p: Promise<unknown>) => void }) => {
+self.addEventListener('periodicsync', ((
+  event: Event & { tag: string; waitUntil: (p: Promise<unknown>) => void },
+) => {
   if (event.tag === 'kovas-sync-5days') {
     event.waitUntil(syncOfflineQueue())
   }

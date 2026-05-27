@@ -11,8 +11,8 @@
  * fournis par le parent (server component recommandé pour SSR usage temps réel).
  */
 
-import { cn } from '@/lib/utils'
 import { formatBytes } from '@/lib/storage/quota'
+import { cn } from '@/lib/utils'
 import { AlertTriangle, HardDrive } from 'lucide-react'
 
 export interface StorageQuotaCardProps {
@@ -34,34 +34,21 @@ export function StorageQuotaCard({
     typeof quotaBytes === 'bigint' ? quotaBytes : BigInt(Math.max(1, Number(quotaBytes)))
 
   const usagePct =
-    quota === 0n
-      ? 0
-      : Math.min(999, Math.max(0, Number((used * 10000n) / quota) / 100))
+    quota === 0n ? 0 : Math.min(999, Math.max(0, Number((used * 10000n) / quota) / 100))
 
   const isWarning = usagePct >= 80 && usagePct < 100
   const isExceeded = usagePct >= 100
 
   // Largeur barre visible (cap à 100% même si over-quota — l'alerte texte gère le >100%)
   const fillPct = Math.min(100, usagePct)
-  const fillColor = isExceeded
-    ? 'bg-danger'
-    : isWarning
-      ? 'bg-accent-warm'
-      : 'bg-chartreuse'
+  const fillColor = isExceeded ? 'bg-danger' : isWarning ? 'bg-accent-warm' : 'bg-chartreuse'
 
   return (
-    <div
-      className={cn(
-        'rounded-xl border border-rule/60 bg-sage p-5 space-y-4',
-        className,
-      )}
-    >
+    <div className={cn('rounded-xl border border-rule/60 bg-sage p-5 space-y-4', className)}>
       {!compact && (
         <div className="flex items-center gap-2 text-ink-soft">
           <HardDrive className="size-4" />
-          <h3 className="font-sans text-sm font-semibold uppercase tracking-wider">
-            Stockage
-          </h3>
+          <h3 className="font-sans text-sm font-semibold uppercase tracking-wider">Stockage</h3>
         </div>
       )}
 

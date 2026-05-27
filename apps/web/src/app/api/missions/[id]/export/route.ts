@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { buildMissionExportData } from '@/lib/exports/build-mission-data'
 import { buildExportZip } from '@/lib/exports/zip-bundle'
 import { buildLicielZip } from '@/lib/exports/zip-liciel'
 import { buildZipFileName } from '@/lib/file-naming'
-import { getCurrentUser } from '@/lib/auth/current-user'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const maxDuration = 90
@@ -15,10 +15,7 @@ export const maxDuration = 90
  *
  * Réponse : binary stream (Content-Disposition attachment).
  */
-export async function GET(
-  request: Request,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id: missionId } = await context.params
   const url = new URL(request.url)
   const format = url.searchParams.get('format') ?? 'zip'

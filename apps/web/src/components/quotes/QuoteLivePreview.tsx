@@ -14,17 +14,17 @@
  * mini aperçu, l'utilisateur télécharge le PDF pour le rendu final.
  */
 
-import { cn } from '@/lib/utils'
 import {
+  QUOTE_PAYMENT_METHOD_LABELS,
   type QuoteClientSnapshot,
   type QuoteLineItem,
   type QuoteOrganizationSnapshot,
   type QuotePaymentMethod,
-  QUOTE_PAYMENT_METHOD_LABELS,
   computeQuoteTotals,
   formatDateLong,
   formatEur,
 } from '@/lib/quotes/types'
+import { cn } from '@/lib/utils'
 
 export interface QuoteLivePreviewProps {
   reference: string
@@ -97,9 +97,7 @@ export function QuoteLivePreview({
         <PartyBlock title="Émetteur">
           <p className="font-bold text-[12px]">{organization.name}</p>
           {organization.address ? <p>{organization.address}</p> : null}
-          <p>
-            {[organization.postalCode, organization.city].filter(Boolean).join(' ') || '—'}
-          </p>
+          <p>{[organization.postalCode, organization.city].filter(Boolean).join(' ') || '—'}</p>
           {organization.siret ? <p className="text-[#4A5878]">SIRET {organization.siret}</p> : null}
           {organization.vatNumber ? (
             <p className="text-[#4A5878]">TVA {organization.vatNumber}</p>
@@ -139,9 +137,7 @@ export function QuoteLivePreview({
               <tr key={line.id} className="border-b border-[#E5DECB]">
                 <td className="py-1.5 px-2">{line.designation}</td>
                 <td className="py-1.5 px-2 text-right">{line.quantity}</td>
-                <td className="py-1.5 px-2 text-right font-mono">
-                  {formatEur(line.unitPriceHt)}
-                </td>
+                <td className="py-1.5 px-2 text-right font-mono">{formatEur(line.unitPriceHt)}</td>
                 <td className="py-1.5 px-2 text-right font-mono">
                   {formatEur(line.quantity * line.unitPriceHt)}
                 </td>
@@ -174,8 +170,8 @@ export function QuoteLivePreview({
 
       {/* Conditions */}
       <p className="text-[9px] text-[#4A5878] mb-1">
-        Conditions de paiement : {QUOTE_PAYMENT_METHOD_LABELS[paymentMethod]} à{' '}
-        {paymentTermsDays} jours.
+        Conditions de paiement : {QUOTE_PAYMENT_METHOD_LABELS[paymentMethod]} à {paymentTermsDays}{' '}
+        jours.
       </p>
       {notes && notes.trim().length > 0 ? (
         <p className="text-[9px] text-[#4A5878] whitespace-pre-wrap mb-1">{notes}</p>
@@ -193,9 +189,7 @@ export function QuoteLivePreview({
 function PartyBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-0.5">
-      <p className="font-mono text-[8px] uppercase tracking-wider text-[#4A5878] mb-1">
-        {title}
-      </p>
+      <p className="font-mono text-[8px] uppercase tracking-wider text-[#4A5878] mb-1">{title}</p>
       {children}
     </div>
   )

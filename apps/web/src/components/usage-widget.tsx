@@ -66,8 +66,7 @@ export async function UsageWidget() {
     'logiciel_cabinet',
     'logiciel_enterprise',
   ])
-  const isUnlimited =
-    unlimitedTiers.has(sub.tier ?? '') || (included !== null && included >= 9000)
+  const isUnlimited = unlimitedTiers.has(sub.tier ?? '') || (included !== null && included >= 9000)
 
   if (isUnlimited) {
     return (

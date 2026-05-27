@@ -57,10 +57,8 @@ const lruCache = new Map<string, CacheEntry>()
 
 export function makeCacheKey(parameterName: ParameterName, ctx: SuggestionContext): string {
   // Signature stable : on round les valeurs continues pour maximiser le hit rate.
-  const yearBucket =
-    typeof ctx.yearBuilt === 'number' ? Math.floor(ctx.yearBuilt / 5) * 5 : 'na'
-  const surfaceBucket =
-    typeof ctx.surface === 'number' ? Math.floor(ctx.surface / 20) * 20 : 'na'
+  const yearBucket = typeof ctx.yearBuilt === 'number' ? Math.floor(ctx.yearBuilt / 5) * 5 : 'na'
+  const surfaceBucket = typeof ctx.surface === 'number' ? Math.floor(ctx.surface / 20) * 20 : 'na'
   const region = ctx.inseeCode ?? ctx.postalCode ?? 'na'
   const bType = ctx.buildingType ?? 'na'
   return `${parameterName}|${yearBucket}|${surfaceBucket}|${region}|${bType}`

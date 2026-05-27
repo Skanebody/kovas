@@ -30,7 +30,7 @@
 
 /// <reference lib="deno.ns" />
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
 
 // ────────────────────────────────────────────────────────────
 // Types — mirror exact `apps/web/src/lib/pre-export/types.ts`
@@ -145,7 +145,8 @@ function checkConformity(m: MissionData): { findings: Finding[]; score: number; 
       category: 'conformity',
       severity: 'critical',
       title: 'Année de construction manquante',
-      message: 'Le champ « Année de construction » est obligatoire pour publier le DPE sur l\'observatoire ADEME.',
+      message:
+        "Le champ « Année de construction » est obligatoire pour publier le DPE sur l'observatoire ADEME.",
       suggested_action: 'Ajouter cette donnée à la mission',
       related_field: 'annee_construction',
     })
@@ -183,7 +184,7 @@ function checkConformity(m: MissionData): { findings: Finding[]; score: number; 
       category: 'conformity',
       severity: 'critical',
       title: 'Adresse incomplète',
-      message: 'L\'adresse complète (voie + CP + ville) est nécessaire.',
+      message: "L'adresse complète (voie + CP + ville) est nécessaire.",
       related_field: 'adresse_complete',
     })
   }
@@ -207,14 +208,15 @@ function checkConformity(m: MissionData): { findings: Finding[]; score: number; 
     })
     .map((e) => e.kind)
 
-  if (equipKinds.some((k) => k === 'chaudiere' || k === 'pac' || k === 'radiateur')) requiredPresent++
+  if (equipKinds.some((k) => k === 'chaudiere' || k === 'pac' || k === 'radiateur'))
+    requiredPresent++
   else
     findings.push({
       code: 'missing_chauffage_systeme',
       category: 'conformity',
       severity: 'critical',
       title: 'Système de chauffage non identifié',
-      message: 'Aucun équipement de chauffage n\'a été détecté dans les notes vocales.',
+      message: "Aucun équipement de chauffage n'a été détecté dans les notes vocales.",
     })
 
   if (equipKinds.includes('chauffe_eau')) requiredPresent++
@@ -224,7 +226,7 @@ function checkConformity(m: MissionData): { findings: Finding[]; score: number; 
       category: 'conformity',
       severity: 'critical',
       title: 'ECS non identifiée',
-      message: 'La production d\'eau chaude sanitaire devrait être renseignée.',
+      message: "La production d'eau chaude sanitaire devrait être renseignée.",
     })
 
   if (equipKinds.includes('ventilation')) requiredPresent++
@@ -254,7 +256,7 @@ function checkConformity(m: MissionData): { findings: Finding[]; score: number; 
       category: 'conformity',
       severity: 'warning',
       title: 'Isolation non décrite',
-      message: 'Les éléments d\'isolation (murs, toiture, planchers) devraient être documentés.',
+      message: "Les éléments d'isolation (murs, toiture, planchers) devraient être documentés.",
     })
 
   if (m.property?.surface_carrez) optionalPresent++
@@ -419,11 +421,7 @@ Deno.serve(async (req) => {
   const exhaustivityScore = conformity.optional
 
   // 3. Agrégation findings
-  const findings: Finding[] = [
-    ...conformity.findings,
-    ...coherence.findings,
-    ...quality.findings,
-  ]
+  const findings: Finding[] = [...conformity.findings, ...coherence.findings, ...quality.findings]
 
   // 4. Score global pondéré
   const conformity_score = Math.round(conformity.score * SCORE_WEIGHTS.conformity)
@@ -435,11 +433,7 @@ Deno.serve(async (req) => {
     0,
     Math.min(
       100,
-      conformity_score +
-        coherence_score +
-        statistical_score +
-        quality_score +
-        exhaustivity_score,
+      conformity_score + coherence_score + statistical_score + quality_score + exhaustivity_score,
     ),
   )
 

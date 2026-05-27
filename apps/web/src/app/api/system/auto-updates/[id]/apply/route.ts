@@ -88,10 +88,7 @@ export async function POST(request: Request, ctx: RouteParams): Promise<Response
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceKey) {
-    return NextResponse.json(
-      { error: 'edge_function_not_configured' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'edge_function_not_configured' }, { status: 500 })
   }
 
   const edgeUrl = `${supabaseUrl}/functions/v1/auto-update-apply`

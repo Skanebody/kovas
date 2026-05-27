@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { type VariantProps, cva } from 'class-variance-authority'
 import { forwardRef } from 'react'
-import type { HTMLAttributes, CSSProperties } from 'react'
+import type { CSSProperties, HTMLAttributes } from 'react'
 
 const cardVariants = cva('rounded-lg transition-all duration-base ease-spring', {
   variants: {
@@ -37,8 +37,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     const warmStyle: CSSProperties | undefined =
       resolved === 'warm'
         ? {
-            background:
-              'linear-gradient(135deg, rgba(255,213,168,0.80), rgba(255,200,150,0.65))',
+            background: 'linear-gradient(135deg, rgba(255,213,168,0.80), rgba(255,200,150,0.65))',
           }
         : undefined
 
@@ -80,9 +79,7 @@ export const CardDescription = forwardRef<HTMLDivElement, HTMLAttributes<HTMLPar
 CardDescription.displayName = 'CardDescription'
 
 export const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('pt-0', className)} {...props} />
-  ),
+  ({ className, ...props }, ref) => <div ref={ref} className={cn('pt-0', className)} {...props} />,
 )
 CardContent.displayName = 'CardContent'
 

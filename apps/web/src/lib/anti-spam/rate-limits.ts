@@ -85,15 +85,7 @@ export async function recordRateLimitHit(
   // Bucket = début de l'heure courante (UTC, idempotent)
   const now = new Date()
   const bucketStart = new Date(
-    Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate(),
-      now.getUTCHours(),
-      0,
-      0,
-      0,
-    ),
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), 0, 0, 0),
   ).toISOString()
 
   // upsert + increment via RPC simple : tentative insert, fallback update si conflict

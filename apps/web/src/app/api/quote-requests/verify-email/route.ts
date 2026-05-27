@@ -11,19 +11,22 @@
  *   4. Envoi email récap au requester
  */
 
+import { verifyCode } from '@/lib/anti-spam/email-verification'
+import { dispatchRecipients } from '@/lib/leads/dispatch-recipients'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { verifyCode } from '@/lib/anti-spam/email-verification'
-import { dispatchRecipients } from '@/lib/leads/dispatch-recipients'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
 const bodySchema = z.object({
   trackingToken: z.string().min(16).max(64),
-  code: z.string().trim().regex(/^\d{6}$/, 'Code à 6 chiffres requis'),
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'Code à 6 chiffres requis'),
 })
 
 export async function POST(request: Request): Promise<Response> {
@@ -52,10 +55,7 @@ export async function POST(request: Request): Promise<Response> {
   const result = await verifyCode(admin, trackingToken, code)
 
   if (result.notFound) {
-    return NextResponse.json(
-      { error: 'Demande introuvable.' },
-      { status: 404 },
-    )
+    return NextResponse.json({ error: 'Demande introuvable.' }, { status: 404 })
   }
 
   if (result.alreadyVerified) {
@@ -88,8 +88,7 @@ export async function POST(request: Request): Promise<Response> {
 
   // Code valide → on déclenche le dispatch (best-effort, async-friendly)
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (request.headers.get('origin') ?? 'https://kovas.fr')
+    process.env.NEXT_PUBLIC_SITE_URL ?? request.headers.get('origin') ?? 'https://kovas.fr'
 
   // Récupère l'ID quote_request pour dispatch
   // biome-ignore lint/suspicious/noExplicitAny: dynamic table
@@ -102,11 +101,7 @@ export async function POST(request: Request): Promise<Response> {
   let dispatchInfo: { totalRecipients: number } | null = null
   if (qrRow && typeof (qrRow as { id?: string }).id === 'string') {
     try {
-      const dispatchResult = await dispatchRecipients(
-        admin,
-        (qrRow as { id: string }).id,
-        baseUrl,
-      )
+      const dispatchResult = await dispatchRecipients(admin, (qrRow as { id: string }).id, baseUrl)
       dispatchInfo = { totalRecipients: dispatchResult.totalRecipients }
     } catch (err) {
       console.error('[verify-email] dispatch failed', err)

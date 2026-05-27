@@ -175,10 +175,7 @@ async function fetchAggregateStats(): Promise<{
 }
 
 export default async function VeilleQueuePage() {
-  const [articles, stats] = await Promise.all([
-    fetchPendingArticles(),
-    fetchAggregateStats(),
-  ])
+  const [articles, stats] = await Promise.all([fetchPendingArticles(), fetchAggregateStats()])
 
   return <VeilleQueueBoard articles={articles} stats={stats} />
 }

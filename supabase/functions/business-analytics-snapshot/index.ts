@@ -33,7 +33,7 @@
 /// <reference lib="deno.ns" />
 // deno-lint-ignore-file no-explicit-any
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
 
 // ────────────────────────────────────────────────────────────
 // Types miroir.
@@ -225,15 +225,12 @@ function healthScore(input: {
   const conversionTarget = 0.5
   const diversityTarget = 0.7
   const revenueScore = Math.min(input.revenueHtCents / revenueTarget, 1) * 30
-  const conversionScore = input.conversion !== null
-    ? Math.min(input.conversion / conversionTarget, 1) * 20
-    : 0
-  const diversityScore = input.diversity !== null
-    ? Math.min(input.diversity / diversityTarget, 1) * 20
-    : 0
-  const growthScore = input.growth !== null
-    ? Math.max(0, Math.min(input.growth + 1, 2) / 2) * 30
-    : 0
+  const conversionScore =
+    input.conversion !== null ? Math.min(input.conversion / conversionTarget, 1) * 20 : 0
+  const diversityScore =
+    input.diversity !== null ? Math.min(input.diversity / diversityTarget, 1) * 20 : 0
+  const growthScore =
+    input.growth !== null ? Math.max(0, Math.min(input.growth + 1, 2) / 2) * 30 : 0
   return Number((revenueScore + conversionScore + diversityScore + growthScore).toFixed(2))
 }
 
@@ -296,7 +293,9 @@ async function loadMonthlyInvoices(
 ): Promise<InvoiceRow[]> {
   const { data, error } = await (client as any)
     .from('invoices')
-    .select('id, organization_id, client_id, status, amount_ht, amount_ttc, paid_at, issued_at, created_at')
+    .select(
+      'id, organization_id, client_id, status, amount_ht, amount_ttc, paid_at, issued_at, created_at',
+    )
     .eq('organization_id', orgId)
     .gte('created_at', from)
     .lt('created_at', to)
@@ -380,9 +379,7 @@ async function snapshotForOrg(
     prevPeriodDate.setUTCMonth(prevPeriodDate.getUTCMonth() - 1)
     const prevPeriod = `${prevPeriodDate.getUTCFullYear()}-${(prevPeriodDate.getUTCMonth() + 1).toString().padStart(2, '0')}-01`
     const prevRevenue = await loadPreviousRevenue(client, org.id, prevPeriod)
-    const growth = prevRevenue !== null && prevRevenue > 0
-      ? (ht - prevRevenue) / prevRevenue
-      : null
+    const growth = prevRevenue !== null && prevRevenue > 0 ? (ht - prevRevenue) / prevRevenue : null
 
     const health = healthScore({
       revenueHtCents: ht,

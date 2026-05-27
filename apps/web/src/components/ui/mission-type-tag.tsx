@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
 import { MISSION_PASTEL_CLASS, MISSION_TYPE_LABEL } from '@/lib/mission-pastels'
+import { cn } from '@/lib/utils'
 import type { MissionType } from '@kovas/shared'
 import type { HTMLAttributes } from 'react'
 

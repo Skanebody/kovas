@@ -23,16 +23,14 @@ export const MISSION_STATUS_LABELS: Record<string, string> = {
   cancelled: 'Annulée',
 }
 
-export const MISSION_STATUS_VARIANT: Record<
-  string,
-  'muted' | 'blue' | 'green' | 'orange' | 'red'
-> = {
-  draft: 'muted',
-  scheduled: 'blue',
-  in_progress: 'orange',
-  to_review: 'orange',
-  done: 'green',
-  exported: 'green',
-  archived: 'muted',
-  cancelled: 'red',
-}
+export const MISSION_STATUS_VARIANT: Record<string, 'muted' | 'blue' | 'green' | 'orange' | 'red'> =
+  {
+    draft: 'muted',
+    scheduled: 'blue',
+    in_progress: 'orange',
+    to_review: 'orange',
+    done: 'green',
+    exported: 'green',
+    archived: 'muted',
+    cancelled: 'red',
+  }

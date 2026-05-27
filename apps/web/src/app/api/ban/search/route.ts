@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { searchBanAddress } from '@/lib/ban'
+import { NextResponse } from 'next/server'
 
 /**
  * Endpoint proxy pour le widget BAN autocomplete client-side.

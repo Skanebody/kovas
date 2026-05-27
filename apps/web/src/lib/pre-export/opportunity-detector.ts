@@ -9,16 +9,32 @@
  * une section "Opportunités" — ce n'est pas un défaut de la mission.
  */
 
-import type {
-  AnalyzerResult,
-  Finding,
-  MissionAnalysisContext,
-} from './types'
+import type { AnalyzerResult, Finding, MissionAnalysisContext } from './types'
 
 /** Liste indicative des départements à arrêté préfectoral termites (au 2026). */
 const TERMITE_DEPARTMENTS = new Set([
-  '13', '17', '24', '30', '31', '32', '33', '34', '40', '47', '49',
-  '50', '64', '66', '67', '68', '81', '82', '83', '85', '92', '94',
+  '13',
+  '17',
+  '24',
+  '30',
+  '31',
+  '32',
+  '33',
+  '34',
+  '40',
+  '47',
+  '49',
+  '50',
+  '64',
+  '66',
+  '67',
+  '68',
+  '81',
+  '82',
+  '83',
+  '85',
+  '92',
+  '94',
 ])
 
 interface OpportunityRule {
@@ -40,7 +56,7 @@ const RULES: OpportunityRule[] = [
         severity: 'suggestion',
         title: 'Audit énergétique requis (vente F/G)',
         message: `Pour la vente d'un bien classé ${cls}, un audit énergétique réglementaire est obligatoire depuis le 1er avril 2023. Vous pouvez orienter le propriétaire vers un partenaire ou un confrère certifié (prestation 400-800 €).`,
-        suggested_action: 'Informer le propriétaire de l\'obligation',
+        suggested_action: "Informer le propriétaire de l'obligation",
       }
     },
   },
@@ -128,7 +144,7 @@ const RULES: OpportunityRule[] = [
         code: 'maprimerenov_potential',
         category: 'opportunity',
         severity: 'info',
-        title: 'Potentiel rénovation MaPrimeRénov\'',
+        title: "Potentiel rénovation MaPrimeRénov'",
         message: `Un passage de ${cls} à C demande environ 25 000 € de travaux, en grande partie éligibles MaPrimeRénov'. Le propriétaire peut être intéressé par un accompagnement (audit + suivi MAR).`,
         suggested_action: 'Orienter vers un MAR partenaire',
       }

@@ -7,8 +7,8 @@
  *   - bucket privé : accès via signed URL TTL court (15 min) ou service_role
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@kovas/database/types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const INVOICES_BUCKET = 'invoices-pdfs'
 export const SIGNED_URL_TTL_SECONDS = 60 * 15 // 15 minutes
@@ -24,13 +24,11 @@ export async function uploadInvoicePdf(
   pdfBytes: Uint8Array,
 ): Promise<{ path: string; error: string | null }> {
   const path = invoicePdfPath(orgId, invoiceId)
-  const { error } = await supabase.storage
-    .from(INVOICES_BUCKET)
-    .upload(path, pdfBytes, {
-      contentType: 'application/pdf',
-      upsert: true,
-      cacheControl: '3600',
-    })
+  const { error } = await supabase.storage.from(INVOICES_BUCKET).upload(path, pdfBytes, {
+    contentType: 'application/pdf',
+    upsert: true,
+    cacheControl: '3600',
+  })
   if (error) return { path, error: error.message }
   return { path, error: null }
 }

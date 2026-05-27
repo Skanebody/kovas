@@ -62,9 +62,7 @@ export async function getDpeCountThisYear(
   const percentage = Math.round((c / DPE_LEGAL_LIMIT) * 100)
 
   // Projection annuelle linéaire : (jour de l'année / nombre de jours) -> extrapolation
-  const dayOfYear = Math.floor(
-    (now.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24),
-  )
+  const dayOfYear = Math.floor((now.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24))
   const totalDays = Math.floor((yearEnd.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24))
   const yearlyProjection = dayOfYear > 0 ? Math.round((c / dayOfYear) * totalDays) : 0
 

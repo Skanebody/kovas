@@ -1,6 +1,12 @@
 'use client'
 
-import { generateClientId, getSyncDB, type BlobRow, type MutationKind, type MutationRow } from './db'
+import {
+  type BlobRow,
+  type MutationKind,
+  type MutationRow,
+  generateClientId,
+  getSyncDB,
+} from './db'
 
 /**
  * Queue API — wrapping des mutations pour fallback offline.

@@ -19,8 +19,8 @@
 import { create } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 import {
-  EMPTY_INTENT_SIGNALS,
   type DecouvrirSection,
+  EMPTY_INTENT_SIGNALS,
   type IntentSignals,
   type ScoredOffer,
   type UserTrack,

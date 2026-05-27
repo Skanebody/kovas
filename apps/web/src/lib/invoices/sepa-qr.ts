@@ -64,17 +64,17 @@ export function buildSepaQrPayload(input: SepaQrPayload): string | null {
 
   // Ordre EPC069 strict.
   const lines = [
-    'BCD',          // Service tag
-    '002',          // Version
-    '1',            // Char set UTF-8
-    'SCT',          // SEPA Credit Transfer
-    bic,            // BIC (peut être vide en SEPA Zone V2)
-    name,           // Beneficiary name
-    iban,           // IBAN
-    amount,         // Amount
-    '',             // Purpose code (vide)
-    ref,            // Reference
-    remit,          // Beneficiary to originator info
+    'BCD', // Service tag
+    '002', // Version
+    '1', // Char set UTF-8
+    'SCT', // SEPA Credit Transfer
+    bic, // BIC (peut être vide en SEPA Zone V2)
+    name, // Beneficiary name
+    iban, // IBAN
+    amount, // Amount
+    '', // Purpose code (vide)
+    ref, // Reference
+    remit, // Beneficiary to originator info
   ]
   return lines.join('\n')
 }

@@ -37,10 +37,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={cn(
-        'flex flex-col items-center justify-center text-center py-16 px-6',
-        className,
-      )}
+      className={cn('flex flex-col items-center justify-center text-center py-16 px-6', className)}
     >
       <div
         aria-hidden

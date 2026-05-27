@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { extractDocument, normalizeDocKind } from '@/lib/document-extractor'
+import { NextResponse } from 'next/server'
 
 /**
  * Lance l'extraction IA Claude Vision sur un document propriétaire.
@@ -26,7 +26,10 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured', stub: true }, { status: 503 })
+    return NextResponse.json(
+      { error: 'ANTHROPIC_API_KEY not configured', stub: true },
+      { status: 503 },
+    )
   }
 
   // Récupère le document + verify org

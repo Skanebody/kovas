@@ -375,7 +375,9 @@ export async function getPPRI(
     id:
       String(row['id_gaspar'] ?? row['id'] ?? row['code_national_ppr'] ?? '') ||
       `${codeInsee}-${row['libelle'] ?? 'PPRI'}`,
-    libelle: String(row['libelle'] ?? row['libelle_type'] ?? 'Plan de Prévention Risque Inondation'),
+    libelle: String(
+      row['libelle'] ?? row['libelle_type'] ?? 'Plan de Prévention Risque Inondation',
+    ),
     etat: String(row['etat'] ?? row['etat_avancement'] ?? 'inconnu').toLowerCase(),
     dateApprobation:
       typeof row['date_approbation'] === 'string' ? (row['date_approbation'] as string) : null,

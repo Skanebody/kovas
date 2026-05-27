@@ -162,9 +162,7 @@ export function ParameterSuggestion({
   if (state.status === 'error') {
     return (
       <Card variant="opaque" padding="sm" className={className}>
-        <p className="text-[12px] text-ink-mute">
-          Suggestion KOVAS indisponible — {state.message}
-        </p>
+        <p className="text-[12px] text-ink-mute">Suggestion KOVAS indisponible — {state.message}</p>
       </Card>
     )
   }

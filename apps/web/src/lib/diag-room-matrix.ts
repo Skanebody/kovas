@@ -21,7 +21,15 @@ export type DiagType =
   | 'erp'
 
 /** Famille de diag pour simplifier la logique des règles */
-type DiagFamily = 'dpe' | 'amiante' | 'plomb' | 'gaz' | 'electricite' | 'termites' | 'carrez' | 'erp'
+type DiagFamily =
+  | 'dpe'
+  | 'amiante'
+  | 'plomb'
+  | 'gaz'
+  | 'electricite'
+  | 'termites'
+  | 'carrez'
+  | 'erp'
 
 function diagFamily(diag: DiagType): DiagFamily {
   if (diag.startsWith('dpe_') || diag === 'copropriete') return 'dpe'
@@ -61,7 +69,16 @@ export function applicableDiagsForRoom(
     if (fam === 'electricite') return true
     // Termites : pièces avec bois apparent (et caves/greniers en priorité)
     if (fam === 'termites') {
-      return ['cave', 'grenier', 'garage', 'salon', 'sejour', 'chambre', 'cuisine', 'autre'].includes(rt)
+      return [
+        'cave',
+        'grenier',
+        'garage',
+        'salon',
+        'sejour',
+        'chambre',
+        'cuisine',
+        'autre',
+      ].includes(rt)
     }
     // DPE : toutes pièces chauffées + cave/grenier pour isolation
     return true

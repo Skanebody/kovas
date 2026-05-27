@@ -99,7 +99,10 @@ export function SmsComposeSheet({
       <BottomSheetBody>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="sms-phone" className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            <label
+              htmlFor="sms-phone"
+              className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute"
+            >
               Destinataire
             </label>
             <input
@@ -115,7 +118,10 @@ export function SmsComposeSheet({
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="sms-message" className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
+            <label
+              htmlFor="sms-message"
+              className="block font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute"
+            >
               Message
             </label>
             <textarea

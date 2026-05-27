@@ -6,11 +6,7 @@
  */
 
 import { Card } from '@/components/ui/card'
-import {
-  type QuoteLineItem,
-  computeQuoteTotals,
-  formatEur,
-} from '@/lib/quotes/types'
+import { type QuoteLineItem, computeQuoteTotals, formatEur } from '@/lib/quotes/types'
 
 interface QuoteLiveTotalsProps {
   lines: QuoteLineItem[]
@@ -33,9 +29,7 @@ export function QuoteLiveTotals({
     <Card variant="opaque" padding="default" className={className}>
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-ink-mute">
-            Aperçu
-          </p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-ink-mute">Aperçu</p>
           <h3 className="font-serif italic font-normal text-[20px] text-ink leading-tight">
             {reference ?? 'Nouveau devis'}
           </h3>

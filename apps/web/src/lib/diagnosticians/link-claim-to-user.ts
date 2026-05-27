@@ -14,8 +14,8 @@
  * En cas d'échec partiel : non bloquant pour le signup (logged côté serveur).
  */
 
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export interface LinkClaimResult {
   linked: boolean
@@ -76,7 +76,11 @@ export async function linkClaimToUser(opts: {
   if (diagErr || !diag) {
     return { linked: false, reason: 'diagnostician_not_found' }
   }
-  if (diag.claim_status === 'claimed' && diag.claimed_by_user_id && diag.claimed_by_user_id !== userId) {
+  if (
+    diag.claim_status === 'claimed' &&
+    diag.claimed_by_user_id &&
+    diag.claimed_by_user_id !== userId
+  ) {
     return { linked: false, reason: 'already_claimed', diagnosticianId: diag.id }
   }
 
@@ -95,10 +99,7 @@ export async function linkClaimToUser(opts: {
   }
 
   // 4. Marque la claim avec l'id user créé (audit trail)
-  await adminAny
-    .from('claim_requests')
-    .update({ user_id_created: userId })
-    .eq('id', claimId)
+  await adminAny.from('claim_requests').update({ user_id_created: userId }).eq('id', claimId)
 
   return { linked: true, diagnosticianId: diag.id }
 }

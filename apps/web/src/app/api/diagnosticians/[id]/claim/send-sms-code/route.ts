@@ -76,23 +76,85 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const code = generateVerificationCode()
   const expiresAt = computeCodeExpiresAt()
 
-  const { data: claim, error: insertErr } = await adminAny
-    .from('claim_requests')
-    .insert({
-      diagnostician_id: diagnosticianId,
-      method: 'sms_official',
-      status: 'code_sent',
-      verification_code: code,
-      verification_code_expires_at: expiresAt.toISOString(),
-      contact_phone: diag.phone,
-      ip_address: ip,
-      user_agent: userAgent,
-    })
-    .select('id')
-    .single()
+  // Refonte Doctolib 2026-05-27 : si un claimId v2 (siret_verified) est passé
+  // par le client, on update la claim existante au lieu d'en créer une nouvelle.
+  // Ainsi on garde 1 seule claim pour les 3 étapes séquentielles.
+  let existingClaimId: string | null = null
+  try {
+    const reqBody = (await request
+      .clone()
+      .json()
+      .catch(() => null)) as { claimId?: string } | null
+    if (
+      reqBody?.claimId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reqBody.claimId)
+    ) {
+      existingClaimId = reqBody.claimId
+    }
+  } catch {
+    // pas de body / pas JSON — comportement v1 (création nouvelle claim)
+  }
 
-  if (insertErr || !claim) {
-    return NextResponse.json({ error: 'Impossible de créer la demande.' }, { status: 500 })
+  let claim: { id: string } | null = null
+
+  if (existingClaimId) {
+    const { data: existing, error: existingErr } = await adminAny
+      .from('claim_requests')
+      .select('id, diagnostician_id, status, flow_version, siret_verified_at')
+      .eq('id', existingClaimId)
+      .maybeSingle()
+
+    if (existingErr || !existing || existing.diagnostician_id !== diagnosticianId) {
+      return NextResponse.json({ error: 'Claim introuvable ou non lié.' }, { status: 404 })
+    }
+    if (!existing.siret_verified_at) {
+      return NextResponse.json({ error: 'Étape SIRET requise avant le SMS.' }, { status: 409 })
+    }
+
+    const { data: updated, error: updErr } = await adminAny
+      .from('claim_requests')
+      .update({
+        method: 'sms_official',
+        status: 'code_sent',
+        verification_code: code,
+        verification_code_expires_at: expiresAt.toISOString(),
+        verification_attempts: 0,
+        contact_phone: diag.phone,
+        flow_version: 'v2_doctolib',
+        ip_address: ip,
+        user_agent: userAgent,
+      })
+      .eq('id', existingClaimId)
+      .select('id')
+      .single()
+
+    if (updErr || !updated) {
+      return NextResponse.json(
+        { error: 'Impossible de mettre à jour la demande.' },
+        { status: 500 },
+      )
+    }
+    claim = { id: updated.id }
+  } else {
+    const { data: inserted, error: insertErr } = await adminAny
+      .from('claim_requests')
+      .insert({
+        diagnostician_id: diagnosticianId,
+        method: 'sms_official',
+        status: 'code_sent',
+        verification_code: code,
+        verification_code_expires_at: expiresAt.toISOString(),
+        contact_phone: diag.phone,
+        ip_address: ip,
+        user_agent: userAgent,
+      })
+      .select('id')
+      .single()
+
+    if (insertErr || !inserted) {
+      return NextResponse.json({ error: 'Impossible de créer la demande.' }, { status: 500 })
+    }
+    claim = { id: inserted.id }
   }
 
   const content = buildClaimSmsVerification(code)

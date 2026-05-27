@@ -15,10 +15,6 @@ import { buildWhisperPrompt as buildWhisperPromptV2 } from './local-ai/vocabular
  * Accepte un type unique, un array, ou null/undefined.
  */
 export function buildWhisperPrompt(missionTypes?: string | string[] | null): string {
-  const typesArray = Array.isArray(missionTypes)
-    ? missionTypes
-    : missionTypes
-      ? [missionTypes]
-      : []
+  const typesArray = Array.isArray(missionTypes) ? missionTypes : missionTypes ? [missionTypes] : []
   return buildWhisperPromptV2(typesArray)
 }

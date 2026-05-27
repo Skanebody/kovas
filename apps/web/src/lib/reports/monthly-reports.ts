@@ -13,7 +13,7 @@
 import { sendEmail } from '@/lib/email/send'
 import { buildMonthlyReportEmail } from '@/lib/email/templates/monthly-report'
 import type { Database } from '@kovas/database/types'
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { type SupabaseClient, createClient } from '@supabase/supabase-js'
 
 // ============================================
 // Types
@@ -151,12 +151,14 @@ export async function computeAndSendMonthlyReport(
   const { supabase, organizationId, year, month, force } = opts
 
   // 1. Compute / upsert la ligne via RPC SQL
-  const rpc = await (supabase as unknown as {
-    rpc: (
-      fn: string,
-      args: Record<string, unknown>,
-    ) => Promise<{ data: MonthlyReportRow | null; error: { message: string } | null }>
-  }).rpc('compute_monthly_report', {
+  const rpc = await (
+    supabase as unknown as {
+      rpc: (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: MonthlyReportRow | null; error: { message: string } | null }>
+    }
+  ).rpc('compute_monthly_report', {
     p_org_id: organizationId,
     p_year: year,
     p_month: month,
@@ -173,7 +175,11 @@ export async function computeAndSendMonthlyReport(
 
   // 2. Idempotence : skip si déjà envoyé (sauf force)
   if (!force && report.email_status === 'sent') {
-    return { status: 'skipped', reason: 'déjà envoyé', message_id: report.email_message_id ?? undefined }
+    return {
+      status: 'skipped',
+      reason: 'déjà envoyé',
+      message_id: report.email_message_id ?? undefined,
+    }
   }
 
   // 3. Skip si retry > MAX_RETRY_COUNT (anti boucle infinie)
@@ -206,16 +212,18 @@ export async function computeAndSendMonthlyReport(
   }
 
   // Préférence opt-out (table user_preferences)
-  const prefQ = (await (supabase as unknown as {
-    from: (t: string) => {
-      select: (cols: string) => {
-        eq: (
-          col: string,
-          val: string,
-        ) => { maybeSingle: () => Promise<{ data: UserPrefRow | null; error: unknown }> }
+  const prefQ = (await (
+    supabase as unknown as {
+      from: (t: string) => {
+        select: (cols: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => { maybeSingle: () => Promise<{ data: UserPrefRow | null; error: unknown }> }
+        }
       }
     }
-  })
+  )
     .from('user_preferences')
     .select('user_id, monthly_report_email_enabled')
     .eq('user_id', report.user_id)
@@ -230,20 +238,28 @@ export async function computeAndSendMonthlyReport(
 
   // 6. Récup le mois précédent pour trend
   const prevMonthRef = previousMonthBefore(year, month)
-  const prevQ = (await (supabase as unknown as {
-    from: (t: string) => {
-      select: (cols: string) => {
-        eq: (col: string, val: string) => {
-          eq: (col2: string, val2: number) => {
+  const prevQ = (await (
+    supabase as unknown as {
+      from: (t: string) => {
+        select: (cols: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             eq: (
-              col3: string,
-              val3: number,
-            ) => { maybeSingle: () => Promise<{ data: MonthlyReportRow | null; error: unknown }> }
+              col2: string,
+              val2: number,
+            ) => {
+              eq: (
+                col3: string,
+                val3: number,
+              ) => { maybeSingle: () => Promise<{ data: MonthlyReportRow | null; error: unknown }> }
+            }
           }
         }
       }
     }
-  })
+  )
     .from('monthly_reports')
     .select('missions_count')
     .eq('organization_id', organizationId)
@@ -306,13 +322,15 @@ async function markStatus(
   messageId: string | null,
   error: string | null,
 ): Promise<void> {
-  await (supabase as unknown as {
-    from: (t: string) => {
-      update: (patch: Record<string, unknown>) => {
-        eq: (col: string, val: string) => Promise<{ error: unknown }>
+  await (
+    supabase as unknown as {
+      from: (t: string) => {
+        update: (patch: Record<string, unknown>) => {
+          eq: (col: string, val: string) => Promise<{ error: unknown }>
+        }
       }
     }
-  })
+  )
     .from('monthly_reports')
     .update({
       email_status: status,
@@ -325,18 +343,23 @@ async function markStatus(
 
   // Pour les failed, on incrémente retry_count séparément (impossible en 1 query sans RPC)
   if (status === 'failed') {
-    const cur = (await (supabase as unknown as {
-      from: (t: string) => {
-        select: (cols: string) => {
-          eq: (col: string, val: string) => {
-            maybeSingle: () => Promise<{
-              data: { retry_count: number } | null
-              error: unknown
-            }>
+    const cur = (await (
+      supabase as unknown as {
+        from: (t: string) => {
+          select: (cols: string) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => {
+              maybeSingle: () => Promise<{
+                data: { retry_count: number } | null
+                error: unknown
+              }>
+            }
           }
         }
       }
-    })
+    )
       .from('monthly_reports')
       .select('retry_count')
       .eq('id', reportId)
@@ -344,13 +367,15 @@ async function markStatus(
 
     const newCount = (cur.data?.retry_count ?? 0) + 1
 
-    await (supabase as unknown as {
-      from: (t: string) => {
-        update: (patch: Record<string, unknown>) => {
-          eq: (col: string, val: string) => Promise<{ error: unknown }>
+    await (
+      supabase as unknown as {
+        from: (t: string) => {
+          update: (patch: Record<string, unknown>) => {
+            eq: (col: string, val: string) => Promise<{ error: unknown }>
+          }
         }
       }
-    })
+    )
       .from('monthly_reports')
       .update({ retry_count: newCount })
       .eq('id', reportId)
@@ -431,9 +456,7 @@ export async function runMonthlyReportsCron(
       }
     } catch (err) {
       result.emails_failed++
-      result.errors.push(
-        `${org.id}: ${err instanceof Error ? err.message : 'unknown'}`,
-      )
+      result.errors.push(`${org.id}: ${err instanceof Error ? err.message : 'unknown'}`)
     }
   }
 

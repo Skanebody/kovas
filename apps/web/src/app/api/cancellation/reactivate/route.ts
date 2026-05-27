@@ -25,10 +25,7 @@ import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 
-const WINBACK_DISCOUNT_PERCENT = Number.parseInt(
-  process.env.WINBACK_DISCOUNT_PERCENT ?? '50',
-  10,
-)
+const WINBACK_DISCOUNT_PERCENT = Number.parseInt(process.env.WINBACK_DISCOUNT_PERCENT ?? '50', 10)
 const WINBACK_DISCOUNT_DURATION_MONTHS = Number.parseInt(
   process.env.WINBACK_DISCOUNT_DURATION_MONTHS ?? '3',
   10,
@@ -63,7 +60,10 @@ export async function POST(request: Request): Promise<NextResponse<ReactivateRes
   const cancRes = (await (
     admin.from('cancellations') as unknown as {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{
             data: {
               id: string
@@ -185,10 +185,7 @@ export async function POST(request: Request): Promise<NextResponse<ReactivateRes
   return NextResponse.json({ ok: true })
 }
 
-async function ensureRetentionCoupon(
-  percent: number,
-  durationMonths: number,
-): Promise<string> {
+async function ensureRetentionCoupon(percent: number, durationMonths: number): Promise<string> {
   const couponId = `RETENTION${percent}_${durationMonths}M`
   const stripe = getStripe()
   try {

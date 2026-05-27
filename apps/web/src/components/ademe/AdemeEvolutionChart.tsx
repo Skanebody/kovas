@@ -24,8 +24,8 @@ import {
   YAxis,
 } from 'recharts'
 
-import { Card } from '@/components/ui/card'
 import type { AdemeKpiSnapshotRow } from '@/app/api/ademe/kpi/current/route'
+import { Card } from '@/components/ui/card'
 
 export interface AdemeEvolutionChartProps {
   snapshots: AdemeKpiSnapshotRow[]

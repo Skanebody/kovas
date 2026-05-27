@@ -27,7 +27,14 @@ import type {
   StorageOverview as StorageOverviewData,
   StorageUsageFilter,
 } from '@/lib/admin/storage-metrics'
-import { AlertOctagon, AlertTriangle, ChevronLeft, ChevronRight, Database, HardDrive } from 'lucide-react'
+import {
+  AlertOctagon,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Database,
+  HardDrive,
+} from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState, useTransition } from 'react'
 
@@ -172,7 +179,9 @@ export function StorageOverview({
           </span>
           <select
             value={filterPlan}
-            onChange={(e) => updateUrl({ plan: e.target.value === 'all' ? null : e.target.value, page: null })}
+            onChange={(e) =>
+              updateUrl({ plan: e.target.value === 'all' ? null : e.target.value, page: null })
+            }
             className="rounded-md border border-rule bg-paper px-3 py-1.5 text-[13px] text-ink"
           >
             <option value="all">Tous</option>
@@ -380,12 +389,7 @@ export function StorageOverview({
             <Button variant="ghost" size="sm" onClick={closeDialog} disabled={isPending}>
               Annuler
             </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleIncreaseQuota}
-              disabled={isPending}
-            >
+            <Button variant="default" size="sm" onClick={handleIncreaseQuota} disabled={isPending}>
               {isPending ? 'Application…' : 'Augmenter le quota'}
             </Button>
           </DialogFooter>

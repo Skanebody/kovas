@@ -16,49 +16,46 @@
 //
 // Auth: header Authorization: Bearer <SERVICE_ROLE_KEY> ou x-cron-secret.
 
-import { serve } from "https://deno.land/std@0.220.1/http/server.ts";
-import {
-  createClient,
-  type SupabaseClient,
-} from "https://esm.sh/@supabase/supabase-js@2.46.0";
+import { serve } from 'https://deno.land/std@0.220.1/http/server.ts'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-type RequestMode = "batch" | "single";
+type RequestMode = 'batch' | 'single'
 
 interface RequestBody {
-  mode?: RequestMode;
-  diagnostician_id?: string;
+  mode?: RequestMode
+  diagnostician_id?: string
 }
 
 interface UpdateRow {
-  validation_status: string | null;
-  sirene_state: string | null;
+  validation_status: string | null
+  sirene_state: string | null
 }
 
 interface ScoreSummary {
-  ok: boolean;
-  processed: number;
-  verified: number;
-  ceased: number;
-  pending: number;
-  durationMs: number;
+  ok: boolean
+  processed: number
+  verified: number
+  ceased: number
+  pending: number
+  durationMs: number
 }
 
 interface RpcResult {
-  processed: number;
-  verified: number;
-  ceased: number;
-  pending: number;
+  processed: number
+  verified: number
+  ceased: number
+  pending: number
 }
 
 // ---------------------------------------------------------------------------
 // Constantes
 // ---------------------------------------------------------------------------
 
-const DEFAULT_BATCH_LIMIT = 5000;
+const DEFAULT_BATCH_LIMIT = 5000
 
 // ---------------------------------------------------------------------------
 // Utilitaires
@@ -67,21 +64,21 @@ const DEFAULT_BATCH_LIMIT = 5000;
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
-  });
+    headers: { 'Content-Type': 'application/json' },
+  })
 }
 
 function isAuthorized(req: Request): boolean {
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const cronSecret = Deno.env.get("CRON_SECRET");
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const cronSecret = Deno.env.get('CRON_SECRET')
 
-  const auth = req.headers.get("authorization") ?? "";
-  if (serviceRoleKey && auth === `Bearer ${serviceRoleKey}`) return true;
+  const auth = req.headers.get('authorization') ?? ''
+  if (serviceRoleKey && auth === `Bearer ${serviceRoleKey}`) return true
 
-  const headerSecret = req.headers.get("x-cron-secret");
-  if (cronSecret && headerSecret === cronSecret) return true;
+  const headerSecret = req.headers.get('x-cron-secret')
+  if (cronSecret && headerSecret === cronSecret) return true
 
-  return false;
+  return false
 }
 
 // ---------------------------------------------------------------------------
@@ -176,24 +173,21 @@ async function recomputeViaRpc(
   diagnosticianId: string | null,
   limit: number,
 ): Promise<RpcResult> {
-  const { data, error } = await supabase.rpc(
-    "recompute_diagnostician_activity_score",
-    {
-      p_diagnostician_id: diagnosticianId,
-      p_limit: limit,
-    },
-  );
+  const { data, error } = await supabase.rpc('recompute_diagnostician_activity_score', {
+    p_diagnostician_id: diagnosticianId,
+    p_limit: limit,
+  })
 
   if (error) {
-    throw new Error(`rpc_failed: ${error.message}`);
+    throw new Error(`rpc_failed: ${error.message}`)
   }
 
   // La RPC retourne une seule row {processed, verified, ceased, pending}.
-  const row = Array.isArray(data) ? data[0] : data;
+  const row = Array.isArray(data) ? data[0] : data
   if (!row) {
-    return { processed: 0, verified: 0, ceased: 0, pending: 0 };
+    return { processed: 0, verified: 0, ceased: 0, pending: 0 }
   }
-  return row as RpcResult;
+  return row as RpcResult
 }
 
 // ---------------------------------------------------------------------------
@@ -206,123 +200,114 @@ async function recomputeViaQueries(
   diagnosticianId: string | null,
   limit: number,
 ): Promise<RpcResult> {
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const twelveMonthsAgo = new Date();
-  twelveMonthsAgo.setUTCMonth(twelveMonthsAgo.getUTCMonth() - 12);
-  const ademeFloor = twelveMonthsAgo.toISOString();
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const twelveMonthsAgo = new Date()
+  twelveMonthsAgo.setUTCMonth(twelveMonthsAgo.getUTCMonth() - 12)
+  const ademeFloor = twelveMonthsAgo.toISOString()
 
   const query = supabase
-    .from("diagnosticians")
+    .from('diagnosticians')
     .select(
-      "id, dhup_imported_at, sirene_last_synced_at, sirene_state, ademe_last_dpe_at, ban_accuracy, inpi_last_synced_at, validation_status, validation_status_reason",
-    );
+      'id, dhup_imported_at, sirene_last_synced_at, sirene_state, ademe_last_dpe_at, ban_accuracy, inpi_last_synced_at, validation_status, validation_status_reason',
+    )
 
   if (diagnosticianId) {
-    query.eq("id", diagnosticianId);
+    query.eq('id', diagnosticianId)
   } else {
     query
       .or(`activity_score.is.null,activity_score_computed_at.lt.${cutoff}`)
-      .order("activity_score_computed_at", {
+      .order('activity_score_computed_at', {
         ascending: true,
         nullsFirst: true,
       })
-      .limit(limit);
+      .limit(limit)
   }
 
-  const { data: rows, error } = await query;
+  const { data: rows, error } = await query
   if (error) {
-    throw new Error(`fetch_failed: ${error.message}`);
+    throw new Error(`fetch_failed: ${error.message}`)
   }
 
-  let processed = 0;
-  let verified = 0;
-  let ceased = 0;
-  let pending = 0;
+  let processed = 0
+  let verified = 0
+  let ceased = 0
+  let pending = 0
 
   for (const row of rows ?? []) {
     const typed = row as {
-      id: string;
-      dhup_imported_at: string | null;
-      sirene_last_synced_at: string | null;
-      sirene_state: string | null;
-      ademe_last_dpe_at: string | null;
-      ban_accuracy: string | null;
-      inpi_last_synced_at: string | null;
-      validation_status: string | null;
-      validation_status_reason: string | null;
-    };
+      id: string
+      dhup_imported_at: string | null
+      sirene_last_synced_at: string | null
+      sirene_state: string | null
+      ademe_last_dpe_at: string | null
+      ban_accuracy: string | null
+      inpi_last_synced_at: string | null
+      validation_status: string | null
+      validation_status_reason: string | null
+    }
 
     const score = Math.max(
       0,
       Math.min(
         100,
         (typed.dhup_imported_at ? 30 : 0) +
-          (typed.sirene_last_synced_at && typed.sirene_state === "active"
-            ? 25
-            : 0) +
-          (typed.ademe_last_dpe_at && typed.ademe_last_dpe_at >= ademeFloor
-            ? 25
-            : 0) +
-          (typed.ban_accuracy === "housenumber" ||
-          typed.ban_accuracy === "street"
-            ? 10
-            : 0) +
+          (typed.sirene_last_synced_at && typed.sirene_state === 'active' ? 25 : 0) +
+          (typed.ademe_last_dpe_at && typed.ademe_last_dpe_at >= ademeFloor ? 25 : 0) +
+          (typed.ban_accuracy === 'housenumber' || typed.ban_accuracy === 'street' ? 10 : 0) +
           (typed.inpi_last_synced_at ? 10 : 0),
       ),
-    );
+    )
 
     // Determine nouveau validation_status.
-    const banPrecise =
-      typed.ban_accuracy === "housenumber" ||
-      typed.ban_accuracy === "street";
+    const banPrecise = typed.ban_accuracy === 'housenumber' || typed.ban_accuracy === 'street'
 
-    let newStatus = typed.validation_status;
-    let newReason = typed.validation_status_reason;
-    let statusChanged = false;
+    let newStatus = typed.validation_status
+    let newReason = typed.validation_status_reason
+    let statusChanged = false
 
-    if (typed.sirene_state === "ceased") {
-      if (typed.validation_status !== "ceased") {
-        newStatus = "ceased";
-        newReason = "auto: sirene ceased";
-        statusChanged = true;
+    if (typed.sirene_state === 'ceased') {
+      if (typed.validation_status !== 'ceased') {
+        newStatus = 'ceased'
+        newReason = 'auto: sirene ceased'
+        statusChanged = true
       }
     } else if (
       score >= 70 &&
-      typed.sirene_state === "active" &&
+      typed.sirene_state === 'active' &&
       banPrecise &&
-      typed.validation_status === "unverified"
+      typed.validation_status === 'unverified'
     ) {
-      newStatus = "verified";
-      newReason = "auto: score >= 70";
-      statusChanged = true;
+      newStatus = 'verified'
+      newReason = 'auto: score >= 70'
+      statusChanged = true
     }
 
     const payload: Record<string, unknown> = {
       activity_score: score,
       activity_score_computed_at: new Date().toISOString(),
-    };
+    }
     if (statusChanged) {
-      payload.validation_status = newStatus;
-      payload.validation_status_changed_at = new Date().toISOString();
-      payload.validation_status_reason = newReason;
+      payload.validation_status = newStatus
+      payload.validation_status_changed_at = new Date().toISOString()
+      payload.validation_status_reason = newReason
     }
 
     const { error: updateError } = await supabase
-      .from("diagnosticians")
+      .from('diagnosticians')
       .update(payload)
-      .eq("id", typed.id);
+      .eq('id', typed.id)
 
     if (updateError) {
-      throw new Error(`update_failed: ${updateError.message}`);
+      throw new Error(`update_failed: ${updateError.message}`)
     }
 
-    processed += 1;
-    if (newStatus === "verified") verified += 1;
-    else if (newStatus === "ceased") ceased += 1;
-    else pending += 1;
+    processed += 1
+    if (newStatus === 'verified') verified += 1
+    else if (newStatus === 'ceased') ceased += 1
+    else pending += 1
   }
 
-  return { processed, verified, ceased, pending };
+  return { processed, verified, ceased, pending }
 }
 
 // ---------------------------------------------------------------------------
@@ -330,74 +315,61 @@ async function recomputeViaQueries(
 // ---------------------------------------------------------------------------
 
 async function handleRequest(req: Request): Promise<Response> {
-  if (req.method !== "POST") {
-    return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
+  if (req.method !== 'POST') {
+    return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405)
   }
   if (!isAuthorized(req)) {
-    return jsonResponse({ ok: false, error: "unauthorized" }, 401);
+    return jsonResponse({ ok: false, error: 'unauthorized' }, 401)
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceRoleKey) {
-    return jsonResponse(
-      { ok: false, error: "missing_supabase_env" },
-      500,
-    );
+    return jsonResponse({ ok: false, error: 'missing_supabase_env' }, 500)
   }
 
-  let body: RequestBody = {};
+  let body: RequestBody = {}
   try {
-    if (req.headers.get("content-length") !== "0") {
-      body = (await req.json()) as RequestBody;
+    if (req.headers.get('content-length') !== '0') {
+      body = (await req.json()) as RequestBody
     }
   } catch {
-    body = {};
+    body = {}
   }
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
-  });
+  })
 
-  const startedAt = Date.now();
-  const mode: RequestMode = body.mode ?? "batch";
-  const targetId = mode === "single" ? body.diagnostician_id ?? null : null;
-  const limit = DEFAULT_BATCH_LIMIT;
+  const startedAt = Date.now()
+  const mode: RequestMode = body.mode ?? 'batch'
+  const targetId = mode === 'single' ? (body.diagnostician_id ?? null) : null
+  const limit = DEFAULT_BATCH_LIMIT
 
-  if (mode === "single" && !targetId) {
-    return jsonResponse(
-      { ok: false, error: "missing_diagnostician_id" },
-      400,
-    );
+  if (mode === 'single' && !targetId) {
+    return jsonResponse({ ok: false, error: 'missing_diagnostician_id' }, 400)
   }
 
-  let result: RpcResult;
+  let result: RpcResult
   try {
     // Tentative RPC (rapide, un seul aller-retour).
-    result = await recomputeViaRpc(supabase, targetId, limit);
+    result = await recomputeViaRpc(supabase, targetId, limit)
   } catch (rpcErr) {
     // Fallback queries TS si la RPC n'existe pas encore en base.
-    const message = rpcErr instanceof Error ? rpcErr.message : String(rpcErr);
+    const message = rpcErr instanceof Error ? rpcErr.message : String(rpcErr)
     if (
-      message.includes("rpc_failed") &&
-      (message.includes("not exist") ||
-        message.includes("404") ||
-        message.includes("not found"))
+      message.includes('rpc_failed') &&
+      (message.includes('not exist') || message.includes('404') || message.includes('not found'))
     ) {
       try {
-        result = await recomputeViaQueries(supabase, targetId, limit);
+        result = await recomputeViaQueries(supabase, targetId, limit)
       } catch (fallbackErr) {
         const fallbackMessage =
-          fallbackErr instanceof Error
-            ? fallbackErr.message
-            : String(fallbackErr);
-        return jsonResponse(
-          { ok: false, error: fallbackMessage },
-          500,
-        );
+          fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)
+        return jsonResponse({ ok: false, error: fallbackMessage }, 500)
       }
     } else {
-      return jsonResponse({ ok: false, error: message }, 500);
+      return jsonResponse({ ok: false, error: message }, 500)
     }
   }
 
@@ -405,12 +377,12 @@ async function handleRequest(req: Request): Promise<Response> {
   // diagnostician_id NULL n'est pas autorise par le schema actuel.
   // On log uniquement en mode 'single'.
   if (targetId) {
-    await supabase.from("diagnostician_cross_validation_logs").insert({
+    await supabase.from('diagnostician_cross_validation_logs').insert({
       diagnostician_id: targetId,
-      source: "ACTIVITY_SCORE",
-      outcome: "matched",
+      source: 'ACTIVITY_SCORE',
+      outcome: 'matched',
       payload: result as unknown as Record<string, unknown>,
-    });
+    })
   }
 
   const summary: ScoreSummary = {
@@ -420,11 +392,11 @@ async function handleRequest(req: Request): Promise<Response> {
     ceased: result.ceased,
     pending: result.pending,
     durationMs: Date.now() - startedAt,
-  };
-  return jsonResponse(summary);
+  }
+  return jsonResponse(summary)
 }
 
-serve(handleRequest);
+serve(handleRequest)
 
 // ---------------------------------------------------------------------------
 // SQL de reference pour la RPC (a creer cote migration DB) :

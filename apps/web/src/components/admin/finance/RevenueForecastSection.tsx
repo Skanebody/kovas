@@ -5,8 +5,8 @@
  * 'mission_done' pour réalisé, fenêtre 30j).
  */
 
-import { AdminMetricCard } from '@/components/admin/shared/AdminMetricCard'
 import { formatEur } from '@/components/admin/finance/finance-format'
+import { AdminMetricCard } from '@/components/admin/shared/AdminMetricCard'
 import type { RevenueForecast, RevenueRealized } from '@/lib/admin/revenue-metrics'
 import { CalendarClock, CheckCircle2, Percent, ShoppingBag } from 'lucide-react'
 

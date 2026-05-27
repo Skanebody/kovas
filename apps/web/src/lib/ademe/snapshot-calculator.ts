@@ -172,9 +172,7 @@ export function calculateKpiSnapshot(input: SnapshotInput): KpiSnapshot {
   // ---- 3. Géo (distances entre DPE consécutifs par date)
   const sortedByDate = [...input.dpeData]
     .filter((d) => d.Date_etablissement_DPE)
-    .sort((a, b) =>
-      (a.Date_etablissement_DPE ?? '').localeCompare(b.Date_etablissement_DPE ?? ''),
-    )
+    .sort((a, b) => (a.Date_etablissement_DPE ?? '').localeCompare(b.Date_etablissement_DPE ?? ''))
   const distances: number[] = []
   for (let i = 1; i < sortedByDate.length; i += 1) {
     const prev = sortedByDate[i - 1]
@@ -330,7 +328,8 @@ function scoreVolume(opts: { yearly: number; daily: number }): number {
   if (opts.yearly >= VOLUME_CRITICAL_YEARLY) score = 100
   else if (opts.yearly >= VOLUME_WARNING_YEARLY) {
     // Interpolation linéaire 800 → 60, 950 → 100
-    const ratio = (opts.yearly - VOLUME_WARNING_YEARLY) / (VOLUME_CRITICAL_YEARLY - VOLUME_WARNING_YEARLY)
+    const ratio =
+      (opts.yearly - VOLUME_WARNING_YEARLY) / (VOLUME_CRITICAL_YEARLY - VOLUME_WARNING_YEARLY)
     score = 60 + 40 * ratio
   } else if (opts.yearly > 0) {
     score = (opts.yearly / VOLUME_WARNING_YEARLY) * 50
@@ -347,7 +346,9 @@ function scoreCoherence(
   totalDpe: number,
 ): number {
   if (totalDpe === 0) return 0
-  const errors = violations.filter((v) => v.severity === 'error' || v.severity === 'blocking').length
+  const errors = violations.filter(
+    (v) => v.severity === 'error' || v.severity === 'blocking',
+  ).length
   const warnings = violations.filter((v) => v.severity === 'warning').length
   // 1 erreur sur 100 DPE = 10 points. 1 warning = 3 points.
   const score = (errors / totalDpe) * 1000 + (warnings / totalDpe) * 300

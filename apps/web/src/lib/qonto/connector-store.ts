@@ -5,8 +5,8 @@
  * incluse) afin d'éviter d'exposer le ciphertext via PostgREST RLS au client.
  */
 
-import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { decryptToken, encryptToken } from '@/lib/security/encrypt'
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { QontoClient } from './client'
 import type { QontoCredentials } from './types'
 
@@ -32,7 +32,9 @@ function getAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) {
-    throw new Error('[connector-store] NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY manquant.')
+    throw new Error(
+      '[connector-store] NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY manquant.',
+    )
   }
   return createSupabaseAdmin(url, key, { auth: { persistSession: false } })
 }
@@ -45,7 +47,9 @@ export async function getConnector(
   const admin = getAdmin()
   const { data, error } = await admin
     .from('accounting_connectors')
-    .select('id, organization_id, provider, status, last_sync_at, last_error, created_at, updated_at')
+    .select(
+      'id, organization_id, provider, status, last_sync_at, last_error, created_at, updated_at',
+    )
     .eq('organization_id', orgId)
     .eq('provider', provider)
     .maybeSingle()

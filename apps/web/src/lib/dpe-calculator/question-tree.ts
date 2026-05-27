@@ -32,18 +32,9 @@ export type HeatingType =
   | 'reseau_chaleur'
   | 'autre'
 
-export type IsolationLevel =
-  | 'tres_bonne'
-  | 'bonne'
-  | 'moyenne'
-  | 'mauvaise'
-  | 'inconnue'
+export type IsolationLevel = 'tres_bonne' | 'bonne' | 'moyenne' | 'mauvaise' | 'inconnue'
 
-export type OccupationMode =
-  | 'residence_principale'
-  | 'residence_secondaire'
-  | 'vacant'
-  | 'locatif'
+export type OccupationMode = 'residence_principale' | 'residence_secondaire' | 'vacant' | 'locatif'
 
 export type ProjectContext = 'vente' | 'location' | 'renovation' | 'curiosite'
 
@@ -150,10 +141,7 @@ export function createEmptyAnswers(): CalculatorAnswers {
  * Validation d'une étape — retourne true si la question courante a une
  * réponse exploitable et que l'utilisateur peut passer à la suivante.
  */
-export function isAnswerComplete(
-  key: QuestionKey,
-  answers: CalculatorAnswers,
-): boolean {
+export function isAnswerComplete(key: QuestionKey, answers: CalculatorAnswers): boolean {
   switch (key) {
     case 'property_type':
       return answers.property_type !== null

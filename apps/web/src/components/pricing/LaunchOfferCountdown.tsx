@@ -77,9 +77,8 @@ export function LaunchOfferCountdown() {
             Offre de lancement
           </strong>
           <span>
-            Plus que{' '}
-            <strong className="tabular-nums">{status.positionsRemaining}</strong>{' '}
-            place{status.positionsRemaining > 1 ? 's' : ''} sur {status.totalSlots}
+            Plus que <strong className="tabular-nums">{status.positionsRemaining}</strong> place
+            {status.positionsRemaining > 1 ? 's' : ''} sur {status.totalSlots}
           </span>
           <span className="text-[#0F1419]/72">·</span>
           <span>−30 % pendant 12 mois</span>

@@ -297,11 +297,7 @@ type FetchOutcome =
   | { ok: true; data: InseeSiretResponse; status: number }
   | { ok: false; status: number; notFound: boolean; message: string }
 
-async function fetchSiret(
-  siret: string,
-  apiBase: string,
-  retryCount = 0,
-): Promise<FetchOutcome> {
+async function fetchSiret(siret: string, apiBase: string, retryCount = 0): Promise<FetchOutcome> {
   const token = await getInseeToken()
   const url = `${apiBase.replace(/\/$/, '')}/siret/${encodeURIComponent(siret)}`
 
@@ -397,10 +393,7 @@ async function processDiagnostician(
         sirene_state: 'unknown',
         sirene_last_synced_at: new Date().toISOString(),
       }
-      await supabase
-        .from('diagnosticians')
-        .update(payload)
-        .eq('id', diag.id)
+      await supabase.from('diagnosticians').update(payload).eq('id', diag.id)
 
       return {
         outcome: 'not_found',
@@ -489,8 +482,7 @@ async function processDiagnostician(
       .from('diagnosticians')
       .update({
         validation_status: 'verified',
-        validation_status_reason:
-          'INSEE etat=A + activity_score >= 70 (recoupement Sirene OK)',
+        validation_status_reason: 'INSEE etat=A + activity_score >= 70 (recoupement Sirene OK)',
         validation_status_changed_at: nowIso,
       })
       .eq('id', diag.id)
@@ -542,8 +534,7 @@ Deno.serve(async (req) => {
   const mode: 'batch' | 'single' = body.mode ?? 'batch'
   const limit = Math.max(1, Math.min(body.limit ?? 200, 500))
   const throttleMs = Number.parseInt(Deno.env.get('INSEE_THROTTLE_MS') ?? '2000', 10)
-  const apiBase =
-    Deno.env.get('INSEE_API_BASE') ?? 'https://api.insee.fr/entreprises/sirene/V3.11'
+  const apiBase = Deno.env.get('INSEE_API_BASE') ?? 'https://api.insee.fr/entreprises/sirene/V3.11'
 
   // --- Supabase admin client ---
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
@@ -562,10 +553,10 @@ Deno.serve(async (req) => {
 
   if (mode === 'single') {
     if (!body.diagnostician_id) {
-      return new Response(
-        JSON.stringify({ error: 'diagnostician_id requis en mode single' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
-      )
+      return new Response(JSON.stringify({ error: 'diagnostician_id requis en mode single' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
     const { data, error } = await supabase
       .from('diagnosticians')

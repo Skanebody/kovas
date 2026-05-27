@@ -121,9 +121,8 @@ export async function generateVCardQrSvg(
   // Sanitize : `logoDataUri` doit être une data URI (image/png|jpeg|svg+xml) ou
   // une URL https. On refuse tout javascript: ou autre.
   const isSafe =
-    /^data:image\/(png|jpeg|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(
-      options.logoDataUri,
-    ) || /^https:\/\//.test(options.logoDataUri)
+    /^data:image\/(png|jpeg|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(options.logoDataUri) ||
+    /^https:\/\//.test(options.logoDataUri)
   if (!isSafe) return svgRaw
 
   const overlay =

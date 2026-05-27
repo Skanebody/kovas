@@ -5,12 +5,12 @@
  *   PATCH /api/litigation/[id]  { status?, regenerate?, escalateReason? }
  */
 
-import { getCurrentUser } from '@/lib/auth/current-user'
 import type {
   Jurisprudence,
   LitigationData,
   LitigationStatus,
 } from '@/components/defense/LitigationWorkflow'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'

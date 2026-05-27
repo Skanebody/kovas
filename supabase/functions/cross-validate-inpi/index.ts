@@ -126,10 +126,7 @@ const DIRECTOR_ROLE_KEYWORDS = [
 ]
 
 function normalizeRole(role: string): string {
-  return role
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toUpperCase()
+  return role.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()
 }
 
 function isDirectorRole(role: string | null | undefined): boolean {
@@ -213,9 +210,7 @@ function buildFullName(pouvoir: InpiPouvoir): string | null {
   const descr = pouvoir.individu?.descriptionPersonne
   if (descr) {
     const prenoms =
-      descr.prenomUsuel ||
-      (Array.isArray(descr.prenoms) ? descr.prenoms.join(' ') : null) ||
-      ''
+      descr.prenomUsuel || (Array.isArray(descr.prenoms) ? descr.prenoms.join(' ') : null) || ''
     const nom = descr.nom ?? ''
     const full = `${prenoms} ${nom}`.trim()
     return full.length > 0 ? full : null
@@ -227,9 +222,7 @@ function buildFullName(pouvoir: InpiPouvoir): string | null {
   return null
 }
 
-function extractRepresentatives(
-  pouvoirs: InpiPouvoir[] | null | undefined,
-): LegalRepresentative[] {
+function extractRepresentatives(pouvoirs: InpiPouvoir[] | null | undefined): LegalRepresentative[] {
   if (!pouvoirs || pouvoirs.length === 0) return []
   const reps: LegalRepresentative[] = []
   for (const p of pouvoirs) {
@@ -258,11 +251,7 @@ type FetchOutcome =
   | { ok: true; data: InpiCompanyResponse; status: number }
   | { ok: false; status: number; notFound: boolean; message: string }
 
-async function fetchCompany(
-  siren: string,
-  apiBase: string,
-  retryCount = 0,
-): Promise<FetchOutcome> {
+async function fetchCompany(siren: string, apiBase: string, retryCount = 0): Promise<FetchOutcome> {
   const token = await getInpiToken()
   const url = `${apiBase.replace(/\/$/, '')}/companies/${encodeURIComponent(siren)}`
 
@@ -301,7 +290,7 @@ async function fetchCompany(
   // L'API RNE renvoie parfois un tableau au lieu d'un objet selon les versions :
   // on tente les deux formes en toute defensive (typage strict).
   const json = (await res.json()) as InpiCompanyResponse | InpiCompanyResponse[]
-  const data: InpiCompanyResponse = Array.isArray(json) ? json[0] ?? {} : json
+  const data: InpiCompanyResponse = Array.isArray(json) ? (json[0] ?? {}) : json
   return { ok: true, data, status: res.status }
 }
 
@@ -458,10 +447,10 @@ Deno.serve(async (req) => {
 
   if (mode === 'single') {
     if (!body.diagnostician_id) {
-      return new Response(
-        JSON.stringify({ error: 'diagnostician_id requis en mode single' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
-      )
+      return new Response(JSON.stringify({ error: 'diagnostician_id requis en mode single' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
     const { data, error } = await supabase
       .from('diagnosticians')

@@ -1,15 +1,15 @@
+import { AdminShortcutsBlock } from './SidebarBlocks/AdminShortcutsBlock'
 import type { CalendarEntry } from './SidebarBlocks/CalendarBlock'
 import { CalendarBlock } from './SidebarBlocks/CalendarBlock'
-import type { OtherDossier } from './SidebarBlocks/OtherDossiersBlock'
-import { OtherDossiersBlock } from './SidebarBlocks/OtherDossiersBlock'
 import type { Opportunity } from './SidebarBlocks/OpportunitiesBlock'
 import { OpportunitiesBlock } from './SidebarBlocks/OpportunitiesBlock'
+import type { OtherDossier } from './SidebarBlocks/OtherDossiersBlock'
+import { OtherDossiersBlock } from './SidebarBlocks/OtherDossiersBlock'
 import type { PropertyHistoryItem } from './SidebarBlocks/PropertyHistoryBlock'
 import { PropertyHistoryBlock } from './SidebarBlocks/PropertyHistoryBlock'
 import { QuickActionsBlock } from './SidebarBlocks/QuickActionsBlock'
 import type { VigilanceSignal } from './SidebarBlocks/VigilanceBlock'
 import { VigilanceBlock } from './SidebarBlocks/VigilanceBlock'
-import { AdminShortcutsBlock } from './SidebarBlocks/AdminShortcutsBlock'
 
 interface SidebarProps {
   dossierId: string

@@ -9,11 +9,7 @@
  */
 
 import { filterTone } from './formulations'
-import {
-  MAX_ALERTS_PER_MISSION,
-  type AlertSeverity,
-  type Finding,
-} from './types'
+import { type AlertSeverity, type Finding, MAX_ALERTS_PER_MISSION } from './types'
 
 const SEVERITY_ORDER: Record<AlertSeverity, number> = {
   critical: 0,
@@ -70,9 +66,7 @@ export function consolidateFindings(
       severity: highestSeverity,
       priorityScore: maxScore,
       message: filterTone(buildGroupMessage(head, items.length)),
-      detail: items
-        .map((it) => `• ${filterTone(it.message)}`)
-        .join('\n'),
+      detail: items.map((it) => `• ${filterTone(it.message)}`).join('\n'),
     })
   }
 

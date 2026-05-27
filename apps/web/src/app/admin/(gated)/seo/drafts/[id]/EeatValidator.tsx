@@ -80,20 +80,22 @@ export function EeatValidator({ validations, score }: EeatValidatorProps) {
           Score EEAT
         </p>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className={`font-serif italic font-normal text-5xl leading-none ${scoreClass(score)}`}>
+          <span
+            className={`font-serif italic font-normal text-5xl leading-none ${scoreClass(score)}`}
+          >
             {score}
           </span>
           <span className="text-ink-faint text-sm">/ 10</span>
         </div>
-        <p className={`inline-block mt-3 rounded-pill px-2.5 py-0.5 text-[11px] font-mono font-semibold ${scoreBgClass(score)} ${scoreClass(score)}`}>
+        <p
+          className={`inline-block mt-3 rounded-pill px-2.5 py-0.5 text-[11px] font-mono font-semibold ${scoreBgClass(score)} ${scoreClass(score)}`}
+        >
           {score >= 7 ? 'Publiable' : score >= 4 ? 'À enrichir' : 'Insuffisant'}
         </p>
       </div>
 
       <div className="space-y-3 border-t border-rule pt-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-mute">
-          Critères
-        </p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-mute">Critères</p>
         {CRITERIA.map((c) => {
           const ok = validations[c.key]
           return (

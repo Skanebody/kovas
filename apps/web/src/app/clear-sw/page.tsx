@@ -24,12 +24,10 @@ export default function ClearSwPage() {
         <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#5A6B78]">
           Maintenance
         </div>
-        <h1 className="font-serif italic text-4xl text-[#163144]">
-          Nettoyage en cours.
-        </h1>
+        <h1 className="font-serif italic text-4xl text-[#163144]">Nettoyage en cours.</h1>
         <p className="text-base text-[#5A6B78]">
-          Désinstallation du Service Worker et purge du cache navigateur.
-          Vous serez redirigé vers KOVAS automatiquement.
+          Désinstallation du Service Worker et purge du cache navigateur. Vous serez redirigé vers
+          KOVAS automatiquement.
         </p>
         <div className="flex justify-center">
           <div className="size-8 border-4 border-[#163144] border-t-transparent rounded-full animate-spin" />

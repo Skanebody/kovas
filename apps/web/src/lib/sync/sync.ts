@@ -1,6 +1,6 @@
 'use client'
 
-import { getSyncDB, type MutationKind, type MutationRow } from './db'
+import { type MutationKind, type MutationRow, getSyncDB } from './db'
 
 /**
  * Sync logic — drain de la queue au retour réseau.
@@ -67,7 +67,9 @@ export async function drain(organizationId: string): Promise<SyncResult> {
     }
 
     // Backoff exponentiel : 1s, 2s, 4s, 8s, 16s
-    const sinceLastAttempt = mut.lastAttemptAt ? Date.now() - mut.lastAttemptAt : Infinity
+    const sinceLastAttempt = mut.lastAttemptAt
+      ? Date.now() - mut.lastAttemptAt
+      : Number.POSITIVE_INFINITY
     const requiredWait = BASE_BACKOFF_MS * 2 ** mut.attempts
     if (sinceLastAttempt < requiredWait) continue
 
@@ -162,9 +164,7 @@ export function setupAutoSync(organizationId: string): () => void {
     const result = await drain(organizationId)
     if (result.succeeded > 0) {
       // Toast côté UI via event custom (le composant SyncIndicator écoute)
-      window.dispatchEvent(
-        new CustomEvent('kovas:sync:complete', { detail: result }),
-      )
+      window.dispatchEvent(new CustomEvent('kovas:sync:complete', { detail: result }))
     }
   }
 

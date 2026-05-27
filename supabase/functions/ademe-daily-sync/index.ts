@@ -44,7 +44,7 @@
 
 /// <reference lib="deno.ns" />
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
 
 // ────────────────────────────────────────────────────────────
 // Configuration
@@ -244,9 +244,7 @@ async function upsertDpeCache(
       consommation_kwh_m2:
         typeof d.Conso_5_usages_par_m2_ep === 'number' ? d.Conso_5_usages_par_m2_ep : null,
       emissions_kgco2_m2:
-        typeof d.Emission_GES_5_usages_par_m2 === 'number'
-          ? d.Emission_GES_5_usages_par_m2
-          : null,
+        typeof d.Emission_GES_5_usages_par_m2 === 'number' ? d.Emission_GES_5_usages_par_m2 : null,
       date_etablissement: d.Date_etablissement_DPE ?? null,
       date_visite: d.Date_visite_diagnostiqueur ?? null,
       date_fin_validite: d.Date_fin_validite_DPE ?? null,

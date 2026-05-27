@@ -96,7 +96,10 @@ export function AdemeFranceMap({ points, className }: AdemeFranceMapProps) {
               key={label}
               className="inline-flex items-center gap-1 rounded-pill border border-rule bg-paper/80 px-2 py-0.5 text-[10px] font-mono text-ink-mute"
             >
-              <span className="size-2 rounded-full" style={{ backgroundColor: LABEL_COLOR[label] }} />
+              <span
+                className="size-2 rounded-full"
+                style={{ backgroundColor: LABEL_COLOR[label] }}
+              />
               {label} · {counts[label]}
             </span>
           ))}

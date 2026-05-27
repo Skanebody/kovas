@@ -21,7 +21,7 @@ export function ClaimBanner({ diagnosticianId }: ClaimBannerProps) {
             </p>
             <p className="text-xs text-white/70 mt-0.5">
               Les informations affichées proviennent de sources publiques (Annuaire ADEME, registre
-              national). Vous êtes le diagnostiqueur référencé ?
+              national). Tu es le diagnostiqueur référencé ?
             </p>
           </div>
         </div>

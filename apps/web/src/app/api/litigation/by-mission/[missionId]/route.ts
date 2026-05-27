@@ -4,12 +4,12 @@
  * GET /api/litigation/by-mission/[missionId]
  */
 
-import { getCurrentUser } from '@/lib/auth/current-user'
 import type {
   Jurisprudence,
   LitigationData,
   LitigationStatus,
 } from '@/components/defense/LitigationWorkflow'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'

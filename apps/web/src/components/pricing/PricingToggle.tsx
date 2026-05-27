@@ -36,9 +36,7 @@ export function PricingToggle({
         aria-label={ariaLabel}
         className={cn(
           'inline-flex rounded-full p-1 gap-1 border',
-          isDark
-            ? 'bg-white/[0.06] border-white/15'
-            : 'bg-white border-[#0F1419]/[0.08]',
+          isDark ? 'bg-white/[0.06] border-white/15' : 'bg-white border-[#0F1419]/[0.08]',
         )}
       >
         <button

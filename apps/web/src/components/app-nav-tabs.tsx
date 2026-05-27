@@ -1,18 +1,10 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import type { AddonCode, PricingPlanCode } from '@/lib/pricing-plans'
 import type { UserAccess } from '@/lib/upsell/access-control'
 import { hasFeatureAccess } from '@/lib/upsell/access-control'
-import {
-  Building2,
-  CalendarDays,
-  ChartLine,
-  FileText,
-  Home,
-  Settings,
-  Users,
-} from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Building2, CalendarDays, ChartLine, FileText, Home, Settings, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'

@@ -30,7 +30,7 @@ export {
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { lookupVerificationCache, storeVerificationCache } from './cache'
-import { verifyDiagnosticActivity, type VerificationResult, type VerifyOptions } from './client'
+import { type VerificationResult, type VerifyOptions, verifyDiagnosticActivity } from './client'
 
 /**
  * Pipeline complet : cache 7j → API fallback → store cache.

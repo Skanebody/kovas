@@ -11,16 +11,16 @@
  *   - generateFacturxXml produit un XML valide structurellement
  */
 
-import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { test } from 'node:test'
 
 import { generateFacturxXml } from './generate-facturx-xml'
 import { generateQuotePdf } from './generate-pdf'
 import {
-  computeQuoteTotals,
   type QuoteClientSnapshot,
   type QuoteLineItem,
   type QuoteOrganizationSnapshot,
+  computeQuoteTotals,
 } from './types'
 
 const SAMPLE_LINES: QuoteLineItem[] = [

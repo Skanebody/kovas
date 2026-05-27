@@ -1,6 +1,6 @@
+import { getStripe } from '@/lib/stripe'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
-import { getStripe } from '@/lib/stripe'
 
 /**
  * Représentation normalisée d'une facture Stripe destinée au front KOVAS.
@@ -62,9 +62,7 @@ function toSummary(invoice: Stripe.Invoice): InvoiceSummary {
  * Cache en mémoire process — OK pour instance unique Vercel/Node. À remplacer
  * par Redis si on passe à un déploiement multi-instance.
  */
-export async function getInvoicesForCustomer(
-  stripeCustomerId: string,
-): Promise<InvoiceSummary[]> {
+export async function getInvoicesForCustomer(stripeCustomerId: string): Promise<InvoiceSummary[]> {
   const now = Date.now()
   const cached = cache.get(stripeCustomerId)
   if (cached && cached.expiresAt > now) {
@@ -78,9 +76,7 @@ export async function getInvoicesForCustomer(
     expand: ['data.lines'],
   })
 
-  const summaries = response.data
-    .map(toSummary)
-    .sort((a, b) => b.created - a.created)
+  const summaries = response.data.map(toSummary).sort((a, b) => b.created - a.created)
 
   cache.set(stripeCustomerId, { data: summaries, expiresAt: now + TTL_MS })
   return summaries

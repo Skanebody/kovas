@@ -34,7 +34,10 @@ export type FeatureKey =
   | 'pennylane_sync'
   | 'multi_user'
 
-const PLAN_FEATURES: Record<KovasPlanId | 'essential' | 'decouverte' | 'pro' | 'all_inclusive' | 'cabinet', FeatureKey[]> = {
+const PLAN_FEATURES: Record<
+  KovasPlanId | 'essential' | 'decouverte' | 'pro' | 'all_inclusive' | 'cabinet',
+  FeatureKey[]
+> = {
   essential: ['regulatory_basic_notifs'],
   decouverte: ['regulatory_basic_notifs', 'cockpit_ademe_mode1'],
   pro: [
@@ -97,10 +100,7 @@ const PLAN_FEATURES: Record<KovasPlanId | 'essential' | 'decouverte' | 'pro' | '
  * Pour les feature gating gated par add-on uniquement, utiliser
  * `userHasAddon(orgId, moduleCode)` séparément (helper async).
  */
-export function planHasFeature(
-  planCode: string | null | undefined,
-  feature: FeatureKey,
-): boolean {
+export function planHasFeature(planCode: string | null | undefined, feature: FeatureKey): boolean {
   if (!planCode) return false
   const planFeatures = PLAN_FEATURES[planCode as keyof typeof PLAN_FEATURES]
   if (!planFeatures) return false

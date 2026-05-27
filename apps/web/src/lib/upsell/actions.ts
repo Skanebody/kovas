@@ -11,16 +11,16 @@
  * Les conversions remontent dans upsell_suggestions.status = 'converted'.
  */
 
-import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import {
-  type AddonCode,
-  type AddonPackCode,
-  type PricingPlanCode,
   ADDON_MODULES,
   ADDON_PACKS,
+  type AddonCode,
+  type AddonPackCode,
   PRICING_PLANS,
+  type PricingPlanCode,
 } from '@/lib/pricing-plans'
+import { revalidatePath } from 'next/cache'
 import { trackBehaviorEvent } from './track-event'
 
 export interface UpsellActionResult {
@@ -35,7 +35,11 @@ const PLAN_CODE_SET = new Set<string>(PRICING_PLANS.map((p) => p.code))
 
 function classifyTarget(
   target: string,
-): { kind: 'addon'; code: AddonCode } | { kind: 'pack'; code: AddonPackCode } | { kind: 'tier_upgrade'; code: PricingPlanCode } | null {
+):
+  | { kind: 'addon'; code: AddonCode }
+  | { kind: 'pack'; code: AddonPackCode }
+  | { kind: 'tier_upgrade'; code: PricingPlanCode }
+  | null {
   if (ADDON_CODE_SET.has(target)) return { kind: 'addon', code: target as AddonCode }
   if (PACK_CODE_SET.has(target)) return { kind: 'pack', code: target as AddonPackCode }
   if (PLAN_CODE_SET.has(target)) return { kind: 'tier_upgrade', code: target as PricingPlanCode }
@@ -47,7 +51,10 @@ function classifyTarget(
  * on redirige vers /pricing/checkout (pas d'essai 14j sur les tiers, c'est
  * un changement d'abonnement payant).
  */
-export async function startTrialAction(target: string, trigger?: string): Promise<UpsellActionResult> {
+export async function startTrialAction(
+  target: string,
+  trigger?: string,
+): Promise<UpsellActionResult> {
   if (!target || typeof target !== 'string' || target.length > 60) {
     return { error: 'Cible invalide' }
   }
@@ -81,8 +88,7 @@ export async function startTrialAction(target: string, trigger?: string): Promis
 
   if (!subRow || !['trialing', 'active', 'past_due'].includes(subRow.status)) {
     return {
-      error:
-        'Aucun abonnement actif. Souscrivez à un forfait avant de démarrer un essai module.',
+      error: 'Aucun abonnement actif. Souscrivez à un forfait avant de démarrer un essai module.',
     }
   }
 
@@ -90,7 +96,10 @@ export async function startTrialAction(target: string, trigger?: string): Promis
   const sb = supabase as unknown as {
     from(t: 'addon_modules'): {
       select(cols: string): {
-        eq(col: string, val: string): {
+        eq(
+          col: string,
+          val: string,
+        ): {
           maybeSingle(): Promise<{ data: { id: string } | null }>
         }
       }
@@ -129,12 +138,9 @@ export async function startTrialAction(target: string, trigger?: string): Promis
     if (insertError.code === '23505') {
       return { error: 'Un essai est déjà en cours sur ce module' }
     }
-    if (
-      insertError.code === '42P01' ||
-      insertError.message?.includes('does not exist')
-    ) {
+    if (insertError.code === '42P01' || insertError.message?.includes('does not exist')) {
       return {
-        error: "Essais module indisponibles — fonctionnalité bientôt activée.",
+        error: 'Essais module indisponibles — fonctionnalité bientôt activée.',
       }
     }
     return { error: insertError.message }
@@ -156,7 +162,10 @@ export async function dismissSuggestionAction(suggestionId: string): Promise<Ups
   const sb = supabase as unknown as {
     from(t: 'upsell_suggestions'): {
       update(rows: Record<string, unknown>): {
-        eq(c: string, v: string): {
+        eq(
+          c: string,
+          v: string,
+        ): {
           eq(c: string, v: string): Promise<{ error: { message: string } | null }>
         }
       }
@@ -181,8 +190,14 @@ export async function markSuggestionShownAction(suggestionId: string): Promise<U
   const sb = supabase as unknown as {
     from(t: 'upsell_suggestions'): {
       update(rows: Record<string, unknown>): {
-        eq(c: string, v: string): {
-          eq(c: string, v: string): {
+        eq(
+          c: string,
+          v: string,
+        ): {
+          eq(
+            c: string,
+            v: string,
+          ): {
             eq(c: string, v: string): Promise<{ error: { message: string } | null }>
           }
         }
@@ -203,16 +218,18 @@ export async function markSuggestionShownAction(suggestionId: string): Promise<U
  * Helper interne : passe toutes les suggestions pending d'un user pour une
  * target donnée en status='converted'.
  */
-async function markAsConverted(
-  supabase: unknown,
-  userId: string,
-  target: string,
-): Promise<void> {
+async function markAsConverted(supabase: unknown, userId: string, target: string): Promise<void> {
   const sb = supabase as {
     from(t: 'upsell_suggestions'): {
       update(rows: Record<string, unknown>): {
-        eq(c: string, v: string): {
-          eq(c: string, v: string): {
+        eq(
+          c: string,
+          v: string,
+        ): {
+          eq(
+            c: string,
+            v: string,
+          ): {
             in(c: string, v: readonly string[]): Promise<{ error: unknown }>
           }
         }

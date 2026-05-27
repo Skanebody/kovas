@@ -127,7 +127,9 @@ export function Step3Confirm({
           </p>
           <div className="flex flex-wrap gap-2 text-xs text-ink-mute">
             {data.propertyType && (
-              <Badge variant="outline">{PROPERTY_TYPE_LABELS[data.propertyType] ?? data.propertyType}</Badge>
+              <Badge variant="outline">
+                {PROPERTY_TYPE_LABELS[data.propertyType] ?? data.propertyType}
+              </Badge>
             )}
             {data.surface && <span>{data.surface} m²</span>}
             {yearLabel && <span>· bâti {yearLabel}</span>}

@@ -12,12 +12,7 @@
  *  - Catégorisation pour structuration éditoriale
  */
 
-export type VeilleCategory =
-  | 'reglementaire'
-  | 'pratique'
-  | 'technique'
-  | 'marche'
-  | 'jurisprudence'
+export type VeilleCategory = 'reglementaire' | 'pratique' | 'technique' | 'marche' | 'jurisprudence'
 
 export type SearchIntent = 'informational' | 'commercial' | 'transactional' | 'navigational'
 
@@ -304,14 +299,10 @@ export const TOP_VEILLE_KEYWORDS: ReadonlyArray<VeilleKeyword> = [
   },
 ] as const
 
-export function getKeywordsByCategory(
-  category: VeilleCategory,
-): ReadonlyArray<VeilleKeyword> {
+export function getKeywordsByCategory(category: VeilleCategory): ReadonlyArray<VeilleKeyword> {
   return TOP_VEILLE_KEYWORDS.filter((k) => k.category === category)
 }
 
 export function getTopKeywords(limit = 10): ReadonlyArray<VeilleKeyword> {
-  return [...TOP_VEILLE_KEYWORDS]
-    .sort((a, b) => b.priority - a.priority)
-    .slice(0, limit)
+  return [...TOP_VEILLE_KEYWORDS].sort((a, b) => b.priority - a.priority).slice(0, limit)
 }

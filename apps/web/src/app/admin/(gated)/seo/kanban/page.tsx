@@ -10,7 +10,7 @@
 
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import type { Metadata } from 'next'
-import { SeoKanbanBoard, type SeoDraftWithKeyword, type SeoDraftStatus } from './SeoKanbanBoard'
+import { type SeoDraftStatus, type SeoDraftWithKeyword, SeoKanbanBoard } from './SeoKanbanBoard'
 
 export const metadata: Metadata = {
   title: 'Pipeline SEO — Kanban',
@@ -32,14 +32,12 @@ interface DraftJoinedRow {
   updated_at: string | null
   created_at: string | null
   keyword_id: string
-  seo_keywords?:
-    | {
-        id: string
-        keyword_display: string
-        score: number | null
-        category: string | null
-      }
-    | null
+  seo_keywords?: {
+    id: string
+    keyword_display: string
+    score: number | null
+    category: string | null
+  } | null
 }
 
 async function fetchAllDrafts(): Promise<SeoDraftWithKeyword[]> {

@@ -57,9 +57,6 @@ export function parisMonthBounds(date: Date = new Date()): { startIso: string; n
   const nextM = m === 12 ? 1 : m + 1
   const nextY = m === 12 ? y + 1 : y
   const start = parisLocalToUtc(`${year}-${month}-01T00:00:00.000`, date)
-  const next = parisLocalToUtc(
-    `${nextY}-${String(nextM).padStart(2, '0')}-01T00:00:00.000`,
-    date,
-  )
+  const next = parisLocalToUtc(`${nextY}-${String(nextM).padStart(2, '0')}-01T00:00:00.000`, date)
   return { startIso: start.toISOString(), nextIso: next.toISOString() }
 }

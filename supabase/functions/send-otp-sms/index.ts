@@ -195,7 +195,10 @@ Deno.serve(async (req: Request) => {
     : null
   if (!purpose) {
     return jsonResponse(
-      { error: 'invalid_purpose', message: `purpose doit être l'un de : ${ALLOWED_PURPOSES.join(', ')}` },
+      {
+        error: 'invalid_purpose',
+        message: `purpose doit être l'un de : ${ALLOWED_PURPOSES.join(', ')}`,
+      },
       400,
     )
   }
@@ -255,10 +258,7 @@ Deno.serve(async (req: Request) => {
 
   if (insertErr || !inserted) {
     console.error('[send-otp-sms] insert otp_codes failed', insertErr)
-    return jsonResponse(
-      { error: 'internal_error', message: 'Impossible de générer le code.' },
-      500,
-    )
+    return jsonResponse({ error: 'internal_error', message: 'Impossible de générer le code.' }, 500)
   }
 
   const otpId = (inserted as { id: string }).id
@@ -273,7 +273,7 @@ Deno.serve(async (req: Request) => {
       return jsonResponse(
         {
           error: 'sms_send_failed',
-          message: 'L\'envoi du SMS a échoué. Réessayez dans quelques instants.',
+          message: "L'envoi du SMS a échoué. Réessayez dans quelques instants.",
         },
         502,
       )

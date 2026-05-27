@@ -72,10 +72,7 @@ export const ARCHIVE_KIND_LABELS: Record<ArchiveFileKind, string> = {
   export: 'Export PDF',
 }
 
-export const ARCHIVE_KIND_BADGE: Record<
-  ArchiveFileKind,
-  'blue' | 'orange' | 'green' | 'yellow'
-> = {
+export const ARCHIVE_KIND_BADGE: Record<ArchiveFileKind, 'blue' | 'orange' | 'green' | 'yellow'> = {
   photo: 'blue',
   audio: 'orange',
   document: 'green',

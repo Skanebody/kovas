@@ -21,7 +21,7 @@ import { useCallback } from 'react'
  *   }
  */
 export function useHaptic(): (durationMs?: number) => void {
-  return useCallback((durationMs: number = 10) => {
+  return useCallback((durationMs = 10) => {
     if (typeof window === 'undefined') return
     if (typeof window.navigator === 'undefined') return
     // Vibration API : Chrome/Firefox/Edge Android, iOS 16.4+ (Safari)

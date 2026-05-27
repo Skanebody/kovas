@@ -19,16 +19,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useExpandState } from '@/lib/hooks/use-expand-state'
 import { cn } from '@/lib/utils'
-import {
-  AlertTriangle,
-  ChevronDown,
-  Construction,
-  Home,
-  MapPin,
-  Ruler,
-} from 'lucide-react'
+import { AlertTriangle, ChevronDown, Construction, Home, MapPin, Ruler } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 
 export interface BanInfo {
   postalCode: string
@@ -293,10 +286,7 @@ function Section({
           </CardTitle>
           {meta ? <span className="text-[11px] text-ink-mute font-mono">{meta}</span> : null}
           <ChevronDown
-            className={cn(
-              'size-4 text-ink-mute transition-transform',
-              expanded && 'rotate-180',
-            )}
+            className={cn('size-4 text-ink-mute transition-transform', expanded && 'rotate-180')}
           />
         </button>
       </CardHeader>

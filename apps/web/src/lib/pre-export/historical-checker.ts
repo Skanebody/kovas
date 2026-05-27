@@ -16,11 +16,7 @@
  * éventuel s'ajoute à la qualité globale.
  */
 
-import type {
-  AnalyzerResult,
-  Finding,
-  MissionAnalysisContext,
-} from './types'
+import type { AnalyzerResult, Finding, MissionAnalysisContext } from './types'
 
 export interface HistoricalDpe {
   ademe_number: string | null

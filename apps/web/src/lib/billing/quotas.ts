@@ -14,7 +14,7 @@
  *   - quota = -1 → illimité (All Inclusive / Cabinet plans)
  */
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { type SupabaseClient, createClient } from '@supabase/supabase-js'
 
 export type QuotaColumn =
   | 'missions_used'
@@ -85,7 +85,11 @@ interface AssertQuotaResult {
  */
 const COLUMN_MAP: Record<
   QuotaColumn,
-  { quotaCol: keyof UsageQuotaRow; overflowCountCol: keyof UsageQuotaRow; overflowAmountCol: keyof UsageQuotaRow }
+  {
+    quotaCol: keyof UsageQuotaRow
+    overflowCountCol: keyof UsageQuotaRow
+    overflowAmountCol: keyof UsageQuotaRow
+  }
 > = {
   missions_used: {
     quotaCol: 'missions_quota',

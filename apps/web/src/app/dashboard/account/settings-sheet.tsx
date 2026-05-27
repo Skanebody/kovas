@@ -66,7 +66,9 @@ export function SettingsSheet({
             </DialogPrimitive.Close>
           </header>
           {description && (
-            <DialogPrimitive.Description className="sr-only">{description}</DialogPrimitive.Description>
+            <DialogPrimitive.Description className="sr-only">
+              {description}
+            </DialogPrimitive.Description>
           )}
 
           {/* Content scrollable */}

@@ -9,25 +9,14 @@
  *    (Approuver / Rejeter / Régénérer)
  */
 
-import { ArticleMarkdown } from '@/components/veille/ArticleMarkdown'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { ArticleMarkdown } from '@/components/veille/ArticleMarkdown'
 import { CATEGORY_LABELS } from '@/lib/veille/types'
-import {
-  CheckCircle2,
-  Loader2,
-  RefreshCw,
-  Sparkles,
-  XCircle,
-} from 'lucide-react'
+import { CheckCircle2, Loader2, RefreshCw, Sparkles, XCircle } from 'lucide-react'
 import { useState, useTransition } from 'react'
-import {
-  approveArticle,
-  regenerateArticle,
-  rejectArticle,
-  triggerBatchGeneration,
-} from './actions'
+import { approveArticle, regenerateArticle, rejectArticle, triggerBatchGeneration } from './actions'
 import type { VeilleQueueArticle } from './page'
 
 interface VeilleQueueBoardProps {
@@ -57,9 +46,7 @@ function formatEur(amount: number): string {
 }
 
 export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    articles[0]?.id ?? null,
-  )
+  const [selectedId, setSelectedId] = useState<string | null>(articles[0]?.id ?? null)
   const [, startTransition] = useTransition()
   const [busy, setBusy] = useState<{ action: string; id: string } | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -115,9 +102,7 @@ export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
   }
 
   async function handleReject(id: string) {
-    const reason = window.prompt(
-      'Motif du rejet (sera enregistré pour amélioration du prompt) :',
-    )
+    const reason = window.prompt('Motif du rejet (sera enregistré pour amélioration du prompt) :')
     if (!reason || !reason.trim()) return
     setBusy({ action: 'reject', id })
     setErrorMsg(null)
@@ -171,17 +156,14 @@ export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
           Articles à publier.
         </h1>
         <p className="text-sm text-ink-mute max-w-2xl">
-          Pipeline Claude Haiku méthode Amandine Bart. Cron hebdomadaire
-          (mardis 6 h CET) — 2 articles par semaine, validation manuelle requise
-          avant mise en ligne sur /dashboard/veille/articles.
+          Pipeline Claude Haiku méthode Amandine Bart. Cron hebdomadaire (mardis 6 h CET) — 2
+          articles par semaine, validation manuelle requise avant mise en ligne sur
+          /dashboard/veille/articles.
         </p>
       </div>
 
       {/* Stats */}
-      <section
-        aria-label="Indicateurs queue"
-        className="grid grid-cols-2 md:grid-cols-4 gap-4"
-      >
+      <section aria-label="Indicateurs queue" className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4">
           <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
             En attente
@@ -192,17 +174,13 @@ export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
           <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
             Publiés 30 j
           </p>
-          <p className="font-serif italic text-3xl text-ink mt-1">
-            {stats.published30d}
-          </p>
+          <p className="font-serif italic text-3xl text-ink mt-1">{stats.published30d}</p>
         </Card>
         <Card className="p-4">
           <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
             Rejetés 30 j
           </p>
-          <p className="font-serif italic text-3xl text-ink mt-1">
-            {stats.rejected30d}
-          </p>
+          <p className="font-serif italic text-3xl text-ink mt-1">{stats.rejected30d}</p>
         </Card>
         <Card className="p-4">
           <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
@@ -242,9 +220,7 @@ export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
 
       {articles.length === 0 ? (
         <Card className="p-12 text-center">
-          <p className="text-ink-mute mb-2">
-            La file est vide — aucun article en attente.
-          </p>
+          <p className="text-ink-mute mb-2">La file est vide — aucun article en attente.</p>
           <p className="text-xs text-ink-faint">
             Le cron hebdomadaire ajoutera 2 nouveaux drafts mardi prochain.
           </p>
@@ -258,10 +234,11 @@ export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
               const liveScores = scores[a.id]
               const liveAvg = liveScores
                 ? Math.round(
-                    (liveScores.experience
-                      + liveScores.expertise
-                      + liveScores.authoritativeness
-                      + liveScores.trustworthiness) / 4,
+                    (liveScores.experience +
+                      liveScores.expertise +
+                      liveScores.authoritativeness +
+                      liveScores.trustworthiness) /
+                      4,
                   )
                 : a.eeatScore
               return (
@@ -295,9 +272,8 @@ export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
                     {a.title}
                   </p>
                   <p className="text-[11px] text-ink-faint font-mono">
-                    {a.wordCount.toLocaleString('fr-FR')} mots ·{' '}
-                    {a.sourceCitationsCount} sources · {a.internalLinksCount} liens
-                    int
+                    {a.wordCount.toLocaleString('fr-FR')} mots · {a.sourceCitationsCount} sources ·{' '}
+                    {a.internalLinksCount} liens int
                   </p>
                 </button>
               )
@@ -306,28 +282,19 @@ export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
 
           {/* Detail */}
           {selected ? (
-            <section
-              aria-label="Détail article"
-              className="space-y-6 min-w-0"
-            >
+            <section aria-label="Détail article" className="space-y-6 min-w-0">
               {/* Métriques structurelles */}
               <Card className="p-5">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                   <div>
-                    <p className="font-mono uppercase text-[10px] text-ink-faint">
-                      Mot-clé cible
-                    </p>
-                    <p className="text-sm text-ink mt-1">
-                      {selected.targetKeyword}
-                    </p>
+                    <p className="font-mono uppercase text-[10px] text-ink-faint">Mot-clé cible</p>
+                    <p className="text-sm text-ink mt-1">{selected.targetKeyword}</p>
                   </div>
                   <div>
-                    <p className="font-mono uppercase text-[10px] text-ink-faint">
-                      Mots / H2 / H3
-                    </p>
+                    <p className="font-mono uppercase text-[10px] text-ink-faint">Mots / H2 / H3</p>
                     <p className="text-sm text-ink mt-1 font-mono">
-                      {selected.wordCount.toLocaleString('fr-FR')} / {selected.h2Count}{' '}
-                      / {selected.h3Count}
+                      {selected.wordCount.toLocaleString('fr-FR')} / {selected.h2Count} /{' '}
+                      {selected.h3Count}
                     </p>
                   </div>
                   <div>
@@ -339,9 +306,7 @@ export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
                     </p>
                   </div>
                   <div>
-                    <p className="font-mono uppercase text-[10px] text-ink-faint">
-                      Coût IA
-                    </p>
+                    <p className="font-mono uppercase text-[10px] text-ink-faint">Coût IA</p>
                     <p className="text-sm text-ink mt-1 font-mono">
                       {formatEur(selected.aiCostEur)}
                     </p>
@@ -376,9 +341,7 @@ export function VeilleQueueBoard({ articles, stats }: VeilleQueueBoardProps) {
                           max={100}
                           step={1}
                           value={value}
-                          onChange={(e) =>
-                            updateScore(selected.id, axis, Number(e.target.value))
-                          }
+                          onChange={(e) => updateScore(selected.id, axis, Number(e.target.value))}
                           className="w-full accent-ink"
                         />
                       </div>

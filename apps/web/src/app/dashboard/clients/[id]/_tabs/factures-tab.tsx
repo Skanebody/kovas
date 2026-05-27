@@ -1,5 +1,3 @@
-import { Plus, Receipt } from 'lucide-react'
-import Link from 'next/link'
 import {
   AppListTable,
   AppListTableCell,
@@ -9,6 +7,8 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
+import { Plus, Receipt } from 'lucide-react'
+import Link from 'next/link'
 import { EmptyTabState } from './empty-tab-state'
 import { formatDate, formatEur } from './format-helpers'
 
@@ -26,10 +26,7 @@ const INVOICE_STATUS_LABELS: Record<string, string> = {
   cancelled: 'Annulée',
 }
 
-const INVOICE_STATUS_VARIANT: Record<
-  string,
-  'muted' | 'blue' | 'green' | 'orange' | 'red'
-> = {
+const INVOICE_STATUS_VARIANT: Record<string, 'muted' | 'blue' | 'green' | 'orange' | 'red'> = {
   draft: 'muted',
   issued: 'blue',
   partial: 'orange',
@@ -92,9 +89,7 @@ export async function ClientFacturesTab({ clientId, orgId }: Props) {
                 <tr>
                   <th className="text-left font-medium px-4 py-3">Référence</th>
                   <th className="text-left font-medium px-4 py-3">Émise le</th>
-                  <th className="text-left font-medium px-4 py-3 hidden md:table-cell">
-                    Échéance
-                  </th>
+                  <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Échéance</th>
                   <th className="text-right font-medium px-4 py-3">Montant TTC</th>
                   <th className="text-left font-medium px-4 py-3">Statut</th>
                   <th className="px-4 py-3" aria-label="actions" />
@@ -153,9 +148,7 @@ export async function ClientFacturesTab({ clientId, orgId }: Props) {
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-ink-mute">
-                      {formatDate(f.issued_at ?? f.created_at)}
-                    </span>
+                    <span className="text-ink-mute">{formatDate(f.issued_at ?? f.created_at)}</span>
                     <span className="font-mono tabular-nums font-semibold text-ink">
                       {formatEur(f.amount_ttc)}
                     </span>

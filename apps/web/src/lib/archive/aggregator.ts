@@ -312,18 +312,22 @@ async function fetchExports(args: FetchSourcesArgs): Promise<ArchiveFile[]> {
   // dossier_exports : pas dans les types générés → cast contrôlé
   const table = args.supabase.from('dossier_exports' as never) as unknown as {
     select: (s: string) => {
-      eq: (col: string, value: string) => {
-        order: (col: string, opts: { ascending: boolean }) => {
+      eq: (
+        col: string,
+        value: string,
+      ) => {
+        order: (
+          col: string,
+          opts: { ascending: boolean },
+        ) => {
           limit: (n: number) => Promise<{
-            data:
-              | Array<{
-                  id: string
-                  destination: string
-                  storage_path: string | null
-                  created_at: string
-                  dossier_id: string
-                }>
-              | null
+            data: Array<{
+              id: string
+              destination: string
+              storage_path: string | null
+              created_at: string
+              dossier_id: string
+            }> | null
             error: { message: string } | null
           }>
         }
@@ -416,9 +420,7 @@ export interface AggregateArgs {
 /**
  * Point d'entrée principal — agrège, filtre, paginate, génère signed URLs.
  */
-export async function aggregateArchiveFiles(
-  args: AggregateArgs,
-): Promise<ArchiveListResponse> {
+export async function aggregateArchiveFiles(args: AggregateArgs): Promise<ArchiveListResponse> {
   const { supabase, orgId, userId, query } = args
   const range = resolvePeriod(query.period)
   const searchText = query.q ? query.q.trim().toLowerCase() : null
@@ -447,8 +449,8 @@ export async function aggregateArchiveFiles(
     fetchExports(fetchArgs),
   ])
 
-  const merged: ArchiveFile[] = [...photos, ...audio, ...documents, ...exports].sort(
-    (a, b) => (a.created_at < b.created_at ? 1 : -1),
+  const merged: ArchiveFile[] = [...photos, ...audio, ...documents, ...exports].sort((a, b) =>
+    a.created_at < b.created_at ? 1 : -1,
   )
 
   const total = merged.length
@@ -464,7 +466,7 @@ export async function aggregateArchiveFiles(
   const refMap = await buildDossierReferenceMap(supabase, orgId, uniqueDossierIds)
   const withRefs = slice.map((f) => ({
     ...f,
-    dossier_reference: f.dossier_id ? refMap.get(f.dossier_id) ?? null : null,
+    dossier_reference: f.dossier_id ? (refMap.get(f.dossier_id) ?? null) : null,
   }))
 
   const withUrls = await enrichSignedUrls(supabase, withRefs)

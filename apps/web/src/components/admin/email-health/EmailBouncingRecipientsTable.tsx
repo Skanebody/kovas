@@ -21,7 +21,9 @@ export function EmailBouncingRecipientsTable({ recipients }: Props) {
   return (
     <Card variant="opaque" padding="default">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[15px] font-semibold tracking-tight text-ink">Top destinataires bouncing</h2>
+        <h2 className="text-[15px] font-semibold tracking-tight text-ink">
+          Top destinataires bouncing
+        </h2>
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
           30 derniers jours
         </span>
@@ -47,7 +49,9 @@ export function EmailBouncingRecipientsTable({ recipients }: Props) {
                     {r.recipient}
                   </td>
                   <td className="py-2 pr-3 text-right text-danger font-medium">{r.bounces}</td>
-                  <td className="py-2 pr-3 text-ink-mute">il y a {formatRelativeDate(r.lastBounceAt)}</td>
+                  <td className="py-2 pr-3 text-ink-mute">
+                    il y a {formatRelativeDate(r.lastBounceAt)}
+                  </td>
                   <td className="py-2">
                     <span
                       className={

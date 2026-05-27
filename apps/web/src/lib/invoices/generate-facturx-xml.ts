@@ -20,11 +20,7 @@
  *   381 = Avoir (Credit note)
  */
 
-import {
-  type InvoiceClientSnapshot,
-  type InvoiceIssuerSnapshot,
-  type InvoiceLineItem,
-} from './types'
+import type { InvoiceClientSnapshot, InvoiceIssuerSnapshot, InvoiceLineItem } from './types'
 
 export type FacturxDocumentTypeCode = '380' | '381'
 
@@ -117,12 +113,13 @@ export function generateFacturxXml(input: GenerateFacturxXmlInput): string {
     .join('')
 
   // Bloc référence facture d'origine si avoir
-  const refDocXml = isCreditNote && input.creditNoteForReference
-    ? `
+  const refDocXml =
+    isCreditNote && input.creditNoteForReference
+      ? `
       <ram:InvoiceReferencedDocument>
         <ram:IssuerAssignedID>${escapeXml(input.creditNoteForReference)}</ram:IssuerAssignedID>
       </ram:InvoiceReferencedDocument>`
-    : ''
+      : ''
 
   // Bloc notes
   const notesXml = input.notes
@@ -183,14 +180,18 @@ export function generateFacturxXml(input: GenerateFacturxXmlInput): string {
     </ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
-      ${input.issuer.iban ? `<ram:SpecifiedTradeSettlementPaymentMeans>
+      ${
+        input.issuer.iban
+          ? `<ram:SpecifiedTradeSettlementPaymentMeans>
         <ram:TypeCode>30</ram:TypeCode>
         <ram:Information>Virement</ram:Information>
         <ram:PayeePartyCreditorFinancialAccount>
           <ram:IBANID>${escapeXml(input.issuer.iban.replace(/\s+/g, ''))}</ram:IBANID>
         </ram:PayeePartyCreditorFinancialAccount>
         ${input.issuer.bic ? `<ram:PayeeSpecifiedCreditorFinancialInstitution><ram:BICID>${escapeXml(input.issuer.bic)}</ram:BICID></ram:PayeeSpecifiedCreditorFinancialInstitution>` : ''}
-      </ram:SpecifiedTradeSettlementPaymentMeans>` : ''}
+      </ram:SpecifiedTradeSettlementPaymentMeans>`
+          : ''
+      }
       <ram:ApplicableTradeTax>
         <ram:CalculatedAmount>${num(tva)}</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>
@@ -198,10 +199,14 @@ export function generateFacturxXml(input: GenerateFacturxXmlInput): string {
         <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>${num(input.tvaRate)}</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
-      ${dueYyyymmdd ? `<ram:SpecifiedTradePaymentTerms>
+      ${
+        dueYyyymmdd
+          ? `<ram:SpecifiedTradePaymentTerms>
         <ram:Description>Paiement à ${input.paymentTermsDays} jour${input.paymentTermsDays > 1 ? 's' : ''}</ram:Description>
         <ram:DueDateDateTime><udt:DateTimeString format="102">${dueYyyymmdd}</udt:DateTimeString></ram:DueDateDateTime>
-      </ram:SpecifiedTradePaymentTerms>` : ''}
+      </ram:SpecifiedTradePaymentTerms>`
+          : ''
+      }
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>${num(ht)}</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>${num(ht)}</ram:TaxBasisTotalAmount>

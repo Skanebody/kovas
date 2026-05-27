@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/ui/form-field'
 import { Textarea } from '@/components/ui/textarea'
+import { useRouter } from 'next/navigation'
+import { useState, useTransition } from 'react'
 import { createCreditNoteAction } from '../../actions'
 
 export interface CreditNoteFormProps {
@@ -107,7 +107,7 @@ export function CreditNoteForm({ invoiceId, amountTtc: _amountTtc }: CreditNoteF
           Annuler
         </Button>
         <Button type="submit" variant="accent" disabled={isPending}>
-          {isPending ? 'Création…' : 'Créer l\'avoir'}
+          {isPending ? 'Création…' : "Créer l'avoir"}
         </Button>
       </div>
     </form>

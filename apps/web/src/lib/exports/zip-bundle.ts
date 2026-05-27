@@ -1,3 +1,6 @@
+import { applyCsvWatermarkLine } from '@/lib/watermark'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 /**
  * Génère un ZIP universel contenant tous les formats d'export.
  * KOVAS_export_{reference}.zip
@@ -11,9 +14,6 @@
  *      └── _sans_piece/...
  */
 import JSZip from 'jszip'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import type { Database } from '@kovas/database/types'
-import { applyCsvWatermarkLine } from '@/lib/watermark'
 import { generateAidesAnnexeIfEligible } from './aides-annexe'
 import type { MissionExportData } from './build-mission-data'
 import { generateCsv } from './csv'
@@ -38,7 +38,7 @@ export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
     '  - donnees.json : structuré (import logiciel tiers)',
     '  - photos/ : photos terrain organisées par pièce',
     data.isTrial ? '' : null,
-    data.isTrial ? '⚠ Document généré pendant l\'essai gratuit KOVAS — kovas.fr' : null,
+    data.isTrial ? "⚠ Document généré pendant l'essai gratuit KOVAS — kovas.fr" : null,
   ]
     .filter(Boolean)
     .join('\n')
@@ -95,7 +95,11 @@ export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
     }
   }
 
-  return await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 6 } })
+  return await zip.generateAsync({
+    type: 'nodebuffer',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 },
+  })
 }
 
 function slugify(s: string): string {

@@ -22,8 +22,7 @@ export function Toaster() {
       closeButton
       toastOptions={{
         classNames: {
-          toast:
-            'rounded-md border border-sidebar-bg/15 bg-paper shadow-md text-ink',
+          toast: 'rounded-md border border-sidebar-bg/15 bg-paper shadow-md text-ink',
           title: 'text-sm font-semibold',
           description: 'text-xs text-ink-mute',
           actionButton:

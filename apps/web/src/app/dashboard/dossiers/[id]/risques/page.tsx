@@ -57,7 +57,9 @@ export default async function DossierRisquesPage({
 
   if (!dossier) notFound()
 
-  const propAny = (Array.isArray(dossier.properties) ? dossier.properties[0] : dossier.properties) as
+  const propAny = (
+    Array.isArray(dossier.properties) ? dossier.properties[0] : dossier.properties
+  ) as
     | {
         id: string
         address: string | null
@@ -245,9 +247,7 @@ export default async function DossierRisquesPage({
                 Cavités souterraines connues
               </h2>
               {bundle.cavites.length > 0 ? (
-                <Badge variant="yellow">
-                  {bundle.cavites.length} dans un rayon de 500&nbsp;m
-                </Badge>
+                <Badge variant="yellow">{bundle.cavites.length} dans un rayon de 500&nbsp;m</Badge>
               ) : (
                 <Badge variant="green">Aucune connue</Badge>
               )}
@@ -263,9 +263,7 @@ export default async function DossierRisquesPage({
                       {c.libelle ?? c.type ?? 'Cavité'}
                     </span>
                     {c.distanceM !== null ? (
-                      <span className="text-[#0F1419]/55">
-                        à {Math.round(c.distanceM)}&nbsp;m
-                      </span>
+                      <span className="text-[#0F1419]/55">à {Math.round(c.distanceM)}&nbsp;m</span>
                     ) : null}
                   </li>
                 ))}

@@ -89,10 +89,7 @@ export async function scrapeRss(url: string): Promise<ScrapedDocument[]> {
   while (match !== null) {
     const block = match[2] ?? ''
     const titleRaw = extractTag(block, 'title')
-    const linkRaw =
-      extractTag(block, 'link') ||
-      block.match(/<link[^>]*href="([^"]+)"/i)?.[1] ||
-      ''
+    const linkRaw = extractTag(block, 'link') || block.match(/<link[^>]*href="([^"]+)"/i)?.[1] || ''
     const desc =
       extractTag(block, 'description') ||
       extractTag(block, 'content') ||
@@ -190,7 +187,9 @@ export async function scrapeLegifranceHtml(
     if (!res.ok) throw new Error(`Legifrance ${url} HTTP ${res.status}`)
     const html = await res.text()
     const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)
-    const title = stripHtml(titleMatch?.[1] ?? 'Légifrance').trim().slice(0, 500)
+    const title = stripHtml(titleMatch?.[1] ?? 'Légifrance')
+      .trim()
+      .slice(0, 500)
     const fullText = stripHtml(html).slice(0, 50_000)
     const hash = await sha256(fullText)
     return [

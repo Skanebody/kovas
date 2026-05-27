@@ -210,10 +210,7 @@ async function processResultLine(
       patch['diagnostic_kinds'] = analysis.affected_diagnostic_types
     }
 
-    const { error } = await client
-      .from('regulatory_documents')
-      .update(patch)
-      .eq('id', documentId)
+    const { error } = await client.from('regulatory_documents').update(patch).eq('id', documentId)
     if (error) {
       console.error('[batch-results-poller] update doc failed:', documentId, error.message)
     }

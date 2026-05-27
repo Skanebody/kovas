@@ -5,9 +5,9 @@
  * Couvre les 10 règles métier (R1 à R10) une par une.
  */
 
-import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { evaluateAllRules, type BehaviorContext } from './behavioral-triggers'
+import { test } from 'node:test'
+import { type BehaviorContext, evaluateAllRules } from './behavioral-triggers'
 
 function makeCtx(overrides: Partial<BehaviorContext>): BehaviorContext {
   return {
@@ -42,7 +42,10 @@ test('R1 — >20 factures sans Factur-X → suggère facturx_ppf', () => {
     },
   })
   const out = evaluateAllRules(ctx)
-  assert.ok(out.find((s) => s.target === 'facturx_ppf'), 'Factur-X attendu')
+  assert.ok(
+    out.find((s) => s.target === 'facturx_ppf'),
+    'Factur-X attendu',
+  )
 })
 
 test('R1 — Pack Cabinet déjà actif → pas de suggestion Factur-X', () => {
@@ -60,7 +63,10 @@ test('R1 — Pack Cabinet déjà actif → pas de suggestion Factur-X', () => {
     currentAccess: { planCode: 'pro', activeAddons: [], activePacks: ['pack_cabinet'] },
   })
   const out = evaluateAllRules(ctx)
-  assert.equal(out.find((s) => s.target === 'facturx_ppf'), undefined)
+  assert.equal(
+    out.find((s) => s.target === 'facturx_ppf'),
+    undefined,
+  )
 })
 
 test('R2 — >5 leads, <30% réponse, tier Essential → upgrade Pro', () => {
@@ -177,7 +183,10 @@ test('R8 — analytics_attempted avec Pro déjà actif → pas de suggestion Pro
     events: [{ type: 'analytics_attempted', data: {}, createdAt: new Date() }],
   })
   const out = evaluateAllRules(ctx)
-  assert.equal(out.find((s) => s.target === 'pro'), undefined)
+  assert.equal(
+    out.find((s) => s.target === 'pro'),
+    undefined,
+  )
 })
 
 test('R9 — bilingual attempted sans addon → suggère pack_international', () => {

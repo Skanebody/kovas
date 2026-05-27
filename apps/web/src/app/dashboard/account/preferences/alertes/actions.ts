@@ -6,12 +6,9 @@
  * Toutes les actions sont scoped à l'organisation courante via getCurrentUser.
  */
 
-import { getCurrentUser } from '@/lib/auth/current-user'
-import {
-  getAlertPreferences,
-  updateAlertPreferences,
-} from '@/lib/alerts/user-preferences'
 import type { AlertPreferences } from '@/lib/alerts/types'
+import { getAlertPreferences, updateAlertPreferences } from '@/lib/alerts/user-preferences'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { revalidatePath } from 'next/cache'
 
 export async function loadAlertPreferencesAction(): Promise<AlertPreferences> {

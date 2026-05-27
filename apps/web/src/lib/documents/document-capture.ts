@@ -14,8 +14,8 @@
  */
 
 import { randomUUID } from 'node:crypto'
+import { StorageQuotaExceeded, assertStorageAvailable } from '@/lib/storage/quota'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { assertStorageAvailable, StorageQuotaExceeded } from '@/lib/storage/quota'
 import type { DocumentSource } from './backend-types'
 import { fileToBuffer, mimeToExt, uploadDocument } from './document-storage'
 import { checkAndDeductQuota } from './quota-enforcer'
@@ -99,7 +99,9 @@ export async function captureDocument(
   // 1bis. Quota stockage organisation — vérifie qu'on a la place pour ce fichier
   //       (raw + thumbnail, donc on compte ~2× la taille du fichier image)
   try {
-    const isImage = (input.mimeType ?? (input.file instanceof File ? input.file.type : '')).startsWith('image/')
+    const isImage = (
+      input.mimeType ?? (input.file instanceof File ? input.file.type : '')
+    ).startsWith('image/')
     const projectedSize = isImage ? fileSize * 2 : fileSize
     await assertStorageAvailable(supabase, input.organizationId, projectedSize)
   } catch (e) {

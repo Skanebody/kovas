@@ -82,10 +82,7 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: 'already_used', status: request.status }, 400)
   }
   if (new Date(request.expires_at).getTime() < Date.now()) {
-    await supabase
-      .from('client_photo_requests')
-      .update({ status: 'expired' })
-      .eq('id', request.id)
+    await supabase.from('client_photo_requests').update({ status: 'expired' }).eq('id', request.id)
     return jsonResponse({ error: 'expired' }, 400)
   }
 

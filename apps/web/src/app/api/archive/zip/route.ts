@@ -18,14 +18,14 @@
  *     ...
  */
 
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { aggregateArchiveFiles } from '@/lib/archive/aggregator'
-import {
-  type ArchiveDiagnostic,
-  type ArchiveFile,
-  type ArchiveFileKind,
-  type ArchiveQuery,
+import type {
+  ArchiveDiagnostic,
+  ArchiveFile,
+  ArchiveFileKind,
+  ArchiveQuery,
 } from '@/lib/archive/types'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import JSZip from 'jszip'
@@ -98,11 +98,7 @@ export async function GET(request: Request) {
     kind: parseEnum<ArchiveFileKind | 'all'>(params.get('type'), KIND_VALUES, 'all'),
     period: parseEnum<ArchiveQuery['period']>(params.get('period'), PERIOD_VALUES, 'all'),
     clientId: params.get('client_id'),
-    diagnostic: parseEnum<ArchiveDiagnostic | 'all'>(
-      params.get('diagnostic'),
-      DIAG_VALUES,
-      'all',
-    ),
+    diagnostic: parseEnum<ArchiveDiagnostic | 'all'>(params.get('diagnostic'), DIAG_VALUES, 'all'),
     q: params.get('q'),
     page: 1,
     limit: MAX_FILES,
@@ -116,7 +112,10 @@ export async function GET(request: Request) {
   })
 
   if (total === 0) {
-    return NextResponse.json({ error: 'Aucun fichier à exporter avec ces filtres.' }, { status: 404 })
+    return NextResponse.json(
+      { error: 'Aucun fichier à exporter avec ces filtres.' },
+      { status: 404 },
+    )
   }
 
   if (total > MAX_FILES) {

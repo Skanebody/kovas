@@ -17,12 +17,7 @@
  * `admin-docs-client.ts` afin d'éviter une route API supplémentaire.
  */
 
-export type AdminDocKind =
-  | 'order'
-  | 'visit'
-  | 'release'
-  | 'bordereau'
-  | 'summary'
+export type AdminDocKind = 'order' | 'visit' | 'release' | 'bordereau' | 'summary'
 
 export interface AdminDocMeta {
   readonly id: AdminDocKind
@@ -85,10 +80,7 @@ export interface AdminDocContext {
  * Compose un nom de fichier stable et lisible :
  *   KOVAS-{slug}-{reference}.pdf
  */
-export function buildAdminDocFileName(
-  kind: AdminDocKind,
-  reference: string,
-): string {
+export function buildAdminDocFileName(kind: AdminDocKind, reference: string): string {
   const meta = ADMIN_DOCS[kind]
   const safeRef = reference.replace(/[^A-Za-z0-9_-]/g, '_')
   return `KOVAS-${meta.slug}-${safeRef}.pdf`
@@ -99,10 +91,7 @@ export function buildAdminDocFileName(
  * structure légale minimaliste. Le contenu détaillé sera livré au
  * sprint admin-docs V1.5 (clauses spécifiques par type).
  */
-export function buildAdminDocBody(
-  kind: AdminDocKind,
-  ctx: AdminDocContext,
-): readonly string[] {
+export function buildAdminDocBody(kind: AdminDocKind, ctx: AdminDocContext): readonly string[] {
   const client = ctx.clientName ?? '—'
   const property = ctx.propertyAddress ?? '—'
   const ref = ctx.dossierReference
@@ -119,7 +108,7 @@ export function buildAdminDocBody(
         '',
         'Les prestations, montants et conditions tarifaires figurent au',
         'devis associé. La signature de ce bon vaut acceptation du devis',
-        'et autorisation d\'intervention sur le bien désigné.',
+        "et autorisation d'intervention sur le bien désigné.",
       ]
     case 'visit':
       return [
@@ -127,12 +116,12 @@ export function buildAdminDocBody(
         `Client : ${client}`,
         `Bien visité : ${property}`,
         '',
-        'Le diagnostiqueur certifié atteste s\'être présenté sur le bien',
+        "Le diagnostiqueur certifié atteste s'être présenté sur le bien",
         'désigné ci-dessus aux fins de réalisation des diagnostics',
         'immobiliers prévus à la mission.',
         '',
-        'La visite s\'est déroulée dans des conditions permettant l\'accès',
-        'à l\'ensemble des locaux et équipements nécessaires.',
+        "La visite s'est déroulée dans des conditions permettant l'accès",
+        "à l'ensemble des locaux et équipements nécessaires.",
       ]
     case 'release':
       return [
@@ -141,7 +130,7 @@ export function buildAdminDocBody(
         `Bien : ${property}`,
         '',
         'Le propriétaire désigné ci-dessus déclare avoir fourni au',
-        'diagnostiqueur l\'ensemble des éléments en sa possession',
+        "diagnostiqueur l'ensemble des éléments en sa possession",
         'concernant le bien (titre de propriété, plans, factures',
         'énergétiques, anciens diagnostics, etc.).',
         '',
@@ -155,7 +144,7 @@ export function buildAdminDocBody(
         `Bien concerné : ${property}`,
         '',
         'Le présent bordereau récapitule les diagnostics immobiliers',
-        'remis au client à l\'issue de la mission.',
+        "remis au client à l'issue de la mission.",
         '',
         'La liste exhaustive des diagnostics réalisés et la date de leur',
         'remise figurent dans le dossier KOVAS associé.',

@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import type { FAQItem } from '@/lib/guides/types'
+import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 
@@ -62,9 +62,7 @@ export function GuideFAQ({ items, className }: GuideFAQProps) {
                 isOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0',
               )}
             >
-              <p className="px-5 pb-5 text-[15px] leading-relaxed text-ink-soft">
-                {item.answer}
-              </p>
+              <p className="px-5 pb-5 text-[15px] leading-relaxed text-ink-soft">{item.answer}</p>
             </div>
           </article>
         )

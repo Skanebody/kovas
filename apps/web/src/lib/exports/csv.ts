@@ -27,7 +27,9 @@ export function generateCsv(data: MissionExportData): string {
   const lines: string[] = []
 
   if (data.isTrial) {
-    lines.push(`# Essai KOVAS — kovas.fr — Mission ${data.mission.reference} — Export ${data.exportedAt}`)
+    lines.push(
+      `# Essai KOVAS — kovas.fr — Mission ${data.mission.reference} — Export ${data.exportedAt}`,
+    )
   }
   lines.push(`# KOVAS — Export mission ${data.mission.reference}`)
   lines.push('')
@@ -35,7 +37,9 @@ export function generateCsv(data: MissionExportData): string {
   // Mission
   lines.push('Section,Champ,Valeur')
   lines.push(`Mission,Référence,${csvEscape(data.mission.reference)}`)
-  lines.push(`Mission,Type,${csvEscape(MISSION_TYPE_LABELS[data.mission.type] ?? data.mission.type)}`)
+  lines.push(
+    `Mission,Type,${csvEscape(MISSION_TYPE_LABELS[data.mission.type] ?? data.mission.type)}`,
+  )
   lines.push(`Mission,Statut,${csvEscape(data.mission.status)}`)
   lines.push(`Mission,Date prévue,${csvEscape(data.mission.scheduled_at ?? '')}`)
   lines.push(`Mission,Date début,${csvEscape(data.mission.started_at ?? '')}`)
@@ -63,13 +67,14 @@ export function generateCsv(data: MissionExportData): string {
     lines.push('')
     lines.push('Pièce,Type,Surface (m²)')
     for (const r of data.rooms) {
-      lines.push(`${csvEscape(r.name)},${csvEscape(r.room_type ?? '')},${csvEscape(r.surface_m2 ?? '')}`)
+      lines.push(
+        `${csvEscape(r.name)},${csvEscape(r.room_type ?? '')},${csvEscape(r.surface_m2 ?? '')}`,
+      )
     }
   }
 
   // Voice notes structured data
-  const allEquipment = data.voiceNotes
-    .flatMap((v) => v.transcript_structured?.equipment ?? [])
+  const allEquipment = data.voiceNotes.flatMap((v) => v.transcript_structured?.equipment ?? [])
   if (allEquipment.length > 0) {
     lines.push('')
     lines.push('Équipement,Marque,Modèle,Année,Notes')

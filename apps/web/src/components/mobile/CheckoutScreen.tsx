@@ -62,10 +62,7 @@ export function CheckoutScreen({
 
   return (
     <div
-      className={cn(
-        'fixed inset-0 z-50 bg-sage overflow-y-auto pb-32 animate-fade-in',
-        className,
-      )}
+      className={cn('fixed inset-0 z-50 bg-sage overflow-y-auto pb-32 animate-fade-in', className)}
     >
       {/* Header */}
       <div className="sticky top-0 z-10 bg-sage/95 backdrop-blur-sm border-b border-rule px-4 py-3 flex items-center gap-3">
@@ -199,13 +196,7 @@ export function CheckoutScreen({
       {/* Bottom sticky actions */}
       <div className="fixed bottom-0 inset-x-0 bg-paper border-t border-rule p-4 space-y-2 shadow-md">
         {hasCriticalGaps && (
-          <Button
-            type="button"
-            variant="accent"
-            size="lg"
-            className="w-full"
-            onClick={onComplete}
-          >
+          <Button type="button" variant="accent" size="lg" className="w-full" onClick={onComplete}>
             Compléter maintenant
           </Button>
         )}

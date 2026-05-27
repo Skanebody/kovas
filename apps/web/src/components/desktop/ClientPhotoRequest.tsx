@@ -117,7 +117,9 @@ export function ClientPhotoRequest({
                   {clientName} a reçu un lien sécurisé valable 48 h. Vous serez notifié quand la
                   photo sera reçue.
                 </p>
-                <p className="text-[11px] font-mono text-ink-mute mt-2">Référence : {resultToken.slice(0, 8)}…</p>
+                <p className="text-[11px] font-mono text-ink-mute mt-2">
+                  Référence : {resultToken.slice(0, 8)}…
+                </p>
               </div>
             </div>
             <div className="flex justify-end mt-4">
@@ -150,9 +152,7 @@ export function ClientPhotoRequest({
 
             {status === 'error' && errorMsg && (
               <div className="bg-danger/10 border border-danger/30 rounded-lg p-3 mb-4">
-                <p className="text-[12px] text-danger leading-snug">
-                  Erreur d\'envoi : {errorMsg}
-                </p>
+                <p className="text-[12px] text-danger leading-snug">Erreur d\'envoi : {errorMsg}</p>
               </div>
             )}
 

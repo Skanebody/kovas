@@ -85,12 +85,7 @@ export function DevisUrgencySection({ kind, rows }: DevisUrgencySectionProps) {
       ) : (
         <ul className="rounded-xl bg-paper border border-rule/60 overflow-hidden">
           {rows.map((row, idx) => (
-            <li
-              key={row.id}
-              className={cn(
-                idx > 0 && 'border-t border-rule/40',
-              )}
-            >
+            <li key={row.id} className={cn(idx > 0 && 'border-t border-rule/40')}>
               <DevisRow row={row} action={meta} />
             </li>
           ))}
@@ -118,9 +113,7 @@ function DevisRow({
           {row.dateShort}
         </span>
         <span className="flex flex-col min-w-0 flex-1">
-          <span className="text-[14px] font-medium text-ink truncate">
-            {row.clientName}
-          </span>
+          <span className="text-[14px] font-medium text-ink truncate">{row.clientName}</span>
           <span className="font-mono text-[11px] text-ink-faint truncate">
             {row.reference}
             {row.clientCity ? ` · ${row.clientCity}` : ''}
@@ -131,12 +124,7 @@ function DevisRow({
         </span>
       </Link>
 
-      <Button
-        asChild
-        size="sm"
-        variant={action.actionVariant}
-        className="shrink-0"
-      >
+      <Button asChild size="sm" variant={action.actionVariant} className="shrink-0">
         <Link
           href={`/dashboard/devis/${row.id}`}
           aria-label={`${action.actionLabel} le devis ${row.reference}`}

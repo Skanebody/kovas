@@ -1,13 +1,13 @@
 'use client'
 
-import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { ArrowRight, Lock, Sparkles, X } from 'lucide-react'
-import { useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import { startTrialAction } from '@/lib/upsell/actions'
 import { getUpsellEntry } from '@/lib/upsell/upsell-content'
+import { cn } from '@/lib/utils'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { ArrowRight, Lock, Sparkles, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
 
 export interface UpsellModalProps {
   target: string
@@ -112,7 +112,9 @@ export function UpsellModal({
           <ul className="space-y-2 mb-6">
             {entry.benefits.map((b) => (
               <li key={b} className="flex items-start gap-2 text-[13px] text-ink">
-                <span aria-hidden className="text-ink-mute mt-0.5">→</span>
+                <span aria-hidden className="text-ink-mute mt-0.5">
+                  →
+                </span>
                 <span>{b}</span>
               </li>
             ))}
@@ -127,12 +129,7 @@ export function UpsellModal({
             >
               Plus tard
             </Button>
-            <Button
-              variant="accent"
-              size="default"
-              onClick={handleStartTrial}
-              disabled={isPending}
-            >
+            <Button variant="accent" size="default" onClick={handleStartTrial} disabled={isPending}>
               {entry.ctaPrimary}
               <ArrowRight className="size-3.5" />
             </Button>

@@ -85,13 +85,12 @@ function FailedInvoicesTable({ rows }: { rows: StripeFailedInvoice[] }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr
-              key={r.id}
-              className="border-b border-rule/40 last:border-0 hover:bg-cream-deep/30"
-            >
+            <tr key={r.id} className="border-b border-rule/40 last:border-0 hover:bg-cream-deep/30">
               <Td>{r.customer_email ?? <span className="text-ink-faint">inconnu</span>}</Td>
               <Td>
-                <span className="font-mono text-[11px] text-ink-mute">{r.number ?? r.id.slice(0, 14)}</span>
+                <span className="font-mono text-[11px] text-ink-mute">
+                  {r.number ?? r.id.slice(0, 14)}
+                </span>
               </Td>
               <Td align="right" className="tabular-nums font-medium">
                 {formatCents(r.amount_due, r.currency)}
@@ -122,11 +121,7 @@ function FailedInvoicesTable({ rows }: { rows: StripeFailedInvoice[] }) {
 
 function DisputesTable({ rows }: { rows: StripeDispute[] }) {
   if (rows.length === 0) {
-    return (
-      <p className="text-sm text-ink-mute italic">
-        Aucune dispute en attente de réponse.
-      </p>
-    )
+    return <p className="text-sm text-ink-mute italic">Aucune dispute en attente de réponse.</p>
   }
   return (
     <div className="overflow-x-auto rounded-md border border-rule">
@@ -143,10 +138,7 @@ function DisputesTable({ rows }: { rows: StripeDispute[] }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr
-              key={r.id}
-              className="border-b border-rule/40 last:border-0 hover:bg-cream-deep/30"
-            >
+            <tr key={r.id} className="border-b border-rule/40 last:border-0 hover:bg-cream-deep/30">
               <Td>
                 <span className="font-mono text-[11px] text-ink-mute">{r.id.slice(0, 16)}…</span>
               </Td>
@@ -177,9 +169,7 @@ function DisputesTable({ rows }: { rows: StripeDispute[] }) {
 
 function PastDueSubsTable({ rows }: { rows: StripePastDueSub[] }) {
   if (rows.length === 0) {
-    return (
-      <p className="text-sm text-ink-mute italic">Aucun abonnement past_due actuellement.</p>
-    )
+    return <p className="text-sm text-ink-mute italic">Aucun abonnement past_due actuellement.</p>
   }
   return (
     <div className="overflow-x-auto rounded-md border border-rule">
@@ -195,10 +185,7 @@ function PastDueSubsTable({ rows }: { rows: StripePastDueSub[] }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr
-              key={r.id}
-              className="border-b border-rule/40 last:border-0 hover:bg-cream-deep/30"
-            >
+            <tr key={r.id} className="border-b border-rule/40 last:border-0 hover:bg-cream-deep/30">
               <Td>{r.customer_email ?? <span className="text-ink-faint">inconnu</span>}</Td>
               <Td align="right" className="tabular-nums font-medium">
                 {formatCents(r.amount_monthly, r.currency)}
@@ -252,7 +239,11 @@ function ExpiringCardsTable({ rows }: { rows: StripeExpiringCard[] }) {
                 {String(r.exp_month).padStart(2, '0')}/{String(r.exp_year).slice(-2)}
               </Td>
               <Td align="right">
-                <Badge variant={r.days_until_expiry < 0 ? 'red' : r.days_until_expiry < 14 ? 'orange' : 'yellow'}>
+                <Badge
+                  variant={
+                    r.days_until_expiry < 0 ? 'red' : r.days_until_expiry < 14 ? 'orange' : 'yellow'
+                  }
+                >
                   <span className="tabular-nums">{r.days_until_expiry} j</span>
                 </Badge>
               </Td>
@@ -310,9 +301,7 @@ export function StripeHealthDashboard({ snapshot }: Props) {
   if (!snapshot.configured) {
     return (
       <Card variant="warm" className="border-l-4 border-l-danger">
-        <h2 className="text-[16px] font-semibold text-ink mb-1">
-          Stripe non configuré
-        </h2>
+        <h2 className="text-[16px] font-semibold text-ink mb-1">Stripe non configuré</h2>
         <p className="text-sm text-ink-mute">
           La variable d&apos;environnement <code className="font-mono">STRIPE_SECRET_KEY</code>{' '}
           n&apos;est pas définie. Aucune donnée ne peut être récupérée.
@@ -419,10 +408,7 @@ export function StripeHealthDashboard({ snapshot }: Props) {
             <CreditCard className="inline size-3 mb-0.5 mr-1" aria-hidden />
             Cartes bancaires
           </p>
-          <h2
-            id="expiring-cards"
-            className="font-serif italic font-normal text-2xl text-ink mt-1"
-          >
+          <h2 id="expiring-cards" className="font-serif italic font-normal text-2xl text-ink mt-1">
             Expirations imminentes.
           </h2>
           <p className="text-sm text-ink-mute mt-1">

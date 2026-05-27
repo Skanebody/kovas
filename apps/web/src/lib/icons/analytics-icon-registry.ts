@@ -18,6 +18,7 @@ import {
   FileText,
   HeartHandshake,
   LineChart,
+  type LucideIcon,
   Percent,
   PiggyBank,
   Repeat,
@@ -28,7 +29,6 @@ import {
   TrendingDown,
   TrendingUp,
   Users,
-  type LucideIcon,
 } from 'lucide-react'
 
 /** Identifiants stables (strings sérialisables) côté serveur. */

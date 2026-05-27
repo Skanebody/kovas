@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { isStripeConfigured } from '@/lib/stripe'
 import { getInvoicesForOrganization } from '@/lib/stripe/invoices'
+import { NextResponse } from 'next/server'
 
 /**
  * GET /api/billing/invoices

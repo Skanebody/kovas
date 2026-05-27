@@ -6,9 +6,9 @@
  * KPI Instrument Serif italic + label monospace.
  */
 
-import { cn } from '@/lib/utils'
 import { INTERPRETATION_LABEL } from '@/lib/pre-export/types'
 import type { PreExportInterpretation } from '@/lib/pre-export/types'
+import { cn } from '@/lib/utils'
 
 interface ScoreHeroProps {
   score: number
@@ -36,10 +36,7 @@ export function ScoreHero({ score, interpretation, counters, className }: ScoreH
 
   return (
     <div
-      className={cn(
-        'rounded-xl bg-paper shadow-sm p-8 md:p-10',
-        className,
-      )}
+      className={cn('rounded-xl bg-paper shadow-sm p-8 md:p-10', className)}
       role="status"
       aria-live="polite"
     >
@@ -55,7 +52,10 @@ export function ScoreHero({ score, interpretation, counters, className }: ScoreH
           {/* Barre de progression sémantique */}
           <div className="relative h-2 bg-ink/5 rounded-full overflow-hidden mb-4">
             <div
-              className={cn('absolute inset-y-0 left-0 rounded-full transition-all duration-slow', color.bar)}
+              className={cn(
+                'absolute inset-y-0 left-0 rounded-full transition-all duration-slow',
+                color.bar,
+              )}
               style={{ width: `${pct}%` }}
               aria-hidden
             />

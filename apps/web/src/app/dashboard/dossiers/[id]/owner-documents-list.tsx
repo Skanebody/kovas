@@ -1,19 +1,11 @@
 'use client'
 
-import {
-  CheckCircle,
-  Circle,
-  Download,
-  FileText,
-  Loader2,
-  Sparkles,
-  Trash2,
-} from 'lucide-react'
-import { useEffect, useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { CheckCircle, Circle, Download, FileText, Loader2, Sparkles, Trash2 } from 'lucide-react'
+import { useEffect, useState, useTransition } from 'react'
 import {
   deleteOwnerDocumentAction,
   importExtractedDataAction,
@@ -73,9 +65,10 @@ export function OwnerDocumentsList({ dossierId, documents }: OwnerDocumentsListP
     async function load() {
       if (documents.length === 0) return
       const supabase = createClient()
-      const { data } = await supabase.storage
-        .from('owner-uploads')
-        .createSignedUrls(documents.map((d) => d.storage_path), 3600)
+      const { data } = await supabase.storage.from('owner-uploads').createSignedUrls(
+        documents.map((d) => d.storage_path),
+        3600,
+      )
       if (!cancelled && data) {
         const map: Record<string, string> = {}
         for (let i = 0; i < documents.length; i++) {
@@ -132,9 +125,7 @@ export function OwnerDocumentsList({ dossierId, documents }: OwnerDocumentsListP
 
   if (documents.length === 0) {
     return (
-      <p className="text-sm text-ink-mute">
-        Aucun document envoyé par le client pour le moment.
-      </p>
+      <p className="text-sm text-ink-mute">Aucun document envoyé par le client pour le moment.</p>
     )
   }
 
@@ -294,9 +285,7 @@ function ExtractedPanel({
             </Badge>
           )}
         </div>
-        {extracted.summary && (
-          <p className="text-ink-mute italic">"{extracted.summary}"</p>
-        )}
+        {extracted.summary && <p className="text-ink-mute italic">"{extracted.summary}"</p>}
       </div>
 
       {usableSuggestions.length > 0 ? (
@@ -332,11 +321,7 @@ function ExtractedPanel({
           {imported ? (
             <Badge variant="green">Données importées ✓</Badge>
           ) : (
-            <Button
-              size="sm"
-              onClick={handleImport}
-              disabled={importing || selected.size === 0}
-            >
+            <Button size="sm" onClick={handleImport} disabled={importing || selected.size === 0}>
               {importing && <Loader2 className="size-3 animate-spin" />}
               Importer {selected.size} valeur{selected.size > 1 ? 's' : ''}
             </Button>

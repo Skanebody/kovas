@@ -34,9 +34,7 @@ export function LinearProgress({
   label = 'Chargement',
 }: LinearProgressProps) {
   const isDeterminate = typeof value === 'number'
-  const clamped = isDeterminate
-    ? Math.max(0, Math.min(100, value as number))
-    : 0
+  const clamped = isDeterminate ? Math.max(0, Math.min(100, value as number)) : 0
 
   return (
     <div

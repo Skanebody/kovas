@@ -13,14 +13,14 @@
  * server component parent + actualise via PATCH au clic.
  */
 
-import { useState, useTransition } from 'react'
 import { AlertTriangle, CheckCircle2, Eye, Info } from 'lucide-react'
+import { useState, useTransition } from 'react'
 
+import type { AdemeAlertRow } from '@/app/api/ademe/alerts/route'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { toast } from '@/components/ui/toaster'
-import type { AdemeAlertRow } from '@/app/api/ademe/alerts/route'
 
 export interface AdemeAlertsListProps {
   alerts: AdemeAlertRow[]
@@ -61,12 +61,16 @@ export function AdemeAlertsList({ alerts: initialAlerts }: AdemeAlertsListProps)
       if (!res.ok) throw new Error(`${res.status}`)
       startTransition(() => {
         setAlerts((prev) =>
-          action === 'resolve' ? prev.filter((a) => a.id !== id) : prev.map((a) => (a.id === id ? { ...a, acknowledged_at: new Date().toISOString() } : a)),
+          action === 'resolve'
+            ? prev.filter((a) => a.id !== id)
+            : prev.map((a) =>
+                a.id === id ? { ...a, acknowledged_at: new Date().toISOString() } : a,
+              ),
         )
       })
       toast.success(action === 'resolve' ? 'Alerte résolue' : 'Alerte vue')
     } catch {
-      toast.error("Action impossible — réessayez")
+      toast.error('Action impossible — réessayez')
     } finally {
       setPendingId(null)
     }
@@ -85,9 +89,7 @@ export function AdemeAlertsList({ alerts: initialAlerts }: AdemeAlertsListProps)
               <div className="flex-1 min-w-0 space-y-1.5">
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge variant={meta.variant}>{meta.label}</Badge>
-                  {acknowledged ? (
-                    <Badge variant="muted">Vue</Badge>
-                  ) : null}
+                  {acknowledged ? <Badge variant="muted">Vue</Badge> : null}
                   <span className="text-[11px] font-mono text-ink-mute">
                     {formatDate(alert.triggered_at)}
                   </span>

@@ -29,11 +29,8 @@
 //   - APIFY_POLL_INTERVAL_MS (defaut 2000ms)
 // ============================================
 
-import { serve } from "https://deno.land/std@0.220.1/http/server.ts";
-import {
-  createClient,
-  type SupabaseClient,
-} from "https://esm.sh/@supabase/supabase-js@2.46.0";
+import { serve } from 'https://deno.land/std@0.220.1/http/server.ts'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
 
 // ============================================
 // Types
@@ -41,78 +38,78 @@ import {
 
 interface RequestBody {
   /** Nombre de top-keywords a traiter (defaut 10, max 50). */
-  topN?: number;
+  topN?: number
 }
 
 interface SeoKeywordRow {
-  id: string;
-  keyword_display: string;
-  score: number | null;
+  id: string
+  keyword_display: string
+  score: number | null
 }
 
 interface ApifyRunStartResponse {
   data: {
-    id: string;
-    actId: string;
-    status: string;
-    defaultDatasetId: string;
-  };
+    id: string
+    actId: string
+    status: string
+    defaultDatasetId: string
+  }
 }
 
 interface ApifyRunStatusResponse {
   data: {
-    id: string;
+    id: string
     status:
-      | "READY"
-      | "RUNNING"
-      | "SUCCEEDED"
-      | "FAILED"
-      | "ABORTING"
-      | "ABORTED"
-      | "TIMING-OUT"
-      | "TIMED-OUT";
-    defaultDatasetId: string;
-  };
+      | 'READY'
+      | 'RUNNING'
+      | 'SUCCEEDED'
+      | 'FAILED'
+      | 'ABORTING'
+      | 'ABORTED'
+      | 'TIMING-OUT'
+      | 'TIMED-OUT'
+    defaultDatasetId: string
+  }
 }
 
 interface ApifyPaaItem {
-  question: string;
-  answer?: string;
+  question: string
+  answer?: string
 }
 
 interface ApifySerpItem {
-  searchQuery?: { term?: string };
-  peopleAlsoAsk?: ApifyPaaItem[];
+  searchQuery?: { term?: string }
+  peopleAlsoAsk?: ApifyPaaItem[]
 }
 
 type KeywordCategory =
-  | "dpe"
-  | "amiante"
-  | "plomb"
-  | "gaz"
-  | "electricite"
-  | "termites"
-  | "carrez"
-  | "erp"
-  | "general";
+  | 'dpe'
+  | 'amiante'
+  | 'plomb'
+  | 'gaz'
+  | 'electricite'
+  | 'termites'
+  | 'carrez'
+  | 'erp'
+  | 'general'
 
 interface KeywordCategoryInput {
-  display: string;
-  category: KeywordCategory;
-  geo_scope?: string | null;
-  language?: string;
-  intent_type?: string | null;
+  display: string
+  category: KeywordCategory
+  geo_scope?: string | null
+  language?: string
+  intent_type?: string | null
 }
 
 interface RunSummary {
-  ok: boolean;
-  mock: boolean;
-  keywordsProcessed: number;
-  paaQuestionsFound: number;
-  signals: number;
-  durationMs: number;
-  ingestion_run_id: string;
-  error?: string;
+  ok: boolean
+  mock: boolean
+  keywordsProcessed: number
+  paaQuestionsFound: number
+  signals: number
+  durationMs: number
+  ingestion_run_id: string
+  error?: string
 }
 
 // ============================================
@@ -120,69 +117,58 @@ interface RunSummary {
 // ============================================
 
 function normalizeKeyword(raw: string): string {
-  return raw
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim()
 }
 
 function detectCategory(query: string): KeywordCategory {
-  const q = normalizeKeyword(query);
-  if (/\b(amiante)\b/.test(q)) return "amiante";
-  if (/\b(plomb|crep)\b/.test(q)) return "plomb";
-  if (/\b(termites?)\b/.test(q)) return "termites";
-  if (/\b(gaz)\b/.test(q)) return "gaz";
-  if (/\b(electric(ite|ity|ique)|electrique)\b/.test(q)) return "electricite";
-  if (/\b(carrez|boutin|surface)\b/.test(q)) return "carrez";
-  if (/\b(erp|etat des risques|georisques?)\b/.test(q)) return "erp";
+  const q = normalizeKeyword(query)
+  if (/\b(amiante)\b/.test(q)) return 'amiante'
+  if (/\b(plomb|crep)\b/.test(q)) return 'plomb'
+  if (/\b(termites?)\b/.test(q)) return 'termites'
+  if (/\b(gaz)\b/.test(q)) return 'gaz'
+  if (/\b(electric(ite|ity|ique)|electrique)\b/.test(q)) return 'electricite'
+  if (/\b(carrez|boutin|surface)\b/.test(q)) return 'carrez'
+  if (/\b(erp|etat des risques|georisques?)\b/.test(q)) return 'erp'
   if (/\b(dpe|diagnostic de performance|performance energetique)\b/.test(q)) {
-    return "dpe";
+    return 'dpe'
   }
-  return "general";
+  return 'general'
 }
 
-async function upsertKeyword(
-  supabase: SupabaseClient,
-  kw: KeywordCategoryInput,
-): Promise<string> {
-  const normalized = normalizeKeyword(kw.display);
+async function upsertKeyword(supabase: SupabaseClient, kw: KeywordCategoryInput): Promise<string> {
+  const normalized = normalizeKeyword(kw.display)
   const { data, error } = await supabase
-    .from("seo_keywords")
+    .from('seo_keywords')
     .upsert(
       {
         keyword_normalized: normalized,
         keyword_display: kw.display,
-        language: kw.language ?? "fr",
+        language: kw.language ?? 'fr',
         geo_scope: kw.geo_scope ?? null,
         category: kw.category,
         intent_type: kw.intent_type ?? null,
         last_seen_at: new Date().toISOString(),
       },
-      { onConflict: "keyword_normalized" },
+      { onConflict: 'keyword_normalized' },
     )
-    .select("id")
-    .single();
-  if (error) throw new Error(`upsertKeyword failed: ${error.message}`);
-  if (!data) throw new Error("upsertKeyword returned no row");
-  return data.id as string;
+    .select('id')
+    .single()
+  if (error) throw new Error(`upsertKeyword failed: ${error.message}`)
+  if (!data) throw new Error('upsertKeyword returned no row')
+  return data.id as string
 }
 
 interface SignalInsert {
-  keyword_id: string;
-  source_code: string;
-  signal_value: number;
-  signal_type: string;
-  metadata?: Record<string, unknown>;
-  ingestion_run_id: string;
+  keyword_id: string
+  source_code: string
+  signal_value: number
+  signal_type: string
+  metadata?: Record<string, unknown>
+  ingestion_run_id: string
 }
 
-async function insertSignal(
-  supabase: SupabaseClient,
-  params: SignalInsert,
-): Promise<void> {
-  const { error } = await supabase.from("seo_keyword_signals").insert({
+async function insertSignal(supabase: SupabaseClient, params: SignalInsert): Promise<void> {
+  const { error } = await supabase.from('seo_keyword_signals').insert({
     keyword_id: params.keyword_id,
     source_code: params.source_code,
     signal_value: params.signal_value,
@@ -190,8 +176,8 @@ async function insertSignal(
     metadata: params.metadata ?? {},
     ingestion_run_id: params.ingestion_run_id,
     captured_at: new Date().toISOString(),
-  });
-  if (error) throw new Error(`insertSignal failed: ${error.message}`);
+  })
+  if (error) throw new Error(`insertSignal failed: ${error.message}`)
 }
 
 async function bumpSourceCounter(
@@ -200,17 +186,17 @@ async function bumpSourceCounter(
   addedSignals: number,
 ): Promise<void> {
   const { data, error } = await supabase
-    .from("seo_sources")
-    .select("total_signals_count")
-    .eq("code", sourceCode)
-    .maybeSingle();
+    .from('seo_sources')
+    .select('total_signals_count')
+    .eq('code', sourceCode)
+    .maybeSingle()
   if (error) {
-    console.warn(`bumpSourceCounter read failed: ${error.message}`);
-    return;
+    console.warn(`bumpSourceCounter read failed: ${error.message}`)
+    return
   }
-  const nowIso = new Date().toISOString();
+  const nowIso = new Date().toISOString()
   if (!data) {
-    const { error: upErr } = await supabase.from("seo_sources").upsert(
+    const { error: upErr } = await supabase.from('seo_sources').upsert(
       {
         code: sourceCode,
         display_name: sourceCode,
@@ -218,24 +204,24 @@ async function bumpSourceCounter(
         last_ingested_at: nowIso,
         total_signals_count: addedSignals,
       },
-      { onConflict: "code" },
-    );
-    if (upErr) console.warn(`bumpSourceCounter insert failed: ${upErr.message}`);
-    return;
+      { onConflict: 'code' },
+    )
+    if (upErr) console.warn(`bumpSourceCounter insert failed: ${upErr.message}`)
+    return
   }
-  const current = (data.total_signals_count as number | undefined) ?? 0;
+  const current = (data.total_signals_count as number | undefined) ?? 0
   const { error: updErr } = await supabase
-    .from("seo_sources")
+    .from('seo_sources')
     .update({
       last_ingested_at: nowIso,
       total_signals_count: current + addedSignals,
     })
-    .eq("code", sourceCode);
-  if (updErr) console.warn(`bumpSourceCounter update failed: ${updErr.message}`);
+    .eq('code', sourceCode)
+  if (updErr) console.warn(`bumpSourceCounter update failed: ${updErr.message}`)
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 // ============================================
@@ -243,88 +229,83 @@ function sleep(ms: number): Promise<void> {
 // ============================================
 
 interface ApifyConfig {
-  token: string;
-  actorId: string;
-  pollIntervalMs: number;
-  timeoutMs: number;
+  token: string
+  actorId: string
+  pollIntervalMs: number
+  timeoutMs: number
 }
 
-async function runApifyPaa(
-  cfg: ApifyConfig,
-  keyword: string,
-): Promise<ApifyPaaItem[]> {
+async function runApifyPaa(cfg: ApifyConfig, keyword: string): Promise<ApifyPaaItem[]> {
   // 1. Lancement du run (synchroneous "runs" — pas runs-sync car on veut
   //    timeout cote nous + status polling explicite)
-  const startUrl = `https://api.apify.com/v2/acts/${cfg.actorId}/runs?token=${encodeURIComponent(cfg.token)}`;
+  const startUrl = `https://api.apify.com/v2/acts/${cfg.actorId}/runs?token=${encodeURIComponent(cfg.token)}`
   const startRes = await fetch(startUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       queries: keyword,
-      countryCode: "fr",
-      languageCode: "fr",
+      countryCode: 'fr',
+      languageCode: 'fr',
       maxPagesPerQuery: 1,
       mobileResults: false,
       includeUnfilteredResults: false,
       saveHtml: false,
     }),
-  });
+  })
   if (!startRes.ok) {
-    const txt = await startRes.text().catch(() => "");
-    throw new Error(`Apify start ${startRes.status}: ${txt.substring(0, 200)}`);
+    const txt = await startRes.text().catch(() => '')
+    throw new Error(`Apify start ${startRes.status}: ${txt.substring(0, 200)}`)
   }
-  const startData = (await startRes.json()) as ApifyRunStartResponse;
-  const runId = startData.data.id;
-  let datasetId = startData.data.defaultDatasetId;
+  const startData = (await startRes.json()) as ApifyRunStartResponse
+  const runId = startData.data.id
+  let datasetId = startData.data.defaultDatasetId
 
   // 2. Poll status (max timeoutMs)
-  const startedAt = Date.now();
-  let lastStatus = startData.data.status;
+  const startedAt = Date.now()
+  let lastStatus = startData.data.status
   while (Date.now() - startedAt < cfg.timeoutMs) {
     if (
-      lastStatus === "SUCCEEDED" ||
-      lastStatus === "FAILED" ||
-      lastStatus === "ABORTED" ||
-      lastStatus === "TIMED-OUT"
+      lastStatus === 'SUCCEEDED' ||
+      lastStatus === 'FAILED' ||
+      lastStatus === 'ABORTED' ||
+      lastStatus === 'TIMED-OUT'
     ) {
-      break;
+      break
     }
-    await sleep(cfg.pollIntervalMs);
+    await sleep(cfg.pollIntervalMs)
 
-    const statusUrl = `https://api.apify.com/v2/actor-runs/${runId}?token=${encodeURIComponent(cfg.token)}`;
-    const statusRes = await fetch(statusUrl);
+    const statusUrl = `https://api.apify.com/v2/actor-runs/${runId}?token=${encodeURIComponent(cfg.token)}`
+    const statusRes = await fetch(statusUrl)
     if (!statusRes.ok) {
-      throw new Error(`Apify status ${statusRes.status}`);
+      throw new Error(`Apify status ${statusRes.status}`)
     }
-    const statusData = (await statusRes.json()) as ApifyRunStatusResponse;
-    lastStatus = statusData.data.status;
-    datasetId = statusData.data.defaultDatasetId;
+    const statusData = (await statusRes.json()) as ApifyRunStatusResponse
+    lastStatus = statusData.data.status
+    datasetId = statusData.data.defaultDatasetId
   }
 
-  if (lastStatus !== "SUCCEEDED") {
-    throw new Error(
-      `Apify run not succeeded for "${keyword}" (status=${lastStatus})`,
-    );
+  if (lastStatus !== 'SUCCEEDED') {
+    throw new Error(`Apify run not succeeded for "${keyword}" (status=${lastStatus})`)
   }
 
   // 3. Recuperer dataset items
-  const itemsUrl = `https://api.apify.com/v2/datasets/${datasetId}/items?token=${encodeURIComponent(cfg.token)}&clean=true&format=json`;
-  const itemsRes = await fetch(itemsUrl);
+  const itemsUrl = `https://api.apify.com/v2/datasets/${datasetId}/items?token=${encodeURIComponent(cfg.token)}&clean=true&format=json`
+  const itemsRes = await fetch(itemsUrl)
   if (!itemsRes.ok) {
-    throw new Error(`Apify dataset items ${itemsRes.status}`);
+    throw new Error(`Apify dataset items ${itemsRes.status}`)
   }
-  const items = (await itemsRes.json()) as ApifySerpItem[];
-  const paas: ApifyPaaItem[] = [];
+  const items = (await itemsRes.json()) as ApifySerpItem[]
+  const paas: ApifyPaaItem[] = []
   for (const item of items) {
     if (Array.isArray(item.peopleAlsoAsk)) {
       for (const paa of item.peopleAlsoAsk) {
-        if (paa.question && typeof paa.question === "string") {
-          paas.push(paa);
+        if (paa.question && typeof paa.question === 'string') {
+          paas.push(paa)
         }
       }
     }
   }
-  return paas;
+  return paas
 }
 
 // ============================================
@@ -332,149 +313,139 @@ async function runApifyPaa(
 // ============================================
 
 function mockPaaForKeyword(keyword: string): ApifyPaaItem[] {
-  const lower = keyword.toLowerCase();
+  const lower = keyword.toLowerCase()
   const generic: ApifyPaaItem[] = [
     { question: `Quel est le prix d'un diagnostic ${lower} ?` },
     { question: `Quelle est la duree de validite d'un diagnostic ${lower} ?` },
     { question: `Le diagnostic ${lower} est-il obligatoire ?` },
     { question: `Qui realise le diagnostic ${lower} ?` },
     { question: `Comment se passe un diagnostic ${lower} ?` },
-  ];
-  return generic;
+  ]
+  return generic
 }
 
 // ============================================
 // Handler principal
 // ============================================
 
-function jsonResponse(
-  status: number,
-  body: Record<string, unknown>,
-): Response {
+function jsonResponse(status: number, body: Record<string, unknown>): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
-  });
+    headers: { 'Content-Type': 'application/json' },
+  })
 }
 
 serve(async (req) => {
-  const t0 = Date.now();
-  const ingestionRunId = crypto.randomUUID();
+  const t0 = Date.now()
+  const ingestionRunId = crypto.randomUUID()
 
   try {
     // --- Auth ---
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const cronSecretHeader = req.headers.get("x-cron-secret") ?? "";
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    const cronSecret = Deno.env.get("CRON_SECRET") ?? "";
+    const authHeader = req.headers.get('Authorization') ?? ''
+    const cronSecretHeader = req.headers.get('x-cron-secret') ?? ''
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
 
-    const isServiceRole = serviceKey && authHeader === `Bearer ${serviceKey}`;
-    const isCron = cronSecret && cronSecretHeader === cronSecret;
+    const isServiceRole = serviceKey && authHeader === `Bearer ${serviceKey}`
+    const isCron = cronSecret && cronSecretHeader === cronSecret
     if (!isServiceRole && !isCron) {
-      return jsonResponse(401, { ok: false, error: "unauthorized" });
+      return jsonResponse(401, { ok: false, error: 'unauthorized' })
     }
 
     // --- Body ---
-    let body: RequestBody = {};
+    let body: RequestBody = {}
     try {
-      const raw = await req.text();
-      if (raw) body = JSON.parse(raw) as RequestBody;
+      const raw = await req.text()
+      if (raw) body = JSON.parse(raw) as RequestBody
     } catch {
-      return jsonResponse(400, { ok: false, error: "invalid json body" });
+      return jsonResponse(400, { ok: false, error: 'invalid json body' })
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
     if (!supabaseUrl || !serviceKey) {
       return jsonResponse(500, {
         ok: false,
-        error: "missing supabase env (SUPABASE_URL/SERVICE_ROLE_KEY)",
-      });
+        error: 'missing supabase env (SUPABASE_URL/SERVICE_ROLE_KEY)',
+      })
     }
     const supabase = createClient(supabaseUrl, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
-    });
+    })
 
-    const topN = Math.max(1, Math.min(body.topN ?? 10, 50));
+    const topN = Math.max(1, Math.min(body.topN ?? 10, 50))
 
     // --- Selection des top-N keywords scored ---
     const { data: topKeywords, error: selErr } = await supabase
-      .from("seo_keywords")
-      .select("id, keyword_display, score")
-      .order("score", { ascending: false, nullsFirst: false })
-      .limit(topN);
+      .from('seo_keywords')
+      .select('id, keyword_display, score')
+      .order('score', { ascending: false, nullsFirst: false })
+      .limit(topN)
     if (selErr) {
       return jsonResponse(200, {
         ok: false,
         error: `select top keywords: ${selErr.message}`,
         durationMs: Date.now() - t0,
         ingestion_run_id: ingestionRunId,
-      });
+      })
     }
-    const keywords = (topKeywords ?? []) as SeoKeywordRow[];
+    const keywords = (topKeywords ?? []) as SeoKeywordRow[]
 
     // --- Mode mock si APIFY_API_TOKEN absent ---
-    const apifyToken = Deno.env.get("APIFY_API_TOKEN") ?? "";
-    const actorId =
-      Deno.env.get("APIFY_PAA_ACTOR_ID") ?? "apify~google-search-scraper";
-    const pollIntervalMs = Number.parseInt(
-      Deno.env.get("APIFY_POLL_INTERVAL_MS") ?? "2000",
-      10,
-    );
-    const timeoutMs = Number.parseInt(
-      Deno.env.get("APIFY_RUN_TIMEOUT_MS") ?? "60000",
-      10,
-    );
+    const apifyToken = Deno.env.get('APIFY_API_TOKEN') ?? ''
+    const actorId = Deno.env.get('APIFY_PAA_ACTOR_ID') ?? 'apify~google-search-scraper'
+    const pollIntervalMs = Number.parseInt(Deno.env.get('APIFY_POLL_INTERVAL_MS') ?? '2000', 10)
+    const timeoutMs = Number.parseInt(Deno.env.get('APIFY_RUN_TIMEOUT_MS') ?? '60000', 10)
 
-    const mock = !apifyToken;
+    const mock = !apifyToken
     if (mock) {
       console.warn(
-        "seo-ingest-paa : APIFY_API_TOKEN absent — bascule mode mock (5 questions hardcodees par keyword)",
-      );
+        'seo-ingest-paa : APIFY_API_TOKEN absent — bascule mode mock (5 questions hardcodees par keyword)',
+      )
     }
 
-    let paaQuestionsFound = 0;
-    let signalsInserted = 0;
-    let processed = 0;
-    const errors: string[] = [];
+    let paaQuestionsFound = 0
+    let signalsInserted = 0
+    let processed = 0
+    const errors: string[] = []
 
     const apifyCfg: ApifyConfig = {
       token: apifyToken,
       actorId,
       pollIntervalMs,
       timeoutMs,
-    };
+    }
 
     for (const kw of keywords) {
-      processed += 1;
-      let paas: ApifyPaaItem[] = [];
+      processed += 1
+      let paas: ApifyPaaItem[] = []
       try {
         if (mock) {
-          paas = mockPaaForKeyword(kw.keyword_display);
+          paas = mockPaaForKeyword(kw.keyword_display)
         } else {
-          paas = await runApifyPaa(apifyCfg, kw.keyword_display);
+          paas = await runApifyPaa(apifyCfg, kw.keyword_display)
         }
       } catch (err) {
-        errors.push(`${kw.keyword_display}: ${(err as Error).message}`);
-        continue;
+        errors.push(`${kw.keyword_display}: ${(err as Error).message}`)
+        continue
       }
 
       for (let i = 0; i < paas.length; i++) {
-        const paa = paas[i];
-        if (!paa.question || paa.question.trim().length === 0) continue;
+        const paa = paas[i]
+        if (!paa.question || paa.question.trim().length === 0) continue
 
         try {
           const paaKeywordId = await upsertKeyword(supabase, {
             display: paa.question,
             category: detectCategory(paa.question),
-            language: "fr",
-            geo_scope: "FR",
-            intent_type: "informational",
-          });
+            language: 'fr',
+            geo_scope: 'FR',
+            intent_type: 'informational',
+          })
           await insertSignal(supabase, {
             keyword_id: paaKeywordId,
-            source_code: "paa_apify",
+            source_code: 'paa_apify',
             signal_value: 1,
-            signal_type: "paa_question",
+            signal_type: 'paa_question',
             metadata: {
               parent_keyword: kw.keyword_display,
               parent_keyword_id: kw.id,
@@ -483,16 +454,16 @@ serve(async (req) => {
               ...(mock ? { mock: true } : {}),
             },
             ingestion_run_id: ingestionRunId,
-          });
-          paaQuestionsFound += 1;
-          signalsInserted += 1;
+          })
+          paaQuestionsFound += 1
+          signalsInserted += 1
         } catch (err) {
-          errors.push(`${paa.question}: ${(err as Error).message}`);
+          errors.push(`${paa.question}: ${(err as Error).message}`)
         }
       }
     }
 
-    await bumpSourceCounter(supabase, "paa_apify", signalsInserted);
+    await bumpSourceCounter(supabase, 'paa_apify', signalsInserted)
 
     const summary: RunSummary = {
       ok: true,
@@ -502,20 +473,20 @@ serve(async (req) => {
       signals: signalsInserted,
       durationMs: Date.now() - t0,
       ingestion_run_id: ingestionRunId,
-    };
-    if (errors.length > 0) {
-      summary.error = `${errors.length} erreurs partielles: ${errors.slice(0, 3).join(" | ")}`;
     }
-    return jsonResponse(200, summary as unknown as Record<string, unknown>);
+    if (errors.length > 0) {
+      summary.error = `${errors.length} erreurs partielles: ${errors.slice(0, 3).join(' | ')}`
+    }
+    return jsonResponse(200, summary as unknown as Record<string, unknown>)
   } catch (err) {
     return jsonResponse(200, {
       ok: false,
       error: (err as Error).message,
       durationMs: Date.now() - t0,
       ingestion_run_id: ingestionRunId,
-    });
+    })
   }
-});
+})
 
 // ============================================
 // Setup cron hebdomadaire (jeudi 04:00 UTC) :

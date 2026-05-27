@@ -1,12 +1,6 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { sendLevelUnlockedEmail } from '@/lib/email/send'
-import {
-  type Level,
-  type LevelId,
-  getLevelById,
-  highestLevelFor,
-  nextLevel,
-} from './levels'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { type Level, type LevelId, getLevelById, highestLevelFor, nextLevel } from './levels'
 
 const LEVEL_EMAIL_MIN_INTERVAL_DAYS = 30
 
@@ -93,25 +87,23 @@ export async function recomputeUserLevel(
   }
 
   // 5. Upsert état courant
-  await supabase
-    .from('user_progression')
-    .upsert(
-      {
-        user_id: userId,
-        current_level: targetLevel.id,
-        current_level_unlocked_at:
-          targetLevel.id > previousLevelId
-            ? nowIso
-            : ((progRow as { current_level_unlocked_at: string } | null)
-                ?.current_level_unlocked_at ?? nowIso),
-        total_missions: stats.totalMissions,
-        total_referrals_paid: stats.totalReferralsPaid,
-        subscription_age_days: stats.subscriptionDays,
-        ademe_export_score: stats.ademeExportScore,
-        last_recomputed_at: nowIso,
-      },
-      { onConflict: 'user_id' },
-    )
+  await supabase.from('user_progression').upsert(
+    {
+      user_id: userId,
+      current_level: targetLevel.id,
+      current_level_unlocked_at:
+        targetLevel.id > previousLevelId
+          ? nowIso
+          : ((progRow as { current_level_unlocked_at: string } | null)?.current_level_unlocked_at ??
+            nowIso),
+      total_missions: stats.totalMissions,
+      total_referrals_paid: stats.totalReferralsPaid,
+      subscription_age_days: stats.subscriptionDays,
+      ademe_export_score: stats.ademeExportScore,
+      last_recomputed_at: nowIso,
+    },
+    { onConflict: 'user_id' },
+  )
 
   return {
     currentLevel: targetLevel,
@@ -168,7 +160,7 @@ async function collectStats(
     .in('status', ['paid_invoice_1', 'rewarded'])
 
   // Score ADEME — best-effort (la table peut ne pas avoir cette colonne en V1)
-  let ademeExportScore: number | null = null
+  const ademeExportScore: number | null = null
   // V1 : pas de colonne ademe_score sur dossiers — on garde null.
   // V2 (post cert ADEME) : SELECT AVG(ademe_score) FROM dossiers WHERE organization_id=...
   // pour ne pas casser le typecheck en V1, on stub à null.

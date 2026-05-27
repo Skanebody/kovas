@@ -23,6 +23,8 @@
  */
 
 import { jsPDF } from 'jspdf'
+import { L441_10_FOOTNOTE } from './penalties'
+import { generateSepaQrDataUrl } from './sepa-qr'
 import {
   type InvoiceClientSnapshot,
   type InvoiceIssuerSnapshot,
@@ -30,8 +32,6 @@ import {
   PAYMENT_METHOD_LABEL,
   type PaymentMethod,
 } from './types'
-import { L441_10_FOOTNOTE } from './penalties'
-import { generateSepaQrDataUrl } from './sepa-qr'
 
 export type InvoiceDocumentKind = 'invoice' | 'credit_note'
 
@@ -157,12 +157,9 @@ export async function generateInvoicePdf(input: GenerateInvoicePdfInput): Promis
     })
   }
   if (isCreditNote && input.creditNoteForReference) {
-    doc.text(
-      `Annule la facture ${input.creditNoteForReference}`,
-      pageWidth - marginX,
-      38,
-      { align: 'right' },
-    )
+    doc.text(`Annule la facture ${input.creditNoteForReference}`, pageWidth - marginX, 38, {
+      align: 'right',
+    })
   }
   if (input.quoteReference) {
     const yQuote = isCreditNote ? 43 : input.dueDate ? 43 : 38
@@ -394,7 +391,10 @@ export async function generateInvoicePdf(input: GenerateInvoicePdfInput): Promis
     doc.setFont('helvetica', 'italic')
     doc.setFontSize(9)
     doc.setTextColor(colors.inkMute)
-    const notesLines = doc.splitTextToSize(safeText(input.notes), pageWidth - marginX * 2) as string[]
+    const notesLines = doc.splitTextToSize(
+      safeText(input.notes),
+      pageWidth - marginX * 2,
+    ) as string[]
     for (const line of notesLines) {
       doc.text(line, marginX, y)
       y += 4
@@ -421,7 +421,7 @@ export async function generateInvoicePdf(input: GenerateInvoicePdfInput): Promis
     }
   } else {
     doc.text(
-      'Avoir émis en application de l\'article 272 du Code général des impôts.',
+      "Avoir émis en application de l'article 272 du Code général des impôts.",
       marginX,
       footerY,
     )

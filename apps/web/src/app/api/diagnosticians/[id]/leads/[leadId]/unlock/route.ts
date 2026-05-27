@@ -81,8 +81,7 @@ export async function POST(_req: Request, { params }: RouteParams) {
       return NextResponse.json(
         {
           error: 'quota_exceeded',
-          message:
-            'Quota mensuel de leads atteint. Passez au tier Pro pour des unlocks illimités.',
+          message: 'Quota mensuel de leads atteint. Passez au tier Pro pour des unlocks illimités.',
           remainingUnlocks: 0,
           quotaMax: check.quotaMax,
         },

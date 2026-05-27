@@ -78,7 +78,9 @@ export function ChecklistPanel({
           <ListTodo className="size-4 text-ink-mute shrink-0" aria-hidden />
           <span className="label-mono text-[11px] truncate">
             {counts.length > 0
-              ? counts.map((c) => `${SHORT_LABEL[c.diagnostic]} ${c.covered}/${c.total}`).join(' · ')
+              ? counts
+                  .map((c) => `${SHORT_LABEL[c.diagnostic]} ${c.covered}/${c.total}`)
+                  .join(' · ')
               : 'Checklist'}
           </span>
         </span>
@@ -122,7 +124,10 @@ export function ChecklistPanel({
               <ul className="space-y-1.5">
                 {status.missing_critical.slice(0, 8).map((item) => (
                   <li key={item.id} className="flex items-start gap-2 text-[13px] text-ink-soft">
-                    <span className="size-1.5 rounded-full bg-warning mt-1.5 shrink-0" aria-hidden />
+                    <span
+                      className="size-1.5 rounded-full bg-warning mt-1.5 shrink-0"
+                      aria-hidden
+                    />
                     <span className="leading-snug">{item.description_short}</span>
                   </li>
                 ))}

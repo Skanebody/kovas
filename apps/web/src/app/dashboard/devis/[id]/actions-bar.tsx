@@ -10,9 +10,9 @@
  *   - refused / expired → (lecture seule)
  */
 
+import { CreateFollowUpDialog } from '@/components/followup/CreateFollowUpDialog'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { CreateFollowUpDialog } from '@/components/followup/CreateFollowUpDialog'
 import {
   Dialog,
   DialogContent,
@@ -21,17 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Bell,
-  Check,
-  Download,
-  FileText,
-  Loader2,
-  Pencil,
-  Send,
-  Trash2,
-  X,
-} from 'lucide-react'
+import { Bell, Check, Download, FileText, Loader2, Pencil, Send, Trash2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
@@ -126,19 +116,10 @@ export function QuoteDetailActions({
             </span>
           </Button>
           <Button variant="accent" size="sm" onClick={handleSend} disabled={pending}>
-            {pending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
+            {pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             Envoyer au client
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setDeleteOpen(true)}
-            disabled={pending}
-          >
+          <Button variant="ghost" size="sm" onClick={() => setDeleteOpen(true)} disabled={pending}>
             <Trash2 className="size-4" /> Supprimer le brouillon
           </Button>
         </div>
@@ -172,11 +153,7 @@ export function QuoteDetailActions({
         <Card variant="opaque" padding="sm">
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="accent" size="sm" onClick={handleAccept} disabled={pending}>
-              {pending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Check className="size-4" />
-              )}
+              {pending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
               Marquer accepté
             </Button>
             <Button variant="outline" size="sm" onClick={handleRefuse} disabled={pending}>

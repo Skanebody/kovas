@@ -57,7 +57,11 @@ function isFresh(fetchedAtIso: string): boolean {
  * Encode lat/lng en geohash de précision `precision`.
  * Implémentation pure-fn (BSD encoder classique), zéro dépendance.
  */
-export function encodeGeohash(lat: number, lng: number, precision = CACHE_GEOHASH_PRECISION): string {
+export function encodeGeohash(
+  lat: number,
+  lng: number,
+  precision = CACHE_GEOHASH_PRECISION,
+): string {
   const BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz'
   let latMin = -90
   let latMax = 90
@@ -266,7 +270,9 @@ export async function getExtendedRisks(
     lat !== null && lng !== null
       ? getArgilesRiskCached(lat, lng)
       : Promise.resolve(null as ArgilesRisk | null),
-    lat !== null && lng !== null ? getCavitesNearbyCached(lat, lng) : Promise.resolve([] as Cavite[]),
+    lat !== null && lng !== null
+      ? getCavitesNearbyCached(lat, lng)
+      : Promise.resolve([] as Cavite[]),
   ])
   return {
     radon,

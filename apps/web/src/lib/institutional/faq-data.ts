@@ -51,10 +51,26 @@ export const FAQ_CHIPS: FaqChip[] = [
   { id: 'termites', label: 'Termites', matchers: ['termite'] },
   { id: 'carrez', label: 'Carrez / Boutin', matchers: ['carrez', 'boutin', 'mesur'] },
   { id: 'erp', label: 'ERP', matchers: ['erp', 'risque'] },
-  { id: 'pro', label: 'Pour les diagnostiqueurs', matchers: ['kovas', 'liciel', 'saisie', 'export', 'workflow', 'mission'] },
-  { id: 'tarifs', label: 'Tarifs', matchers: ['tarif', 'prix', 'cout', 'coût', 'essai', 'forfait'] },
-  { id: 'compte', label: 'Compte', matchers: ['compte', 'connexion', 'mot-de-passe', 'inscription'] },
-  { id: 'rgpd', label: 'Conformité RGPD', matchers: ['rgpd', 'securite', 'sécurit', 'donnees', 'donné', 'hebergement'] },
+  {
+    id: 'pro',
+    label: 'Pour les diagnostiqueurs',
+    matchers: ['kovas', 'liciel', 'saisie', 'export', 'workflow', 'mission'],
+  },
+  {
+    id: 'tarifs',
+    label: 'Tarifs',
+    matchers: ['tarif', 'prix', 'cout', 'coût', 'essai', 'forfait'],
+  },
+  {
+    id: 'compte',
+    label: 'Compte',
+    matchers: ['compte', 'connexion', 'mot-de-passe', 'inscription'],
+  },
+  {
+    id: 'rgpd',
+    label: 'Conformité RGPD',
+    matchers: ['rgpd', 'securite', 'sécurit', 'donnees', 'donné', 'hebergement'],
+  },
 ] as const
 
 export interface CategorizedFaqQuestion extends FaqQuestion {
@@ -71,9 +87,7 @@ export interface CategorizedFaqQuestion extends FaqQuestion {
 export function buildCategorizedFaq(): CategorizedFaqQuestion[] {
   const allQuestions: Array<{ q: FaqQuestion; originCategoryId: string }> = [
     ...FAQ_LANDING.map((q) => ({ q, originCategoryId: 'essentiel' })),
-    ...FAQ_CATEGORIES.flatMap((cat) =>
-      cat.questions.map((q) => ({ q, originCategoryId: cat.id })),
-    ),
+    ...FAQ_CATEGORIES.flatMap((cat) => cat.questions.map((q) => ({ q, originCategoryId: cat.id }))),
   ]
 
   return allQuestions.map(({ q, originCategoryId }) => {

@@ -1,8 +1,8 @@
 import { AppPageHeader } from '@/components/app-page-header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { CreditNoteForm } from './CreditNoteForm'
 
 export const metadata: Metadata = { title: 'Créer un avoir' }
@@ -41,7 +41,11 @@ export default async function CreateCreditNotePage({ params }: PageProps) {
   if (!invoice) notFound()
 
   // Refus : ne peut pas faire un avoir sur un avoir, ni sur un draft, ni sur cancelled
-  if (invoice.credit_note_for_invoice_id || invoice.status === 'draft' || invoice.status === 'cancelled') {
+  if (
+    invoice.credit_note_for_invoice_id ||
+    invoice.status === 'draft' ||
+    invoice.status === 'cancelled'
+  ) {
     return (
       <div className="space-y-6 animate-fade-in">
         <AppPageHeader title="Avoir" accent="impossible" />

@@ -176,9 +176,7 @@ export function AutoQuoteReview({
     setPending(op)
     try {
       const url =
-        op === 'send'
-          ? `/api/auto-quotes/${autoQuoteId}/send`
-          : `/api/auto-quotes/${autoQuoteId}`
+        op === 'send' ? `/api/auto-quotes/${autoQuoteId}/send` : `/api/auto-quotes/${autoQuoteId}`
       const res = await fetch(url, {
         method: op === 'send' ? 'POST' : 'PATCH',
         headers: { 'content-type': 'application/json' },
@@ -319,9 +317,7 @@ export function AutoQuoteReview({
             <dt className="text-ink-mute text-right">TVA ({Math.round(data.vatRate * 100)}%)</dt>
             <dd className="font-mono text-ink-soft">{formatCurrency(totalTva)}</dd>
             <dt className="text-ink text-right font-semibold">Total TTC</dt>
-            <dd className="font-mono font-bold text-ink text-[15px]">
-              {formatCurrency(totalTtc)}
-            </dd>
+            <dd className="font-mono font-bold text-ink text-[15px]">{formatCurrency(totalTtc)}</dd>
           </dl>
         </section>
 

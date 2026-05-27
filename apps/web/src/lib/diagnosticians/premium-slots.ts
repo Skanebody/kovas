@@ -10,7 +10,7 @@
  * 80% des clics. Modèle 89€/mo HT par slot.
  */
 
-import { asUntyped, type SupabaseUntyped } from './supabase-untyped'
+import { type SupabaseUntyped, asUntyped } from './supabase-untyped'
 
 export interface PremiumSlot {
   id: string

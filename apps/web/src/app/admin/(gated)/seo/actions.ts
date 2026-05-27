@@ -20,10 +20,10 @@ import { verifyAdminAccess } from '@/lib/admin/admin-middleware'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import {
+  type SeoDraftStatus,
+  VALID_SEO_DRAFT_STATUSES,
   computeEeatScore as _computeEeatScore,
   computeEeatValidations as _computeEeatValidations,
-  VALID_SEO_DRAFT_STATUSES,
-  type SeoDraftStatus,
 } from './eeat'
 
 const VALID_STATUSES = VALID_SEO_DRAFT_STATUSES
@@ -145,10 +145,7 @@ export async function generateSeoDrafts(top = 5): Promise<GenerateDraftsResponse
 // updateDraftStatus
 // ============================================
 
-export async function updateDraftStatus(
-  draftId: string,
-  newStatus: SeoDraftStatus,
-): Promise<void> {
+export async function updateDraftStatus(draftId: string, newStatus: SeoDraftStatus): Promise<void> {
   await requireAdmin()
 
   if (!VALID_STATUSES.includes(newStatus)) {
@@ -159,9 +156,7 @@ export async function updateDraftStatus(
   const { error } = await (
     supabase as unknown as {
       from: (table: string) => {
-        update: (
-          values: Record<string, unknown>,
-        ) => {
+        update: (values: Record<string, unknown>) => {
           eq: (col: string, value: string) => Promise<{ error: { message: string } | null }>
         }
       }
@@ -196,7 +191,10 @@ export async function saveDraft(
     supabase as unknown as {
       from: (table: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             maybeSingle: () => Promise<{
               data: SeoDraftMinimalRow | null
               error: { message: string } | null
@@ -224,9 +222,7 @@ export async function saveDraft(
   const { error: updErr } = await (
     supabase as unknown as {
       from: (table: string) => {
-        update: (
-          values: Record<string, unknown>,
-        ) => {
+        update: (values: Record<string, unknown>) => {
           eq: (col: string, value: string) => Promise<{ error: { message: string } | null }>
         }
       }
@@ -287,7 +283,10 @@ export async function publishDraft(draftId: string): Promise<{ publishedUrl: str
     supabase as unknown as {
       from: (table: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             maybeSingle: () => Promise<{
               data:
                 | (SeoDraftMinimalRow & {
@@ -321,9 +320,7 @@ export async function publishDraft(draftId: string): Promise<{ publishedUrl: str
   const { error: updErr } = await (
     supabase as unknown as {
       from: (table: string) => {
-        update: (
-          values: Record<string, unknown>,
-        ) => {
+        update: (values: Record<string, unknown>) => {
           eq: (col: string, value: string) => Promise<{ error: { message: string } | null }>
         }
       }
@@ -381,9 +378,7 @@ export async function assignDraft(draftId: string, userId: string | null): Promi
   const { error } = await (
     supabase as unknown as {
       from: (table: string) => {
-        update: (
-          values: Record<string, unknown>,
-        ) => {
+        update: (values: Record<string, unknown>) => {
           eq: (col: string, value: string) => Promise<{ error: { message: string } | null }>
         }
       }

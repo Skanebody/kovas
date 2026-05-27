@@ -92,7 +92,8 @@ const RULES_VENTILATION: StaticRule[] = [
     match: (ctx) => typeof ctx.yearBuilt === 'number' && ctx.yearBuilt < 1969,
     value: 'naturelle',
     confidence: 0.65,
-    justification: 'Logement antérieur à 1969 : ventilation naturelle par défaut (pas d\'obligation VMC avant arrêté 1982).',
+    justification:
+      "Logement antérieur à 1969 : ventilation naturelle par défaut (pas d'obligation VMC avant arrêté 1982).",
     references: [REF_CEREMA_VENTILATION, REF_ARRETE_VENTILATION_1982],
   },
   {
@@ -100,7 +101,8 @@ const RULES_VENTILATION: StaticRule[] = [
       typeof ctx.yearBuilt === 'number' && ctx.yearBuilt >= 1969 && ctx.yearBuilt < 1982,
     value: 'vmc_simple_flux',
     confidence: 0.55,
-    justification: 'Logement 1969-1982 : transition obligation ventilation mécanique. VMC SF la plus probable.',
+    justification:
+      'Logement 1969-1982 : transition obligation ventilation mécanique. VMC SF la plus probable.',
     references: [REF_ARRETE_VENTILATION_1982, REF_CEREMA_VENTILATION],
   },
   {
@@ -116,14 +118,16 @@ const RULES_VENTILATION: StaticRule[] = [
       typeof ctx.yearBuilt === 'number' && ctx.yearBuilt >= 2000 && ctx.yearBuilt < 2012,
     value: 'vmc_hygro_a',
     confidence: 0.6,
-    justification: 'Logement 2000-2012 : montée en gamme des VMC, VMC hygro A fréquente en construction neuve.',
+    justification:
+      'Logement 2000-2012 : montée en gamme des VMC, VMC hygro A fréquente en construction neuve.',
     references: [REF_CEREMA_VENTILATION, REF_CEREMA_PERFORMANCE],
   },
   {
     match: (ctx) => typeof ctx.yearBuilt === 'number' && ctx.yearBuilt >= 2012,
     value: 'vmc_hygro_b',
     confidence: 0.7,
-    justification: 'Logement post-RT 2012 : VMC hygro B ou double-flux dominantes pour respecter le bouclage règlementaire.',
+    justification:
+      'Logement post-RT 2012 : VMC hygro B ou double-flux dominantes pour respecter le bouclage règlementaire.',
     references: [REF_ARRETE_3CL_2021, REF_CEREMA_VENTILATION],
   },
 ]
@@ -134,12 +138,11 @@ const RULES_VENTILATION: StaticRule[] = [
 const RULES_CHAUFFAGE: StaticRule[] = [
   {
     match: (ctx) =>
-      typeof ctx.yearBuilt === 'number' &&
-      ctx.yearBuilt < 1980 &&
-      ctx.buildingType === 'maison',
+      typeof ctx.yearBuilt === 'number' && ctx.yearBuilt < 1980 && ctx.buildingType === 'maison',
     value: 'fioul',
     confidence: 0.4,
-    justification: 'Maison construite avant 1980 : fioul ou chaudière gaz sont les configurations historiques majoritaires.',
+    justification:
+      'Maison construite avant 1980 : fioul ou chaudière gaz sont les configurations historiques majoritaires.',
     references: [REF_ADEME_BILAN_DPE, REF_CEREMA_PERFORMANCE],
   },
   {
@@ -150,21 +153,25 @@ const RULES_CHAUFFAGE: StaticRule[] = [
       ctx.buildingType === 'maison',
     value: 'gaz',
     confidence: 0.5,
-    justification: 'Maison 1980-2005 : chaudière gaz devient majoritaire en zone urbaine raccordée.',
+    justification:
+      'Maison 1980-2005 : chaudière gaz devient majoritaire en zone urbaine raccordée.',
     references: [REF_ADEME_BILAN_DPE],
   },
   {
     match: (ctx) => typeof ctx.yearBuilt === 'number' && ctx.yearBuilt >= 2012,
     value: 'pac',
     confidence: 0.55,
-    justification: 'Logement RT 2012+ : pompe à chaleur (PAC) air-eau ou air-air en très forte progression.',
+    justification:
+      'Logement RT 2012+ : pompe à chaleur (PAC) air-eau ou air-air en très forte progression.',
     references: [REF_ARRETE_3CL_2021, REF_ADEME_BILAN_DPE],
   },
   {
-    match: (ctx) => ctx.buildingType === 'appartement' && typeof ctx.floors === 'number' && ctx.floors > 5,
+    match: (ctx) =>
+      ctx.buildingType === 'appartement' && typeof ctx.floors === 'number' && ctx.floors > 5,
     value: 'electrique',
     confidence: 0.5,
-    justification: 'Appartement en immeuble haut : chauffage électrique individuel très courant (conventions chauffage collectif rares).',
+    justification:
+      'Appartement en immeuble haut : chauffage électrique individuel très courant (conventions chauffage collectif rares).',
     references: [REF_ADEME_BILAN_DPE],
   },
 ]
@@ -182,9 +189,7 @@ const RULES_ECS: StaticRule[] = [
   },
   {
     match: (ctx) =>
-      typeof ctx.yearBuilt === 'number' &&
-      ctx.yearBuilt >= 1990 &&
-      ctx.yearBuilt < 2012,
+      typeof ctx.yearBuilt === 'number' && ctx.yearBuilt >= 1990 && ctx.yearBuilt < 2012,
     value: 'electrique',
     confidence: 0.6,
     justification: 'Logement 1990-2012 : chauffe-eau électrique à accumulation dominant en France.',
@@ -200,7 +205,8 @@ const RULES_ISOLATION_MURS: StaticRule[] = [
     match: (ctx) => typeof ctx.yearBuilt === 'number' && ctx.yearBuilt < 1975,
     value: 'non_isole',
     confidence: 0.7,
-    justification: 'Logement antérieur à 1975 (1ère RT) : murs non isolés à l\'origine (sauf rénovation déclarée).',
+    justification:
+      "Logement antérieur à 1975 (1ère RT) : murs non isolés à l'origine (sauf rénovation déclarée).",
     references: [REF_CEREMA_PERFORMANCE, REF_ADEME_BILAN_DPE],
   },
   {
@@ -208,7 +214,8 @@ const RULES_ISOLATION_MURS: StaticRule[] = [
       typeof ctx.yearBuilt === 'number' && ctx.yearBuilt >= 1975 && ctx.yearBuilt < 2005,
     value: 'iti',
     confidence: 0.6,
-    justification: 'Logement 1975-2005 : isolation thermique par l\'intérieur (ITI) standard, R ≈ 2.5-3.5.',
+    justification:
+      "Logement 1975-2005 : isolation thermique par l'intérieur (ITI) standard, R ≈ 2.5-3.5.",
     references: [REF_CEREMA_PERFORMANCE],
   },
   {
@@ -228,7 +235,8 @@ const RULES_MENUISERIES: StaticRule[] = [
     match: (ctx) => typeof ctx.yearBuilt === 'number' && ctx.yearBuilt < 1990,
     value: 'simple_vitrage',
     confidence: 0.5,
-    justification: 'Logement antérieur 1990 : simple vitrage à l\'origine (remplacement double vitrage fréquent depuis).',
+    justification:
+      "Logement antérieur 1990 : simple vitrage à l'origine (remplacement double vitrage fréquent depuis).",
     references: [REF_CEREMA_PERFORMANCE],
   },
   {
@@ -243,7 +251,8 @@ const RULES_MENUISERIES: StaticRule[] = [
     match: (ctx) => typeof ctx.yearBuilt === 'number' && ctx.yearBuilt >= 2012,
     value: 'double_vitrage',
     confidence: 0.8,
-    justification: 'Logement post-RT 2012 : double vitrage à isolation renforcée majoritaire, triple vitrage < 5%.',
+    justification:
+      'Logement post-RT 2012 : double vitrage à isolation renforcée majoritaire, triple vitrage < 5%.',
     references: [REF_ARRETE_3CL_2021, REF_CEREMA_PERFORMANCE],
   },
 ]

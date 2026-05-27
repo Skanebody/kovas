@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import type { AutoUpdateStatus } from '@/lib/regulatory/types'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, type FormEvent } from 'react'
+import { type FormEvent, useState } from 'react'
 
 type ActionKind = 'approve' | 'reject' | 'apply' | 'rollback'
 
@@ -140,7 +140,7 @@ export function AutoUpdateActions({ id, status }: AutoUpdateActionsProps) {
                 {confirming === 'apply'
                   ? "L'action sera appliquée immédiatement et auditée."
                   : confirming === 'rollback'
-                    ? 'Restaure l\'état antérieur. Action auditée.'
+                    ? "Restaure l'état antérieur. Action auditée."
                     : 'Confirmation requise. Action auditée.'}
               </p>
             </div>

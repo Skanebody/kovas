@@ -1,8 +1,8 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 /**
  * Subscribe aux changements Realtime sur les tables liées à un dossier.
@@ -32,7 +32,12 @@ export function MissionRealtime({ missionId }: { missionId: string }) {
       .channel(`dossier-${dossierId}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'dossier_rooms', filter: `dossier_id=eq.${dossierId}` },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'dossier_rooms',
+          filter: `dossier_id=eq.${dossierId}`,
+        },
         debouncedRefresh,
       )
       .on(
@@ -42,12 +47,22 @@ export function MissionRealtime({ missionId }: { missionId: string }) {
       )
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'voice_notes', filter: `dossier_id=eq.${dossierId}` },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'voice_notes',
+          filter: `dossier_id=eq.${dossierId}`,
+        },
         debouncedRefresh,
       )
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'owner_documents', filter: `dossier_id=eq.${dossierId}` },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'owner_documents',
+          filter: `dossier_id=eq.${dossierId}`,
+        },
         debouncedRefresh,
       )
       .on(

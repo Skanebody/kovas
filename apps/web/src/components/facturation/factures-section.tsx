@@ -8,9 +8,9 @@
  */
 
 import {
+  type FactureUrgencyRow,
   FacturesPaidSummary,
   FacturesUrgencySection,
-  type FactureUrgencyRow,
 } from '@/components/factures/FacturesUrgencySection'
 import { getCurrentUser } from '@/lib/auth/current-user'
 
@@ -47,10 +47,7 @@ function toOverdueRow(inv: InvoiceDbRow): FactureUrgencyRow {
     id: inv.id,
     reference: inv.reference,
     dateShort: formatDateShort(inv.due_date ?? inv.issued_at),
-    clientName:
-      inv.clients?.display_name ??
-      inv.client_snapshot?.display_name ??
-      'Client retiré',
+    clientName: inv.clients?.display_name ?? inv.client_snapshot?.display_name ?? 'Client retiré',
     clientEmail: inv.clients?.email ?? inv.client_snapshot?.email ?? null,
     amountDueEur: due,
   }
@@ -64,10 +61,7 @@ function toUpcomingRow(inv: InvoiceDbRow): FactureUrgencyRow {
     id: inv.id,
     reference: inv.reference,
     dateShort: formatDateShort(inv.due_date),
-    clientName:
-      inv.clients?.display_name ??
-      inv.client_snapshot?.display_name ??
-      'Client retiré',
+    clientName: inv.clients?.display_name ?? inv.client_snapshot?.display_name ?? 'Client retiré',
     clientEmail: inv.clients?.email ?? inv.client_snapshot?.email ?? null,
     amountDueEur: due,
   }
@@ -78,9 +72,7 @@ export async function FacturesSectionLive() {
 
   const now = new Date()
   const today = now.toISOString().slice(0, 10)
-  const in7daysIso = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10)
+  const in7daysIso = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
   const baseSelect =
     'id, reference, amount_ttc, paid_amount, due_date, issued_at, client_id, client_snapshot, clients(display_name, email)'
 
@@ -114,17 +106,12 @@ export async function FacturesSectionLive() {
       .eq('status', 'paid'),
   ])
 
-  const overdue = ((overdueQ.data ?? []) as unknown as InvoiceDbRow[]).map(
-    toOverdueRow,
-  )
-  const upcoming = ((upcomingQ.data ?? []) as unknown as InvoiceDbRow[]).map(
-    toUpcomingRow,
-  )
+  const overdue = ((overdueQ.data ?? []) as unknown as InvoiceDbRow[]).map(toOverdueRow)
+  const upcoming = ((upcomingQ.data ?? []) as unknown as InvoiceDbRow[]).map(toUpcomingRow)
 
   const paidCount = paidStats.count ?? 0
   const totalCollectedEur = (paidSumQ.data ?? []).reduce(
-    (acc, row) =>
-      acc + Number((row as { paid_amount: number | null }).paid_amount ?? 0),
+    (acc, row) => acc + Number((row as { paid_amount: number | null }).paid_amount ?? 0),
     0,
   )
 
@@ -132,10 +119,7 @@ export async function FacturesSectionLive() {
     <div className="space-y-8">
       <FacturesUrgencySection kind="overdue" rows={overdue} />
       <FacturesUrgencySection kind="upcoming" rows={upcoming} />
-      <FacturesPaidSummary
-        paidCount={paidCount}
-        totalCollectedEur={totalCollectedEur}
-      />
+      <FacturesPaidSummary paidCount={paidCount} totalCollectedEur={totalCollectedEur} />
     </div>
   )
 }

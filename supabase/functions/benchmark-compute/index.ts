@@ -31,30 +31,109 @@
 /// <reference lib="deno.ns" />
 // deno-lint-ignore-file no-explicit-any
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
 
 // ────────────────────────────────────────────────────────────
 // Constantes / régions.
 // ────────────────────────────────────────────────────────────
 
 const DEPT_TO_REGION: Record<string, string> = {
-  '01': '84', '03': '84', '07': '84', '15': '84', '26': '84', '38': '84', '42': '84',
-  '43': '84', '63': '84', '69': '84', '73': '84', '74': '84',
-  '21': '27', '25': '27', '39': '27', '58': '27', '70': '27', '71': '27', '89': '27', '90': '27',
-  '22': '53', '29': '53', '35': '53', '56': '53',
-  '18': '24', '28': '24', '36': '24', '37': '24', '41': '24', '45': '24',
-  '2A': '94', '2B': '94',
-  '08': '44', '10': '44', '51': '44', '52': '44', '54': '44', '55': '44', '57': '44',
-  '67': '44', '68': '44', '88': '44',
-  '02': '32', '59': '32', '60': '32', '62': '32', '80': '32',
-  '75': '11', '77': '11', '78': '11', '91': '11', '92': '11', '93': '11', '94': '11', '95': '11',
-  '14': '28', '27': '28', '50': '28', '61': '28', '76': '28',
-  '16': '75', '17': '75', '19': '75', '23': '75', '24': '75', '33': '75', '40': '75',
-  '47': '75', '64': '75', '79': '75', '86': '75', '87': '75',
-  '09': '76', '11': '76', '12': '76', '30': '76', '31': '76', '32': '76', '34': '76',
-  '46': '76', '48': '76', '65': '76', '66': '76', '81': '76', '82': '76',
-  '44': '52', '49': '52', '53': '52', '72': '52', '85': '52',
-  '04': '93', '05': '93', '06': '93', '13': '93', '83': '93', '84': '93',
+  '01': '84',
+  '03': '84',
+  '07': '84',
+  '15': '84',
+  '26': '84',
+  '38': '84',
+  '42': '84',
+  '43': '84',
+  '63': '84',
+  '69': '84',
+  '73': '84',
+  '74': '84',
+  '21': '27',
+  '25': '27',
+  '39': '27',
+  '58': '27',
+  '70': '27',
+  '71': '27',
+  '89': '27',
+  '90': '27',
+  '22': '53',
+  '29': '53',
+  '35': '53',
+  '56': '53',
+  '18': '24',
+  '28': '24',
+  '36': '24',
+  '37': '24',
+  '41': '24',
+  '45': '24',
+  '2A': '94',
+  '2B': '94',
+  '08': '44',
+  '10': '44',
+  '51': '44',
+  '52': '44',
+  '54': '44',
+  '55': '44',
+  '57': '44',
+  '67': '44',
+  '68': '44',
+  '88': '44',
+  '02': '32',
+  '59': '32',
+  '60': '32',
+  '62': '32',
+  '80': '32',
+  '75': '11',
+  '77': '11',
+  '78': '11',
+  '91': '11',
+  '92': '11',
+  '93': '11',
+  '94': '11',
+  '95': '11',
+  '14': '28',
+  '27': '28',
+  '50': '28',
+  '61': '28',
+  '76': '28',
+  '16': '75',
+  '17': '75',
+  '19': '75',
+  '23': '75',
+  '24': '75',
+  '33': '75',
+  '40': '75',
+  '47': '75',
+  '64': '75',
+  '79': '75',
+  '86': '75',
+  '87': '75',
+  '09': '76',
+  '11': '76',
+  '12': '76',
+  '30': '76',
+  '31': '76',
+  '32': '76',
+  '34': '76',
+  '46': '76',
+  '48': '76',
+  '65': '76',
+  '66': '76',
+  '81': '76',
+  '82': '76',
+  '44': '52',
+  '49': '52',
+  '53': '52',
+  '72': '52',
+  '85': '52',
+  '04': '93',
+  '05': '93',
+  '06': '93',
+  '13': '93',
+  '83': '93',
+  '84': '93',
 }
 
 const MIN_CABINETS = 5
@@ -167,9 +246,7 @@ function percentileTriple(values: number[]): PercentileTriple | null {
 }
 
 function passesAntiDeduction(snaps: SnapshotForBench[]): boolean {
-  const ratios = snaps
-    .map((s) => s.top_client_share_pct)
-    .filter((v): v is number => v !== null)
+  const ratios = snaps.map((s) => s.top_client_share_pct).filter((v): v is number => v !== null)
   if (ratios.length === 0) return true
   const avg = ratios.reduce((a, b) => a + b, 0) / ratios.length
   return avg / 100 <= ANTI_DEDUCTION_THRESHOLD
@@ -179,10 +256,7 @@ function passesAntiDeduction(snaps: SnapshotForBench[]): boolean {
 // Loaders.
 // ────────────────────────────────────────────────────────────
 
-async function loadSnapshots(
-  client: SupabaseClient,
-  period: string,
-): Promise<SnapshotRow[]> {
+async function loadSnapshots(client: SupabaseClient, period: string): Promise<SnapshotRow[]> {
   const { data, error } = await (client as any)
     .from('business_analytics_snapshots')
     .select(
@@ -249,9 +323,14 @@ function buildBenchRows(
       revenue_ht_cents: s.revenue_ht_cents,
       missions_completed: s.missions_completed,
       avg_mission_value_cents: s.avg_mission_value_cents,
-      conversion_rate: typeof meta['conversion_rate'] === 'number' ? meta['conversion_rate'] as number : null,
-      repeat_client_rate: typeof meta['repeat_client_rate'] === 'number' ? meta['repeat_client_rate'] as number : null,
-      health_score: typeof meta['health_score'] === 'number' ? meta['health_score'] as number : null,
+      conversion_rate:
+        typeof meta['conversion_rate'] === 'number' ? (meta['conversion_rate'] as number) : null,
+      repeat_client_rate:
+        typeof meta['repeat_client_rate'] === 'number'
+          ? (meta['repeat_client_rate'] as number)
+          : null,
+      health_score:
+        typeof meta['health_score'] === 'number' ? (meta['health_score'] as number) : null,
       diagnostic_mix: s.diagnostic_mix ?? {},
       top_client_share_pct: s.top_client_share_pct,
     })
@@ -318,15 +397,9 @@ function computeBenchmarks(period: string, snaps: SnapshotForBench[]): Benchmark
     const missionsArr = group.map((s) => s.missions_completed)
     const revenueArr = group.map((s) => s.revenue_ht_cents)
     const valueArr = group.map((s) => s.avg_mission_value_cents)
-    const conversionArr = group
-      .map((s) => s.conversion_rate)
-      .filter((v): v is number => v !== null)
-    const repeatArr = group
-      .map((s) => s.repeat_client_rate)
-      .filter((v): v is number => v !== null)
-    const healthArr = group
-      .map((s) => s.health_score)
-      .filter((v): v is number => v !== null)
+    const conversionArr = group.map((s) => s.conversion_rate).filter((v): v is number => v !== null)
+    const repeatArr = group.map((s) => s.repeat_client_rate).filter((v): v is number => v !== null)
+    const healthArr = group.map((s) => s.health_score).filter((v): v is number => v !== null)
 
     const missionsTriple = percentileTriple(missionsArr)
     const valueTriple = percentileTriple(valueArr)
@@ -348,16 +421,32 @@ function computeBenchmarks(period: string, snaps: SnapshotForBench[]): Benchmark
       }
     }
 
-    const conversionMedian = conversionArr.length > 0
-      ? percentile([...conversionArr].sort((a, b) => a - b), 0.5)
-      : null
-    const repeatMedian = repeatArr.length > 0
-      ? percentile([...repeatArr].sort((a, b) => a - b), 0.5)
-      : null
-    const healthMedian = healthArr.length > 0
-      ? percentile([...healthArr].sort((a, b) => a - b), 0.5)
-      : null
-    const revenueMedian = percentile([...revenueArr].sort((a, b) => a - b), 0.5) ?? 0
+    const conversionMedian =
+      conversionArr.length > 0
+        ? percentile(
+            [...conversionArr].sort((a, b) => a - b),
+            0.5,
+          )
+        : null
+    const repeatMedian =
+      repeatArr.length > 0
+        ? percentile(
+            [...repeatArr].sort((a, b) => a - b),
+            0.5,
+          )
+        : null
+    const healthMedian =
+      healthArr.length > 0
+        ? percentile(
+            [...healthArr].sort((a, b) => a - b),
+            0.5,
+          )
+        : null
+    const revenueMedian =
+      percentile(
+        [...revenueArr].sort((a, b) => a - b),
+        0.5,
+      ) ?? 0
 
     rows.push({
       snapshot_period: period,
@@ -379,7 +468,8 @@ function computeBenchmarks(period: string, snaps: SnapshotForBench[]): Benchmark
       computed_by: 'edge_benchmark_compute_v1',
       metadata: {
         median_revenue_monthly_cents: Math.round(revenueMedian),
-        median_conversion_rate: conversionMedian !== null ? Number(conversionMedian.toFixed(4)) : null,
+        median_conversion_rate:
+          conversionMedian !== null ? Number(conversionMedian.toFixed(4)) : null,
         median_repeat_client_rate: repeatMedian !== null ? Number(repeatMedian.toFixed(4)) : null,
         median_health_score: healthMedian !== null ? Number(healthMedian.toFixed(2)) : null,
         anti_deduction_pass: true,
@@ -394,21 +484,15 @@ function computeBenchmarks(period: string, snaps: SnapshotForBench[]): Benchmark
 // Upsert.
 // ────────────────────────────────────────────────────────────
 
-async function upsertBenchmarks(
-  client: SupabaseClient,
-  rows: BenchmarkRow[],
-): Promise<number> {
+async function upsertBenchmarks(client: SupabaseClient, rows: BenchmarkRow[]): Promise<number> {
   if (rows.length === 0) return 0
   const CHUNK = 200
   let total = 0
   for (let i = 0; i < rows.length; i += CHUNK) {
     const slice = rows.slice(i, i + CHUNK)
-    const { error } = await (client as any)
-      .from('anonymous_benchmarks')
-      .upsert(slice, {
-        onConflict:
-          'snapshot_period,period_type,scope,scope_code,cabinet_segment,diagnostic_kind',
-      })
+    const { error } = await (client as any).from('anonymous_benchmarks').upsert(slice, {
+      onConflict: 'snapshot_period,period_type,scope,scope_code,cabinet_segment,diagnostic_kind',
+    })
     if (error) throw new Error(`upsert anonymous_benchmarks: ${error.message}`)
     total += slice.length
   }
@@ -481,7 +565,9 @@ Deno.serve(async (req: Request) => {
         benchmark_rows_computed: rows.length,
         benchmark_rows_upserted: upserted,
         groups_skipped_low_k:
-          snapshots.length > 0 && rows.length === 0 ? 'all groups under k-anonymity threshold' : null,
+          snapshots.length > 0 && rows.length === 0
+            ? 'all groups under k-anonymity threshold'
+            : null,
         elapsed_ms: Date.now() - startedAt,
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } },

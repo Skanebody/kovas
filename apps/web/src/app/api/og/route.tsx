@@ -32,11 +32,7 @@ function clamp(input: string | null, max: number, fallback: string): string {
 
 export function GET(request: NextRequest): ImageResponse {
   const url = new URL(request.url)
-  const title = clamp(
-    url.searchParams.get('title'),
-    90,
-    'KOVAS — Diagnostic immobilier IA',
-  )
+  const title = clamp(url.searchParams.get('title'), 90, 'KOVAS — Diagnostic immobilier IA')
   const subtitle = clamp(
     url.searchParams.get('subtitle'),
     120,

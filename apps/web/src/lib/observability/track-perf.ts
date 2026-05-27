@@ -46,10 +46,7 @@ async function insertPerfMetric(row: PerfMetricInsertRow): Promise<void> {
   }
 }
 
-export async function trackPerf<T>(
-  params: TrackPerfParams,
-  fn: () => Promise<T>,
-): Promise<T> {
+export async function trackPerf<T>(params: TrackPerfParams, fn: () => Promise<T>): Promise<T> {
   const start = Date.now()
   try {
     const result = await fn()
@@ -66,11 +63,7 @@ export async function trackPerf<T>(
   } catch (err) {
     const duration = Date.now() - start
     const errorCode =
-      err instanceof Error
-        ? err.name
-        : typeof err === 'string'
-          ? err.slice(0, 64)
-          : 'unknown_error'
+      err instanceof Error ? err.name : typeof err === 'string' ? err.slice(0, 64) : 'unknown_error'
     await insertPerfMetric({
       operation: params.operation,
       duration_ms: duration,

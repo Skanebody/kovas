@@ -19,7 +19,7 @@ export function BundlesGrid({ recommendedCode }: BundlesGridProps) {
           offer={offer}
           recommended={offer.code === recommendedCode}
           position="grid_bundle"
-          ctaHref="/app/account"
+          ctaHref="/dashboard/account"
           secondaryCtaLabel="Détailler ce pack"
         />
       ))}

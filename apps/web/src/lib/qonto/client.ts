@@ -153,11 +153,7 @@ export class QontoClient {
     throw new QontoApiError(0, 'unknown', 'Échec après retries Qonto.', lastError)
   }
 
-  private async fetchOnce(
-    method: string,
-    url: string,
-    jsonBody?: unknown,
-  ): Promise<RawResponse> {
+  private async fetchOnce(method: string, url: string, jsonBody?: unknown): Promise<RawResponse> {
     const ctrl = new AbortController()
     const timer = setTimeout(() => ctrl.abort(), this.timeoutMs)
 

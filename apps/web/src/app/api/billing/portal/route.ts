@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { getStripe, isStripeConfigured } from '@/lib/stripe'
+import { NextResponse } from 'next/server'
 
 /**
  * Redirige vers le Stripe Customer Portal (gestion abonnement self-service).

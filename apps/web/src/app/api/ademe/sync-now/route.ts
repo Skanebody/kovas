@@ -57,7 +57,10 @@ export async function POST() {
     return NextResponse.json({ ok: res.ok, status: res.status, result: json })
   } catch (err) {
     return NextResponse.json(
-      { error: 'Edge Function call failed', detail: err instanceof Error ? err.message : 'unknown' },
+      {
+        error: 'Edge Function call failed',
+        detail: err instanceof Error ? err.message : 'unknown',
+      },
       { status: 502 },
     )
   }

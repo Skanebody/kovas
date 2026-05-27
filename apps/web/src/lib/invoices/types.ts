@@ -4,13 +4,7 @@
  * + supabase/migrations/20260527120000_invoices_v1.sql.
  */
 
-export type InvoiceStatus =
-  | 'draft'
-  | 'issued'
-  | 'partial'
-  | 'paid'
-  | 'overdue'
-  | 'cancelled'
+export type InvoiceStatus = 'draft' | 'issued' | 'partial' | 'paid' | 'overdue' | 'cancelled'
 
 export type PaymentMethod =
   | 'virement'

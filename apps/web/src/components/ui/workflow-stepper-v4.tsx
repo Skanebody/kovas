@@ -56,7 +56,10 @@ export const DEFAULT_KOVAS_STEPS_LABELS: Record<string, string> = {
   '6': 'Validation & livraison',
 }
 
-const STATUS_STYLES: Record<StepStatus, { card: string; iconBg: string; iconColor: string; label: string }> = {
+const STATUS_STYLES: Record<
+  StepStatus,
+  { card: string; iconBg: string; iconColor: string; label: string }
+> = {
   done: {
     card: 'bg-white border-success/30 shadow-glass-sm',
     iconBg: 'bg-success/10',
@@ -129,7 +132,10 @@ export function WorkflowStepper({ steps, className }: WorkflowStepperProps) {
  * Helper : construit les 6 étapes canoniques KOVAS depuis un statut dossier.
  * À utiliser depuis page dossier-detail.
  */
-export function buildKovasSteps(currentStep: 1 | 2 | 3 | 4 | 5 | 6, atRisk: number[] = []): WorkflowStep[] {
+export function buildKovasSteps(
+  currentStep: 1 | 2 | 3 | 4 | 5 | 6,
+  atRisk: number[] = [],
+): WorkflowStep[] {
   return ([1, 2, 3, 4, 5, 6] as const).map((n) => {
     let status: StepStatus
     if (atRisk.includes(n)) status = 'at-risk'

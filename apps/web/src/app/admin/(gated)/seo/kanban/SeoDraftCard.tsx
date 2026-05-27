@@ -51,9 +51,7 @@ export function SeoDraftCard({ draft, onStatusChange, disabled }: SeoDraftCardPr
 
   return (
     <div className="rounded-md border border-rule bg-paper px-3 py-2.5 hover:border-ink/30 transition-colors">
-      <p className="text-[13px] font-semibold text-ink leading-snug">
-        {truncate(draft.title, 60)}
-      </p>
+      <p className="text-[13px] font-semibold text-ink leading-snug">{truncate(draft.title, 60)}</p>
 
       {draft.keyword ? (
         <p className="mt-1 text-[11px] text-ink-mute leading-snug">
@@ -77,9 +75,7 @@ export function SeoDraftCard({ draft, onStatusChange, disabled }: SeoDraftCardPr
           EEAT {eeat}/10
         </span>
         {draft.revisionCount > 0 ? (
-          <span className="text-[10px] text-ink-faint font-mono">
-            v{draft.revisionCount}
-          </span>
+          <span className="text-[10px] text-ink-faint font-mono">v{draft.revisionCount}</span>
         ) : null}
       </div>
 

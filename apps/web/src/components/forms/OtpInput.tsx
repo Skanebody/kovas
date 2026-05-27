@@ -17,8 +17,8 @@
  * Pas d'emoji, pas d'animation gaming — sobre professionnel.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 export interface OtpInputProps {
   /** Nombre de cellules. Default 6. */
@@ -149,7 +149,10 @@ export function OtpInput({
   }
 
   const handlePaste = (index: number) => (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length - index)
+    const pasted = e.clipboardData
+      .getData('text')
+      .replace(/\D/g, '')
+      .slice(0, length - index)
     if (pasted.length === 0) return
     e.preventDefault()
     setValues((prev) => {
@@ -212,11 +215,7 @@ export function OtpInput({
         ))}
       </div>
       {error ? (
-        <p
-          id={`${id}-error`}
-          role="alert"
-          className="text-center text-sm text-red-600"
-        >
+        <p id={`${id}-error`} role="alert" className="text-center text-sm text-red-600">
           {error}
         </p>
       ) : null}

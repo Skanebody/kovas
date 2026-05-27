@@ -20,7 +20,7 @@ export function StartTrialButton({ moduleCode }: { moduleCode: string }) {
       if (res?.error) {
         toast.error(res.error)
       } else {
-        toast.success("Essai 14j démarré. Rappels J+1 / J-5 / J-2 par email.")
+        toast.success('Essai 14j démarré. Rappels J+1 / J-5 / J-2 par email.')
       }
     })
   }

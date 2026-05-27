@@ -1,10 +1,10 @@
 import { Card } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { getStorageUsage } from '@/lib/storage/quota'
 import { parisMonthBounds } from '@/lib/paris-dates'
 import { isLegacyPlan } from '@/lib/pricing-plans'
+import { getStorageUsage } from '@/lib/storage/quota'
 import { cn } from '@/lib/utils'
-import { Activity, HardDrive, MessageCircle, ArrowRight } from 'lucide-react'
+import { Activity, ArrowRight, HardDrive, MessageCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 
@@ -67,8 +67,14 @@ export async function UsageQuotasWidget() {
       supabase as unknown as {
         from: (t: string) => {
           select: (cols: string) => {
-            eq: (col: string, val: string) => {
-              eq: (col2: string, val2: string) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => {
+              eq: (
+                col2: string,
+                val2: string,
+              ) => {
                 maybeSingle: () => Promise<{ data: QuotaRow | null }>
               }
             }
@@ -77,9 +83,7 @@ export async function UsageQuotasWidget() {
       }
     )
       .from('user_usage_quotas')
-      .select(
-        'missions_used, missions_quota, chatbot_messages_used, chatbot_messages_quota',
-      )
+      .select('missions_used, missions_quota, chatbot_messages_used, chatbot_messages_quota')
       .eq('organization_id', orgId)
       .eq('period_month', periodMonth)
       .maybeSingle(),
@@ -88,7 +92,10 @@ export async function UsageQuotasWidget() {
       supabase as unknown as {
         from: (t: string) => {
           select: (cols: string) => {
-            eq: (col: string, val: string) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => {
               maybeSingle: () => Promise<{ data: SubscriptionRow | null }>
             }
           }
@@ -127,8 +134,7 @@ export async function UsageQuotasWidget() {
         icon: MessageCircle,
         label: 'Chatbot IA',
         used: quota.chatbot_messages_used,
-        quota:
-          quota.chatbot_messages_quota === -1 ? null : quota.chatbot_messages_quota,
+        quota: quota.chatbot_messages_quota === -1 ? null : quota.chatbot_messages_quota,
         unit: 'messages',
       })
     } else {

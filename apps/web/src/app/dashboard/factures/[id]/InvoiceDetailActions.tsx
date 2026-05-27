@@ -1,23 +1,14 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import {
-  Bell,
-  CreditCard,
-  Download,
-  FileText,
-  Mail,
-  RefreshCw,
-  Send,
-  Trash2,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { CreateFollowUpDialog } from '@/components/followup/CreateFollowUpDialog'
 import { InvoicePaymentSheet } from '@/components/invoices/InvoicePaymentSheet'
-import type { InvoiceStatus, PaymentMethod } from '@/lib/invoices/types'
+import { Button } from '@/components/ui/button'
 import { UpsellModal } from '@/components/upsell/UpsellModal'
+import type { InvoiceStatus, PaymentMethod } from '@/lib/invoices/types'
+import { Bell, CreditCard, Download, FileText, Mail, RefreshCw, Send, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState, useTransition } from 'react'
 import {
   cancelInvoiceDraftAction,
   getPdfDownloadUrlAction,
@@ -145,7 +136,10 @@ export function InvoiceDetailActions({
         showFeedback('error', result.error)
         return
       }
-      showFeedback('success', clientEmail ? `Relance envoyée à ${clientEmail}.` : 'Relance envoyée.')
+      showFeedback(
+        'success',
+        clientEmail ? `Relance envoyée à ${clientEmail}.` : 'Relance envoyée.',
+      )
       router.refresh()
     })
   }
@@ -214,11 +208,7 @@ export function InvoiceDetailActions({
               </Link>
             </Button>
           ) : (
-            <Button
-              onClick={() => setFollowUpOpen(true)}
-              disabled={isPending}
-              variant="outline"
-            >
+            <Button onClick={() => setFollowUpOpen(true)} disabled={isPending} variant="outline">
               <Bell className="size-4" />
               Créer séquence relance
             </Button>
@@ -237,7 +227,11 @@ export function InvoiceDetailActions({
           </Button>
         ) : null}
         {/* L1 — Bouton Pennylane toujours visible. Si addon inactif → modal upsell au clic */}
-        {!isCreditNote && (status === 'issued' || status === 'partial' || status === 'paid' || status === 'overdue') ? (
+        {!isCreditNote &&
+        (status === 'issued' ||
+          status === 'partial' ||
+          status === 'paid' ||
+          status === 'overdue') ? (
           <Button onClick={handlePennylaneClick} disabled={isPending} variant="outline">
             <RefreshCw className="size-4" />
             Synchroniser Pennylane

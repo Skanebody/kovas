@@ -9,12 +9,12 @@
  * (templates HTML dans /src/emails/) là où l'Edge Function n'a pas cet accès.
  */
 
-import { NextResponse } from 'next/server'
 import {
   sendPreNotificationEmail1,
   sendPreNotificationEmail2,
   sendPreNotificationEmail3,
 } from '@/lib/emails/diagnostician-rgpd-sender'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

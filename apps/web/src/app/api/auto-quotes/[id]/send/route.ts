@@ -8,8 +8,8 @@
  * 3. Renvoie la row complète à jour
  */
 
-import { getCurrentUser } from '@/lib/auth/current-user'
 import type { AutoQuoteData, QuoteLine } from '@/components/quotes/AutoQuoteReview'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
@@ -104,16 +104,14 @@ export async function POST(
     .eq('organization_id', orgId)
     .maybeSingle()
 
-  const row = data as unknown as
-    | {
-        id: string
-        status: AutoQuoteData['status']
-        extraction: AutoQuoteData['extraction'] | null
-        lines: QuoteLine[] | null
-        vat_rate: number | null
-        notes: string | null
-      }
-    | null
+  const row = data as unknown as {
+    id: string
+    status: AutoQuoteData['status']
+    extraction: AutoQuoteData['extraction'] | null
+    lines: QuoteLine[] | null
+    vat_rate: number | null
+    notes: string | null
+  } | null
   if (!row) return NextResponse.json({ error: 'not_found' }, { status: 404 })
 
   const out: AutoQuoteData = {

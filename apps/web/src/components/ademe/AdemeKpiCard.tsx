@@ -88,7 +88,9 @@ export function AdemeKpiCard({
 function KpiProgressBar({ progress }: { progress: NonNullable<AdemeKpiCardProps['progress']> }) {
   const pct = Math.min(100, Math.round((progress.current / progress.max) * 100))
   const warningPct = progress.warning ? Math.round((progress.warning / progress.max) * 100) : null
-  const criticalPct = progress.critical ? Math.round((progress.critical / progress.max) * 100) : null
+  const criticalPct = progress.critical
+    ? Math.round((progress.critical / progress.max) * 100)
+    : null
 
   // Couleur de la barre selon seuil franchi
   let barClass = 'bg-chartreuse'
@@ -131,7 +133,9 @@ function KpiDelta({ delta }: { delta: NonNullable<AdemeKpiCardProps['delta']> })
   const positive = delta.value >= 0
   const positiveIsGood = delta.positive_is_good ?? true
   const isGood = positive === positiveIsGood
-  const className = isGood ? 'bg-accent-green/15 text-accent-green' : 'bg-accent-red/15 text-accent-red'
+  const className = isGood
+    ? 'bg-accent-green/15 text-accent-green'
+    : 'bg-accent-red/15 text-accent-red'
 
   const formatted =
     delta.format === 'pp'
@@ -141,7 +145,12 @@ function KpiDelta({ delta }: { delta: NonNullable<AdemeKpiCardProps['delta']> })
         : `${positive ? '+' : ''}${delta.value}`
 
   return (
-    <span className={cn('inline-flex items-center rounded-pill px-2.5 py-1 text-[11px] font-medium', className)}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-pill px-2.5 py-1 text-[11px] font-medium',
+        className,
+      )}
+    >
       {formatted} vs référence
     </span>
   )

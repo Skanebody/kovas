@@ -34,9 +34,7 @@ export async function GET(): Promise<Response> {
     const rows = data as PublicationRow[]
     for (const row of rows) {
       if (typeof row.published_url !== 'string' || row.published_url.length === 0) continue
-      const path = row.published_url.startsWith('/')
-        ? row.published_url
-        : `/${row.published_url}`
+      const path = row.published_url.startsWith('/') ? row.published_url : `/${row.published_url}`
       const lastmod = row.last_gsc_sync_at ?? row.published_at ?? new Date().toISOString()
       dbUrls.push(
         [

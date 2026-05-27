@@ -1,30 +1,27 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { generateInvoicePdf } from '@/lib/invoices/generate-pdf'
-import { generateFacturxXml } from '@/lib/invoices/generate-facturx-xml'
-import {
-  getInvoicePdfSignedUrl,
-  uploadInvoicePdf,
-} from '@/lib/invoices/storage'
-import { createInvoicePaymentLink } from '@/lib/invoices/stripe-payment-link'
 import {
   sendInvoiceIssuedEmail,
   sendReminderJ7Email,
   sendReminderJ15Email,
   sendReminderJ30Email,
 } from '@/lib/invoices/emails'
+import { generateFacturxXml } from '@/lib/invoices/generate-facturx-xml'
+import { generateInvoicePdf } from '@/lib/invoices/generate-pdf'
+import { getInvoicePdfSignedUrl, uploadInvoicePdf } from '@/lib/invoices/storage'
+import { createInvoicePaymentLink } from '@/lib/invoices/stripe-payment-link'
 import {
-  computeInvoiceTotals,
   type InvoiceClientSnapshot,
   type InvoiceIssuerSnapshot,
   type InvoiceLineItem,
-  parseLineItems,
   type PaymentMethod,
+  computeInvoiceTotals,
+  parseLineItems,
 } from '@/lib/invoices/types'
 import type { Json } from '@kovas/database/types'
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 // ──────────────────────────────────────────────────────────────────────
 // Validation utilitaires
@@ -56,9 +53,7 @@ function toStr(value: FormDataEntryValue | null): string | null {
 // 1. createInvoiceDraftAction — INSERT draft
 // ──────────────────────────────────────────────────────────────────────
 
-export type InvoiceFormState =
-  | { error?: string; fieldErrors?: Record<string, string> }
-  | undefined
+export type InvoiceFormState = { error?: string; fieldErrors?: Record<string, string> } | undefined
 
 export async function createInvoiceDraftAction(
   _prev: InvoiceFormState,
@@ -234,7 +229,9 @@ export async function issueInvoiceAction(invoiceId: string): Promise<{
   // Charge client
   const { data: client } = await supabase
     .from('clients')
-    .select('display_name, email, phone, address, city, postal_code, country, siret, type, first_name')
+    .select(
+      'display_name, email, phone, address, city, postal_code, country, siret, type, first_name',
+    )
     .eq('id', invoice.client_id)
     .maybeSingle()
   if (!client) return { error: 'Client introuvable' }
@@ -242,9 +239,7 @@ export async function issueInvoiceAction(invoiceId: string): Promise<{
   // Charge organisation (snapshot émetteur)
   const { data: org } = await supabase
     .from('organizations')
-    .select(
-      'name, siret, vat_number, address, city, postal_code, country, iban, bic, bank_name',
-    )
+    .select('name, siret, vat_number, address, city, postal_code, country, iban, bic, bank_name')
     .eq('id', orgId)
     .maybeSingle()
   if (!org) return { error: 'Organisation introuvable' }
@@ -429,7 +424,8 @@ export async function markInvoicePaidAction(input: {
 
   const ttc = Number(invoice.amount_ttc)
   const previousPaid = Number(invoice.paid_amount ?? 0)
-  const incomingPaid = input.paidAmount !== undefined ? Number(input.paidAmount) : ttc - previousPaid
+  const incomingPaid =
+    input.paidAmount !== undefined ? Number(input.paidAmount) : ttc - previousPaid
 
   if (incomingPaid <= 0) return { error: 'Le montant doit être supérieur à 0.' }
   if (incomingPaid > ttc - previousPaid + 0.01)
@@ -580,15 +576,14 @@ export async function createCreditNoteAction(input: {
     .eq('id', input.invoiceId)
     .eq('organization_id', orgId)
     .maybeSingle()
-  if (loadErr || !original) return { error: 'Facture d\'origine introuvable' }
+  if (loadErr || !original) return { error: "Facture d'origine introuvable" }
   if (original.status === 'cancelled' || original.status === 'draft') {
     return { error: 'Avoir impossible sur une facture annulée ou en brouillon.' }
   }
 
-  const { data: refData, error: refErr } = await supabase.rpc(
-    'generate_credit_note_reference',
-    { p_org_id: orgId },
-  )
+  const { data: refData, error: refErr } = await supabase.rpc('generate_credit_note_reference', {
+    p_org_id: orgId,
+  })
   if (refErr) return { error: `Erreur référence : ${refErr.message}` }
   const reference = String(refData)
 

@@ -1,10 +1,16 @@
 'use client'
 
-import { cn } from '@/lib/utils'
-import { pendingCount, listPending, retry, discard, unresolvedConflictsCount } from '@/lib/sync/queue'
-import type { MutationRow } from '@/lib/sync/db'
-import { setupAutoSync } from '@/lib/sync/sync'
 import { toast } from '@/components/ui/toaster'
+import type { MutationRow } from '@/lib/sync/db'
+import {
+  discard,
+  listPending,
+  pendingCount,
+  retry,
+  unresolvedConflictsCount,
+} from '@/lib/sync/queue'
+import { setupAutoSync } from '@/lib/sync/sync'
+import { cn } from '@/lib/utils'
 import { CheckCircle2, CloudOff, RefreshCw, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -118,11 +124,12 @@ function SyncPanel({
   async function handleRetry(id: number) {
     await retry(id)
     await onRefresh()
-    toast.info('Mutation remise en file d\'attente')
+    toast.info("Mutation remise en file d'attente")
   }
 
   async function handleDiscard(id: number) {
-    if (!confirm('Abandonner définitivement cette modification ? Cette action est irréversible.')) return
+    if (!confirm('Abandonner définitivement cette modification ? Cette action est irréversible.'))
+      return
     await discard(id)
     await onRefresh()
     toast.success('Mutation supprimée')
@@ -176,9 +183,7 @@ function SyncPanel({
                     )}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink">
-                      {labelForKind(mut.kind)}
-                    </p>
+                    <p className="text-sm font-medium text-ink">{labelForKind(mut.kind)}</p>
                     <p className="text-[11px] font-mono text-ink-mute mt-0.5">
                       {new Date(mut.createdAt).toLocaleString('fr-FR')}
                       {mut.attempts > 0 && ` · ${mut.attempts} essai${mut.attempts > 1 ? 's' : ''}`}

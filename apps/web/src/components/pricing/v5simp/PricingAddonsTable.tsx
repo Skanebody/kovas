@@ -4,8 +4,8 @@
  * Pas de bordures épaisses, alignement texte / prix simple. 4 modules.
  */
 
-import { ADDON_MODULES } from '@/lib/pricing-plans'
 import { formatPriceEurCompact } from '@/lib/format/price'
+import { ADDON_MODULES } from '@/lib/pricing-plans'
 
 export function PricingAddonsTable() {
   return (
@@ -23,17 +23,10 @@ export function PricingAddonsTable() {
         </thead>
         <tbody>
           {ADDON_MODULES.map((addon) => (
-            <tr
-              key={addon.code}
-              className="border-b border-[#0B1D33]/[0.04] last:border-b-0"
-            >
+            <tr key={addon.code} className="border-b border-[#0B1D33]/[0.04] last:border-b-0">
               <td className="px-5 sm:px-6 py-4">
-                <p className="text-[14px] text-[#0B1D33] font-medium">
-                  {addon.name}
-                </p>
-                <p className="text-[12px] text-[#0B1D33]/55 mt-0.5">
-                  {addon.description}
-                </p>
+                <p className="text-[14px] text-[#0B1D33] font-medium">{addon.name}</p>
+                <p className="text-[12px] text-[#0B1D33]/55 mt-0.5">{addon.description}</p>
               </td>
               <td className="px-5 sm:px-6 py-4 text-right font-mono text-[14px] text-[#0B1D33] tabular-nums whitespace-nowrap">
                 {formatPriceEurCompact(addon.monthlyPrice)}

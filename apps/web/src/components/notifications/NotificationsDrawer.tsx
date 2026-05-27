@@ -336,7 +336,11 @@ function formatRelative(iso: string): string {
   if (diffD === 1) return 'Hier'
   if (diffD < 7) return `Il y a ${diffD}j`
 
-  return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', timeZone: 'Europe/Paris' })
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    timeZone: 'Europe/Paris',
+  })
 }
 
 /* ----------------------------------------------------------------------- */

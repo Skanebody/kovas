@@ -36,12 +36,7 @@ const calculatorAnswersSchema = z.object({
     'autre',
   ]),
   isolation: z.enum(['tres_bonne', 'bonne', 'moyenne', 'mauvaise', 'inconnue']),
-  occupation: z.enum([
-    'residence_principale',
-    'residence_secondaire',
-    'vacant',
-    'locatif',
-  ]),
+  occupation: z.enum(['residence_principale', 'residence_secondaire', 'vacant', 'locatif']),
   context: z.array(z.enum(['vente', 'location', 'renovation', 'curiosite'])).min(1),
 })
 

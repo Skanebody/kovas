@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import { AppListTableCell, AppListTableRow } from '@/components/ui/app-list-table'
-import { InvoiceStatusPill } from './InvoiceStatusPill'
 import type { InvoiceStatus } from '@/lib/invoices/types'
+import Link from 'next/link'
+import { InvoiceStatusPill } from './InvoiceStatusPill'
 
 export interface InvoiceListRowData {
   id: string
@@ -58,9 +58,7 @@ export function InvoiceListRow({ invoice }: InvoiceListRowProps) {
           </span>
         ) : null}
       </AppListTableCell>
-      <AppListTableCell className="text-ink">
-        {invoice.client_display_name}
-      </AppListTableCell>
+      <AppListTableCell className="text-ink">{invoice.client_display_name}</AppListTableCell>
       <AppListTableCell className="hidden md:table-cell text-ink-mute whitespace-nowrap">
         {formatDateShort(invoice.issued_at)}
       </AppListTableCell>

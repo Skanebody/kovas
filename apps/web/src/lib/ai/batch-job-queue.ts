@@ -141,7 +141,9 @@ export async function submitBatch(params: {
     throw new Error('submitBatch: requests cannot be empty')
   }
   if (params.requests.length > MAX_BATCH_REQUESTS) {
-    throw new Error(`submitBatch: too many requests (${params.requests.length} > ${MAX_BATCH_REQUESTS})`)
+    throw new Error(
+      `submitBatch: too many requests (${params.requests.length} > ${MAX_BATCH_REQUESTS})`,
+    )
   }
   const res = await fetch('https://api.anthropic.com/v1/messages/batches', {
     method: 'POST',

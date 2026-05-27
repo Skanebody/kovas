@@ -107,7 +107,9 @@ export function FollowUpSequencesManager({
     setSequences(null)
     setError(null)
     try {
-      const url = queryKind ? `/api/followup-sequences?kind=${queryKind}` : `/api/followup-sequences`
+      const url = queryKind
+        ? `/api/followup-sequences?kind=${queryKind}`
+        : `/api/followup-sequences`
       const seqRes = await fetch(url)
       if (!seqRes.ok) throw new Error(`HTTP ${seqRes.status}`)
       const seqData = (await seqRes.json()) as { sequences: FollowUpSequence[] }
@@ -132,8 +134,7 @@ export function FollowUpSequencesManager({
             s.id === id
               ? {
                   ...s,
-                  status:
-                    op === 'pause' ? 'paused' : op === 'resume' ? 'active' : 'cancelled',
+                  status: op === 'pause' ? 'paused' : op === 'resume' ? 'active' : 'cancelled',
                 }
               : s,
           )
@@ -177,9 +178,7 @@ export function FollowUpSequencesManager({
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
                   'px-3.5 py-1.5 rounded-pill text-[12px] font-medium transition-colors',
-                  active
-                    ? 'bg-navy text-paper'
-                    : 'text-ink-mute hover:bg-ink/5 hover:text-ink',
+                  active ? 'bg-navy text-paper' : 'text-ink-mute hover:bg-ink/5 hover:text-ink',
                 )}
               >
                 {tab.label}
@@ -280,9 +279,7 @@ function buildTargetHref(seq: FollowUpSequence): string | null {
   }
 }
 
-function statusBadgeVariant(
-  status: FollowUpStatus,
-): 'green' | 'amber' | 'muted' | 'red' | 'blue' {
+function statusBadgeVariant(status: FollowUpStatus): 'green' | 'amber' | 'muted' | 'red' | 'blue' {
   switch (status) {
     case 'active':
       return 'green'
@@ -369,8 +366,7 @@ function SequenceRow({
                 key={i}
                 className={cn(
                   'inline-flex items-center gap-1 px-2 py-0.5 rounded-pill border',
-                  state === 'done' &&
-                    'border-transparent bg-lime-mist text-[#2D4015]',
+                  state === 'done' && 'border-transparent bg-lime-mist text-[#2D4015]',
                   state === 'current' &&
                     'border-transparent bg-blue-mist text-[#1E3A8A] animate-pulse-soft',
                   state === 'pending' && 'border-rule/60 text-ink-mute',
@@ -404,7 +400,11 @@ function SequenceRow({
               aria-label="Mettre en pause"
               title="Mettre en pause"
             >
-              {pending ? <Loader2 className="size-3.5 animate-spin" /> : <Pause className="size-3.5" />}
+              {pending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Pause className="size-3.5" />
+              )}
             </Button>
           ) : seq.status === 'paused' ? (
             <Button
@@ -415,7 +415,11 @@ function SequenceRow({
               aria-label="Reprendre"
               title="Reprendre"
             >
-              {pending ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
+              {pending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Play className="size-3.5" />
+              )}
             </Button>
           ) : null}
           {(seq.status === 'active' || seq.status === 'paused') && (

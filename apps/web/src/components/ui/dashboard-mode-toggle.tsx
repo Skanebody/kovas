@@ -34,7 +34,8 @@ export function useDashboardMode(): {
   }
 
   function cycle() {
-    const next: DashboardMode = mode === 'auto' ? 'morning' : mode === 'morning' ? 'evening' : 'auto'
+    const next: DashboardMode =
+      mode === 'auto' ? 'morning' : mode === 'morning' ? 'evening' : 'auto'
     setMode(next)
   }
 

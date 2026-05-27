@@ -70,10 +70,7 @@ function renderInline(text: string): ReactNode[] {
     const codeMatch = remaining.match(/^`([^`]+)`/)
     if (codeMatch) {
       parts.push(
-        <code
-          key={key++}
-          className="font-mono text-[0.85em] px-1.5 py-0.5 bg-cream-deep rounded"
-        >
+        <code key={key++} className="font-mono text-[0.85em] px-1.5 py-0.5 bg-cream-deep rounded">
           {codeMatch[1]}
         </code>,
       )
@@ -101,16 +98,7 @@ function renderInline(text: string): ReactNode[] {
 }
 
 interface Block {
-  type:
-    | 'h1'
-    | 'h2'
-    | 'h3'
-    | 'p'
-    | 'ul'
-    | 'ol'
-    | 'blockquote'
-    | 'hr'
-    | 'code'
+  type: 'h1' | 'h2' | 'h3' | 'p' | 'ul' | 'ol' | 'blockquote' | 'hr' | 'code'
   content: string
   items?: string[]
 }
@@ -288,10 +276,7 @@ export function ArticleMarkdown({ markdown }: ArticleMarkdownProps) {
             )
           case 'h3':
             return (
-              <h3
-                key={key}
-                className="font-sans font-semibold text-lg text-ink mt-6 mb-3"
-              >
+              <h3 key={key} className="font-sans font-semibold text-lg text-ink mt-6 mb-3">
                 {renderInline(block.content)}
               </h3>
             )

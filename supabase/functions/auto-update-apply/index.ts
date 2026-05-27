@@ -40,13 +40,7 @@ interface RequestBody {
 interface AutoUpdateRow {
   id: string
   change_type: 'config' | 'seed_data' | 'code_patch' | 'content_update' | 'manual_task'
-  status:
-    | 'pending_review'
-    | 'approved'
-    | 'rejected'
-    | 'applied'
-    | 'rolled_back'
-    | 'failed'
+  status: 'pending_review' | 'approved' | 'rejected' | 'applied' | 'rolled_back' | 'failed'
   title: string
   proposed_payload: Record<string, unknown>
   rollback_payload: Record<string, unknown> | null
@@ -74,10 +68,7 @@ function readString(payload: Record<string, unknown>, key: string): string | nul
   return typeof v === 'string' && v.length > 0 ? v : null
 }
 
-function readObject(
-  payload: Record<string, unknown>,
-  key: string,
-): Record<string, unknown> | null {
+function readObject(payload: Record<string, unknown>, key: string): Record<string, unknown> | null {
   const v = payload[key]
   return v !== null && typeof v === 'object' && !Array.isArray(v)
     ? (v as Record<string, unknown>)
@@ -97,9 +88,7 @@ async function applyCoherenceRuleAdded(
   const description = readString(payload, 'description')
   const ruleLogic = readObject(payload, 'rule_logic')
   if (!ruleCode || !title || !description || !ruleLogic) {
-    throw new Error(
-      'coherence_rule_added requires rule_code, title, description, rule_logic',
-    )
+    throw new Error('coherence_rule_added requires rule_code, title, description, rule_logic')
   }
 
   const insertRow = {
@@ -248,9 +237,7 @@ async function applyParameterDefaultChanged(
   }
 }
 
-async function applyPricingTemplateUpdated(
-  payload: Record<string, unknown>,
-): Promise<ApplyResult> {
+async function applyPricingTemplateUpdated(payload: Record<string, unknown>): Promise<ApplyResult> {
   // pricing_templates n'existe pas en V1 (cf. migration 20260522140000_pricing.sql).
   // On enregistre l'intention dans le retour pour qu'un admin la traite manuellement.
   return {

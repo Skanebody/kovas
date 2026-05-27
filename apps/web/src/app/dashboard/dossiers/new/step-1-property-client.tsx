@@ -5,15 +5,7 @@ import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import {
-  Briefcase,
-  Building2,
-  ChevronDown,
-  ChevronUp,
-  Home,
-  MapPin,
-  User,
-} from 'lucide-react'
+import { Briefcase, Building2, ChevronDown, ChevronUp, Home, MapPin, User } from 'lucide-react'
 import { useEffect } from 'react'
 import type {
   ClientOption,
@@ -61,13 +53,7 @@ const CLIENT_TYPE_PILLS: {
  * Champs : adresse BAN OU bien existant + type bien + surface + année +
  * client inline OU client existant. Validation propagée au wizard via `data`.
  */
-export function Step1PropertyClient({
-  data,
-  patch,
-  properties,
-  clients,
-  fieldErrors,
-}: Step1Props) {
+export function Step1PropertyClient({ data, patch, properties, clients, fieldErrors }: Step1Props) {
   const activeClientPill =
     CLIENT_TYPE_PILLS.find((p) => p.value === data.clientPill) ?? CLIENT_TYPE_PILLS[0]
   const clientIsBusiness = activeClientPill.isBusiness
@@ -92,7 +78,8 @@ export function Step1PropertyClient({
       <section className="space-y-2.5">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <span className="text-[11px] font-mono uppercase tracking-[0.1em] text-ink-mute flex items-center gap-1.5">
-            <MapPin className="size-3.5" /> Adresse du bien <span className="text-accent-red">*</span>
+            <MapPin className="size-3.5" /> Adresse du bien{' '}
+            <span className="text-accent-red">*</span>
           </span>
           {properties.length > 0 && (
             <button
@@ -161,11 +148,7 @@ export function Step1PropertyClient({
                   onChange={(e) => patch({ yearBuilt: e.target.value })}
                 />
               </FormField>
-              <FormField
-                label="Surface (m²)"
-                htmlFor="surfaceTotal"
-                hint="Pour estimation durée"
-              >
+              <FormField label="Surface (m²)" htmlFor="surfaceTotal" hint="Pour estimation durée">
                 <Input
                   id="surfaceTotal"
                   type="number"

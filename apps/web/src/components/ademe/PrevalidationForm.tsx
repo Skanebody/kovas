@@ -25,22 +25,22 @@ import { useState } from 'react'
 import { toast } from '@/components/ui/toaster'
 import { cn } from '@/lib/utils'
 
-import { PrevalidationProgress } from './prevalidation-progress'
 import { PrevalidationResult, type RiskVerdict } from './PrevalidationResult'
+import { PrevalidationProgress } from './prevalidation-progress'
 import {
-  PrevalidationStep1Property,
   type BuildingType,
+  PrevalidationStep1Property,
   type PropertyStepValues,
 } from './prevalidation-step-1-property'
 import {
-  PrevalidationStep2Results,
   type Etiquette,
+  PrevalidationStep2Results,
   type ResultsStepValues,
 } from './prevalidation-step-2-results'
 import {
-  PrevalidationStep3Method,
   type DpeMethod,
   type MethodStepValues,
+  PrevalidationStep3Method,
 } from './prevalidation-step-3-method'
 
 interface ApiResponse {

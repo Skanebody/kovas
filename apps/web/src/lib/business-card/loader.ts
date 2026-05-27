@@ -11,13 +11,13 @@
  * la sécurité repose alors sur le `public_token` (32 chars aléatoires).
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   BRANDING_BUCKET,
   BRANDING_SIGNED_URL_TTL_SECONDS,
   DEFAULT_BRAND_COLOR_HEX,
 } from '@/lib/branding/get-organization-branding'
-import { buildCertificationNote, type VCardInput } from './vcard'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { type VCardInput, buildCertificationNote } from './vcard'
 
 export interface BusinessCardRow {
   organization_id: string
@@ -88,7 +88,10 @@ export async function loadBusinessCardByOrg(
   const client = supabase as unknown as {
     from: (t: string) => {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{
             data: BusinessCardRow | OrganizationRow | ProfileRow | null
             error: { message: string } | null
@@ -138,7 +141,10 @@ export async function loadBusinessCardByToken(
   const client = adminSupabase as unknown as {
     from: (t: string) => {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{
             data: BusinessCardRow | null
             error: { message: string } | null
@@ -166,7 +172,10 @@ async function buildContext(
   const client = supabase as unknown as {
     from: (t: string) => {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{
             data: OrganizationRow | ProfileRow | null
             error: { message: string } | null
@@ -228,17 +237,15 @@ async function buildContext(
 
   const phoneMobile = card.show_phone_mobile && profile.phone ? profile.phone : undefined
   const phoneWork =
-    card.show_phone_fixed && card.custom_phone_fixed
-      ? card.custom_phone_fixed
-      : undefined
+    card.show_phone_fixed && card.custom_phone_fixed ? card.custom_phone_fixed : undefined
 
   const emailWork = card.show_email && profile.email ? profile.email : undefined
   const website = card.show_website && card.custom_website ? card.custom_website : undefined
 
-  const addressLine1 = card.show_address ? org.address ?? undefined : undefined
-  const postalCode = card.show_address ? org.postal_code ?? undefined : undefined
-  const city = card.show_address ? org.city ?? undefined : undefined
-  const country = card.show_address ? org.country ?? 'France' : undefined
+  const addressLine1 = card.show_address ? (org.address ?? undefined) : undefined
+  const postalCode = card.show_address ? (org.postal_code ?? undefined) : undefined
+  const city = card.show_address ? (org.city ?? undefined) : undefined
+  const country = card.show_address ? (org.country ?? 'France') : undefined
 
   const note = buildCertificationNote({
     certificationN: org.certification_n,

@@ -9,12 +9,12 @@
  *   - revalidatePath du listing après chaque mutation
  */
 
+import { getCurrentUser } from '@/lib/auth/current-user'
 import {
   type OrganizationBranding,
   getOrganizationBranding,
 } from '@/lib/branding/get-organization-branding'
 import { sendEmail } from '@/lib/email/send'
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { generateFacturxXml } from '@/lib/quotes/generate-facturx-xml'
 import { generateQuotePdf } from '@/lib/quotes/generate-pdf'
 import {
@@ -85,16 +85,16 @@ interface SupabaseClient {
   storage: {
     from: (bucket: string) => unknown
   }
-  rpc: (fn: string, args: Record<string, unknown>) => Promise<{
+  rpc: (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{
     data: unknown
     error: { message: string } | null
   }>
 }
 
-async function generateQuoteReference(
-  supabase: SupabaseClient,
-  orgId: string,
-): Promise<string> {
+async function generateQuoteReference(supabase: SupabaseClient, orgId: string): Promise<string> {
   const { data, error } = await supabase.rpc('generate_quote_reference', {
     p_org: orgId,
   })
@@ -209,9 +209,7 @@ async function buildOrganizationSnapshot(
  * Télécharge le logo signed URL et le convertit en data-URL pour jspdf.
  * Retourne null si pas de logo / mime non supporté par jspdf (svg).
  */
-async function fetchLogoDataUrl(
-  branding: OrganizationBranding,
-): Promise<string | null> {
+async function fetchLogoDataUrl(branding: OrganizationBranding): Promise<string | null> {
   if (!branding.logoSignedUrl) return null
   if (branding.logoMime === 'image/svg+xml') return null // jspdf ne sait pas faire
   try {
@@ -236,9 +234,7 @@ export interface QuoteActionResult {
   error?: string
 }
 
-export async function createQuoteDraftAction(
-  input: CreateQuoteInput,
-): Promise<QuoteActionResult> {
+export async function createQuoteDraftAction(input: CreateQuoteInput): Promise<QuoteActionResult> {
   const parsed = createQuoteSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? 'Input invalide.' }
@@ -317,9 +313,7 @@ export async function createQuoteDraftAction(
 // 2. Update (only if draft)
 // ============================================
 
-export async function updateQuoteAction(
-  input: UpdateQuoteInput,
-): Promise<QuoteActionResult> {
+export async function updateQuoteAction(input: UpdateQuoteInput): Promise<QuoteActionResult> {
   const parsed = updateQuoteSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? 'Input invalide.' }
@@ -388,10 +382,7 @@ export async function updateQuoteAction(
         col: string,
         val: string,
       ) => {
-        eq: (
-          col: string,
-          val: string,
-        ) => Promise<{ error: { message: string } | null }>
+        eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>
       }
     }
   }
@@ -574,10 +565,7 @@ export async function sendQuoteAction(quoteId: string): Promise<QuoteActionResul
         col: string,
         val: string,
       ) => {
-        eq: (
-          col: string,
-          val: string,
-        ) => Promise<{ error: { message: string } | null }>
+        eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>
       }
     }
   }
@@ -689,17 +677,11 @@ async function updateQuoteStatus(
         col: string,
         val: string,
       ) => {
-        eq: (
-          col: string,
-          val: string,
-        ) => Promise<{ error: { message: string } | null }>
+        eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>
       }
     }
   }
-  const { error } = await updateClient
-    .update(patch)
-    .eq('id', quoteId)
-    .eq('organization_id', orgId)
+  const { error } = await updateClient.update(patch).eq('id', quoteId).eq('organization_id', orgId)
   if (error) return { success: false, error: error.message }
 
   revalidatePath('/dashboard/devis')
@@ -749,10 +731,7 @@ export async function deleteQuoteDraftAction(quoteId: string): Promise<QuoteActi
         col: string,
         val: string,
       ) => {
-        eq: (
-          col: string,
-          val: string,
-        ) => Promise<{ error: { message: string } | null }>
+        eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>
       }
     }
   }
@@ -787,9 +766,7 @@ export interface QuickClientResult {
   error?: string
 }
 
-export async function createQuickClientAction(
-  input: QuickClientInput,
-): Promise<QuickClientResult> {
+export async function createQuickClientAction(input: QuickClientInput): Promise<QuickClientResult> {
   const parsed = quickClientSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? 'Input invalide.' }
@@ -809,8 +786,7 @@ export async function createQuickClientAction(
     }
   }
 
-  const emailValue =
-    parsed.data.email && parsed.data.email.length > 0 ? parsed.data.email : null
+  const emailValue = parsed.data.email && parsed.data.email.length > 0 ? parsed.data.email : null
 
   const { data, error } = await insertClient
     .insert({

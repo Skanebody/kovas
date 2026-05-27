@@ -30,21 +30,18 @@ export async function triggerManualGeneration(options?: {
     return { ok: false, error: 'Configuration Edge Function manquante' }
   }
 
-  const response = await fetch(
-    `${supabaseUrl}/functions/v1/observatoire-monthly-report`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${serviceKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        force: options?.force ?? false,
-        target_year: options?.targetYear,
-        target_month: options?.targetMonth,
-      }),
+  const response = await fetch(`${supabaseUrl}/functions/v1/observatoire-monthly-report`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
     },
-  )
+    body: JSON.stringify({
+      force: options?.force ?? false,
+      target_year: options?.targetYear,
+      target_month: options?.targetMonth,
+    }),
+  })
 
   if (!response.ok) {
     const errText = await response.text()

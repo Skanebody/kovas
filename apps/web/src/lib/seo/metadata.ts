@@ -123,9 +123,7 @@ export function buildMetadata(params: BuildMetadataParams): Metadata {
       ...(ogType === 'article' && params.publishedTime
         ? { publishedTime: params.publishedTime }
         : {}),
-      ...(ogType === 'article' && params.modifiedTime
-        ? { modifiedTime: params.modifiedTime }
-        : {}),
+      ...(ogType === 'article' && params.modifiedTime ? { modifiedTime: params.modifiedTime } : {}),
       ...(ogType === 'article' && params.authorName ? { authors: [params.authorName] } : {}),
     },
     twitter: {

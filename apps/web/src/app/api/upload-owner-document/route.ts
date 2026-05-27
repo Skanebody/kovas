@@ -1,7 +1,7 @@
+import { StorageQuotaExceeded, assertStorageAvailable } from '@/lib/storage/quota'
+import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import type { Database } from '@kovas/database/types'
-import { assertStorageAvailable, StorageQuotaExceeded } from '@/lib/storage/quota'
 
 /**
  * Endpoint upload public token-validated.
@@ -57,10 +57,7 @@ export async function POST(request: Request) {
   if (!dossier) {
     return NextResponse.json({ error: 'Token invalide' }, { status: 404 })
   }
-  if (
-    dossier.client_upload_expires_at &&
-    new Date(dossier.client_upload_expires_at) < new Date()
-  ) {
+  if (dossier.client_upload_expires_at && new Date(dossier.client_upload_expires_at) < new Date()) {
     return NextResponse.json({ error: 'Lien expiré' }, { status: 410 })
   }
 

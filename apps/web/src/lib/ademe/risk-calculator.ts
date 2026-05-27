@@ -22,9 +22,9 @@
  */
 
 import type { AdemeDpe } from './ademe-api'
+import { haversineDistanceKm } from './haversine'
 import { evaluateRule } from './rule-evaluator'
 import type { CoherenceRule } from './rule-evaluator'
-import { haversineDistanceKm } from './haversine'
 
 // ============================================================
 // Types publics
@@ -284,7 +284,8 @@ export function checkVolumeRisk(snapshot: LatestSnapshot | null): VolumeCheckRes
       severity: 'error',
       code: 'VOLUME_YEARLY_CRITICAL',
       message: `${snapshot.dpe_count_12m} DPE publiés sur 12 mois — seuil critique ADEME atteint (${VOLUME_THRESHOLDS.critical_yearly}). Risque de contrôle.`,
-      suggested_fix: 'Espacer les publications ou justifier la productivité (cabinet, multi-techniciens).',
+      suggested_fix:
+        'Espacer les publications ou justifier la productivité (cabinet, multi-techniciens).',
       context: { count_12m: snapshot.dpe_count_12m, threshold: VOLUME_THRESHOLDS.critical_yearly },
     })
   } else if (snapshot.dpe_count_12m >= VOLUME_THRESHOLDS.warning_yearly) {
@@ -305,7 +306,10 @@ export function checkVolumeRisk(snapshot: LatestSnapshot | null): VolumeCheckRes
       severity: 'warning',
       code: 'VOLUME_DAILY_WARNING',
       message: `${snapshot.dpe_count_today} DPE déjà publiés aujourd'hui — cadence anormale.`,
-      context: { count_today: snapshot.dpe_count_today, threshold: VOLUME_THRESHOLDS.warning_daily },
+      context: {
+        count_today: snapshot.dpe_count_today,
+        threshold: VOLUME_THRESHOLDS.warning_daily,
+      },
     })
   }
 
@@ -434,7 +438,8 @@ export function checkStatisticalRisk(
         severity: 'warning',
         code: 'STAT_FG_UNDERREPRESENTED',
         message: `Votre cabinet déclare ${(snapshot.ratio_fg * 100).toFixed(1)}% de F/G vs ${(NATIONAL_FG_RATIO * 100).toFixed(1)}% national — sous-représentation significative.`,
-        suggested_fix: "S'assurer de l'absence de biais systémique (calculs PAC, ventilation, ECS).",
+        suggested_fix:
+          "S'assurer de l'absence de biais systémique (calculs PAC, ventilation, ECS).",
         context: { org_ratio: snapshot.ratio_fg, national_ratio: NATIONAL_FG_RATIO, delta },
       })
     }

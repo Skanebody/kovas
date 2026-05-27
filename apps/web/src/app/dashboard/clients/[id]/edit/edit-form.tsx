@@ -1,10 +1,10 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import { useActionState } from 'react'
-import { Button } from '@/components/ui/button'
-import { ClientFormFields, type ClientFormDefaults } from '../../client-form-fields'
 import { type ClientFormState, updateClientAction } from '../../actions'
+import { type ClientFormDefaults, ClientFormFields } from '../../client-form-fields'
 
 interface EditClientFormProps {
   client: ClientFormDefaults & { id: string }

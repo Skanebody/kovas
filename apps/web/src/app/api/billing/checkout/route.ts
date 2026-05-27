@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { getStripe, isStripeConfigured } from '@/lib/stripe'
 import { getStripePriceId, getTier } from '@/lib/stripe-config'
+import { NextResponse } from 'next/server'
 
 /**
  * Crée une session Stripe Checkout pour s'abonner à un tier KOVAS.

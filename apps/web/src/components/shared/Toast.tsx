@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from 'react'
+import { type ReactNode, createContext, useCallback, useContext, useMemo } from 'react'
 import { toast as sonnerToast } from 'sonner'
 
 /**
@@ -104,9 +98,7 @@ export function useToast(): ToastContextValue {
       const options: Parameters<typeof sonnerToast>[1] = {
         description: body,
         duration,
-        action: action
-          ? { label: action.label, onClick: action.onClick }
-          : undefined,
+        action: action ? { label: action.label, onClick: action.onClick } : undefined,
       }
       if (variant === 'success') sonnerToast.success(title, options)
       else if (variant === 'error') sonnerToast.error(title, options)

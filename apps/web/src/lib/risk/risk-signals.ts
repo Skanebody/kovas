@@ -297,11 +297,10 @@ export function detectCadastreMismatch(mission: Mission): RiskSignal | null {
     return null
   }
 
-  const diffPct = Math.abs(dpe - cadastre) / cadastre * 100
+  const diffPct = (Math.abs(dpe - cadastre) / cadastre) * 100
   if (diffPct < SURFACE_MISMATCH_PCT_THRESHOLD) return null
 
-  const severity: RiskSeverity =
-    diffPct >= 40 ? 'critical' : diffPct >= 25 ? 'high' : 'medium'
+  const severity: RiskSeverity = diffPct >= 40 ? 'critical' : diffPct >= 25 ? 'high' : 'medium'
 
   return {
     type: 'cadastre_mismatch',

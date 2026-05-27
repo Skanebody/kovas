@@ -6,9 +6,9 @@
  * envoie une notification à contact@kovas.fr.
  */
 
-import { NextResponse } from 'next/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/email/send'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -38,17 +38,13 @@ export async function POST(req: Request, context: RouteContext) {
     body.current_values && typeof body.current_values === 'object' ? body.current_values : {}
   const proposedChanges =
     body.proposed_changes && typeof body.proposed_changes === 'object' ? body.proposed_changes : {}
-  const message =
-    typeof body.message === 'string' ? body.message.trim().slice(0, 2000) : null
+  const message = typeof body.message === 'string' ? body.message.trim().slice(0, 2000) : null
   const contactEmail =
     typeof body.contact_email === 'string' ? body.contact_email.trim().slice(0, 200) : null
 
   // Validation : au moins un changement ou un message
   if (Object.keys(proposedChanges).length === 0 && !message) {
-    return NextResponse.json(
-      { error: 'Aucune modification ou message fourni.' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Aucune modification ou message fourni.' }, { status: 400 })
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -72,21 +68,18 @@ export async function POST(req: Request, context: RouteContext) {
   }
 
   // Capter IP / UA pour anti-abus
-  const ipAddress =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
   const userAgent = req.headers.get('user-agent')?.slice(0, 500) ?? null
 
-  const { error: insertErr } = await admin
-    .from('diagnostician_corrections_pending')
-    .insert({
-      diagnostician_id: id,
-      current_values: currentValues,
-      proposed_changes: proposedChanges,
-      message,
-      contact_email: contactEmail,
-      submitter_ip: ipAddress,
-      submitter_user_agent: userAgent,
-    })
+  const { error: insertErr } = await admin.from('diagnostician_corrections_pending').insert({
+    diagnostician_id: id,
+    current_values: currentValues,
+    proposed_changes: proposedChanges,
+    message,
+    contact_email: contactEmail,
+    submitter_ip: ipAddress,
+    submitter_user_agent: userAgent,
+  })
 
   if (insertErr) {
     console.error(`[corriger] Insert failed: ${insertErr.message}`)

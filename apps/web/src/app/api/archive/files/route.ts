@@ -17,7 +17,6 @@
  * Sécurité : multi-tenant strict via `getCurrentUser()` + RLS Supabase.
  */
 
-import { getCurrentUser } from '@/lib/auth/current-user'
 import { aggregateArchiveFiles } from '@/lib/archive/aggregator'
 import {
   ARCHIVE_DEFAULT_LIMIT,
@@ -25,6 +24,7 @@ import {
   type ArchiveFileKind,
   type ArchiveQuery,
 } from '@/lib/archive/types'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
@@ -89,11 +89,7 @@ export async function GET(request: Request) {
     kind: parseEnum<ArchiveFileKind | 'all'>(params.get('type'), KIND_VALUES, 'all'),
     period: parseEnum<ArchiveQuery['period']>(params.get('period'), PERIOD_VALUES, 'all'),
     clientId: params.get('client_id'),
-    diagnostic: parseEnum<ArchiveDiagnostic | 'all'>(
-      params.get('diagnostic'),
-      DIAG_VALUES,
-      'all',
-    ),
+    diagnostic: parseEnum<ArchiveDiagnostic | 'all'>(params.get('diagnostic'), DIAG_VALUES, 'all'),
     q: params.get('q'),
     page: parseInt32(params.get('page'), 1, 1, 10_000),
     limit: parseInt32(params.get('limit'), ARCHIVE_DEFAULT_LIMIT, 1, 200),

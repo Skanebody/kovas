@@ -12,19 +12,13 @@
  * Poids dans le score global : 10/100.
  */
 
-import type {
-  AnalyzerResult,
-  Finding,
-  MissionAnalysisContext,
-} from './types'
+import type { AnalyzerResult, Finding, MissionAnalysisContext } from './types'
 
 /** Nombre minimum de photos recommandé pour un dossier DPE solide. */
 const MIN_PHOTOS_RECOMMENDED = 5
 const MIN_PHOTOS_GOOD = 8
 
-export function analyzePhotosAndObservations(
-  ctx: MissionAnalysisContext,
-): AnalyzerResult {
+export function analyzePhotosAndObservations(ctx: MissionAnalysisContext): AnalyzerResult {
   const findings: Finding[] = []
 
   const totalPhotos = ctx.photos.length
@@ -73,7 +67,9 @@ export function analyzePhotosAndObservations(
       message: `Certaines pièces n'ont aucune photo associée : ${roomsWithoutPhoto
         .map((r) => r.name)
         .slice(0, 5)
-        .join(', ')}${roomsWithoutPhoto.length > 5 ? '…' : ''}. Pour la traçabilité, une photo générale par pièce visitée est conseillée.`,
+        .join(
+          ', ',
+        )}${roomsWithoutPhoto.length > 5 ? '…' : ''}. Pour la traçabilité, une photo générale par pièce visitée est conseillée.`,
       context: { rooms: roomsWithoutPhoto.map((r) => r.id) },
     })
   }
@@ -84,10 +80,7 @@ export function analyzePhotosAndObservations(
     if (!vn.room_id || !vn.transcript_structured) continue
     const kinds = vn.transcript_structured.equipment.map((e) => e.kind)
     if (kinds.length === 0) continue
-    equipmentsByRoom.set(vn.room_id, [
-      ...(equipmentsByRoom.get(vn.room_id) ?? []),
-      ...kinds,
-    ])
+    equipmentsByRoom.set(vn.room_id, [...(equipmentsByRoom.get(vn.room_id) ?? []), ...kinds])
   }
   const mismatches: string[] = []
   for (const [roomId, kinds] of equipmentsByRoom) {
@@ -107,9 +100,7 @@ export function analyzePhotosAndObservations(
       title: `Équipements mentionnés sans photo`,
       message: `Vous avez parlé d'équipements dans certaines pièces sans prendre de photo : ${mismatches
         .slice(0, 3)
-        .join(' ; ')}${
-        mismatches.length > 3 ? '…' : ''
-      }. Une photo aide à étayer le rapport.`,
+        .join(' ; ')}${mismatches.length > 3 ? '…' : ''}. Une photo aide à étayer le rapport.`,
     })
   }
 

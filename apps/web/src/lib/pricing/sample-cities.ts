@@ -55,18 +55,11 @@ export const SAMPLE_CITIES: readonly SampleCity[] = [
  * Retourne la première correspondance par préfixe, sinon `null`.
  */
 export function findSampleCityByName(query: string): SampleCity | null {
-  const normalized = query
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim()
+  const normalized = query.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
   if (normalized.length === 0) return null
 
   const match = SAMPLE_CITIES.find((city) => {
-    const cityNorm = city.name
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .toLowerCase()
+    const cityNorm = city.name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
     return cityNorm.startsWith(normalized)
   })
   return match ?? null
@@ -77,20 +70,13 @@ export function findSampleCityByName(query: string): SampleCity | null {
  * décroissante pour favoriser les villes les plus reconnaissables.
  */
 export function suggestSampleCities(query: string, max = 6): readonly SampleCity[] {
-  const normalized = query
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim()
+  const normalized = query.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
   if (normalized.length === 0) {
     return [...SAMPLE_CITIES].sort((a, b) => b.population - a.population).slice(0, max)
   }
   return [...SAMPLE_CITIES]
     .filter((city) => {
-      const cityNorm = city.name
-        .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
-        .toLowerCase()
+      const cityNorm = city.name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
       return cityNorm.includes(normalized)
     })
     .sort((a, b) => b.population - a.population)

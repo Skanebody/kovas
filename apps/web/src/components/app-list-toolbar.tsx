@@ -21,14 +21,7 @@ import { Select } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PAGE_PARAM, SEARCH_PARAM } from './app-list-toolbar-utils'
 
 // Re-export pour rétro-compat des imports existants (server components devraient
@@ -169,8 +162,7 @@ export function AppListToolbar({
     [buildHref, currentPage],
   )
 
-  const showPagination =
-    totalCount !== undefined && totalCount > pageSize && totalPages > 1
+  const showPagination = totalCount !== undefined && totalCount > pageSize && totalPages > 1
 
   return (
     <div
@@ -260,10 +252,7 @@ export function AppListToolbar({
         </p>
 
         {showPagination && (
-          <nav
-            className="flex items-center gap-2"
-            aria-label="Pagination"
-          >
+          <nav className="flex items-center gap-2" aria-label="Pagination">
             <Button
               asChild={currentPage > 1}
               variant="outline"

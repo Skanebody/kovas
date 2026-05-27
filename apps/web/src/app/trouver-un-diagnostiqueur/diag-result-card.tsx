@@ -113,9 +113,7 @@ export function DiagResultCard({
             {displayName}
           </h3>
           {subtitleGerant ? (
-            <p className="text-[11px] text-ink-faint truncate">
-              Représenté par {subtitleGerant}
-            </p>
+            <p className="text-[11px] text-ink-faint truncate">Représenté par {subtitleGerant}</p>
           ) : null}
           {city ? (
             <p className="flex items-center gap-1 text-[12px] text-ink-mute">

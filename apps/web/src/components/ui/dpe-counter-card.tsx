@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
-import type { DpeCounterResult, DpeAlertLevel } from '@/lib/dpe-counter'
+import type { DpeAlertLevel, DpeCounterResult } from '@/lib/dpe-counter'
 import { microcopyFor } from '@/lib/dpe-counter'
+import { cn } from '@/lib/utils'
 import { AlertTriangle, Info } from 'lucide-react'
 
 interface DpeCounterCardProps {
@@ -11,7 +11,10 @@ interface DpeCounterCardProps {
   className?: string
 }
 
-const ALERT_STYLES: Record<DpeAlertLevel, { bar: string; badge: string; icon: 'none' | 'info' | 'warning' }> = {
+const ALERT_STYLES: Record<
+  DpeAlertLevel,
+  { bar: string; badge: string; icon: 'none' | 'info' | 'warning' }
+> = {
   none: { bar: 'bg-chartreuse', badge: 'bg-muted text-ink-mute', icon: 'none' },
   info: { bar: 'bg-amber', badge: 'bg-amber/15 text-amber', icon: 'info' },
   warning: {
@@ -69,9 +72,7 @@ export function DpeCounterCard({ data, size = 'compact', className }: DpeCounter
         >
           {data.count}
         </p>
-        <p className="text-2xl md:text-3xl text-ink-mute font-light">
-          / {data.limit}
-        </p>
+        <p className="text-2xl md:text-3xl text-ink-mute font-light">/ {data.limit}</p>
       </div>
 
       {/* Barre de progression */}

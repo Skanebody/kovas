@@ -160,10 +160,7 @@ async function loadSubscribersSummary(): Promise<{
 }
 
 export default async function AdminObservatoirePage() {
-  const [reports, subs] = await Promise.all([
-    loadReports(),
-    loadSubscribersSummary(),
-  ])
+  const [reports, subs] = await Promise.all([loadReports(), loadSubscribersSummary()])
 
   const lastReport = reports[0] ?? null
   const avgOpenRate =

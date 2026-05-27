@@ -1,3 +1,5 @@
+import type { VoiceParsedData } from '@/lib/voice-parser'
+import type { Database } from '@kovas/database/types'
 /**
  * Agrégateur de données mission pour export.
  * Une mission appartient à un dossier qui contient les pièces, photos,
@@ -5,8 +7,6 @@
  * du dossier.
  */
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import type { Database } from '@kovas/database/types'
-import type { VoiceParsedData } from '@/lib/voice-parser'
 
 export interface MissionExportData {
   mission: {

@@ -1,3 +1,5 @@
+import { getStripe, isStripeConfigured } from '@/lib/stripe'
+import { createClient } from '@/lib/supabase/server'
 /**
  * Endpoint de monitoring santé infrastructure.
  *
@@ -16,8 +18,6 @@
  * banner in-app temps réel.
  */
 import { NextResponse } from 'next/server'
-import { isStripeConfigured, getStripe } from '@/lib/stripe'
-import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -46,9 +46,7 @@ const HEALTH_TIMEOUT_MS = 3000
 async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return await Promise.race([
     promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms),
-    ),
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms)),
   ])
 }
 

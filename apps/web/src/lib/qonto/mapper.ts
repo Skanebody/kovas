@@ -50,15 +50,7 @@ function numericToCents(val: number | string): number {
 // TVA : float 0.20 → enum string Qonto "20"
 // ============================================
 
-const QONTO_VAT_VALUES: ReadonlySet<string> = new Set([
-  '0',
-  '2.1',
-  '5.5',
-  '8.5',
-  '10',
-  '13',
-  '20',
-])
+const QONTO_VAT_VALUES: ReadonlySet<string> = new Set(['0', '2.1', '5.5', '8.5', '10', '13', '20'])
 
 export function tvaRateToQonto(rate: number | string | null | undefined): QontoVatRate {
   if (rate === null || rate === undefined) return '20'
@@ -74,7 +66,7 @@ export function tvaRateToQonto(rate: number | string | null | undefined): QontoV
   // Fallback : approximation par valeur la plus proche
   const candidates = [0, 2.1, 5.5, 8.5, 10, 13, 20]
   let closest = 20
-  let diff = Infinity
+  let diff = Number.POSITIVE_INFINITY
   for (const c of candidates) {
     const d = Math.abs(c - pct)
     if (d < diff) {
@@ -175,15 +167,11 @@ export function mapKovasInvoiceToQonto(
   }
 
   const issueDate = toIsoDate(invoice.issued_at, new Date())
-  const dueDate = invoice.due_date
-    ? toIsoDate(invoice.due_date)
-    : addDaysIso(issueDate, 30) // défaut 30j Code Commerce
+  const dueDate = invoice.due_date ? toIsoDate(invoice.due_date) : addDaysIso(issueDate, 30) // défaut 30j Code Commerce
 
   const vatRate = tvaRateToQonto(invoice.tva_rate)
 
-  const items: QontoInvoiceItem[] = (invoice.line_items ?? []).map((li) =>
-    mapLineItem(li, vatRate),
-  )
+  const items: QontoInvoiceItem[] = (invoice.line_items ?? []).map((li) => mapLineItem(li, vatRate))
 
   // Fallback : si aucune ligne, créer une ligne unique depuis amount_ht
   if (items.length === 0) {

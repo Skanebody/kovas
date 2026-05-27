@@ -1,5 +1,15 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  type DiagType,
+  type RoomMatrixContext,
+  applicableDiagsForRoom,
+  evaluateRoomTasks,
+} from '@/lib/diag-room-matrix'
+import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
+import { cn } from '@/lib/utils'
 import {
   Camera,
   CheckCircle2,
@@ -10,16 +20,6 @@ import {
   Mic,
 } from 'lucide-react'
 import { useState, useTransition } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
-import {
-  type DiagType,
-  type RoomMatrixContext,
-  applicableDiagsForRoom,
-  evaluateRoomTasks,
-} from '@/lib/diag-room-matrix'
-import { MISSION_TYPE_LABELS } from '@/lib/mission-helpers'
 import { toggleRoomTaskAction } from './actions'
 
 interface RoomRow {
@@ -119,12 +119,17 @@ export function RoomsMatrixView({
                       <CardTitle className="text-base text-left">{room.name}</CardTitle>
                       <div className="flex items-center gap-3 flex-wrap mt-1 text-xs text-ink-mute">
                         <span className="flex items-center gap-1">
-                          <Camera className="size-3" /> {photosInRoom} photo{photosInRoom > 1 ? 's' : ''}
+                          <Camera className="size-3" /> {photosInRoom} photo
+                          {photosInRoom > 1 ? 's' : ''}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Mic className="size-3" /> {voicesInRoom} note{voicesInRoom > 1 ? 's' : ''}
+                          <Mic className="size-3" /> {voicesInRoom} note
+                          {voicesInRoom > 1 ? 's' : ''}
                         </span>
-                        <span>{applicableDiags.length} diagnostic{applicableDiags.length > 1 ? 's' : ''} applicable{applicableDiags.length > 1 ? 's' : ''}</span>
+                        <span>
+                          {applicableDiags.length} diagnostic{applicableDiags.length > 1 ? 's' : ''}{' '}
+                          applicable{applicableDiags.length > 1 ? 's' : ''}
+                        </span>
                       </div>
                     </div>
                   </div>

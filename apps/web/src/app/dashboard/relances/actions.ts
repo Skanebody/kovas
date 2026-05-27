@@ -12,10 +12,7 @@
  */
 
 import { getCurrentUser } from '@/lib/auth/current-user'
-import {
-  DEFAULT_SEQUENCES,
-  type SequenceStep,
-} from '@/lib/followup/executor'
+import { DEFAULT_SEQUENCES, type SequenceStep } from '@/lib/followup/executor'
 import type { SequenceTemplate } from '@/lib/followup/templates'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -50,7 +47,10 @@ export interface CreateFollowUpResult {
  * Renvoie les steps custom selon le preset choisi par l'utilisateur.
  * Les valeurs `delayDays` sont relatives au step précédent (sauf step 0 = depuis création).
  */
-function buildSteps(targetType: (typeof TARGET_TYPES)[number], preset: (typeof PRESETS)[number]): {
+function buildSteps(
+  targetType: (typeof TARGET_TYPES)[number],
+  preset: (typeof PRESETS)[number],
+): {
   steps: SequenceStep[]
   template: SequenceTemplate
 } {
@@ -165,12 +165,14 @@ export async function createFollowUpSequenceAction(
   if (existing && existing.length > 0) {
     return {
       success: false,
-      error: 'Une séquence est déjà active pour cette cible. Annulez-la avant d\'en créer une nouvelle.',
+      error:
+        "Une séquence est déjà active pour cette cible. Annulez-la avant d'en créer une nouvelle.",
     }
   }
 
   // Vérifie que la cible existe et appartient à l'org (RLS gère, mais on remonte une erreur claire).
-  const targetTable = targetType === 'mission' ? 'missions' : targetType === 'invoice' ? 'invoices' : 'quotes'
+  const targetTable =
+    targetType === 'mission' ? 'missions' : targetType === 'invoice' ? 'invoices' : 'quotes'
   const { data: targetRow, error: targetErr } = await supabase
     .from(targetTable)
     .select('id')

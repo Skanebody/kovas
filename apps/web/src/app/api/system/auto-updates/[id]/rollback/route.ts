@@ -57,10 +57,7 @@ function readObject(
 
 interface SupabaseUpdateBuilder<TRow> {
   update: (patch: Partial<TRow>) => {
-    eq: (
-      col: string,
-      val: string | boolean,
-    ) => Promise<{ error: { message: string } | null }>
+    eq: (col: string, val: string | boolean) => Promise<{ error: { message: string } | null }>
   }
   delete: () => {
     eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>
@@ -131,31 +128,38 @@ export async function POST(_req: Request, ctx: RouteParams): Promise<Response> {
       const previous = readObject(update.rollback_payload, 'previous_state')
       const ruleCode = readString(update.rollback_payload, 'rule_code')
       if (!previous || !ruleCode) {
-        throw new Error('coherence_rule_modified rollback requires rollback_payload.previous_state + rule_code')
+        throw new Error(
+          'coherence_rule_modified rollback requires rollback_payload.previous_state + rule_code',
+        )
       }
-      const builder = supabase.from('ademe_coherence_rules') as unknown as SupabaseUpdateBuilder<CoherenceRuleRow>
+      const builder = supabase.from(
+        'ademe_coherence_rules',
+      ) as unknown as SupabaseUpdateBuilder<CoherenceRuleRow>
       const { error } = await builder
         .update({
           rule_logic: (previous as { rule_logic?: Record<string, unknown> }).rule_logic,
           severity: (previous as { severity?: string }).severity,
           title: (previous as { title?: string }).title,
           description: (previous as { description?: string }).description,
-          suggested_fix:
-            (previous as { suggested_fix?: string | null }).suggested_fix ?? null,
+          suggested_fix: (previous as { suggested_fix?: string | null }).suggested_fix ?? null,
         })
         .eq('rule_code', ruleCode)
       if (error) throw new Error(`restore rule failed: ${error.message}`)
     } else if (operation === 'coherence_rule_deactivated') {
       const ruleCode = readString(update.proposed_payload, 'rule_code')
       if (!ruleCode) throw new Error('rollback requires rule_code')
-      const builder = supabase.from('ademe_coherence_rules') as unknown as SupabaseUpdateBuilder<CoherenceRuleRow>
+      const builder = supabase.from(
+        'ademe_coherence_rules',
+      ) as unknown as SupabaseUpdateBuilder<CoherenceRuleRow>
       const { error } = await builder.update({ enabled: true }).eq('rule_code', ruleCode)
       if (error) throw new Error(`reactivate rule failed: ${error.message}`)
     } else if (operation === 'coherence_rule_added') {
       const details = readObject(update.apply_result, 'details')
       const newId = readString(details, 'id')
       if (!newId) throw new Error('rollback requires apply_result.details.id')
-      const builder = supabase.from('ademe_coherence_rules') as unknown as SupabaseUpdateBuilder<CoherenceRuleRow>
+      const builder = supabase.from(
+        'ademe_coherence_rules',
+      ) as unknown as SupabaseUpdateBuilder<CoherenceRuleRow>
       const { error } = await builder.delete().eq('id', newId)
       if (error) throw new Error(`delete rule failed: ${error.message}`)
     } else if (operation === 'report_template_updated') {
@@ -163,7 +167,9 @@ export async function POST(_req: Request, ctx: RouteParams): Promise<Response> {
       const newId = readString(details, 'id')
       const slug = readString(details, 'slug')
       if (!newId || !slug) throw new Error('rollback requires apply_result.details.id + slug')
-      const builder = supabase.from('report_templates') as unknown as SupabaseUpdateBuilder<ReportTemplateRow>
+      const builder = supabase.from(
+        'report_templates',
+      ) as unknown as SupabaseUpdateBuilder<ReportTemplateRow>
       // 1. Désactive la nouvelle version
       const r1 = await builder.update({ is_active: false }).eq('id', newId)
       if (r1.error) throw new Error(`deactivate new template failed: ${r1.error.message}`)

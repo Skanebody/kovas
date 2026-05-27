@@ -72,10 +72,7 @@ export interface TokenBreakdown {
  * Appelants : passer `input = response.usage.input_tokens` directement
  * (la doc Anthropic confirme que ce champ exclut les cache hits/writes).
  */
-export function computeAnthropicCostEur(
-  model: string,
-  tokens: TokenBreakdown,
-): number {
+export function computeAnthropicCostEur(model: string, tokens: TokenBreakdown): number {
   const p = PRICING_USD_PER_MTOK[model]
   if (!p) return 0
   const usd =
@@ -87,10 +84,7 @@ export function computeAnthropicCostEur(
 }
 
 /** Coût d'un batch = coût standard * 0.5 (Anthropic Batch API discount). */
-export function computeAnthropicBatchCostEur(
-  model: string,
-  tokens: TokenBreakdown,
-): number {
+export function computeAnthropicBatchCostEur(model: string, tokens: TokenBreakdown): number {
   return computeAnthropicCostEur(model, tokens) * 0.5
 }
 
@@ -126,10 +120,7 @@ export function modelForFeature(feature: Feature): string {
  * Vérifie qu'un modèle utilisé correspond au mapping recommandé.
  * Renvoie un warning string si divergence (à logger en obs, pas bloquant).
  */
-export function checkModelAlignment(
-  feature: Feature,
-  modelUsed: string,
-): string | null {
+export function checkModelAlignment(feature: Feature, modelUsed: string): string | null {
   const expected = modelForFeature(feature)
   if (modelUsed === expected) return null
   return `[anthropic-config] feature='${feature}' uses model='${modelUsed}' but recommended='${expected}'`
@@ -141,10 +132,7 @@ export const OPENAI_EMBEDDING_PRICING_USD_PER_MTOK = {
   'text-embedding-3-large': 0.13,
 } as const
 
-export function computeOpenAIEmbeddingCostEur(
-  model: string,
-  tokens: number,
-): number {
+export function computeOpenAIEmbeddingCostEur(model: string, tokens: number): number {
   const pricing =
     OPENAI_EMBEDDING_PRICING_USD_PER_MTOK[
       model as keyof typeof OPENAI_EMBEDDING_PRICING_USD_PER_MTOK

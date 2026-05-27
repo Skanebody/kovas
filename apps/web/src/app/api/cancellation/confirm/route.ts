@@ -15,12 +15,12 @@
  * Body : { cancellationId, feedback, category }
  */
 
+import { randomBytes } from 'node:crypto'
 import { logAdminAction } from '@/lib/admin/audit-log'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { sendEmail } from '@/lib/email/send'
 import { getStripe, isStripeConfigured } from '@/lib/stripe'
-import { randomBytes } from 'node:crypto'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
@@ -82,7 +82,10 @@ export async function POST(request: Request): Promise<NextResponse<ConfirmRespon
   const cancRes = (await (
     admin.from('cancellations') as unknown as {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{
             data: {
               id: string
@@ -118,9 +121,7 @@ export async function POST(request: Request): Promise<NextResponse<ConfirmRespon
 
   const subRes = (await admin
     .from('subscriptions')
-    .select(
-      'id, organization_id, stripe_subscription_id, current_period_end',
-    )
+    .select('id, organization_id, stripe_subscription_id, current_period_end')
     .eq('id', cancRes.data.subscription_id)
     .maybeSingle()) as {
     data: {
@@ -139,10 +140,10 @@ export async function POST(request: Request): Promise<NextResponse<ConfirmRespon
   let effectiveEndIso: string | null = subRes.data.current_period_end
   try {
     if (isStripeConfigured() && subRes.data.stripe_subscription_id) {
-      const updated = await getStripe().subscriptions.update(
-        subRes.data.stripe_subscription_id,
-        { cancel_at_period_end: true, cancellation_details: { feedback: 'other' } },
-      )
+      const updated = await getStripe().subscriptions.update(subRes.data.stripe_subscription_id, {
+        cancel_at_period_end: true,
+        cancellation_details: { feedback: 'other' },
+      })
       // Depuis Stripe API 2026-04 (dahlia), current_period_end est porté par
       // l'item Subscription (plus par la subscription elle-même).
       const periodEnd = updated.items?.data[0]?.current_period_end
@@ -174,7 +175,10 @@ export async function POST(request: Request): Promise<NextResponse<ConfirmRespon
   const updateRes = (await (
     admin.from('cancellations') as unknown as {
       update: (p: Record<string, unknown>) => {
-        eq: (col: string, val: string) => Promise<{
+        eq: (
+          col: string,
+          val: string,
+        ) => Promise<{
           error: { message: string } | null
         }>
       }
@@ -191,10 +195,7 @@ export async function POST(request: Request): Promise<NextResponse<ConfirmRespon
     .eq('id', body.cancellationId)) as { error: { message: string } | null }
 
   if (updateRes.error) {
-    return NextResponse.json(
-      { ok: false, error: updateRes.error.message },
-      { status: 500 },
-    )
+    return NextResponse.json({ ok: false, error: updateRes.error.message }, { status: 500 })
   }
 
   // Miroir côté subscriptions (cancel_reason + cancel_feedback + cancel_at_period_end)

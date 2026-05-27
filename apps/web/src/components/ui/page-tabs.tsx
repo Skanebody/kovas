@@ -1,6 +1,6 @@
-import Link from 'next/link'
-import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { LucideIcon } from 'lucide-react'
+import Link from 'next/link'
 
 export type PageTab = {
   /** Slug technique (utilisé en valeur du param URL `?tab=`) */
@@ -33,13 +33,7 @@ type PageTabsProps = {
  *
  * Inspiration Qonto fiche contact : pill + underline subtle + compteurs mono.
  */
-export function PageTabs({
-  basePath,
-  tabs,
-  active,
-  paramName = 'tab',
-  className,
-}: PageTabsProps) {
+export function PageTabs({ basePath, tabs, active, paramName = 'tab', className }: PageTabsProps) {
   return (
     <nav
       aria-label="Sections"

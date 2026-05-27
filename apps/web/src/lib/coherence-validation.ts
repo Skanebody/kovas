@@ -93,9 +93,7 @@ export function runCoherenceChecks(ctx: CoherenceContext): CoherenceWarning[] {
 
   // === Règle 4 : Équipement chauffage manquant ===
   const hasHeatingMention = ctx.voiceNotes.some((v) =>
-    v.equipment.some(
-      (e) => e.kind === 'chaudiere' || e.kind === 'pac' || e.kind === 'radiateur',
-    ),
+    v.equipment.some((e) => e.kind === 'chaudiere' || e.kind === 'pac' || e.kind === 'radiateur'),
   )
   if (ctx.voiceNotes.length >= 2 && !hasHeatingMention) {
     warnings.push({

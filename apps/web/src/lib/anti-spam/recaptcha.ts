@@ -25,7 +25,7 @@ export interface RecaptchaVerdict {
 export async function verifyRecaptchaToken(
   token: string | null | undefined,
   expectedAction: string,
-  minScore: number = 0.5,
+  minScore = 0.5,
 ): Promise<RecaptchaVerdict> {
   const secret = process.env.RECAPTCHA_SECRET_KEY
   if (!secret) {

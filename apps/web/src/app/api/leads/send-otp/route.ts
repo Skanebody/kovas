@@ -63,10 +63,7 @@ export async function POST(request: Request): Promise<Response> {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceRoleKey) {
     console.error('[leads/send-otp] missing Supabase env vars')
-    return NextResponse.json(
-      { error: 'server_misconfigured' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'server_misconfigured' }, { status: 500 })
   }
 
   // Proxy IP client → Edge Function (pour rate-limit / audit)

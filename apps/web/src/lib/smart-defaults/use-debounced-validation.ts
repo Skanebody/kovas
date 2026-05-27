@@ -37,9 +37,7 @@ export function useDebouncedValidation<T>(
 
   useEffect(() => {
     const isEmpty =
-      value === null ||
-      value === undefined ||
-      (typeof value === 'string' && value.trim() === '')
+      value === null || value === undefined || (typeof value === 'string' && value.trim() === '')
 
     if (isEmpty) {
       setResult({ state: 'idle' })

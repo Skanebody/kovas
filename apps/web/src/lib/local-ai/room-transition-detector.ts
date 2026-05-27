@@ -88,7 +88,11 @@ const ROOM_KEYWORDS: ReadonlyArray<RoomKeyword> = [
   { pattern: /\bcoin cuisine\b/i, type: 'cuisine', confidence: 0.9 },
   { pattern: /\bkitchenette\b/i, type: 'cuisine', confidence: 0.9 },
   // chambres
-  { pattern: /\bchambre( principale| parentale| des parents| d'amis| enfant| numero \d+| \d+)?\b/i, type: 'chambre', confidence: 0.95 },
+  {
+    pattern: /\bchambre( principale| parentale| des parents| d'amis| enfant| numero \d+| \d+)?\b/i,
+    type: 'chambre',
+    confidence: 0.95,
+  },
   { pattern: /\bbedroom\b/i, type: 'chambre', confidence: 0.8 },
   // salles de bain
   { pattern: /\bsalle de bain[s]?\b/i, type: 'salle_de_bain', confidence: 0.95 },

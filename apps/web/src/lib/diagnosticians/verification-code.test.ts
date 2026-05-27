@@ -8,10 +8,10 @@
 
 import { describe, expect, it } from 'vitest'
 import {
+  MAX_VERIFICATION_ATTEMPTS,
   checkVerificationCode,
   computeCodeExpiresAt,
   generateVerificationCode,
-  MAX_VERIFICATION_ATTEMPTS,
 } from './verification-code'
 
 describe('generateVerificationCode', () => {

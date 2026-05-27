@@ -19,7 +19,7 @@ export function SponsorisedTiersGrid({ recommendedCode }: SponsorisedTiersGridPr
           offer={offer}
           recommended={offer.code === recommendedCode}
           position="grid_sponsorise"
-          ctaHref="/app/account"
+          ctaHref="/dashboard/account"
           secondaryCtaLabel="Choisir une commune"
         />
       ))}

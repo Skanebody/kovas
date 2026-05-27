@@ -6,8 +6,8 @@
  * on documente ici les SIRETs canoniques utilisés.
  */
 
-import { describe, expect, it } from 'vitest'
 import { validateSiret } from '@/lib/validation/siret'
+import { describe, expect, it } from 'vitest'
 
 describe('SIRET claim — Luhn validation', () => {
   it('accepts valid SIRETs (Luhn passes)', () => {

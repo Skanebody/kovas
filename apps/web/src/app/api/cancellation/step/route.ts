@@ -52,7 +52,10 @@ export async function PATCH(request: Request): Promise<NextResponse<StepResponse
   const ownerCheck = (await (
     admin.from('cancellations') as unknown as {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{
             data: { user_id: string; confirmed_at: string | null } | null
           }>

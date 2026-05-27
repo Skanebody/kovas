@@ -24,8 +24,8 @@
  * séparément via la table `email_preferences` user-side.
  */
 
-import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { createHmac, timingSafeEqual } from 'node:crypto'
+import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'

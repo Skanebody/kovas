@@ -158,11 +158,7 @@ function renderCover(doc: jsPDF, stats: ObservatoireStats, y: number): number {
   doc.setTextColor(COLOR_INK_MUTE.r, COLOR_INK_MUTE.g, COLOR_INK_MUTE.b)
   doc.text(`Édition ${stats.lastUpdatedLabel}`, MARGIN, cursor)
   cursor += 16
-  doc.text(
-    'Rapport mensuel — toutes les data publiques du marché français',
-    MARGIN,
-    cursor,
-  )
+  doc.text('Rapport mensuel — toutes les data publiques du marché français', MARGIN, cursor)
   cursor += 50
 
   // Bloc KPI hero couverture

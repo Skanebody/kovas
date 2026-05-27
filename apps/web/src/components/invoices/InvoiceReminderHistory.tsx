@@ -42,11 +42,7 @@ export function InvoiceReminderHistory({
   const anySent = reminderJ7At || reminderJ15At || reminderJ30At
 
   if (!anySent) {
-    return (
-      <div className="text-[13px] text-ink-mute">
-        Aucune relance envoyée pour le moment.
-      </div>
-    )
+    return <div className="text-[13px] text-ink-mute">Aucune relance envoyée pour le moment.</div>
   }
 
   return (
@@ -74,9 +70,7 @@ export function InvoiceReminderHistory({
                   {formatDateTime(at)}
                 </p>
               ) : (
-                <p className="text-[11px] font-mono text-ink-faint whitespace-nowrap">
-                  Non envoyé
-                </p>
+                <p className="text-[11px] font-mono text-ink-faint whitespace-nowrap">Non envoyé</p>
               )}
             </div>
           </li>

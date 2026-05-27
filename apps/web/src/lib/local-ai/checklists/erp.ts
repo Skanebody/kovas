@@ -9,7 +9,7 @@
  * pollutions et sinistres antérieurs.
  */
 
-import { TRIGGER_DELAYS, type DiagnosticChecklist } from './types'
+import { type DiagnosticChecklist, TRIGGER_DELAYS } from './types'
 
 export const ERP_CHECKLIST: DiagnosticChecklist = {
   diagnostic: 'erp',
@@ -38,7 +38,8 @@ export const ERP_CHECKLIST: DiagnosticChecklist = {
           id: 'erp_pprn',
           field_name: 'erp.pprn',
           description_short: 'PPRN (Plan Prévention Risques Naturels)',
-          description_full: 'Périmètre PPRN (inondation, mouvement terrain, sécheresse, feu, avalanche).',
+          description_full:
+            'Périmètre PPRN (inondation, mouvement terrain, sécheresse, feu, avalanche).',
           scope: 'global',
           required: true,
           severity: 'critical',
@@ -134,7 +135,8 @@ export const ERP_CHECKLIST: DiagnosticChecklist = {
           id: 'erp_sinistres',
           field_name: 'erp.previous_claims',
           description_short: 'Sinistres antérieurs CatNat',
-          description_full: 'Sinistres indemnisés au titre d\'arrêté CatNat (à déclarer par le vendeur).',
+          description_full:
+            "Sinistres indemnisés au titre d'arrêté CatNat (à déclarer par le vendeur).",
           scope: 'global',
           required: true,
           severity: 'important',

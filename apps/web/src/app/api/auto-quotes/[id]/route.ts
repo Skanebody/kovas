@@ -5,8 +5,12 @@
  *   PATCH /api/auto-quotes/[id]   { lines?, notes?, status? }
  */
 
+import type {
+  AutoQuoteData,
+  AutoQuoteExtraction,
+  QuoteLine,
+} from '@/components/quotes/AutoQuoteReview'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import type { AutoQuoteData, AutoQuoteExtraction, QuoteLine } from '@/components/quotes/AutoQuoteReview'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
@@ -97,7 +101,11 @@ export async function PATCH(
       supabase: Awaited<ReturnType<typeof getCurrentUser>>['supabase']
     }> => {
       // wrap pour conserver le pattern unauthorized propre
-      return getCurrentUser().then((u) => ({ orgId: u.orgId, userId: u.user.id, supabase: u.supabase }))
+      return getCurrentUser().then((u) => ({
+        orgId: u.orgId,
+        userId: u.user.id,
+        supabase: u.supabase,
+      }))
     })()
 
     const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }

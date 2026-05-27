@@ -21,7 +21,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // @ts-expect-error : Deno global disponible au runtime Edge
-const Deno = globalThis.Deno as { env: { get(key: string): string | undefined }; serve: (handler: (req: Request) => Response | Promise<Response>) => void }
+const Deno = globalThis.Deno as {
+  env: { get(key: string): string | undefined }
+  serve: (handler: (req: Request) => Response | Promise<Response>) => void
+}
 
 const BATCH_LIMIT = 500
 const MIN_DAYS_BETWEEN_SENDS = 7
@@ -74,7 +77,10 @@ async function decideStep(
   const sent3 = diag.pre_notification_email_3_sent_at
 
   const lastSent =
-    [sent1, sent2, sent3].filter((x): x is string => x !== null).sort().pop() ?? null
+    [sent1, sent2, sent3]
+      .filter((x): x is string => x !== null)
+      .sort()
+      .pop() ?? null
   const daysSinceLast = daysSince(lastSent)
   if (daysSinceLast !== null && daysSinceLast < MIN_DAYS_BETWEEN_SENDS) return null
 

@@ -23,10 +23,10 @@ import { Card } from '@/components/ui/card'
 import { useMemo, useState, useTransition } from 'react'
 import { publishDraft, saveDraft, updateDraftStatus } from '../../actions'
 import {
-  computeEeatScore,
-  computeEeatValidations,
   type EeatValidations,
   type SeoDraftStatus,
+  computeEeatScore,
+  computeEeatValidations,
 } from '../../eeat'
 import { EeatValidator } from './EeatValidator'
 
@@ -66,10 +66,7 @@ export function SeoDraftEditor({ initialDraft }: SeoDraftEditorProps) {
   const [isPending, startTransition] = useTransition()
 
   // Validations EEAT recomputées à chaque keystroke (memo, regex légères).
-  const liveValidations: EeatValidations = useMemo(
-    () => computeEeatValidations(content),
-    [content],
-  )
+  const liveValidations: EeatValidations = useMemo(() => computeEeatValidations(content), [content])
   const liveScore = computeEeatScore(liveValidations)
 
   function announce(kind: 'ok' | 'error', text: string): void {
@@ -130,7 +127,8 @@ export function SeoDraftEditor({ initialDraft }: SeoDraftEditorProps) {
             </h1>
             {initialDraft.keyword ? (
               <p className="mt-1 text-[12px] text-ink-mute">
-                Mot-clé : <span className="font-medium text-ink">{initialDraft.keyword.display}</span>
+                Mot-clé :{' '}
+                <span className="font-medium text-ink">{initialDraft.keyword.display}</span>
                 {initialDraft.keyword.category ? (
                   <span> · {initialDraft.keyword.category}</span>
                 ) : null}

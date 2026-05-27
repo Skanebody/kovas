@@ -33,9 +33,7 @@ export async function GET(): Promise<NextResponse<LaunchOfferStatus>> {
     // si elle n'existe pas (404 / 42P01), on retombe sur la valeur par défaut.
     // Cast : la vue n'est pas encore dans le type `Database` généré (migration
     // backend en cours dans une autre vague).
-    const fromUntyped = supabase.from as unknown as (
-      table: string,
-    ) => {
+    const fromUntyped = supabase.from as unknown as (table: string) => {
       select: (cols: string) => {
         maybeSingle: () => Promise<{
           data: { positions_taken?: number | null; positions_remaining?: number | null } | null

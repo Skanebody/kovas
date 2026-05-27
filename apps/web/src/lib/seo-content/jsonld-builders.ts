@@ -129,11 +129,7 @@ export function buildLocalBusinessListLD(
           longitude: d.longitude,
         }
       }
-      if (
-        d.ratingAvg !== undefined &&
-        d.ratingCount !== undefined &&
-        d.ratingCount > 0
-      ) {
+      if (d.ratingAvg !== undefined && d.ratingCount !== undefined && d.ratingCount > 0) {
         business.aggregateRating = {
           '@type': 'AggregateRating',
           ratingValue: d.ratingAvg,
@@ -168,13 +164,7 @@ export function buildMockDiagnosticians(
     return Math.abs(hash)
   }
 
-  const firstNames = [
-    'Cabinet',
-    'Expertise',
-    'Diagnostic',
-    'Bureau',
-    'Conseil',
-  ] as const
+  const firstNames = ['Cabinet', 'Expertise', 'Diagnostic', 'Bureau', 'Conseil'] as const
   const lastNames = [
     'Immo',
     'Habitat',
@@ -191,7 +181,7 @@ export function buildMockDiagnosticians(
     const fn = firstNames[seed % firstNames.length]
     const ln = lastNames[(seed >> 4) % lastNames.length]
     if (fn === undefined || ln === undefined) continue
-    const rating = 4 + ((seed % 10) / 10)
+    const rating = 4 + (seed % 10) / 10
     const ratingCount = 12 + (seed % 87)
     result.push({
       id: `${city.slug}-${i}`,
@@ -207,10 +197,7 @@ export function buildMockDiagnosticians(
   return result
 }
 
-export function buildPriceSpecLD(
-  type: DiagnosticType,
-  city: City,
-): Record<string, unknown> {
+export function buildPriceSpecLD(type: DiagnosticType, city: City): Record<string, unknown> {
   const range = DIAGNOSTIC_PRICE_RANGES[type]
   return {
     '@context': 'https://schema.org',

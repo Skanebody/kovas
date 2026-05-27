@@ -1,8 +1,8 @@
+import { validateProEmail } from '@/lib/validation/email'
+import type { Database } from '@kovas/database/types'
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
-import type { Database } from '@kovas/database/types'
-import { validateProEmail } from '@/lib/validation/email'
 
 /** SIRET Luhn valide — aligné sur tools/test-trial-protection.mjs (SNCF test) */
 const DEV_BOOTSTRAP_SIRET = '36252187900001'
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
   }
 
   const redirectUrl = new URL('/dashboard/dashboard', request.nextUrl.origin)
-  let response = NextResponse.redirect(redirectUrl)
+  const response = NextResponse.redirect(redirectUrl)
 
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
 
   const trySignIn = () => supabase.auth.signInWithPassword({ email, password })
 
-  let { error: signInError } = await trySignIn()
+  const { error: signInError } = await trySignIn()
   if (!signInError) {
     return response
   }
@@ -95,9 +95,7 @@ export async function GET(request: NextRequest) {
     user_metadata: { full_name: 'Dev KOVAS' },
   })
 
-  const duplicateEmail =
-    createError &&
-    /already|registered|exists/i.test(createError.message ?? '')
+  const duplicateEmail = createError && /already|registered|exists/i.test(createError.message ?? '')
 
   if (createError && !duplicateEmail) {
     return NextResponse.json({ error: createError.message }, { status: 500 })

@@ -40,8 +40,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? ''
 const BREVO_SMS_SENDER = Deno.env.get('BREVO_SMS_SENDER') ?? 'KOVAS'
-const PUBLIC_BASE_URL =
-  Deno.env.get('KOVAS_PUBLIC_BASE_URL') ?? 'https://kovas.fr'
+const PUBLIC_BASE_URL = Deno.env.get('KOVAS_PUBLIC_BASE_URL') ?? 'https://kovas.fr'
 
 const E164_REGEX = /^\+[1-9]\d{1,14}$/
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -113,13 +112,7 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: 'invalid_json' }, 400)
   }
 
-  const {
-    missionId,
-    organizationId,
-    clientPhone,
-    photoDescription,
-    requestedBy,
-  } = body ?? {}
+  const { missionId, organizationId, clientPhone, photoDescription, requestedBy } = body ?? {}
 
   if (
     typeof missionId !== 'string' ||
@@ -174,10 +167,7 @@ Deno.serve(async (req: Request) => {
       .from('client_photo_requests')
       .update({ status: 'cancelled' })
       .eq('id', inserted.id)
-    return jsonResponse(
-      { error: 'sms_send_failed', message: smsResult.error ?? 'unknown' },
-      502,
-    )
+    return jsonResponse({ error: 'sms_send_failed', message: smsResult.error ?? 'unknown' }, 502)
   }
 
   return jsonResponse({

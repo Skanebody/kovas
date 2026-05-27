@@ -35,18 +35,21 @@ export async function POST(request: Request): Promise<NextResponse<InitResponse>
     .maybeSingle()) as { data: { id: string; status: string | null } | null }
 
   if (!subRes.data || subRes.data.status !== 'active') {
-    return NextResponse.json(
-      { ok: false, error: 'no active subscription' },
-      { status: 409 },
-    )
+    return NextResponse.json({ ok: false, error: 'no active subscription' }, { status: 409 })
   }
 
   // Vérifier qu'aucune cancellation in-progress n'existe déjà.
   const existing = (await (
     admin.from('cancellations') as unknown as {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
-          is: (col: string, val: null) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
+          is: (
+            col: string,
+            val: null,
+          ) => {
             limit: (n: number) => {
               maybeSingle: () => Promise<{ data: { id: string } | null }>
             }
@@ -65,8 +68,10 @@ export async function POST(request: Request): Promise<NextResponse<InitResponse>
     return NextResponse.json({ ok: true, cancellationId: existing.data.id })
   }
 
-  const draftFeedback =
-    '[draft cancellation in progress — to be filled at step 3]___'.padEnd(50, '_')
+  const draftFeedback = '[draft cancellation in progress — to be filled at step 3]___'.padEnd(
+    50,
+    '_',
+  )
 
   const inserted = (await (
     admin.from('cancellations') as unknown as {

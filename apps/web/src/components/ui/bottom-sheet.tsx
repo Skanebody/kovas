@@ -138,9 +138,7 @@ interface BottomSheetBodyProps {
 
 /** Body principal du bottom sheet — texte standard 14px ink-soft. */
 export function BottomSheetBody({ children, className }: BottomSheetBodyProps) {
-  return (
-    <div className={cn('px-4 py-3 text-sm text-ink-soft', className)}>{children}</div>
-  )
+  return <div className={cn('px-4 py-3 text-sm text-ink-soft', className)}>{children}</div>
 }
 
 interface BottomSheetActionsProps {

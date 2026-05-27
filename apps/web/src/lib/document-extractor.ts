@@ -144,7 +144,13 @@ raw_fields : tout ce qui peut être pertinent pour un diagnostic immobilier.`
  */
 export function normalizeDocKind(userKind: string | null): DocumentKind {
   const k = (userKind ?? 'autre').toLowerCase()
-  if (k === 'facture_energie' || k === 'ancien_dpe' || k === 'acte' || k === 'plan' || k === 'reglement_copro') {
+  if (
+    k === 'facture_energie' ||
+    k === 'ancien_dpe' ||
+    k === 'acte' ||
+    k === 'plan' ||
+    k === 'reglement_copro'
+  ) {
     return k as DocumentKind
   }
   return 'autre'
@@ -237,10 +243,7 @@ export async function extractDocument(
   const outputTokens = response.usage.output_tokens
   const cachedInput = response.usage.cache_read_input_tokens ?? 0
   const billableInput = inputTokens - cachedInput
-  const costUsd =
-    billableInput * 0.000003 +
-    cachedInput * 0.0000003 +
-    outputTokens * 0.000015
+  const costUsd = billableInput * 0.000003 + cachedInput * 0.0000003 + outputTokens * 0.000015
   const costEur = Math.round(costUsd * 0.93 * 100000) / 100000
 
   return { data: parsed, costEur, latencyMs }

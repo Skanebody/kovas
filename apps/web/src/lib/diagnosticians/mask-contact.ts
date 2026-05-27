@@ -25,10 +25,14 @@ export function maskPhone(phone: string): string {
   const prefix = clean.startsWith('+33') ? '+33' : clean.slice(0, 2)
   const middle = clean.slice(prefix.length, -2).replace(/\d/g, '*')
   // Format lisible : +33 X ** ** ** XX
-  return `${prefix} ${middle.slice(0, 1)} ${middle.slice(1).match(/.{1,2}/g)?.join(' ') ?? ''} ${last2}`.replace(
-    /\s+/g,
-    ' ',
-  ).trim()
+  return `${prefix} ${middle.slice(0, 1)} ${
+    middle
+      .slice(1)
+      .match(/.{1,2}/g)
+      ?.join(' ') ?? ''
+  } ${last2}`
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 /**

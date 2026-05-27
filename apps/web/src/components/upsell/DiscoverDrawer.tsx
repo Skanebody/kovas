@@ -1,5 +1,20 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+import {
+  ADDON_MODULES,
+  ADDON_PACKS,
+  type AddonCode,
+  type AddonPackCode,
+  PRICING_PLANS,
+  type PricingPlanCode,
+} from '@/lib/pricing-plans'
+import type { UserAccess } from '@/lib/upsell/access-control'
+import { getEffectiveAddons } from '@/lib/upsell/access-control'
+import { startTrialAction } from '@/lib/upsell/actions'
+import type { PendingUpsellSuggestion } from '@/lib/upsell/load-access'
+import { UPSELL_CATALOG, type UpsellCatalogEntry } from '@/lib/upsell/upsell-content'
+import { cn } from '@/lib/utils'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
   ArrowRight,
@@ -20,25 +35,10 @@ import {
   Users2,
   X,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import { useMemo, useState } from 'react'
 import { useTransition } from 'react'
-import { startTrialAction } from '@/lib/upsell/actions'
-import {
-  ADDON_MODULES,
-  ADDON_PACKS,
-  PRICING_PLANS,
-  type AddonCode,
-  type AddonPackCode,
-  type PricingPlanCode,
-} from '@/lib/pricing-plans'
-import { UPSELL_CATALOG, type UpsellCatalogEntry } from '@/lib/upsell/upsell-content'
-import type { UserAccess } from '@/lib/upsell/access-control'
-import { getEffectiveAddons } from '@/lib/upsell/access-control'
-import type { PendingUpsellSuggestion } from '@/lib/upsell/load-access'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Receipt,
@@ -151,12 +151,18 @@ export function DiscoverDrawer({ open, onOpenChange, access, suggestions }: Disc
 
           <div className="flex-1 overflow-y-auto px-6 py-5">
             {activeTab === 'trial' && (
-              <TrialTab access={access} recommendedTargets={recommendedTargets} onClose={() => onOpenChange(false)} />
+              <TrialTab
+                access={access}
+                recommendedTargets={recommendedTargets}
+                onClose={() => onOpenChange(false)}
+              />
             )}
             {activeTab === 'upgrade' && (
               <UpgradeTab access={access} onClose={() => onOpenChange(false)} />
             )}
-            {activeTab === 'catalog' && <CatalogTab access={access} onClose={() => onOpenChange(false)} />}
+            {activeTab === 'catalog' && (
+              <CatalogTab access={access} onClose={() => onOpenChange(false)} />
+            )}
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
@@ -333,7 +339,9 @@ function UpgradeTab({ access, onClose }: { access: UserAccess; onClose: () => vo
         </h3>
         <p className="text-[13px] text-ink-mute mt-2 leading-relaxed">{entry.description}</p>
         <div className="mt-4 flex items-baseline gap-2">
-          <span className="font-serif italic text-3xl text-ink">{(targetPlan?.monthlyPrice ?? 0) / 100}€</span>
+          <span className="font-serif italic text-3xl text-ink">
+            {(targetPlan?.monthlyPrice ?? 0) / 100}€
+          </span>
           <span className="font-mono text-[11px] text-ink-mute">/ mois HT</span>
           {deltaCents > 0 && currentPlan ? (
             <span className="font-mono text-[10px] text-ink-mute ml-auto">
@@ -351,7 +359,9 @@ function UpgradeTab({ access, onClose }: { access: UserAccess; onClose: () => vo
           <ul className="space-y-1.5">
             {uniqueFeatures.slice(0, 7).map((f) => (
               <li key={f} className="flex items-start gap-2 text-[13px] text-ink">
-                <span aria-hidden className="text-ink-mute mt-0.5">→</span>
+                <span aria-hidden className="text-ink-mute mt-0.5">
+                  →
+                </span>
                 <span>{f}</span>
               </li>
             ))}
@@ -359,7 +369,13 @@ function UpgradeTab({ access, onClose }: { access: UserAccess; onClose: () => vo
         </div>
       ) : null}
 
-      <Button variant="accent" size="default" onClick={handleUpgrade} disabled={isPending} className="w-full">
+      <Button
+        variant="accent"
+        size="default"
+        onClick={handleUpgrade}
+        disabled={isPending}
+        className="w-full"
+      >
         Passer sur {targetPlan?.name}
         <ArrowUpRight className="size-3.5" />
       </Button>
@@ -371,7 +387,9 @@ function UpgradeTab({ access, onClose }: { access: UserAccess; onClose: () => vo
 function CatalogTab({ access: _access, onClose }: { access: UserAccess; onClose: () => void }) {
   const router = useRouter()
   const [query, setQuery] = useState('')
-  const [category, setCategory] = useState<'all' | 'productivity' | 'compliance' | 'commercial' | 'cabinet'>('all')
+  const [category, setCategory] = useState<
+    'all' | 'productivity' | 'compliance' | 'commercial' | 'cabinet'
+  >('all')
 
   const allEntries = useMemo(() => {
     const tiers = PRICING_PLANS.map((p) => UPSELL_CATALOG[p.code as PricingPlanCode])
@@ -384,7 +402,8 @@ function CatalogTab({ access: _access, onClose }: { access: UserAccess; onClose:
     const q = query.trim().toLowerCase()
     return allEntries.filter((e) => {
       if (category !== 'all' && e.category !== category) return false
-      if (q && !e.title.toLowerCase().includes(q) && !e.description.toLowerCase().includes(q)) return false
+      if (q && !e.title.toLowerCase().includes(q) && !e.description.toLowerCase().includes(q))
+        return false
       return true
     })
   }, [allEntries, category, query])
@@ -429,13 +448,23 @@ function CatalogTab({ access: _access, onClose }: { access: UserAccess; onClose:
               }}
               className="w-full text-left rounded-md border border-rule/60 bg-paper-soft/50 hover:bg-paper px-3 py-3 flex items-start gap-3 transition-colors"
             >
-              <span aria-hidden className="size-8 rounded-md bg-chartreuse/15 flex items-center justify-center shrink-0">
+              <span
+                aria-hidden
+                className="size-8 rounded-md bg-chartreuse/15 flex items-center justify-center shrink-0"
+              >
                 <Icon className="size-3.5 text-[#0F1419]" />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-[13px] text-ink leading-tight truncate">{entry.title}</p>
+                <p className="font-medium text-[13px] text-ink leading-tight truncate">
+                  {entry.title}
+                </p>
                 <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute mt-0.5">
-                  {entry.priceLabel} · {entry.kind === 'tier_upgrade' ? 'Forfait' : entry.kind === 'pack' ? 'Pack' : 'Module'}
+                  {entry.priceLabel} ·{' '}
+                  {entry.kind === 'tier_upgrade'
+                    ? 'Forfait'
+                    : entry.kind === 'pack'
+                      ? 'Pack'
+                      : 'Module'}
                 </p>
               </div>
               <ArrowRight className="size-3.5 text-ink-mute mt-1.5" />

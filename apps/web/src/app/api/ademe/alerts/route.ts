@@ -49,9 +49,10 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   const { orgId, supabase } = await getCurrentUser()
-  const body = (await request.json().catch(() => null)) as
-    | { id?: string; action?: 'acknowledge' | 'resolve' }
-    | null
+  const body = (await request.json().catch(() => null)) as {
+    id?: string
+    action?: 'acknowledge' | 'resolve'
+  } | null
 
   if (!body?.id || !body.action) {
     return NextResponse.json({ error: 'Missing id or action' }, { status: 400 })

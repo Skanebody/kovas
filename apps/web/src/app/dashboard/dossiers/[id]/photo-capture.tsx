@@ -1,7 +1,5 @@
 'use client'
 
-import { Camera, ChevronDown, Loader2 } from 'lucide-react'
-import { useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -12,6 +10,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Select } from '@/components/ui/select'
+import { buildPhotoFileName } from '@/lib/file-naming'
+import { getCurrentPosition } from '@/lib/geolocation'
+import { compressImage } from '@/lib/image-compress'
 import {
   GROUP_LABELS,
   type ViewType,
@@ -19,11 +20,10 @@ import {
   pinnedViewTypes,
   viewTypesByGroup,
 } from '@/lib/photo-view-types'
-import { buildPhotoFileName } from '@/lib/file-naming'
-import { getCurrentPosition } from '@/lib/geolocation'
-import { compressImage } from '@/lib/image-compress'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { Camera, ChevronDown, Loader2 } from 'lucide-react'
+import { useId, useRef, useState } from 'react'
 import { createPhotoAction } from './actions'
 
 interface PhotoCaptureProps {
@@ -72,7 +72,7 @@ export function PhotoCapture({
     // Compteur local (incrémenté par photo dans la même session)
     let nextPhotoIndex = selectedRoom ? (photoCountsByRoom[selectedRoom] ?? 0) + 1 : 1
     const roomData = rooms.find((r) => r.id === selectedRoom)
-    const roomIndex = selectedRoom ? roomIndexById[selectedRoom] ?? 1 : 1
+    const roomIndex = selectedRoom ? (roomIndexById[selectedRoom] ?? 1) : 1
 
     try {
       for (let i = 0; i < files.length; i++) {
@@ -199,10 +199,9 @@ export function PhotoCapture({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-7 text-xs">
-                {!pinned.find((v) => v.id === selectedView) &&
-                  selectedView !== 'vue_generale' && (
-                    <span className="font-medium">{getViewType(selectedView)?.label} · </span>
-                  )}
+                {!pinned.find((v) => v.id === selectedView) && selectedView !== 'vue_generale' && (
+                  <span className="font-medium">{getViewType(selectedView)?.label} · </span>
+                )}
                 Plus
                 <ChevronDown className="size-3" />
               </Button>

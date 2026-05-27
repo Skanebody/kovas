@@ -232,9 +232,9 @@ export function SearchBar({ initialQuery = '', preservedParams = {} }: SearchBar
       (err) => {
         setLocating(false)
         if (err.code === err.PERMISSION_DENIED) {
-          setLocError('Vous avez refusé la géolocalisation.')
+          setLocError('Tu as refusé la géolocalisation.')
         } else {
-          setLocError('Position introuvable. Réessayez plus tard.')
+          setLocError('Position introuvable. Réessaie plus tard.')
         }
       },
       { enableHighAccuracy: false, timeout: 7000, maximumAge: 5 * 60 * 1000 },

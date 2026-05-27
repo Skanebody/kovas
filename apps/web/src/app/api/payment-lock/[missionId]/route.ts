@@ -8,8 +8,8 @@
  * Authority : CLAUDE.md §3 + §10 RGPD.
  */
 
-import { getCurrentUser } from '@/lib/auth/current-user'
 import type { PaymentLockReminder, PaymentLockState } from '@/components/payment/ReportLockToggle'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'

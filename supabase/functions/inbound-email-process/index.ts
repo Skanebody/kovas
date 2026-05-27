@@ -144,7 +144,7 @@ const EXTRACT_TOOL = {
       },
       extracted_client_phone: {
         type: ['string', 'null'],
-        description: "Numéro de téléphone format français (+33...). null sinon.",
+        description: 'Numéro de téléphone format français (+33...). null sinon.',
       },
     },
     required: [
@@ -199,11 +199,7 @@ async function extractQuoteFromEmail(
   return null
 }
 
-async function notifyTelegram(
-  botToken: string,
-  chatId: string,
-  text: string,
-): Promise<void> {
+async function notifyTelegram(botToken: string, chatId: string, text: string): Promise<void> {
   try {
     await fetch(`${TELEGRAM_API_BASE}${botToken}/sendMessage`, {
       method: 'POST',
@@ -287,8 +283,7 @@ Deno.serve(async (req: Request) => {
       const ownerUserId = ownerMembership?.user_id ?? null
 
       const subject = item.Subject ?? '(sans sujet)'
-      const body =
-        item.ExtractedMarkdownMessage ?? item.RawTextBody ?? item.RawHtmlBody ?? ''
+      const body = item.ExtractedMarkdownMessage ?? item.RawTextBody ?? item.RawHtmlBody ?? ''
       const fromAddress = item.From?.Address ?? '(inconnu)'
 
       // 2b. Extraction IA
@@ -428,17 +423,14 @@ Deno.serve(async (req: Request) => {
         results.push({ status: 'pending_validation', auto_quote_id: aq.id })
       } else if (internalSecret) {
         // 2e. Auto-generation via auto-quote-generate
-        const genResp = await fetch(
-          `${supabaseUrl}/functions/v1/auto-quote-generate`,
-          {
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              Authorization: `Bearer ${internalSecret}`,
-            },
-            body: JSON.stringify({ auto_quote_id: aq.id }),
+        const genResp = await fetch(`${supabaseUrl}/functions/v1/auto-quote-generate`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            Authorization: `Bearer ${internalSecret}`,
           },
-        )
+          body: JSON.stringify({ auto_quote_id: aq.id }),
+        })
         if (genResp.ok) {
           results.push({ status: 'auto_generated', auto_quote_id: aq.id })
         } else {

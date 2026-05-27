@@ -7,10 +7,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import {
-  DEFAULT_ALERT_PREFERENCES,
-  type AlertPreferences,
-} from './types'
+import { type AlertPreferences, DEFAULT_ALERT_PREFERENCES } from './types'
 
 interface AlertPreferencesRow {
   organization_id: string
@@ -58,8 +55,7 @@ function preferencesToRow(
     row.fraud_detection_enabled = prefs.fraudDetectionEnabled
   if (prefs.fraudSensitivity !== undefined) row.fraud_sensitivity = prefs.fraudSensitivity
   if (prefs.preExportEnabled !== undefined) row.pre_export_enabled = prefs.preExportEnabled
-  if (prefs.preExportStrictness !== undefined)
-    row.pre_export_strictness = prefs.preExportStrictness
+  if (prefs.preExportStrictness !== undefined) row.pre_export_strictness = prefs.preExportStrictness
   if (prefs.proactiveSuggestionsMode !== undefined)
     row.proactive_suggestions_mode = prefs.proactiveSuggestionsMode
   if (prefs.coachAiEnabled !== undefined) row.coach_ai_enabled = prefs.coachAiEnabled
@@ -72,8 +68,7 @@ function preferencesToRow(
     row.lead_notifications_quiet_hours_end = prefs.leadQuietHoursEnd
   if (prefs.leadWeekendNotifications !== undefined)
     row.lead_notifications_weekend = prefs.leadWeekendNotifications
-  if (prefs.gamificationEnabled !== undefined)
-    row.gamification_enabled = prefs.gamificationEnabled
+  if (prefs.gamificationEnabled !== undefined) row.gamification_enabled = prefs.gamificationEnabled
   if (prefs.levelNotificationsEnabled !== undefined)
     row.level_notifications_enabled = prefs.levelNotificationsEnabled
   return row

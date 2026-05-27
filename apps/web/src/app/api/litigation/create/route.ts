@@ -9,8 +9,8 @@
  * 3. Renvoie le LitigationData complet.
  */
 
-import { getCurrentUser } from '@/lib/auth/current-user'
 import type { LitigationData } from '@/components/defense/LitigationWorkflow'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'

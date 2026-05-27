@@ -21,7 +21,7 @@ export function AnnuairePlansGrid({ currentCode, recommendedCode }: AnnuairePlan
           recommended={offer.code === recommendedCode}
           current={offer.code === currentCode}
           position="grid_annuaire"
-          ctaHref={offer.priceMonthlyCents === 0 ? '/app/account' : '/app/account'}
+          ctaHref="/dashboard/annuaire"
           secondaryCtaLabel="Voir un exemple de fiche"
         />
       ))}

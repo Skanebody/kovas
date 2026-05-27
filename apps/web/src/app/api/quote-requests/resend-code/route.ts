@@ -8,15 +8,15 @@
  * (Sécurité contre spam des codes — utilise rate_limits avec clé spéciale.)
  */
 
-import type { Database } from '@kovas/database/types'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
 import {
   regenerateVerificationCode,
   sendVerificationEmail,
 } from '@/lib/anti-spam/email-verification'
 import { checkRateLimit, recordRateLimitHit } from '@/lib/anti-spam/rate-limits'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 export const runtime = 'nodejs'
 export const maxDuration = 15
@@ -99,8 +99,7 @@ export async function POST(request: Request): Promise<Response> {
   const { code } = await regenerateVerificationCode(admin, row.id)
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (request.headers.get('origin') ?? 'https://kovas.fr')
+    process.env.NEXT_PUBLIC_SITE_URL ?? request.headers.get('origin') ?? 'https://kovas.fr'
 
   try {
     await sendVerificationEmail(admin, {

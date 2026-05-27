@@ -12,15 +12,14 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk'
-import OpenAI from 'openai'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import OpenAI from 'openai'
 
 // ────────────────────────────────────────────────────────────
 // Constantes & types
 // ────────────────────────────────────────────────────────────
 
-const ANTHROPIC_MODEL =
-  process.env.ANTHROPIC_MODEL_REGULATORY ?? 'claude-sonnet-4-6'
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL_REGULATORY ?? 'claude-sonnet-4-6'
 const OPENAI_EMBED_MODEL = 'text-embedding-3-small'
 
 const ANTHROPIC_INPUT_USD_PER_MTOK = 3
@@ -219,7 +218,7 @@ Analyse le document et appelle obligatoirement l'outil submit_regulatory_analysi
       })
 
       const toolUse = response.content.find(
-        (c): c is Extract<typeof response.content[number], { type: 'tool_use' }> =>
+        (c): c is Extract<(typeof response.content)[number], { type: 'tool_use' }> =>
           c.type === 'tool_use' && c.name === 'submit_regulatory_analysis',
       )
       if (!toolUse) {

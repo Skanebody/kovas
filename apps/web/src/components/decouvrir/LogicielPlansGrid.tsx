@@ -23,7 +23,7 @@ export function LogicielPlansGrid({ currentCode, recommendedCode }: LogicielPlan
           recommended={offer.code === recommendedCode}
           current={offer.code === currentCode}
           position="grid_logiciel"
-          ctaHref={offer.priceMonthlyCents === 0 ? '/signup' : '/app/account'}
+          ctaHref={offer.priceMonthlyCents === 0 ? '/signup' : '/dashboard/account'}
           secondaryCtaLabel="Comparer"
         />
       ))}

@@ -88,8 +88,8 @@ export function LegalRouteShell({ document }: LegalRouteShellProps) {
       <footer className="border-t border-[#0F1419]/[0.08] px-5 sm:px-8 py-8 text-[12px] text-[#0F1419]/55 bg-[#F5F7F4]">
         <div className="mx-auto max-w-[1240px] flex flex-col md:flex-row md:justify-between gap-3">
           <p>
-            Document validé en sa {document.versionLabel}. © 2026 SASU{' '}
-            {COMPANY_IDENTITY.legalName} · SIREN {COMPANY_IDENTITY.sirenFormatted}.
+            Document validé en sa {document.versionLabel}. © 2026 SASU {COMPANY_IDENTITY.legalName}{' '}
+            · SIREN {COMPANY_IDENTITY.sirenFormatted}.
           </p>
           <nav aria-label="Navigation pack juridique" className="flex flex-wrap gap-x-4 gap-y-1">
             <Link href="/mentions-legales" className="hover:text-[#0F1419] transition-colors">

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { NextResponse } from 'next/server'
 
 /**
  * GET /api/factures/[id]/xml
@@ -7,10 +7,7 @@ import { getCurrentUser } from '@/lib/auth/current-user'
  * Renvoie le XML Factur-X d'une facture pour téléchargement.
  * RLS Supabase protège l'accès (is_member_of via SELECT).
  */
-export async function GET(
-  _req: Request,
-  ctx: { params: Promise<{ id: string }> },
-) {
+export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params
   const { supabase, orgId } = await getCurrentUser()
 

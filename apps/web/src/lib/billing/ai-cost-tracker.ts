@@ -13,12 +13,8 @@
  * Skip si `is_grandfathered = true` (anciens plans : pas de hard caps).
  */
 
+import { PRICING_PLANS, type PricingPlanCode, isLegacyPlan } from '@/lib/pricing-plans'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import {
-  PRICING_PLANS,
-  isLegacyPlan,
-  type PricingPlanCode,
-} from '@/lib/pricing-plans'
 
 export type AiUsageType = 'whisper' | 'vision' | 'claude_input' | 'claude_output'
 
@@ -88,16 +84,26 @@ async function getCapsForOrg(
 } | null> {
   const { data: sub } = await supabase
     .from('subscriptions')
-    .select('organization_id, tier, is_grandfathered, hard_cap_whisper_seconds, hard_cap_vision_calls')
+    .select(
+      'organization_id, tier, is_grandfathered, hard_cap_whisper_seconds, hard_cap_vision_calls',
+    )
     .eq('organization_id', orgId)
     .maybeSingle<SubscriptionRow>()
 
   if (!sub || !sub.tier) return null
   if (sub.is_grandfathered === true) {
-    return { isGrandfathered: true, whisperCap: Number.POSITIVE_INFINITY, visionCap: Number.POSITIVE_INFINITY }
+    return {
+      isGrandfathered: true,
+      whisperCap: Number.POSITIVE_INFINITY,
+      visionCap: Number.POSITIVE_INFINITY,
+    }
   }
   if (isLegacyPlan(sub.tier)) {
-    return { isGrandfathered: true, whisperCap: Number.POSITIVE_INFINITY, visionCap: Number.POSITIVE_INFINITY }
+    return {
+      isGrandfathered: true,
+      whisperCap: Number.POSITIVE_INFINITY,
+      visionCap: Number.POSITIVE_INFINITY,
+    }
   }
 
   const tierCode = sub.tier as PricingPlanCode
@@ -201,7 +207,11 @@ export async function isAiDegradedMode(
   if (row.degraded_mode_at !== null) {
     const reasonW = row.whisper_seconds >= caps.whisperCap
     const reasonV = caps.visionCap > 0 && row.vision_calls >= caps.visionCap
-    const reason: DegradedModeStatus['reason'] = reasonW ? 'whisper_cap' : reasonV ? 'vision_cap' : 'whisper_cap'
+    const reason: DegradedModeStatus['reason'] = reasonW
+      ? 'whisper_cap'
+      : reasonV
+        ? 'vision_cap'
+        : 'whisper_cap'
     return { degraded: true, reason, resetAt }
   }
 

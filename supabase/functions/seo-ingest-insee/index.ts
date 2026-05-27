@@ -23,7 +23,7 @@
 //   - INSEE_DONNEES_LOCALES_BASE (optionnel)
 // ============================================
 
-import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
 
 // ============================================
 // Types
@@ -130,12 +130,7 @@ const SAMPLE_CITIES: SampleCity[] = [
 // Helpers
 // ============================================
 function normalizeKeyword(raw: string): string {
-  return raw
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim()
 }
 
 function sleep(ms: number): Promise<void> {
@@ -194,10 +189,7 @@ async function upsertKeyword(
   return inserted.id as string
 }
 
-async function insertSignal(
-  supabase: SupabaseClient,
-  params: InsertSignalParams,
-): Promise<void> {
+async function insertSignal(supabase: SupabaseClient, params: InsertSignalParams): Promise<void> {
   const { error } = await supabase.from('seo_keyword_signals').insert({
     keyword_id: params.keywordId,
     source_code: params.sourceCode,
@@ -222,8 +214,7 @@ async function updateSeoSource(
     .maybeSingle()
 
   if (existing) {
-    const prev =
-      typeof existing.total_signals_count === 'number' ? existing.total_signals_count : 0
+    const prev = typeof existing.total_signals_count === 'number' ? existing.total_signals_count : 0
     await supabase
       .from('seo_sources')
       .update({
@@ -314,8 +305,7 @@ async function fetchPopulation(
 ): Promise<{ ok: boolean; population: number | null; status: number }> {
   // Population totale 2020 (recensement) : POPSEXEAGE-ENS / SEXE-2 (toutes
   // sexes confondus) sur le geo-COM correspondant
-  const url =
-    `${apiBase.replace(/\/$/, '')}/donnees/geo-COM-${insee}@GEO2023RP2020/SEXE-2.POPSEXEAGE-ENS`
+  const url = `${apiBase.replace(/\/$/, '')}/donnees/geo-COM-${insee}@GEO2023RP2020/SEXE-2.POPSEXEAGE-ENS`
 
   try {
     const res = await fetch(url, {
@@ -367,10 +357,10 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
   if (!supabaseUrl || !serviceKey) {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'missing supabase env' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ ok: false, error: 'missing supabase env' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   const supabase = createClient(supabaseUrl, serviceKey, {
@@ -488,10 +478,10 @@ Deno.serve(async (req) => {
     await updateSeoSource(supabase, 'insee', stats.signals)
   } catch (err) {
     stats.ok = false
-    return new Response(
-      JSON.stringify({ ok: false, error: (err as Error).message, stats }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ ok: false, error: (err as Error).message, stats }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   stats.durationMs = Date.now() - t0

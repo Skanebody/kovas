@@ -13,7 +13,7 @@
  * Fixtures inline volontairement minimales — pas de DB ni I/O.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import {
   type Mission,
@@ -333,7 +333,7 @@ describe('detectAberrantData', () => {
     expect(signals.some((s) => s.evidence.check === 'class_a_with_high_consumption')).toBe(true)
   })
 
-  it("signale maison ancienne (<1948) classée A sans travaux", () => {
+  it('signale maison ancienne (<1948) classée A sans travaux', () => {
     const m = makeMission({
       id: 'm1',
       propertyId: 'p1',
@@ -345,7 +345,7 @@ describe('detectAberrantData', () => {
     expect(signals.some((s) => s.evidence.check === 'old_building_good_class')).toBe(true)
   })
 
-  it("ne signale rien si mission cohérente", () => {
+  it('ne signale rien si mission cohérente', () => {
     const m = makeMission({
       id: 'm1',
       propertyId: 'p1',
@@ -395,7 +395,7 @@ describe('detectRecurrentPatterns', () => {
     expect(vmcSignal?.severity).toBe('high') // 75% > 50%
   })
 
-  it("ne signale pas si pattern présent dans < 30% des missions", () => {
+  it('ne signale pas si pattern présent dans < 30% des missions', () => {
     const missions: Mission[] = [
       makeMission({
         id: 'm1',
@@ -475,9 +475,27 @@ describe('aggregateRiskSignals', () => {
 
   it('top5 priorise les critical puis high', () => {
     const signals = [
-      { type: 'aberrant_data' as const, severity: 'low' as const, missionId: 'm1', description: '', evidence: {} },
-      { type: 'cadastre_mismatch' as const, severity: 'critical' as const, missionId: 'm2', description: '', evidence: {} },
-      { type: 'class_jump' as const, severity: 'high' as const, missionId: 'm3', description: '', evidence: {} },
+      {
+        type: 'aberrant_data' as const,
+        severity: 'low' as const,
+        missionId: 'm1',
+        description: '',
+        evidence: {},
+      },
+      {
+        type: 'cadastre_mismatch' as const,
+        severity: 'critical' as const,
+        missionId: 'm2',
+        description: '',
+        evidence: {},
+      },
+      {
+        type: 'class_jump' as const,
+        severity: 'high' as const,
+        missionId: 'm3',
+        description: '',
+        evidence: {},
+      },
     ]
     const result = aggregateRiskSignals(signals)
     expect(result.top5[0]?.severity).toBe('critical')
@@ -522,7 +540,7 @@ describe('runAllDetectors', () => {
     expect(aggregate.top5.length).toBeGreaterThan(0)
   })
 
-  it("retourne score 100 sur une liste de missions parfaitement saines", () => {
+  it('retourne score 100 sur une liste de missions parfaitement saines', () => {
     const missions: Mission[] = [
       makeMission({
         id: 'm1',

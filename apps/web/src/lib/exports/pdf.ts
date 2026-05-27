@@ -75,7 +75,7 @@ export function generatePdf(data: MissionExportData): Buffer {
 
   // Client block
   if (data.client) {
-    y = section(doc, 'Donneur d\'ordre', y, margin)
+    y = section(doc, "Donneur d'ordre", y, margin)
     y = kv(doc, 'Nom', data.client.display_name, y, margin)
     y = kv(doc, 'Type', data.client.type, y, margin)
     if (data.client.email) y = kv(doc, 'Email', data.client.email, y, margin)
@@ -138,7 +138,11 @@ export function generatePdf(data: MissionExportData): Buffer {
   doc.setFontSize(8)
   doc.setTextColor(128)
   const footY = doc.internal.pageSize.getHeight() - 26
-  doc.text(`Généré le ${new Date(data.exportedAt).toLocaleString('fr-FR')} via kovas.fr`, margin, footY)
+  doc.text(
+    `Généré le ${new Date(data.exportedAt).toLocaleString('fr-FR')} via kovas.fr`,
+    margin,
+    footY,
+  )
   doc.setTextColor(0)
 
   return Buffer.from(doc.output('arraybuffer'))

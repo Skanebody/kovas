@@ -49,7 +49,21 @@ const RESPONSE_SCHEMA = {
       items: {
         type: 'object',
         properties: {
-          kind: { type: 'string', enum: ['chaudiere', 'chauffe_eau', 'radiateur', 'pac', 'climatisation', 'fenetre', 'isolation', 'ventilation', 'tableau_elec', 'autre'] },
+          kind: {
+            type: 'string',
+            enum: [
+              'chaudiere',
+              'chauffe_eau',
+              'radiateur',
+              'pac',
+              'climatisation',
+              'fenetre',
+              'isolation',
+              'ventilation',
+              'tableau_elec',
+              'autre',
+            ],
+          },
           brand: { type: 'string' },
           model: { type: 'string' },
           energy_class: { type: 'string' },
@@ -106,7 +120,10 @@ export async function structureWithClaude(
   }
 
   // Strip markdown fences if present
-  const cleaned = block.text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '')
+  const cleaned = block.text
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/, '')
   const parsed = JSON.parse(cleaned) as Partial<VoiceParsedData>
 
   // Approximate cost calculation (Haiku pricing: $0.80/M input, $4/M output)
@@ -115,9 +132,9 @@ export async function structureWithClaude(
   const cachedInput = response.usage.cache_read_input_tokens ?? 0
   const billableInput = inputTokens - cachedInput
   const costUsd =
-    (billableInput * 0.0000008) +
-    (cachedInput * 0.00000008) + // cache read is 10x cheaper
-    (outputTokens * 0.000004)
+    billableInput * 0.0000008 +
+    cachedInput * 0.00000008 + // cache read is 10x cheaper
+    outputTokens * 0.000004
   const costEur = Math.round(costUsd * 0.93 * 100000) / 100000
 
   return {

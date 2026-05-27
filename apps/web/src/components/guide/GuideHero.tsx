@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
 import type { Guide } from '@/lib/guides/types'
+import { cn } from '@/lib/utils'
 import { Clock, FileText, RefreshCw } from 'lucide-react'
 
 interface GuideHeroProps {
@@ -29,10 +29,7 @@ export function GuideHero({ guide, className }: GuideHeroProps) {
 
   return (
     <section
-      className={cn(
-        'relative isolate overflow-hidden border-b border-rule/40 bg-sage',
-        className,
-      )}
+      className={cn('relative isolate overflow-hidden border-b border-rule/40 bg-sage', className)}
     >
       <div className="mx-auto max-w-screen-xl px-4 py-16 md:px-6 md:py-24">
         <p className="mb-4 font-mono text-[11px] font-medium uppercase tracking-wider text-ink-mute">
@@ -44,9 +41,7 @@ export function GuideHero({ guide, className }: GuideHeroProps) {
             {titleAccent ?? 'guide complet 2026'}
           </span>
         </h1>
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-mute">
-          {guide.tagline}
-        </p>
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-mute">{guide.tagline}</p>
         <div className="mt-8 flex flex-wrap items-center gap-3 text-sm">
           <span className="inline-flex items-center gap-2 rounded-pill border border-rule/60 bg-paper px-3 py-1.5 font-mono text-xs text-ink-mute">
             <Clock className="size-3.5" aria-hidden />

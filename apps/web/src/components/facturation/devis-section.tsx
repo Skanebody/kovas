@@ -7,10 +7,7 @@
  * `/dashboard/devis` historique afin de ne pas dupliquer la query Supabase.
  */
 
-import {
-  DevisUrgencySection,
-  type DevisUrgencyRow,
-} from '@/components/devis/DevisUrgencySection'
+import { type DevisUrgencyRow, DevisUrgencySection } from '@/components/devis/DevisUrgencySection'
 import { getCurrentUser } from '@/lib/auth/current-user'
 
 interface QuoteDbRow {
@@ -36,8 +33,7 @@ function formatDateShort(iso: string | null): string {
 }
 
 function toRow(q: QuoteDbRow): DevisUrgencyRow {
-  const displayName =
-    q.clients?.display_name ?? q.client_snapshot?.displayName ?? 'Client retiré'
+  const displayName = q.clients?.display_name ?? q.client_snapshot?.displayName ?? 'Client retiré'
   const city = q.clients?.city ?? q.client_snapshot?.city ?? null
   const referenceDate = q.issued_at ?? q.expires_at ?? null
   return {
@@ -84,12 +80,8 @@ export async function DevisSectionLive() {
   ])
 
   const toSend = ((draftQ.data ?? []) as unknown as QuoteDbRow[]).map(toRow)
-  const pendingSignature = ((sentQ.data ?? []) as unknown as QuoteDbRow[]).map(
-    toRow,
-  )
-  const refusedExpired = ((refusedQ.data ?? []) as unknown as QuoteDbRow[]).map(
-    toRow,
-  )
+  const pendingSignature = ((sentQ.data ?? []) as unknown as QuoteDbRow[]).map(toRow)
+  const refusedExpired = ((refusedQ.data ?? []) as unknown as QuoteDbRow[]).map(toRow)
 
   return (
     <div className="space-y-8">

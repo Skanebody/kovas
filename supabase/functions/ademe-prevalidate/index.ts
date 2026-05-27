@@ -23,7 +23,7 @@
 
 /// <reference lib="deno.ns" />
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
 
 // ────────────────────────────────────────────────────────────
 // Types — mirror exact `apps/web/src/lib/ademe/risk-calculator.ts`
@@ -129,8 +129,7 @@ function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): nu
   const dLon = toRadians(bLng - aLng)
   const lat1 = toRadians(aLat)
   const lat2 = toRadians(bLat)
-  const h =
-    Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
   return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
 }
 
@@ -277,7 +276,9 @@ async function computeRisk(
       .maybeSingle(),
     supabase
       .from('ademe_coherence_rules')
-      .select('id, rule_code, title, description, severity, rule_logic, suggested_fix, diagnostic_types, enabled')
+      .select(
+        'id, rule_code, title, description, severity, rule_logic, suggested_fix, diagnostic_types, enabled',
+      )
       .eq('enabled', true),
   ])
 
@@ -449,7 +450,8 @@ async function persistPrevalidation(
   assessment: RiskAssessment,
   rulesChecked: number,
 ): Promise<{ id: string }> {
-  const rulesPassed = rulesChecked - assessment.warnings.filter((w) => w.axis === 'coherence').length
+  const rulesPassed =
+    rulesChecked - assessment.warnings.filter((w) => w.axis === 'coherence').length
   const rulesFailed = assessment.warnings.filter(
     (w) => w.axis === 'coherence' && (w.severity === 'error' || w.severity === 'blocking'),
   ).length
@@ -458,11 +460,7 @@ async function persistPrevalidation(
   ).length
 
   const status =
-    assessment.verdict === 'red'
-      ? 'failed'
-      : assessment.verdict === 'yellow'
-      ? 'warning'
-      : 'passed'
+    assessment.verdict === 'red' ? 'failed' : assessment.verdict === 'yellow' ? 'warning' : 'passed'
 
   const row = {
     organization_id: body.organization_id,
@@ -507,7 +505,8 @@ function validateBody(raw: unknown): RequestBody | { error: string } {
   }
   if (typeof d.annee_construction !== 'number') return { error: 'annee_construction_invalid' }
   if (typeof d.surface_habitable_m2 !== 'number') return { error: 'surface_habitable_m2_invalid' }
-  if (typeof d.type_energie_chauffage !== 'string') return { error: 'type_energie_chauffage_invalid' }
+  if (typeof d.type_energie_chauffage !== 'string')
+    return { error: 'type_energie_chauffage_invalid' }
   if (typeof d.type_climatisation !== 'string') return { error: 'type_climatisation_invalid' }
   if (typeof d.etiquette_dpe !== 'string' || !labels.includes(d.etiquette_dpe)) {
     return { error: 'etiquette_dpe_invalid' }
@@ -519,9 +518,10 @@ function validateBody(raw: unknown): RequestBody | { error: string } {
     return { error: 'conso_5_usages_par_m2_ep_invalid' }
   }
   const triggers = ['manual', 'auto_on_save', 'auto_pre_export', 'scheduled']
-  const triggered = typeof r.triggered_by === 'string' && triggers.includes(r.triggered_by)
-    ? (r.triggered_by as RequestBody['triggered_by'])
-    : 'manual'
+  const triggered =
+    typeof r.triggered_by === 'string' && triggers.includes(r.triggered_by)
+      ? (r.triggered_by as RequestBody['triggered_by'])
+      : 'manual'
 
   return {
     mission_id: r.mission_id,
@@ -603,10 +603,10 @@ Deno.serve(async (req: Request) => {
       assessment,
       rulesChecked,
     )
-    return new Response(
-      JSON.stringify({ ok: true, prevalidation_id: persisted.id, assessment }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ ok: true, prevalidation_id: persisted.id, assessment }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   } catch (err) {
     return new Response(
       JSON.stringify({ ok: false, error: err instanceof Error ? err.message : String(err) }),

@@ -28,15 +28,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          'bg-navy text-paper shadow-accent hover:bg-navy-deep hover:-translate-y-px',
+        default: 'bg-navy text-paper shadow-accent hover:bg-navy-deep hover:-translate-y-px',
         // v5 accent UNIQUE chartreuse — CTA fort signature (max 1/écran)
         accent:
           'bg-chartreuse text-ink shadow-[0_6px_18px_rgba(212,245,66,0.35)] hover:bg-chartreuse-deep hover:-translate-y-px',
         // v5 : warm est désormais un alias de accent (chartreuse) — l'ambre
         // est réservé aux Card variant warm (coherence warnings) uniquement
-        warm:
-          'bg-chartreuse text-ink shadow-[0_6px_18px_rgba(212,245,66,0.35)] hover:bg-chartreuse-deep hover:-translate-y-px',
+        warm: 'bg-chartreuse text-ink shadow-[0_6px_18px_rgba(212,245,66,0.35)] hover:bg-chartreuse-deep hover:-translate-y-px',
         glass:
           'bg-paper/85 text-ink border border-paper/70 shadow-sm backdrop-blur-md hover:bg-paper',
         outline:

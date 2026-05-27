@@ -7,13 +7,13 @@
 
 import { verifyAdminAccess } from '@/lib/admin/admin-middleware'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
-import { NextResponse } from 'next/server'
 import type {
   AutoUpdateChangeType,
   AutoUpdateRiskLevel,
   AutoUpdateStatus,
   SystemAutoUpdateRow,
 } from '@/lib/regulatory/types'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -27,7 +27,9 @@ interface AutoUpdatesQueryBuilder {
     from: number,
     to: number,
   ) => Promise<{
-    data: Array<SystemAutoUpdateRow & { regulatory_documents: { id: string; title: string } | null }>
+    data: Array<
+      SystemAutoUpdateRow & { regulatory_documents: { id: string; title: string } | null }
+    >
     error: { message: string } | null
   }>
 }

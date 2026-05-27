@@ -58,10 +58,7 @@ export function PricingTrackSection({
   const [billing, setBilling] = useState<Billing>('monthly')
 
   return (
-    <section
-      id={id}
-      className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0B1D33]/[0.08]"
-    >
+    <section id={id} className="px-5 sm:px-12 py-20 sm:py-28 border-t border-[#0B1D33]/[0.08]">
       <div className="max-w-[860px] mx-auto">
         <header className="text-center mb-12">
           <p className="font-mono text-[12px] uppercase tracking-[0.16em] text-[#0B1D33]/55 font-semibold mb-4">
@@ -69,9 +66,7 @@ export function PricingTrackSection({
           </p>
           <h2 className="font-sans font-semibold text-[32px] sm:text-[44px] md:text-[56px] leading-[1.04] tracking-[-0.03em] text-[#0B1D33] mb-5">
             {title}{' '}
-            <span className="font-serif italic font-normal text-[#0B1D33]/72">
-              {titleAccent}
-            </span>
+            <span className="font-serif italic font-normal text-[#0B1D33]/72">{titleAccent}</span>
           </h2>
           <p className="text-[16px] sm:text-[17px] text-[#0B1D33]/72 leading-relaxed max-w-[660px] mx-auto">
             {description}
@@ -140,15 +135,11 @@ function PricingTrackCard({
           {isFree ? 'Gratuit' : formatPriceEurCompact(priceCents)}
         </p>
         {!isFree ? (
-          <span className="font-mono text-[12px] text-[#0B1D33]/55">
-            {priceLabel}
-          </span>
+          <span className="font-mono text-[12px] text-[#0B1D33]/55">{priceLabel}</span>
         ) : null}
       </div>
       {showAnnualHint ? (
-        <p className="font-mono text-[11px] text-[#0B1D33]/55 mb-4">
-          {showAnnualHint}
-        </p>
+        <p className="font-mono text-[11px] text-[#0B1D33]/55 mb-4">{showAnnualHint}</p>
       ) : null}
 
       <p className="text-[14px] sm:text-[15px] text-[#0B1D33]/72 leading-relaxed mb-6">
@@ -163,9 +154,7 @@ function PricingTrackCard({
               className="size-4 text-[#A3C920] shrink-0 mt-0.5"
               strokeWidth={2.5}
             />
-            <span className="text-[14px] text-[#0B1D33]/85 leading-relaxed">
-              {feature}
-            </span>
+            <span className="text-[14px] text-[#0B1D33]/85 leading-relaxed">{feature}</span>
           </li>
         ))}
       </ul>
@@ -204,9 +193,7 @@ function BillingToggle({
         aria-selected={value === 'monthly'}
         onClick={() => onChange('monthly')}
         className={`px-5 py-2 rounded-full text-[12px] font-medium transition-colors ${
-          value === 'monthly'
-            ? 'bg-white text-[#0B1D33]'
-            : 'text-white/85 hover:text-white'
+          value === 'monthly' ? 'bg-white text-[#0B1D33]' : 'text-white/85 hover:text-white'
         }`}
       >
         Mensuel
@@ -217,9 +204,7 @@ function BillingToggle({
         aria-selected={value === 'annual'}
         onClick={() => onChange('annual')}
         className={`px-5 py-2 rounded-full text-[12px] font-medium transition-colors ${
-          value === 'annual'
-            ? 'bg-[#D4F542] text-[#0B1D33]'
-            : 'text-white/85 hover:text-white'
+          value === 'annual' ? 'bg-[#D4F542] text-[#0B1D33]' : 'text-white/85 hover:text-white'
         }`}
       >
         Annuel

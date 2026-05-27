@@ -183,10 +183,7 @@ export const IMPORTANCE_LABEL: Record<RegulatoryImportance, string> = {
   critical: 'Critique',
 }
 
-export const IMPORTANCE_BADGE: Record<
-  RegulatoryImportance,
-  'muted' | 'blue' | 'orange' | 'red'
-> = {
+export const IMPORTANCE_BADGE: Record<RegulatoryImportance, 'muted' | 'blue' | 'orange' | 'red'> = {
   low: 'muted',
   normal: 'blue',
   high: 'orange',
@@ -202,17 +199,15 @@ export const STATUS_LABEL: Record<AutoUpdateStatus, string> = {
   failed: 'Échec',
 }
 
-export const STATUS_BADGE: Record<
-  AutoUpdateStatus,
-  'muted' | 'blue' | 'green' | 'red' | 'orange'
-> = {
-  pending_review: 'orange',
-  approved: 'blue',
-  rejected: 'muted',
-  applied: 'green',
-  rolled_back: 'muted',
-  failed: 'red',
-}
+export const STATUS_BADGE: Record<AutoUpdateStatus, 'muted' | 'blue' | 'green' | 'red' | 'orange'> =
+  {
+    pending_review: 'orange',
+    approved: 'blue',
+    rejected: 'muted',
+    applied: 'green',
+    rolled_back: 'muted',
+    failed: 'red',
+  }
 
 export const RISK_BADGE: Record<AutoUpdateRiskLevel, 'muted' | 'blue' | 'orange' | 'red'> = {
   low: 'muted',

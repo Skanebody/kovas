@@ -6,13 +6,7 @@
  * (SeoDraftEditor.tsx). Fichier neutre — pas de 'use server'.
  */
 
-export type SeoDraftStatus =
-  | 'draft'
-  | 'review'
-  | 'approved'
-  | 'published'
-  | 'archived'
-  | 'rejected'
+export type SeoDraftStatus = 'draft' | 'review' | 'approved' | 'published' | 'archived' | 'rejected'
 
 export const VALID_SEO_DRAFT_STATUSES: readonly SeoDraftStatus[] = [
   'draft',
@@ -50,10 +44,8 @@ export function computeEeatValidations(markdown: string): EeatValidations {
   const figures = markdown.match(figureRegex) ?? []
   const hasFigures = figures.length >= 3
 
-  const quoteRegex1 =
-    /[«"][^»"]{20,300}[»"]\s*[—\-–]\s*[A-ZÀ-Ý][a-zà-ÿ-]+\s+[A-ZÀ-Ý][a-zà-ÿ-]+/
-  const quoteRegex2 =
-    /selon\s+[A-ZÀ-Ý][a-zà-ÿ-]+\s+[A-ZÀ-Ý][a-zà-ÿ-]+\s*,\s*[a-zà-ÿ]/i
+  const quoteRegex1 = /[«"][^»"]{20,300}[»"]\s*[—\-–]\s*[A-ZÀ-Ý][a-zà-ÿ-]+\s+[A-ZÀ-Ý][a-zà-ÿ-]+/
+  const quoteRegex2 = /selon\s+[A-ZÀ-Ý][a-zà-ÿ-]+\s+[A-ZÀ-Ý][a-zà-ÿ-]+\s*,\s*[a-zà-ÿ]/i
   const hasExpertQuote = quoteRegex1.test(markdown) || quoteRegex2.test(markdown)
 
   const hasPhoto = /!\[[^\]]*\]\([^)]+\)/.test(markdown)

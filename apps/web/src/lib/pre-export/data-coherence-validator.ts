@@ -9,11 +9,7 @@
  * Poids dans le score global : 20/100.
  */
 
-import type {
-  AnalyzerResult,
-  Finding,
-  MissionAnalysisContext,
-} from './types'
+import type { AnalyzerResult, Finding, MissionAnalysisContext } from './types'
 
 /** Tolérance entre somme surfaces pièces et surface totale (5%). */
 const SURFACE_TOLERANCE_RATIO = 0.05

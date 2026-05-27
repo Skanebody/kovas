@@ -7,10 +7,7 @@
 
 import { StorageOverview } from '@/components/admin/storage/StorageOverview'
 import { AppPageHeader } from '@/components/app-page-header'
-import {
-  type StorageUsageFilter,
-  getStorageOverview,
-} from '@/lib/admin/storage-metrics'
+import { type StorageUsageFilter, getStorageOverview } from '@/lib/admin/storage-metrics'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
 import type { Metadata } from 'next'
 

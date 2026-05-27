@@ -107,7 +107,10 @@ export function WorkflowStepper({
         </div>
 
         <div className="h-1.5 rounded-full bg-sage-alt overflow-hidden">
-          <div className="h-full bg-[#0F1419] transition-all" style={{ width: `${overallPercent}%` }} />
+          <div
+            className="h-full bg-[#0F1419] transition-all"
+            style={{ width: `${overallPercent}%` }}
+          />
         </div>
 
         <ol className="space-y-2">
@@ -134,9 +137,7 @@ export function WorkflowStepper({
                   <span
                     className={cn(
                       'shrink-0 size-7 rounded-full flex items-center justify-center text-xs font-semibold',
-                      step.completed
-                        ? 'bg-accent-green text-white'
-                        : 'bg-sage-alt text-ink-mute',
+                      step.completed ? 'bg-accent-green text-white' : 'bg-sage-alt text-ink-mute',
                     )}
                   >
                     {step.completed ? <CheckCircle2 className="size-4" /> : idx + 1}
@@ -148,9 +149,7 @@ export function WorkflowStepper({
                         {percent}%
                       </Badge>
                     </div>
-                    {isOpen && (
-                      <p className="text-xs text-ink-mute mt-0.5">{step.description}</p>
-                    )}
+                    {isOpen && <p className="text-xs text-ink-mute mt-0.5">{step.description}</p>}
                   </div>
                   {isOpen ? (
                     <ChevronDown className="size-4 text-ink-mute" />

@@ -90,14 +90,14 @@ interface AiUsageRow {
  * Vrai SSI la subscription de l'org est en statut `trialing` (essai 30j non encore débité).
  * Memoized par requête via React cache appelant (le caller décide).
  */
-async function isOrganizationInTrial(
-  supabase: SupabaseClient,
-  orgId: string,
-): Promise<boolean> {
+async function isOrganizationInTrial(supabase: SupabaseClient, orgId: string): Promise<boolean> {
   const sb = supabase as unknown as {
     from: (t: 'subscriptions') => {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{ data: SubscriptionTrialRow | null }>
         }
       }
@@ -133,15 +133,18 @@ function currentMonthIsoParis(): string {
  * Lit `ai_usage_monthly` pour l'org × mois courant.
  * Retourne { whisper_seconds: 0, vision_calls: 0 } si pas de ligne.
  */
-async function getAiUsageThisMonth(
-  supabase: SupabaseClient,
-  orgId: string,
-): Promise<AiUsageRow> {
+async function getAiUsageThisMonth(supabase: SupabaseClient, orgId: string): Promise<AiUsageRow> {
   const sb = supabase as unknown as {
     from: (t: 'ai_usage_monthly') => {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
-          eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             maybeSingle: () => Promise<{ data: AiUsageRow | null }>
           }
         }
@@ -183,8 +186,14 @@ async function getMissionsCreatedThisMonth(
         cols: string,
         opts: { count: 'exact'; head: true },
       ) => {
-        eq: (col: string, val: string) => {
-          is: (col: string, val: null) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
+          is: (
+            col: string,
+            val: null,
+          ) => {
             gte: (col: string, val: string) => Promise<{ count: number | null }>
           }
         }
@@ -223,8 +232,14 @@ async function getClaudeMessagesThisMonth(
   const sb = supabase as unknown as {
     from: (t: 'user_usage_quotas') => {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
-          eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             maybeSingle: () => Promise<{ data: { chatbot_messages_used: number } | null }>
           }
         }

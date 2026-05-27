@@ -11,10 +11,7 @@
  */
 
 import { getCurrentUser } from '@/lib/auth/current-user'
-import type {
-  ParameterName,
-  SuggestionContext,
-} from '@/lib/parameters/parameter-types'
+import type { ParameterName, SuggestionContext } from '@/lib/parameters/parameter-types'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'

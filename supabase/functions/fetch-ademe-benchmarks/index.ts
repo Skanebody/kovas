@@ -54,8 +54,7 @@ async function fetchDistribution(
   // Construction du filtre `qs` (champs ADEME)
   const conditions: string[] = []
   if (filters.bien_type) conditions.push(`Type_bâtiment:"${filters.bien_type}"`)
-  if (filters.year_min)
-    conditions.push(`Année_construction:>=${filters.year_min}`)
+  if (filters.year_min) conditions.push(`Année_construction:>=${filters.year_min}`)
   if (filters.year_max) conditions.push(`Année_construction:<${filters.year_max}`)
   if (filters.region) conditions.push(`Code_région_(BAN):"${filters.region}"`)
   if (filters.departement) conditions.push(`Code_département_(BAN):"${filters.departement}"`)
@@ -184,10 +183,7 @@ Deno.serve(async (req) => {
   }
 
   // 3. Persistance — DELETE puis INSERT (snapshot mensuel)
-  await supabase
-    .from('ademe_benchmarks')
-    .delete()
-    .eq('source', 'ademe_open_data')
+  await supabase.from('ademe_benchmarks').delete().eq('source', 'ademe_open_data')
 
   if (rows.length > 0) {
     const { error: insertErr } = await supabase.from('ademe_benchmarks').insert(rows)

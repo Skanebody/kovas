@@ -7,18 +7,11 @@ import type { Alternative } from '@/lib/scheduling/alternative-generator'
 import type { ClusteringOpportunity } from '@/lib/scheduling/clustering-suggester'
 import type { ConflictResult } from '@/lib/scheduling/conflict-detector'
 import type { DurationEstimate } from '@/lib/scheduling/duration-estimator'
-import type {
-  SchedulingOwnership,
-  SchedulingPropertyType,
-} from '@/lib/scheduling/duration-schemas'
+import type { SchedulingOwnership, SchedulingPropertyType } from '@/lib/scheduling/duration-schemas'
 // Helpers timezone Europe/Paris extraits vers @/lib/scheduling/paris-tz pour
 // pouvoir être importés depuis des Server Components / routes API (pattern
 // parsePropertyLocation, 2026-05-23). Re-exportés ci-dessous pour back-compat.
-import {
-  makeIsoFromYmdHm,
-  toParisHm,
-  toParisYmd,
-} from '@/lib/scheduling/paris-tz'
+import { makeIsoFromYmdHm, toParisHm, toParisYmd } from '@/lib/scheduling/paris-tz'
 import { cn } from '@/lib/utils'
 import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
@@ -434,13 +427,7 @@ export function DossierWizard({
       .finally(() => setAlternativesLoading(false))
 
     return () => controller.abort()
-  }, [
-    data.scheduledDate,
-    data.scheduledTime,
-    coords,
-    effectiveDurationMin,
-    data.forcedOriginal,
-  ])
+  }, [data.scheduledDate, data.scheduledTime, coords, effectiveDurationMin, data.forcedOriginal])
 
   function handleAcceptAlternative(alt: Alternative): void {
     const d = alt.startAt instanceof Date ? alt.startAt : new Date(alt.startAt)
@@ -630,9 +617,7 @@ export function DossierWizard({
               variant="accent"
               size="lg"
               onClick={goNext}
-              disabled={
-                pending || (step === 1 && !step1Valid) || (step === 2 && !step2Valid)
-              }
+              disabled={pending || (step === 1 && !step1Valid) || (step === 2 && !step2Valid)}
             >
               Continuer <ArrowRight className="size-4" />
             </Button>

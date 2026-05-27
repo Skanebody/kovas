@@ -12,11 +12,7 @@
  * Poids dans le score global : 20/100.
  */
 
-import type {
-  AnalyzerResult,
-  Finding,
-  MissionAnalysisContext,
-} from './types'
+import type { AnalyzerResult, Finding, MissionAnalysisContext } from './types'
 
 export interface AdemeBenchmark {
   scope_type: 'national' | 'regional' | 'departemental'
@@ -68,9 +64,7 @@ export function analyzeStatistical(
   const band = year ? yearToConstructionBand(year) : null
 
   const matched =
-    benchmarks.find(
-      (b) => b.bien_type === propType && b.year_construction_band === band,
-    ) ??
+    benchmarks.find((b) => b.bien_type === propType && b.year_construction_band === band) ??
     benchmarks.find((b) => b.bien_type === propType) ??
     benchmarks.find((b) => b.scope_type === 'national')
 
@@ -99,8 +93,7 @@ export function analyzeStatistical(
   // 3. Analyse de la distribution personnelle du diagnostiqueur
   if (diagnosticianDist && matched && diagnosticianDist.total >= 20) {
     const personalFg =
-      (diagnosticianDist.classes.F + diagnosticianDist.classes.G) /
-      diagnosticianDist.total
+      (diagnosticianDist.classes.F + diagnosticianDist.classes.G) / diagnosticianDist.total
     const nationalFg = matched.distribution.F + matched.distribution.G
     const delta = personalFg - nationalFg
     if (Math.abs(delta) > FG_DEVIATION_THRESHOLD) {
@@ -136,9 +129,7 @@ export function analyzeStatistical(
   // 4. Distribution A-B-C suspecte (DPE "flatteurs" récurrents)
   if (diagnosticianDist && diagnosticianDist.total >= 30) {
     const abcShare =
-      (diagnosticianDist.classes.A +
-        diagnosticianDist.classes.B +
-        diagnosticianDist.classes.C) /
+      (diagnosticianDist.classes.A + diagnosticianDist.classes.B + diagnosticianDist.classes.C) /
       diagnosticianDist.total
     if (abcShare > 0.6) {
       findings.push({

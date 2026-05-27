@@ -20,7 +20,7 @@
 // Variables env : aucune (API publique).
 // ============================================
 
-import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
 
 // ============================================
 // Types
@@ -126,12 +126,7 @@ const SAMPLE_CITIES: SampleCity[] = [
 // Helpers (idem D2)
 // ============================================
 function normalizeKeyword(raw: string): string {
-  return raw
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim()
 }
 
 function sleep(ms: number): Promise<void> {
@@ -190,10 +185,7 @@ async function upsertKeyword(
   return inserted.id as string
 }
 
-async function insertSignal(
-  supabase: SupabaseClient,
-  params: InsertSignalParams,
-): Promise<void> {
+async function insertSignal(supabase: SupabaseClient, params: InsertSignalParams): Promise<void> {
   const { error } = await supabase.from('seo_keyword_signals').insert({
     keyword_id: params.keywordId,
     source_code: params.sourceCode,
@@ -218,8 +210,7 @@ async function updateSeoSource(
     .maybeSingle()
 
   if (existing) {
-    const prev =
-      typeof existing.total_signals_count === 'number' ? existing.total_signals_count : 0
+    const prev = typeof existing.total_signals_count === 'number' ? existing.total_signals_count : 0
     await supabase
       .from('seo_sources')
       .update({
@@ -253,9 +244,7 @@ interface CityDpeAggregate {
   passoiresPct: number
 }
 
-function readBuckets(
-  data: AdemeAggregationsResponse,
-): AdemeAggregationBucket[] {
+function readBuckets(data: AdemeAggregationsResponse): AdemeAggregationBucket[] {
   const agg = data.aggs?.etiquette_dpe
   if (!agg) return []
   if (Array.isArray(agg.results)) return agg.results
@@ -320,8 +309,7 @@ async function fetchCityDpeAgg(
         ? json.total
         : countA + countB + countC + countD + countE + countF + countG
 
-    const passoiresPct =
-      totalDpe > 0 ? Math.round(((countF + countG) / totalDpe) * 10000) / 100 : 0
+    const passoiresPct = totalDpe > 0 ? Math.round(((countF + countG) / totalDpe) * 10000) / 100 : 0
 
     return {
       ok: true,
@@ -367,10 +355,10 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
   if (!supabaseUrl || !serviceKey) {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'missing supabase env' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ ok: false, error: 'missing supabase env' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   const supabase = createClient(supabaseUrl, serviceKey, {
@@ -510,10 +498,10 @@ Deno.serve(async (req) => {
     await updateSeoSource(supabase, 'ademe', stats.signals)
   } catch (err) {
     stats.ok = false
-    return new Response(
-      JSON.stringify({ ok: false, error: (err as Error).message, stats }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ ok: false, error: (err as Error).message, stats }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   stats.durationMs = Date.now() - t0

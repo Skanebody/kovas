@@ -1,7 +1,7 @@
 'use client'
 
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { getUpsellEntry } from '@/lib/upsell/upsell-content'
 import { ArrowRight, Lock, Sparkles } from 'lucide-react'
 import { useState } from 'react'
@@ -29,7 +29,13 @@ export interface UpsellEmptyStateProps {
  *   - Liste 3 bénéfices
  *   - CTA primary chartreuse "Démarrer mon essai 14j"
  */
-export function UpsellEmptyState({ target, trigger, title, description, className }: UpsellEmptyStateProps) {
+export function UpsellEmptyState({
+  target,
+  trigger,
+  title,
+  description,
+  className,
+}: UpsellEmptyStateProps) {
   const entry = getUpsellEntry(target)
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -74,7 +80,9 @@ export function UpsellEmptyState({ target, trigger, title, description, classNam
           <ul className="space-y-1.5">
             {entry.benefits.map((b) => (
               <li key={b} className="flex items-start gap-2 text-[13px] text-ink">
-                <span aria-hidden className="text-ink-mute mt-0.5">→</span>
+                <span aria-hidden className="text-ink-mute mt-0.5">
+                  →
+                </span>
                 <span>{b}</span>
               </li>
             ))}

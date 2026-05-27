@@ -11,7 +11,7 @@
  * indicative entre deux RDV. Le scheduling sérieux (clustering, contraintes
  * trafic) passe par `@/lib/scheduling/route-calculator`.
  */
-import { haversineDistanceKm, type LatLng } from '@/lib/ademe/haversine'
+import { type LatLng, haversineDistanceKm } from '@/lib/ademe/haversine'
 
 export interface LatLon {
   lat: number

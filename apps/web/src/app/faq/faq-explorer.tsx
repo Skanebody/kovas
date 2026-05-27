@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from 'react'
 
-import { Card } from '@/components/ui/card'
 import { FaqAnswer } from '@/components/faq-answer'
+import { Card } from '@/components/ui/card'
 import {
   FAQ_CHIPS,
+  type FaqChipId,
   buildCategorizedFaq,
   countByChip,
-  type FaqChipId,
 } from '@/lib/institutional/faq-data'
 import { cn } from '@/lib/utils'
 

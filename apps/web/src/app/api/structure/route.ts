@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
+import { getCurrentUser } from '@/lib/auth/current-user'
 import { structureWithClaude } from '@/lib/claude-structurer'
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUser } from '@/lib/auth/current-user'
+import { NextResponse } from 'next/server'
 
 /**
  * Fallback Claude pour transcripts à faible confiance (< 0,7).

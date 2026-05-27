@@ -13,12 +13,8 @@
  * historique conservée, pas de fair-use).
  */
 
+import { PRICING_PLANS, type PricingPlanCode, isLegacyPlan } from '@/lib/pricing-plans'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import {
-  PRICING_PLANS,
-  isLegacyPlan,
-  type PricingPlanCode,
-} from '@/lib/pricing-plans'
 
 /** Statut fair-use courant pour une organisation. */
 export interface FairUseStatus {
@@ -39,11 +35,12 @@ export interface ProcessFairUseAlertsResult {
 }
 
 /** Tier le plus petit dont le cap couvre le volume mensuel donné. */
-function suggestUpgradeTier(missionsCount: number, currentTier: PricingPlanCode): PricingPlanCode | undefined {
+function suggestUpgradeTier(
+  missionsCount: number,
+  currentTier: PricingPlanCode,
+): PricingPlanCode | undefined {
   // Ordre canonique des tiers (du plus petit cap au plus grand)
-  const tiersSorted = [...PRICING_PLANS].sort(
-    (a, b) => a.caps.missions - b.caps.missions,
-  )
+  const tiersSorted = [...PRICING_PLANS].sort((a, b) => a.caps.missions - b.caps.missions)
   const currentIdx = tiersSorted.findIndex((p) => p.code === currentTier)
   // On cherche le premier tier strictement au-dessus du courant qui couvre le volume
   for (let i = currentIdx + 1; i < tiersSorted.length; i += 1) {

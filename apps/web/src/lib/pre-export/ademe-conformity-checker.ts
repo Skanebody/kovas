@@ -11,11 +11,7 @@
  * Score local 0-1 = 1 - (sum severity-weighted issues / total expected).
  */
 
-import type {
-  AnalyzerResult,
-  Finding,
-  MissionAnalysisContext,
-} from './types'
+import type { AnalyzerResult, Finding, MissionAnalysisContext } from './types'
 
 /** Champs critiques pour qu'un DPE puisse être publié sur l'observatoire ADEME. */
 interface FieldCheck {
@@ -91,7 +87,7 @@ const REQUIRED_FIELDS: FieldCheck[] = [
   },
   {
     code: 'ecs_production',
-    label: 'Production d\'eau chaude sanitaire identifiée',
+    label: "Production d'eau chaude sanitaire identifiée",
     read: (ctx) => {
       const hasEcs = ctx.voiceNotes.some((v) =>
         v.transcript_structured?.equipment?.some((e) => e.kind === 'chauffe_eau'),

@@ -112,19 +112,13 @@ Deno.serve(async (req: Request) => {
   // 1. Validation phone
   const phone = typeof input.phone === 'string' ? input.phone.trim() : ''
   if (!E164_REGEX.test(phone)) {
-    return jsonResponse(
-      { error: 'invalid_phone', message: 'Numéro de téléphone invalide.' },
-      400,
-    )
+    return jsonResponse({ error: 'invalid_phone', message: 'Numéro de téléphone invalide.' }, 400)
   }
 
   // 2. Validation code
   const code = typeof input.code === 'string' ? input.code.trim() : ''
   if (!CODE_REGEX.test(code)) {
-    return jsonResponse(
-      { error: 'invalid_code', message: 'Code à 6 chiffres requis.' },
-      400,
-    )
+    return jsonResponse({ error: 'invalid_code', message: 'Code à 6 chiffres requis.' }, 400)
   }
 
   // 3. Validation otpId / leadId optionnels
@@ -261,10 +255,7 @@ Deno.serve(async (req: Request) => {
 
   if (verifyErr) {
     console.error('[verify-otp] update verified_at failed', verifyErr)
-    return jsonResponse(
-      { error: 'internal_error', message: 'Erreur lors de la validation.' },
-      500,
-    )
+    return jsonResponse({ error: 'internal_error', message: 'Erreur lors de la validation.' }, 500)
   }
 
   // 8. Si leadId → propage sur quote_requests

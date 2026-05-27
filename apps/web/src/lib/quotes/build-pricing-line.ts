@@ -12,8 +12,8 @@
  */
 
 import {
-  type DiagnosticPricing,
   type DiagnosticModulations,
+  type DiagnosticPricing,
   type PricingDiagnosticType,
   type PropertyType,
   getModulationForProperty,
@@ -96,10 +96,7 @@ export function buildPackLine(args: {
   packPriceHt: number
   tvaRate: number
 }): QuoteLineItem {
-  const diagsLabel =
-    args.packDiagnostics.length > 0
-      ? ` (${args.packDiagnostics.join(' + ')})`
-      : ''
+  const diagsLabel = args.packDiagnostics.length > 0 ? ` (${args.packDiagnostics.join(' + ')})` : ''
   return {
     id: `tmp-pack-${args.packId.slice(0, 6)}-${Math.random().toString(36).slice(2, 6)}`,
     kind: 'pack',
@@ -168,8 +165,6 @@ export function haversineKm(
   const dLng = toRad(b.lng - a.lng)
   const lat1 = toRad(a.lat)
   const lat2 = toRad(b.lat)
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2)
+  const h = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2)
   return 2 * R * Math.asin(Math.sqrt(h))
 }

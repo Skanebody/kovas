@@ -52,7 +52,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Récupère la claim active la plus récente pour ce diag + méthode
   let query = adminAny
     .from('claim_requests')
-    .select('id, status, verification_code, verification_code_expires_at, verification_attempts')
+    .select(
+      'id, status, verification_code, verification_code_expires_at, verification_attempts, flow_version, siret_verified_at',
+    )
     .eq('diagnostician_id', diagnosticianId)
     .eq('method', body.method)
     .eq('status', 'code_sent')
@@ -67,7 +69,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (claimErr || !claims || claims.length === 0) {
     return NextResponse.json(
-      { error: 'Aucun code actif. Demandez un nouveau code.' },
+      { error: 'Aucun code actif. Demande un nouveau code.' },
       { status: 404 },
     )
   }
@@ -78,6 +80,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     verification_code: string | null
     verification_code_expires_at: string | null
     verification_attempts: number
+    flow_version: string | null
+    siret_verified_at: string | null
   }
 
   // Incrément du compteur de tentatives AVANT vérification (anti-brute)
@@ -115,23 +119,39 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     )
   }
 
-  // Code OK → marque verified + efface code (zero retention)
+  // Code OK → bascule de status :
+  //   - v2 Doctolib + siret_verified_at présent → 'phone_verified' (étape 2 OK,
+  //     reste l'étape 3 KYC à faire)
+  //   - sinon (legacy v1 ou claim direct SMS sans SIRET préalable) → 'verified'
+  //     comme avant (back-compat)
+  const isV2 = claim.flow_version === 'v2_doctolib' && claim.siret_verified_at !== null
+  const nowIso = new Date().toISOString()
+
+  const updatePayload: Record<string, unknown> = {
+    status: isV2 ? 'phone_verified' : 'verified',
+    verification_code: null,
+  }
+  if (isV2) {
+    updatePayload.phone_verified_at = nowIso
+  } else {
+    updatePayload.verified_at = nowIso
+  }
+
   const { error: updErr } = await adminAny
     .from('claim_requests')
-    .update({
-      status: 'verified',
-      verified_at: new Date().toISOString(),
-      verification_code: null,
-    })
+    .update(updatePayload)
     .eq('id', claim.id)
 
   if (updErr) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 
+  // v2 → on ne redirige PAS vers /signup (il reste l'étape 3 KYC).
+  // v1 → comportement legacy (redirect signup direct).
   return NextResponse.json({
     ok: true,
     claimId: claim.id,
-    redirect: `/signup?claim_id=${claim.id}`,
+    status: isV2 ? 'phone_verified' : 'verified',
+    ...(isV2 ? {} : { redirect: `/signup?claim_id=${claim.id}` }),
   })
 }

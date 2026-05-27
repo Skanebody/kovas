@@ -80,5 +80,12 @@ export function resolveDiagnosticKind(input: string): DiagnosticKind | null {
   }
 }
 
-export type { ChecklistItem, ChecklistSection, ChecklistSeverity, ChecklistScope, DiagnosticChecklist, DiagnosticKind } from './types'
+export type {
+  ChecklistItem,
+  ChecklistSection,
+  ChecklistSeverity,
+  ChecklistScope,
+  DiagnosticChecklist,
+  DiagnosticKind,
+} from './types'
 export { TRIGGER_DELAYS } from './types'

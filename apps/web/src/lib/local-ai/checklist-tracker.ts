@@ -18,13 +18,13 @@
  * - Lexique métier (jargon) côté Whisper/Claude, pas requis ici (keywords inline)
  */
 
-import { getChecklists, type DiagnosticKind } from './checklists'
+import { type DiagnosticKind, getChecklists } from './checklists'
 import type { ChecklistItem, ChecklistSection } from './checklists/types'
 import {
-  type RoomType,
   ROOM_LABEL_FR,
-  detectRoomTransition,
+  type RoomType,
   detectRoomInText,
+  detectRoomTransition,
 } from './room-transition-detector'
 import { containsAnyKeyword, foldText } from './text-folding'
 
@@ -230,7 +230,8 @@ export class ChecklistTracker {
     for (const [, state] of this.itemsById) {
       // Pour scope per_room : on instancie l'état dans la pièce courante au besoin
       if (state.item.scope === 'per_room') {
-        const roomForCheck = message.kind === 'photo' && message.room ? message.room : this.currentRoom
+        const roomForCheck =
+          message.kind === 'photo' && message.room ? message.room : this.currentRoom
         if (!roomForCheck) continue
         const key = this.makeStateKey(state.item, roomForCheck)
         let perRoomState = this.itemsById.get(key)
@@ -390,7 +391,8 @@ export class ChecklistTracker {
 
     // Pourcentage = couvert / required total (critical + important)
     const totalRequired = covered.length + missingCritical.length + missingImportant.length
-    const percentage = totalRequired === 0 ? 100 : Math.round((covered.length / totalRequired) * 100)
+    const percentage =
+      totalRequired === 0 ? 100 : Math.round((covered.length / totalRequired) * 100)
 
     return {
       diagnostics: [...this.diagnostics],

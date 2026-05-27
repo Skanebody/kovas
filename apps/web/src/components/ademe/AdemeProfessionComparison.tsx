@@ -46,11 +46,18 @@ export function AdemeProfessionComparison({
           return (
             <li key={item.label} className="space-y-1">
               <div className="flex items-center justify-between text-[11px]">
-                <span className={cn('text-ink-mute', item.tone === 'accent' && 'font-semibold text-ink')}>
+                <span
+                  className={cn(
+                    'text-ink-mute',
+                    item.tone === 'accent' && 'font-semibold text-ink',
+                  )}
+                >
                   {item.label}
                 </span>
                 <span className="font-mono text-ink">
-                  {yourRatio === null && item.tone === 'accent' ? '—' : `${(item.value * 100).toFixed(1)}%`}
+                  {yourRatio === null && item.tone === 'accent'
+                    ? '—'
+                    : `${(item.value * 100).toFixed(1)}%`}
                 </span>
               </div>
               <div className="h-2.5 w-full rounded-pill bg-sage-alt">

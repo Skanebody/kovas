@@ -179,11 +179,7 @@ describe('buildExtendedRisksFindings', () => {
       source: 'georisques.gouv.fr',
     }
     const findings = buildExtendedRisksFindings(bundle, null)
-    expect(findings.map((f) => f.id).sort()).toEqual([
-      'ial-argiles',
-      'ial-ppri',
-      'ial-radon',
-    ])
+    expect(findings.map((f) => f.id).sort()).toEqual(['ial-argiles', 'ial-ppri', 'ial-radon'])
   })
 
   it('respects partial IAL ack (radon true, ppri false)', () => {

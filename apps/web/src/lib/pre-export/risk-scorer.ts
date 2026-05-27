@@ -11,12 +11,7 @@
  * Interprétation textuelle déterminée par `interpretScore` (lib/pre-export/types).
  */
 
-import {
-  type Finding,
-  type PreExportAnalysisResult,
-  interpretScore,
-  SCORE_WEIGHTS,
-} from './types'
+import { type Finding, type PreExportAnalysisResult, SCORE_WEIGHTS, interpretScore } from './types'
 
 export interface SubScores {
   conformity: number // 0-1
@@ -41,11 +36,7 @@ export function computeGlobalScore(
     0,
     Math.min(
       100,
-      conformity_score +
-        coherence_score +
-        statistical_score +
-        quality_score +
-        exhaustivity_score,
+      conformity_score + coherence_score + statistical_score + quality_score + exhaustivity_score,
     ),
   )
 

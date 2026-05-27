@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import type { GuideSection } from '@/lib/guides/types'
+import { cn } from '@/lib/utils'
 import { ChevronRight, List } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -100,9 +100,7 @@ export function GuideTOC({ sections, className }: GuideTOCProps) {
                   <ChevronRight
                     className={cn(
                       'mt-0.5 size-3.5 shrink-0 transition-transform',
-                      isActive
-                        ? 'translate-x-0.5 text-chartreuse-deep'
-                        : 'opacity-50',
+                      isActive ? 'translate-x-0.5 text-chartreuse-deep' : 'opacity-50',
                     )}
                     aria-hidden
                   />

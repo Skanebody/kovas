@@ -1,12 +1,12 @@
 'use client'
 
-import type { ReactNode } from 'react'
-import { useState } from 'react'
 import {
-  hasFeatureAccess,
   type FeatureRequirement,
   type UserAccess,
+  hasFeatureAccess,
 } from '@/lib/upsell/access-control'
+import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { UpsellEmptyState } from './UpsellEmptyState'
 import { UpsellModal } from './UpsellModal'
 
@@ -85,7 +85,12 @@ export function FeatureGate({
           className="absolute inset-0 rounded-xl border border-rule/60 bg-foreground/[0.03] backdrop-blur-[1px] group-hover:bg-foreground/[0.06] transition-colors"
         />
       </button>
-      <UpsellModal target={upsellTarget} trigger={trigger} open={modalOpen} onOpenChange={setModalOpen} />
+      <UpsellModal
+        target={upsellTarget}
+        trigger={trigger}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+      />
     </>
   )
 }

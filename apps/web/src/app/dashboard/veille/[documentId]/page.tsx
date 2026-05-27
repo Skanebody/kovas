@@ -15,18 +15,18 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import {
+  type AutoUpdateStatus,
   CHANGE_TYPE_LABEL,
   DOC_TYPE_LABEL,
   IMPORTANCE_BADGE,
   IMPORTANCE_LABEL,
   MODULE_LABEL,
-  STATUS_BADGE,
-  STATUS_LABEL,
-  type AutoUpdateStatus,
   type RegulatoryDocType,
   type RegulatoryDocumentDetail,
   type RegulatoryImportance,
   type RegulatoryModule,
+  STATUS_BADGE,
+  STATUS_LABEL,
 } from '@/lib/regulatory/types'
 import { ChevronLeft, ExternalLink } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -87,8 +87,14 @@ interface AutoUpdateRowLite {
 
 interface NotifUpdateBuilder {
   update: (patch: { read_at: string }) => {
-    eq: (col: string, val: string) => {
-      eq: (col: string, val: string) => {
+    eq: (
+      col: string,
+      val: string,
+    ) => {
+      eq: (
+        col: string,
+        val: string,
+      ) => {
         is: (col: string, val: null) => Promise<{ error: { message: string } | null }>
       }
     }
@@ -102,7 +108,7 @@ function unwrapSource(
     | null,
 ): { id: string; name: string; authority: string } | null {
   if (!value) return null
-  return Array.isArray(value) ? value[0] ?? null : value
+  return Array.isArray(value) ? (value[0] ?? null) : value
 }
 
 function formatDate(iso: string | null): string {
@@ -193,7 +199,9 @@ export default async function VeilleDocumentPage({ params }: PageProps) {
   }
 
   const moduleTopics = doc.topics.filter((t): t is RegulatoryModule =>
-    (['dpe', 'amiante', 'plomb', 'gaz', 'electricite', 'termites', 'carrez', 'erp'] as string[]).includes(t),
+    (
+      ['dpe', 'amiante', 'plomb', 'gaz', 'electricite', 'termites', 'carrez', 'erp'] as string[]
+    ).includes(t),
   )
 
   return (
@@ -308,9 +316,7 @@ export default async function VeilleDocumentPage({ params }: PageProps) {
                       {STATUS_LABEL[u.status]}
                     </Badge>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13px] font-semibold text-ink leading-snug">
-                        {u.title}
-                      </p>
+                      <p className="text-[13px] font-semibold text-ink leading-snug">{u.title}</p>
                       <p className="text-[12px] text-ink-mute mt-1 leading-relaxed line-clamp-2">
                         {u.summary}
                       </p>

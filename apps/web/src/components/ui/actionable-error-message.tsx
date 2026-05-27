@@ -1,7 +1,7 @@
 'use client'
 
-import { AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AlertCircle } from 'lucide-react'
 
 interface ActionableErrorMessageProps {
   message: string
@@ -33,11 +33,7 @@ export function ActionableErrorMessage({
 
   return (
     <div
-      className={cn(
-        'flex items-start gap-2 rounded-md border p-3 text-xs',
-        toneClasses,
-        className,
-      )}
+      className={cn('flex items-start gap-2 rounded-md border p-3 text-xs', toneClasses, className)}
       role="alert"
     >
       <AlertCircle className="size-4 shrink-0 mt-0.5" aria-hidden="true" />

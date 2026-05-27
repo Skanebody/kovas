@@ -1,9 +1,9 @@
 'use client'
 
-import { AlertTriangle, Loader2, Trash2 } from 'lucide-react'
-import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AlertTriangle, Loader2, Trash2 } from 'lucide-react'
+import { useState, useTransition } from 'react'
 
 interface DangerZoneProps {
   /** Server action qui fait le soft-delete. Lance une erreur si problème. */
@@ -75,7 +75,11 @@ export function DangerZone({ onDelete, entityLabel, confirmWord = 'supprimer' }:
                 disabled={typed.trim().toLowerCase() !== confirmWord.toLowerCase() || isPending}
                 className="bg-accent-red hover:bg-accent-red/80"
               >
-                {isPending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                {isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Trash2 className="size-4" />
+                )}
                 Confirmer la suppression
               </Button>
               <Button

@@ -1,7 +1,5 @@
 'use client'
 
-import { Check, ChevronDown, Loader2 } from 'lucide-react'
-import { useEffect, useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,10 +8,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  MISSION_STATUS_LABELS,
-  MISSION_STATUS_VARIANT,
-} from '@/lib/mission-helpers'
+import { MISSION_STATUS_LABELS, MISSION_STATUS_VARIANT } from '@/lib/mission-helpers'
+import { Check, ChevronDown, Loader2 } from 'lucide-react'
+import { useEffect, useState, useTransition } from 'react'
 import { updateMissionStatusAction } from './actions'
 
 type Status =
@@ -77,7 +74,11 @@ export function MissionStatusButton({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" disabled={isPending}>
-              {isPending ? <Loader2 className="size-3 animate-spin" /> : <ChevronDown className="size-3" />}
+              {isPending ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <ChevronDown className="size-3" />
+              )}
               Changer
             </Button>
           </DropdownMenuTrigger>

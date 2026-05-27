@@ -37,9 +37,7 @@ export const GUIDE_REGISTRY: Readonly<Record<GuideType, Guide>> = Object.freeze(
 export const GUIDES_LIST: ReadonlyArray<Guide> = Object.values(GUIDE_REGISTRY)
 
 /** Liste des slugs supportés (utile pour `generateStaticParams`). */
-export const GUIDE_SLUGS: ReadonlyArray<GuideType> = Object.keys(
-  GUIDE_REGISTRY,
-) as GuideType[]
+export const GUIDE_SLUGS: ReadonlyArray<GuideType> = Object.keys(GUIDE_REGISTRY) as GuideType[]
 
 /**
  * Récupère un guide par son slug. Retourne `null` si introuvable

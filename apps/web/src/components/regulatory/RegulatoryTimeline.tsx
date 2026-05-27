@@ -61,7 +61,9 @@ export function RegulatoryTimeline({
         const importanceVariant = IMPORTANCE_BADGE[item.importance]
         // On affiche les modules effectivement matchés dans topics.
         const moduleTags = item.topics.filter((t): t is RegulatoryModule =>
-          ['dpe', 'amiante', 'plomb', 'gaz', 'electricite', 'termites', 'carrez', 'erp'].includes(t),
+          ['dpe', 'amiante', 'plomb', 'gaz', 'electricite', 'termites', 'carrez', 'erp'].includes(
+            t,
+          ),
         )
         return (
           <li key={item.id}>

@@ -54,16 +54,18 @@ export async function trackBehaviorEvent(
   options: TrackEventOptions = {},
 ): Promise<void> {
   try {
-    const { error } = await (supabase as unknown as {
-      from(table: 'user_behavior_events'): {
-        insert(payload: {
-          user_id: string
-          organization_id: string | null
-          event_type: string
-          event_data: Record<string, unknown> | null
-        }): Promise<{ error: unknown }>
+    const { error } = await (
+      supabase as unknown as {
+        from(table: 'user_behavior_events'): {
+          insert(payload: {
+            user_id: string
+            organization_id: string | null
+            event_type: string
+            event_data: Record<string, unknown> | null
+          }): Promise<{ error: unknown }>
+        }
       }
-    })
+    )
       .from('user_behavior_events')
       .insert({
         user_id: userId,

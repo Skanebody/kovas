@@ -19,7 +19,7 @@ export function AddonsGrid({ recommendedCode }: AddonsGridProps) {
           offer={offer}
           recommended={offer.code === recommendedCode}
           position="grid_addons"
-          ctaHref="/app/account"
+          ctaHref="/dashboard/account"
           secondaryCtaLabel="Voir le détail"
         />
       ))}

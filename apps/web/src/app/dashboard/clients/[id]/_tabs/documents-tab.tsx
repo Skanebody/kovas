@@ -1,7 +1,7 @@
-import { FileText, Receipt } from 'lucide-react'
-import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
+import { FileText, Receipt } from 'lucide-react'
+import Link from 'next/link'
 import { EmptyTabState } from './empty-tab-state'
 import { formatDate } from './format-helpers'
 

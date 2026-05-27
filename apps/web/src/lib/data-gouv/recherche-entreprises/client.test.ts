@@ -163,7 +163,10 @@ describe('verifyDiagnosticActivity', () => {
   })
 
   it("returns error='not_found' when results array is empty", async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => buildResponse({ results: [], total_results: 0 })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => buildResponse({ results: [], total_results: 0 })),
+    )
 
     const result = await verifyDiagnosticActivity(VALID_SIRET_DIAG)
     expect(result.found).toBe(false)

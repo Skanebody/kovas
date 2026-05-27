@@ -21,15 +21,11 @@
  *   />
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { consolidateFindings } from '@/lib/alerts/consolidator'
 import { filterTone } from '@/lib/alerts/formulations'
-import {
-  MAX_ALERTS_PER_MISSION,
-  type AlertSeverity,
-  type Finding,
-} from '@/lib/alerts/types'
+import { type AlertSeverity, type Finding, MAX_ALERTS_PER_MISSION } from '@/lib/alerts/types'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, Eye, Info, Lightbulb, X } from 'lucide-react'
 import Link from 'next/link'
@@ -50,26 +46,24 @@ interface AlertManagerProps {
   className?: string
 }
 
-const SEVERITY_STYLES: Record<
-  AlertSeverity,
-  { icon: typeof Info; color: string; label: string }
-> = {
-  critical: {
-    icon: Eye,
-    color: 'text-accent-orange',
-    label: 'À regarder',
-  },
-  warning: {
-    icon: Lightbulb,
-    color: 'text-accent-amber',
-    label: 'À confirmer',
-  },
-  info: {
-    icon: Info,
-    color: 'text-ink-mute',
-    label: 'Pour info',
-  },
-}
+const SEVERITY_STYLES: Record<AlertSeverity, { icon: typeof Info; color: string; label: string }> =
+  {
+    critical: {
+      icon: Eye,
+      color: 'text-accent-orange',
+      label: 'À regarder',
+    },
+    warning: {
+      icon: Lightbulb,
+      color: 'text-accent-amber',
+      label: 'À confirmer',
+    },
+    info: {
+      icon: Info,
+      color: 'text-ink-mute',
+      label: 'Pour info',
+    },
+  }
 
 export function AlertManager({
   findings,
@@ -148,12 +142,7 @@ export function AlertManager({
                     </p>
                   )}
                   {f.href && (
-                    <Button
-                      asChild
-                      variant="link"
-                      size="sm"
-                      className="px-0 h-auto text-xs mt-1"
-                    >
+                    <Button asChild variant="link" size="sm" className="px-0 h-auto text-xs mt-1">
                       <Link href={f.href}>Voir le détail</Link>
                     </Button>
                   )}

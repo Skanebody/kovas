@@ -31,23 +31,16 @@ function AddonCard({ addon }: { addon: AddonModule }) {
 
   return (
     <li className="rounded-[20px] border border-[#0F1419]/[0.08] bg-white p-5 hover:border-[#0F1419]/35 transition-colors flex flex-col">
-      <p className="text-[15px] font-semibold text-[#0F1419] leading-snug mb-2">
-        {addon.name}
-      </p>
+      <p className="text-[15px] font-semibold text-[#0F1419] leading-snug mb-2">{addon.name}</p>
       <p className="text-[13px] text-[#0F1419]/72 leading-relaxed mb-4 min-h-[60px] flex-1">
         {addon.description}
       </p>
       <div className="pt-3 border-t border-[#0F1419]/[0.04] space-y-1">
         <p className="font-semibold text-[14px] tabular-nums text-[#0F1419]">
-          {monthlyEuros} €{' '}
-          <span className="font-normal text-[#0F1419]/55">/ mois</span>
+          {monthlyEuros} € <span className="font-normal text-[#0F1419]/55">/ mois</span>
         </p>
-        {includedDisplay && (
-          <p className="text-[11px] text-[#0F1419]/72">{includedDisplay}</p>
-        )}
-        {overageDisplay && (
-          <p className="text-[11px] text-[#0F1419]/55">{overageDisplay}</p>
-        )}
+        {includedDisplay && <p className="text-[11px] text-[#0F1419]/72">{includedDisplay}</p>}
+        {overageDisplay && <p className="text-[11px] text-[#0F1419]/55">{overageDisplay}</p>}
       </div>
     </li>
   )

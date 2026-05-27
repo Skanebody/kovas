@@ -52,7 +52,10 @@ export async function getOrganizationBranding(
   const client = supabase as unknown as {
     from: (t: string) => {
       select: (cols: string) => {
-        eq: (col: string, val: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
           maybeSingle: () => Promise<{
             data: OrganizationBrandingRow | null
             error: { message: string } | null
@@ -110,11 +113,7 @@ export function brandingMimeToExt(mime: string): 'png' | 'svg' | 'jpg' {
  * Liste des mimes acceptés (cohérent avec migration CHECK constraint +
  * `allowed_mime_types` du bucket).
  */
-export const BRANDING_ALLOWED_MIME_TYPES = [
-  'image/png',
-  'image/svg+xml',
-  'image/jpeg',
-] as const
+export const BRANDING_ALLOWED_MIME_TYPES = ['image/png', 'image/svg+xml', 'image/jpeg'] as const
 
 export type BrandingMime = (typeof BRANDING_ALLOWED_MIME_TYPES)[number]
 

@@ -410,8 +410,9 @@ function levenshtein(a: string, b: string): number {
   if (a.length === 0) return b.length
   if (b.length === 0) return a.length
 
-  const matrix: number[][] = Array.from({ length: a.length + 1 }, () =>
-    new Array(b.length + 1).fill(0) as number[],
+  const matrix: number[][] = Array.from(
+    { length: a.length + 1 },
+    () => new Array(b.length + 1).fill(0) as number[],
   )
   for (let i = 0; i <= a.length; i += 1) {
     const row = matrix[i]

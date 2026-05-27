@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Drawer } from 'vaul'
 
 /**
@@ -158,9 +158,7 @@ function MobileSheet({
               {description}
             </Drawer.Description>
           ) : (
-            <Drawer.Description className="sr-only">
-              Panneau d&apos;action
-            </Drawer.Description>
+            <Drawer.Description className="sr-only">Panneau d&apos;action</Drawer.Description>
           )}
           <div className="flex-1 overflow-y-auto px-4 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] pt-1">
             {children}
@@ -218,12 +216,8 @@ function DesktopDrawer({
       >
         <div className="flex items-start justify-between gap-3 px-6 pt-5 pb-3 border-b border-rule">
           <div className="min-w-0">
-            {title && (
-              <h2 className="text-[18px] font-bold text-ink truncate">{title}</h2>
-            )}
-            {description && (
-              <p className="text-sm text-ink-mute mt-0.5">{description}</p>
-            )}
+            {title && <h2 className="text-[18px] font-bold text-ink truncate">{title}</h2>}
+            {description && <p className="text-sm text-ink-mute mt-0.5">{description}</p>}
           </div>
           <button
             type="button"

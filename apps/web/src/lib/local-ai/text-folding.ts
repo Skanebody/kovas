@@ -16,11 +16,7 @@
  *   sans diacritiques
  */
 export function foldText(input: string): string {
-  return input
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim()
+  return input.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 }
 
 /**

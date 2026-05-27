@@ -7,7 +7,7 @@
  * 9 items répartis sur 3 sections : périmètre / mesurage par pièce / total + annexes.
  */
 
-import { TRIGGER_DELAYS, type DiagnosticChecklist } from './types'
+import { type DiagnosticChecklist, TRIGGER_DELAYS } from './types'
 
 export const CARREZ_CHECKLIST: DiagnosticChecklist = {
   diagnostic: 'carrez',
@@ -70,7 +70,8 @@ export const CARREZ_CHECKLIST: DiagnosticChecklist = {
           id: 'carrez_room_height',
           field_name: 'carrez.room_height',
           description_short: 'Hauteur sous plafond ≥ 1,80 m',
-          description_full: 'Hauteur sous plafond vérifiée — sous-pentes < 1,80 m exclues du calcul.',
+          description_full:
+            'Hauteur sous plafond vérifiée — sous-pentes < 1,80 m exclues du calcul.',
           scope: 'per_room',
           required: true,
           severity: 'critical',
@@ -84,7 +85,8 @@ export const CARREZ_CHECKLIST: DiagnosticChecklist = {
           id: 'carrez_deductions',
           field_name: 'carrez.deductions',
           description_short: 'Déductions (trémies, gaines)',
-          description_full: 'Déduction trémies cheminée, escaliers, gaines techniques, cloisons épaisses.',
+          description_full:
+            'Déduction trémies cheminée, escaliers, gaines techniques, cloisons épaisses.',
           scope: 'per_room',
           required: true,
           severity: 'important',
@@ -118,7 +120,8 @@ export const CARREZ_CHECKLIST: DiagnosticChecklist = {
           id: 'carrez_excluded_annexes',
           field_name: 'carrez.excluded_annexes',
           description_short: 'Annexes hors Carrez listées',
-          description_full: 'Liste des annexes exclues du Carrez (cave, balcon, terrasse, parking).',
+          description_full:
+            'Liste des annexes exclues du Carrez (cave, balcon, terrasse, parking).',
           scope: 'global',
           required: false,
           severity: 'important',
@@ -132,7 +135,8 @@ export const CARREZ_CHECKLIST: DiagnosticChecklist = {
           id: 'carrez_plans',
           field_name: 'carrez.attached_plan',
           description_short: 'Plan croquis joint',
-          description_full: 'Croquis coté joint au certificat (recommandé même si non obligatoire).',
+          description_full:
+            'Croquis coté joint au certificat (recommandé même si non obligatoire).',
           scope: 'global',
           required: false,
           severity: 'optional',

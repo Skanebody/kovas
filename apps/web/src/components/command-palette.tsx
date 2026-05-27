@@ -45,9 +45,21 @@ const NAV_ITEMS = [
     icon: Home,
     shortcut: 'G D',
   },
-  { id: 'dossiers', label: 'Dossiers', href: '/dashboard/dossiers', icon: FileText, shortcut: 'G O' },
+  {
+    id: 'dossiers',
+    label: 'Dossiers',
+    href: '/dashboard/dossiers',
+    icon: FileText,
+    shortcut: 'G O',
+  },
   { id: 'clients', label: 'Clients', href: '/dashboard/clients', icon: Users, shortcut: 'G C' },
-  { id: 'properties', label: 'Biens', href: '/dashboard/properties', icon: Building2, shortcut: 'G B' },
+  {
+    id: 'properties',
+    label: 'Biens',
+    href: '/dashboard/properties',
+    icon: Building2,
+    shortcut: 'G B',
+  },
 ] as const
 
 const QUICK_ACTIONS = [
@@ -389,14 +401,15 @@ function CommandRow({
       <span className="text-ink-mute shrink-0">{icon}</span>
       <span className="flex-1 min-w-0">
         <span className="truncate block">{label}</span>
-        {subtitle && (
-          <span className="text-[11px] text-ink-mute truncate block">{subtitle}</span>
-        )}
+        {subtitle && <span className="text-[11px] text-ink-mute truncate block">{subtitle}</span>}
       </span>
       {shortcut && (
         <span className="flex gap-0.5 shrink-0">
           {shortcut.split(' ').map((k, i) => (
-            <kbd key={`${shortcut}-${i}`} className="text-[10px] bg-cream-deep/50 rounded px-1.5 py-0.5">
+            <kbd
+              key={`${shortcut}-${i}`}
+              className="text-[10px] bg-cream-deep/50 rounded px-1.5 py-0.5"
+            >
               {k}
             </kbd>
           ))}

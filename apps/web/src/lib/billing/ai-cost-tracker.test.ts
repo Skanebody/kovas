@@ -8,13 +8,13 @@
  *   - recordAiUsage : upsert + déclenchement degraded_mode_at
  */
 
-import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { test } from 'node:test'
 import {
+  type DegradedModeStatus,
   __testing,
   isAiDegradedMode,
   recordAiUsage,
-  type DegradedModeStatus,
 } from './ai-cost-tracker'
 
 const { currentMonthIso, nextMonthResetDate } = __testing
@@ -97,7 +97,7 @@ function buildMockSupabase(state: MockState): {
    isAiDegradedMode
    ============================================================ */
 
-test('isAiDegradedMode — pas d\'abonnement → degraded=false', async () => {
+test("isAiDegradedMode — pas d'abonnement → degraded=false", async () => {
   const { client } = buildMockSupabase({ subscription: null })
   const out = await isAiDegradedMode(client as never, 'org-1')
   assert.equal(out.degraded, false)

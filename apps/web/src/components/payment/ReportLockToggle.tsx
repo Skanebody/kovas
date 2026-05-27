@@ -260,7 +260,11 @@ export function ReportLockToggle({
                 >
                   <span className="font-mono text-ink-mute">{formatDate(r.sentAt)}</span>
                   <span className="truncate text-ink-soft">{r.recipient}</span>
-                  <Badge variant={r.status === 'clicked' ? 'green' : r.status === 'failed' ? 'red' : 'muted'}>
+                  <Badge
+                    variant={
+                      r.status === 'clicked' ? 'green' : r.status === 'failed' ? 'red' : 'muted'
+                    }
+                  >
                     {r.status}
                   </Badge>
                 </li>

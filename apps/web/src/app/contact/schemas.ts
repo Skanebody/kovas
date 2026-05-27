@@ -39,7 +39,13 @@ const partenariatSchema = baseContactSchema.extend({
   inquiry_type: z.literal('partenariat'),
   company: z.string().trim().min(2).max(160),
   partnership_type: z
-    .enum(['notaires', 'agences-immobilieres', 'banques-courtiers', 'fournisseurs-energie', 'autre'])
+    .enum([
+      'notaires',
+      'agences-immobilieres',
+      'banques-courtiers',
+      'fournisseurs-energie',
+      'autre',
+    ])
     .optional(),
 })
 

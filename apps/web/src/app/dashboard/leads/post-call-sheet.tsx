@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import { useState } from 'react'
-import { POST_CALL_OUTCOMES, type LeadItem, type PostCallOutcome } from './leads-types'
+import { type LeadItem, POST_CALL_OUTCOMES, type PostCallOutcome } from './leads-types'
 
 interface PostCallSheetProps {
   open: boolean

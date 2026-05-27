@@ -30,16 +30,16 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  buildCustomLine,
-  buildDiagnosticLine,
-  buildPackLine,
-} from '@/lib/quotes/build-pricing-line'
 import type {
   DiagnosticPricing,
   PricingDiagnosticType,
   PropertyType,
 } from '@/lib/pricing/pricing-templates'
+import {
+  buildCustomLine,
+  buildDiagnosticLine,
+  buildPackLine,
+} from '@/lib/quotes/build-pricing-line'
 import {
   QUOTE_DIAGNOSTIC_LABELS,
   type QuoteDiagnosticType,
@@ -162,9 +162,7 @@ export function QuoteCatalogPicker({
           </DropdownMenuLabel>
           {ALL_DIAGNOSTICS.map((diag) => {
             const pricing = diagnosticsPricing[diag]
-            const priceLabel = pricing
-              ? `${pricing.basePrice} € HT`
-              : 'à configurer'
+            const priceLabel = pricing ? `${pricing.basePrice} € HT` : 'à configurer'
             return (
               <DropdownMenuItem
                 key={diag}
@@ -230,9 +228,7 @@ export function QuoteCatalogPicker({
                   type="number"
                   min={1}
                   value={customForm.quantity}
-                  onChange={(e) =>
-                    setCustomForm((prev) => ({ ...prev, quantity: e.target.value }))
-                  }
+                  onChange={(e) => setCustomForm((prev) => ({ ...prev, quantity: e.target.value }))}
                 />
               </div>
               <div className="space-y-1.5">
@@ -254,9 +250,7 @@ export function QuoteCatalogPicker({
                   type="text"
                   inputMode="decimal"
                   value={customForm.tvaRate}
-                  onChange={(e) =>
-                    setCustomForm((prev) => ({ ...prev, tvaRate: e.target.value }))
-                  }
+                  onChange={(e) => setCustomForm((prev) => ({ ...prev, tvaRate: e.target.value }))}
                 />
               </div>
             </div>

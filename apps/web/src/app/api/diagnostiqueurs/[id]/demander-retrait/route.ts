@@ -7,10 +7,10 @@
  * Cf. CLAUDE.md §14 (RGPD article 17 — droit à l'effacement).
  */
 
-import { NextResponse } from 'next/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/email/send'
 import { formatLegalMentions } from '@/lib/legal/company-identity'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -28,8 +28,7 @@ export async function POST(req: Request, context: RouteContext) {
   } catch {
     // Body vide accepté
   }
-  const reason =
-    typeof body.reason === 'string' ? body.reason.trim().slice(0, 1000) : null
+  const reason = typeof body.reason === 'string' ? body.reason.trim().slice(0, 1000) : null
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -68,10 +67,7 @@ export async function POST(req: Request, context: RouteContext) {
     updatePayload.withdrawal_reason = reason
   }
 
-  const { error: updateErr } = await admin
-    .from('diagnosticians')
-    .update(updatePayload)
-    .eq('id', id)
+  const { error: updateErr } = await admin.from('diagnosticians').update(updatePayload).eq('id', id)
   if (updateErr) {
     console.error(`[demander-retrait] Update failed: ${updateErr.message}`)
     return NextResponse.json({ error: 'Erreur enregistrement, réessayez.' }, { status: 500 })

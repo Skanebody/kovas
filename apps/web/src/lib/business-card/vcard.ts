@@ -211,7 +211,10 @@ export function buildVCard(input: VCardInput): string {
   // REV (timestamp UTC ISO 8601)
   lines.push({
     prop: 'REV',
-    value: new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''),
+    value: new Date()
+      .toISOString()
+      .replace(/[-:]/g, '')
+      .replace(/\.\d{3}/, ''),
   })
 
   lines.push({ prop: 'END', value: 'VCARD' })

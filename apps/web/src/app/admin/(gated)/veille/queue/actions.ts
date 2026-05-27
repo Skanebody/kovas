@@ -47,10 +47,8 @@ export async function approveArticle(
     published_at: new Date().toISOString(),
   }
 
-  if (options?.eeatExperience !== undefined)
-    patch.eeat_experience = options.eeatExperience
-  if (options?.eeatExpertise !== undefined)
-    patch.eeat_expertise = options.eeatExpertise
+  if (options?.eeatExperience !== undefined) patch.eeat_experience = options.eeatExperience
+  if (options?.eeatExpertise !== undefined) patch.eeat_expertise = options.eeatExpertise
   if (options?.eeatAuthoritativeness !== undefined)
     patch.eeat_authoritativeness = options.eeatAuthoritativeness
   if (options?.eeatTrustworthiness !== undefined)
@@ -70,10 +68,7 @@ export async function approveArticle(
   return { ok: true }
 }
 
-export async function rejectArticle(
-  articleId: string,
-  reason: string,
-): Promise<ApproveResult> {
+export async function rejectArticle(articleId: string, reason: string): Promise<ApproveResult> {
   if (!articleId || !reason.trim()) {
     return { ok: false, error: 'articleId et reason requis' }
   }
@@ -98,9 +93,7 @@ export async function rejectArticle(
   return { ok: true }
 }
 
-export async function regenerateArticle(
-  articleId: string,
-): Promise<ApproveResult> {
+export async function regenerateArticle(articleId: string): Promise<ApproveResult> {
   await requireAdmin()
   const supabase = createAdminClient()
 
@@ -144,17 +137,14 @@ export async function regenerateArticle(
     return { ok: false, error: 'Configuration Edge Function manquante' }
   }
 
-  const fnResponse = await fetch(
-    `${supabaseUrl}/functions/v1/generate-veille-article`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${serviceKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ keyword_id: kw.id }),
+  const fnResponse = await fetch(`${supabaseUrl}/functions/v1/generate-veille-article`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
     },
-  )
+    body: JSON.stringify({ keyword_id: kw.id }),
+  })
 
   if (!fnResponse.ok) {
     const errText = await fnResponse.text()
@@ -178,12 +168,10 @@ export async function updateArticleContent(
   const supabase = createAdminClient()
 
   const patch: Record<string, unknown> = {}
-  if (patches.contentMarkdown !== undefined)
-    patch.content_markdown = patches.contentMarkdown
+  if (patches.contentMarkdown !== undefined) patch.content_markdown = patches.contentMarkdown
   if (patches.title !== undefined) patch.title = patches.title
   if (patches.metaTitle !== undefined) patch.meta_title = patches.metaTitle
-  if (patches.metaDescription !== undefined)
-    patch.meta_description = patches.metaDescription
+  if (patches.metaDescription !== undefined) patch.meta_description = patches.metaDescription
 
   if (Object.keys(patch).length === 0) {
     return { ok: false, error: 'Aucune modification' }
@@ -202,7 +190,7 @@ export async function updateArticleContent(
 }
 
 export async function triggerBatchGeneration(
-  limit: number = 2,
+  limit = 2,
 ): Promise<{ ok: boolean; generated?: number; error?: string }> {
   await requireAdmin()
 
@@ -212,17 +200,14 @@ export async function triggerBatchGeneration(
     return { ok: false, error: 'Configuration Edge Function manquante' }
   }
 
-  const response = await fetch(
-    `${supabaseUrl}/functions/v1/generate-veille-article`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${serviceKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ limit }),
+  const response = await fetch(`${supabaseUrl}/functions/v1/generate-veille-article`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
     },
-  )
+    body: JSON.stringify({ limit }),
+  })
 
   if (!response.ok) {
     const errText = await response.text()

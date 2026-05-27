@@ -144,8 +144,7 @@ function scoreHeating(heating: HeatingType | null): SubScore {
   return {
     delta: entry.delta,
     factor: { code: `heating:${heating}`, label: entry.label },
-    direction:
-      entry.delta > 0 ? 'positive' : entry.delta < 0 ? 'negative' : 'neutral',
+    direction: entry.delta > 0 ? 'positive' : entry.delta < 0 ? 'negative' : 'neutral',
   }
 }
 

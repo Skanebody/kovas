@@ -22,13 +22,7 @@ import { useState, useTransition } from 'react'
 import { generateSeoDrafts, updateDraftStatus } from '../actions'
 import { SeoDraftCard } from './SeoDraftCard'
 
-export type SeoDraftStatus =
-  | 'draft'
-  | 'review'
-  | 'approved'
-  | 'published'
-  | 'archived'
-  | 'rejected'
+export type SeoDraftStatus = 'draft' | 'review' | 'approved' | 'published' | 'archived' | 'rejected'
 
 export interface SeoDraftWithKeyword {
   id: string
@@ -91,9 +85,7 @@ export function SeoKanbanBoard({ initialDrafts }: SeoKanbanBoardProps) {
   const grouped = groupByStatus(drafts)
 
   function handleStatusChange(draftId: string, newStatus: SeoDraftStatus) {
-    setDrafts((prev) =>
-      prev.map((d) => (d.id === draftId ? { ...d, status: newStatus } : d)),
-    )
+    setDrafts((prev) => prev.map((d) => (d.id === draftId ? { ...d, status: newStatus } : d)))
     startTransition(async () => {
       try {
         await updateDraftStatus(draftId, newStatus)
@@ -149,12 +141,7 @@ export function SeoKanbanBoard({ initialDrafts }: SeoKanbanBoardProps) {
             Validation EEAT obligatoire avant publication.
           </p>
         </div>
-        <Button
-          variant="accent"
-          onClick={handleGenerate}
-          disabled={isPending}
-          className="shrink-0"
-        >
+        <Button variant="accent" onClick={handleGenerate} disabled={isPending} className="shrink-0">
           <Sparkles className="size-4" aria-hidden />
           {isPending ? 'Génération…' : 'Générer 5 nouveaux drafts'}
         </Button>

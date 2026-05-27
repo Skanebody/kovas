@@ -6,8 +6,8 @@
  */
 
 import type { Finding, FindingCategory } from '@/lib/pre-export/types'
-import { FindingCard } from './FindingCard'
 import { CheckCircle2 } from 'lucide-react'
+import { FindingCard } from './FindingCard'
 
 interface AnalysisSectionProps {
   title: string
@@ -32,9 +32,7 @@ export function AnalysisSection({
       <div className="flex items-baseline justify-between gap-4 flex-wrap">
         <div>
           <h3 className="text-[17px] font-semibold text-ink leading-tight">{title}</h3>
-          {description ? (
-            <p className="text-[12px] text-ink-mute mt-0.5">{description}</p>
-          ) : null}
+          {description ? <p className="text-[12px] text-ink-mute mt-0.5">{description}</p> : null}
         </div>
         {scoreLabel ? (
           <span className="label-mono text-ink-mute" aria-label="Score de la section">
@@ -46,9 +44,7 @@ export function AnalysisSection({
       {findings.length === 0 ? (
         <div className="rounded-lg bg-paper border border-rule p-5 flex items-center gap-3">
           <CheckCircle2 className="size-5 text-success shrink-0" aria-hidden />
-          <p className="text-[13px] text-ink-soft">
-            Aucun point d'attention sur cette section.
-          </p>
+          <p className="text-[13px] text-ink-soft">Aucun point d'attention sur cette section.</p>
         </div>
       ) : (
         <div className="space-y-3">

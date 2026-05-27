@@ -16,26 +16,70 @@ export interface ViewType {
 
 export const VIEW_TYPES: ViewType[] = [
   // General
-  { id: 'vue_generale', label: 'Vue générale', filenameTag: 'VUE-GENERALE', group: 'general', pinned: true },
+  {
+    id: 'vue_generale',
+    label: 'Vue générale',
+    filenameTag: 'VUE-GENERALE',
+    group: 'general',
+    pinned: true,
+  },
   { id: 'detail', label: 'Détail', filenameTag: 'DETAIL', group: 'general' },
-  { id: 'anomalie', label: 'Anomalie / Désordre', filenameTag: 'ANOMALIE-DESORDRE', group: 'general' },
+  {
+    id: 'anomalie',
+    label: 'Anomalie / Désordre',
+    filenameTag: 'ANOMALIE-DESORDRE',
+    group: 'general',
+  },
 
   // Ouvertures
   { id: 'fenetre_nord', label: 'Fenêtre Nord', filenameTag: 'FENETRE-NORD', group: 'ouvertures' },
   { id: 'fenetre_sud', label: 'Fenêtre Sud', filenameTag: 'FENETRE-SUD', group: 'ouvertures' },
   { id: 'fenetre_est', label: 'Fenêtre Est', filenameTag: 'FENETRE-EST', group: 'ouvertures' },
-  { id: 'fenetre_ouest', label: 'Fenêtre Ouest', filenameTag: 'FENETRE-OUEST', group: 'ouvertures' },
+  {
+    id: 'fenetre_ouest',
+    label: 'Fenêtre Ouest',
+    filenameTag: 'FENETRE-OUEST',
+    group: 'ouvertures',
+  },
   { id: 'porte_entree', label: 'Porte entrée', filenameTag: 'PORTE-ENTREE', group: 'ouvertures' },
-  { id: 'porte_interieure', label: 'Porte intérieure', filenameTag: 'PORTE-INTERIEURE', group: 'ouvertures' },
+  {
+    id: 'porte_interieure',
+    label: 'Porte intérieure',
+    filenameTag: 'PORTE-INTERIEURE',
+    group: 'ouvertures',
+  },
 
   // Chauffage / ECS
-  { id: 'radiateur', label: 'Radiateur', filenameTag: 'RADIATEUR', group: 'chauffage', pinned: true },
-  { id: 'chaudiere', label: 'Chaudière', filenameTag: 'CHAUDIERE', group: 'chauffage', pinned: true },
+  {
+    id: 'radiateur',
+    label: 'Radiateur',
+    filenameTag: 'RADIATEUR',
+    group: 'chauffage',
+    pinned: true,
+  },
+  {
+    id: 'chaudiere',
+    label: 'Chaudière',
+    filenameTag: 'CHAUDIERE',
+    group: 'chauffage',
+    pinned: true,
+  },
   { id: 'chauffe_eau', label: 'Chauffe-eau', filenameTag: 'CHAUFFE-EAU', group: 'chauffage' },
-  { id: 'plaque_signaletique', label: 'Plaque signalétique', filenameTag: 'PLAQUE-SIGNALETIQUE', group: 'chauffage', pinned: true },
+  {
+    id: 'plaque_signaletique',
+    label: 'Plaque signalétique',
+    filenameTag: 'PLAQUE-SIGNALETIQUE',
+    group: 'chauffage',
+    pinned: true,
+  },
 
   // Électrique
-  { id: 'tableau_electrique', label: 'Tableau électrique', filenameTag: 'TABLEAU-ELECTRIQUE', group: 'electrique' },
+  {
+    id: 'tableau_electrique',
+    label: 'Tableau électrique',
+    filenameTag: 'TABLEAU-ELECTRIQUE',
+    group: 'electrique',
+  },
   { id: 'prise', label: 'Prise', filenameTag: 'PRISE', group: 'electrique' },
   { id: 'interrupteur', label: 'Interrupteur', filenameTag: 'INTERRUPTEUR', group: 'electrique' },
 

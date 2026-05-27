@@ -18,11 +18,11 @@
 
 import { jsPDF } from 'jspdf'
 import {
+  QUOTE_PAYMENT_METHOD_LABELS,
   type QuoteClientSnapshot,
   type QuoteLineItem,
   type QuoteOrganizationSnapshot,
   type QuotePaymentMethod,
-  QUOTE_PAYMENT_METHOD_LABELS,
   computeQuoteTotals,
   formatDateLong,
   formatEur,
@@ -208,10 +208,7 @@ export function generateQuotePdf(input: QuotePdfInput): Buffer {
     const lineHt = Math.round(line.quantity * line.unitPriceHt * 100) / 100
 
     // Désignation (wrap si long)
-    const designationLines = doc.splitTextToSize(
-      line.designation,
-      innerWidth - 250,
-    ) as string[]
+    const designationLines = doc.splitTextToSize(line.designation, innerWidth - 250) as string[]
     doc.text(designationLines, margin + 8, y)
     doc.text(String(line.quantity), margin + innerWidth - 220, y, { align: 'right' })
     doc.text(formatEur(line.unitPriceHt), margin + innerWidth - 130, y, { align: 'right' })
@@ -297,7 +294,7 @@ export function generateQuotePdf(input: QuotePdfInput): Buffer {
     footerLines.push(`Certification : ${input.organization.certificationN}`)
   }
   footerLines.push(
-    'Diagnostics immobiliers — Art. L271-4 et suivants du Code de la construction et de l\'habitation.',
+    "Diagnostics immobiliers — Art. L271-4 et suivants du Code de la construction et de l'habitation.",
   )
   footerLines.push(
     `Devis valable jusqu'au ${formatDateLong(input.expiresAt)}. Signature pour acceptation par retour email ou courrier.`,

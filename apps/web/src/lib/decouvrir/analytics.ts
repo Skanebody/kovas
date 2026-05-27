@@ -37,10 +37,7 @@ export function trackOfferHovered(offerCode: string, durationMs: number): void {
   })
 }
 
-export function trackSectionViewed(
-  section: DecouvrirSection,
-  timeSpentMs: number,
-): void {
+export function trackSectionViewed(section: DecouvrirSection, timeSpentMs: number): void {
   if (timeSpentMs < 1000) return
   getPosthog()?.capture('decouvrir_section_viewed', {
     section,

@@ -5,7 +5,15 @@
  */
 
 import { Card } from '@/components/ui/card'
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 
 interface DailyPoint {
   date: string
@@ -89,13 +97,7 @@ export function EmailDailyChart({ data }: Props) {
                 axisLine={false}
                 interval={4}
               />
-              <YAxis
-                stroke="#7E8AA4"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                width={40}
-              />
+              <YAxis stroke="#7E8AA4" fontSize={10} tickLine={false} axisLine={false} width={40} />
               <Tooltip content={<ChartTooltip />} />
               <Line
                 type="monotone"

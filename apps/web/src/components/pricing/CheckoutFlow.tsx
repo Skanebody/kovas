@@ -1,13 +1,13 @@
 'use client'
 
+import { formatPriceEur, formatPriceEurCompact } from '@/lib/format/price'
 import {
   ADDON_MODULES,
-  PRICING_PLANS,
   type AddonModule,
+  PRICING_PLANS,
   type PricingPlan,
   type PricingPlanCode,
 } from '@/lib/pricing-plans'
-import { formatPriceEur, formatPriceEurCompact } from '@/lib/format/price'
 import { cn } from '@/lib/utils'
 import { ArrowRight, Check, Sparkles } from 'lucide-react'
 import Link from 'next/link'
@@ -120,19 +120,17 @@ export function CheckoutFlow({ planCode, billing }: CheckoutFlowProps) {
                       aria-pressed={isSelected}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <h3 className="text-[14px] font-semibold leading-tight">
-                          {addon.name}
-                        </h3>
+                        <h3 className="text-[14px] font-semibold leading-tight">{addon.name}</h3>
                         <span
                           className={cn(
                             'shrink-0 size-5 rounded-md border-2 flex items-center justify-center transition-colors',
-                            isSelected
-                              ? 'bg-chartreuse border-chartreuse'
-                              : 'border-[#0F1419]/25',
+                            isSelected ? 'bg-chartreuse border-chartreuse' : 'border-[#0F1419]/25',
                           )}
                           aria-hidden
                         >
-                          {isSelected && <Check className="size-3 text-[#0F1419]" strokeWidth={3} />}
+                          {isSelected && (
+                            <Check className="size-3 text-[#0F1419]" strokeWidth={3} />
+                          )}
                         </span>
                       </div>
                       <p className="text-[12px] text-[#0F1419]/72 leading-snug flex-1 mb-3">
@@ -173,10 +171,7 @@ export function CheckoutFlow({ planCode, billing }: CheckoutFlowProps) {
                   key={addon.code}
                   className="flex items-start gap-2.5 p-4 rounded-[16px] bg-chartreuse/15 border border-chartreuse/30"
                 >
-                  <Check
-                    className="size-4 text-[#0F1419] shrink-0 mt-0.5"
-                    strokeWidth={2.5}
-                  />
+                  <Check className="size-4 text-[#0F1419] shrink-0 mt-0.5" strokeWidth={2.5} />
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-medium text-[#0F1419] leading-tight">
                       {addon.name}
@@ -231,9 +226,7 @@ export function CheckoutFlow({ planCode, billing }: CheckoutFlowProps) {
                       key={code}
                       className="flex items-baseline justify-between gap-2 text-[13px]"
                     >
-                      <span className="text-white/90 truncate flex-1 min-w-0">
-                        {addon.name}
-                      </span>
+                      <span className="text-white/90 truncate flex-1 min-w-0">{addon.name}</span>
                       <span className="font-mono text-xs text-white/60 tabular-nums shrink-0">
                         + {formatPriceEurCompact(addon.monthlyPrice)}/mo
                       </span>

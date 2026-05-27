@@ -40,7 +40,10 @@ export async function GET(request: Request) {
   const since = url.searchParams.get('since')
 
   // biome-ignore lint/suspicious/noExplicitAny: types DB pas encore régénérés
-  let query = supabase.from('ademe_dpe_cache' as any).select('*').eq('organization_id', orgId)
+  let query = supabase
+    .from('ademe_dpe_cache' as any)
+    .select('*')
+    .eq('organization_id', orgId)
 
   if (since) query = query.gte('date_etablissement_dpe', since)
 
@@ -57,6 +60,6 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     dpe: (data ?? []) as unknown as AdemeDpeCacheRow[],
-    count: count ?? (data?.length ?? 0),
+    count: count ?? data?.length ?? 0,
   })
 }

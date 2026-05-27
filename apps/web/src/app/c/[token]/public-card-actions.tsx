@@ -11,8 +11,8 @@
  */
 
 import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
 import { Download, Share2, Wallet } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface PublicCardActionsProps {
   vcardUrl: string

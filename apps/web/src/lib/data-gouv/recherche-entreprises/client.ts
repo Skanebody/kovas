@@ -214,7 +214,8 @@ function parseApiResult(raw: RawApiResult, cleanedSiret: string): VerificationRe
       null)
     : null
 
-  const etatAdm = match?.etat_administratif ?? raw.etat_administratif ?? raw.siege?.etat_administratif ?? null
+  const etatAdm =
+    match?.etat_administratif ?? raw.etat_administratif ?? raw.siege?.etat_administratif ?? null
   const nafRaw =
     match?.activite_principale ?? raw.activite_principale ?? raw.siege?.activite_principale ?? null
   const nafCode = normalizeNafCode(nafRaw)

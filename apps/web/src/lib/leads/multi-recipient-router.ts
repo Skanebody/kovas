@@ -59,12 +59,7 @@ interface CandidateRow {
 /**
  * Distance haversine en km entre 2 points (formule simple V1).
  */
-function haversineDistanceKm(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number,
-): number {
+function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371
   const toRad = (d: number) => (d * Math.PI) / 180
   const dLat = toRad(lat2 - lat1)
@@ -87,7 +82,7 @@ export async function fetchCandidates(
   // biome-ignore lint/suspicious/noExplicitAny: client générique
   supabase: SupabaseClient<any, any, any>,
   ctx: QuoteRequestContext,
-  limit: number = 50,
+  limit = 50,
 ): Promise<CandidateRow[]> {
   // Stratégie : on charge un set large par ville/dept + on filtre/ranke en mémoire.
   // Volume cible V1 : ~13k diag FR → max 200-300 par ville la plus dense, OK.
@@ -122,10 +117,7 @@ export async function fetchCandidates(
  * Filtre les candidats par distance vs rayon d'intervention déclaré.
  * Sans coordonnées, on garde le candidat.
  */
-function filterByCoverage(
-  candidates: CandidateRow[],
-  ctx: QuoteRequestContext,
-): CandidateRow[] {
+function filterByCoverage(candidates: CandidateRow[], ctx: QuoteRequestContext): CandidateRow[] {
   if (ctx.property_geo_lat == null || ctx.property_geo_lng == null) {
     return candidates
   }

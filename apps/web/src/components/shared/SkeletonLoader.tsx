@@ -1,5 +1,5 @@
-import type { HTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
+import type { HTMLAttributes } from 'react'
 
 /**
  * SkeletonLoader — Principe de fluidité #5 (V5).
@@ -26,41 +26,22 @@ interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
 const STRIPE_BG =
   'bg-[linear-gradient(45deg,hsl(var(--navy)/0.06)_25%,transparent_25%,transparent_50%,hsl(var(--navy)/0.06)_50%,hsl(var(--navy)/0.06)_75%,transparent_75%,transparent)] bg-[length:24px_24px]'
 
-function SkeletonBar({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) {
+function SkeletonBar({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       aria-hidden
-      className={cn(
-        'rounded-md bg-navy/5 animate-progress-stripe',
-        STRIPE_BG,
-        className,
-      )}
+      className={cn('rounded-md bg-navy/5 animate-progress-stripe', STRIPE_BG, className)}
       {...props}
     />
   )
 }
 
-export function Skeleton({
-  variant = 'text',
-  lines,
-  className,
-  ...props
-}: SkeletonProps) {
+export function Skeleton({ variant = 'text', lines, className, ...props }: SkeletonProps) {
   if (variant === 'avatar') {
-    return (
-      <SkeletonBar className={cn('size-10 rounded-full', className)} {...props} />
-    )
+    return <SkeletonBar className={cn('size-10 rounded-full', className)} {...props} />
   }
   if (variant === 'image') {
-    return (
-      <SkeletonBar
-        className={cn('w-full aspect-video rounded-lg', className)}
-        {...props}
-      />
-    )
+    return <SkeletonBar className={cn('w-full aspect-video rounded-lg', className)} {...props} />
   }
   if (variant === 'line') {
     return <SkeletonBar className={cn('h-1 w-full', className)} {...props} />
@@ -71,18 +52,12 @@ export function Skeleton({
       <div
         role="status"
         aria-label="Chargement en cours"
-        className={cn(
-          'rounded-xl border border-rule bg-paper p-6 space-y-3',
-          className,
-        )}
+        className={cn('rounded-xl border border-rule bg-paper p-6 space-y-3', className)}
         {...props}
       >
         <SkeletonBar className="h-5 w-2/3" />
         {Array.from({ length: count }).map((_, i) => (
-          <SkeletonBar
-            key={i}
-            className={cn('h-3', i === count - 1 ? 'w-1/2' : 'w-full')}
-          />
+          <SkeletonBar key={i} className={cn('h-3', i === count - 1 ? 'w-1/2' : 'w-full')} />
         ))}
       </div>
     )
@@ -107,10 +82,7 @@ export function Skeleton({
       {...props}
     >
       {Array.from({ length: count }).map((_, i) => (
-        <SkeletonBar
-          key={i}
-          className={cn('h-4', i === count - 1 ? 'w-3/4' : 'w-full')}
-        />
+        <SkeletonBar key={i} className={cn('h-4', i === count - 1 ? 'w-3/4' : 'w-full')} />
       ))}
     </div>
   )

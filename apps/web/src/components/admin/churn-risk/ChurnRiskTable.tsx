@@ -178,7 +178,7 @@ function TagButton({ user }: { user: ChurnRiskUser }) {
           ? 'inline-flex items-center gap-1.5 rounded-md bg-amber/15 text-amber px-2.5 py-1 text-[11px] font-medium border border-amber/30 hover:bg-amber/20 transition-colors disabled:opacity-50'
           : 'inline-flex items-center gap-1.5 rounded-md bg-paper text-ink-mute px-2.5 py-1 text-[11px] font-medium border border-rule/60 hover:bg-rule/10 transition-colors disabled:opacity-50'
       }
-      title={tagged ? "Retirer le tag « à appeler »" : 'Marquer comme à appeler'}
+      title={tagged ? 'Retirer le tag « à appeler »' : 'Marquer comme à appeler'}
     >
       <PhoneCall className="size-3" aria-hidden />
       {tagged ? 'À appeler ✓' : 'À appeler'}
@@ -238,9 +238,7 @@ export function ChurnRiskTable({ users }: Props) {
                             {u.email}
                           </span>
                           {u.organizationName ? (
-                            <span className="text-[10px] text-ink-faint">
-                              {u.organizationName}
-                            </span>
+                            <span className="text-[10px] text-ink-faint">{u.organizationName}</span>
                           ) : null}
                         </div>
                       </td>

@@ -11,7 +11,11 @@ import Link from 'next/link'
 export function ValidityCheckerShortcut() {
   return (
     <Button asChild variant="outline" size="sm">
-      <Link href="/dashboard/outils/verification-validite" target="_blank" rel="noopener noreferrer">
+      <Link
+        href="/dashboard/outils/verification-validite"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <FileCheck className="size-4" />
         Vérifier validité diagnostic
       </Link>

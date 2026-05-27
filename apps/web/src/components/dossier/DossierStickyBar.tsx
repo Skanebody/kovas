@@ -111,7 +111,8 @@ export function DossierStickyBar({
   const meta = metaCopyFor(summary)
 
   const resolvedHref =
-    primaryHref ?? (primary.defaultHref || `/dashboard/dossiers/${encodeURIComponent(dossierId)}/mission`)
+    primaryHref ??
+    (primary.defaultHref || `/dashboard/dossiers/${encodeURIComponent(dossierId)}/mission`)
 
   return (
     <section

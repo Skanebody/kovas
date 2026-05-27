@@ -1,12 +1,13 @@
+import { hasActiveFollowUpSequenceAction } from '@/app/dashboard/relances/actions'
 import { AppPageHeader } from '@/components/app-page-header'
 import { QuoteStatusPill } from '@/components/quotes/QuoteStatusPill'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import {
+  QUOTE_PAYMENT_METHOD_LABELS,
   type QuoteClientSnapshot,
   type QuoteLineItem,
-  QUOTE_PAYMENT_METHOD_LABELS,
   formatDateLong,
   formatEur,
 } from '@/lib/quotes/types'
@@ -14,7 +15,6 @@ import { ArrowLeft, FileText } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { hasActiveFollowUpSequenceAction } from '@/app/dashboard/relances/actions'
 import { QuoteDetailActions } from './actions-bar'
 
 export const metadata: Metadata = { title: 'Devis' }
@@ -94,7 +94,7 @@ export default async function QuoteDetailPage({ params }: PageProps) {
         description={
           quote.issued_at
             ? `Émis le ${formatDateLong(quote.issued_at)}, valable jusqu'au ${formatDateLong(quote.expires_at)}.`
-            : 'Brouillon en attente d\'envoi.'
+            : "Brouillon en attente d'envoi."
         }
         action={<QuoteStatusPill status={quote.status} />}
       />
@@ -119,30 +119,28 @@ export default async function QuoteDetailPage({ params }: PageProps) {
               <p className="text-[13px] text-ink-faint italic">Aucune prestation.</p>
             ) : (
               <div className="overflow-x-auto -mx-2 px-2">
-              <table className="w-full text-[13px] min-w-[480px]">
-                <thead>
-                  <tr className="text-[11px] uppercase tracking-wide text-ink-mute border-b border-rule/60">
-                    <th className="text-left py-2 font-medium">Désignation</th>
-                    <th className="text-right py-2 font-medium w-[50px]">Qté</th>
-                    <th className="text-right py-2 font-medium w-[100px]">PU HT</th>
-                    <th className="text-right py-2 font-medium w-[100px]">Total HT</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {quote.line_items.map((line) => (
-                    <tr key={line.id} className="border-b border-rule/40">
-                      <td className="py-2 align-top">{line.designation}</td>
-                      <td className="py-2 text-right">{line.quantity}</td>
-                      <td className="py-2 text-right font-mono">
-                        {formatEur(line.unitPriceHt)}
-                      </td>
-                      <td className="py-2 text-right font-mono">
-                        {formatEur(line.quantity * line.unitPriceHt)}
-                      </td>
+                <table className="w-full text-[13px] min-w-[480px]">
+                  <thead>
+                    <tr className="text-[11px] uppercase tracking-wide text-ink-mute border-b border-rule/60">
+                      <th className="text-left py-2 font-medium">Désignation</th>
+                      <th className="text-right py-2 font-medium w-[50px]">Qté</th>
+                      <th className="text-right py-2 font-medium w-[100px]">PU HT</th>
+                      <th className="text-right py-2 font-medium w-[100px]">Total HT</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {quote.line_items.map((line) => (
+                      <tr key={line.id} className="border-b border-rule/40">
+                        <td className="py-2 align-top">{line.designation}</td>
+                        <td className="py-2 text-right">{line.quantity}</td>
+                        <td className="py-2 text-right font-mono">{formatEur(line.unitPriceHt)}</td>
+                        <td className="py-2 text-right font-mono">
+                          {formatEur(line.quantity * line.unitPriceHt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
             <div className="flex justify-end mt-4">
@@ -156,9 +154,7 @@ export default async function QuoteDetailPage({ params }: PageProps) {
                   <span className="font-mono">{formatEur(quote.amount_tva)}</span>
                 </div>
                 <div className="flex justify-between mt-2 pt-2 border-t border-rule/60 text-ink font-semibold">
-                  <span className="uppercase text-[11px] tracking-wider font-mono">
-                    Total TTC
-                  </span>
+                  <span className="uppercase text-[11px] tracking-wider font-mono">Total TTC</span>
                   <span className="font-serif italic text-[22px] leading-none">
                     {formatEur(quote.amount_ttc)}
                   </span>
@@ -186,7 +182,7 @@ export default async function QuoteDetailPage({ params }: PageProps) {
             <p className="font-semibold text-ink">
               {quote.client_snapshot?.displayName ?? quote.clients?.display_name ?? '—'}
             </p>
-            {quote.client_snapshot?.email ?? quote.clients?.email ? (
+            {(quote.client_snapshot?.email ?? quote.clients?.email) ? (
               <p className="text-[12px] text-ink-mute">
                 {quote.client_snapshot?.email ?? quote.clients?.email}
               </p>
@@ -195,9 +191,7 @@ export default async function QuoteDetailPage({ params }: PageProps) {
               <p className="text-[12px] text-ink-mute">{quote.client_snapshot.phone}</p>
             ) : null}
             {quote.client_snapshot?.companyName ? (
-              <p className="text-[12px] text-ink-mute mt-1">
-                {quote.client_snapshot.companyName}
-              </p>
+              <p className="text-[12px] text-ink-mute mt-1">{quote.client_snapshot.companyName}</p>
             ) : null}
             {quote.client_snapshot?.siret ? (
               <p className="text-[12px] text-ink-mute">SIRET {quote.client_snapshot.siret}</p>
@@ -210,9 +204,9 @@ export default async function QuoteDetailPage({ params }: PageProps) {
             </p>
             <p className="text-[13px] text-ink-soft">
               {quote.payment_method
-                ? QUOTE_PAYMENT_METHOD_LABELS[
+                ? (QUOTE_PAYMENT_METHOD_LABELS[
                     quote.payment_method as keyof typeof QUOTE_PAYMENT_METHOD_LABELS
-                  ] ?? quote.payment_method
+                  ] ?? quote.payment_method)
                 : '—'}{' '}
               · {quote.payment_terms_days ?? 30} jours
             </p>

@@ -15,10 +15,7 @@ import type { Alternative } from '@/lib/scheduling/alternative-generator'
 import type { ClusteringOpportunity } from '@/lib/scheduling/clustering-suggester'
 import type { ConflictResult } from '@/lib/scheduling/conflict-detector'
 import type { DurationEstimate } from '@/lib/scheduling/duration-estimator'
-import type {
-  SchedulingOwnership,
-  SchedulingPropertyType,
-} from '@/lib/scheduling/duration-schemas'
+import type { SchedulingOwnership, SchedulingPropertyType } from '@/lib/scheduling/duration-schemas'
 import { cn } from '@/lib/utils'
 import { Info, Phone } from 'lucide-react'
 import type { DossierFormData } from './dossier-wizard'

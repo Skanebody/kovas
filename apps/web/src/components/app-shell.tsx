@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
+import type { ReactNode } from 'react'
 
 export type AppBackground = 'light' | 'cyan' | 'navy' | 'cream'
 
@@ -24,7 +24,5 @@ export function AppShell({
   className?: string
   children: ReactNode
 }) {
-  return (
-    <div className={cn('min-h-full', BG[background], className)}>{children}</div>
-  )
+  return <div className={cn('min-h-full', BG[background], className)}>{children}</div>
 }

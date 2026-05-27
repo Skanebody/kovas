@@ -1,4 +1,8 @@
-import { getSiretValidationMessage, isFakeSiretAllowed, validateSiret } from '@/lib/validation/siret'
+import {
+  getSiretValidationMessage,
+  isFakeSiretAllowed,
+  validateSiret,
+} from '@/lib/validation/siret'
 import { z } from 'zod'
 
 export const CLIENT_TYPES = [

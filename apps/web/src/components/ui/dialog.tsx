@@ -1,14 +1,10 @@
 'use client'
 
+import { cn } from '@/lib/utils'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { forwardRef } from 'react'
-import type {
-  ComponentPropsWithoutRef,
-  ElementRef,
-  HTMLAttributes,
-} from 'react'
-import { cn } from '@/lib/utils'
+import type { ComponentPropsWithoutRef, ElementRef, HTMLAttributes } from 'react'
 
 export const Dialog = DialogPrimitive.Root
 export const DialogTrigger = DialogPrimitive.Trigger

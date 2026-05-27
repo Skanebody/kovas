@@ -75,17 +75,20 @@ async function searchAdemeApi(
   const query = `${address} ${postalCode ?? ''}`.trim()
   qs.set('q', query)
   qs.set('size', '5')
-  qs.set('select', [
-    'Numero_DPE',
-    'Date_etablissement_DPE',
-    'Nom_diagnostiqueur',
-    'Etiquette_DPE',
-    'Etiquette_GES',
-    'Conso_5_usages_par_m2_e_finale',
-    'Emission_GES_5_usages_par_m2',
-    'Adresse_brut',
-    'Code_postal_BAN',
-  ].join(','))
+  qs.set(
+    'select',
+    [
+      'Numero_DPE',
+      'Date_etablissement_DPE',
+      'Nom_diagnostiqueur',
+      'Etiquette_DPE',
+      'Etiquette_GES',
+      'Conso_5_usages_par_m2_e_finale',
+      'Emission_GES_5_usages_par_m2',
+      'Adresse_brut',
+      'Code_postal_BAN',
+    ].join(','),
+  )
   qs.set('sort', '-Date_etablissement_DPE')
 
   const url = `${ADEME_BASE_URL}/datasets/${DATASET}/lines?${qs.toString()}`

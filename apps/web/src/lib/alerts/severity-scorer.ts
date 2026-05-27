@@ -5,7 +5,7 @@
  * sur 100 missions). La grande majorité des findings sont info ou warning.
  */
 
-import type { Finding, AlertSeverity } from './types'
+import type { AlertSeverity, Finding } from './types'
 
 export interface ScoringContext {
   /** Sensibilité réglée par l'utilisateur — affecte la barre critique. */

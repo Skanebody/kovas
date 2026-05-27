@@ -13,7 +13,7 @@
  *  - délai minimum entre 2 steps : 24 h (configurable via MIN_DELAY_HOURS)
  */
 
-import type { SequenceTemplate, SequenceStepContent } from './templates'
+import type { SequenceStepContent, SequenceTemplate } from './templates'
 
 export const MAX_STEPS_PER_SEQUENCE = 4
 export const MIN_DELAY_HOURS = 24
@@ -74,9 +74,7 @@ export function validateSequenceDefinition(def: SequenceDefinition): void {
       throw new Error(`step ${i}: delayDays must be a positive number`)
     }
     if (i === 0 && step.delayDays * 24 < MIN_DELAY_HOURS) {
-      throw new Error(
-        `step 0: delayDays must be ≥ ${MIN_DELAY_HOURS / 24} (anti-spam minimum)`,
-      )
+      throw new Error(`step 0: delayDays must be ≥ ${MIN_DELAY_HOURS / 24} (anti-spam minimum)`)
     }
   })
 }

@@ -22,12 +22,23 @@ export interface DiagnosticianSireneBadge {
   nafCode: string | null
   /** Libellé humain du NAF (ex. "Analyses, essais et inspections techniques"). */
   nafLabel: string | null
+  /**
+   * Identité légale enrichie (open data — affichable publiquement, équivalent
+   * du RPPS pour les médecins sur Doctolib). Tous les champs sont nullables
+   * pour permettre une dégradation gracieuse si l'API n'a pas l'information.
+   */
+  companyName: string | null
+  legalForm: string | null
+  siret: string | null
 }
 
 const EMPTY: DiagnosticianSireneBadge = {
   isVerified: false,
   nafCode: null,
   nafLabel: null,
+  companyName: null,
+  legalForm: null,
+  siret: null,
 }
 
 /**
@@ -53,5 +64,8 @@ export async function fetchDiagnosticianSireneBadge(
     isVerified: true,
     nafCode: r.nafCode,
     nafLabel: r.nafLabel,
+    companyName: r.companyName ?? null,
+    legalForm: r.legalForm ?? null,
+    siret: r.siret ?? cleaned,
   }
 }

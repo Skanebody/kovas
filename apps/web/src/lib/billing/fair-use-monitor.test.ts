@@ -11,13 +11,9 @@
  *   - checkFairUseStatus : flow complet avec mocks Supabase
  */
 
-import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import {
-  __testing,
-  checkFairUseStatus,
-  type FairUseStatus,
-} from './fair-use-monitor'
+import { test } from 'node:test'
+import { type FairUseStatus, __testing, checkFairUseStatus } from './fair-use-monitor'
 
 const { suggestUpgradeTier, monthIsoFor, monthBounds } = __testing
 
@@ -157,7 +153,7 @@ function buildMockSupabase(resp: MockResponse): unknown {
   }
 }
 
-test('checkFairUseStatus — pas d\'abonnement → null', async () => {
+test("checkFairUseStatus — pas d'abonnement → null", async () => {
   const supabase = buildMockSupabase({ subscription: null })
   const out = await checkFairUseStatus(supabase as never, 'org-1')
   assert.equal(out, null)

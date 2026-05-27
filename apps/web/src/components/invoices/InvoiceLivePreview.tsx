@@ -1,5 +1,9 @@
+import type {
+  InvoiceClientSnapshot,
+  InvoiceIssuerSnapshot,
+  InvoiceLineItem,
+} from '@/lib/invoices/types'
 import { cn } from '@/lib/utils'
-import type { InvoiceClientSnapshot, InvoiceIssuerSnapshot, InvoiceLineItem } from '@/lib/invoices/types'
 
 export interface InvoiceLivePreviewProps {
   reference: string
@@ -166,7 +170,9 @@ export function InvoiceLivePreview(props: InvoiceLivePreviewProps) {
           <p className="font-medium text-ink mb-1">Virement bancaire</p>
           {props.issuer.bank_name ? <p>{props.issuer.bank_name}</p> : null}
           <p className="font-mono text-[10px]">IBAN : {props.issuer.iban}</p>
-          {props.issuer.bic ? <p className="font-mono text-[10px]">BIC : {props.issuer.bic}</p> : null}
+          {props.issuer.bic ? (
+            <p className="font-mono text-[10px]">BIC : {props.issuer.bic}</p>
+          ) : null}
           <p className="mt-1">Référence à indiquer : {props.reference}</p>
         </div>
       ) : null}

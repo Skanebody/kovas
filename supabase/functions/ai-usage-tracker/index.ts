@@ -127,8 +127,7 @@ function computeCostEurCents(input: {
   if (p.outputUsdPerMTok) usd += (input.outputTokens * p.outputUsdPerMTok) / 1_000_000
   if (p.cachedInputUsdPerMTok)
     usd += (input.cachedInputTokens * p.cachedInputUsdPerMTok) / 1_000_000
-  if (p.cacheWriteUsdPerMTok)
-    usd += (input.cacheWriteTokens * p.cacheWriteUsdPerMTok) / 1_000_000
+  if (p.cacheWriteUsdPerMTok) usd += (input.cacheWriteTokens * p.cacheWriteUsdPerMTok) / 1_000_000
   if (p.audioUsdPerMinute) usd += input.audioMinutes * p.audioUsdPerMinute
   return { eurCents: Math.round(usd * input.usdToEur * 100), usd, source: 'default' }
 }

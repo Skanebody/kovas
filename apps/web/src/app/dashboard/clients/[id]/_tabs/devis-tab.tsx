@@ -1,5 +1,3 @@
-import { FileText, Plus } from 'lucide-react'
-import Link from 'next/link'
 import {
   AppListTable,
   AppListTableCell,
@@ -9,6 +7,8 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
+import { FileText, Plus } from 'lucide-react'
+import Link from 'next/link'
 import { EmptyTabState } from './empty-tab-state'
 import { formatDate, formatEur } from './format-helpers'
 
@@ -25,10 +25,7 @@ const QUOTE_STATUS_LABELS: Record<string, string> = {
   expired: 'Expiré',
 }
 
-const QUOTE_STATUS_VARIANT: Record<
-  string,
-  'muted' | 'blue' | 'green' | 'orange' | 'red'
-> = {
+const QUOTE_STATUS_VARIANT: Record<string, 'muted' | 'blue' | 'green' | 'orange' | 'red'> = {
   draft: 'muted',
   sent: 'blue',
   accepted: 'green',
@@ -143,9 +140,7 @@ export async function ClientDevisTab({ clientId, orgId }: Props) {
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-ink-mute">
-                      {formatDate(q.issued_at ?? q.created_at)}
-                    </span>
+                    <span className="text-ink-mute">{formatDate(q.issued_at ?? q.created_at)}</span>
                     <span className="font-mono tabular-nums font-semibold text-ink">
                       {formatEur(q.amount_ttc)}
                     </span>

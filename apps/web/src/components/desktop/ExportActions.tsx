@@ -11,10 +11,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import {
-  TARGET_FORMAT_LABEL,
-  type TargetExportFormat,
-} from '@/lib/pre-export/types'
+import { TARGET_FORMAT_LABEL, type TargetExportFormat } from '@/lib/pre-export/types'
 import { ArrowRight, Wrench } from 'lucide-react'
 
 interface ExportActionsProps {
@@ -39,17 +36,12 @@ export function ExportActions({
       <div className="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between gap-4 flex-wrap">
         <p className="text-[12px] text-ink-mute hidden md:block">
           {hasCritical
-            ? 'Vous pouvez exporter quand même — KOVAS ne bloque jamais l\'envoi.'
-            : 'Dossier prêt à l\'export.'}
+            ? "Vous pouvez exporter quand même — KOVAS ne bloque jamais l'envoi."
+            : "Dossier prêt à l'export."}
         </p>
 
         <div className="flex items-center gap-3 ml-auto">
-          <Button
-            variant="outline"
-            size="default"
-            onClick={onFixFirst}
-            disabled={isExporting}
-          >
+          <Button variant="outline" size="default" onClick={onFixFirst} disabled={isExporting}>
             <Wrench className="size-4" aria-hidden />
             Tout corriger d'abord
           </Button>
@@ -61,7 +53,9 @@ export function ExportActions({
             disabled={isExporting}
             aria-label={`Exporter vers ${TARGET_FORMAT_LABEL[targetFormat]}`}
           >
-            {isExporting ? 'Export en cours…' : `Exporter vers ${TARGET_FORMAT_LABEL[targetFormat]}`}
+            {isExporting
+              ? 'Export en cours…'
+              : `Exporter vers ${TARGET_FORMAT_LABEL[targetFormat]}`}
             <ArrowRight className="size-4" aria-hidden />
           </Button>
         </div>

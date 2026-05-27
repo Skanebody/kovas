@@ -49,8 +49,8 @@ export default async function AdminEmailHealthPage() {
           Santé de la délivrabilité.
         </h1>
         <p className="text-sm text-ink-mute max-w-xl">
-          Taux de delivery, bounces et plaintes Resend sur les 30 derniers jours. Source :
-          webhook <code className="font-mono text-[11px]">/api/webhooks/resend</code>.
+          Taux de delivery, bounces et plaintes Resend sur les 30 derniers jours. Source : webhook{' '}
+          <code className="font-mono text-[11px]">/api/webhooks/resend</code>.
         </p>
       </div>
 
@@ -91,7 +91,10 @@ export default async function AdminEmailHealthPage() {
       </section>
 
       {/* Tables */}
-      <section className="grid gap-4 grid-cols-1 lg:grid-cols-2" aria-label="Détails par type et bouncing">
+      <section
+        className="grid gap-4 grid-cols-1 lg:grid-cols-2"
+        aria-label="Détails par type et bouncing"
+      >
         <EmailDeliveryByTypeTable rows={snapshot.byType} />
         <EmailBouncingRecipientsTable recipients={snapshot.topBouncing} />
       </section>

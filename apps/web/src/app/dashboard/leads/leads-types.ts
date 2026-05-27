@@ -31,7 +31,7 @@ export const POST_CALL_OUTCOMES: { value: PostCallOutcome; label: string; hint: 
   {
     value: 'quote_sent',
     label: 'Devis envoyé',
-    hint: 'Le client souhaite un devis. Vous lui enverrez après l\'appel.',
+    hint: "Le client souhaite un devis. Vous lui enverrez après l'appel.",
   },
   {
     value: 'not_interested',

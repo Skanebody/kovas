@@ -151,9 +151,7 @@ export async function fetchDvfNearby(
     const pricesPerSqm = transactions
       .filter(
         (t) =>
-          t.valeur_fonciere !== null &&
-          t.surface_reelle_bati !== null &&
-          t.surface_reelle_bati > 5,
+          t.valeur_fonciere !== null && t.surface_reelle_bati !== null && t.surface_reelle_bati > 5,
       )
       .map((t) => (t.valeur_fonciere as number) / (t.surface_reelle_bati as number))
 

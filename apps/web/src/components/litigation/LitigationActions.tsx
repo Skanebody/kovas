@@ -7,9 +7,9 @@
  * - "Marquer résolu" + "Escalader au tribunal" (PATCH /api/litigation/:id)
  */
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Gavel, Loader2, RefreshCcw, Scale, ShieldCheck } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/toaster'
@@ -54,7 +54,11 @@ export function LitigationActions({ litigationId, status, hasDraft }: Litigation
         throw new Error(err.error ?? `HTTP ${res.status}`)
       }
       toast.success(
-        next === 'resolved' ? 'Litige résolu' : next === 'court' ? 'Escalade au tribunal' : 'Litige clos',
+        next === 'resolved'
+          ? 'Litige résolu'
+          : next === 'court'
+            ? 'Escalade au tribunal'
+            : 'Litige clos',
       )
       router.refresh()
     } catch (err) {

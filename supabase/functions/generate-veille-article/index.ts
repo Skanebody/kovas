@@ -190,21 +190,13 @@ function scoreEeat(md: string): {
     'observé',
     'constaté',
   ]
-  const trustMarkers = [
-    'mise à jour',
-    'attention',
-    'avertissement',
-    'cas par cas',
-  ]
+  const trustMarkers = ['mise à jour', 'attention', 'avertissement', 'cas par cas']
 
   const sources = officialSources.reduce(
     (acc, s) => acc + (lower.match(new RegExp(s, 'g'))?.length ?? 0),
     0,
   )
-  const tech = techTerms.reduce(
-    (acc, t) => acc + (lower.match(new RegExp(t, 'g'))?.length ?? 0),
-    0,
-  )
+  const tech = techTerms.reduce((acc, t) => acc + (lower.match(new RegExp(t, 'g'))?.length ?? 0), 0)
   const exp = experienceMarkers.reduce(
     (acc, m) => acc + (lower.match(new RegExp(m, 'g'))?.length ?? 0),
     0,
@@ -225,9 +217,9 @@ function scoreEeat(md: string): {
     expertise: clamp(tech * 3.5),
     authoritativeness: clamp(sources * 8 + externalLinks * 5),
     trustworthiness: clamp(
-      trust * 12
-        + (lower.includes('mise à jour') ? 20 : 0)
-        + (externalLinks >= 3 ? 15 : externalLinks * 5),
+      trust * 12 +
+        (lower.includes('mise à jour') ? 20 : 0) +
+        (externalLinks >= 3 ? 15 : externalLinks * 5),
     ),
   }
 }
@@ -271,8 +263,8 @@ async function callClaude(input: {
   const inputTokens = data.usage.input_tokens
   const outputTokens = data.usage.output_tokens
   const costUsd =
-    (inputTokens / 1_000_000) * HAIKU_INPUT_USD_PER_MTOK
-    + (outputTokens / 1_000_000) * HAIKU_OUTPUT_USD_PER_MTOK
+    (inputTokens / 1_000_000) * HAIKU_INPUT_USD_PER_MTOK +
+    (outputTokens / 1_000_000) * HAIKU_OUTPUT_USD_PER_MTOK
   const costEur = Math.round(costUsd * USD_TO_EUR * 10000) / 10000
 
   return { text, inputTokens, outputTokens, costEur }
@@ -391,10 +383,10 @@ async function generateForKeyword(
 
 Deno.serve(async (req: Request) => {
   if (!SERVICE_ROLE_KEY || !ANTHROPIC_API_KEY) {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'missing env vars' }),
-      { status: 500, headers: { 'content-type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ ok: false, error: 'missing env vars' }), {
+      status: 500,
+      headers: { 'content-type': 'application/json' },
+    })
   }
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {

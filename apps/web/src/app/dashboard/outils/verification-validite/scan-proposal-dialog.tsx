@@ -329,7 +329,7 @@ export function ScanProposalDialog({
             <p className="text-xs text-ink-mute">
               {!clientId && scan.proprietaire ? (
                 <>
-                  Aucun client correspondant. Vous pouvez{' '}
+                  Aucun client correspondant. Tu peux{' '}
                   <a
                     href={`/dashboard/clients/new?display_name=${encodeURIComponent(scan.proprietaire)}`}
                     className="underline"
@@ -343,7 +343,7 @@ export function ScanProposalDialog({
               ) : null}
               {!propertyId && scan.adresse ? (
                 <>
-                  {!clientId ? ' ' : ''}Aucun bien correspondant. Vous pouvez{' '}
+                  {!clientId ? ' ' : ''}Aucun bien correspondant. Tu peux{' '}
                   <a
                     href={`/dashboard/properties/new?address=${encodeURIComponent(scan.adresse)}`}
                     className="underline"

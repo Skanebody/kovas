@@ -15,13 +15,7 @@
 
 'use client'
 
-import { useMemo, useState } from 'react'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
-import { ScoreHero } from './ScoreHero'
-import { AnalysisSection } from './AnalysisSection'
-import { ExportActions } from './ExportActions'
 import type {
   Finding,
   FindingCategory,
@@ -29,6 +23,12 @@ import type {
   TargetExportFormat,
 } from '@/lib/pre-export/types'
 import { TARGET_FORMAT_LABEL } from '@/lib/pre-export/types'
+import { cn } from '@/lib/utils'
+import { X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { AnalysisSection } from './AnalysisSection'
+import { ExportActions } from './ExportActions'
+import { ScoreHero } from './ScoreHero'
 
 type FilterKey = 'all' | FindingCategory
 
@@ -42,39 +42,30 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'historical', label: 'Historique' },
 ]
 
-const SECTION_TITLE: Record<
-  FindingCategory,
-  { title: string; description: string }
-> = {
+const SECTION_TITLE: Record<FindingCategory, { title: string; description: string }> = {
   conformity: {
     title: 'Conformité ADEME 3CL',
-    description:
-      'Champs obligatoires DPE 3CL-2021 (méthode actuelle de l\'observatoire).',
+    description: "Champs obligatoires DPE 3CL-2021 (méthode actuelle de l'observatoire).",
   },
   coherence: {
     title: 'Cohérence interne',
-    description:
-      'Vérifications entre les données saisies (surfaces, équipements, année bâti).',
+    description: 'Vérifications entre les données saisies (surfaces, équipements, année bâti).',
   },
   statistical: {
     title: 'Cohérence statistique',
-    description:
-      'Comparaison à la distribution nationale / régionale / typologie ADEME.',
+    description: 'Comparaison à la distribution nationale / régionale / typologie ADEME.',
   },
   quality: {
     title: 'Qualité photos et observations',
-    description:
-      'Couverture photo, voice-notes, preuves EEAT en cas de contrôle.',
+    description: 'Couverture photo, voice-notes, preuves EEAT en cas de contrôle.',
   },
   opportunity: {
     title: 'Opportunités commerciales',
-    description:
-      'Diagnostics ou prestations complémentaires à proposer au propriétaire.',
+    description: 'Diagnostics ou prestations complémentaires à proposer au propriétaire.',
   },
   historical: {
     title: 'Comparaison historique',
-    description:
-      'Présence éventuelle d\'un DPE antérieur à la même adresse.',
+    description: "Présence éventuelle d'un DPE antérieur à la même adresse.",
   },
 }
 
@@ -112,9 +103,16 @@ export function PreExportPanel({
 
   const visibleCategories: FindingCategory[] =
     activeFilter === 'all'
-      ? (['conformity', 'coherence', 'statistical', 'quality', 'opportunity', 'historical'] as const).filter(
-          (c) => findingsByCategory.has(c),
-        )
+      ? (
+          [
+            'conformity',
+            'coherence',
+            'statistical',
+            'quality',
+            'opportunity',
+            'historical',
+          ] as const
+        ).filter((c) => findingsByCategory.has(c))
       : [activeFilter as FindingCategory].filter((c) => findingsByCategory.has(c))
 
   const hasCritical = result.counters.critical > 0
@@ -140,8 +138,8 @@ export function PreExportPanel({
           <div>
             <p className="label-mono text-ink-mute">PRÉ-VÉRIFICATION AVANT EXPORT</p>
             <p className="text-[13px] text-ink-soft mt-1">
-              Mission <span className="font-mono">{missionReference}</span> · Export
-              vers {TARGET_FORMAT_LABEL[targetFormat]}
+              Mission <span className="font-mono">{missionReference}</span> · Export vers{' '}
+              {TARGET_FORMAT_LABEL[targetFormat]}
             </p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer">
@@ -164,7 +162,7 @@ export function PreExportPanel({
             const count =
               f.key === 'all'
                 ? result.findings.length
-                : findingsByCategory.get(f.key as FindingCategory)?.length ?? 0
+                : (findingsByCategory.get(f.key as FindingCategory)?.length ?? 0)
             const isActive = activeFilter === f.key
             return (
               <button
@@ -199,9 +197,7 @@ export function PreExportPanel({
         <div className="space-y-10">
           {visibleCategories.length === 0 ? (
             <div className="rounded-xl bg-paper border border-rule p-10 text-center">
-              <p className="text-display-serif text-xl text-ink mb-2">
-                Aucun point d'attention
-              </p>
+              <p className="text-display-serif text-xl text-ink mb-2">Aucun point d'attention</p>
               <p className="text-[13px] text-ink-mute">
                 Le dossier ne présente aucun finding sur les analyseurs sélectionnés.
               </p>

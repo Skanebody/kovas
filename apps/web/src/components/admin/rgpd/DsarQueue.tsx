@@ -304,9 +304,7 @@ export function DsarQueue({ data }: Props) {
         <AdminMetricCard
           eyebrow="Résolution moyenne"
           value={
-            data.kpi.averageResolutionDays !== null
-              ? `${data.kpi.averageResolutionDays} j`
-              : '—'
+            data.kpi.averageResolutionDays !== null ? `${data.kpi.averageResolutionDays} j` : '—'
           }
           hint="sur demandes complétées"
           icon={CheckCircle2}
@@ -370,7 +368,7 @@ export function DsarQueue({ data }: Props) {
               onChange={(e) => setNote(e.target.value)}
               placeholder={
                 dialog.kind === 'completed'
-                  ? 'Lien export généré : .../downloads/...zip — données livrées par email à l\'utilisateur le 2026-XX-XX.'
+                  ? "Lien export généré : .../downloads/...zip — données livrées par email à l'utilisateur le 2026-XX-XX."
                   : dialog.kind === 'rejected'
                     ? 'Motif : demande déjà traitée le… / identité non vérifiée / …'
                     : 'Action en cours, ETA estimé…'
@@ -401,7 +399,6 @@ export function DsarQueue({ data }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   )
 }

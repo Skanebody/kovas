@@ -79,7 +79,9 @@ export function VideoCallRequest({
         <div className="flex items-start justify-between mb-4">
           <div>
             <p className="label-mono text-ink-mute mb-1">Récupération à distance</p>
-            <h2 className="text-[18px] font-semibold text-ink">Proposer une visio à {clientName}</h2>
+            <h2 className="text-[18px] font-semibold text-ink">
+              Proposer une visio à {clientName}
+            </h2>
             <p className="text-[13px] text-ink-soft mt-1">
               SMS envoyé au {clientPhone} avec le lien et le motif.
             </p>
@@ -144,9 +146,7 @@ export function VideoCallRequest({
 
             {status === 'error' && errorMsg && (
               <div className="bg-danger/10 border border-danger/30 rounded-lg p-3 mb-4">
-                <p className="text-[12px] text-danger leading-snug">
-                  Erreur d\'envoi : {errorMsg}
-                </p>
+                <p className="text-[12px] text-danger leading-snug">Erreur d\'envoi : {errorMsg}</p>
               </div>
             )}
 

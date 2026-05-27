@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,11 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { PAYMENT_METHOD_LABEL, type PaymentMethod } from '@/lib/invoices/types'
+import { useState, useTransition } from 'react'
 
 const PAYMENT_METHOD_OPTIONS: PaymentMethod[] = [
   'virement',

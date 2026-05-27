@@ -29,7 +29,7 @@
 /// <reference lib="deno.ns" />
 // deno-lint-ignore-file no-explicit-any
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
 
 // ────────────────────────────────────────────────────────────
 // Types miroir (copie minimaliste des helpers Node — Edge n'a pas
@@ -107,10 +107,8 @@ const LRU_TTL_MS = 60 * 60 * 1000
 const cache = new Map<string, CacheEntry>()
 
 function makeCacheKey(name: ParameterName, ctx: SuggestionContext): string {
-  const yearBucket =
-    typeof ctx.yearBuilt === 'number' ? Math.floor(ctx.yearBuilt / 5) * 5 : 'na'
-  const surfaceBucket =
-    typeof ctx.surface === 'number' ? Math.floor(ctx.surface / 20) * 20 : 'na'
+  const yearBucket = typeof ctx.yearBuilt === 'number' ? Math.floor(ctx.yearBuilt / 5) * 5 : 'na'
+  const surfaceBucket = typeof ctx.surface === 'number' ? Math.floor(ctx.surface / 20) * 20 : 'na'
   const region = ctx.inseeCode ?? ctx.postalCode ?? 'na'
   const bType = ctx.buildingType ?? 'na'
   return `${name}|${yearBucket}|${surfaceBucket}|${region}|${bType}`
@@ -302,28 +300,26 @@ const RULES_VENTILATION: StaticRule[] = [
     match: (c) => typeof c.yearBuilt === 'number' && c.yearBuilt < 1969,
     value: 'naturelle',
     confidence: 0.65,
-    justification: 'Logement antérieur à 1969 : ventilation naturelle (pas d\'obligation VMC avant 1982).',
+    justification:
+      "Logement antérieur à 1969 : ventilation naturelle (pas d'obligation VMC avant 1982).",
     references: [REF_CEREMA_VENTILATION, REF_ARRETE_VENTILATION_1982],
   },
   {
-    match: (c) =>
-      typeof c.yearBuilt === 'number' && c.yearBuilt >= 1969 && c.yearBuilt < 1982,
+    match: (c) => typeof c.yearBuilt === 'number' && c.yearBuilt >= 1969 && c.yearBuilt < 1982,
     value: 'vmc_simple_flux',
     confidence: 0.55,
     justification: 'Logement 1969-1982 : transition vers VMC. VMC SF probable.',
     references: [REF_ARRETE_VENTILATION_1982, REF_CEREMA_VENTILATION],
   },
   {
-    match: (c) =>
-      typeof c.yearBuilt === 'number' && c.yearBuilt >= 1982 && c.yearBuilt < 2000,
+    match: (c) => typeof c.yearBuilt === 'number' && c.yearBuilt >= 1982 && c.yearBuilt < 2000,
     value: 'vmc_simple_flux',
     confidence: 0.75,
     justification: 'Logement 1982-2000 : arrêté 1982 → VMC SF standard.',
     references: [REF_ARRETE_VENTILATION_1982, REF_CEREMA_VENTILATION],
   },
   {
-    match: (c) =>
-      typeof c.yearBuilt === 'number' && c.yearBuilt >= 2000 && c.yearBuilt < 2012,
+    match: (c) => typeof c.yearBuilt === 'number' && c.yearBuilt >= 2000 && c.yearBuilt < 2012,
     value: 'vmc_hygro_a',
     confidence: 0.6,
     justification: 'Logement 2000-2012 : VMC hygro A fréquente en neuf.',
@@ -376,8 +372,7 @@ const RULES_ECS: StaticRule[] = [
     references: [REF_ARRETE_3CL_2021, REF_ADEME_BILAN_DPE],
   },
   {
-    match: (c) =>
-      typeof c.yearBuilt === 'number' && c.yearBuilt >= 1990 && c.yearBuilt < 2012,
+    match: (c) => typeof c.yearBuilt === 'number' && c.yearBuilt >= 1990 && c.yearBuilt < 2012,
     value: 'electrique',
     confidence: 0.6,
     justification: 'Logement 1990-2012 : chauffe-eau électrique standard.',

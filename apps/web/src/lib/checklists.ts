@@ -69,7 +69,7 @@ const DPE_CHECKLIST: ChecklistItem[] = [
   },
   {
     id: 'dpe_ecs',
-    label: 'Production d\'eau chaude sanitaire identifiée',
+    label: "Production d'eau chaude sanitaire identifiée",
     category: 'equipements',
     required: true,
   },
@@ -87,7 +87,7 @@ const DPE_CHECKLIST: ChecklistItem[] = [
   },
   {
     id: 'dpe_isolation',
-    label: 'Type et état de l\'isolation noté (murs, toiture, planchers)',
+    label: "Type et état de l'isolation noté (murs, toiture, planchers)",
     category: 'equipements',
     required: true,
   },
@@ -143,7 +143,7 @@ const PLOMB_CHECKLIST: ChecklistItem[] = [
   },
   {
     id: 'plomb_ecaillage',
-    label: 'Photos des zones d\'écaillage / dégradation',
+    label: "Photos des zones d'écaillage / dégradation",
     category: 'pieces',
     required: true,
   },
@@ -158,13 +158,13 @@ const GAZ_CHECKLIST: ChecklistItem[] = [
   },
   {
     id: 'gaz_robinets',
-    label: 'Robinets d\'arrêt accessibles et fonctionnels',
+    label: "Robinets d'arrêt accessibles et fonctionnels",
     category: 'equipements',
     required: true,
   },
   {
     id: 'gaz_conduits',
-    label: 'Conduits d\'évacuation vérifiés (chaudière, chauffe-eau)',
+    label: "Conduits d'évacuation vérifiés (chaudière, chauffe-eau)",
     category: 'equipements',
     required: true,
   },
@@ -197,7 +197,7 @@ const ELEC_CHECKLIST: ChecklistItem[] = [
   },
   {
     id: 'elec_salles_eau',
-    label: 'Liaison équipotentielle vérifiée dans salles d\'eau',
+    label: "Liaison équipotentielle vérifiée dans salles d'eau",
     category: 'equipements',
     required: true,
   },
@@ -227,7 +227,7 @@ const TERMITES_CHECKLIST: ChecklistItem[] = [
 const ERP_CHECKLIST: ChecklistItem[] = [
   {
     id: 'erp_georisques',
-    label: 'Document Géorisques téléchargé pour l\'adresse exacte',
+    label: "Document Géorisques téléchargé pour l'adresse exacte",
     category: 'documents',
     required: true,
   },
@@ -319,9 +319,7 @@ export function runChecklist(
   const completion = total === 0 ? 1 : Math.round((done / total) * 100) / 100
 
   const required = items.filter((it) => it.required)
-  const requiredOk = required.every(
-    (it) => it.status === 'auto_ok' || it.manualChecked === true,
-  )
+  const requiredOk = required.every((it) => it.status === 'auto_ok' || it.manualChecked === true)
 
   return { items, completion, requiredOk }
 }

@@ -1,9 +1,9 @@
 'use client'
 
-import { Sparkles } from 'lucide-react'
-import { useState } from 'react'
 import type { UserAccess } from '@/lib/upsell/access-control'
 import type { PendingUpsellSuggestion } from '@/lib/upsell/load-access'
+import { Sparkles } from 'lucide-react'
+import { useState } from 'react'
 import { DiscoverDrawer } from './DiscoverDrawer'
 
 export interface DiscoverSidebarButtonProps {

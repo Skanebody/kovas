@@ -8,9 +8,9 @@
  * destinataire à partir de l'`organization_id`. Pas d'effet de bord si user introuvable.
  */
 
-import type Stripe from 'stripe'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@kovas/database/types'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type Stripe from 'stripe'
 import { sendEmail } from './send'
 
 type Admin = SupabaseClient<Database>

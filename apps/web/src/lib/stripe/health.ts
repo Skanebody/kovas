@@ -98,7 +98,9 @@ export function invalidateHealthCache(): void {
 // Helpers conversion
 // ============================================
 
-function customerEmail(customer: string | Stripe.Customer | Stripe.DeletedCustomer | null): string | null {
+function customerEmail(
+  customer: string | Stripe.Customer | Stripe.DeletedCustomer | null,
+): string | null {
   if (!customer) return null
   if (typeof customer === 'string') return null
   if ('deleted' in customer && customer.deleted) return null
@@ -151,9 +153,7 @@ async function fetchFailedInvoices(stripe: Stripe): Promise<StripeFailedInvoice[
   const all: Stripe.Invoice[] = [...uncollectible.data, ...open.data]
 
   return all.map((inv) => {
-    const daysOverdue = inv.due_date
-      ? Math.floor((now - inv.due_date) / (24 * 60 * 60))
-      : null
+    const daysOverdue = inv.due_date ? Math.floor((now - inv.due_date) / (24 * 60 * 60)) : null
     return {
       id: inv.id ?? '',
       number: inv.number ?? null,

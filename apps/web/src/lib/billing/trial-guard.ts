@@ -49,7 +49,10 @@ export const checkTrialGuard = cache(
     const sb = supabase as unknown as {
       from: (t: 'subscriptions') => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             maybeSingle: () => Promise<{ data: SubscriptionGuardRow | null }>
           }
         }
@@ -75,11 +78,9 @@ export const checkTrialGuard = cache(
     //   - status = 'trialing' ou 'past_due' ou 'unpaid'
     //   - ET current_period_end < maintenant
     //   - ET pas de moyen de paiement (stripe_customer_id null OU stripe_subscription_id null)
-    const isExpiredStatus =
-      status === 'trialing' || status === 'past_due' || status === 'unpaid'
+    const isExpiredStatus = status === 'trialing' || status === 'past_due' || status === 'unpaid'
     const isPeriodExpired = periodEnd !== null && periodEnd < now
-    const hasNoPaymentSetup =
-      !sub.stripe_customer_id || !sub.stripe_subscription_id
+    const hasNoPaymentSetup = !sub.stripe_customer_id || !sub.stripe_subscription_id
 
     if (isExpiredStatus && isPeriodExpired && hasNoPaymentSetup) {
       return {
@@ -87,7 +88,7 @@ export const checkTrialGuard = cache(
         reason:
           status === 'trialing'
             ? 'Votre essai gratuit de 14 jours est arrivé à échéance.'
-            : 'Votre paiement n\'a pas pu être traité.',
+            : "Votre paiement n'a pas pu être traité.",
         expiresAt: sub.current_period_end,
       }
     }

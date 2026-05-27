@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
 import type { GuideSection as GuideSectionType } from '@/lib/guides/types'
+import { cn } from '@/lib/utils'
 import { Info, Lightbulb, TriangleAlert } from 'lucide-react'
 
 interface GuideSectionProps {
@@ -75,15 +75,14 @@ export function GuideSection({ section, index, className }: GuideSectionProps) {
         </ul>
       )}
 
-      {section.callout && <SectionCallout type={section.callout.type} text={section.callout.text} />}
+      {section.callout && (
+        <SectionCallout type={section.callout.type} text={section.callout.text} />
+      )}
 
       {section.howToSteps && section.howToSteps.length > 0 && (
         <ol className="mt-8 space-y-4">
           {section.howToSteps.map((step) => (
-            <li
-              key={step.position}
-              className="rounded-lg border border-rule/40 bg-paper p-5"
-            >
+            <li key={step.position} className="rounded-lg border border-rule/40 bg-paper p-5">
               <div className="flex items-start gap-4">
                 <span
                   aria-hidden
@@ -92,12 +91,8 @@ export function GuideSection({ section, index, className }: GuideSectionProps) {
                   {step.position}
                 </span>
                 <div className="flex-1">
-                  <h3 className="font-display text-base font-semibold text-ink">
-                    {step.name}
-                  </h3>
-                  <p className="mt-1.5 text-[15px] leading-relaxed text-ink-soft">
-                    {step.text}
-                  </p>
+                  <h3 className="font-display text-base font-semibold text-ink">{step.name}</h3>
+                  <p className="mt-1.5 text-[15px] leading-relaxed text-ink-soft">{step.text}</p>
                 </div>
               </div>
             </li>
@@ -144,11 +139,7 @@ function SectionCallout({ type, text }: SectionCalloutProps) {
 
   return (
     <aside
-      className={cn(
-        'mt-6 flex gap-3 rounded-lg border p-5',
-        config.bg,
-        config.border,
-      )}
+      className={cn('mt-6 flex gap-3 rounded-lg border p-5', config.bg, config.border)}
       aria-label={config.label}
     >
       <Icon className={cn('mt-0.5 size-5 shrink-0', config.iconColor)} aria-hidden />

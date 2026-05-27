@@ -177,19 +177,14 @@ export function scoreEeat(markdown: string): EeatScoreResult {
 
   // Experience : exemples concrets + chiffres tangibles + retours terrain
   const experience = clampScore(
-    experienceMarkerCount * 10 +
-      percentageCount * 4 +
-      currencyCount * 4 +
-      yearMentionCount * 3,
+    experienceMarkerCount * 10 + percentageCount * 4 + currencyCount * 4 + yearMentionCount * 3,
   )
 
   // Expertise : densité jargon métier (1 point par occurrence, plafonné)
   const expertise = clampScore(technicalTermCount * 3.5)
 
   // Authoritativeness : citations sources officielles + liens externes
-  const authoritativeness = clampScore(
-    officialSourceCount * 8 + externalLinkCount * 5,
-  )
+  const authoritativeness = clampScore(officialSourceCount * 8 + externalLinkCount * 5)
 
   // Trustworthiness : disclaimers, dates de mise à jour, indications de doute
   const trustworthiness = clampScore(
@@ -198,9 +193,7 @@ export function scoreEeat(markdown: string): EeatScoreResult {
       (externalLinkCount >= 3 ? 15 : externalLinkCount * 5),
   )
 
-  const composite = Math.round(
-    (experience + expertise + authoritativeness + trustworthiness) / 4,
-  )
+  const composite = Math.round((experience + expertise + authoritativeness + trustworthiness) / 4)
 
   return {
     experience,
@@ -251,12 +244,13 @@ export function analyzeStructure(markdown: string): ArticleStructure {
   const h3Count = [...markdown.matchAll(H3_PATTERN)].length
 
   // FAQ : compte des "## Question..." ou "**Question..."
-  const faqSection = markdown.toLowerCase().includes('questions fréquentes')
-    || markdown.toLowerCase().includes('faq')
+  const faqSection =
+    markdown.toLowerCase().includes('questions fréquentes') ||
+    markdown.toLowerCase().includes('faq')
   const faqQuestionCount = faqSection
-    ? (markdown.match(/^\*\*[QQ][^*]+\?\*\*$/gm)?.length
-        ?? markdown.match(/^###?\s+.+\?$/gm)?.length
-        ?? 0)
+    ? (markdown.match(/^\*\*[QQ][^*]+\?\*\*$/gm)?.length ??
+      markdown.match(/^###?\s+.+\?$/gm)?.length ??
+      0)
     : 0
 
   return {
@@ -268,10 +262,10 @@ export function analyzeStructure(markdown: string): ArticleStructure {
     externalLinkCount,
     hasFaqSection: faqSection,
     hasTableOfContents:
-      markdown.toLowerCase().includes('sommaire')
-      || markdown.toLowerCase().includes('table des matières'),
+      markdown.toLowerCase().includes('sommaire') ||
+      markdown.toLowerCase().includes('table des matières'),
     hasUpdateDate:
-      markdown.toLowerCase().includes('mise à jour')
-      || markdown.toLowerCase().includes('dernière révision'),
+      markdown.toLowerCase().includes('mise à jour') ||
+      markdown.toLowerCase().includes('dernière révision'),
   }
 }

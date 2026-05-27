@@ -14,11 +14,11 @@
  */
 
 import {
-  computeAnthropicCostEur,
-  computeAnthropicBatchCostEur,
-  computeOpenAIEmbeddingCostEur,
-  type Feature,
   type AnthropicTier,
+  type Feature,
+  computeAnthropicBatchCostEur,
+  computeAnthropicCostEur,
+  computeOpenAIEmbeddingCostEur,
 } from './anthropic-config'
 
 /** Structure usage Anthropic (miroir SDK). */
@@ -84,9 +84,7 @@ export async function trackAnthropicCall(params: TrackAnthropicParams): Promise<
   })
 }
 
-export async function trackOpenAIEmbeddingCall(
-  params: TrackOpenAIEmbeddingParams,
-): Promise<void> {
+export async function trackOpenAIEmbeddingCall(params: TrackOpenAIEmbeddingParams): Promise<void> {
   const costEur = computeOpenAIEmbeddingCostEur(params.modelUsed, params.totalTokens)
   await postUsageTracker({
     organizationId: params.organizationId,
@@ -127,7 +125,9 @@ async function postUsageTracker(payload: UsageTrackerPayload): Promise<void> {
   const url = process.env.SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) {
-    console.warn('[cost-tracker] missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY — usage not tracked')
+    console.warn(
+      '[cost-tracker] missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY — usage not tracked',
+    )
     return
   }
   try {

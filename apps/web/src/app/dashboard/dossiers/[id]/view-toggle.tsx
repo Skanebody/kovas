@@ -1,9 +1,9 @@
 'use client'
 
-import { DoorOpen, ListChecks } from 'lucide-react'
-import { useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { DoorOpen, ListChecks } from 'lucide-react'
+import { useTransition } from 'react'
 import { setDossierViewPreferenceAction } from './actions'
 
 interface ViewToggleProps {

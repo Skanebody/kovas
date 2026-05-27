@@ -31,7 +31,7 @@ export function AnomalyRowActions({ trialId, disabled = false }: Props) {
     if (pending || disabled) return
     if (
       !confirm(
-        "Rejeter cette inscription ? Le SIRET sera marqué comme bloqué (signup_naf_invalid).",
+        'Rejeter cette inscription ? Le SIRET sera marqué comme bloqué (signup_naf_invalid).',
       )
     )
       return

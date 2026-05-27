@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import type { AutoSaveStatus } from '@/hooks/useAutoSave'
+import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 
 interface SavedIndicatorProps {
@@ -30,12 +30,7 @@ interface SavedIndicatorProps {
  *   const { status, lastSavedAt, retry } = useAutoSave(values, save)
  *   <SavedIndicator status={status} lastSavedAt={lastSavedAt} onRetry={retry} />
  */
-export function SavedIndicator({
-  status,
-  lastSavedAt,
-  onRetry,
-  className,
-}: SavedIndicatorProps) {
+export function SavedIndicator({ status, lastSavedAt, onRetry, className }: SavedIndicatorProps) {
   // Force re-render chaque minute pour "il y a X min"
   const [, setTick] = useState(0)
   useEffect(() => {

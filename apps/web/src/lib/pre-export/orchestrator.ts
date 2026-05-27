@@ -15,20 +15,16 @@
 
 import { checkAdemeConformity } from './ademe-conformity-checker'
 import { validateDataCoherence } from './data-coherence-validator'
+import { type HistoricalDpe, checkHistorical } from './historical-checker'
 import { detectOpportunities } from './opportunity-detector'
-import { checkHistorical, type HistoricalDpe } from './historical-checker'
 import { analyzePhotosAndObservations } from './photo-vision-analyzer'
 import { computeGlobalScore } from './risk-scorer'
 import {
-  analyzeStatistical,
   type AdemeBenchmark,
   type DiagnosticianDistribution,
+  analyzeStatistical,
 } from './statistical-analyzer'
-import type {
-  Finding,
-  MissionAnalysisContext,
-  PreExportAnalysisResult,
-} from './types'
+import type { Finding, MissionAnalysisContext, PreExportAnalysisResult } from './types'
 
 export interface OrchestratorInputs {
   ctx: MissionAnalysisContext
@@ -45,29 +41,18 @@ export async function runPreExportAnalysis(
 ): Promise<PreExportAnalysisResult> {
   const start = Date.now()
 
-  const {
-    ctx,
-    benchmarks = [],
-    diagnosticianDistribution,
-    historical = null,
-  } = inputs
+  const { ctx, benchmarks = [], diagnosticianDistribution, historical = null } = inputs
 
   // Lancement parallèle (analyseurs purs — pas d'IO ici)
-  const [
-    conformityRes,
-    coherenceRes,
-    statisticalRes,
-    opportunityRes,
-    historicalRes,
-    qualityRes,
-  ] = await Promise.all([
-    Promise.resolve(checkAdemeConformity(ctx)),
-    Promise.resolve(validateDataCoherence(ctx)),
-    Promise.resolve(analyzeStatistical(ctx, benchmarks, diagnosticianDistribution)),
-    Promise.resolve(detectOpportunities(ctx)),
-    Promise.resolve(checkHistorical(ctx, historical)),
-    Promise.resolve(analyzePhotosAndObservations(ctx)),
-  ])
+  const [conformityRes, coherenceRes, statisticalRes, opportunityRes, historicalRes, qualityRes] =
+    await Promise.all([
+      Promise.resolve(checkAdemeConformity(ctx)),
+      Promise.resolve(validateDataCoherence(ctx)),
+      Promise.resolve(analyzeStatistical(ctx, benchmarks, diagnosticianDistribution)),
+      Promise.resolve(detectOpportunities(ctx)),
+      Promise.resolve(checkHistorical(ctx, historical)),
+      Promise.resolve(analyzePhotosAndObservations(ctx)),
+    ])
 
   // Calcul du sous-score exhaustivity à partir du meta du conformity checker
   const conformityMeta = conformityRes.meta as

@@ -13,13 +13,13 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
+  type ComponentType,
+  type KeyboardEvent,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ComponentType,
-  type KeyboardEvent,
 } from 'react'
 
 /**
@@ -211,9 +211,7 @@ export function CommandK({ enableShortcut = true }: CommandKProps = {}) {
         setActiveIndex((i) => (i + 1) % Math.max(1, filtered.length))
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
-        setActiveIndex(
-          (i) => (i - 1 + Math.max(1, filtered.length)) % Math.max(1, filtered.length),
-        )
+        setActiveIndex((i) => (i - 1 + Math.max(1, filtered.length)) % Math.max(1, filtered.length))
       } else if (e.key === 'Enter') {
         e.preventDefault()
         const item = filtered[activeIndex]

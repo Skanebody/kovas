@@ -32,7 +32,7 @@
 /// <reference lib="deno.ns" />
 // deno-lint-ignore-file no-explicit-any
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.1'
 import { PDFDocument, StandardFonts, rgb } from 'https://esm.sh/pdf-lib@1.17.1'
 import QRCode from 'https://esm.sh/qrcode-svg@1.1.0'
 
@@ -124,9 +124,7 @@ interface ParameterSuggestionRow {
 // Auth user / org.
 // ────────────────────────────────────────────────────────────
 
-async function resolveUser(
-  authClient: SupabaseClient,
-): Promise<{ userId: string } | null> {
+async function resolveUser(authClient: SupabaseClient): Promise<{ userId: string } | null> {
   const { data, error } = await authClient.auth.getUser()
   if (error || !data?.user) return null
   return { userId: data.user.id }
@@ -180,7 +178,8 @@ async function loadOrCreateDefenseDossier(
       'id, organization_id, mission_id, reference, status, contract_url, cgv_url, certificate_url',
     )
     .single()
-  if (insErr || !inserted) throw new Error(`defense_dossiers insert: ${insErr?.message ?? 'unknown'}`)
+  if (insErr || !inserted)
+    throw new Error(`defense_dossiers insert: ${insErr?.message ?? 'unknown'}`)
   return inserted as DefenseDossierRow
 }
 
@@ -207,7 +206,10 @@ async function loadDossier(client: SupabaseClient, dossierId: string): Promise<D
   return data as DossierRow
 }
 
-async function loadProperty(client: SupabaseClient, propertyId: string): Promise<PropertyRow | null> {
+async function loadProperty(
+  client: SupabaseClient,
+  propertyId: string,
+): Promise<PropertyRow | null> {
   const { data, error } = await (client as any)
     .from('properties')
     .select('id, address, city, postal_code, insee_code, property_type')
@@ -555,7 +557,7 @@ function drawPageGeolocation(
     page,
     MARGIN,
     y,
-    'Une carte statique de localisation peut être ajoutée en V2 via l\'API Mapbox Static (jetons côté serveur). Pour la V1, les coordonnées exactes de chaque photo géolocalisée figurent en page 3.',
+    "Une carte statique de localisation peut être ajoutée en V2 via l'API Mapbox Static (jetons côté serveur). Pour la V1, les coordonnées exactes de chaque photo géolocalisée figurent en page 3.",
     { size: 9 },
   )
   drawFooter(ctx, page, 'Page 2 — Géolocalisation')
@@ -632,7 +634,7 @@ function drawPageMethodologyChoices(
       page,
       MARGIN,
       y,
-      'Aucun paramètre suggéré n\'a été utilisé pour cette mission. Le diagnostiqueur a saisi manuellement les valeurs (cf. rapport métier joint).',
+      "Aucun paramètre suggéré n'a été utilisé pour cette mission. Le diagnostiqueur a saisi manuellement les valeurs (cf. rapport métier joint).",
       { size: 10 },
     )
     drawFooter(ctx, page, 'Page 4 — Méthodologie')
@@ -736,7 +738,7 @@ function drawPageAttachedDocuments(
     page,
     MARGIN,
     y,
-    'Note d\'intégrité : ce PDF est horodaté par hash SHA-256. Pour un horodatage qualifié RFC 3161 (eIDAS), KOVAS prévoit en V2 une intégration Lex Persona ou DigiCert.',
+    "Note d'intégrité : ce PDF est horodaté par hash SHA-256. Pour un horodatage qualifié RFC 3161 (eIDAS), KOVAS prévoit en V2 une intégration Lex Persona ou DigiCert.",
     { size: 9, lineHeight: 12 },
   )
   drawFooter(ctx, page, 'Page 5 — Documents joints')
@@ -791,12 +793,10 @@ async function uploadPdf(
   pdfBytes: Uint8Array,
 ): Promise<{ path: string; signedUrl: string | null }> {
   const path = `${orgId}/${defenseDossierId}/dossier-${Date.now()}.pdf`
-  const { error: upErr } = await client.storage
-    .from('defense-dossiers')
-    .upload(path, pdfBytes, {
-      contentType: 'application/pdf',
-      upsert: true,
-    })
+  const { error: upErr } = await client.storage.from('defense-dossiers').upload(path, pdfBytes, {
+    contentType: 'application/pdf',
+    upsert: true,
+  })
   if (upErr) throw new Error(`storage upload: ${upErr.message}`)
 
   // Signed URL TTL 1h (lecture côté client par signed URL ; le path est l'autorité).
@@ -897,8 +897,7 @@ Deno.serve(async (req: Request) => {
       method: 'sha256_only_v1',
       sha256: hash,
       anchored_at: generatedAt,
-      todo:
-        'V2: OpenTimestamps (RFC 3161, gratuit) puis Lex Persona/DigiCert (eIDAS qualifié) — cf. CLAUDE.md §20.',
+      todo: 'V2: OpenTimestamps (RFC 3161, gratuit) puis Lex Persona/DigiCert (eIDAS qualifié) — cf. CLAUDE.md §20.',
     }
 
     const { error: updErr } = await (admin as any)

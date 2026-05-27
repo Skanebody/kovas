@@ -15,14 +15,7 @@ import { AdminMetricCard } from '@/components/admin/shared/AdminMetricCard'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
-import {
-  Award,
-  BookOpen,
-  Gauge,
-  ShieldCheck,
-  Sparkles,
-  Star,
-} from 'lucide-react'
+import { Award, BookOpen, Gauge, ShieldCheck, Sparkles, Star } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -59,7 +52,7 @@ async function fetchVeilleStats(): Promise<VeilleStats> {
     )
     .eq('status', 'published')
 
-  const rows = ((data ?? []) as Array<{
+  const rows = (data ?? []) as Array<{
     eeat_experience: number
     eeat_expertise: number
     eeat_authoritativeness: number
@@ -67,7 +60,7 @@ async function fetchVeilleStats(): Promise<VeilleStats> {
     word_count: number
     internal_links_count: number
     source_citations_count: number
-  }>)
+  }>
 
   if (rows.length === 0) {
     return {
@@ -116,14 +109,13 @@ async function fetchSeoStats(): Promise<SeoStats> {
     .select('eeat_score, status')
     .in('status', ['approved', 'published'])
 
-  const rows = ((data ?? []) as Array<{ eeat_score: number | null; status: string }>)
-    .filter((r) => typeof r.eeat_score === 'number')
+  const rows = ((data ?? []) as Array<{ eeat_score: number | null; status: string }>).filter(
+    (r) => typeof r.eeat_score === 'number',
+  )
 
   if (rows.length === 0) return { approvedDrafts: 0, avgEeatScore: 0 }
 
-  const avg = Math.round(
-    rows.reduce((acc, r) => acc + (r.eeat_score ?? 0), 0) / rows.length,
-  )
+  const avg = Math.round(rows.reduce((acc, r) => acc + (r.eeat_score ?? 0), 0) / rows.length)
 
   return { approvedDrafts: rows.length, avgEeatScore: avg }
 }
@@ -202,9 +194,8 @@ export default async function AdminQualityPage() {
           Indicateurs qualité.
         </h1>
         <p className="text-sm text-ink-mute max-w-xl">
-          Moyennes E-E-A-T (Google Quality Rater Guidelines) sur l'ensemble des
-          articles de veille et drafts SEO publiés. Source primaire : pipeline
-          méthode Amandine Bart + scoring auto.
+          Moyennes E-E-A-T (Google Quality Rater Guidelines) sur l'ensemble des articles de veille
+          et drafts SEO publiés. Source primaire : pipeline méthode Amandine Bart + scoring auto.
         </p>
       </div>
 
@@ -228,10 +219,11 @@ export default async function AdminQualityPage() {
         <AdminMetricCard
           eyebrow="Score E-E-A-T moyen"
           value={`${Math.round(
-            (veille.avgExperience
-              + veille.avgExpertise
-              + veille.avgAuthoritativeness
-              + veille.avgTrustworthiness) / 4,
+            (veille.avgExperience +
+              veille.avgExpertise +
+              veille.avgAuthoritativeness +
+              veille.avgTrustworthiness) /
+              4,
           )}/100`}
           hint="Composite veille publiée"
           icon={Award}
@@ -251,8 +243,8 @@ export default async function AdminQualityPage() {
         </h2>
         {veille.published === 0 ? (
           <p className="text-sm text-ink-mute py-6 text-center">
-            Aucun article publié pour le moment. Les scores apparaîtront dès la
-            publication du premier draft validé.
+            Aucun article publié pour le moment. Les scores apparaîtront dès la publication du
+            premier draft validé.
           </p>
         ) : (
           <div className="space-y-5">
@@ -286,15 +278,12 @@ export default async function AdminQualityPage() {
 
       {/* Lighthouse — placeholder pour V2 instrumentation */}
       <Card className="p-6 bg-cream-deep border-rule">
-        <h2 className="font-sans font-semibold text-lg text-ink mb-2">
-          Scores Lighthouse — V2
-        </h2>
+        <h2 className="font-sans font-semibold text-lg text-ink mb-2">Scores Lighthouse — V2</h2>
         <p className="text-sm text-ink-mute">
-          L'instrumentation Lighthouse CI sera câblée en V2 via un webhook GitHub
-          Actions sur les principaux templates SEO (`/diagnostic/[type]/[ville]`,
-          `/diagnostiqueurs/[dept]/[city]`, `/observatoire`). Les scores
-          Performance, SEO et Accessibility apparaîtront ici une fois la pipeline
-          en place.
+          L'instrumentation Lighthouse CI sera câblée en V2 via un webhook GitHub Actions sur les
+          principaux templates SEO (`/diagnostic/[type]/[ville]`, `/diagnostiqueurs/[dept]/[city]`,
+          `/observatoire`). Les scores Performance, SEO et Accessibility apparaîtront ici une fois
+          la pipeline en place.
         </p>
       </Card>
     </div>

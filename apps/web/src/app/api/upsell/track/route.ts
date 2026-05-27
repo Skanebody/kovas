@@ -6,9 +6,9 @@
  * bouton gated). Le user_id vient de la session Supabase.
  */
 
-import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { trackBehaviorEvent, type BehaviorEventType } from '@/lib/upsell/track-event'
+import { type BehaviorEventType, trackBehaviorEvent } from '@/lib/upsell/track-event'
+import { NextResponse } from 'next/server'
 
 const VALID_EVENT_TYPES = new Set<BehaviorEventType>([
   'mission_created',

@@ -1,6 +1,6 @@
-import { cn } from '@/lib/utils'
 import { ringClassesFor, textClassesFor } from '@/lib/gamification/badges'
-import { getLevelById, type LevelId } from '@/lib/gamification/levels'
+import { type LevelId, getLevelById } from '@/lib/gamification/levels'
+import { cn } from '@/lib/utils'
 
 export interface LevelBadgeProps {
   level: LevelId
@@ -9,7 +9,10 @@ export interface LevelBadgeProps {
   className?: string
 }
 
-const SIZE_STYLES: Record<NonNullable<LevelBadgeProps['size']>, { box: string; dot: string; label: string }> = {
+const SIZE_STYLES: Record<
+  NonNullable<LevelBadgeProps['size']>,
+  { box: string; dot: string; label: string }
+> = {
   sm: { box: 'h-6 w-6', dot: 'h-2 w-2', label: 'text-[10px] tracking-[0.06em]' },
   md: { box: 'h-8 w-8', dot: 'h-2.5 w-2.5', label: 'text-[11px] tracking-[0.08em]' },
   lg: { box: 'h-12 w-12', dot: 'h-3.5 w-3.5', label: 'text-[12px] tracking-[0.08em]' },
@@ -58,13 +61,7 @@ export function LevelBadge({ level, size = 'md', showLabel = true, className }: 
       </div>
 
       {showLabel ? (
-        <span
-          className={cn(
-            'font-mono uppercase font-medium',
-            styles.label,
-            textClassesFor(def),
-          )}
-        >
+        <span className={cn('font-mono uppercase font-medium', styles.label, textClassesFor(def))}>
           {def.label}
         </span>
       ) : null}

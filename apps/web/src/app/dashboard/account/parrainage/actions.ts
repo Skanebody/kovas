@@ -4,9 +4,7 @@ import { getCurrentUser } from '@/lib/auth/current-user'
 import { ensureReferralCode } from '@/lib/referral/code-generator'
 import { revalidatePath } from 'next/cache'
 
-export type ReferralActionState =
-  | { ok?: boolean; error?: string; code?: string }
-  | undefined
+export type ReferralActionState = { ok?: boolean; error?: string; code?: string } | undefined
 
 /**
  * Génère (ou retourne) le code de parrainage de l'utilisateur courant.

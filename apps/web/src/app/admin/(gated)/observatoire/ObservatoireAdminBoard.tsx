@@ -10,20 +10,10 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import {
-  CheckCircle2,
-  Download,
-  Loader2,
-  RefreshCw,
-  Sparkles,
-  XCircle,
-} from 'lucide-react'
+import { CheckCircle2, Download, Loader2, RefreshCw, Sparkles, XCircle } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { triggerManualGeneration } from './actions'
-import type {
-  AdminObservatoireSummary,
-  ObservatoireReport,
-} from './page'
+import type { AdminObservatoireSummary, ObservatoireReport } from './page'
 
 interface Props {
   readonly reports: ReadonlyArray<ObservatoireReport>
@@ -113,10 +103,9 @@ export function ObservatoireAdminBoard({ reports, summary }: Props) {
           Rapport mensuel auto-généré.
         </h1>
         <p className="text-sm text-ink-mute max-w-2xl">
-          Le 1er du mois à 6 h CET, l'Edge Function
-          {' '}<code className="font-mono text-xs">observatoire-monthly-report</code>{' '}
-          agrège les stats du mois écoulé, génère le PDF, l'archive et l'envoie
-          à tous les subscribers actifs.
+          Le 1er du mois à 6 h CET, l'Edge Function{' '}
+          <code className="font-mono text-xs">observatoire-monthly-report</code> agrège les stats du
+          mois écoulé, génère le PDF, l'archive et l'envoie à tous les subscribers actifs.
         </p>
       </div>
 
@@ -132,9 +121,7 @@ export function ObservatoireAdminBoard({ reports, summary }: Props) {
           <p className="font-serif italic text-3xl text-ink mt-1">
             {summary.activeSubscribers.toLocaleString('fr-FR')}
           </p>
-          <p className="text-[11px] text-ink-faint mt-0.5">
-            {summary.unsubscribed} désinscrits
-          </p>
+          <p className="text-[11px] text-ink-faint mt-0.5">{summary.unsubscribed} désinscrits</p>
         </Card>
         <Card className="p-4">
           <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
@@ -143,9 +130,7 @@ export function ObservatoireAdminBoard({ reports, summary }: Props) {
           <p className="font-serif italic text-3xl text-ink mt-1">
             {summary.avgOpenRatePct.toFixed(1)}%
           </p>
-          <p className="text-[11px] text-ink-faint mt-0.5">
-            Dernier rapport envoyé
-          </p>
+          <p className="text-[11px] text-ink-faint mt-0.5">Dernier rapport envoyé</p>
         </Card>
         <Card className="p-4">
           <p className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
@@ -176,10 +161,7 @@ export function ObservatoireAdminBoard({ reports, summary }: Props) {
           {reports.length} rapport{reports.length > 1 ? 's' : ''} archivé
           {reports.length > 1 ? 's' : ''}
         </p>
-        <Button
-          onClick={() => handleGenerate(false)}
-          disabled={busy === 'fresh'}
-        >
+        <Button onClick={() => handleGenerate(false)} disabled={busy === 'fresh'}>
           {busy === 'fresh' ? (
             <Loader2 className="size-4 animate-spin" />
           ) : (
@@ -246,14 +228,10 @@ export function ObservatoireAdminBoard({ reports, summary }: Props) {
                   <td className="px-4 py-3 text-right font-mono text-ink">
                     {r.emailsSent}
                     {r.emailsFailed > 0 ? (
-                      <span className="text-red-600 text-xs ml-1">
-                        ({r.emailsFailed} ✕)
-                      </span>
+                      <span className="text-red-600 text-xs ml-1">({r.emailsFailed} ✕)</span>
                     ) : null}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-ink">
-                    {r.emailsOpened}
-                  </td>
+                  <td className="px-4 py-3 text-right font-mono text-ink">{r.emailsOpened}</td>
                   <td className="px-4 py-3 text-right font-mono text-ink-mute">
                     {r.downloadsDirect}
                   </td>

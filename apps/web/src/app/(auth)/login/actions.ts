@@ -1,8 +1,8 @@
 'use server'
 
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
 
 const loginSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -25,7 +25,12 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   const { error } = await supabase.auth.signInWithPassword(parsed.data)
 
   if (error) {
-    return { error: error.message === 'Invalid login credentials' ? 'Email ou mot de passe incorrect' : error.message }
+    return {
+      error:
+        error.message === 'Invalid login credentials'
+          ? 'Email ou mot de passe incorrect'
+          : error.message,
+    }
   }
 
   redirect('/dashboard/dashboard')

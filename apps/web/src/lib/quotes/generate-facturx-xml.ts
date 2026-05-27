@@ -18,11 +18,7 @@
  *       - ApplicableHeaderTradeSettlement (montants + TVA + paiement)
  */
 
-import type {
-  QuoteClientSnapshot,
-  QuoteLineItem,
-  QuoteOrganizationSnapshot,
-} from './types'
+import type { QuoteClientSnapshot, QuoteLineItem, QuoteOrganizationSnapshot } from './types'
 
 export interface FacturxQuoteInput {
   reference: string

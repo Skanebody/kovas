@@ -13,8 +13,8 @@
 import {
   type AddonCode,
   type AddonPackCode,
-  getAddonPack,
   type PricingPlanCode,
+  getAddonPack,
 } from '@/lib/pricing-plans'
 
 /**
@@ -99,10 +99,7 @@ export function getEffectiveAddons(access: UserAccess): readonly AddonCode[] {
 /**
  * True si l'utilisateur dispose de la feature (tier + tous les addons requis).
  */
-export function hasFeatureAccess(
-  access: UserAccess,
-  feature: FeatureRequirement,
-): boolean {
+export function hasFeatureAccess(access: UserAccess, feature: FeatureRequirement): boolean {
   // Tier minimum
   if (feature.requiredTier && !tierAtLeast(access.planCode, feature.requiredTier)) {
     return false

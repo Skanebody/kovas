@@ -51,8 +51,7 @@ export function TrialLimitAlert({
               Essai gratuit 30 jours
             </p>
             <p className="text-[14px] leading-snug text-ink">
-              <span className="font-serif italic text-ink">Limite atteinte.</span>{' '}
-              {message}
+              <span className="font-serif italic text-ink">Limite atteinte.</span> {message}
             </p>
           </div>
         </div>

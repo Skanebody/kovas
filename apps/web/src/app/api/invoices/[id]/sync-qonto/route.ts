@@ -1,18 +1,18 @@
-import { NextResponse } from 'next/server'
-import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { QontoClient } from '@/lib/qonto/client'
 import {
   getConnectorWithCredentials,
   setConnectorStatus,
   touchLastSync,
 } from '@/lib/qonto/connector-store'
-import { QontoClient } from '@/lib/qonto/client'
 import { mapKovasClientToQonto, mapKovasInvoiceToQonto } from '@/lib/qonto/mapper'
 import {
-  QontoApiError,
   type KovasClientForMapping,
   type KovasInvoiceForMapping,
+  QontoApiError,
 } from '@/lib/qonto/types'
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -27,10 +27,7 @@ export const maxDuration = 60
  *   4. POST /client_invoices Qonto
  *   5. Stocke qonto_invoice_id + qonto_synced_at sur la facture
  */
-export async function POST(
-  _request: Request,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id: invoiceId } = await context.params
 
   let orgId: string

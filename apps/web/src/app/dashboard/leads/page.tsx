@@ -122,13 +122,13 @@ export default async function LeadsPage() {
   const count = leads.length
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-2xl mx-auto">
+    <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
       <AppPageHeader
-        title="Vos"
+        title="Tes"
         accent="leads"
         description={
           count > 0
-            ? `${count} lead${count > 1 ? 's' : ''} en attente · traitez le plus ancien d'abord`
+            ? `${count} lead${count > 1 ? 's' : ''} en attente · traite le plus ancien d'abord`
             : "Demandes entrantes des particuliers via l'annuaire KOVAS"
         }
       />

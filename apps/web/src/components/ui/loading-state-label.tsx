@@ -1,7 +1,7 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Loader2 } from 'lucide-react'
 
 interface LoadingStateLabelProps {
   state: 'idle' | 'loading'
@@ -28,11 +28,7 @@ export function LoadingStateLabel({
   const textSize = size === 'md' ? 'text-sm' : 'text-xs'
   return (
     <span
-      className={cn(
-        'inline-flex items-center gap-2 text-ink-mute',
-        textSize,
-        className,
-      )}
+      className={cn('inline-flex items-center gap-2 text-ink-mute', textSize, className)}
       role="status"
       aria-live="polite"
     >
