@@ -3,8 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { toast } from '@/components/ui/toaster'
-import { History, Inbox } from 'lucide-react'
-import Link from 'next/link'
+import { Inbox } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { LeadFocalCard } from './lead-focal-card'
 import { LeadsQueueSheet } from './leads-queue-sheet'
@@ -112,15 +111,7 @@ export function LeadsFocalClient({ leads }: LeadsFocalClientProps) {
       <EmptyState
         icon={Inbox}
         title="Aucun lead en attente. Bien joué."
-        description="Tous les leads ont été traités. Consulte l'historique pour revoir tes décisions."
-        action={
-          <Button asChild variant="outline">
-            <Link href="/dashboard/leads/history">
-              <History className="size-4" />
-              Voir l&apos;historique
-            </Link>
-          </Button>
-        }
+        description="Tous les leads ont été traités. Les prochaines demandes apparaîtront ici dès qu'elles arriveront."
       />
     )
   }

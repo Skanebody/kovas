@@ -21,9 +21,9 @@ export default function UpgradeBundlePage() {
     <div className="space-y-8 pb-8">
       <AppPageHeader
         eyebrow="Bundles Annuaire + KOVAS"
-        title="Combinez et"
-        accent="économisez"
-        description="Souscrivez Annuaire + KOVAS en un seul abonnement et économisez jusqu'à 59 €/mois. Bundles transparents — l'économie mensuelle est affichée sur chaque card."
+        title="Combine et"
+        accent="économise"
+        description="Souscris Annuaire + KOVAS en un seul abonnement et économise jusqu'à 99 €/mois. Bundles transparents — l'économie mensuelle est affichée sur chaque card."
       />
 
       <div className="flex justify-center">

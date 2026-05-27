@@ -27,10 +27,10 @@ type NavItem = {
 const NAV: readonly NavItem[] = [
   { href: '/dashboard/dashboard', label: 'Tableau de bord', icon: Home },
   { href: '/dashboard/dossiers', label: 'Dossiers', icon: FileText },
-  { href: '/dashboard/calendar', label: 'Planning', icon: CalendarDays },
+  { href: '/dashboard/calendar', label: 'Calendrier', icon: CalendarDays },
   { href: '/dashboard/clients', label: 'Clients', icon: Users },
   { href: '/dashboard/properties', label: 'Biens', icon: Building2 },
-  { href: '/dashboard/analytics', label: 'Performance', icon: ChartLine },
+  { href: '/dashboard/analytics', label: 'Statistiques', icon: ChartLine },
   { href: '/dashboard/account', label: 'Compte', icon: Settings },
 ] as const
 

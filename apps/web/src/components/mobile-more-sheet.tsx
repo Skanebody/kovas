@@ -10,21 +10,19 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
   Archive,
   Bell,
-  Briefcase,
+  BookOpen,
   Building2,
   ChartLine,
-  Gift,
   HelpCircle,
   IdCard,
   Inbox,
-  KeyRound,
   MessageSquare,
   Radar,
   Receipt,
   ScrollText,
   Send,
   Settings,
-  Sparkle,
+  ShieldCheck,
   TrendingUp,
   Users,
   Wrench,
@@ -60,7 +58,6 @@ const LOGICIEL_SECTIONS: readonly MoreSection[] = [
     items: [
       { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare },
       { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
-      { href: '/dashboard/coach', label: 'Coach IA', icon: Sparkle },
     ],
   },
   {
@@ -68,11 +65,15 @@ const LOGICIEL_SECTIONS: readonly MoreSection[] = [
     items: [
       { href: '/dashboard/clients', label: 'Clients', icon: Users },
       { href: '/dashboard/properties', label: 'Biens', icon: Building2 },
-      { href: '/dashboard/gain', label: 'Performance', icon: ChartLine },
+      { href: '/dashboard/gain', label: 'Statistiques', icon: ChartLine },
       { href: '/dashboard/archive', label: 'Archives', icon: Archive },
-      { href: '/dashboard/coffre', label: 'Coffre-fort certifications', icon: KeyRound },
+      {
+        href: '/dashboard/outils/verification-validite',
+        label: 'Coffre-fort certifications',
+        icon: ShieldCheck,
+      },
       { href: '/dashboard/outils', label: 'Outils', icon: Wrench },
-      { href: '/dashboard/annuaire', label: 'Mon annuaire', icon: Inbox },
+      { href: '/dashboard/annuaire', label: 'Mon annuaire', icon: BookOpen },
     ],
   },
   {
@@ -84,18 +85,17 @@ const LOGICIEL_SECTIONS: readonly MoreSection[] = [
         icon: Radar,
         requiredTier: 'pro',
       },
-      { href: '/dashboard/analytics', label: 'Analytics', icon: TrendingUp, requiredTier: 'pro' },
+      {
+        href: '/dashboard/analytics',
+        label: 'Statistiques',
+        icon: TrendingUp,
+        requiredTier: 'pro',
+      },
       {
         href: '/dashboard/veille',
         label: 'Veille',
         icon: Bell,
         requiredAddons: ['regulatory_watch'],
-      },
-      {
-        href: '/dashboard/communaute',
-        label: 'Communauté',
-        icon: MessageSquare,
-        requiredAddons: ['community_pro'],
       },
     ],
   },
@@ -109,16 +109,7 @@ const LOGICIEL_SECTIONS: readonly MoreSection[] = [
   },
   {
     title: 'Croissance',
-    items: [
-      {
-        href: '/dashboard/prescripteurs',
-        label: 'Prescripteurs',
-        icon: Briefcase,
-        requiredTier: 'pro',
-      },
-      { href: '/dashboard/affiliation', label: 'Affiliation rénovation', icon: Gift },
-      { href: '/dashboard/account/parrainage', label: 'Parrainage', icon: Users },
-    ],
+    items: [{ href: '/dashboard/account/parrainage', label: 'Parrainage', icon: Users }],
   },
   {
     title: 'Système',
@@ -137,8 +128,8 @@ const ANNUAIRE_SECTIONS: readonly MoreSection[] = [
   {
     title: 'KOVAS Annuaire',
     items: [
-      { href: '/dashboard/annuaire/profile', label: 'Profil annuaire', icon: IdCard },
-      { href: '/dashboard/annuaire/leads', label: 'Leads reçus', icon: Inbox },
+      { href: '/dashboard/annuaire/ma-fiche', label: 'Profil annuaire', icon: IdCard },
+      { href: '/dashboard/leads/incoming', label: 'Leads reçus', icon: Inbox },
       { href: '/dashboard/annuaire/stats', label: 'Stats fiche', icon: TrendingUp },
     ],
   },

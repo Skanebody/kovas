@@ -34,11 +34,11 @@ import {
   CreditCard,
   Download,
   ExternalLink,
-  IdCard,
+  FileText,
   KeyRound,
   Layers,
   type LucideIcon,
-  Palette,
+  Plug,
   Radar,
   Receipt,
   Shield,
@@ -538,16 +538,14 @@ function CabinetTab({ props }: { props: AccountSettingsClientProps }) {
         />
       </Card>
 
+      {/*
+        Section Préférences cabinet — 4 raccourcis vers les pages de configuration :
+        tarifs prestations, intégrations comptables PDP, attestations légales, alertes.
+        (Logo & couleur + Carte de visite retirés refonte 2026-05 : gimmicks non-moat.)
+      */}
       <Card variant="opaque" padding="default" className="space-y-4">
-        <SectionTitle icon={Palette} title="Personnalisation" iconColor="#FF9500" />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <ShortcutCard
-            href="/dashboard/compte/branding"
-            icon={Palette}
-            iconBg="#FF9500"
-            label="Logo & couleur"
-            sublabel="Identité visuelle cabinet"
-          />
+        <SectionTitle icon={Plug} title="Préférences cabinet" iconColor="#0F1419" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <ShortcutCard
             href="/dashboard/compte/tarifs"
             icon={Calculator}
@@ -556,11 +554,25 @@ function CabinetTab({ props }: { props: AccountSettingsClientProps }) {
             sublabel="Prestations & packs"
           />
           <ShortcutCard
-            href="/dashboard/compte/carte-visite"
-            icon={IdCard}
-            iconBg="#5AC8FA"
-            label="Carte de visite"
-            sublabel="QR + Wallet"
+            href="/dashboard/account/integrations"
+            icon={Plug}
+            iconBg="#0F1419"
+            label="Intégrations"
+            sublabel="Qonto · Pennylane"
+          />
+          <ShortcutCard
+            href="/dashboard/account/legal"
+            icon={FileText}
+            iconBg="#AF52DE"
+            label="Attestations légales"
+            sublabel="LAFT · RGPD · DGFiP"
+          />
+          <ShortcutCard
+            href="/dashboard/account/preferences/alertes"
+            icon={Bell}
+            iconBg="#FF9500"
+            label="Préférences d'alertes"
+            sublabel="Notifications & rappels"
           />
         </div>
       </Card>

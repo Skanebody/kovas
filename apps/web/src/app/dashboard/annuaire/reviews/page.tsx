@@ -38,6 +38,18 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Avis annuaire' }
 
+/**
+ * Feature flag V1 → V1.5.
+ *
+ * En V1, la table `marketplace_reviews` n'existe pas encore et aucune Server
+ * Action n'est branchée pour répondre / modifier / demander des avis. On masque
+ * donc les boutons interactifs plutôt que de les laisser visibles mais inertes
+ * (= UX frustrante "produit pas fini").
+ *
+ * À basculer à `true` en V1.5 quand les actions seront branchées.
+ */
+const FEATURE_REVIEWS_INTERACTIVE = false // TODO V1.5
+
 interface PageProps {
   searchParams: Promise<{ filter?: string }>
 }
@@ -72,7 +84,7 @@ export default async function AnnuaireReviewsPage({ searchParams }: PageProps) {
             summary={summary}
           />
           <ReviewsList reviews={reviews} filter={filter} />
-          <RequestReviewCta />
+          {FEATURE_REVIEWS_INTERACTIVE ? <RequestReviewCta /> : null}
         </>
       ) : (
         <EmptyState
@@ -80,9 +92,11 @@ export default async function AnnuaireReviewsPage({ searchParams }: PageProps) {
           title="Aucun avis pour l'instant"
           description="Demande à tes anciens clients de partager leur expérience. Les avis vérifiés boostent ton classement annuaire de +35 % en moyenne."
           action={
-            <Button variant="accent" size="lg">
-              Demander un avis à mes anciens clients
-            </Button>
+            FEATURE_REVIEWS_INTERACTIVE ? (
+              <Button variant="accent" size="lg">
+                Demander un avis à mes anciens clients
+              </Button>
+            ) : undefined
           }
         />
       )}
@@ -210,18 +224,11 @@ function ReviewsList({ reviews, filter }: ReviewsListProps) {
 /* CARD AVIS                                                           */
 /* ------------------------------------------------------------------ */
 
-const MAX_BODY_PREVIEW = 220
-
 interface ReviewCardProps {
   review: AnnuaireReview
 }
 
 function ReviewCard({ review }: ReviewCardProps) {
-  const needsTruncate = review.body.length > MAX_BODY_PREVIEW
-  const bodyPreview = needsTruncate
-    ? `${review.body.slice(0, MAX_BODY_PREVIEW).trimEnd()}…`
-    : review.body
-
   return (
     <Card variant="flat" padding="default" className="space-y-4">
       {/* En-tête : stars + auteur + date */}
@@ -237,13 +244,9 @@ function ReviewCard({ review }: ReviewCardProps) {
         </div>
       </div>
 
-      {/* Corps de l'avis (truncate sans state client : on rend la version courte
-          + lien Lire plus pointant vers un futur détail ; V1 OK car la version
-          longue est rarement nécessaire dans le dashboard). */}
-      <div className="text-[14px] leading-relaxed text-ink/85">
-        {bodyPreview}
-        {needsTruncate ? <span className="ml-1 text-ink-mute italic">(Lire plus)</span> : null}
-      </div>
+      {/* Corps de l'avis — truncate CSS line-clamp-3 plutôt qu'un bouton
+          "Lire plus" inerte (V1 : pas de page détail avis). */}
+      <p className="text-[14px] leading-relaxed text-ink/85 line-clamp-3">{review.body}</p>
 
       {/* Critères validés */}
       {review.criteria.length > 0 ? (
@@ -257,26 +260,28 @@ function ReviewCard({ review }: ReviewCardProps) {
         </div>
       ) : null}
 
-      {/* Footer : réponse existante OU bouton Répondre */}
+      {/* Footer : réponse existante OU bouton Répondre (V1.5+) */}
       {review.response ? (
         <div className="rounded-lg bg-sage-alt/40 border border-rule/50 p-4 space-y-2">
           <div className="flex items-center justify-between gap-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
               Votre réponse · {formatReviewDate(review.response.respondedAt)}
             </p>
-            <Button variant="ghost" size="sm" className="font-medium">
-              Modifier
-            </Button>
+            {FEATURE_REVIEWS_INTERACTIVE ? (
+              <Button variant="ghost" size="sm" className="font-medium">
+                Modifier
+              </Button>
+            ) : null}
           </div>
           <p className="text-[13px] leading-relaxed text-ink/85">{review.response.body}</p>
         </div>
-      ) : (
+      ) : FEATURE_REVIEWS_INTERACTIVE ? (
         <div className="flex justify-end">
           <Button variant="default" size="sm">
             Répondre
           </Button>
         </div>
-      )}
+      ) : null}
     </Card>
   )
 }

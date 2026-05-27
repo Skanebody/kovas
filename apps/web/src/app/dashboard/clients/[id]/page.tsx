@@ -237,13 +237,13 @@ export default async function ClientDetailPage({
               </Button>
             ) : null}
             <Button variant="default" size="sm" asChild>
-              <Link href={`/dashboard/devis/new?client_id=${client.id}`}>
+              <Link href={`/dashboard/devis/nouveau?client_id=${client.id}`}>
                 <FileText className="size-4" />
                 Devis
               </Link>
             </Button>
             <Button variant="accent" size="sm" asChild>
-              <Link href={`/dashboard/factures/new?client_id=${client.id}`}>
+              <Link href={`/dashboard/factures/nouveau?client_id=${client.id}`}>
                 <Receipt className="size-4" />
                 Facture
               </Link>

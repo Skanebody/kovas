@@ -75,8 +75,8 @@ export default async function GainPage() {
           Ton temps <span className="font-serif italic font-normal">libéré</span>.
         </h1>
         <p className="text-[16px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
-          Suivi mensuel basé sur ton temps moyen avant KOVAS ({baselineMinutes} min /
-          mission, modifiable dans{' '}
+          Suivi mensuel basé sur ton temps moyen avant KOVAS ({baselineMinutes} min / mission,
+          modifiable dans{' '}
           <Link
             href="/dashboard/account"
             className="text-[#0F1419] underline underline-offset-2 hover:no-underline"
@@ -113,8 +113,7 @@ export default async function GainPage() {
             )}
             {monthCount > 0 ? (
               <p className="text-sm text-card-accent-foreground/80">
-                Sur{' '}
-                <span className="font-semibold text-card-accent-foreground">{monthCount}</span>{' '}
+                Sur <span className="font-semibold text-card-accent-foreground">{monthCount}</span>{' '}
                 mission{monthCount > 1 ? 's' : ''} ·{' '}
                 <span className="font-semibold text-card-accent-foreground">
                   {monthEuros.toLocaleString('fr-FR')}€
@@ -175,16 +174,16 @@ export default async function GainPage() {
               Statistiques détaillées · V1.5
             </h2>
             <p className="text-[13px] text-[#0F1419]/72 leading-relaxed max-w-2xl">
-              Bientôt : évolution mensuelle sur 12 mois, répartition par type de diagnostic
-              (DPE, Amiante, Plomb…), classement vs autres diagnostiqueurs de ta zone, et
-              statuts professionnels débloqués. Roadmap{' '}
+              Bientôt : évolution mensuelle sur 12 mois, répartition par type de diagnostic (DPE,
+              Amiante, Plomb…), classement vs autres diagnostiqueurs de ta zone, et statuts
+              professionnels débloqués. Roadmap{' '}
               <span className="font-mono text-[11px]">gain-tracker-system §2-4</span>.
             </p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2 pt-2">
           <Link
-            href="/dashboard/account/progression"
+            href="/dashboard/account/parrainage"
             className="inline-flex items-center gap-2 rounded-pill border border-[#0F1419]/[0.12] bg-paper px-4 py-2 text-sm font-medium text-[#0F1419] hover:bg-[#0F1419]/[0.04] transition-colors"
           >
             <BarChart3 className="size-4" aria-hidden />
@@ -192,7 +191,7 @@ export default async function GainPage() {
             <ArrowRight className="size-3.5" aria-hidden />
           </Link>
           <Link
-            href="/dashboard/dashboard"
+            href="/dashboard"
             className="inline-flex items-center gap-2 rounded-pill border border-[#0F1419]/[0.12] bg-paper px-4 py-2 text-sm font-medium text-[#0F1419] hover:bg-[#0F1419]/[0.04] transition-colors"
           >
             Retour au tableau de bord

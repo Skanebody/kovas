@@ -55,7 +55,7 @@ export function IdentitySection({
           <div className="space-y-1.5 text-[14px]">
             {client.id && client.display_name ? (
               <Link
-                href={`/app/clients/${client.id}`}
+                href={`/dashboard/clients/${client.id}`}
                 className="flex items-center gap-2 font-medium text-[#0F1419] hover:underline"
               >
                 <User className="size-3.5 text-[#0F1419]/72" />
@@ -93,7 +93,7 @@ export function IdentitySection({
           <div className="space-y-1.5 text-[14px]">
             {fullAddress ? (
               <Link
-                href={`/app/properties/${property.id}`}
+                href={`/dashboard/properties/${property.id}`}
                 className="flex items-start gap-2 font-medium text-[#0F1419] hover:underline"
               >
                 <MapPin className="size-3.5 text-[#0F1419]/72 mt-0.5 shrink-0" />

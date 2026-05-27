@@ -8,9 +8,10 @@ import { useState } from 'react'
 /**
  * Page /dashboard/upgrade/logiciel
  *
- * Cross-sell KOVAS (SaaS B2B) pour un user `annuaire-only` ou `free`.
- * Affiche les 5 tiers Logiciel (free / starter / active / cabinet / enterprise)
- * avec toggle mensuel/annuel et CTAs Stripe checkout.
+ * Cross-sell KOVAS (SaaS B2B) pour un user `annuaire-only` ou en essai 30j.
+ * Affiche les 5 tiers Logiciel canoniques V5 (essai 30j / solo 29€ /
+ * pro 79€ / cabinet 199€ / cabinet_plus 499€ / enterprise sur devis) avec
+ * toggle mensuel/annuel et CTAs Stripe checkout.
  *
  * Layout authentifié `/dashboard/*` (DS v5 sage + chartreuse).
  */

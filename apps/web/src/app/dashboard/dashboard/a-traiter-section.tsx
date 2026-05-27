@@ -69,21 +69,21 @@ export async function ATraiterSection() {
       icon: Inbox,
       label: 'Leads non répondus',
       count: counts.leads,
-      href: '/dashboard/messages',
+      href: '/dashboard/leads',
     },
     {
       key: 'quotes',
       icon: FileCheck2,
       label: 'Devis sans réponse',
       count: counts.quotes,
-      href: '/dashboard/facturation',
+      href: '/dashboard/facturation?tab=devis',
     },
     {
       key: 'invoices',
       icon: Receipt,
       label: 'Factures impayées',
       count: counts.invoices,
-      href: '/dashboard/facturation',
+      href: '/dashboard/facturation?tab=factures&filter=overdue',
     },
   ]
 

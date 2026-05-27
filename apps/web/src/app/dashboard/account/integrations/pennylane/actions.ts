@@ -69,7 +69,7 @@ export async function saveConnectorAction(
     return { error: `Échec sauvegarde : ${error.message}` }
   }
 
-  revalidatePath('/app/account/integrations/pennylane')
+  revalidatePath('/dashboard/account/integrations/pennylane')
   return { success: true, message: 'Connecteur Pennylane enregistré.' }
 }
 
@@ -85,7 +85,7 @@ export async function deactivateConnectorAction(): Promise<ConnectorFormState> {
   })
 
   if (error) return { error: `Échec désactivation : ${error.message}` }
-  revalidatePath('/app/account/integrations/pennylane')
+  revalidatePath('/dashboard/account/integrations/pennylane')
   return { success: true, message: 'Connecteur Pennylane désactivé.' }
 }
 
@@ -97,6 +97,6 @@ export async function deleteConnectorAction(): Promise<ConnectorFormState> {
   const { error } = await deleteConnector(supabase, orgId, PROVIDER)
 
   if (error) return { error: `Échec suppression : ${error.message}` }
-  revalidatePath('/app/account/integrations/pennylane')
+  revalidatePath('/dashboard/account/integrations/pennylane')
   return { success: true, message: 'Connecteur Pennylane supprimé.' }
 }

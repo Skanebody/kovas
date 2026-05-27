@@ -1,10 +1,10 @@
 /**
  * Page Compte → Intégrations.
  *
- * Vue unifiée des 4 connecteurs comptables disponibles (Qonto, Pennylane,
- * Indy, Tiime). Permet d'activer plusieurs connecteurs en parallèle.
+ * Vue unifiée des 2 connecteurs comptables PDP agréés DGFiP : Qonto, Pennylane.
+ * Indy + Tiime retirés (refonte 2026-05 : pas de moat, doublons fonctionnels).
  *
- * Ton : sobre, vouvoiement, pas d'emoji. Tokens v5.
+ * Ton : sobre, tutoiement, pas d'emoji. Tokens v5.
  */
 
 import { AppPageHeader } from '@/components/app-page-header'
@@ -18,7 +18,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Intégrations comptables',
-  description: 'Connectez KOVAS à Qonto, Pennylane, Indy ou Tiime.',
+  description: 'Connecte KOVAS à Qonto ou Pennylane (PDP agréées DGFiP).',
 }
 
 export default async function IntegrationsPage() {
@@ -53,7 +53,7 @@ export default async function IntegrationsPage() {
         </div>
       </div>
 
-      {/* Grille connecteurs — 4 cards */}
+      {/* Grille connecteurs — 2 PDP agréées DGFiP */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ConnectorCard
           name="Qonto"
@@ -73,26 +73,6 @@ export default async function IntegrationsPage() {
           lastSyncAt={state.pennylane.lastSyncAt}
           href="/dashboard/account/integrations/pennylane"
           logoChar="P"
-          accentColor="navy"
-        />
-        <ConnectorCard
-          name="Indy"
-          description="Comptabilité automatique freemium pour indépendants. Bien adapté aux solos en BNC. API en cours d'ouverture."
-          tagline="freemium · indépendants"
-          status={state.indy.status}
-          lastSyncAt={state.indy.lastSyncAt}
-          href="/dashboard/account/integrations/indy"
-          logoChar="I"
-          accentColor="navy"
-        />
-        <ConnectorCard
-          name="Tiime"
-          description="Comptabilité automatique avec connexion bancaire et reporting. Solution mobile-first. Tarif sur devis selon volume."
-          tagline="payant · mobile-first"
-          status={state.tiime.status}
-          lastSyncAt={state.tiime.lastSyncAt}
-          href="/dashboard/account/integrations/tiime"
-          logoChar="T"
           accentColor="navy"
         />
       </section>
@@ -119,11 +99,6 @@ export default async function IntegrationsPage() {
             pro) ou <strong className="text-[#0F1419] font-semibold">Pennylane</strong> (à partir de
             22€ HT/mois). Ces deux outils sont des PDP officiellement agréées par la DGFiP.
           </p>
-          <p>
-            <strong className="text-[#0F1419] font-semibold">Indy et Tiime</strong> ne sont pas des
-            PDP. Tu peux les utiliser pour ta comptabilité quotidienne, mais devras transiter par
-            une PDP pour la transmission officielle des factures.
-          </p>
         </div>
       </section>
 
@@ -131,8 +106,8 @@ export default async function IntegrationsPage() {
       <section className="rounded-lg border border-[#0F1419]/[0.08] bg-paper p-5 space-y-2">
         <h3 className="font-bold text-sm text-[#0F1419]">Add-on Connecteurs Pro · 9€ HT/mois</h3>
         <p className="text-xs text-[#0F1419]/72 leading-relaxed">
-          Un seul add-on débloque la synchronisation vers les 4 connecteurs (Qonto, Pennylane, Indy,
-          Tiime). Active-le depuis Compte → Abonnement.
+          Un seul add-on débloque la synchronisation vers les 2 PDP agréées (Qonto, Pennylane).
+          Active-le depuis Compte → Abonnement.
         </p>
       </section>
     </div>

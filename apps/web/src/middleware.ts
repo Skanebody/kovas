@@ -2,36 +2,37 @@ import { updateSession } from '@/lib/supabase/middleware'
 import { type NextRequest, NextResponse } from 'next/server'
 
 /**
- * REFONTE ACQUI-TARGET 2026-05 — routes Bucket C supprimées.
- * Cf. docs/refonte-2026-05/REFONTE-ACQUI-TARGET-V2.md
+ * REFONTE ACQUI-TARGET 2026-05 — routes définitivement retirées (post-pivot).
+ *
+ * Liste réduite après revue 2026-05-27 (Benjamin a clarifié la direction
+ * hybride pragmatique) : on garde gain, annuaire, veille, progression,
+ * parrainage qui sont activement utilisés. On retire vraiment les features
+ * non-moat (coach IA, communauté, prescripteurs, gimmicks identité visuelle,
+ * connecteurs doublons Indy/Tiime, calculatrice standalone).
  *
  * Redirection préventive (signets utilisateur, liens externes, crawlers).
  */
 const REMOVED_ROUTES = [
-  // Coach / Veille IA produit (ChatGPT free alternative)
+  // Coach IA conversationnel (Phase 3 M19+, pas de moat vs ChatGPT)
   '/dashboard/coach',
-  '/dashboard/veille/articles',
+  // Chat IA veille (V1.5 différé, page article reste accessible)
   '/dashboard/veille/chat',
-  // Communauté B2B vertical solo (piège chronophage)
+  // Communauté B2B vertical solo (piège chronophage non-moat)
   '/dashboard/communaute',
-  // Gamification fluff
-  '/dashboard/gain',
-  '/dashboard/account/progression',
-  '/dashboard/account/parrainage/badges',
-  // Annuaire/Prescripteurs (pas de moat Liciel)
-  '/dashboard/annuaire',
+  // Prescripteurs (pas dans roadmap V1)
   '/dashboard/prescripteurs',
-  // Gimmicks
+  // Gimmicks identité visuelle (pas de différenciation business)
   '/dashboard/compte/carte-visite',
   '/dashboard/compte/branding',
+  // Calculatrice standalone (présente dans flow mission)
   '/dashboard/outils/calculatrice-surface',
-  // Connecteurs doublons (Qonto + Pennylane suffisent)
+  // Connecteurs comptables doublons (Qonto + Pennylane = 2 PDP agréées DGFiP)
   '/dashboard/account/integrations/indy',
   '/dashboard/account/integrations/tiime',
   // Premature optimization pre-PMF
   '/admin/ab-testing',
   '/admin/(gated)/ab-testing',
-  // Public misc
+  // Page publique remplacée par formulaire claim
   '/signaler-un-diagnostiqueur',
 ] as const
 

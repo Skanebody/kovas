@@ -59,7 +59,7 @@ export async function ClientFacturesTab({ clientId, orgId }: Props) {
           Factures
         </h2>
         <Button asChild variant="accent" size="sm">
-          <Link href={`/dashboard/factures/new?client_id=${clientId}`}>
+          <Link href={`/dashboard/factures/nouveau?client_id=${clientId}`}>
             <Plus className="size-4" />
             Nouvelle facture
           </Link>
@@ -73,7 +73,7 @@ export async function ClientFacturesTab({ clientId, orgId }: Props) {
           description="Émettez une facture (depuis un devis accepté ou directement). Factur-X et suivi de paiement inclus."
           action={
             <Button asChild variant="accent" size="sm">
-              <Link href={`/dashboard/factures/new?client_id=${clientId}`}>
+              <Link href={`/dashboard/factures/nouveau?client_id=${clientId}`}>
                 <Plus className="size-4" />
                 Créer une facture
               </Link>

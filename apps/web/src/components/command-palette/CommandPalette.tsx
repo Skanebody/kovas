@@ -135,7 +135,7 @@ const NAV_ITEMS = [
   },
   {
     id: 'calendar',
-    label: 'Planning',
+    label: 'Calendrier',
     href: '/dashboard/calendar',
     icon: CalendarClock,
     shortcut: 'G P',

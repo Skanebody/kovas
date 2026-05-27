@@ -179,7 +179,7 @@ export default async function AnalyticsPage() {
           target="pro"
           trigger="analytics_attempted"
           title="Analytics avancées · forfait Pro"
-          description="Health score composite, tendances longue durée 3 ans, benchmarks anonymisés (k-anonymity ≥ 5 cabinets), positionnement vs médiane FR. Disponible sur Pro, All Inclusive et Cabinet."
+          description="Health score composite, tendances longue durée 3 ans, benchmarks anonymisés (k-anonymity ≥ 5 cabinets), positionnement vs médiane FR. Disponible sur Pro, Cabinet et Cabinet+."
         />
       </div>
     )

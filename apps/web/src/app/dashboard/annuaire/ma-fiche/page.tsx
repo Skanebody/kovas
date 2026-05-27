@@ -9,6 +9,7 @@ import { PageTabs } from '@/components/ui/page-tabs'
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { cn } from '@/lib/utils'
 import {
+  ArrowRight,
   Bell,
   CalendarClock,
   ExternalLink,
@@ -182,6 +183,20 @@ export default async function MaFichePage({ searchParams }: MaFichePageProps) {
         <div className="min-w-0">
           {active === 'profil' ? (
             <ProfileSection initial={initial} isClaimed={isClaimed} />
+          ) : active === 'reviews' ? (
+            <SectionRedirect
+              section="reviews"
+              href="/dashboard/annuaire/reviews"
+              ctaLabel="Ouvrir la gestion des avis"
+              description="Tes avis Google synchronisés, distribution des notes, filtres et réponses sont gérés sur la page dédiée."
+            />
+          ) : active === 'notifications' ? (
+            <SectionRedirect
+              section="notifications"
+              href="/dashboard/notifications"
+              ctaLabel="Ouvrir le centre de notifications"
+              description="Tes préférences de notifications (leads, avis, veille réglementaire, alertes système) sont centralisées sur la page Notifications."
+            />
           ) : (
             <SectionPlaceholder section={active} />
           )}
@@ -191,6 +206,9 @@ export default async function MaFichePage({ searchParams }: MaFichePageProps) {
   )
 }
 
+// TODO V1.5 : implémenter les sections suivantes (photos, legal, zone-tarifs,
+// disponibilites, preferences-leads, booking, visibility, reglages). En V1, on
+// affiche un placeholder pour ne pas laisser l'onglet en 404.
 function SectionPlaceholder({ section }: { section: SectionKey }) {
   const meta = SECTIONS.find((s) => s.key === section)
   if (!meta) return null
@@ -212,6 +230,51 @@ function SectionPlaceholder({ section }: { section: SectionKey }) {
             attendant, la section <strong>Profil</strong> est entièrement éditable et tes
             modifications sont publiées immédiatement sur ta fiche publique.
           </p>
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+/**
+ * Onglet déjà fonctionnel ailleurs dans le dashboard — on redirige proprement
+ * plutôt que d'afficher un placeholder mensonger. Utilisé pour `reviews` et
+ * `notifications`.
+ */
+function SectionRedirect({
+  section,
+  href,
+  ctaLabel,
+  description,
+}: {
+  section: SectionKey
+  href: string
+  ctaLabel: string
+  description: string
+}) {
+  const meta = SECTIONS.find((s) => s.key === section)
+  if (!meta) return null
+  const Icon = meta.icon
+  return (
+    <Card variant="flat" padding="lg">
+      <div className="flex items-start gap-4">
+        <div
+          aria-hidden
+          className="flex size-12 items-center justify-center rounded-full bg-cream-deep text-ink shrink-0"
+        >
+          <Icon className="size-5" strokeWidth={1.5} />
+        </div>
+        <div className="space-y-2 flex-1">
+          <CardTitle>{meta.label}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+          <div className="pt-2">
+            <Button asChild variant="default">
+              <Link href={href}>
+                {ctaLabel}
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

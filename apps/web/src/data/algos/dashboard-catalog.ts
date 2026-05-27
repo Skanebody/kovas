@@ -87,9 +87,8 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     title: 'Vision équipement',
     what: 'Reconnaît chaudières, étiquettes énergétiques et matériaux isolants directement depuis tes photos terrain.',
     forYou: 'Les caractéristiques se pré-remplissent toutes seules. Tu valides au lieu de saisir.',
-    status: 'exposed',
-    exposedAt: '/dashboard/dossiers',
-    exposedAtLabel: 'Validation mission',
+    // V2 différée (cf. CLAUDE.md §3 — Vision IA reportée 3-6 mois post-launch)
+    status: 'coming-soon',
   },
   {
     code: 'A1.3.3',
@@ -160,7 +159,7 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     what: 'Prédit la date d’expiration de ta certification COFRAC et de ta RC Pro. Alerte 90, 60 et 30 jours avant.',
     forYou: "Aucun risque d'oubli. Plus de mission refusée pour certification expirée.",
     status: 'exposed',
-    exposedAt: '/dashboard/dashboard',
+    exposedAt: '/dashboard',
     exposedAtLabel: 'Tableau de bord',
   },
   {
@@ -170,9 +169,8 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     what: 'Apprend ta façon de saisir au fil des missions : terminologie, ordre des pièces, équipements types.',
     forYou:
       'Les suggestions deviennent de plus en plus précises. -60 à -70 % de tokens IA après 6 mois.',
-    status: 'exposed',
-    exposedAt: '/dashboard/analytics',
-    exposedAtLabel: 'Statistiques',
+    // Phase 3 différée (cf. CLAUDE.md §3 — assistant IA conversationnel métier M19+)
+    status: 'coming-soon',
   },
   {
     code: 'A1.3.5',
@@ -200,9 +198,9 @@ export const DASHBOARD_ALGOS_CATALOG: ReadonlyArray<AlgoCatalogEntry> = [
     title: 'SEO de ta fiche publique',
     what: 'Audit en continu de ta fiche kovas.fr/[ville] : title, meta, schema.org, maillage, mots-clés.',
     forYou: 'Ta fiche annuaire remonte sur Google sans publicité. Leads B2C en pilote auto.',
-    status: 'exposed',
-    exposedAt: '/dashboard/account/parrainage',
-    exposedAtLabel: 'Compte > Parrainage',
+    // V1.5 : page dédiée audit SEO fiche publique pas encore exposée
+    // (la surface actuelle /account/parrainage gère le programme de parrainage, pas le SEO).
+    status: 'coming-soon',
   },
   {
     code: 'A1.3.8',

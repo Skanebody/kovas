@@ -437,22 +437,12 @@ export function AppMobileNav({
         .filter((d) => hasFeatureAccess(access, d))
     : []
 
-  // Sélection des 4 tabs primaires pour mobile : priorité aux items
-  // workflow standard (home, dossiers, capture, calendar).
-  const preferredIds: SidebarItemId[] = ['home', 'dossiers', 'capture', 'calendar']
-  const tabDefs: SidebarItemDef[] = []
-  for (const id of preferredIds) {
-    const found = visibleMain.find((d) => d.id === id)
-    if (found) tabDefs.push(found)
-  }
-  // Complète si moins de 4 (track free / annuaire-only ou items masqués)
-  if (tabDefs.length < 4) {
-    for (const def of visibleMain) {
-      if (tabDefs.length >= 4) break
-      if (!tabDefs.find((d) => d.id === def.id)) tabDefs.push(def)
-    }
-  }
-  // Si toujours vide (track free), fallback minimal
+  // Sélection des 4 tabs primaires pour mobile : on respecte l'ordre de
+  // personnalisation de l'utilisateur (`prefs.mainItems`). Le hardcode
+  // ['home','dossiers','capture','calendar'] a été retiré pour ne plus
+  // surcharger silencieusement les préférences user.
+  const tabDefs: SidebarItemDef[] = visibleMain.slice(0, 4)
+  // Si toujours vide (track free / annuaire-only sans mainItems), fallback minimal
   if (tabDefs.length === 0) {
     const homeDef = SIDEBAR_ITEMS_BY_ID.get('home')
     if (homeDef) tabDefs.push(homeDef)

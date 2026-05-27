@@ -26,7 +26,7 @@ import {
   type RegulatoryImportance,
   type RegulatoryModule,
 } from '@/lib/regulatory/types'
-import { Sparkles } from 'lucide-react'
+import { Bell } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -179,17 +179,23 @@ export default async function VeillePage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-7 max-w-7xl mx-auto w-full">
-      {/* Header — V5 sobre AppPageHeader */}
+      {/* Header — V5 sobre AppPageHeader.
+          NB : le chat IA réglementaire (« Poser une question ») est une feature
+          V1.5+ (cf. CLAUDE.md §20 Phase 3). En V1 on propose à la place
+          l'abonnement aux alertes courriel sur les évolutions réglementaires. */}
       <AppPageHeader
         eyebrow="Veille réglementaire"
         title="Reste"
         accent="à jour"
         description="Arrêtés, décrets, guides ADEME et FAQ Cofrac — résumés par l'IA KOVAS."
         action={
-          <Button asChild variant="accent" size="default">
-            <Link href="/dashboard/veille/chat" className="inline-flex items-center gap-2">
-              <Sparkles className="size-4" />
-              Poser une question
+          <Button asChild variant="outline" size="default">
+            <Link
+              href="/dashboard/account/preferences/alertes"
+              className="inline-flex items-center gap-2"
+            >
+              <Bell className="size-4" />
+              S&apos;abonner aux alertes
             </Link>
           </Button>
         }

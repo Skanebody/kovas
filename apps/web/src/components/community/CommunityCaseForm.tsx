@@ -25,7 +25,6 @@ import {
   type CommunityDiagnosticKind,
   type CommunityYearRange,
 } from '@/lib/community/types'
-import { useRouter } from 'next/navigation'
 import { type FormEvent, useState } from 'react'
 
 interface SubmitResponse {
@@ -35,7 +34,7 @@ interface SubmitResponse {
 }
 
 export function CommunityCaseForm() {
-  const router = useRouter()
+  // Communauté = feature V2 — `useRouter()` retiré jusqu'à réactivation de la page liste.
   const [title, setTitle] = useState('')
   const [buildingType, setBuildingType] = useState<CommunityBuildingType | ''>('')
   const [yearRange, setYearRange] = useState<CommunityYearRange | ''>('')
@@ -97,10 +96,8 @@ export function CommunityCaseForm() {
         return
       }
       setSubmitted(true)
-      // Redirige après 2.5s vers la liste.
-      setTimeout(() => {
-        router.push('/dashboard/communaute')
-      }, 2500)
+      // Communauté = feature V2 — la page /dashboard/communaute n'existe pas en V1.
+      // Le redirect après modération sera réactivé quand la page liste sera live.
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur réseau')
     } finally {

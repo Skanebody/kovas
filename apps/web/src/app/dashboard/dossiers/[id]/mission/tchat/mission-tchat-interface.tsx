@@ -1445,7 +1445,7 @@ export function MissionTchatInterface({
 
   const handleExportToLiciel = useCallback(() => {
     setAnalysisOpen(false)
-    router.push(`/dashboard/dossiers/${dossierId}/export`)
+    router.push(`/dashboard/dossiers/${dossierId}/prevalidation`)
   }, [dossierId, router])
 
   // ----- MISSION-H lot 3 : photo metadata modal -----

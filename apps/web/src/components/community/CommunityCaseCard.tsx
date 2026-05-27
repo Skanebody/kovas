@@ -24,7 +24,6 @@ import {
 } from '@/lib/community/types'
 import { cn } from '@/lib/utils'
 import { ArrowBigDown, ArrowBigUp, BadgeCheck, Eye, MessageSquare } from 'lucide-react'
-import Link from 'next/link'
 
 interface Props {
   row: CommunityCaseRow
@@ -46,11 +45,10 @@ export function CommunityCaseCard({ row, className }: Props) {
         className,
       )}
     >
-      <Link
-        href={`/dashboard/communaute/${row.id}`}
-        className="absolute inset-0 z-0"
-        aria-label={`Ouvrir le cas : ${row.title}`}
-      />
+      {/*
+        Communauté = feature V2 — la page détail /dashboard/communaute/[id] n'existe
+        pas en V1. Le Link wrapper est retiré jusqu'à réactivation de la section.
+      */}
 
       <div className="relative z-10 space-y-3">
         <header className="flex flex-wrap items-start justify-between gap-2">

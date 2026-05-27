@@ -8,9 +8,10 @@ import { useState } from 'react'
 /**
  * Page /dashboard/upgrade/annuaire
  *
- * Cross-sell KOVAS Annuaire pour un user `logiciel-only` (ou free). Affiche
- * les 4 tiers Annuaire (free / pro / visibility / sponsored) avec toggle
- * mensuel/annuel et CTAs Stripe checkout.
+ * Cross-sell KOVAS Annuaire pour un user `logiciel-only` (ou fiche réclamée
+ * sans abonnement). Affiche les 4 tiers Annuaire canoniques V5 (free_claim /
+ * presence 19€ / boost 39€ / premium 79€) avec toggle mensuel/annuel et CTAs
+ * Stripe checkout.
  *
  * Layout authentifié `/dashboard/*` (DS v5 sage + chartreuse + dark sidebar
  * via le parent layout).

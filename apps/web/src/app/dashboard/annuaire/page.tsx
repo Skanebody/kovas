@@ -92,18 +92,18 @@ export default async function AnnuaireHubPage() {
           <EmptyState
             icon={UserCheck}
             title="Active ta fiche annuaire."
-            description="Réclame ta fiche publique en deux minutes pour apparaître dans les recherches de particuliers et recevoir tes premiers leads qualifiés."
+            description="Trouve ta fiche dans l'annuaire et clique sur « Je suis ce diagnostiqueur » pour la réclamer (vérification KYC en deux minutes). Une fois réclamée, tu pourras choisir un forfait de visibilité."
             action={
               <Button asChild variant="accent">
-                <Link href="/dashboard/upgrade/annuaire">
-                  Activer ma fiche
+                <Link href="/trouver-un-diagnostiqueur">
+                  Trouver ma fiche
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
             }
             secondaryAction={
               <Button asChild variant="ghost">
-                <Link href="/diagnostiqueurs">Voir l&apos;annuaire public</Link>
+                <Link href="/trouver-un-diagnostiqueur">Voir l&apos;annuaire public</Link>
               </Button>
             }
           />

@@ -5,7 +5,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { toast } from '@/components/ui/toaster'
@@ -19,8 +18,11 @@ interface DossierMoreMenuProps {
 
 /**
  * Menu Plus (⋮) en haut à droite du dossier.
- * Pour V1 : seul Supprimer (soft-delete) est disponible. Dupliquer/Archiver/
- * Exporter dossier seront ajoutés quand les server actions existeront.
+ * V1 : seul Supprimer (soft-delete) est exposé. Les items Dupliquer / Archiver
+ * sont retirés tant que les server actions ne sont pas branchées (un menu doit
+ * montrer ce qui marche, pas un catalogue d'intentions).
+ *
+ * TODO V1.5 : réactiver duplicate + archive avec actions branchées.
  */
 export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -50,13 +52,6 @@ export function DossierMoreMenu({ dossierId }: DossierMoreMenuProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem disabled className="text-[#0F1419]/72">
-            Dupliquer le dossier (bientôt)
-          </DropdownMenuItem>
-          <DropdownMenuItem disabled className="text-[#0F1419]/72">
-            Archiver (bientôt)
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setConfirmOpen(true)}
             className="text-accent-red focus:text-accent-red"

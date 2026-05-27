@@ -55,7 +55,7 @@ export async function ClientDevisTab({ clientId, orgId }: Props) {
           Devis
         </h2>
         <Button asChild variant="default" size="sm">
-          <Link href={`/dashboard/devis/new?client_id=${clientId}`}>
+          <Link href={`/dashboard/devis/nouveau?client_id=${clientId}`}>
             <Plus className="size-4" />
             Nouveau devis
           </Link>
@@ -69,7 +69,7 @@ export async function ClientDevisTab({ clientId, orgId }: Props) {
           description="Créez un premier devis pour ce client. Vous pourrez ensuite le convertir en facture en un clic."
           action={
             <Button asChild variant="default" size="sm">
-              <Link href={`/dashboard/devis/new?client_id=${clientId}`}>
+              <Link href={`/dashboard/devis/nouveau?client_id=${clientId}`}>
                 <Plus className="size-4" />
                 Créer un devis
               </Link>
