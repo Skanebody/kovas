@@ -1,3 +1,4 @@
+import { AnnuaireUpgradeBanner } from '@/components/annuaire-dashboard/AnnuaireUpgradeBanner'
 import { ReactivationModal } from '@/components/cancellation/ReactivationModal'
 import { Button } from '@/components/ui/button'
 import { createAdminClient } from '@/lib/admin/supabase-admin'
@@ -326,6 +327,18 @@ export default async function AccountPage({
           <KpiTopCell key={k.label} item={k} />
         ))}
       </div>
+
+      {/* ============================================
+          Bandeau upgrade contextuel (Lot Annuaire §6)
+          ============================================
+          Affiché juste après les KPI top pour proposer un upgrade pertinent
+          en fonction du tier annuaire courant (Présence → Boost, Boost →
+          Solo logiciel, Premium → Pro logiciel). Le banner ne s'affiche
+          PAS si l'utilisateur est déjà sur Pro/Cabinet/+. La logique de
+          sélection est dans `getUpgradeMessage()`. Le banner fetch ses
+          propres souscriptions (annuaire ET logiciel séparément) car la
+          query `maybeSingle` ci-dessus ne ramène qu'une seule ligne. */}
+      <AnnuaireUpgradeBanner />
 
       {/* ============================================
           Tabs + contenu (client) — délégué pour state local

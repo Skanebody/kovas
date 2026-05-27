@@ -1,3 +1,4 @@
+import { AnnuaireUpgradeBanner } from '@/components/annuaire-dashboard/AnnuaireUpgradeBanner'
 import { AppPageHeader } from '@/components/app-page-header'
 import { ProfessionStatsWidget } from '@/components/dashboard/widgets/ProfessionStatsWidget'
 import { RenewalsWidget } from '@/components/dashboard/widgets/RenewalsWidget'
@@ -65,6 +66,11 @@ export default async function DashboardPage() {
 
         {/* Widget stats secteur 7 jours (GC4 diag-facing) — Lot B82 */}
         <ProfessionStatsWidget />
+
+        {/* Bandeau upgrade contextuel annuaire/logiciel (Lot Annuaire §6) —
+            n'affiche rien si user déjà sur Pro/Cabinet/+. Lecture interne
+            des souscriptions actives via Supabase. */}
+        <AnnuaireUpgradeBanner />
       </div>
     </div>
   )
