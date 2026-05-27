@@ -21,7 +21,15 @@
   position: relative;
   display: inline-block;
   vertical-align: baseline;
-  overflow: hidden;
+  /* `overflow: clip` (vs hidden) + `overflow-clip-margin` autorise les
+     ascenders italiques (haut du "A", point sur le "i", glyphes Instrument
+     Serif) à dépasser légèrement la box sans être tronqués au top/bottom,
+     tout en gardant le clipping pour les items de la stack qui défilent
+     verticalement. clip-margin 0.2em horizontalement aussi pour laisser
+     respirer le slant italique sur le bord droit du dernier glyphe.
+     Support : Chrome 90+, Safari 17.4+, Firefox 102+. */
+  overflow: clip;
+  overflow-clip-margin: 0.22em;
   /* Hauteur = 1 ligne de texte du parent. line-height:1 ici car le
      conteneur fait 1em — les items à l'intérieur héritent. */
   height: 1em;
