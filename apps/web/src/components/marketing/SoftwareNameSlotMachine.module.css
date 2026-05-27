@@ -1,95 +1,109 @@
 /*
- * KOVAS — Slot machine pour cyclage des noms de logiciels concurrents.
+ * KOVAS — Cyclage des noms de logiciels concurrents par cross-fade.
  *
- * Effet : défilement vertical à la "roue de loterie" sur 4 noms
- * (Liciel · OBBC · AnalysImmo · ORIS) avec arrêt sur chaque nom pendant
- * ~1.5s, transition courte 0.4s en ease-out-expo (cubic-bezier(0.16, 1,
- * 0.3, 1)) qui donne le caractéristique "spin & stop" d'une slot machine.
+ * Effet : 4 noms (Liciel · OBBC · AnalysImmo · ORIS) apparaissent l'un
+ * après l'autre par fondu enchaîné. Chaque nom est visible ~1.6s à 100%
+ * d'opacité, avec des transitions de 0.4s entre chacun (crossfade). Cycle
+ * total 8s en boucle infinie.
  *
- * Durée totale 8s. Premier rendu SSR = "Liciel" (translateY 0) → SEO
- * préservé. La stack inclut Liciel à la fin (5e item) pour assurer une
- * boucle seamless (transition ORIS → Liciel invisible au reset 100%→0%).
+ * Historique :
+ *  - v3 (640e029) : slot machine défilement vertical (translateY)
+ *  - v4 (présent) : crossfade pur (Benjamin : "faut pas qu'ils défilent,
+ *    faut qu'ils apparaissent à la suite")
  *
- * Respect `prefers-reduced-motion` → animation désactivée + affichage
- * statique du premier nom.
+ * Avantages crossfade vs défilement :
+ *  - Aucun clipping des ascenders italiques Instrument Serif (haut du "A",
+ *    point du "i", accent) → fini "AnalysImmo" coupé au top
+ *  - Animation plus apaisée (cohérent avec avatar SOBRE PROFESSIONNEL)
+ *  - Pas de overflow:hidden requis → glyphes rendus naturellement
  *
- * Largeur stabilisée via inline-block + un span fantôme avec le nom le
- * plus long ("AnalysImmo") qui réserve l'espace en width.
+ * SSR-friendly :
+ *  - L'item Liciel (1er) utilise animation-delay négatif -0.4s → à t=0 il
+ *    est déjà à 5% de son cycle = opacity 1. Premier paint = "Liciel."
+ *    visible immédiatement, pas de fade-in initial. SEO préservé.
+ *
+ * Respect prefers-reduced-motion :
+ *  - Animation désactivée, opacity 1 statique sur le 1er item (Liciel).
+ *  - Les autres items restent à opacity 0 et donc invisibles.
+ *
+ * Largeur stabilisée :
+ *  - widthSpacer (le mot le plus long "AnalysImmo." suffix compris) en
+ *    visibility:hidden réserve l'espace → zéro reflow horizontal.
  */
 
 .slot {
   position: relative;
   display: inline-block;
   vertical-align: baseline;
-  /* `overflow: clip` (vs hidden) + `overflow-clip-margin` autorise les
-     ascenders italiques (haut du "A", point sur le "i", glyphes Instrument
-     Serif) à dépasser légèrement la box sans être tronqués au top/bottom,
-     tout en gardant le clipping pour les items de la stack qui défilent
-     verticalement. clip-margin 0.2em horizontalement aussi pour laisser
-     respirer le slant italique sur le bord droit du dernier glyphe.
-     Support : Chrome 90+, Safari 17.4+, Firefox 102+. */
-  overflow: clip;
-  overflow-clip-margin: 0.22em;
-  /* Hauteur = 1 ligne de texte du parent. line-height:1 ici car le
-     conteneur fait 1em — les items à l'intérieur héritent. */
-  height: 1em;
   line-height: 1;
 }
 
-/* Reserve la largeur pour éviter le reflow horizontal pendant les spins.
-   On utilise le mot le plus long ("AnalysImmo") en visibility:hidden pour
-   garder son footprint mais le rendre invisible. */
+/* Réserve la largeur : widthSpacer en visibility hidden garde son footprint
+   horizontal mais reste invisible. Évite tout reflow du texte autour. */
 .widthSpacer {
   visibility: hidden;
   display: inline-block;
 }
 
-.stack {
+/* Chaque nom est positionné absolument à la même origine (top:0, left:0)
+   sur le slot. Le fade gère leur visibilité dans le temps. */
+.item {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  animation: slotSpin 8s infinite cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.item {
-  display: block;
-  height: 1em;
-  line-height: 1;
   white-space: nowrap;
+  opacity: 0;
+  animation: slotFade 8s infinite;
 }
 
-/* Keyframes : 4 pauses de ~1.5s, transitions de ~0.4s entre chaque stop.
-   5e item (Liciel dupliqué) pour boucle seamless ORIS → Liciel sans flash.
-   À 100% l'animation reset à 0% qui affiche le 1er Liciel (même rendu). */
-@keyframes slotSpin {
-  0%,
-  18.75% {
-    transform: translateY(0);
-  } /* Liciel — 1.5s */
-  23.75%,
-  42.5% {
-    transform: translateY(-1em);
-  } /* OBBC — 1.5s */
-  47.5%,
-  66.25% {
-    transform: translateY(-2em);
-  } /* AnalysImmo — 1.5s */
-  71.25%,
-  90% {
-    transform: translateY(-3em);
-  } /* ORIS — 1.5s */
-  95%,
+/* Décalage de 2s entre chaque item (cycle 8s / 4 items = 2s par tour).
+   Item 1 (Liciel) : delay -0.4s → à t=0 il est déjà à 5% du cycle = opacity 1
+   → SSR / premier paint affiche directement "Liciel." sans fade-in initial. */
+.item:nth-child(2) {
+  animation-delay: -0.4s;
+} /* Liciel — visible 0-2s */
+.item:nth-child(3) {
+  animation-delay: 1.6s;
+} /* OBBC — visible 2-4s */
+.item:nth-child(4) {
+  animation-delay: 3.6s;
+} /* AnalysImmo — visible 4-6s */
+.item:nth-child(5) {
+  animation-delay: 5.6s;
+} /* ORIS — visible 6-8s */
+
+/* Animation d'un item sur son cycle 8s :
+ *   0% (t=0s)    : opacity 0 (avant fade-in)
+ *   5% (t=0.4s)  : opacity 1 (fade-in terminé, 0.4s)
+ *   25% (t=2s)   : opacity 1 (encore visible, fenêtre de 1.6s à 100%)
+ *   30% (t=2.4s) : opacity 0 (fade-out terminé, 0.4s)
+ *   30-100%      : opacity 0 (invisible pendant que les 3 autres défilent)
+ *
+ * Avec les delays décalés de 2s + delay -0.4s sur Liciel, les fade-in du
+ * suivant et fade-out du précédent se chevauchent exactement → crossfade
+ * continu, jamais d'instant "vide" où le slot est totalement invisible.
+ */
+@keyframes slotFade {
+  0% {
+    opacity: 0;
+  }
+  5%,
+  25% {
+    opacity: 1;
+  }
+  30%,
   100% {
-    transform: translateY(-4em);
-  } /* Liciel boucle seamless */
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stack {
+  .item {
     animation: none;
-    transform: translateY(0);
+    opacity: 0;
+  }
+  /* En mode reduced-motion, on fige Liciel visible sans animation. */
+  .item:nth-child(2) {
+    opacity: 1;
   }
 }
