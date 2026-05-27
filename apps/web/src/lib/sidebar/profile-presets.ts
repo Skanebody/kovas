@@ -25,36 +25,48 @@ export interface ProfilePreset {
 
 /**
  * Solo terrain — diagnostiqueur indépendant majoritairement en visite.
- * Capture en tête, accès rapide dossiers/calendrier/clients.
+ * Démarrer en tête, accès rapide dossiers/calendrier/clients/biens.
+ *
+ * Refonte 2026-05-27 : ajout `properties` (Biens, entité métier centrale)
+ * en position 5. `home` repoussé en fin (l'accueil est moins utile sur le
+ * terrain qu'un accès direct aux entités).
  */
 export const PROFILE_SOLO_TERRAIN: ProfilePreset = {
   code: 'solo_terrain',
   label: 'Solo terrain',
-  description: 'Capture et dossiers en tête. Idéal si tu es principalement en visite client.',
-  mainOrder: ['capture', 'dossiers', 'calendar', 'clients', 'facturation', 'home'],
+  description: 'Démarrer et dossiers en tête. Idéal si tu es principalement en visite client.',
+  mainOrder: ['capture', 'dossiers', 'calendar', 'clients', 'properties', 'facturation', 'home'],
 }
 
 /**
  * Solo administratif — diagnostiqueur indépendant centré bureau.
- * Accueil + dossiers + facturation + statistiques en priorité.
+ * Accueil + dossiers + facturation + statistiques + gain en priorité.
+ *
+ * Refonte 2026-05-27 : ajout `gain` (KPI mensuel de temps libéré, motivation
+ * jour 1 sur un profil bureau qui veut suivre son ROI) en position 4.
  */
 export const PROFILE_SOLO_ADMIN: ProfilePreset = {
   code: 'solo_admin',
   label: 'Solo administratif',
   description:
-    'Accueil, dossiers et facturation en tête. Idéal pour un solo orienté bureau et suivi cabinet.',
-  mainOrder: ['home', 'dossiers', 'calendar', 'facturation', 'analytics', 'clients'],
+    'Accueil, dossiers, facturation et gain de temps en tête. Idéal pour un solo orienté bureau.',
+  mainOrder: ['home', 'dossiers', 'calendar', 'facturation', 'gain', 'analytics', 'clients'],
 }
 
 /**
  * Manager Cabinet — vue équipe et planning collectif.
- * Accueil (équipe) + dossiers + planning + facturation + statistiques.
+ * Accueil (équipe) + dossiers + planning + facturation + statistiques + leads.
+ *
+ * Refonte 2026-05-27 : ajout `leads` (file demandes B2C entrantes — utile pour
+ * dispatch équipe) en position 5. `capture` bascule dans more (le manager
+ * ne capture pas lui-même, c'est ses diagnostiqueurs).
  */
 export const PROFILE_MANAGER_CABINET: ProfilePreset = {
   code: 'manager_cabinet',
   label: 'Manager Cabinet',
-  description: 'Vue équipe, planning collectif et facturation cabinet. Capture bascule dans Plus.',
-  mainOrder: ['home', 'dossiers', 'calendar', 'facturation', 'analytics', 'clients'],
+  description:
+    'Vue équipe, planning collectif, facturation et leads B2C. Démarrer bascule dans Plus.',
+  mainOrder: ['home', 'dossiers', 'calendar', 'facturation', 'leads', 'analytics', 'clients'],
 }
 
 export const ALL_PROFILE_PRESETS: readonly ProfilePreset[] = [

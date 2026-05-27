@@ -1,11 +1,14 @@
 /**
- * KOVAS — Registre canonique des items de sidebar (refonte 2026-05-23).
+ * KOVAS — Registre canonique des items de sidebar (refonte 2026-05-23 +
+ * extension 2026-05-27 — Benjamin a demandé l'audit complet du registre :
+ * ajout de 9 items manquants + retrait de `algos` qui est devenu une
+ * sous-page de `decouvrir`).
  *
  * Source de vérité pour les 5 zones de la sidebar :
  *
  *   Zone 1 — Avatar / identité (rendu inline dans AppSidebar)
  *   Zone 2 — Workflow quotidien (5 items par défaut)
- *   Zone 3 — Business (3 items par défaut)
+ *   Zone 3 — Business (4 items par défaut)
  *   Zone 4 — Menu "Plus" (collapsible, items secondaires)
  *   Zone 5 — Système (Aide / Paramètres / Personnaliser)
  *
@@ -17,16 +20,24 @@ import type { AddonCode, PricingPlanCode } from '@/lib/pricing-plans'
 import {
   Archive,
   BarChart3,
-  Brain,
+  Bell,
+  BookUser,
+  Building2,
   Calendar,
+  Compass,
   FolderOpen,
   HelpCircle,
   Home,
+  Inbox,
   LayoutGrid,
   MessageSquare,
+  Newspaper,
   Receipt,
   Settings,
+  ShieldAlert,
+  ShieldCheck,
   Sparkles,
+  TrendingUp,
   Users,
   Wrench,
 } from 'lucide-react'
@@ -36,20 +47,34 @@ import type { LucideIcon } from 'lucide-react'
  * Identifiants stables des items. Servent de clé dans la table
  * sidebar_preferences (JSONB main_items / more_items) — NE JAMAIS renommer
  * sans migration, sinon les préférences user pointent dans le vide.
+ *
+ * Note 2026-05-27 : `algos` retiré du registre (devenu sous-page de
+ * `/dashboard/decouvrir/algos`, accessible via l'item `decouvrir`). Si
+ * d'anciennes préférences utilisateur référencent encore `algos`, le helper
+ * `SIDEBAR_ITEMS_BY_ID.get('algos')` renvoie undefined et la sidebar ignore
+ * l'entrée (cf. app-sidebar.tsx ligne 437 filter).
  */
 export type SidebarItemId =
   | 'home'
   | 'dossiers'
   | 'calendar'
   | 'clients'
+  | 'properties'
   | 'capture'
   | 'facturation'
   | 'analytics'
+  | 'gain'
   | 'messages'
   | 'archive'
   | 'outils'
   | 'parrainage'
-  | 'algos'
+  | 'annuaire'
+  | 'decouvrir'
+  | 'leads'
+  | 'relances'
+  | 'veille'
+  | 'cockpit_ademe'
+  | 'cockpit_fraude'
 
 export type SidebarZone = 'main' | 'more'
 
@@ -88,11 +113,13 @@ export interface SidebarItemDef {
  * Registre canonique. Chaque item définit son href, label, icône, zone par
  * défaut, et position par défaut.
  *
- * `Capture` (#5) reçoit `accent: true` → mise en avant visuelle chartreuse
+ * `Capture` (#6) reçoit `accent: true` → mise en avant visuelle chartreuse
  * subtile, pour matcher le DS v5 (action principale).
  */
 export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
-  // Zone 2 — Workflow quotidien (positions 0..4)
+  // =====================================================================
+  // Zone 2 — Workflow quotidien (positions 0..5)
+  // =====================================================================
   {
     id: 'home',
     href: '/dashboard/dashboard',
@@ -131,6 +158,16 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     customizable: true,
   },
   {
+    id: 'properties',
+    href: '/dashboard/properties',
+    label: 'Biens',
+    tooltip: 'Biens immobiliers visités (DPE, amiante, plomb, etc.)',
+    icon: Building2,
+    defaultZone: 'main',
+    defaultPosition: 4,
+    customizable: true,
+  },
+  {
     id: 'capture',
     // FIX-JJ — multi-accès #2 : redirect intelligent vers le mode mission selon
     // le contexte (mission en cours / RDV imminent / fallback wizard).
@@ -143,12 +180,14 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     tooltip: 'Démarrer une nouvelle mission ou reprendre celle en cours',
     icon: Sparkles,
     defaultZone: 'main',
-    defaultPosition: 4,
+    defaultPosition: 5,
     customizable: true,
     accent: true,
   },
 
-  // Zone 3 — Business (positions 5..7)
+  // =====================================================================
+  // Zone 3 — Business (positions 6..8)
+  // =====================================================================
   {
     id: 'facturation',
     href: '/dashboard/facturation',
@@ -156,10 +195,10 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     // Note : tooltip explicite pour lever toute ambiguïté entre cette page
     // (= revenus du diagnostiqueur, factures émises à SES clients) et
     // /dashboard/account?tab=facturation (= factures KOVAS pour son abonnement).
-    tooltip: 'Vos devis et factures émises à vos clients (revenus)',
+    tooltip: 'Devis et factures émises à tes clients (revenus)',
     icon: Receipt,
     defaultZone: 'main',
-    defaultPosition: 5,
+    defaultPosition: 6,
     customizable: true,
     badgeKey: 'overdue_invoices',
   },
@@ -167,22 +206,106 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     id: 'analytics',
     href: '/dashboard/analytics',
     label: 'Statistiques',
+    tooltip: 'KPI activité, benchmarks zone et tendances mensuelles',
     icon: BarChart3,
     defaultZone: 'main',
-    defaultPosition: 6,
+    defaultPosition: 7,
+    customizable: true,
+  },
+  {
+    id: 'gain',
+    href: '/dashboard/gain',
+    label: 'Gain',
+    tooltip: 'Suivi du gain de temps cumulé ce mois et projection annuelle',
+    icon: TrendingUp,
+    defaultZone: 'main',
+    defaultPosition: 8,
     customizable: true,
   },
 
+  // =====================================================================
   // Zone 4 — Menu "Plus" (positions 0..n)
+  // =====================================================================
+  {
+    id: 'annuaire',
+    href: '/dashboard/annuaire',
+    label: 'Annuaire',
+    tooltip: 'Ta fiche publique KOVAS Annuaire (avis, stats, leads B2C)',
+    icon: BookUser,
+    defaultZone: 'more',
+    defaultPosition: 0,
+    customizable: true,
+  },
+  {
+    id: 'decouvrir',
+    href: '/dashboard/decouvrir',
+    label: 'Découvrir',
+    tooltip: 'Catalogue des offres KOVAS : logiciel, annuaire, bundles, add-ons',
+    icon: Compass,
+    defaultZone: 'more',
+    defaultPosition: 1,
+    customizable: true,
+  },
+  {
+    id: 'leads',
+    href: '/dashboard/leads',
+    label: 'Leads',
+    tooltip: 'File des demandes B2C entrantes depuis l’annuaire',
+    icon: Inbox,
+    defaultZone: 'more',
+    defaultPosition: 2,
+    customizable: true,
+  },
+  {
+    id: 'relances',
+    href: '/dashboard/relances',
+    label: 'Relances',
+    tooltip: 'Relances automatiques des factures impayées',
+    icon: Bell,
+    defaultZone: 'more',
+    defaultPosition: 3,
+    customizable: true,
+    badgeKey: 'overdue_invoices',
+  },
   {
     id: 'messages',
     href: '/dashboard/messages',
     label: 'Messages',
     icon: MessageSquare,
     defaultZone: 'more',
-    defaultPosition: 0,
+    defaultPosition: 4,
     customizable: true,
     badgeKey: 'unread_messages',
+  },
+  {
+    id: 'veille',
+    href: '/dashboard/veille',
+    label: 'Veille',
+    tooltip: 'Veille réglementaire IA : nouveautés DPE, jurisprudence, méthodes',
+    icon: Newspaper,
+    defaultZone: 'more',
+    defaultPosition: 5,
+    customizable: true,
+  },
+  {
+    id: 'cockpit_ademe',
+    href: '/dashboard/cockpit-ademe',
+    label: 'Pré-validation ADEME',
+    tooltip: 'Cross-check 6 sources publiques avant envoi ADEME (game-changer 1)',
+    icon: ShieldCheck,
+    defaultZone: 'more',
+    defaultPosition: 6,
+    customizable: true,
+  },
+  {
+    id: 'cockpit_fraude',
+    href: '/dashboard/cockpit-fraude',
+    label: 'Anti-fraude DPE',
+    tooltip: 'Score anti-fraude de tes DPE (game-changer 6)',
+    icon: ShieldAlert,
+    defaultZone: 'more',
+    defaultPosition: 7,
+    customizable: true,
   },
   {
     id: 'archive',
@@ -190,37 +313,27 @@ export const SIDEBAR_ITEMS_REGISTRY: readonly SidebarItemDef[] = [
     label: 'Archives',
     icon: Archive,
     defaultZone: 'more',
-    defaultPosition: 1,
+    defaultPosition: 8,
     customizable: true,
   },
   {
     id: 'outils',
     href: '/dashboard/outils',
     label: 'Outils',
+    tooltip: 'Convertisseurs, calculatrices, génération QR code…',
     icon: Wrench,
     defaultZone: 'more',
-    defaultPosition: 2,
+    defaultPosition: 9,
     customizable: true,
   },
   {
     id: 'parrainage',
     href: '/dashboard/account/parrainage',
     label: 'Parrainage',
+    tooltip: 'Programme parrainage : gagne 1 mois offert par filleul actif',
     icon: Users,
     defaultZone: 'more',
-    defaultPosition: 3,
-    customizable: true,
-  },
-  // B82 (Vague 3A) — Découvrir > Algorithmes : catalogue diag-facing des
-  // 13 algos A1.3.* (pendant interne du SectionAlgosCatalog de la home).
-  {
-    id: 'algos',
-    href: '/dashboard/decouvrir/algos',
-    label: 'Algorithmes',
-    tooltip: 'Découvrir les 13 algorithmes propriétaires KOVAS',
-    icon: Brain,
-    defaultZone: 'more',
-    defaultPosition: 4,
+    defaultPosition: 10,
     customizable: true,
   },
 ] as const
