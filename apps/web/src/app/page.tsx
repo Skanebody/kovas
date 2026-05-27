@@ -35,6 +35,7 @@
  * + bascule tutoiement).
  */
 
+import { CompatGrid } from '@/components/landing/CompatGrid'
 import { CrossCheck6Sources } from '@/components/marketing/CrossCheck6Sources'
 import { InlineCta } from '@/components/marketing/InlineCta'
 import { MobileStickyCta } from '@/components/marketing/MobileStickyCta'
@@ -1393,6 +1394,11 @@ export default async function HomePage() {
       <main className="flex-1">
         <SectionHero />
         <SectionTrustBar stats={stats} />
+        {/* Grille 8 logos éditeurs compatibles — confirmation visuelle de la
+            promesse du H1 ("Compatible avec Liciel, OBBC, AnalysImmo, ORIS").
+            Cite 8 logiciels (les 4 du slot machine + 4 outsiders) pour
+            maximiser la couverture du marché FR diag immobilier. */}
+        <CompatGrid />
         <SectionThreePromises />
         <SectionLicielVsKovas />
         {/* CTA inline #1 — desktop only, après pic rationnel (vraie économie).
