@@ -116,11 +116,15 @@ function SectionHero(): React.ReactElement {
           className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
           style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
         >
-          <span className="font-serif italic font-normal">Terminé</span> les 3 heures par jour sur{' '}
-          <GlossaryTerm term="liciel">
-            <SoftwareNameSlotMachine />
-          </GlossaryTerm>
-          .
+          {/* Le slot machine porte l'accent éditorial (italic Instrument Serif)
+              au lieu de "Terminé" — les noms de logiciels sont le focus visuel
+              de la phrase. GlossaryTerm retiré pour supprimer le point d'info
+              qui séparait visuellement le nom du logiciel du point final.
+              Le suffix="." voyage avec chaque nom (vs point figé après le
+              widthSpacer) → reste collé à "Liciel"/"OBBC"/"ORIS" malgré
+              les largeurs différentes des 4 noms. */}
+          Terminé les 3 heures par jour sur{' '}
+          <SoftwareNameSlotMachine className="font-serif italic font-normal" suffix="." />
         </h1>
         <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
           Capture vocale et photos pendant ta mission. Tes données arrivent dans Liciel prêtes à

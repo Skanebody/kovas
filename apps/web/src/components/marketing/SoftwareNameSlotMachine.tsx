@@ -44,29 +44,40 @@ const LONGEST_NAME = 'AnalysImmo'
 export interface SoftwareNameSlotMachineProps {
   /** Classe additionnelle à appliquer au conteneur. */
   className?: string
+  /**
+   * Suffixe optionnel collé à chaque nom (typiquement le point de fin de
+   * phrase). Inclus dans la widthSpacer pour préserver l'alignement.
+   *
+   * Sans suffixe, la widthSpacer fait la largeur de "AnalysImmo" mais quand
+   * le slot affiche "Liciel" (plus court), un point écrit après le composant
+   * resterait visuellement détaché. Avec suffixe ici, le point voyage avec
+   * le nom et reste "collé".
+   */
+  suffix?: string
 }
 
 export function SoftwareNameSlotMachine({
   className,
+  suffix = '',
 }: SoftwareNameSlotMachineProps): React.ReactElement {
   return (
     <>
       {/* Spacer largeur stable : le wrapper extérieur fait min-width
-          = largeur du mot le plus long, évite le reflow horizontal du
-          texte autour quand le slot tourne. */}
+          = largeur du mot le plus long (suffixe inclus), évite le reflow
+          horizontal du texte autour quand le slot tourne. */}
       <span aria-hidden className={[styles.slot, className].filter(Boolean).join(' ')}>
         <span className={styles.widthSpacer} aria-hidden>
-          {LONGEST_NAME}
+          {`${LONGEST_NAME}${suffix}`}
         </span>
         <span className={styles.stack}>
           {SOFTWARE_NAMES.map((name) => (
             <span key={name} className={styles.item}>
-              {name}
+              {`${name}${suffix}`}
             </span>
           ))}
           {/* Dupliqué pour boucle seamless ORIS → Liciel */}
           <span className={styles.item} aria-hidden>
-            {SOFTWARE_NAMES[0]}
+            {`${SOFTWARE_NAMES[0]}${suffix}`}
           </span>
         </span>
       </span>
