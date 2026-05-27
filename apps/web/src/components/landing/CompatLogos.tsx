@@ -36,31 +36,25 @@ interface LogoProps {
  * Factory : crée un composant logo `<img>` standardisé pointant vers le
  * fichier SVG dans `/public/logos/compat/`.
  *
- * Sizing "fit-within" :
- *  - max-height = 32px (cale sur la hauteur du wrapper h-8)
- *  - max-width = plafond logo selon ratio (évite les SVG trop étirés)
- *  - height/width = auto + object-contain → le navigateur scale-down
- *    proportionnellement quand la cellule mobile est plus étroite que le
- *    plafond, sans déformer ni couper le logo.
+ * Sizing robuste cross-browser :
+ *  - height = 32px (explicite, pas auto) → fixe la hauteur visible
+ *  - width = auto → dérivée du ratio viewBox du SVG par le navigateur
+ *  - max-width = 100% du wrapper → scale-down si cellule mobile étroite
+ *  - SVG sources : ont tous `width`/`height` attributes ET viewBox sur
+ *    le `<svg>` root (sinon Safari peut tomber sur fallback 300×150).
  */
-function makeLogoComponent(
-  slug: string,
-  alt: string,
-  options: { maxWidth?: number } = {},
-): (props: LogoProps) => React.ReactElement {
-  const maxWidth = options.maxWidth ?? 140
+function makeLogoComponent(slug: string, alt: string): (props: LogoProps) => React.ReactElement {
   return function LogoImage({ className }: LogoProps) {
     return (
       <img
         src={`/logos/compat/${slug}-logo.svg`}
         alt={alt}
+        height={RENDER_HEIGHT}
         className={className}
         style={{
-          maxHeight: RENDER_HEIGHT,
-          maxWidth,
+          height: RENDER_HEIGHT,
           width: 'auto',
-          height: 'auto',
-          objectFit: 'contain',
+          maxWidth: '100%',
           display: 'block',
         }}
       />
@@ -72,34 +66,14 @@ function makeLogoComponent(
    8 logos compatibles — identités visuelles propres
    ============================================================ */
 
-export const LicielLogo = makeLogoComponent('liciel', 'Liciel — logo officiel', { maxWidth: 130 })
-
-export const AnalysImmoLogo = makeLogoComponent('analysimmo', 'AnalysImmo — logiciel Atlibitum', {
-  maxWidth: 140,
-})
-
+export const LicielLogo = makeLogoComponent('liciel', 'Liciel — logo officiel')
+export const AnalysImmoLogo = makeLogoComponent('analysimmo', 'AnalysImmo — logiciel Atlibitum')
 export const WinDiagnosticsLogo = makeLogoComponent(
   'windiagnostics',
   'WinDiagnostics — logiciel OBBC',
-  { maxWidth: 150 },
 )
-
-export const GestionDiagLogo = makeLogoComponent('gestiondiag', 'GestionDiag — CRM diagnostic', {
-  maxWidth: 145,
-})
-
-export const ImDiagLogo = makeLogoComponent('imdiag', "Im'Diag — multi-modules diagnostic", {
-  maxWidth: 125,
-})
-
-export const OrisLogo = makeLogoComponent('oris', 'ORIS — diagnostic immobilier', {
-  maxWidth: 115,
-})
-
-export const ArgosLogo = makeLogoComponent('argos', 'Argos — Ithaque audit & diagnostic', {
-  maxWidth: 125,
-})
-
-export const DpeWinLogo = makeLogoComponent('dpewin', 'DPEWin — logiciel Perrenoud', {
-  maxWidth: 125,
-})
+export const GestionDiagLogo = makeLogoComponent('gestiondiag', 'GestionDiag — CRM diagnostic')
+export const ImDiagLogo = makeLogoComponent('imdiag', "Im'Diag — multi-modules diagnostic")
+export const OrisLogo = makeLogoComponent('oris', 'ORIS — diagnostic immobilier')
+export const ArgosLogo = makeLogoComponent('argos', 'Argos — Ithaque audit & diagnostic')
+export const DpeWinLogo = makeLogoComponent('dpewin', 'DPEWin — logiciel Perrenoud')

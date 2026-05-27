@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 70" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="70" viewBox="0 0 280 70" fill="none">
   <!-- "O" remplace par triangle orange pointe haut (signature OBBC) -->
   <g transform="translate(8,8)">
     <path d="M22 4 L40 34 L4 34 Z" fill="none" stroke="#E84E2A" stroke-width="4" stroke-linejoin="round"/>
