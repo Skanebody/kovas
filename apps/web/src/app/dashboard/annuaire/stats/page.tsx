@@ -44,7 +44,7 @@ export default async function AnnuaireStatsPage({ searchParams }: PageProps) {
   const snapshot = await getAnnuaireStatsSnapshot(diagnosticianId, period)
 
   return (
-    <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-12">
+    <div className="space-y-8 animate-fade-in pb-12">
       <AppPageHeader
         title="Tes"
         accent="statistiques"

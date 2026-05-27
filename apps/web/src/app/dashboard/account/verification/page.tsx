@@ -16,6 +16,7 @@ import {
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { ResubmitToast } from './resubmit-toast'
 
 export const metadata: Metadata = {
   title: 'Validation de mon profil — KOVAS',
@@ -92,15 +93,21 @@ async function loadAll(): Promise<{
   }
 }
 
-export default async function VerificationPage() {
+interface VerificationPageProps {
+  searchParams: Promise<{ resubmitted?: string }>
+}
+
+export default async function VerificationPage({ searchParams }: VerificationPageProps) {
   const data = await loadAll()
   if (!data) redirect('/login?redirect=/dashboard/account/verification')
 
+  const { resubmitted } = await searchParams
   const { status, logs } = data
   const isVerified = status?.overall_status === 'verified'
 
   return (
-    <div className="px-4 sm:px-8 py-8 max-w-4xl mx-auto space-y-6">
+    <div className="px-4 sm:px-8 py-8 max-w-6xl mx-auto space-y-6">
+      {resubmitted && <ResubmitToast phase={resubmitted} />}
       <header className="space-y-3">
         <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#0F1419]/55 font-semibold">
           Mon compte · Validation
@@ -111,7 +118,7 @@ export default async function VerificationPage() {
         <GlobalBanner status={status} />
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <PhaseCard
           icon={<UserCheck className="size-5" />}
           title="Identité civile"
@@ -122,7 +129,7 @@ export default async function VerificationPage() {
               : 'Non renseignée'
           }
           rejection={status?.identity_rejection_reason ?? null}
-          resubmitHref="/signup/diagnostiqueur?step=3"
+          resubmitHref="/dashboard/account/verification/resubmit/identity"
         />
         <PhaseCard
           icon={<FileCheck2 className="size-5" />}
@@ -134,7 +141,7 @@ export default async function VerificationPage() {
               : 'Non renseignée'
           }
           rejection={status?.cofrac_rejection_reason ?? null}
-          resubmitHref="/signup/diagnostiqueur?step=4"
+          resubmitHref="/dashboard/account/verification/resubmit/cofrac"
         />
         <PhaseCard
           icon={<ShieldCheck className="size-5" />}
@@ -146,7 +153,7 @@ export default async function VerificationPage() {
               : 'Non renseignée'
           }
           rejection={status?.rcpro_rejection_reason ?? null}
-          resubmitHref="/signup/diagnostiqueur?step=5"
+          resubmitHref="/dashboard/account/verification/resubmit/rcpro"
         />
         <PhaseCard
           icon={<Building2 className="size-5" />}
@@ -158,7 +165,7 @@ export default async function VerificationPage() {
               : 'Non renseignée'
           }
           rejection={status?.sirene_rejection_reason ?? null}
-          resubmitHref="/signup/diagnostiqueur?step=6"
+          resubmitHref="/dashboard/account/verification/resubmit/sirene"
         />
       </section>
 

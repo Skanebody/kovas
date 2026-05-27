@@ -239,7 +239,7 @@ export default async function DossierDefensePage({
         </div>
         {defense?.methodological_choices && defense.methodological_choices.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[13px] min-w-[600px]">
               <thead>
                 <tr className="border-b border-[#0F1419]/[0.08] text-left text-[#0F1419]/72">
                   <th

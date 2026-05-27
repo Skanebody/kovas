@@ -26,7 +26,7 @@ export default async function IntegrationsPage() {
   const state = await getConnectorsForOrg(orgId)
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="space-y-8">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/dashboard/account">
           <ArrowLeft className="size-4" /> Mon compte

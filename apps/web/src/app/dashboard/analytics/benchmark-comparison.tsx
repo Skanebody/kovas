@@ -73,7 +73,7 @@ export function BenchmarkComparison({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-[12px]">
+        <table className="w-full text-[12px] min-w-[480px]">
           <thead className="bg-sage-alt/40">
             <tr className="text-left">
               <th

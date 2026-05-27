@@ -93,7 +93,7 @@ export function ReferralsTable({ rows }: ReferralsTableProps) {
       </div>
 
       <div className="overflow-x-auto -mx-2 px-2">
-        <table className="w-full text-[13px]">
+        <table className="w-full text-[13px] min-w-[480px]">
           <thead>
             <tr className="border-b border-rule/60">
               <th className="text-left font-mono text-[10px] uppercase tracking-[0.08em] text-ink-mute py-2 pr-3">

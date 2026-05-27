@@ -129,23 +129,23 @@ export default async function DiagnosticVillePage({
 
       <SeoSection title={`Combien coûte un ${label} à ${city.name}`}>
         <p>{content.priceContext}</p>
-        <Card className="p-6 mt-4">
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">Minimum</p>
-              <p className="font-mono text-2xl font-semibold text-ink mt-1">
+        <Card className="p-4 sm:p-6 mt-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center min-w-0">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-ink-mute font-mono">Minimum</p>
+              <p className="font-mono text-lg sm:text-2xl font-semibold text-ink mt-1">
                 {DIAGNOSTIC_PRICE_RANGES[diagnosticType].min} €
               </p>
             </div>
-            <div className="border-x border-rule">
-              <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">Médiane</p>
-              <p className="font-serif italic text-3xl text-chartreuse-deep mt-1">
+            <div className="border-x border-rule min-w-0">
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-ink-mute font-mono">Médiane</p>
+              <p className="font-serif italic text-xl sm:text-3xl text-chartreuse-deep mt-1">
                 {DIAGNOSTIC_PRICE_RANGES[diagnosticType].median} €
               </p>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-wider text-ink-mute font-mono">Maximum</p>
-              <p className="font-mono text-2xl font-semibold text-ink mt-1">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-ink-mute font-mono">Maximum</p>
+              <p className="font-mono text-lg sm:text-2xl font-semibold text-ink mt-1">
                 {DIAGNOSTIC_PRICE_RANGES[diagnosticType].max} €
               </p>
             </div>

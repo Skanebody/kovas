@@ -22,8 +22,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           KOVAS
         </Link>
       </header>
-      <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-sm bg-white rounded-2xl p-8 border border-[#0F1419]/[0.08] shadow-sm">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
+        <div className="w-full max-w-md bg-white rounded-2xl p-6 sm:p-8 border border-[#0F1419]/[0.08] shadow-sm">
           {children}
         </div>
       </main>

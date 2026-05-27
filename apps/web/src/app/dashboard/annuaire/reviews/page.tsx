@@ -56,7 +56,7 @@ export default async function AnnuaireReviewsPage({ searchParams }: PageProps) {
   const hasAnyReview = summary.totalCount > 0
 
   return (
-    <div className="space-y-8 animate-fade-in max-w-4xl mx-auto pb-12">
+    <div className="space-y-8 animate-fade-in pb-12">
       <AppPageHeader
         title="Tes"
         accent="avis"

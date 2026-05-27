@@ -21,34 +21,57 @@ import Link from 'next/link'
 export function PublicHeader() {
   return (
     <header className="sticky top-0 z-50 bg-background/85 backdrop-blur-md border-b border-rule/60">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-12 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
+      {/*
+        Fix tablet overflow (2026-05-27) : le breakpoint md (768px) faisait
+        déborder le header (logo 120 + nav 470 + CTAs 170 + padding 48 = ~808 px
+        pour 768 px de viewport). Solution :
+          - md (768-1023px) : nav avec gap réduit + labels plus courts via classes
+            `md:hidden lg:inline` sur les mots optionnels + CTA "Se connecter"
+            masqué (laisse juste l'accent CTA "Essai 30j")
+          - lg+ (≥1024px) : nav complète + les 2 CTAs visibles
+      */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-12 h-16 flex items-center justify-between gap-2 sm:gap-4">
+        <Link href="/" className="flex items-center gap-2 shrink-0">
           <span className="size-8 rounded-md bg-ink" aria-hidden />
           <span className="text-base font-bold tracking-tight text-ink">KOVAS</span>
         </Link>
         <nav
-          className="hidden md:flex items-center gap-7 text-sm"
+          className="hidden md:flex items-center gap-3 lg:gap-7 text-sm min-w-0"
           aria-label="Navigation principale"
         >
           <Link
             href="/calculateur-dpe-gratuit"
-            className="text-ink-mute hover:text-ink transition-colors"
+            className="text-ink-mute hover:text-ink transition-colors whitespace-nowrap"
           >
-            Calculateur DPE
+            Calculateur<span className="hidden lg:inline"> DPE</span>
           </Link>
-          <Link href="/trouver-un-diagnostiqueur" className="text-ink-mute hover:text-ink transition-colors">
-            Trouver un diagnostiqueur
+          <Link
+            href="/trouver-un-diagnostiqueur"
+            className="text-ink-mute hover:text-ink transition-colors whitespace-nowrap"
+          >
+            <span className="lg:hidden">Annuaire</span>
+            <span className="hidden lg:inline">Trouver un diagnostiqueur</span>
           </Link>
-          <Link href="/observatoire" className="text-ink-mute hover:text-ink transition-colors">
+          <Link
+            href="/observatoire"
+            className="text-ink-mute hover:text-ink transition-colors whitespace-nowrap"
+          >
             Observatoire
           </Link>
           <GuidesMenu />
-          <Link href="/pros" className="text-ink-mute hover:text-ink transition-colors">
-            Pour diagnostiqueurs
+          <Link
+            href="/pros"
+            className="text-ink-mute hover:text-ink transition-colors whitespace-nowrap"
+          >
+            <span className="lg:hidden">Pros</span>
+            <span className="hidden lg:inline">Pour diagnostiqueurs</span>
           </Link>
         </nav>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
+        <div className="flex items-center gap-2 shrink-0">
+          {/* "Se connecter" masqué entre md (768) et lg (1024) pour éviter overflow,
+              re-apparaît dès lg+. Sur mobile (&lt; md) il reste visible — le header
+              n'a pas la nav donc l'espace est libre. */}
+          <Button variant="ghost" size="sm" asChild className="md:hidden lg:inline-flex">
             <Link href="/login">Se connecter</Link>
           </Button>
           <Button size="sm" variant="accent" asChild>

@@ -122,7 +122,7 @@ export default async function LeadsPage() {
   const count = leads.length
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       <AppPageHeader
         title="Tes"
         accent="leads"
