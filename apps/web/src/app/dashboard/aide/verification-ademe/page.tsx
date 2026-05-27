@@ -1,7 +1,7 @@
 /**
  * KOVAS — Tutoriel "Vérifie ton DPE avant l'envoi ADEME" (Lot B96).
  *
- * Détaille le workflow PrevalidationPanel + 13 algorithmes propriétaires.
+ * Détaille le workflow PrevalidationPanel + 13 algorithmes.
  * Tutoiement strict, avatar diagnostiqueur 43 ans.
  *
  * Authority : CLAUDE.md §3 + ADEME cockpit + Lot B96.
@@ -19,7 +19,7 @@ import Link from 'next/link'
 export const metadata: Metadata = buildNoindexMetadata({
   title: "Vérifie ton DPE avant l'envoi ADEME — Aide",
   description:
-    'Les 13 algorithmes de pré-validation propriétaires KOVAS, le workflow PrevalidationPanel et la lecture des verdicts vert / orange / rouge.',
+    'Les 13 algorithmes de pré-validation KOVAS, le workflow PrevalidationPanel et la lecture des verdicts vert / orange / rouge.',
   path: '/dashboard/aide/verification-ademe',
 })
 
@@ -38,7 +38,7 @@ export default function AideVerificationAdemePage() {
         eyebrow="Tutoriel · 7 min"
         title="Vérifie ton DPE"
         accent="avant ADEME"
-        description="Les 13 algorithmes de pré-validation propriétaires qui te protègent des signalements et sanctions."
+        description="Les 13 algorithmes de pré-validation qui te protègent des signalements et sanctions."
       />
 
       {/* Pourquoi vérifier */}
@@ -57,9 +57,9 @@ export default function AideVerificationAdemePage() {
           et peut conduire à une suspension de ta certification <GlossaryTerm term="cofrac" />.
         </p>
         <p className="text-[13px] text-ink-soft leading-relaxed">
-          KOVAS lance automatiquement 13 contrôles propriétaires avant chaque export, appliqués sur
-          la méthode <GlossaryTerm term="3cl-2021" /> en vigueur. Le but n&apos;est pas de te
-          ralentir, mais de t&apos;éviter une sanction.
+          KOVAS lance automatiquement 13 contrôles avant chaque export, appliqués sur la méthode{' '}
+          <GlossaryTerm term="3cl-2021" /> en vigueur. Le but n&apos;est pas de te ralentir, mais de
+          t&apos;éviter une sanction.
         </p>
       </section>
 

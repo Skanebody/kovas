@@ -140,10 +140,10 @@ export default function AidePremiereMissionPage() {
         <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">Étape 5</p>
         <h2 className="text-[20px] font-semibold text-ink leading-tight">Pré-validation ADEME</h2>
         <p className="text-[13px] text-ink-soft leading-relaxed">
-          Avant l&apos;export, KOVAS lance automatiquement 13 algorithmes propriétaires de cohérence
-          : surface vs chaudière, année construction vs étiquette, présence VMC vs ventilation
-          déclarée. Le panneau <GlossaryTerm term="ademe" /> de pré-validation t&apos;affiche un
-          verdict vert / orange / rouge avec les points à corriger avant transmission.
+          Avant l&apos;export, KOVAS lance automatiquement 13 algorithmes de cohérence : surface vs
+          chaudière, année construction vs étiquette, présence VMC vs ventilation déclarée. Le
+          panneau <GlossaryTerm term="ademe" /> de pré-validation t&apos;affiche un verdict vert /
+          orange / rouge avec les points à corriger avant transmission.
         </p>
         <p className="text-[13px] text-ink-soft leading-relaxed">
           Verdict rouge ? Tu peux corriger en 1 clic depuis le panneau. Verdict orange ? Tu peux

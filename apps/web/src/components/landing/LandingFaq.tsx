@@ -26,7 +26,7 @@ const FAQ_ITEMS: FaqItem[] = [
     id: 'data-ownership',
     question: "Mes données restent-elles à moi si j'arrête KOVAS ?",
     answer:
-      "Oui, sans condition. Export complet en PDF, Word, CSV, JSON ou ZIP Liciel à tout moment, depuis ton tableau de bord. Après résiliation, ton abonnement reste actif jusqu'à la fin de la période en cours, puis ton compte bascule 90 jours en mode lecture et export pour reprendre tes dossiers à ton rythme. Au-delà, tes données opérationnelles sont supprimées ; tes factures restent conservées 10 ans (obligation légale comptable). Une demande explicite d'effacement RGPD via contact@kovas.fr est traitée sous 30 jours. Aucun verrou propriétaire, aucune négociation de sortie.",
+      "Oui, sans condition. Export complet en PDF, Word, CSV, JSON ou ZIP Liciel à tout moment, depuis ton tableau de bord. Après résiliation, ton abonnement reste actif jusqu'à la fin de la période en cours, puis ton compte bascule 90 jours en mode lecture et export pour reprendre tes dossiers à ton rythme. Au-delà, tes données opérationnelles sont supprimées ; tes factures restent conservées 10 ans (obligation légale comptable). Une demande explicite d'effacement RGPD via contact@kovas.fr est traitée sous 30 jours. Aucun verrou éditeur, aucune négociation de sortie.",
   },
   {
     id: 'compat',

@@ -8,7 +8,7 @@
  *   4.  Comparaison Liciel seul vs Liciel + KOVAS
  *   5.  How it works 3 étapes (Capture → Vérifie → Export Liciel)
  *   6.  🆕 Mécanique révélée — pas par magie, par 3 mécaniques précises
- *   7.  13 algorithmes propriétaires (B69 — explique les 13 algos A1.3.*)
+ *   7.  13 algorithmes (B69 — explique les 13 algos A1.3.*)
  *   8.  🆕 Lettre du fondateur (Benjamin Bel — connexion émotionnelle)
  *   9.  🆕 Anti-pitch (filtre bad-fit — "n'est pas pour toi si…")
  *   10. Pricing teaser transparent
@@ -523,7 +523,7 @@ function SectionHowItWorks(): React.ReactElement {
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /* 5bis. SIGNATURE BOX "Le contrôle automatique avant l'ADEME" (NEURO-2)       */
-/*       Préambule officiel du mécanisme propriétaire — intro au tableau       */
+/*       Préambule officiel du mécanisme — intro au tableau                    */
 /*       des 3 mécaniques qui suit.                                            */
 /*                                                                             */
 /*       Reframing langage métier (cf. KOVAS_COPY_FOUNDATIONS §5.3) :          */
@@ -639,9 +639,9 @@ function SectionCrossCheckSignature(): React.ReactElement {
           </div>
         </div>
 
-        {/* Bandeau discret de signature propriétaire */}
+        {/* Bandeau discret de signature KOVAS */}
         <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/45 text-center pt-2">
-          Combinaison brevetable · Implémentation propriétaire KOVAS
+          Combinaison brevetable · Implémentation KOVAS
         </p>
       </div>
     </section>
@@ -902,7 +902,7 @@ function SectionAlgosCatalog(): React.ReactElement {
             className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.05]"
             style={{ fontSize: 'clamp(32px, 4vw, 56px)' }}
           >
-            13 <span className="font-serif italic font-normal">algorithmes</span> propriétaires.
+            13 <span className="font-serif italic font-normal">algorithmes</span>.
           </h2>
           <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
             Ce que KOVAS calcule pour toi en permanence — et pourquoi ça te fait gagner du temps, de
@@ -1233,7 +1233,7 @@ const HOME_FAQ: ReadonlyArray<{ q: string; a: string }> = [
   },
   {
     q: "Mes données restent-elles à moi si j'arrête KOVAS ?",
-    a: 'Oui sans condition. Export complet PDF, Word, CSV, JSON ou ZIP Liciel à tout moment. Après résiliation, ton compte reste 90 jours en lecture seule pour récupérer tes dossiers. Aucun verrou propriétaire, aucune négociation de sortie.',
+    a: 'Oui sans condition. Export complet PDF, Word, CSV, JSON ou ZIP Liciel à tout moment. Après résiliation, ton compte reste 90 jours en lecture seule pour récupérer tes dossiers. Aucun verrou éditeur, aucune négociation de sortie.',
   },
   {
     q: 'Quelles données sont stockées et où ?',
@@ -1253,7 +1253,7 @@ const HOME_FAQ: ReadonlyArray<{ q: string; a: string }> = [
   },
   {
     q: 'Quel est le moat technique de KOVAS face à un nouveau concurrent ?',
-    a: 'Data lake autonome (BAN + IGN + ADEME + DVF + INSEE + DHUP + Géorisques + COFRAC + INPI + GSC + France Renov) cross-validé en temps réel. 13 algorithmes propriétaires testés (159 tests Vitest, 10 E2E Playwright). API publique CC-BY 4.0. Construire ça prend 18-24 mois minimum.',
+    a: 'Data lake autonome (BAN + IGN + ADEME + DVF + INSEE + DHUP + Géorisques + COFRAC + INPI + GSC + France Renov) cross-validé en temps réel. 13 algorithmes testés (159 tests Vitest, 10 E2E Playwright). API publique CC-BY 4.0. Construire ça prend 18-24 mois minimum.',
   },
 ]
 

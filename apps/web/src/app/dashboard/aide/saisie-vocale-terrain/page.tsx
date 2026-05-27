@@ -92,9 +92,9 @@ export default function AideSaisieVocaleTerrainPage() {
             le français technique métier.
           </li>
           <li>
-            <strong>Parser métier propriétaire (80 % des cas)</strong> — règles propriétaires KOVAS
-            qui structurent automatiquement la transcription (« cuisine, 12 m², chaudière gaz 2018
-            ») sans appel cloud.
+            <strong>Parser métier (80 % des cas)</strong> — règles KOVAS qui structurent
+            automatiquement la transcription (« cuisine, 12 m², chaudière gaz 2018 ») sans appel
+            cloud.
           </li>
           <li>
             <strong>Assistant cloud (20 % des cas)</strong> — appel IA uniquement quand le parser

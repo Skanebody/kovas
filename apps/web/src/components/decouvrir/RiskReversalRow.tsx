@@ -48,8 +48,7 @@ const GUARANTEES: readonly Guarantee[] = [
   {
     icon: FileDown,
     title: 'Tes données restent à toi',
-    description:
-      'Export PDF, Word, CSV, JSON ou ZIP Liciel à tout moment. Aucun verrou propriétaire.',
+    description: 'Export PDF, Word, CSV, JSON ou ZIP Liciel à tout moment. Aucun verrou éditeur.',
   },
   {
     icon: ShieldCheck,

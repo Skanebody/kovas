@@ -35,8 +35,8 @@ export default function AlgosCatalogPage() {
     <div className="space-y-10 max-w-7xl mx-auto pb-12 animate-fade-in motion-reduce:animate-none">
       <AppPageHeader
         eyebrow="Sous le capot"
-        title="13 algorithmes"
-        accent="propriétaires"
+        title="13"
+        accent="algorithmes"
         description="Ce que KOVAS calcule en continu, et où le voir."
       />
 

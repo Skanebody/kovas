@@ -204,7 +204,7 @@ export default function PourLesDiagnostiqueursPage() {
       <main className="flex-1">
         <HeroB2B />
         <PainPoints />
-        {/* Mécanisme unique propriétaire — Cross-Check 6 sources data.gouv
+        {/* Mécanisme unique — Cross-Check 6 sources data.gouv
             Le différenciateur Tugan : aucun autre logiciel certifié ne
             combine ces 6 sources avant envoi ADEME. Mode static (server-
             friendly, pas d'animation au scroll). */}
