@@ -998,8 +998,7 @@ function SectionFounderLetter(): React.ReactElement {
               <div className="text-center lg:text-left space-y-1">
                 <p className="font-sans font-semibold text-[#0F1419] text-[15px]">Benjamin Bel</p>
                 <p className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/60 leading-relaxed">
-                  Fondateur · Diagnostiqueur
-                  <br className="hidden lg:block" /> certifié DPE
+                  Fondateur · Formé à<br className="hidden lg:block" /> l&apos;IMPI Kedge Bordeaux
                 </p>
               </div>
             </div>
@@ -1047,7 +1046,7 @@ function SectionFounderLetter(): React.ReactElement {
                 </p>
               </div>
               <p className="font-mono text-[12px] uppercase tracking-wider text-[#0F1419]/60 mt-8 pt-6 border-t border-[#0F1419]/[0.06]">
-                — Benjamin Bel · Fondateur · Diagnostiqueur certifié DPE
+                — Benjamin Bel · Fondateur · Formé à l&apos;IMPI Kedge Bordeaux
               </p>
             </div>
           </div>

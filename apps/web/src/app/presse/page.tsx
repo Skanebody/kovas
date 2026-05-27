@@ -323,6 +323,9 @@ export default async function PressePage() {
                   <p className="text-sm text-[#0F1419]/72">
                     Fondateur et président · SASU Nexus 1993
                   </p>
+                  <p className="text-xs text-[#0F1419]/60">
+                    Formé à l&apos;IMPI Kedge Bordeaux · n°1 France Eduniversal
+                  </p>
                   <a
                     href="/press-kit/photo-benjamin-bel.jpg"
                     download="benjamin-bel-fondateur-kovas.jpg"
