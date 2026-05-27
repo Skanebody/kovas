@@ -3,18 +3,25 @@
 /**
  * PostHog — analytics business + feature flags + session replay.
  *
- * Initialisation lazy : appelée une seule fois au montage du provider racine
- * (cf. components/posthog-provider.tsx). Tous les helpers ci-dessous sont des
- * no-ops si PostHog n'est pas initialisé ou si la clé publique est absente
- * (dev local, build CI sans secrets, etc.).
+ * Initialisation lazy + GATED par le consentement cookies CNIL.
  *
- * RGPD :
- * - session_recording.maskAllInputs : masque tous les <input> (jamais de saisie
- *   client capturée). Texte affiché reste visible — masque-le via classe CSS
- *   `ph-no-capture` au cas par cas si besoin.
- * - capture_pageview géré par PostHog (auto). Capture personnalisée déclenchée
- *   par les helpers métier ci-dessous.
+ * Appelée uniquement depuis `CookieConsentProvider` quand l'utilisateur a
+ * donné son consentement analytics (`kovas_consent_v1.analytics === true`).
+ * Tous les helpers ci-dessous sont des no-ops si PostHog n'est pas initialisé
+ * ou si la clé publique est absente (dev local, build CI sans secrets, etc.).
+ *
+ * RGPD / CNIL :
+ * - L'init n'a lieu QU'APRÈS consentement explicite via le banner.
+ * - `opt_out_capturing_by_default: true` est un filet de sécurité : même si
+ *   l'init est appelée accidentellement sans consent, aucune capture ne
+ *   partira tant qu'on n'a pas appelé `opt_in_capturing()`.
+ * - session_recording.maskAllInputs : masque tous les <input> (jamais de
+ *   saisie client capturée). Texte affiché reste visible — masque-le via
+ *   classe CSS `ph-no-capture` au cas par cas si besoin.
+ * - capture_pageview géré par PostHog (auto). Capture personnalisée
+ *   déclenchée par les helpers métier ci-dessous.
  */
+import { hasAnalyticsConsent } from '@/lib/cookies/consent-storage'
 import posthog from 'posthog-js'
 
 let isInitialized = false
@@ -27,6 +34,11 @@ export function initPostHog(): void {
   const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://eu.posthog.com'
 
   if (!key) return
+
+  // CNIL gate : n'init PAS PostHog sans consent analytics explicite. Le
+  // `CookieConsentProvider` est responsable de rappeler `initPostHog()` après
+  // un opt-in user.
+  const hasConsent = hasAnalyticsConsent()
 
   posthog.init(key, {
     api_host: host,
@@ -41,6 +53,9 @@ export function initPostHog(): void {
     },
     // Respect Do Not Track (RGPD)
     respect_dnt: true,
+    // Filet de sécurité CNIL : opt-out par défaut. On bascule en opt-in via
+    // `opt_in_capturing()` immédiatement après init SI consent stocké.
+    opt_out_capturing_by_default: true,
     // Cookie sécurisé HTTPS-only + jamais sur sous-domaines (annuaire.kovas.fr
     // ne doit pas hériter du cookie dashboard.kovas.fr et vice-versa).
     secure_cookie: true,
@@ -48,9 +63,18 @@ export function initPostHog(): void {
     // Cap la taille de chaque propriété d'event à 1KB. Empêche les leaks
     // accidentels de payloads volumineux (JSON brut, stack traces complètes).
     properties_string_max_length: 1024,
-    // Pas d'init en dev pour éviter de polluer les datasets prod
+    // Pas de capture en dev pour éviter de polluer les datasets prod, et
+    // applique l'opt-in/opt-out selon consent CNIL.
     loaded: (ph) => {
-      if (process.env.NODE_ENV !== 'production') ph.opt_out_capturing()
+      if (process.env.NODE_ENV !== 'production') {
+        ph.opt_out_capturing()
+        return
+      }
+      if (hasConsent) {
+        ph.opt_in_capturing()
+      } else {
+        ph.opt_out_capturing()
+      }
     },
   })
 

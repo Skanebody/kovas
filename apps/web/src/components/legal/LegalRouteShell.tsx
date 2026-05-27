@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
+import { CookiePreferencesButton } from '@/components/cookies/CookiePreferencesButton'
 import { LegalDocumentRenderer } from '@/components/legal/LegalDocumentRenderer'
 import { Button } from '@/components/ui/button'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
@@ -110,6 +111,9 @@ export function LegalRouteShell({ document }: LegalRouteShellProps) {
             <Link href="/cookies" className="hover:text-[#0F1419] transition-colors">
               Cookies
             </Link>
+            <CookiePreferencesButton className="hover:text-[#0F1419] transition-colors">
+              Préférences cookies
+            </CookiePreferencesButton>
           </nav>
         </div>
       </footer>

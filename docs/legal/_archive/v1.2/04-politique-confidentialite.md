@@ -2,9 +2,9 @@
 
 **Document 4/9 du pack juridique KOVAS**
 
-**Édition au 27 mai 2026 — Version 1.3**
+**Édition au 21 mai 2026 — Version 1.2**
 
-> Version 1.3 — intégration des mesures de sécurité techniques renforcées (audit sécurité 27/05/2026, cf. `docs/security/SECURITY-AUDIT-2026-05-27.md`) : scrubbing automatique des données personnelles dans les logs d'erreur, limitation de débit (rate-limiting) sur les endpoints sensibles, validation MIME et vérification de signature binaire (magic number) sur les uploads, politique de sécurité du contenu (CSP) stricte avec endpoint de reporting, pinning du `search_path` sur les fonctions `SECURITY DEFINER`, double authentification (2FA) pour les comptes administrateurs, blocage de la suppression de factures côté client (rétention 10 ans), sauvegardes quotidiennes et Point-In-Time Recovery. Liste des sous-traitants techniques précisée et actualisée (Sentry, PostHog, Upstash expressément mentionnés). Les autres stipulations restent inchangées. Version précédente archivée dans `_archive/v1.2/`.
+> Version 1.2 — intégration de l'identité officielle complète du responsable du traitement (NEXUS 1993, SIREN 982 786 154, RCS Paris, siège social 66 Avenue des Champs Élysées 75008 Paris) et substitution de l'adresse postale du point de contact RGPD. Les stipulations matérielles relatives aux finalités de traitement, aux bases juridiques, aux durées de conservation, aux sous-traitants techniques et aux droits exerçables par les personnes concernées demeurent inchangées au fond. Version précédente conservée dans `_archive/v1.0/`.
 
 ---
 
@@ -140,23 +140,27 @@ Les Données Personnelles collectées par KOVAS ne sont communiquées à des tie
 
 Prestataires intervenant pour le compte de KOVAS et sous son contrôle exclusif, en qualité de sous-traitants au sens de l'article 28 du RGPD, liés à KOVAS par des accords de sous-traitance comportant l'ensemble des stipulations exigées par l'article 28, paragraphe 3, du RGPD :
 
-| Sous-traitant | Finalité | Hébergement | Données traitées |
-|---|---|---|---|
-| **Supabase Inc.** (offre Pro) | Hébergement base de données + authentification + stockage de fichiers | Union européenne (Paris, eu-west-3) | Ensemble des données personnelles et des données de mission |
-| **Vercel Inc.** | Hébergement du frontend Next.js | Union européenne (Francfort) | Journaux d'accès, en-têtes HTTP |
-| **Sentry (Functional Software Inc.)** | Supervision technique et journalisation des erreurs ; rediffusion de session (session replay) sur opt-in | Union européenne (Francfort) | Traces d'exécution (stack traces) avec scrubbing automatique des données personnelles |
-| **PostHog Inc.** | Mesure d'audience produit (opt-in) | Union européenne (Francfort) | Événements anonymisés ou pseudonymisés |
-| **Upstash Inc.** | Cache Redis pour la limitation de débit (rate-limiting) | Union européenne (Francfort) | Empreintes (hash) d'adresses IP et d'adresses électroniques, expiration ≤ 15 minutes |
-| **Stripe Payments Europe Limited** | Paiements et facturation KOVAS | Union européenne (Irlande) + États-Unis (Data Privacy Framework) | Données de carte (PCI-DSS), adresse électronique, montants |
-| **Resend Inc.** | Envoi d'e-mails transactionnels | Union européenne (Francfort) | Adresse électronique du destinataire et contenu du message |
-| **Brevo SAS** (ex-Sendinblue) | Envoi de SMS et e-mails (OTP, marketing opt-in) | Union européenne (Paris) | Numéros de téléphone au format E.164, OTP à 6 chiffres expirant après 10 minutes |
-| **Anthropic PBC** | Traitement par intelligence artificielle (assistant vocal, suggestions) | Union européenne (Francfort) ou États-Unis selon endpoint utilisé, encadré par les Clauses Contractuelles Types et le Data Privacy Framework | Transcriptions vocales anonymisées avant envoi |
-| **OpenAI L.L.C.** | Transcription par modèle Whisper (fallback) | Union européenne ou États-Unis (Data Privacy Framework) | Flux audio bruts (scrubbing des données personnelles préalable lorsque détectées) |
-| **Yousign SAS** | Signature électronique eIDAS (à la demande) | Union européenne (France) | Identité du signataire, document signé |
-| **Pennylane SAS** | Comptabilité et facturation (à compter de la mise en service) | Union européenne (France) | Données contractuelles et de facturation |
-| **OpenStreetMap Foundation** | Fond de carte (cartographie) | Royaume-Uni (décision d'adéquation post-Brexit) | Aucune donnée personnelle collectée (fond de carte statique) |
+**a) Hébergement de l'application** : Vercel Inc. (États-Unis, encadré par les Clauses Contractuelles Types et certification au titre du Data Privacy Framework UE-USA) ;
 
-L'ensemble de ces sous-traitants intervient sur la base d'accords de sous-traitance conformes à l'article 28 du RGPD (DPA), signés ou en cours de signature, lesquels peuvent être communiqués sur demande à l'adresse dpo@kovas.fr.
+**b) Hébergement de la base de données** : Supabase Inc. (serveurs localisés à Francfort-sur-le-Main, Allemagne, dans l'Union européenne) ;
+
+**c) Services de paiement** : Stripe Payments Europe Limited (Irlande, Union européenne) ;
+
+**d) Envoi de courriers électroniques** : Brevo (anciennement Sendinblue), société de droit français ;
+
+**e) Envoi de SMS** : Brevo (anciennement Sendinblue) ou Twilio Inc. selon les besoins techniques ;
+
+**f) Signature électronique** : Yousign, société de droit français ;
+
+**g) Comptabilité et facturation** : Pennylane, société de droit français ;
+
+**h) Automatisation de processus** : Make.com (Celonis), société de droit tchèque (Union européenne) ;
+
+**i) Intelligence artificielle pour la veille réglementaire et la génération de contenu** : Anthropic PBC (États-Unis, encadré par les Clauses Contractuelles Types et le Data Privacy Framework) ;
+
+**j) Cartographie** : OpenStreetMap Foundation (Royaume-Uni, soumis à décision d'adéquation post-Brexit) et fond de carte servis sans collecte de données ;
+
+**k) Outils d'analyse statistique et de mesure d'audience** : Plausible Analytics (Estonie, Union européenne) ou Matomo (auto-hébergé) selon configuration retenue.
 
 ### 4.2. Diagnostiqueurs destinataires de demandes de devis
 
@@ -330,32 +334,6 @@ En cas de violation de Données Personnelles au sens de l'article 4, point 12), 
 
 **c) Documenter intégralement** toute violation de Données Personnelles, conformément à l'article 33, paragraphe 5, du RGPD.
 
-### 8.7. Mesures techniques complémentaires issues de l'audit sécurité du 27 mai 2026
-
-Aux mesures décrites aux articles 8.1 à 8.6 ci-dessus s'ajoutent les mesures techniques spécifiques suivantes, mises en œuvre à la suite de l'audit interne de sécurité du 27 mai 2026 :
-
-**a) Scrubbing automatique des données personnelles dans les journaux d'erreur** : avant tout envoi de trace d'exécution au sous-traitant de supervision Sentry, KOVAS procède à un masquage automatique, côté serveur comme côté client, des données suivantes lorsqu'elles sont détectées : adresses électroniques, numéros de téléphone (formats E.164 et national 0X), numéros SIRET à 14 chiffres, jetons d'authentification JSON Web Tokens (JWT), et clés d'API émises par les sous-traitants techniques (Stripe, Supabase, Anthropic, OpenAI). Le module de scrubbing est documenté dans le code source à l'emplacement `apps/web/src/lib/security/scrub-pii.ts` ;
-
-**b) Limitation de débit (rate-limiting)** : KOVAS applique sur les endpoints sensibles des seuils stricts de requêtes par fenêtre temporelle, mis en œuvre via le cache Redis du sous-traitant Upstash hébergé en Allemagne (Union européenne). Les seuils principaux sont :
-
-— Authentification (connexion, inscription, callback OAuth) : dix (10) requêtes par fenêtre de quinze (15) minutes par adresse électronique ou par adresse IP ;
-— Workflow de revendication de fiche annuaire (KYC) et envoi d'OTP : trois (3) requêtes par fenêtre de quinze (15) minutes par adresse IP ;
-— API publique : soixante (60) requêtes par minute par adresse IP en accès anonyme, six cents (600) requêtes par minute par clé API authentifiée ;
-
-**c) Validation MIME et signature binaire (magic number) sur les uploads** : tout fichier déposé sur la Plateforme (photographies de mission, pièces du dossier de revendication KYC, documents propriétaire) fait l'objet d'une double vérification : contrôle du type MIME déclaré et contrôle de la signature binaire du fichier (magic number), afin d'empêcher l'envoi de fichiers déguisés sous une extension trompeuse ;
-
-**d) Politique de sécurité du contenu (Content Security Policy)** : la Plateforme applique une politique CSP stricte, assortie d'un endpoint de reporting transmettant à Sentry les violations détectées, aux fins de détection précoce des tentatives d'injection de code ;
-
-**e) Pinning du `search_path` sur les fonctions `SECURITY DEFINER`** : les fonctions PL/pgSQL stockées en base de données et exécutées en mode `SECURITY DEFINER` se voient appliquer un `search_path` fixé, mesure de défense en profondeur contre les attaques par injection de schéma ;
-
-**f) Double authentification (2FA)** : la double authentification par algorithme TOTP (Time-based One-Time Password) est disponible pour l'ensemble des comptes Utilisateurs et expressément recommandée pour les comptes disposant de privilèges d'administration ;
-
-**g) Verrouillage de la suppression de factures côté client** : conformément à l'obligation décennale de conservation des pièces comptables prévue à l'article L.123-22 du Code de commerce et aux exigences de la Direction générale des Finances publiques (DGFiP), la suppression de factures émises est techniquement bloquée côté application, indépendamment des contrôles serveur ;
-
-**h) Sauvegardes quotidiennes et Point-In-Time Recovery (PITR)** : l'infrastructure Supabase Pro réalise des sauvegardes quotidiennes complètes et permet la restauration à un instant précis (Point-In-Time Recovery) sur une fenêtre de sept (7) jours minimum, aux fins de continuité d'activité et de reprise après incident.
-
-Ces mesures complètent, sans s'y substituer, les mesures décrites aux articles 8.1 à 8.6 ci-dessus. KOVAS se réserve la faculté d'ajuster sans préavis les seuils techniques applicables aux fins de garantir la disponibilité et la sécurité de la Plateforme.
-
 ## ARTICLE 9. MINEURS
 
 La Plateforme n'est pas destinée à être utilisée par des personnes mineures de moins de quinze (15) ans révolus, âge correspondant au seuil de consentement numérique fixé par la loi française en application de l'article 8 du RGPD.
@@ -388,13 +366,12 @@ Toute question, observation, réclamation ou demande d'exercice de droits relati
 
 ---
 
-**Document validé en sa version 1.3 le 27 mai 2026.**
+**Document validé en sa version 1.2 le 21 mai 2026.**
 
 ---
 
 ## CHANGELOG
 
-- **v1.3 — 27 mai 2026** : intégration des mesures de sécurité techniques renforcées issues de l'audit sécurité du 27 mai 2026 (article 8.7 ajouté : scrubbing PII Sentry, rate-limiting Upstash, validation MIME et magic number, CSP stricte avec reporting, pinning du `search_path` sur fonctions `SECURITY DEFINER`, 2FA TOTP recommandée pour administrateurs, blocage suppression de factures côté client conformément à l'article L.123-22 du Code de commerce, sauvegardes quotidiennes et Point-In-Time Recovery 7 jours minimum). Refonte du tableau des sous-traitants techniques à l'article 4.1 (Sentry, PostHog, Upstash, Resend, OpenAI expressément mentionnés). Les autres stipulations restent inchangées.
 - **v1.2 — 21 mai 2026** : intégration de l'identité officielle complète du responsable du traitement (NEXUS 1993, SIREN 982 786 154, RCS Paris, siège social 66 Avenue des Champs Élysées 75008 Paris) et substitution de l'adresse postale du point de contact RGPD.
 - **v1.1 — 2 juin 2026** : actualisation de l'en-tête de version, sans modification au fond des stipulations matérielles.
 - **v1.0 — 20 mai 2026** : version initiale.

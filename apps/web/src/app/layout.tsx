@@ -1,4 +1,5 @@
 import { AddToHomeScreen } from '@/components/add-to-home-screen'
+import { CookieConsentProvider } from '@/components/cookies/CookieConsentProvider'
 import { QueryProvider } from '@/components/query-provider'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { ToastProvider } from '@/components/shared/Toast'
@@ -138,6 +139,10 @@ export default function RootLayout({
               {children}
               <AddToHomeScreen />
               <Toaster />
+              {/* Bandeau cookies CNIL — masqué sur /dashboard/* et /admin/*
+                  (consent implicite via CGU). Init conditionnelle PostHog
+                  + Sentry session replay selon préférences utilisateur. */}
+              <CookieConsentProvider />
             </ToastProvider>
           </QueryProvider>
         </ThemeProvider>

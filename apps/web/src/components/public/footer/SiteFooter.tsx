@@ -1,3 +1,4 @@
+import { CookiePreferencesButton } from '@/components/cookies/CookiePreferencesButton'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
@@ -139,9 +140,9 @@ export function SiteFooter({ className }: SiteFooterProps) {
               · SIREN 982 786 154
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              <Link href="/cookies" className="hover:text-ink transition-colors">
-                Gérer les cookies
-              </Link>
+              <CookiePreferencesButton className="text-xs text-ink-faint">
+                Préférences cookies
+              </CookiePreferencesButton>
               <LanguageSelector />
             </div>
           </div>

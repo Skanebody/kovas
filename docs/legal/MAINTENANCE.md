@@ -85,4 +85,20 @@ Une vérification de cohérence est exécutée automatiquement par le module `ap
 
 ---
 
-**Version du présent document de procédure** : v1.1 — 21 mai 2026 (mise à jour post-immatriculation NEXUS 1993, intégration de la source unique de vérité `apps/web/src/lib/legal/company-identity.ts` et mise à jour de la matrice des dépendances).
+## 8. Journal des mises à jour ponctuelles
+
+### 2026-05-27 — Mise à jour post-audit sécurité
+
+- **04-politique-confidentialite.md** : v1.2 → v1.3 (article 8.7 ajouté détaillant les mesures techniques art. 32 RGPD issues de l'audit du 27/05/2026 : scrubbing PII Sentry, rate-limiting Upstash, validation MIME + magic number, CSP stricte avec reporting, pinning `search_path` sur fonctions `SECURITY DEFINER`, 2FA TOTP admin recommandée, blocage suppression de factures côté client conformément à l'article L.123-22 du Code de commerce, sauvegardes quotidiennes et Point-In-Time Recovery 7 jours minimum + refonte du tableau des sous-traitants techniques à l'article 4.1 avec Sentry, PostHog, Upstash, Resend, OpenAI expressément mentionnés).
+- **05-politique-cookies.md** : v1.2 → v1.3 (refonte article 3 « Recueil et gestion du consentement » pour refléter le bandeau de consentement effectivement implémenté en mai 2026, durée de conservation des choix portée à 13 mois, ajout de l'article 3.5 sur le traitement du signal `Do Not Track` ; refonte article 5 en trois sous-catégories : essentiels / mesure d'audience PostHog / fonctionnels Sentry session replay, avec durées exactes et configuration de minimisation `maskAllText`, `blockAllMedia`, `maskTextSelector`).
+- **02-cgu.md** : v1.2 → v1.3 (ajout article 6 bis « Usage acceptable de la Plateforme et mesures techniques anti-abus » : engagements de l'Utilisateur en matière d'usage normal, seuils techniques de rate-limiting Upstash applicables aux endpoints sensibles et à l'API publique, coopération en cas d'incident de sécurité).
+- Versions précédentes archivées dans `docs/legal/_archive/v1.2/` (02-cgu.md, 04-politique-confidentialite.md, 05-politique-cookies.md).
+
+Audit source : `docs/security/SECURITY-AUDIT-2026-05-27.md`
+Commit code source : `f40aed2 feat(security): audit 360° + 24 fixes anti-piratage + anti-fuite données`
+
+---
+
+**Version du présent document de procédure** : v1.2 — 27 mai 2026 (ajout du journal des mises à jour ponctuelles avec entrée post-audit sécurité 27/05/2026).
+**Versions précédentes** :
+- v1.1 — 21 mai 2026 (mise à jour post-immatriculation NEXUS 1993, intégration de la source unique de vérité `apps/web/src/lib/legal/company-identity.ts` et mise à jour de la matrice des dépendances).

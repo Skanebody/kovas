@@ -2,9 +2,9 @@
 
 **Document 5/9 du pack juridique KOVAS**
 
-**Édition au 27 mai 2026 — Version 1.3**
+**Édition au 21 mai 2026 — Version 1.2**
 
-> Version 1.3 — refonte de l'article 3 « Recueil et gestion du consentement » et de l'article 5 « Liste détaillée des traceurs utilisés » pour refléter l'implémentation effective du bandeau de consentement déployé en mai 2026 (composant React custom, stockage localStorage `kovas_consent_v1`, durée de conservation des choix portée à treize (13) mois conformément à la recommandation CNIL). Détail des cookies et stockages local par catégorie (essentiels / analytics PostHog / fonctionnels Sentry session replay), avec mention du respect du signal `Do Not Track`. Les autres stipulations restent inchangées. Version précédente archivée dans `_archive/v1.2/`.
+> Version 1.2 — harmonisation de la datation avec l'édition v1.2 du pack juridique post-immatriculation NEXUS 1993. Les catégories de traceurs déposées, leurs finalités, leurs durées et les moyens d'exercer le consentement demeurent inchangés. Version précédente conservée dans `_archive/v1.0/`.
 
 ---
 
@@ -82,17 +82,19 @@ Sont expressément soumis à recueil préalable du consentement explicite, libre
 
 ## ARTICLE 3. RECUEIL ET GESTION DU CONSENTEMENT
 
-### 3.1. Mécanisme de recueil du consentement (mis à jour au 27 mai 2026)
+### 3.1. Mécanisme de recueil du consentement
 
-Lors de la première visite de l'Utilisateur sur la Plateforme, et à chaque visite ultérieure intervenant après l'expiration du délai de conservation du choix précisé à l'article 3.4 ci-après, ou en cas de modification substantielle des traceurs utilisés, un bandeau d'information apparaît en bas de page de la Plateforme. Ce bandeau, implémenté sous la forme d'un composant React intégré à la Plateforme, comporte :
+Lors de la première visite de l'Utilisateur sur la Plateforme, et à chaque visite ultérieure intervenant après un délai de six (6) mois à compter de la dernière expression de choix, ou en cas de modification substantielle des traceurs utilisés, une bannière d'information est présentée à l'Utilisateur, comportant :
 
-**a)** Une information claire, complète et apparente sur les traceurs utilisés et leurs finalités, ainsi qu'un renvoi vers la présente Politique Cookies ;
+**a)** Une information claire, complète et apparente sur les traceurs utilisés et leurs finalités ;
 
-**b) Trois options exprimées avec une mise en forme identique et offrant un choix réellement équivalent**, conformément aux lignes directrices CNIL :
+**b)** Trois options exprimées avec une mise en forme identique et offrant un choix réellement équivalent :
 
-— « **Tout accepter** » : autorisation du dépôt des traceurs de mesure d'audience (PostHog) et des cookies fonctionnels (session replay Sentry déclenché uniquement en cas d'erreur) ;
-— « **Tout refuser** » : seuls les cookies strictement nécessaires au fonctionnement de la Plateforme sont conservés ;
-— « **Personnaliser** » : ouverture d'un panneau granulaire permettant de sélectionner, catégorie par catégorie, les traceurs autorisés.
+— « Tout accepter » : consentement à l'ensemble des traceurs présentés ;
+— « Tout refuser » : refus du dépôt de tout traceur non strictement nécessaire ;
+— « Personnaliser mes choix » : ouverture d'un panneau permettant de sélectionner finalité par finalité ;
+
+**c)** Un renvoi vers la présente Politique Cookies pour information détaillée.
 
 ### 3.2. Caractéristiques du consentement
 
@@ -108,15 +110,11 @@ Conformément aux exigences du RGPD et des lignes directrices CNIL, le consentem
 
 ### 3.3. Retrait du consentement
 
-L'Utilisateur peut, à tout moment et avec la même facilité que celle avec laquelle il a exprimé son consentement, modifier ses choix ou retirer son consentement, par l'intermédiaire d'un lien permanent intitulé « **Préférences cookies** » accessible dans le pied de page de toutes les pages publiques de la Plateforme.
+L'Utilisateur peut, à tout moment et avec la même facilité que celle avec laquelle il a exprimé son consentement, modifier ses choix ou retirer son consentement, par l'intermédiaire d'un lien permanent intitulé « Gérer mes cookies » accessible en pied de page de toutes les pages de la Plateforme.
 
 ### 3.4. Conservation des choix exprimés
 
-Le choix exprimé par l'Utilisateur est enregistré dans le stockage local (`localStorage`) du navigateur sous la clé `kovas_consent_v1` pour une durée maximale de **treize (13) mois**, conformément à la durée recommandée par la CNIL en matière de conservation du choix de l'Utilisateur en matière de traceurs. À l'expiration de cette durée, le bandeau réapparaît afin de recueillir un consentement renouvelé.
-
-### 3.5. Traitement du signal « Do Not Track »
-
-Lorsque le navigateur de l'Utilisateur émet le signal HTTP « Do Not Track » (DNT), le bandeau de consentement est néanmoins présenté à l'Utilisateur, le signal DNT seul n'étant pas considéré par la CNIL comme une manifestation de refus explicite au sens de l'article 82 de la loi du 6 janvier 1978 modifiée. Toutefois, dans cette hypothèse, les sélecteurs du panneau « Personnaliser » sont, par défaut, positionnés sur l'option « refusé », afin de respecter au mieux la préférence implicitement exprimée par l'Utilisateur.
+Les choix exprimés par l'Utilisateur sont conservés pendant une durée maximale de six (6) mois, à l'issue de laquelle la bannière d'information est à nouveau présentée pour recueil d'un consentement renouvelé.
 
 ## ARTICLE 4. PARAMÉTRAGE DES COOKIES DANS LE NAVIGATEUR
 
@@ -136,44 +134,16 @@ Il est précisé que le paramétrage du navigateur visant à refuser systématiq
 
 ## ARTICLE 5. LISTE DÉTAILLÉE DES TRACEURS UTILISÉS
 
-La liste détaillée et actualisée de l'ensemble des traceurs effectivement utilisés sur la Plateforme, comportant pour chacun d'eux son nom, sa catégorie, sa finalité, sa durée de conservation et son émetteur, est accessible en permanence depuis le panneau « Préférences cookies » visé à l'article 3.3 ci-dessus. Cette liste est mise à jour à chaque évolution de la configuration technique de la Plateforme.
+La liste détaillée et actualisée de l'ensemble des traceurs effectivement utilisés sur la Plateforme, comportant pour chacun d'eux son nom, sa catégorie, sa finalité, sa durée de conservation et son émetteur, est accessible en permanence depuis le panneau de gestion des cookies. Cette liste est mise à jour à chaque évolution de la configuration technique de la Plateforme.
 
-À la date des présentes, KOVAS utilise les traceurs et stockages local suivants, classés en trois (3) catégories :
+À la date des présentes, et à titre purement indicatif, KOVAS utilise les principaux traceurs suivants :
 
-### 5.1. Catégorie « Essentiels » — toujours actifs (dispensés de consentement)
-
-| Identifiant | Type | Émetteur | Finalité | Durée | Attributs |
-|---|---|---|---|---|---|
-| `sb-*` | Cookie | Supabase / kovas.fr | Tokens d'authentification (`access_token`, `refresh_token`) — maintien de la session connectée | jusqu'à 12 mois | `HttpOnly`, `Secure`, `SameSite=Lax` |
-| `__stripe_*` | Cookie | stripe.com | Prévention de la fraude lors des opérations de paiement (Stripe Checkout) | jusqu'à 12 mois selon la politique Stripe | `Secure`, `SameSite` |
-| `kovas_consent_v1` | localStorage | kovas.fr | Mémorisation du choix exprimé par l'Utilisateur sur le bandeau de consentement | 13 mois maximum | Stockage local du navigateur |
-| `kovas_2fa_admin` | Cookie | kovas.fr | Validation HMAC de la double authentification (TOTP) des comptes administrateurs | 30 minutes | `HttpOnly`, `Secure`, `SameSite=Strict` |
-| `kovas_ref_code` | Cookie | kovas.fr | Mémorisation d'un code de parrainage saisi sur la Plateforme | 90 jours | `HttpOnly`, `Secure`, `SameSite=Lax` |
-
-### 5.2. Catégorie « Mesure d'audience » — opt-in obligatoire (PostHog)
-
-| Identifiant | Type | Émetteur | Finalité | Durée | Hébergement |
-|---|---|---|---|---|---|
-| `ph_*` | Cookie + localStorage | PostHog (eu.posthog.com) | Identifiant anonyme de visiteur, mesure d'audience produit (pages vues, événements, parcours) | 24 mois | Union européenne (Francfort) |
-
-Configuration spécifique adoptée par KOVAS pour minimiser la collecte de données :
-
-— Sélecteur de masquage du texte : `maskTextSelector: '*'` (l'ensemble des textes affichés à l'écran sont masqués) ;
-— Respect du signal `Do Not Track` du navigateur Utilisateur (transmission désactivée si DNT) ;
-— Aucune collecte ne s'opère sans consentement préalable explicite.
-
-### 5.3. Catégorie « Fonctionnels — Session replay Sentry » — opt-in obligatoire
-
-| Identifiant | Type | Émetteur | Finalité | Durée | Hébergement |
-|---|---|---|---|---|---|
-| Session replay Sentry | Stockage serveur (aucun cookie navigateur) | Sentry (de.sentry.io) | Enregistrement de la session uniquement lors de la survenue d'une erreur (`replaysOnErrorSampleRate`), aux fins de reproduction du contexte technique de l'incident | Conservation côté serveur Sentry — 90 jours | Union européenne (Francfort) |
-
-Configuration spécifique adoptée par KOVAS pour minimiser la collecte de données :
-
-— `maskAllText: true` — l'ensemble des textes affichés à l'écran sont masqués dans l'enregistrement ;
-— `blockAllMedia: true` — les médias (images, vidéos) sont bloqués dans l'enregistrement ;
-— Aucun enregistrement ne s'opère sans consentement préalable explicite ;
-— Les données personnelles éventuellement présentes dans les traces d'exécution font l'objet d'un scrubbing automatique préalable, conformément à l'article 8.7 de la Politique de Confidentialité (document n°4).
+| Nom du traceur | Catégorie | Émetteur | Finalité | Durée |
+|----------------|-----------|----------|----------|-------|
+| kovas_session | Strictement nécessaire | kovas.fr | Authentification | Session |
+| kovas_csrf | Strictement nécessaire | kovas.fr | Sécurité (anti-CSRF) | Session |
+| kovas_cookie_consent | Strictement nécessaire | kovas.fr | Mémorisation des choix cookies | 6 mois |
+| _plausible | Mesure d'audience exemptée | plausible.io | Statistiques anonymes | 24 heures |
 
 ## ARTICLE 6. SANCTIONS DU NON-RESPECT DE LA RÉGLEMENTATION
 
@@ -185,13 +155,12 @@ KOVAS se réserve la faculté de modifier la présente Politique Cookies à tout
 
 ---
 
-**Document validé en sa version 1.3 le 27 mai 2026.**
+**Document validé en sa version 1.2 le 21 mai 2026.**
 
 ---
 
 ## CHANGELOG
 
-- **v1.3 — 27 mai 2026** : refonte de l'article 3 « Recueil et gestion du consentement » pour refléter l'implémentation effective du bandeau de consentement déployé en mai 2026 (composant React custom, stockage `localStorage` `kovas_consent_v1`, durée de conservation des choix portée à 13 mois conformément à la recommandation CNIL, traitement du signal `Do Not Track`). Refonte de l'article 5 « Liste détaillée des traceurs utilisés » en trois sous-catégories (essentiels / mesure d'audience PostHog / fonctionnels Sentry session replay), avec mention des durées exactes et de la configuration de minimisation (maskAllText, blockAllMedia, maskTextSelector). Les autres stipulations restent inchangées.
 - **v1.2 — 21 mai 2026** : harmonisation de la datation avec l'édition v1.2 du pack juridique post-immatriculation NEXUS 1993. Aucune modification de fond des stipulations relatives aux traceurs.
 - **v1.1 — 2 juin 2026** : actualisation de l'en-tête de version, sans modification au fond des stipulations matérielles.
 - **v1.0 — 20 mai 2026** : version initiale.

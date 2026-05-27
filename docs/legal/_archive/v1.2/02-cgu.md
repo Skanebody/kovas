@@ -2,9 +2,9 @@
 
 **Document 2/9 du pack juridique KOVAS**
 
-**Édition au 27 mai 2026 — Version 1.3**
+**Édition au 21 mai 2026 — Version 1.2**
 
-> Version 1.3 — ajout de l'article 6 bis « Usage acceptable de la Plateforme et mesures techniques anti-abus » détaillant les engagements de l'Utilisateur en matière d'usage normal de la Plateforme et les mesures techniques de limitation de débit (rate-limiting) mises en œuvre par KOVAS à la suite de l'audit sécurité du 27 mai 2026 (cf. `docs/security/SECURITY-AUDIT-2026-05-27.md`). Les autres stipulations restent inchangées. Version précédente archivée dans `_archive/v1.2/`.
+> Version 1.2 — intégration des données légales officielles NEXUS 1993 post-immatriculation au Registre du commerce et des sociétés de Paris et substitution du ressort de la Cour d'appel de Rouen par celui de la Cour d'appel de Paris. Les stipulations matérielles relatives à l'accès, à la création de compte, aux comportements prohibés et à la responsabilité demeurent inchangées au fond. Version précédente conservée dans `_archive/v1.0/`.
 
 ---
 
@@ -202,40 +202,6 @@ En cas de constatation d'un comportement contrevenant aux stipulations de l'arti
 
 **d)** Saisir, au choix de KOVAS, l'autorité judiciaire compétente, l'autorité administrative compétente (notamment la Commission nationale de l'informatique et des libertés, la Direction générale de la concurrence, de la consommation et de la répression des fraudes, ou la plateforme d'harmonisation, d'analyse, de recoupement et d'orientation des signalements PHAROS), et communiquer auxdites autorités les éléments en sa possession permettant d'identifier l'Utilisateur fautif et de caractériser les faits.
 
-## ARTICLE 6 BIS. USAGE ACCEPTABLE DE LA PLATEFORME ET MESURES TECHNIQUES ANTI-ABUS
-
-### 6 bis.1. Engagements de l'Utilisateur en matière d'usage normal
-
-L'Utilisateur s'engage à utiliser la Plateforme KOVAS de manière conforme à sa finalité, à savoir la gestion de diagnostics immobiliers professionnels et l'accès aux Services associés tels que définis aux présentes. Sans préjudice des stipulations de l'article 6.1 ci-dessus, l'Utilisateur s'interdit expressément :
-
-**a)** Toute tentative d'accès non autorisé aux comptes d'autres Utilisateurs, aux bases de données opérées par KOVAS ou par ses sous-traitants techniques, ainsi qu'à l'infrastructure technique sous-jacente à la Plateforme ;
-
-**b)** Toute requête anormale, automatisée ou émise en quantité disproportionnée au regard de l'usage normal d'un Diagnostiqueur, qu'il s'agisse de moissonnage automatisé (web scraping), d'extraction massive de données, de tests d'intrusion non autorisés, de campagnes de spam ou de toute autre opération similaire ;
-
-**c)** Toute action visant à contourner ou à neutraliser les mesures techniques de sécurité mises en œuvre par KOVAS, en ce compris notamment les mécanismes de limitation de débit (rate-limiting), de signature des webhooks, de vérification du type MIME et de la signature binaire des fichiers déposés, ainsi que la double authentification ;
-
-**d)** Toute utilisation des interfaces de programmation applicatives (API) publiques exposées par KOVAS en dehors des limites contractuelles, des quotas associés à l'offre souscrite ou des seuils techniques précisés à l'article 6 bis.2 ci-après ;
-
-**e)** Toute revente, sous-licence, mise à disposition ou exposition à des tiers des fonctionnalités de la Plateforme, sans accord écrit et préalable de NEXUS 1993, sauf à ce que cela soit expressément prévu par les conditions particulières du Forfait souscrit.
-
-### 6 bis.2. Mesures techniques anti-abus et limitation de débit (rate-limiting)
-
-Aux fins de garantir la disponibilité de la Plateforme à l'ensemble des Utilisateurs légitimes et de protéger la sécurité des Données Personnelles traitées, KOVAS met en œuvre, en application des dispositions de l'article 32 du RGPD, des mesures techniques automatisées de limitation de débit. Ces mesures incluent notamment, à la date des présentes, les seuils suivants :
-
-**a) Endpoints d'authentification** (connexion, inscription, callback OAuth) : maximum dix (10) requêtes par fenêtre de quinze (15) minutes, par adresse électronique ou par adresse IP de l'Utilisateur ;
-
-**b) Workflow de revendication de fiche annuaire (KYC) et envoi d'OTP par SMS** : maximum trois (3) requêtes par fenêtre de quinze (15) minutes, par adresse IP de l'Utilisateur ;
-
-**c) API publique en accès anonyme** : maximum soixante (60) requêtes par minute par adresse IP ;
-
-**d) API publique en accès authentifié par clé API** : maximum six cents (600) requêtes par minute par clé API.
-
-Ces seuils peuvent être ajustés sans préavis par KOVAS, dans des proportions raisonnables et dans l'intérêt légitime de la sécurité et de la disponibilité de la Plateforme, notamment pour faire face à des incidents de sécurité avérés ou suspectés. Les requêtes excédant les seuils susvisés reçoivent une réponse HTTP au code 429 (Too Many Requests) et peuvent, en cas d'abus répété ou caractérisé, conduire à la suspension temporaire ou définitive du compte concerné, dans les conditions prévues à l'article 6.2 ci-dessus.
-
-### 6 bis.3. Coopération en cas d'incident de sécurité
-
-En cas de tentative d'accès non autorisé, d'usage abusif de la Plateforme ou de compromission d'un compte, l'Utilisateur s'engage à coopérer pleinement avec KOVAS aux fins d'identifier la cause de l'incident et de prendre les mesures correctives appropriées, en ce compris la communication, à première demande, de tout élément utile à l'analyse de l'incident. KOVAS pourra, en tant que de besoin, communiquer toute information utile aux autorités administratives et judiciaires compétentes (Commission nationale de l'informatique et des libertés, Agence nationale de la sécurité des systèmes d'information, gendarmerie cyber, parquet) en cas de procédure ou d'enquête.
-
 ## ARTICLE 7. CONTENUS PUBLIÉS PAR LES UTILISATEURS
 
 ### 7.1. Définition
@@ -326,13 +292,12 @@ Tout litige relatif à l'existence, à l'interprétation, à l'exécution ou à 
 
 ---
 
-**Document validé en sa version 1.3 le 27 mai 2026.**
+**Document validé en sa version 1.2 le 21 mai 2026.**
 
 ---
 
 ## CHANGELOG
 
-- **v1.3 — 27 mai 2026** : ajout de l'article 6 bis « Usage acceptable de la Plateforme et mesures techniques anti-abus » (engagements de l'Utilisateur en matière d'usage normal, mesures techniques de limitation de débit Upstash applicables aux endpoints sensibles et à l'API publique, coopération en cas d'incident de sécurité). Aligné sur l'audit sécurité du 27 mai 2026. Les autres stipulations restent inchangées.
 - **v1.2 — 21 mai 2026** : intégration des données légales officielles NEXUS 1993 post-immatriculation au Registre du commerce et des sociétés de Paris (SIREN 982 786 154, RCS Paris, siège social 66 Avenue des Champs Élysées 75008 Paris). Substitution du ressort de la Cour d'appel de Rouen par celui de la Cour d'appel de Paris.
 - **v1.1 — 2 juin 2026** : actualisation de l'en-tête de version, sans modification au fond des stipulations matérielles.
 - **v1.0 — 20 mai 2026** : version initiale.
