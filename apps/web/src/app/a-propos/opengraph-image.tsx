@@ -21,6 +21,6 @@ export default function OpenGraphImage(): ImageResponse {
       italic: 'Benjamin Bel.',
       after: '',
     },
-    tagline: 'Formé IMPI Kedge Bordeaux · Fondateur KOVAS · Solo Dieppe',
+    tagline: 'Fondateur KOVAS · Solo Dieppe',
   })
 }

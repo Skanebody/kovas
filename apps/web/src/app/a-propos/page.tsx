@@ -213,13 +213,9 @@ export default function AProposPage() {
               <p>
                 Formation initiale en sport business (AMOS Bachelor 2013-2016 puis Master 2016-2018,
                 MSc Sport Management à Coventry University en 2014-2015), complétée par le cursus
-                Mastère BAC+6{' '}
-                <span className="font-medium text-[#0F1419]">
-                  IMPI — Gestion Patrimoniale et Immobilière
-                </span>{' '}
-                à KEDGE Business School (2018-2019, programme classé n°1 France par Eduniversal,
-                accrédité RICS). Cette double formation a structuré ma capacité à analyser un actif
-                (sportif, immobilier, patrimonial) sous l&apos;angle de la valeur, du risque et de
+                Mastère en Gestion Patrimoniale et Immobilière à KEDGE Business School (2018-2019).
+                Cette double formation a structuré ma capacité à analyser un actif (sportif,
+                immobilier, patrimonial) sous l&apos;angle de la valeur, du risque et de
                 l&apos;exploitation opérationnelle.
               </p>
               <p>
