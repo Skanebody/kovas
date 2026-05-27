@@ -51,11 +51,35 @@ const CONTENT_SECURITY_POLICY = [
   "form-action 'self'",
   "frame-ancestors 'none'",
   'upgrade-insecure-requests',
+  // CSP violation reporting (endpoint /api/security/csp-report).
+  // report-uri : legacy (Firefox/Safari), report-to : moderne (Chrome).
+  'report-uri /api/security/csp-report',
+  'report-to csp-endpoint',
 ].join('; ')
+
+/**
+ * Report-To groupe pour les violations CSP modernes (Chrome/Edge).
+ * Référence un endpoint POST qui log dans Sentry.
+ */
+const REPORT_TO_HEADER = JSON.stringify({
+  group: 'csp-endpoint',
+  max_age: 10886400,
+  endpoints: [{ url: '/api/security/csp-report' }],
+  include_subdomains: true,
+})
 
 /**
  * Security headers appliqués à toutes les routes.
  * Cf. docs/SECURITY.md > "Headers HTTP appliqués".
+ *
+ * Cross-Origin isolation :
+ * - COOP same-origin : isole le browsing context (anti Spectre + window.opener leaks)
+ * - COEP credentialless : autorise les ressources cross-origin sans CORS si elles
+ *   sont chargées sans credentials (mode permissif vs require-corp). Si régression
+ *   constatée (images tiers cassées : tuiles OSM, avatars, etc.), basculer sur
+ *   'unsafe-none' (désactive l'isolation mais aucune régression possible).
+ *   Décision Benjamin requise post-monitoring 7j.
+ * - CORP same-site : empêche les autres sites de charger nos ressources.
  */
 const SECURITY_HEADERS = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
@@ -63,14 +87,21 @@ const SECURITY_HEADERS = [
     key: 'Strict-Transport-Security',
     value: 'max-age=63072000; includeSubDomains; preload',
   },
-  { key: 'X-XSS-Protection', value: '1; mode=block' },
-  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  // X-Frame-Options DENY : cohérent avec frame-ancestors 'none' dans la CSP.
+  // KOVAS n'est jamais embarqué (anti-clickjacking).
+  { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   {
     key: 'Permissions-Policy',
     value: 'camera=(self), microphone=(self), geolocation=(self), payment=(self)',
   },
+  // Cross-Origin isolation (cf. commentaire ci-dessus).
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
+  { key: 'Cross-Origin-Resource-Policy', value: 'same-site' },
+  // Report-To groupe utilisé par la directive CSP report-to.
+  { key: 'Report-To', value: REPORT_TO_HEADER },
   { key: 'Content-Security-Policy', value: CONTENT_SECURITY_POLICY },
 ]
 

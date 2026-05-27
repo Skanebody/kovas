@@ -23,9 +23,42 @@
 import type { TelegramUpdate } from '@/lib/telegram/types'
 import { handleTelegramWebhook } from '@/lib/telegram/webhook-handler'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+
+// Schema minimal pour valider la structure attendue d'un update Telegram.
+// `passthrough()` autorise les champs supplémentaires (forward-compat avec
+// les nouvelles features Telegram non encore modélisées côté KOVAS).
+const TelegramUpdateSchema = z
+  .object({
+    update_id: z.number(),
+    message: z
+      .object({
+        message_id: z.number(),
+        from: z
+          .object({
+            id: z.number(),
+            is_bot: z.boolean(),
+            first_name: z.string().max(200).optional(),
+            username: z.string().max(200).optional(),
+          })
+          .passthrough()
+          .optional(),
+        chat: z
+          .object({
+            id: z.number(),
+            type: z.string().max(50),
+          })
+          .passthrough(),
+        date: z.number(),
+        text: z.string().max(4096).optional(),
+      })
+      .passthrough()
+      .optional(),
+  })
+  .passthrough()
 
 export async function POST(req: Request): Promise<NextResponse> {
   // 1. Vérif secret token (anti spoof)
@@ -39,10 +72,16 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // 2. Parse body
+  // 2. Parse + valide body via Zod (anti-payload-malformé + anti-DoS via champs surdimensionnés)
   let update: TelegramUpdate
   try {
-    update = (await req.json()) as TelegramUpdate
+    const raw = await req.json()
+    const parsed = TelegramUpdateSchema.safeParse(raw)
+    if (!parsed.success) {
+      console.warn('[api/telegram/webhook] invalid payload', parsed.error.issues.slice(0, 3))
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+    }
+    update = parsed.data as unknown as TelegramUpdate
   } catch (e) {
     console.error('[api/telegram/webhook] invalid JSON', e)
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })

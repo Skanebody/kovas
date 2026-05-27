@@ -6,6 +6,7 @@ import {
   generateVerificationCode,
 } from '@/lib/diagnosticians/verification-code'
 import { sendEmail } from '@/lib/email/send'
+import { checkRateLimit } from '@/lib/rate-limit'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
@@ -34,7 +35,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const ip = extractIpFromRequest(request)
   const userAgent = request.headers.get('user-agent')?.slice(0, 300) ?? null
 
-  // Rate-limit anti-abus
+  // Defense-in-depth : rate-limit Upstash global anti-OTP-spam (coût Brevo +
+  // brute-force code). 3 demandes / 15 min / IP. Fail-closed en prod si Upstash absent.
+  const upstashRl = await checkRateLimit('auth_strict', `claim_email:${ip ?? 'unknown'}`)
+  if (!upstashRl.success) {
+    const retryAfter = Math.max(0, Math.ceil((upstashRl.reset - Date.now()) / 1000))
+    return NextResponse.json(
+      { error: 'Trop de demandes. Réessayez dans quelques minutes.' },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    )
+  }
+
+  // Rate-limit anti-abus DB-based (par IP + par diag cible)
   const rl = await checkClaimRateLimit({ ipAddress: ip, diagnosticianId })
   if (!rl.allowed) {
     return NextResponse.json(

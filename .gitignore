@@ -16,6 +16,27 @@ build/
 .env.development
 .env.production
 
+# Credentials et certificats (defense-in-depth — JAMAIS committés)
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cert
+
+# Backups locaux (peuvent contenir copies de fichiers sensibles)
+*.bak
+*.backup
+*.orig
+*~
+
+# Répertoires temporaires
+tmp/
+temp/
+
+# Netlify (au cas où — alternative à Vercel)
+.netlify
+
 # Logs
 *.log
 npm-debug.log*

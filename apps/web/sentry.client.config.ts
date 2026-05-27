@@ -1,3 +1,4 @@
+import { scrubPii } from '@/lib/security/scrub-pii'
 /**
  * Sentry — configuration côté navigateur.
  *
@@ -42,10 +43,11 @@ Sentry.init({
     'Non-Error promise rejection captured',
   ],
 
-  // Aucune télémétrie depuis dev / staging — uniquement prod
+  // Aucune télémétrie depuis dev / staging — uniquement prod.
+  // Scrub PII (emails, téléphones, SIRET, JWT, clés API) avant envoi.
   beforeSend(event) {
     if (process.env.NODE_ENV !== 'production') return null
-    return event
+    return scrubPii(event)
   },
 
   environment: process.env.NODE_ENV,

@@ -33,9 +33,21 @@ export function initPostHog(): void {
     capture_pageview: true,
     session_recording: {
       maskAllInputs: true,
+      // maskTextSelector '*' : masque AUSSI tout texte affiché (adresses, noms
+      // clients, numéros DPE, etc.). Équivalent moderne d'un "maskAllText".
+      // Compensé par opt-in via classe CSS .ph-no-capture pour les zones non
+      // sensibles si besoin (rare).
+      maskTextSelector: '*',
     },
     // Respect Do Not Track (RGPD)
     respect_dnt: true,
+    // Cookie sécurisé HTTPS-only + jamais sur sous-domaines (annuaire.kovas.fr
+    // ne doit pas hériter du cookie dashboard.kovas.fr et vice-versa).
+    secure_cookie: true,
+    cross_subdomain_cookie: false,
+    // Cap la taille de chaque propriété d'event à 1KB. Empêche les leaks
+    // accidentels de payloads volumineux (JSON brut, stack traces complètes).
+    properties_string_max_length: 1024,
     // Pas d'init en dev pour éviter de polluer les datasets prod
     loaded: (ph) => {
       if (process.env.NODE_ENV !== 'production') ph.opt_out_capturing()

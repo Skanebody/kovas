@@ -2,6 +2,7 @@
 
 import { verifyDiagnosticActivityCached } from '@/lib/data-gouv/recherche-entreprises'
 import { joinFullName } from '@/lib/name-utils'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { isValidReferralCodeFormat } from '@/lib/referral/code-generator'
 import { applyReferralOnSignup } from '@/lib/referral/referral-engine'
 import { createClient } from '@/lib/supabase/server'
@@ -40,6 +41,16 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     return {
       error: 'Données invalides',
       fieldErrors: Object.fromEntries(parsed.error.issues.map((i) => [i.path[0], i.message])),
+    }
+  }
+
+  // Rate-limit scopé à l'email (anti credential-stuffing + spam signup)
+  // 10 tentatives / 15 min / email. Fail-closed en prod si Upstash absent.
+  const rl = await checkRateLimit('auth', `signup:${parsed.data.email.toLowerCase()}`)
+  if (!rl.success) {
+    const retryMinutes = Math.max(1, Math.ceil((rl.reset - Date.now()) / 60_000))
+    return {
+      error: `Trop de tentatives d'inscription. Réessayez dans ${retryMinutes} minute${retryMinutes > 1 ? 's' : ''}.`,
     }
   }
 

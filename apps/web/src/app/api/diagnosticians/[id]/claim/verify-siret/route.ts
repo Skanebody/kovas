@@ -1,4 +1,5 @@
 import { checkClaimRateLimit, extractIpFromRequest } from '@/lib/diagnosticians/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { validateSiret } from '@/lib/validation/siret'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
@@ -47,6 +48,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const ip = extractIpFromRequest(request)
   const userAgent = request.headers.get('user-agent')?.slice(0, 300) ?? null
+
+  // Rate-limit Upstash anti brute-force SIRET : 3 tentatives / 15 min / IP
+  // (le SIRET cible est sur la fiche, donc bruteforce direct dangereux).
+  const upstashRl = await checkRateLimit('auth_strict', `claim_siret:${ip ?? 'unknown'}`)
+  if (!upstashRl.success) {
+    const retryAfter = Math.max(0, Math.ceil((upstashRl.reset - Date.now()) / 1000))
+    return NextResponse.json(
+      { error: 'Trop de tentatives. Réessayez dans quelques minutes.' },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    )
+  }
 
   const rl = await checkClaimRateLimit({ ipAddress: ip, diagnosticianId })
   if (!rl.allowed) {

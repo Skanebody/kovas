@@ -1,7 +1,9 @@
+import { extractIpFromRequest } from '@/lib/diagnosticians/rate-limit'
 import {
   MAX_VERIFICATION_ATTEMPTS,
   checkVerificationCode,
 } from '@/lib/diagnosticians/verification-code'
+import { checkRateLimit } from '@/lib/rate-limit'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
@@ -30,6 +32,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(diagnosticianId)) {
     return NextResponse.json({ error: 'ID invalide' }, { status: 400 })
+  }
+
+  // Rate-limit Upstash anti brute-force OTP : 3 tentatives / 15 min / IP
+  // (la table claim_requests.verification_attempts borne déjà à 5, mais
+  // cette couche bloque les attaques distribuées qui tournent vite avant
+  // l'incrément côté DB).
+  const ip = extractIpFromRequest(request)
+  const upstashRl = await checkRateLimit('auth_strict', `claim_verify:${ip ?? 'unknown'}`)
+  if (!upstashRl.success) {
+    const retryAfter = Math.max(0, Math.ceil((upstashRl.reset - Date.now()) / 1000))
+    return NextResponse.json(
+      { error: 'Trop de tentatives. Réessayez dans quelques minutes.' },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    )
   }
 
   let body: z.infer<typeof bodySchema>

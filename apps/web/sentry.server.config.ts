@@ -1,3 +1,4 @@
+import { scrubPii } from '@/lib/security/scrub-pii'
 /**
  * Sentry — configuration côté Node.js (Route Handlers, Server Components,
  * Server Actions, middlewares).
@@ -26,7 +27,7 @@ Sentry.init({
 
   beforeSend(event) {
     if (process.env.NODE_ENV !== 'production') return null
-    return event
+    return scrubPii(event)
   },
 
   environment: process.env.NODE_ENV,

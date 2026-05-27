@@ -1,6 +1,7 @@
 import { buildClaimAdminNotification } from '@/lib/diagnosticians/claim-templates'
 import { checkClaimRateLimit, extractIpFromRequest } from '@/lib/diagnosticians/rate-limit'
 import { sendEmail } from '@/lib/email/send'
+import { checkRateLimit } from '@/lib/rate-limit'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
@@ -42,6 +43,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const ip = extractIpFromRequest(request)
   const userAgent = request.headers.get('user-agent')?.slice(0, 300) ?? null
+
+  // Rate-limit Upstash anti-spam upload manuel : 3 uploads / 15 min / IP
+  // (limite flood + protège bucket Storage + email admin).
+  const upstashRl = await checkRateLimit('auth_strict', `claim_manual_upload:${ip ?? 'unknown'}`)
+  if (!upstashRl.success) {
+    const retryAfter = Math.max(0, Math.ceil((upstashRl.reset - Date.now()) / 1000))
+    return NextResponse.json(
+      { error: 'Trop de demandes. Réessayez dans quelques minutes.' },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    )
+  }
 
   const rl = await checkClaimRateLimit({ ipAddress: ip, diagnosticianId })
   if (!rl.allowed) {
