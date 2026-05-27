@@ -521,6 +521,29 @@ Aligné Tailwind par défaut (`p-1`=4px, `p-2`=8px, `p-3`=12px, `p-4`=16px, `p-5
   - Téléphone : E.164 (`+33...`), parse via `libphonenumber-js`
   - Surface : m² float
 - **Architecture i18n prête J0** (clés + namespace), FR seule active
+- **API officielles en priorité, scraping en fallback** pour toute intégration externe (règle Benjamin 2026-05-27, précisée le même jour) :
+  - Ordre de préférence strict :
+    1. **API officielle publique** (data.gouv.fr, api.gouv.fr, BCE, ECB, etc.) — TOUJOURS en premier si l'éditeur en fournit une.
+    2. **MCP officiel** (Anthropic registry) si l'éditeur en fournit un.
+    3. **Connecteur SaaS officiel** (Stripe SDK, Resend SDK, etc.) si l'API REST a un SDK officiel.
+    4. **Scraping HTML / RSS / Atom** AUTORISÉ en fallback **uniquement si aucune des 3 options précédentes n'existe pour la source**. Respecter robots.txt + ToS + User-Agent navigateur réaliste + rate-limit poli.
+  - Sources réglementaires FR (veille `/dashboard/veille`) :
+    - **API officielles disponibles** (à utiliser en priorité) :
+      - JORF / arrêtés / décrets → **API Légifrance PISTE** (DILA, OAuth2 gratuit, https://piste.gouv.fr) — inscription développeur requise (action Benjamin)
+      - Données ADEME DPE (datasets records) → **ADEME data-fair API** (https://data.ademe.fr/data-fair/api/v1, sans clé)
+      - Entreprises (SIRENE) → **API Recherche Entreprises** (https://recherche-entreprises.api.gouv.fr, sans clé)
+      - Géorisques (radon, PPRI, argiles) → **Géorisques API** (https://www.georisques.gouv.fr/api, sans clé)
+      - Cadastre / adresses → **API BAN** (https://api-adresse.data.gouv.fr, sans clé) + **IGN Géoplateforme** (clé gratuite)
+    - **Scraping autorisé (pas d'API officielle disponible)** :
+      - ADEME Actualités (blog HTML, pas d'API) → scraping RSS/HTML
+      - Cofrac (FAQ + actualités, pas d'API) → scraping RSS/HTML
+      - CSTB (actualités bâtiment, pas d'API) → scraping RSS/HTML
+      - DGCCRF (alertes + sanctions, pas d'API) → scraping RSS/HTML
+      - MTE Logement (annonces ministère, pas d'API) → scraping RSS/HTML
+      - AFNOR Normes (pas d'API publique gratuite) → scraping HTML
+  - Tout scraping doit être **flagué dans le code** avec commentaire `// SCRAPING_FALLBACK (pas d'API officielle disponible pour cette source)` + lien vers vérification annuelle de l'existence éventuelle d'une nouvelle API.
+  - Si l'API officielle devient payante (NewsAPI, AFNOR Pro, etc.), décision business explicite Benjamin avant intégration.
+  - **Avant tout scraping**, vérifier : (a) `robots.txt` autorise (b) ToS du site n'interdisent pas (c) UA navigateur respectueux (d) rate-limit poli (max 1 req/seconde).
 
 ---
 

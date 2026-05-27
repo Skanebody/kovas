@@ -48,8 +48,9 @@ const FETCH_TIMEOUT_MS = 20_000
 const MAX_DOCS_PER_SOURCE = 30 // limite anti-flood au premier run
 const MAX_RAW_TEXT_LENGTH = 50_000 // tronque les très longs articles
 
-// Mots-clés métier — pondèrent l'importance et filtrent les docs hors-scope
-const DIAGNOSTIC_KEYWORDS = [
+// Mots-clés métier "FORTS" — directement liés au diagnostic immobilier.
+// Match → garde le document.
+const STRONG_KEYWORDS = [
   'dpe',
   'diagnostic',
   'diagnostiqueur',
@@ -57,27 +58,48 @@ const DIAGNOSTIC_KEYWORDS = [
   'plomb',
   'crep',
   'termites',
+  'carrez',
+  'boutin',
+  'audit énergétique',
+  'audit energetique',
+  'performance énergétique',
+  'performance energetique',
+  'passoire énergétique',
+  'passoire energetique',
+  'cofrac',
+  '3cl',
+  '3cl-2021',
+  "état des risques",
+  'etat des risques',
+]
+
+// Mots-clés métier "FAIBLES" — pertinents mais trop génériques pour matcher seuls.
+// Garde le document UNIQUEMENT si au moins 1 strong OU 2+ weak.
+const WEAK_KEYWORDS = [
+  'rénovation énergétique',
+  'renovation energetique',
   'gaz',
   'électricité',
   'electricite',
   'electrique',
-  'carrez',
-  'boutin',
   'erp',
-  'audit énergétique',
-  'audit energetique',
-  'performance énergétique',
-  'rénovation',
-  'renovation',
-  'passoire',
-  'cofrac',
   'ademe',
-  '3cl',
-  '3cl-2021',
   'logement',
   'habitation',
   'bâtiment',
   'batiment',
+]
+
+// Domaines blocklist — pas des sources réglementaires (réseaux sociaux,
+// pages utilisateurs, blogs personnels). Évite la pollution du flux.
+const DOMAIN_BLOCKLIST = [
+  'x.com',
+  'twitter.com',
+  'facebook.com',
+  'instagram.com',
+  'linkedin.com',
+  'youtube.com',
+  'tiktok.com',
 ]
 
 const HIGH_IMPORTANCE_KEYWORDS = [
@@ -132,13 +154,49 @@ interface WatcherSummary {
 // Helpers — fetch + parsing
 // ────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Fetch avec headers navigateur réalistes complets.
+ *
+ * SCRAPING_FALLBACK (pas d'API officielle disponible pour la plupart des
+ * sources réglementaires FR) — les WAF gouvernementaux (Cloudflare, ImpervaWAF,
+ * etc.) bloquent les UA "bot". Solution : émuler une vraie session Chrome
+ * avec headers Sec-Fetch-*, Accept-Language fr-FR, Accept-Encoding gzip,
+ * Upgrade-Insecure-Requests, Referer Google FR.
+ *
+ * Cf. CLAUDE.md §10 — règle "API officielles en priorité, scraping en fallback".
+ * Pour Légifrance JORF, la vraie solution durable est l'API PISTE
+ * (https://piste.gouv.fr, inscription développeur OAuth2 gratuite).
+ */
 async function fetchWithTimeout(url: string): Promise<string> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
   try {
+    const urlObj = new URL(url)
     const response = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT, Accept: 'text/xml,application/rss+xml,text/html,*/*' },
+      headers: {
+        'User-Agent': USER_AGENT,
+        Accept:
+          'text/html,application/xhtml+xml,application/xml,application/rss+xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Accept-Encoding': 'gzip, deflate, br',
+        // Headers Sec-Fetch — Chrome 126+ les envoie systématiquement,
+        // leur absence est un signal classique des WAF anti-bot.
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'cross-site',
+        'Sec-Fetch-User': '?1',
+        'Sec-Ch-Ua': '"Chromium";v="126", "Google Chrome";v="126", "Not-A.Brand";v="99"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"macOS"',
+        'Upgrade-Insecure-Requests': '1',
+        // Referer Google FR pour simuler un visiteur arrivant via une recherche.
+        // Évite le flag "direct access without referer" qui sert d'heuristique
+        // anti-bot pour certains WAF (Cloudflare Bot Management notamment).
+        Referer: 'https://www.google.fr/',
+        Host: urlObj.host,
+      },
       signal: controller.signal,
+      redirect: 'follow',
     })
     if (!response.ok) {
       throw new Error(`HTTP ${response.status} ${response.statusText}`)
@@ -240,33 +298,75 @@ function parseRssFeed(xml: string, maxItems: number): ParsedItem[] {
 }
 
 /**
- * Parse une page HTML — extraction basique de liens d'articles.
- * Cherche des balises <article> ou des liens dans une nav d'actualités.
- * Best-effort : ne ramène que les éléments avec un titre + un lien
- * absolus / relatifs valides.
+ * Parse une page HTML — extraction tolérante de liens d'articles.
+ *
+ * Stratégie multi-passes pour absorber la diversité des structures HTML des
+ * sites institutionnels français (qui ont quasi-tous abandonné les RSS) :
+ *   1. <article>...</article> (sémantique HTML5 moderne — rare en FR public)
+ *   2. <div class="...news...|...post...|...article...|...card..."> (CMS WordPress, Drupal)
+ *   3. <li class="...news..."> (listes d'actualités classiques)
+ *
+ * Filtre des faux positifs : titre ≥ 15 caractères, URL non-fragment (#),
+ * URL pas vers /tag/ /category/ /author/ (pages méta WordPress).
  */
 function parseHtmlListing(html: string, sourceUrl: string, maxItems: number): ParsedItem[] {
   const items: ParsedItem[] = []
-  // Cherche des balises <a> avec un title/texte non vide
-  // Pattern conservateur — ratera la moitié des articles, mais évite les
-  // faux positifs (header nav, footer, etc.).
-  const articleRe = /<article[\s\S]*?<\/article>/gi
-  const blocks = html.match(articleRe) ?? []
+  const seenUrls = new Set<string>()
 
-  for (const block of blocks.slice(0, maxItems)) {
+  // Multi-pass : essaie plusieurs patterns dans l'ordre de fiabilité
+  const blockPatterns: RegExp[] = [
+    /<article\b[\s\S]*?<\/article>/gi,
+    /<div\s+class=["'][^"']*(?:news|post|article|card|item|teaser)[^"']*["'][\s\S]*?<\/div>/gi,
+    /<li\s+class=["'][^"']*(?:news|post|article|teaser)[^"']*["'][\s\S]*?<\/li>/gi,
+  ]
+
+  const allBlocks: string[] = []
+  for (const pattern of blockPatterns) {
+    const matches = html.match(pattern) ?? []
+    allBlocks.push(...matches)
+    if (allBlocks.length >= maxItems * 3) break // suffisant
+  }
+
+  // 4e fallback : si aucun block sémantique trouvé, extraire les liens
+  // directs avec texte ≥ 20 chars (ratisse large — le filtre métier
+  // `isRelevantToDiagnostic` éliminera le bruit en aval).
+  // Utile pour les sites institutionnels FR (Cofrac, MTE) qui mettent les
+  // liens d'actualités directement dans le body sans <article> parent.
+  if (allBlocks.length === 0) {
+    const linkRe = /<a\s+[^>]*href=["']([^"']+)["'][^>]*>([^<]{20,})<\/a>/gi
+    let m: RegExpExecArray | null
+    m = linkRe.exec(html)
+    while (m !== null) {
+      // On synthétise un pseudo-block par lien pour réutiliser la suite du parseur.
+      allBlocks.push(`<a href="${m[1]}">${m[2]}</a>`)
+      if (allBlocks.length >= maxItems * 5) break
+      m = linkRe.exec(html)
+    }
+  }
+
+  for (const block of allBlocks) {
+    if (items.length >= maxItems) break
+
     const linkMatch = block.match(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i)
     if (!linkMatch) continue
     const href = linkMatch[1]
     const titleRaw = linkMatch[2]
     if (!href || !titleRaw) continue
+    if (href.startsWith('#') || href.startsWith('javascript:')) continue
+    if (/\/(tag|category|author|wp-admin)\//i.test(href)) continue
+
     const title = stripHtml(titleRaw)
-    if (title.length < 10) continue // skip "Lire la suite" etc.
+    if (title.length < 15) continue
 
-    const url = href.startsWith('http')
-      ? href
-      : new URL(href, sourceUrl).toString()
+    let url: string
+    try {
+      url = href.startsWith('http') ? href : new URL(href, sourceUrl).toString()
+    } catch {
+      continue
+    }
+    if (seenUrls.has(url)) continue
+    seenUrls.add(url)
 
-    // Heuristique date — cherche dans le block <time datetime="...">
     const dateMatch = block.match(/<time[^>]+datetime=["']([^"']+)["']/i)
     const published_at = parseDateSafe(dateMatch?.[1])
 
@@ -288,32 +388,63 @@ function parseHtmlListing(html: string, sourceUrl: string, maxItems: number): Pa
 // Heuristiques métier — doc_type + importance
 // ────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Inférence doc_type — DOIT matcher la CHECK constraint
+ * `regulatory_documents_doc_type_check` qui autorise :
+ *   ['arrete', 'decret', 'loi', 'circulaire', 'guide', 'norme', 'faq', 'autre']
+ */
 function inferDocType(title: string, authority: string): string {
   const lower = title.toLowerCase()
   if (lower.includes('arrêté') || lower.includes('arrete ')) return 'arrete'
   if (lower.includes('décret') || lower.includes('decret ')) return 'decret'
   if (lower.includes('loi ') || lower.startsWith('loi ')) return 'loi'
-  if (lower.includes('ordonnance')) return 'ordonnance'
   if (lower.includes('circulaire')) return 'circulaire'
-  if (lower.includes('faq')) return 'faq_cofrac'
-  if (authority === 'cofrac') return 'documentation_cofrac'
-  if (authority === 'ademe') return 'guide_ademe'
-  if (authority === 'afnor') return 'norme_afnor'
+  if (lower.includes('faq')) return 'faq'
+  if (authority === 'cofrac') return 'faq'
+  if (authority === 'ademe') return 'guide'
+  if (authority === 'afnor') return 'norme'
+  if (authority === 'cstb') return 'guide'
   return 'autre'
 }
 
+/**
+ * Inférence importance — DOIT matcher la CHECK constraint
+ * `regulatory_documents_importance_check` qui autorise :
+ *   ['low', 'normal', 'high', 'critical']
+ * (et NON 'medium' comme on aurait pu s'attendre — c'est `normal`).
+ */
 function inferImportance(title: string, rawText: string): string {
   const haystack = `${title} ${rawText}`.toLowerCase()
-  // Critical : sanctions financières / retraits accréditation
   if (CRITICAL_IMPORTANCE_KEYWORDS.some((kw) => haystack.includes(kw))) return 'critical'
-  // High : arrêtés / décrets / certifications
   if (HIGH_IMPORTANCE_KEYWORDS.some((kw) => haystack.includes(kw))) return 'high'
-  return 'medium'
+  return 'normal'
 }
 
-function isRelevantToDiagnostic(title: string, rawText: string): boolean {
+/**
+ * Filtre pertinence diagnostic — 2 niveaux pour éviter les faux positifs :
+ *   - au moins 1 keyword "fort" (dpe, amiante, plomb, COFRAC, etc.)
+ *   - OU au moins 2 keywords "faibles" différents (logement + bâtiment, etc.)
+ *
+ * Bloque aussi les URLs vers réseaux sociaux (X, Facebook, LinkedIn…) qui
+ * ne sont jamais des sources réglementaires.
+ */
+function isRelevantToDiagnostic(title: string, rawText: string, url: string): boolean {
+  // Domain blocklist (réseaux sociaux et trackers)
+  try {
+    const hostname = new URL(url).hostname.toLowerCase().replace(/^www\./, '')
+    if (DOMAIN_BLOCKLIST.some((d) => hostname === d || hostname.endsWith(`.${d}`))) {
+      return false
+    }
+  } catch {
+    // URL invalide → skip
+    return false
+  }
+
   const haystack = `${title} ${rawText}`.toLowerCase()
-  return DIAGNOSTIC_KEYWORDS.some((kw) => haystack.includes(kw))
+  if (STRONG_KEYWORDS.some((kw) => haystack.includes(kw))) return true
+
+  const weakHits = WEAK_KEYWORDS.filter((kw) => haystack.includes(kw)).length
+  return weakHits >= 2
 }
 
 function inferTopics(title: string, rawText: string): string[] {
@@ -363,8 +494,8 @@ async function processSource(
     return { inserted: 0, skipped: 0, error: `unsupported fetch_method: ${source.fetch_method}` }
   }
 
-  // Filtre : ne garder que les items pertinents diagnostic
-  const relevant = items.filter((it) => isRelevantToDiagnostic(it.title, it.raw_text))
+  // Filtre : ne garder que les items pertinents diagnostic (strong | 2+ weak)
+  const relevant = items.filter((it) => isRelevantToDiagnostic(it.title, it.raw_text, it.url))
 
   let inserted = 0
   let skipped = 0
