@@ -38,7 +38,7 @@ export function NewDocumentButton({ current }: NewDocumentButtonProps) {
 
   const onTarifClick = useCallback(() => {
     toast.info('Création de produit', {
-      description: 'La modal de catalogue arrive avec la V1.5 — vous serez notifié.',
+      description: 'La modal de catalogue arrive avec la V1.5 — tu seras notifié.',
     })
   }, [])
 

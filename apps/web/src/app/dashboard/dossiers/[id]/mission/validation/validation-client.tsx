@@ -238,7 +238,7 @@ export function ValidationClient({
           description: res.error,
         })
       } else {
-        toast.success('Synchronisation lancée — vous serez notifié à la fin.')
+        toast.success('Synchronisation lancée — tu seras notifié à la fin.')
       }
     })
   }

@@ -239,7 +239,7 @@ export async function submitDpeLead(raw: SubmitDpeLeadInput): Promise<SubmitDpeL
       if (!ipVerdict.allowed) {
         return {
           ok: false,
-          error: 'Trop de demandes depuis votre connexion. Réessayez dans 1 heure.',
+          error: 'Trop de demandes depuis ta connexion. Réessaie dans 1 heure.',
         }
       }
     }
@@ -354,7 +354,7 @@ export async function submitDpeLead(raw: SubmitDpeLeadInput): Promise<SubmitDpeL
     return {
       ok: true,
       message:
-        'Votre estimation a bien été calculée. Notre équipe vous met en relation avec un diagnostiqueur sous 24h.',
+        'Ton estimation a bien été calculée. Notre équipe te met en relation avec un diagnostiqueur sous 24h.',
     }
   }
 
@@ -386,7 +386,7 @@ export async function submitDpeLead(raw: SubmitDpeLeadInput): Promise<SubmitDpeL
     recipientCount,
     message:
       recipientCount > 0
-        ? `Votre demande a été transmise à ${recipientCount} diagnostiqueur${recipientCount > 1 ? 's' : ''} certifié${recipientCount > 1 ? 's' : ''}.`
-        : 'Votre demande est enregistrée. Notre équipe vous met en relation avec un diagnostiqueur sous 24h.',
+        ? `Ta demande a été transmise à ${recipientCount} diagnostiqueur${recipientCount > 1 ? 's' : ''} certifié${recipientCount > 1 ? 's' : ''}.`
+        : 'Ta demande est enregistrée. Notre équipe te met en relation avec un diagnostiqueur sous 24h.',
   }
 }

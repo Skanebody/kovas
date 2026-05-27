@@ -8,12 +8,12 @@
  * 20 items pour la collecte terrain (synthèse des 87 points légaux).
  */
 
-import { TRIGGER_DELAYS, type DiagnosticChecklist } from './types'
+import { type DiagnosticChecklist, TRIGGER_DELAYS } from './types'
 
 export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
   diagnostic: 'electricite',
   short_label: 'ELEC',
-  long_label: 'État de l\'installation intérieure d\'électricité',
+  long_label: "État de l'installation intérieure d'électricité",
   sections: [
     {
       id: 'scope',
@@ -23,13 +23,14 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_install_age',
           field_name: 'elec.install_age',
           description_short: 'Installation > 15 ans',
-          description_full: 'Confirmation que l\'installation a plus de 15 ans (obligation diagnostic).',
+          description_full:
+            "Confirmation que l'installation a plus de 15 ans (obligation diagnostic).",
           scope: 'global',
           required: true,
           severity: 'critical',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.fast,
-          trigger_question_text: 'L\'installation électrique a-t-elle bien plus de 15 ans ?',
+          trigger_question_text: "L'installation électrique a-t-elle bien plus de 15 ans ?",
           keywords: ['15 ans', 'installation', 'ancienneté', 'rénovée'],
           diagnostic: 'electricite',
         },
@@ -57,7 +58,8 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_disjoncteur_general',
           field_name: 'elec.disjoncteur_general',
           description_short: 'Disjoncteur général présent et accessible',
-          description_full: 'Présence AGCP (disjoncteur de branchement), accessible, manœuvrable, calibré.',
+          description_full:
+            'Présence AGCP (disjoncteur de branchement), accessible, manœuvrable, calibré.',
           scope: 'global',
           required: true,
           severity: 'critical',
@@ -71,7 +73,8 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_disjoncteur_caliber',
           field_name: 'elec.disjoncteur_calibre',
           description_short: 'Calibre disjoncteur (A)',
-          description_full: 'Calibre du disjoncteur (15/30, 30/45, 60 A) — adapté à la puissance souscrite.',
+          description_full:
+            'Calibre du disjoncteur (15/30, 30/45, 60 A) — adapté à la puissance souscrite.',
           scope: 'global',
           required: true,
           severity: 'important',
@@ -91,13 +94,15 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_id_30ma',
           field_name: 'elec.id_30ma_count',
           description_short: 'Interrupteurs différentiels 30 mA',
-          description_full: 'Nombre et fonctionnement des ID 30 mA (type A pour plaque, type AC général).',
+          description_full:
+            'Nombre et fonctionnement des ID 30 mA (type A pour plaque, type AC général).',
           scope: 'global',
           required: true,
           severity: 'critical',
           requires_photo: true,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Combien d\'interrupteurs différentiels 30 mA, et fonctionnent-ils ?',
+          trigger_question_text:
+            "Combien d'interrupteurs différentiels 30 mA, et fonctionnent-ils ?",
           keywords: ['différentiel', '30 ma', 'interrupteur', 'id', 'type a', 'type ac'],
           diagnostic: 'electricite',
         },
@@ -105,7 +110,8 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_id_test',
           field_name: 'elec.id_test_result',
           description_short: 'Test bouton ID',
-          description_full: 'Vérification fonctionnement par bouton test (déclenchement instantané).',
+          description_full:
+            'Vérification fonctionnement par bouton test (déclenchement instantané).',
           scope: 'per_equipment',
           required: true,
           severity: 'critical',
@@ -125,7 +131,8 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_prise_terre',
           field_name: 'elec.terre_present',
           description_short: 'Prise de terre présente',
-          description_full: 'Présence prise de terre + barrette de coupure + valeur résistance < 100 Ω.',
+          description_full:
+            'Présence prise de terre + barrette de coupure + valeur résistance < 100 Ω.',
           scope: 'global',
           required: true,
           severity: 'critical',
@@ -153,13 +160,15 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_liaison_equipotentielle',
           field_name: 'elec.liaison_eq',
           description_short: 'Liaison équipotentielle salle de bain',
-          description_full: 'Liaison équipotentielle locale (LEL) en salle de bain, raccordée à terre.',
+          description_full:
+            'Liaison équipotentielle locale (LEL) en salle de bain, raccordée à terre.',
           scope: 'global',
           required: true,
           severity: 'critical',
           requires_photo: true,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'La liaison équipotentielle locale en salle de bain est-elle bien raccordée ?',
+          trigger_question_text:
+            'La liaison équipotentielle locale en salle de bain est-elle bien raccordée ?',
           keywords: ['liaison', 'équipotentielle', 'lel', 'salle de bain', 'masse'],
           diagnostic: 'electricite',
         },
@@ -187,13 +196,15 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_disjoncteur_divisionnaire',
           field_name: 'elec.disjoncteurs_div',
           description_short: 'Disjoncteurs divisionnaires',
-          description_full: 'Calibres adaptés aux circuits (10A éclairage, 16A prises, 20A spéciaux, 32A cuisson).',
+          description_full:
+            'Calibres adaptés aux circuits (10A éclairage, 16A prises, 20A spéciaux, 32A cuisson).',
           scope: 'global',
           required: true,
           severity: 'critical',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Les calibres des disjoncteurs divisionnaires sont-ils adaptés aux circuits ?',
+          trigger_question_text:
+            'Les calibres des disjoncteurs divisionnaires sont-ils adaptés aux circuits ?',
           keywords: ['disjoncteur', 'divisionnaire', '10a', '16a', '20a', '32a', 'circuit'],
           diagnostic: 'electricite',
         },
@@ -249,13 +260,15 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_materiel_vétuste',
           field_name: 'elec.materiel_vetuste',
           description_short: 'Matériel vétuste / inadapté',
-          description_full: 'Fils dénudés, ruban adhésif, dominos accessibles, prolongateurs en série.',
+          description_full:
+            'Fils dénudés, ruban adhésif, dominos accessibles, prolongateurs en série.',
           scope: 'per_room',
           required: true,
           severity: 'critical',
           requires_photo: true,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Repérez-vous du matériel vétuste, fils dénudés ou dominos accessibles ?',
+          trigger_question_text:
+            'Repérez-vous du matériel vétuste, fils dénudés ou dominos accessibles ?',
           keywords: ['vétuste', 'dénudé', 'domino', 'prolongateur', 'rallonge', 'multiprise'],
           diagnostic: 'electricite',
         },
@@ -263,13 +276,15 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           id: 'elec_sdb_volumes',
           field_name: 'elec.sdb_volumes',
           description_short: 'Respect volumes salle de bain',
-          description_full: 'Vérification respect des volumes V0/V1/V2 (indice IP, hauteur, distance).',
+          description_full:
+            'Vérification respect des volumes V0/V1/V2 (indice IP, hauteur, distance).',
           scope: 'per_room',
           required: true,
           severity: 'critical',
           requires_photo: true,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Dans la salle de bain, les volumes V0/V1/V2 sont-ils bien respectés ?',
+          trigger_question_text:
+            'Dans la salle de bain, les volumes V0/V1/V2 sont-ils bien respectés ?',
           keywords: ['volume', 'v0', 'v1', 'v2', 'salle de bain', 'ip', 'douche', 'baignoire'],
           diagnostic: 'electricite',
         },
@@ -283,7 +298,8 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           severity: 'important',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Les circuits spécialisés (cuisson, lave-linge) sont-ils bien dédiés ?',
+          trigger_question_text:
+            'Les circuits spécialisés (cuisson, lave-linge) sont-ils bien dédiés ?',
           keywords: ['circuit spécialisé', 'cuisson', 'lave-linge', 'lave-vaisselle', '32a', '20a'],
           diagnostic: 'electricite',
         },
@@ -303,7 +319,7 @@ export const ELECTRICITE_CHECKLIST: DiagnosticChecklist = {
           severity: 'critical',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Combien d\'anomalies au total, et dans quelles catégories ?',
+          trigger_question_text: "Combien d'anomalies au total, et dans quelles catégories ?",
           keywords: ['anomalie', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'décompte'],
           diagnostic: 'electricite',
         },

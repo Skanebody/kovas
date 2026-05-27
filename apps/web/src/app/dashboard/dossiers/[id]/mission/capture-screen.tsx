@@ -225,7 +225,7 @@ export function CaptureScreen({ dossier, orgId, rooms: initialRooms }: CaptureSc
       setConsolidate({
         phase: 'error',
         message: isAbort
-          ? 'La consolidation a dépassé 60 secondes. Réessayez avec moins de pièces ou vérifiez votre connexion.'
+          ? 'La consolidation a dépassé 60 secondes. Réessaie avec moins de pièces ou vérifie ta connexion.'
           : e instanceof Error
             ? e.message
             : 'Erreur réseau',

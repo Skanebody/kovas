@@ -221,8 +221,8 @@ export function DossiersListClient({ dossiers, initialTab }: DossiersListClientP
             }
             description={
               active === 'all'
-                ? "Profitez-en pour préparer votre prochaine mission — un dossier regroupe tous les diagnostics d'une même visite."
-                : 'Sélectionnez un autre filtre ou créez un nouveau dossier.'
+                ? "Profite-en pour préparer ta prochaine mission — un dossier regroupe tous les diagnostics d'une même visite."
+                : 'Sélectionne un autre filtre ou crée un nouveau dossier.'
             }
             action={
               active === 'all' ? (

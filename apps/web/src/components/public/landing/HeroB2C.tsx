@@ -87,12 +87,12 @@ export function HeroB2C() {
       />
       <div className="relative mx-auto max-w-4xl text-center space-y-8">
         <h1 className="font-display font-light text-[40px] sm:text-[56px] md:text-[68px] leading-[1.05] tracking-tight text-ink">
-          Trouvez votre{' '}
+          Trouve ton{' '}
           <span className="font-serif italic font-normal">diagnostiqueur immobilier</span>{' '}
           certifié
         </h1>
         <p className="text-base sm:text-lg text-ink-mute max-w-2xl mx-auto leading-relaxed">
-          13 000 professionnels certifiés : DPE, Amiante, Plomb, Gaz, Électricité. Demandez un
+          13 000 professionnels certifiés : DPE, Amiante, Plomb, Gaz, Électricité. Demande un
           devis gratuit en 2 minutes.
         </p>
 
@@ -118,7 +118,7 @@ export function HeroB2C() {
                 }}
                 onFocus={() => setShowSugg(true)}
                 onBlur={() => setTimeout(() => setShowSugg(false), 200)}
-                placeholder="Saisissez votre adresse ou ville"
+                placeholder="Saisis ton adresse ou ville"
                 className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-ink-ghost"
                 autoComplete="street-address"
               />
@@ -196,7 +196,7 @@ export function HeroB2C() {
         </ul>
 
         <p className="text-xs text-ink-faint pt-2">
-          Pas (encore) de diagnostiqueur dans votre ville ?{' '}
+          Pas (encore) de diagnostiqueur dans ta ville ?{' '}
           <Link
             href="/trouver-un-diagnostiqueur"
             className="text-ink underline-offset-4 hover:underline"

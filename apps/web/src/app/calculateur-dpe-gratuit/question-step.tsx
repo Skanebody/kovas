@@ -16,6 +16,23 @@
  */
 
 import {
+  CONTEXT_LABEL,
+  type CalculatorAnswers,
+  type DpeClass,
+  HEATING_LABEL,
+  type HeatingType,
+  ISOLATION_LABEL,
+  type IsolationLevel,
+  OCCUPATION_LABEL,
+  type OccupationMode,
+  type ProjectContext,
+  type PropertyType,
+  type QuestionKey,
+  YEAR_BUCKET_LABEL,
+  type YearBucket,
+} from '@/lib/dpe-calculator/question-tree'
+import { cn } from '@/lib/utils'
+import {
   Box,
   Building2,
   Clock,
@@ -31,23 +48,6 @@ import {
   Zap,
 } from 'lucide-react'
 import { useId } from 'react'
-import { cn } from '@/lib/utils'
-import {
-  CONTEXT_LABEL,
-  HEATING_LABEL,
-  ISOLATION_LABEL,
-  OCCUPATION_LABEL,
-  YEAR_BUCKET_LABEL,
-  type CalculatorAnswers,
-  type DpeClass,
-  type HeatingType,
-  type IsolationLevel,
-  type OccupationMode,
-  type ProjectContext,
-  type PropertyType,
-  type QuestionKey,
-  type YearBucket,
-} from '@/lib/dpe-calculator/question-tree'
 
 interface QuestionStepProps {
   questionKey: QuestionKey
@@ -95,13 +95,9 @@ function RadioCard({ selected, onClick, icon, label, hint }: RadioCardProps) {
       ) : null}
       <span className="flex-1">
         <span className="block text-[14px] font-semibold text-ink">{label}</span>
-        {hint ? (
-          <span className="mt-0.5 block text-[12px] text-ink-mute">{hint}</span>
-        ) : null}
+        {hint ? <span className="mt-0.5 block text-[12px] text-ink-mute">{hint}</span> : null}
       </span>
-      {selected ? (
-        <span aria-hidden className="size-2.5 rounded-full bg-chartreuse-deep" />
-      ) : null}
+      {selected ? <span aria-hidden className="size-2.5 rounded-full bg-chartreuse-deep" /> : null}
     </button>
   )
 }
@@ -188,7 +184,7 @@ function PropertyTypeStep({
 }) {
   return (
     <StepContainer
-      title="Quel type de bien souhaitez-vous estimer ?"
+      title="Quel type de bien souhaites-tu estimer ?"
       hint="Le type influence légèrement la méthode d'estimation."
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -225,7 +221,7 @@ function SurfaceStep({
   return (
     <StepContainer
       title="Quelle est la surface habitable du bien ?"
-      hint="Surface au sens loi Boutin ou Carrez si vous la connaissez."
+      hint="Surface au sens loi Boutin ou Carrez si tu la connais."
     >
       <div className="space-y-5">
         <div className="flex items-center justify-center gap-4">
@@ -325,27 +321,19 @@ function ExistingDpeStep({
   onChange: (patch: Partial<CalculatorAnswers>) => void
 }) {
   const known: 'yes' | 'no' | 'unsure' | null =
-    value === null
-      ? null
-      : value.known === true
-        ? 'yes'
-        : value.known === false
-          ? 'no'
-          : 'unsure'
+    value === null ? null : value.known === true ? 'yes' : value.known === false ? 'no' : 'unsure'
 
   const currentClass = value && value.known === true ? value.value : null
 
   return (
     <StepContainer
-      title="Disposez-vous déjà d'un DPE pour ce bien ?"
+      title="Disposes-tu déjà d'un DPE pour ce bien ?"
       hint="Si oui, cela nous aide à calibrer plus finement l'estimation."
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <RadioCard
           selected={known === 'yes'}
-          onClick={() =>
-            onChange({ existing_dpe: { known: true, value: currentClass } })
-          }
+          onClick={() => onChange({ existing_dpe: { known: true, value: currentClass } })}
           label="Oui"
           hint="Précisez la classe ci-dessous"
         />
@@ -374,9 +362,7 @@ function ExistingDpeStep({
                 <button
                   key={cls}
                   type="button"
-                  onClick={() =>
-                    onChange({ existing_dpe: { known: true, value: cls } })
-                  }
+                  onClick={() => onChange({ existing_dpe: { known: true, value: cls } })}
                   aria-pressed={isSelected}
                   className={cn(
                     'flex size-12 items-center justify-center rounded-lg border',
@@ -446,18 +432,12 @@ function IsolationStep({
   value: IsolationLevel | null
   onChange: (patch: Partial<CalculatorAnswers>) => void
 }) {
-  const levels: IsolationLevel[] = [
-    'tres_bonne',
-    'bonne',
-    'moyenne',
-    'mauvaise',
-    'inconnue',
-  ]
+  const levels: IsolationLevel[] = ['tres_bonne', 'bonne', 'moyenne', 'mauvaise', 'inconnue']
   const currentIndex = value ? levels.indexOf(value) : 2
 
   return (
     <StepContainer
-      title="Comment estimez-vous l'isolation du bien ?"
+      title="Comment estimes-tu l'isolation du bien ?"
       hint="Murs, combles, fenêtres : appréciation globale."
     >
       <div className="space-y-4">
@@ -558,15 +538,13 @@ function ContextStep({
   const current = value ?? []
 
   function toggle(ctx: ProjectContext) {
-    const next = current.includes(ctx)
-      ? current.filter((c) => c !== ctx)
-      : [...current, ctx]
+    const next = current.includes(ctx) ? current.filter((c) => c !== ctx) : [...current, ctx]
     onChange({ context: next.length > 0 ? next : [] })
   }
 
   return (
     <StepContainer
-      title="Pour quel projet souhaitez-vous une estimation ?"
+      title="Pour quel projet souhaites-tu une estimation ?"
       hint="Plusieurs choix possibles."
     >
       <div className="flex flex-wrap gap-2.5">
@@ -583,8 +561,8 @@ function ContextStep({
       <div className="mt-5 flex items-start gap-2 rounded-md border border-border bg-paper px-3 py-2.5">
         <Box className="size-4 mt-0.5 text-ink-mute" aria-hidden />
         <p className="text-[12px] leading-relaxed text-ink-mute">
-          Vos réponses restent confidentielles et nous permettent de mettre en relation
-          avec un diagnostiqueur certifié près de chez vous si vous le souhaitez.
+          Tes réponses restent confidentielles et nous permettent de mettre en relation avec un
+          diagnostiqueur certifié près de chez toi si tu le souhaites.
         </p>
       </div>
     </StepContainer>

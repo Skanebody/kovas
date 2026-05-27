@@ -38,8 +38,8 @@ export function LandingPricingTeaser() {
             Deux produits. Un prix juste.
           </h2>
           <p className="text-ink-mute">
-            Choisissez ce dont vous avez besoin : visibilité B2C avec l'Annuaire, productivité
-            terrain avec KOVAS, ou les deux en bundle remisé.
+            Choisis ce dont tu as besoin : visibilité B2C avec l'Annuaire, productivité terrain avec
+            KOVAS, ou les deux en bundle remisé.
           </p>
         </div>
 

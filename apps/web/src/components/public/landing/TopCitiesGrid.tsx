@@ -45,7 +45,7 @@ export function TopCitiesGrid() {
             04 · Annuaire
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">
-            Trouvez un diagnostiqueur dans votre ville
+            Trouve un diagnostiqueur dans ta ville
           </h2>
           <p className="text-ink-mute leading-relaxed">
             L&apos;annuaire le plus complet de France, mis à jour quotidiennement depuis

@@ -269,7 +269,7 @@ export function QuoteWizard(props: QuoteWizardProps) {
   function toggleMajoration(kind: 'urgency' | 'weekend' | 'evening', enabled: boolean) {
     const cfg = props.pricingConfig.majorations
     if (!cfg) {
-      toast.error('Configurez vos majorations dans Compte → Tarifs avant de les utiliser.')
+      toast.error('Configure tes majorations dans Compte → Tarifs avant de les utiliser.')
       return
     }
     if (enabled) {
@@ -454,7 +454,7 @@ export function QuoteWizard(props: QuoteWizardProps) {
         <Section title="4. Frais de déplacement" eyebrow="LOGISTIQUE">
           {!props.pricingConfig.travelFees ? (
             <p className="text-[13px] text-ink-mute">
-              Configurez vos frais de déplacement dans{' '}
+              Configure tes frais de déplacement dans{' '}
               <Link href="/dashboard/compte/tarifs" className="text-ink underline">
                 Compte → Tarifs
               </Link>{' '}
@@ -462,13 +462,13 @@ export function QuoteWizard(props: QuoteWizardProps) {
             </p>
           ) : !selectedProperty ? (
             <p className="text-[13px] text-ink-mute">
-              Sélectionnez un bien (étape 2) pour calculer automatiquement les frais, ou ajoutez une
+              Sélectionne un bien (étape 2) pour calculer automatiquement les frais, ou ajoute une
               ligne libre.
             </p>
           ) : distanceKm === null ? (
             <p className="text-[13px] text-ink-mute">
-              Coordonnées GPS du bien indisponibles — saisissez manuellement via « Ligne libre »
-              dans les prestations.
+              Coordonnées GPS du bien indisponibles — saisis manuellement via « Ligne libre » dans
+              les prestations.
             </p>
           ) : (
             <div className="flex items-center gap-3 flex-wrap">
@@ -489,7 +489,7 @@ export function QuoteWizard(props: QuoteWizardProps) {
         <Section title="5. Majorations (optionnel)" eyebrow="CONTEXTE INTERVENTION">
           {!props.pricingConfig.majorations ? (
             <p className="text-[13px] text-ink-mute">
-              Configurez vos majorations dans Compte → Tarifs.
+              Configure tes majorations dans Compte → Tarifs.
             </p>
           ) : (
             <div className="flex flex-wrap gap-3">

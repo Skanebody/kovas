@@ -54,10 +54,10 @@ export function Step6SireneForm() {
           Étape 6 sur 7 — Entreprise SIRENE
         </p>
         <h1 className="font-serif italic text-3xl text-[#0F1419] leading-tight">
-          Vérification de votre entreprise.
+          Vérification de ton entreprise.
         </h1>
         <p className="text-[14px] text-[#0F1419]/70">
-          Nous croisons votre SIRET avec l&apos;API INSEE pour récupérer automatiquement raison
+          Nous croisons ton SIRET avec l&apos;API INSEE pour récupérer automatiquement raison
           sociale, code APE et dirigeant.
         </p>
       </div>

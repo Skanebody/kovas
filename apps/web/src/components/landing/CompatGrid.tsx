@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import {
   AnalysImmoLogo,
   ArgosLogo,
@@ -8,7 +9,6 @@ import {
   OrisLogo,
   WinDiagnosticsLogo,
 } from './CompatLogos'
-import type { ReactNode } from 'react'
 
 interface CompatLogo {
   name: string
@@ -46,7 +46,7 @@ export function CompatGrid() {
         Écosystème
       </p>
       <p className="text-[20px] sm:text-[26px] text-[#0F1419]/72 mb-12 font-normal max-w-[640px] mx-auto leading-snug">
-        <strong className="text-[#0F1419] font-semibold">Compagnon de votre logiciel actuel.</strong>{' '}
+        <strong className="text-[#0F1419] font-semibold">Compagnon de ton logiciel actuel.</strong>{' '}
         Compatible avec les 8 logiciels métier majeurs du marché français.
       </p>
 
@@ -68,8 +68,8 @@ export function CompatGrid() {
 
       {/* Disclaimer juridique — citation factuelle de marques tierces */}
       <p className="mt-8 max-w-[640px] mx-auto font-mono text-[11px] text-[#0F1419]/35 leading-relaxed">
-        Les marques citées appartiennent à leurs propriétaires respectifs. KOVAS n'est ni affilié
-        à, ni endossé par ces éditeurs ; la mention de compatibilité signale une interopérabilité
+        Les marques citées appartiennent à leurs propriétaires respectifs. KOVAS n'est ni affilié à,
+        ni endossé par ces éditeurs ; la mention de compatibilité signale une interopérabilité
         technique.
       </p>
     </section>

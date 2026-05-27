@@ -54,7 +54,7 @@ export function DayComparison() {
             Mardi, 3 missions DPE.
           </h2>
           <p className="text-[17px] sm:text-[20px] text-[#0F1419]/72 leading-relaxed">
-            La même journée. Avec KOVAS et sans. Voici à quoi ressemble votre soir.
+            La même journée. Avec KOVAS et sans. Voici à quoi ressemble ton soir.
           </p>
         </div>
 

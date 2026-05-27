@@ -90,7 +90,7 @@ export default async function UploadPhotoPage({ params }: PageProps) {
           expiresAt={request.expiresAt}
         />
         <footer className="text-center text-[11px] text-ink-mute mt-8 leading-relaxed">
-          Lien sécurisé valable 48 heures. La photo est transmise uniquement à votre diagnostiqueur.
+          Lien sécurisé valable 48 heures. La photo est transmise uniquement à ton diagnostiqueur.
           <br />
           KOVAS — édité par NEXUS 1993 (SASU au capital de 500 €).
         </footer>

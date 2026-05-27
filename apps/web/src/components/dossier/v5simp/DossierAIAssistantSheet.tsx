@@ -36,7 +36,7 @@ const WELCOME_MESSAGE: AIMessage = {
   id: 'welcome',
   role: 'assistant',
   content:
-    'Bonjour, je suis votre assistant KOVAS. Je peux répondre à vos questions sur ce dossier (réglementation, cohérence des saisies, équipements). Que puis-je faire pour vous ?',
+    'Bonjour, je suis ton assistant KOVAS. Je peux répondre à tes questions sur ce dossier (réglementation, cohérence des saisies, équipements). Que puis-je faire pour toi ?',
 }
 
 function uid(): string {
@@ -116,11 +116,7 @@ export function DossierAIAssistantSheet({
         const data = (await response.json().catch(() => ({}))) as { error?: string }
         const err = data.error ?? `HTTP ${response.status}`
         setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId
-              ? { ...m, content: `Erreur : ${err}` }
-              : m,
-          ),
+          prev.map((m) => (m.id === assistantId ? { ...m, content: `Erreur : ${err}` } : m)),
         )
         toast.error("L'assistant a rencontré une erreur.")
         return
@@ -154,9 +150,7 @@ export function DossierAIAssistantSheet({
             if (parsed.type === 'delta') {
               setMessages((prev) =>
                 prev.map((m) =>
-                  m.id === assistantId
-                    ? { ...m, content: m.content + parsed.text }
-                    : m,
+                  m.id === assistantId ? { ...m, content: m.content + parsed.text } : m,
                 ),
               )
             } else if (parsed.type === 'error') {
@@ -179,9 +173,7 @@ export function DossierAIAssistantSheet({
       const message = err instanceof Error ? err.message : 'Erreur réseau'
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === assistantId
-            ? { ...m, content: m.content || `Erreur : ${message}` }
-            : m,
+          m.id === assistantId ? { ...m, content: m.content || `Erreur : ${message}` } : m,
         ),
       )
       toast.error(message)
@@ -241,18 +233,13 @@ export function DossierAIAssistantSheet({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Posez votre question…"
+            placeholder="Pose ta question…"
             aria-label="Message à l'assistant KOVAS"
             disabled={streaming}
             maxLength={2000}
             className="flex-1 h-10 rounded-pill border border-rule bg-paper px-4 text-[13px] text-ink placeholder:text-ink-mute focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/30 disabled:opacity-60"
           />
-          <Button
-            type="submit"
-            size="icon"
-            aria-label="Envoyer"
-            disabled={!canSend}
-          >
+          <Button type="submit" size="icon" aria-label="Envoyer" disabled={!canSend}>
             <Send className="size-4" />
           </Button>
         </form>

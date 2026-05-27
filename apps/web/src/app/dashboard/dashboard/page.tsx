@@ -47,34 +47,54 @@ export default async function DashboardPage() {
         description={visitLabel}
       />
 
-      {/* Contenu épuré : action du jour + sections minimes (pattern SIMP-2)
-          Cap à 800px pour la lecture confortable, dans le max-w-7xl du layout. */}
-      <div className="mx-auto w-full max-w-[800px] space-y-6 md:space-y-10">
-        {/* Action unique du jour */}
-        <ActionDuJour />
+      {/*
+        Layout responsive 2026-05-27 (fix Benjamin) :
+          - Mobile/tablet (default → md)  : stack vertical 1 colonne, espacement
+            généreux. Lecture séquentielle naturelle.
+          - lg (≥1024 px)                  : grille 2 colonnes — main 1fr +
+            aside 360 px. La colonne main reste la lecture principale ("Action
+            du jour" + "Aujourd'hui" + "Insights IA" + bandeau upgrade) tandis
+            que la sidebar regroupe les compteurs / stats / renouvellements
+            (référence rapide en jetant un œil).
+          - xl (≥1280 px)                  : la sidebar passe à 380 px pour
+            respirer encore plus sur grand écran.
+        Avant : `max-w-[800px] mx-auto` figeait toute la page à 800 px et
+        gâchait 600+ px d'espace vide sur grand écran.
+      */}
+      <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_380px] lg:gap-10 xl:gap-12 lg:items-start">
+        {/* COLONNE PRINCIPALE — lecture séquentielle (CTA → mission jour → IA → upgrade) */}
+        <div className="space-y-6 md:space-y-10 min-w-0">
+          {/* Action unique du jour */}
+          <ActionDuJour />
 
-        {/* Liste compacte RDV du jour */}
-        <AujourdhuiSection />
+          {/* Liste compacte RDV du jour */}
+          <AujourdhuiSection />
 
-        {/* Compteurs à traiter */}
-        <ATraiterSection />
+          {/* Section 5 — Insights IA contextuels (2-4 cartes actionnables) */}
+          <InsightsIASection />
 
-        {/* Mini-stats semaine */}
-        <CetteSemaineSection />
+          {/* Bandeau upgrade contextuel annuaire/logiciel (Lot Annuaire §6) —
+              n'affiche rien si user déjà sur Pro/Cabinet/+. Lecture interne
+              des souscriptions actives via Supabase. */}
+          <AnnuaireUpgradeBanner />
+        </div>
 
-        {/* Section 5 — Insights IA contextuels (2-4 cartes actionnables) */}
-        <InsightsIASection />
+        {/* SIDEBAR — référence rapide (compteurs, mini-stats, renouvellements)
+            Sticky en lg+ pour rester visible pendant le scroll de la colonne
+            principale. Top calibré pour passer sous le header sticky (h-16). */}
+        <aside className="space-y-6 md:space-y-8 lg:sticky lg:top-24 min-w-0">
+          {/* Compteurs à traiter */}
+          <ATraiterSection />
 
-        {/* Widget renouvellements certifications (A1.3.10) — Lot B82 */}
-        <RenewalsWidget />
+          {/* Mini-stats semaine */}
+          <CetteSemaineSection />
 
-        {/* Widget stats secteur 7 jours (GC4 diag-facing) — Lot B82 */}
-        <ProfessionStatsWidget />
+          {/* Widget renouvellements certifications (A1.3.10) — Lot B82 */}
+          <RenewalsWidget />
 
-        {/* Bandeau upgrade contextuel annuaire/logiciel (Lot Annuaire §6) —
-            n'affiche rien si user déjà sur Pro/Cabinet/+. Lecture interne
-            des souscriptions actives via Supabase. */}
-        <AnnuaireUpgradeBanner />
+          {/* Widget stats secteur 7 jours (GC4 diag-facing) — Lot B82 */}
+          <ProfessionStatsWidget />
+        </aside>
       </div>
     </div>
   )

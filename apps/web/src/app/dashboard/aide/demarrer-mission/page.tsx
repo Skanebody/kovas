@@ -14,8 +14,8 @@ import {
   CheckCircle2,
   Command,
   Eye,
-  ListTree,
   Lightbulb,
+  ListTree,
   Play,
   Sparkles,
   Wifi,
@@ -24,8 +24,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Démarrer une mission — Aide',
-  description:
-    "Six points d'accès au mode mission tchat IA depuis n'importe où dans KOVAS.",
+  description: "Six points d'accès au mode mission tchat IA depuis n'importe où dans KOVAS.",
 }
 
 interface AccessPoint {
@@ -49,7 +48,7 @@ const ACCESS_POINTS: ReadonlyArray<AccessPoint> = [
     number: 2,
     title: 'Sidebar — Item "Capture"',
     description:
-      'Bouton "Capture" mis en avant chartreuse dans la sidebar gauche. Au clic, redirige intelligemment vers : la mission en cours (si vous étiez en train de saisir), le mode mission du RDV imminent (< 60 min), ou le wizard nouveau dossier si rien d\'urgent.',
+      'Bouton "Capture" mis en avant chartreuse dans la sidebar gauche. Au clic, redirige intelligemment vers : la mission en cours (si tu étais en train de saisir), le mode mission du RDV imminent (< 60 min), ou le wizard nouveau dossier si rien d\'urgent.',
     where: 'Sidebar → "Capture"',
     icon: Sparkles,
   },
@@ -57,7 +56,7 @@ const ACCESS_POINTS: ReadonlyArray<AccessPoint> = [
     number: 3,
     title: 'Calendrier — Bouton "Démarrer"',
     description:
-      'Sur chaque RDV du calendrier (Jour/Semaine/Mois/Agenda), un clic ouvre la fiche RDV avec un bouton chartreuse "Démarrer la mission". Idéal en mobilité quand vous arrivez sur place sans passer par le dossier.',
+      'Sur chaque RDV du calendrier (Jour/Semaine/Mois/Agenda), un clic ouvre la fiche RDV avec un bouton chartreuse "Démarrer la mission". Idéal en mobilité quand tu arrives sur place sans passer par le dossier.',
     where: '/dashboard/calendar',
     icon: Calendar,
   },
@@ -73,7 +72,7 @@ const ACCESS_POINTS: ReadonlyArray<AccessPoint> = [
     number: 5,
     title: 'FAB mobile (Floating Action Button)',
     description:
-      'En mobile, une icône Sparkles chartreuse flotte en bas à droite. Un clic lance directement le mode mission de votre prochain RDV éligible (en cours ou dans les 48h). Distinct du bouton "+" central qui sert à créer un nouveau dossier.',
+      'En mobile, une icône Sparkles chartreuse flotte en bas à droite. Un clic lance directement le mode mission de ton prochain RDV éligible (en cours ou dans les 48h). Distinct du bouton "+" central qui sert à créer un nouveau dossier.',
     where: 'Mobile, bottom-right',
     icon: Sparkles,
   },
@@ -81,7 +80,7 @@ const ACCESS_POINTS: ReadonlyArray<AccessPoint> = [
     number: 6,
     title: 'Command palette (Cmd+K)',
     description:
-      'Ouvrez la palette de commandes avec Cmd+K (ou Ctrl+K sur Windows), puis tapez "mission" ou utilisez le raccourci direct Cmd+M pour démarrer la mission imminente sans passer par l\'UI.',
+      'Ouvre la palette de commandes avec Cmd+K (ou Ctrl+K sur Windows), puis tape "mission" ou utilise le raccourci direct Cmd+M pour démarrer la mission imminente sans passer par l\'UI.',
     where: 'Partout — Cmd+K ou Cmd+M',
     icon: Command,
   },
@@ -90,18 +89,18 @@ const ACCESS_POINTS: ReadonlyArray<AccessPoint> = [
 const TIPS: ReadonlyArray<{ icon: typeof Wifi; title: string; text: string }> = [
   {
     icon: Wifi,
-    title: 'Activez le mode hors ligne avant zone blanche',
-    text: 'Le mode mission fonctionne sans internet — Service Worker + IndexedDB conservent vos saisies et photos en local. La synchronisation reprend automatiquement au retour du réseau. Avant de partir, ouvrez l\'app une fois sur le réseau pour précharger les données du dossier.',
+    title: 'Active le mode hors ligne avant zone blanche',
+    text: "Le mode mission fonctionne sans internet — Service Worker + IndexedDB conservent tes saisies et photos en local. La synchronisation reprend automatiquement au retour du réseau. Avant de partir, ouvre l'app une fois sur le réseau pour précharger les données du dossier.",
   },
   {
     icon: CheckCircle2,
-    title: 'Vérifiez votre synchronisation avant de partir',
-    text: 'L\'indicateur de sync en haut à droite doit afficher "Synchronisé". Si vous voyez des photos en attente d\'upload sur un précédent dossier, attendez la fin de la sync pour libérer de la place IndexedDB.',
+    title: 'Vérifie ta synchronisation avant de partir',
+    text: 'L\'indicateur de sync en haut à droite doit afficher "Synchronisé". Si tu vois des photos en attente d\'upload sur un précédent dossier, attends la fin de la sync pour libérer de la place IndexedDB.',
   },
   {
     icon: Eye,
     title: 'La pause sauvegarde tout',
-    text: 'Pendant le mode mission tchat, le bouton "Pause" en haut sauvegarde la conversation et l\'état des saisies. Vous pouvez reprendre exactement là où vous en étiez, depuis n\'importe quel point d\'accès parmi les 6.',
+    text: "Pendant le mode mission tchat, le bouton \"Pause\" en haut sauvegarde la conversation et l'état des saisies. Tu peux reprendre exactement là où tu en étais, depuis n'importe quel point d'accès parmi les 6.",
   },
 ] as const
 
@@ -131,9 +130,7 @@ export default function AideDemarrerMissionPage() {
 
       {/* 6 points d'accès */}
       <section className="space-y-4">
-        <h2 className="font-serif italic text-[24px] text-ink">
-          Les 6 points d&apos;accès
-        </h2>
+        <h2 className="font-serif italic text-[24px] text-ink">Les 6 points d&apos;accès</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {ACCESS_POINTS.map((point) => {
             const Icon = point.icon
@@ -155,9 +152,7 @@ export default function AideDemarrerMissionPage() {
                     </h3>
                   </div>
                 </div>
-                <p className="text-[13px] text-ink-soft leading-relaxed">
-                  {point.description}
-                </p>
+                <p className="text-[13px] text-ink-soft leading-relaxed">{point.description}</p>
                 <p className="font-mono text-[11px] text-ink-mute border-t border-rule/40 pt-2">
                   {point.where}
                 </p>
@@ -195,9 +190,8 @@ export default function AideDemarrerMissionPage() {
               Astuce : Cmd+M est le raccourci le plus rapide
             </p>
             <p className="text-[13px] text-ink-soft leading-relaxed">
-              Depuis n&apos;importe quelle page de l&apos;app, Cmd+M (ou Ctrl+M sur Windows)
-              démarre directement la mission imminente. Plus rapide que la sidebar ou
-              le tableau de bord.
+              Depuis n&apos;importe quelle page de l&apos;app, Cmd+M (ou Ctrl+M sur Windows) démarre
+              directement la mission imminente. Plus rapide que la sidebar ou le tableau de bord.
             </p>
           </div>
         </div>

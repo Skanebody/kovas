@@ -353,7 +353,7 @@ function QuoteRequestFormInner(props: QuoteRequestFormProps) {
         <h3 className="text-[18px] font-bold text-ink mb-2">Demande envoyée</h3>
         <p className="text-[13px] text-ink-mute leading-relaxed mb-4">{successMessage}</p>
         <p className="text-[12px] text-ink-faint">
-          Un email de confirmation vient de vous être envoyé.
+          Un email de confirmation vient de t'être envoyé.
         </p>
       </Card>
     )
@@ -633,7 +633,7 @@ function StepDiagnostics({
         <div className="rounded-md bg-pastel-butter/40 border border-rule/40 p-3 text-[12px] text-ink-soft leading-relaxed">
           <strong className="text-ink">{suggestedDiags.filter((d) => d.required).length}</strong>{' '}
           diagnostic{suggestedDiags.filter((d) => d.required).length > 1 ? 's sont' : ' est'}{' '}
-          requis pour votre situation. Vous pouvez les modifier ci-dessous.
+          requis pour ta situation. Tu peux les modifier ci-dessous.
         </div>
       )}
 

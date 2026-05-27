@@ -18,10 +18,10 @@ export function Step1AccountForm() {
           Étape 1 sur 7
         </p>
         <h1 className="font-serif italic text-3xl sm:text-4xl text-[#0F1419] leading-tight">
-          Bienvenue sur KOVAS, créez votre compte en cinq minutes.
+          Bienvenue sur KOVAS, crée ton compte en cinq minutes.
         </h1>
         <p className="text-[14px] text-[#0F1419]/70">
-          Votre compte est créé immédiatement. Les quatre vérifications (identité, COFRAC, RC Pro,
+          Ton compte est créé immédiatement. Les quatre vérifications (identité, COFRAC, RC Pro,
           SIRENE) se font ensuite en 24-48 h.
         </p>
       </div>
@@ -34,7 +34,7 @@ export function Step1AccountForm() {
             type="email"
             autoComplete="email"
             required
-            placeholder="vous@cabinet.fr"
+            placeholder="toi@cabinet.fr"
           />
         </FormField>
 

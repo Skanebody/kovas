@@ -49,12 +49,11 @@ export default function PricingComparePage() {
             className="font-sans font-semibold leading-[1.05] tracking-[-0.03em] mb-6 max-w-[760px] mx-auto"
             style={{ fontSize: 'clamp(28px, 5vw, 60px)' }}
           >
-            Toujours hésitant ?
-            <span className="block text-[#0F1419]/35">Composez votre offre.</span>
+            Toujours hésitant ?<span className="block text-[#0F1419]/35">Compose ton offre.</span>
           </h2>
           <p className="text-[16px] sm:text-[18px] text-[#0F1419]/72 max-w-[600px] mx-auto leading-relaxed mb-10">
-            Choisissez votre forfait, ajoutez les modules dont vous avez vraiment besoin et voyez le
-            total HT mensuel se mettre à jour en direct.
+            Choisis ton forfait, ajoute les modules dont tu as vraiment besoin et regarde le total
+            HT mensuel se mettre à jour en direct.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link

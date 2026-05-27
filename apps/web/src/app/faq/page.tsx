@@ -10,7 +10,7 @@ import { FaqExplorer } from './faq-explorer'
 export const metadata = buildMetadata({
   title: 'Questions fréquentes',
   description:
-    "Toutes les réponses sur KOVAS, le diagnostic immobilier, le DPE, les obligations légales 2026 et la conformité. Filtrage par catégorie.",
+    'Toutes les réponses sur KOVAS, le diagnostic immobilier, le DPE, les obligations légales 2026 et la conformité. Filtrage par catégorie.',
   path: '/faq',
 })
 
@@ -53,15 +53,15 @@ export default function FaqPage() {
             className="font-sans font-medium tracking-tight text-ink leading-[1.05]"
             style={{ fontSize: 'clamp(40px, 5vw, 72px)' }}
           >
-            Tout ce que vous voulez savoir sur KOVAS et le{' '}
+            Tout ce que tu veux savoir sur KOVAS et le{' '}
             <span className="font-serif italic font-normal text-chartreuse-deep">
               diagnostic immobilier
             </span>
             .
           </h1>
           <p className="text-ink-mute text-lg">
-            Filtrez par catégorie pour aller plus vite. Pour les diagnostiqueurs, les
-            propriétaires, les vendeurs et les locataires.
+            Filtre par catégorie pour aller plus vite. Pour les diagnostiqueurs, les propriétaires,
+            les vendeurs et les locataires.
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export default function FaqPage() {
 
         <div className="mt-16 pt-8 border-t border-rule/60 text-center space-y-4">
           <p className="text-sm text-ink-mute">
-            Pas de réponse à votre question ? Contactez-nous directement.
+            Pas de réponse à ta question ? Contacte-nous directement.
           </p>
           <Button asChild variant="accent">
             <Link href="/contact">Nous contacter</Link>

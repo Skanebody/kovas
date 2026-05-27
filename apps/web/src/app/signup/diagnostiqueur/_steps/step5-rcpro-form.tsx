@@ -52,11 +52,11 @@ export function Step5RcproForm() {
           Étape 5 sur 7 — Assurance RC Pro
         </p>
         <h1 className="font-serif italic text-3xl text-[#0F1419] leading-tight">
-          Votre attestation responsabilité civile.
+          Ton attestation responsabilité civile.
         </h1>
         <p className="text-[14px] text-[#0F1419]/70">
-          Téléversez votre attestation en cours de validité. Nous extrayons automatiquement les
-          informations clés (compagnie, montants, échéance) — vous validez l&apos;exactitude.
+          Téléverse ton attestation en cours de validité. Nous extrayons automatiquement les
+          informations clés (compagnie, montants, échéance) — tu valides l&apos;exactitude.
         </p>
       </div>
 

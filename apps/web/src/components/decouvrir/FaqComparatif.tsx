@@ -14,7 +14,7 @@ export function FaqComparatif() {
   const faqs = [
     {
       q: "Que se passe-t-il après l'essai 30 jours ?",
-      a: 'Aucun prélèvement automatique. Vous choisissez ensuite parmi nos plans payants. Vos données restent stockées 90 jours en cas de réactivation.',
+      a: "Le débit du plan choisi se déclenche automatiquement à J+30 sur la CB enregistrée à l'inscription. Tu peux résilier en 2 clics depuis Mon compte avant cette date — aucun prélèvement. Stripe envoie un email de rappel à J+27.",
     },
     {
       q: "Puis-je changer de plan en cours d'abonnement ?",
@@ -22,7 +22,7 @@ export function FaqComparatif() {
     },
     {
       q: "Comment fonctionne l'annuaire KOVAS ?",
-      a: 'Une fiche gratuite donne une visibilité de base. Les plans Local / Régional / National vous donnent une priorité géographique + des fonctions avancées (avis, statistiques, leads).',
+      a: 'Une fiche gratuite donne une visibilité de base. Les plans Présence / Boost / Premium te donnent une priorité géographique + des fonctions avancées (avis vérifiés, statistiques temps réel, notifications leads, profil enrichi).',
     },
     {
       q: 'Les bundles sont-ils résiliables séparément ?',

@@ -9,21 +9,16 @@
 
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { headers } from 'next/headers'
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
+import { headers } from 'next/headers'
 
-import {
-  checkRateLimit,
-  emailKey,
-  ipKey,
-  recordRateLimitHit,
-} from '@/lib/anti-spam/rate-limits'
+import { checkRateLimit, emailKey, ipKey, recordRateLimitHit } from '@/lib/anti-spam/rate-limits'
 import { sendEmail } from '@/lib/email/send'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import {
-  partnerInquirySchema,
   type PartnerInquiryInput,
   type PartnerInquiryResult,
+  partnerInquirySchema,
 } from './schemas'
 
 async function getClientIp(): Promise<string | null> {
@@ -92,7 +87,7 @@ export async function submitPartnerInquiry(
     if (!ipVerdict.allowed) {
       return {
         ok: false,
-        error: 'Trop de demandes depuis votre connexion. Réessayez dans une heure.',
+        error: 'Trop de demandes depuis ta connexion. Réessaie dans une heure.',
       }
     }
   }
@@ -105,35 +100,30 @@ export async function submitPartnerInquiry(
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: table non typée
-  const { error: insertError } = await (admin as any)
-    .from('partner_inquiries')
-    .insert({
-      first_name: data.first_name,
-      last_name: data.last_name,
-      email: data.email,
-      phone: phoneE164,
-      company_name: data.company_name,
-      company_role: data.company_role,
-      partnership_type: data.partnership_type,
-      message: data.message,
-      source_ip: clientIp,
-      user_agent: userAgent,
-      honeypot_value: data.honeypot ?? null,
-    })
+  const { error: insertError } = await (admin as any).from('partner_inquiries').insert({
+    first_name: data.first_name,
+    last_name: data.last_name,
+    email: data.email,
+    phone: phoneE164,
+    company_name: data.company_name,
+    company_role: data.company_role,
+    partnership_type: data.partnership_type,
+    message: data.message,
+    source_ip: clientIp,
+    user_agent: userAgent,
+    honeypot_value: data.honeypot ?? null,
+  })
 
   if (insertError) {
     console.error('[partenaires:insert] error', insertError)
     return {
       ok: false,
-      error: "Impossible d'enregistrer votre demande. Réessayez dans un instant.",
+      error: "Impossible d'enregistrer ta demande. Réessaie dans un instant.",
     }
   }
 
   try {
-    await recordRateLimitHit(admin, [
-      emailKey(data.email),
-      ...(clientIp ? [ipKey(clientIp)] : []),
-    ])
+    await recordRateLimitHit(admin, [emailKey(data.email), ...(clientIp ? [ipKey(clientIp)] : [])])
   } catch (err) {
     console.warn('[partenaires:rate-limit-hit] failed', err)
   }
@@ -166,7 +156,7 @@ export async function submitPartnerInquiry(
       text: [
         `Bonjour ${data.first_name},`,
         '',
-        "Nous avons bien reçu votre demande de partenariat et reviendrons vers vous sous quarante-huit heures ouvrées pour échanger.",
+        'Nous avons bien reçu votre demande de partenariat et reviendrons vers vous sous quarante-huit heures ouvrées pour échanger.',
         '',
         "Pour préparer notre échange, n'hésitez pas à nous transmettre tout document utile (présentation, plaquette, fiche société) à contact@kovas.fr.",
         '',
@@ -185,6 +175,6 @@ export async function submitPartnerInquiry(
   return {
     ok: true,
     message:
-      'Votre demande a bien été enregistrée. Nous revenons vers vous sous 48h ouvrées pour échanger.',
+      'Ta demande a bien été enregistrée. Nous revenons vers toi sous 48h ouvrées pour échanger.',
   }
 }

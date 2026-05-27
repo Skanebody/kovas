@@ -68,7 +68,7 @@ export function NotesSection({ dossierId, initialNotes }: NotesSectionProps) {
       <Textarea
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Vos notes internes sur ce dossier (visibles uniquement par vous)…"
+        placeholder="Tes notes internes sur ce dossier (visibles uniquement par toi)…"
         rows={5}
         className="resize-y"
       />

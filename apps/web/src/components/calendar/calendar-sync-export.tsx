@@ -39,7 +39,7 @@ export function CalendarSyncExport({ httpsUrl, webcalUrl }: CalendarSyncExportPr
   return (
     <div className="space-y-4">
       <p className="text-sm text-ink-soft leading-relaxed">
-        Synchronisez vos RDV KOVAS avec votre agenda personnel. Tous vos dossiers planifiés
+        Synchronise tes RDV KOVAS avec ton agenda personnel. Tous tes dossiers planifiés
         apparaîtront automatiquement dans <strong>Google Calendar</strong>,{' '}
         <strong>Apple Calendar</strong>, <strong>Outlook</strong> — refresh ~1h.
       </p>

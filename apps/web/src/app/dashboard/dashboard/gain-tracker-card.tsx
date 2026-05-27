@@ -59,7 +59,7 @@ export async function GainTrackerCard() {
 
       <div className="relative">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-card-accent-foreground/65 mb-4">
-          Vous avez gagné ce mois
+          Tu as gagné ce mois
         </p>
 
         {count > 0 ? (
@@ -86,7 +86,7 @@ export async function GainTrackerCard() {
           </p>
         ) : (
           <p className="text-base text-card-accent-foreground/70 max-w-sm">
-            Terminez votre première mission ce mois pour voir votre gain de temps cumulé.
+            Termine ta première mission ce mois pour voir ton gain de temps cumulé.
           </p>
         )}
       </div>

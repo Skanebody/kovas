@@ -86,7 +86,7 @@ async function getCurrentUserAndDiagnostician() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Session expirée — reconnectez-vous.')
+  if (!user) throw new Error('Session expirée — reconnecte-toi.')
   const diagId = await getOrCreateDiagnosticianForUser(user.id, user.email ?? '')
   return { user, diagnostician_id: diagId }
 }

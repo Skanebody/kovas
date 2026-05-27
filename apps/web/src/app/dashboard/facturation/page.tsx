@@ -63,14 +63,14 @@ export default async function FacturationPage({ searchParams }: FacturationPageP
           ============================================ */}
       <div
         className="inline-flex items-center gap-2 rounded-pill border border-[#D4F542]/60 bg-[#D4F542]/15 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-[#0F1419]"
-        aria-label="Cette page concerne vos revenus, pas votre abonnement KOVAS"
+        aria-label="Cette page concerne tes revenus, pas ton abonnement KOVAS"
       >
         <span aria-hidden className="size-1.5 rounded-full bg-[#0F1419]" />
-        Vos revenus · factures émises à vos clients
+        Tes revenus · factures émises à tes clients
       </div>
 
       <AppPageHeader
-        title="Votre"
+        title="Ta"
         accent="facturation"
         description={headerCopy}
         action={<NewDocumentButton current={current} />}
@@ -97,13 +97,13 @@ function TarifsSection({
       <EmptyState
         icon={FileSpreadsheet}
         title="Aucun produit trouvé."
-        description="Aucun produit du catalogue ne correspond à votre recherche."
+        description="Aucun produit du catalogue ne correspond à ta recherche."
       />
     ) : (
       <EmptyState
         icon={Package}
         title="Catalogue tarifs vide."
-        description="Créez vos packs et tarifs réutilisables (DPE seul, pack vente, audit, etc.) pour les insérer en 1 clic dans vos devis."
+        description="Crée tes packs et tarifs réutilisables (DPE seul, pack vente, audit, etc.) pour les insérer en 1 clic dans tes devis."
       />
     )
   }

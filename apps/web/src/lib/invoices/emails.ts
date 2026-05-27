@@ -11,7 +11,7 @@
  */
 
 import { sendEmail } from '@/lib/email/send'
-import { computeLatePenalties, L441_10_FOOTNOTE } from './penalties'
+import { L441_10_FOOTNOTE, computeLatePenalties } from './penalties'
 
 function escapeHtml(input: string): string {
   return input
@@ -112,9 +112,7 @@ export interface IssuedEmailArgs {
 }
 
 export async function sendInvoiceIssuedEmail(args: IssuedEmailArgs) {
-  const greeting = args.recipientFirstName
-    ? `Bonjour ${args.recipientFirstName},`
-    : 'Bonjour,'
+  const greeting = args.recipientFirstName ? `Bonjour ${args.recipientFirstName},` : 'Bonjour,'
 
   const lines = [
     greeting,
@@ -125,9 +123,7 @@ export async function sendInvoiceIssuedEmail(args: IssuedEmailArgs) {
   ]
   if (args.notes) lines.push(args.notes)
 
-  const ctaBlock = args.paymentLinkUrl
-    ? buttonHtml('Régler en ligne', args.paymentLinkUrl)
-    : ''
+  const ctaBlock = args.paymentLinkUrl ? buttonHtml('Régler en ligne', args.paymentLinkUrl) : ''
 
   const pdfBlock = args.pdfDownloadUrl
     ? `<p style="margin:8px 0;font-size:13px;color:#6B7280;"><a href="${escapeHtml(args.pdfDownloadUrl)}" style="color:#0F1419;text-decoration:underline;">Télécharger la facture (PDF)</a></p>`
@@ -180,9 +176,7 @@ export interface ReminderEmailArgs {
 }
 
 export async function sendReminderJ7Email(args: ReminderEmailArgs) {
-  const greeting = args.recipientFirstName
-    ? `Bonjour ${args.recipientFirstName},`
-    : 'Bonjour,'
+  const greeting = args.recipientFirstName ? `Bonjour ${args.recipientFirstName},` : 'Bonjour,'
 
   const lines = [
     greeting,
@@ -219,9 +213,7 @@ export async function sendReminderJ7Email(args: ReminderEmailArgs) {
 // ──────────────────────────────────────────────────────────────────────
 
 export async function sendReminderJ15Email(args: ReminderEmailArgs) {
-  const greeting = args.recipientFirstName
-    ? `Bonjour ${args.recipientFirstName},`
-    : 'Bonjour,'
+  const greeting = args.recipientFirstName ? `Bonjour ${args.recipientFirstName},` : 'Bonjour,'
 
   const lines = [
     greeting,
@@ -255,9 +247,7 @@ export async function sendReminderJ15Email(args: ReminderEmailArgs) {
 // ──────────────────────────────────────────────────────────────────────
 
 export async function sendReminderJ30Email(args: ReminderEmailArgs) {
-  const greeting = args.recipientFirstName
-    ? `Bonjour ${args.recipientFirstName},`
-    : 'Bonjour,'
+  const greeting = args.recipientFirstName ? `Bonjour ${args.recipientFirstName},` : 'Bonjour,'
 
   const penalties = computeLatePenalties({
     unpaidAmountHt: args.amountUnpaid,
@@ -275,7 +265,9 @@ export async function sendReminderJ30Email(args: ReminderEmailArgs) {
     `Je reste à votre disposition pour convenir d'un échelonnement amiable si la difficulté est temporaire.`,
     L441_10_FOOTNOTE,
   ]
-  const ctaBlock = args.paymentLinkUrl ? buttonHtml('Régler immédiatement', args.paymentLinkUrl) : ''
+  const ctaBlock = args.paymentLinkUrl
+    ? buttonHtml('Régler immédiatement', args.paymentLinkUrl)
+    : ''
   const ibanBlock = ibanBlockHtml({
     bankName: args.bankName,
     iban: args.iban,

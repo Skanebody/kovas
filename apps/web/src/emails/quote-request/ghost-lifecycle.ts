@@ -23,9 +23,11 @@ export interface GhostLifecycleEmailParams {
   reactivation_url: string
 }
 
-export function renderGhostWarnedEmail(
-  params: GhostLifecycleEmailParams,
-): { subject: string; html: string; text: string } {
+export function renderGhostWarnedEmail(params: GhostLifecycleEmailParams): {
+  subject: string
+  html: string
+  text: string
+} {
   const subject = `${params.ignored_count} demandes en attente sur votre fiche KOVAS`
 
   const html = `
@@ -77,9 +79,11 @@ export function renderGhostWarnedEmail(
   return { subject, html, text }
 }
 
-export function renderGhostDemotedEmail(
-  params: GhostLifecycleEmailParams,
-): { subject: string; html: string; text: string } {
+export function renderGhostDemotedEmail(params: GhostLifecycleEmailParams): {
+  subject: string
+  html: string
+  text: string
+} {
   const subject = `Votre fiche KOVAS est désormais moins visible`
 
   const html = `
@@ -132,9 +136,11 @@ export function renderGhostDemotedEmail(
   return { subject, html, text }
 }
 
-export function renderGhostSoftDisabledEmail(
-  params: GhostLifecycleEmailParams,
-): { subject: string; html: string; text: string } {
+export function renderGhostSoftDisabledEmail(params: GhostLifecycleEmailParams): {
+  subject: string
+  html: string
+  text: string
+} {
   const subject = `Votre fiche KOVAS a été mise en veille`
 
   const html = `

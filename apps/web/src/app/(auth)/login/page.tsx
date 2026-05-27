@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { LoginForm } from './login-form'
 
 export const metadata: Metadata = {
@@ -22,9 +22,7 @@ export default function LoginPage() {
         <h1 className="font-serif italic font-normal text-4xl md:text-5xl tracking-tight text-ink leading-[1.05]">
           Bienvenue.
         </h1>
-        <p className="text-sm md:text-base text-ink-mute">
-          Connectez-vous pour continuer.
-        </p>
+        <p className="text-sm md:text-base text-ink-mute">Connecte-toi pour continuer.</p>
       </div>
 
       <LoginForm defaultEmail={devPrefill.email} defaultPassword={devPrefill.password} />

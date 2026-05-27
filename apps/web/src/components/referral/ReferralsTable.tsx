@@ -54,7 +54,7 @@ export function ReferralsTable({ rows }: ReferralsTableProps) {
   if (rows.length === 0) {
     return (
       <p className="text-[13px] text-ink-mute py-6 text-center">
-        Aucun filleul pour l'instant. Partagez votre lien pour démarrer.
+        Aucun filleul pour l'instant. Partage ton lien pour démarrer.
       </p>
     )
   }

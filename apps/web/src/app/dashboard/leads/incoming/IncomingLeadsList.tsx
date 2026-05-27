@@ -172,8 +172,8 @@ export function IncomingLeadsList({ initialAssignments }: IncomingLeadsListProps
           }
           description={
             filter === 'pending'
-              ? "Profitez-en pour mettre à jour votre fiche annuaire — c'est elle qui amène les prochains prospects."
-              : 'Changez de filtre pour retrouver vos autres assignments.'
+              ? "Profite-en pour mettre à jour ta fiche annuaire — c'est elle qui amène les prochains prospects."
+              : 'Change de filtre pour retrouver tes autres assignments.'
           }
         />
       ) : (

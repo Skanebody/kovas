@@ -32,7 +32,7 @@ export function HeroHome({ stats }: HeroHomeProps) {
           <span className="font-serif italic font-normal text-chartreuse-deep">
             diagnostic immobilier
           </span>{' '}
-          qui pense pour vous
+          qui pense pour toi
         </h1>
 
         <p className="font-sans text-base sm:text-lg md:text-xl text-ink-mute max-w-3xl mx-auto leading-relaxed">

@@ -57,7 +57,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     displayName: 'Marc D.',
     role: 'Conseiller technique — Architecture logicielle',
     category: 'advisor',
-    bio: "Ingénieur logiciel, il accompagne la conception technique de KOVAS sur les aspects sécurité, conformité RGPD et résilience offline.",
+    bio: 'Ingénieur logiciel, il accompagne la conception technique de KOVAS sur les aspects sécurité, conformité RGPD et résilience offline.',
     experience:
       "Vingt ans d'expérience en édition de logiciels SaaS B2B (productivité, paiement, conformité). A piloté des migrations de plateformes multi-tenant et des audits de sécurité ISO 27001. Garant des choix d'architecture KOVAS : Next.js 15, Supabase hébergé en France, chiffrement au repos, et stratégie de sauvegarde PITR.",
     photoPath: null,
@@ -123,7 +123,7 @@ export const COMPANY_VALUES = [
     title: 'Transparent',
     summary: 'Vous savez ce que vous payez, ce que nous stockons et où.',
     description:
-      "Tarification publique, hébergement déclaré en France, registre des sous-traitants accessible et fonctionnement de chaque algorithme expliqué en français clair. Si nous ne savons pas répondre, nous le disons.",
+      'Tarification publique, hébergement déclaré en France, registre des sous-traitants accessible et fonctionnement de chaque algorithme expliqué en français clair. Si nous ne savons pas répondre, nous le disons.',
   },
   {
     id: 'conforme',
@@ -137,7 +137,7 @@ export const COMPANY_VALUES = [
     title: 'Indépendant',
     summary: 'Vos données vous appartiennent, vos exports aussi.',
     description:
-      "KOVAS exporte vos dossiers au format ZIP Liciel officiel, en PDF, Word, CSV et JSON. Aucun verrouillage propriétaire : si vous changez de logiciel, vos données partent avec vous, sans frais ni délai.",
+      'KOVAS exporte vos dossiers au format ZIP Liciel officiel, en PDF, Word, CSV et JSON. Aucun verrouillage propriétaire : si vous changez de logiciel, vos données partent avec vous, sans frais ni délai.',
   },
 ] as const
 
@@ -152,13 +152,13 @@ export const CAREER_VALUES: CareerValue[] = [
     id: 'autonomy',
     title: 'Autonomie',
     description:
-      "Nous travaillons en confiance, à distance, sur des objectifs trimestriels clairs. Pas de micro-management, pas de réunion sans ordre du jour.",
+      'Nous travaillons en confiance, à distance, sur des objectifs trimestriels clairs. Pas de micro-management, pas de réunion sans ordre du jour.',
   },
   {
     id: 'technical-excellence',
     title: 'Excellence technique',
     description:
-      "TypeScript strict zéro any, tests automatisés, revue de code systématique. Nous prenons le temps de bien faire les choses, parce que les diagnostiqueurs comptent sur nous.",
+      'TypeScript strict zéro any, tests automatisés, revue de code systématique. Nous prenons le temps de bien faire les choses, parce que les diagnostiqueurs comptent sur nous.',
   },
   {
     id: 'respect',

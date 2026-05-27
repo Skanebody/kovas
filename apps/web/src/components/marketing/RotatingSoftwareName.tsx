@@ -10,9 +10,10 @@
  * (language match + polarization sans exclure).
  *
  * Comportement :
- * - Cycle automatique toutes les 2.4 s (ralenti pour donner le temps de lire).
+ * - Cycle automatique toutes les 1.4 s (cadence punchy demandée par Benjamin
+ *   le 2026-05-27 — la version 2.4 s donnait l'impression d'être bloqué).
  * - Première valeur = "Liciel" (préservation du SEO "Plus jamais 21 h devant Liciel").
- * - Crossfade subtle 350 ms (pas de flash, pas d'animation gimmick).
+ * - Crossfade subtle 220 ms (pas de flash, pas d'animation gimmick).
  * - Respect `prefers-reduced-motion` → désactive l'animation, garde uniquement "Liciel".
  * - Largeur stabilisée via inline-block + min-width pour empêcher le reflow.
  *
@@ -27,14 +28,14 @@ import { useEffect, useState } from 'react'
 const SOFTWARE_NAMES = ['Liciel', 'OBBC', 'AnalysImmo', 'ORIS'] as const
 
 export interface RotatingSoftwareNameProps {
-  /** Intervalle entre les rotations (ms). Défaut 2400. */
+  /** Intervalle entre les rotations (ms). Défaut 1400 (cadence punchy). */
   intervalMs?: number
   /** Class additionnelle (Tailwind etc.). */
   className?: string
 }
 
 export function RotatingSoftwareName({
-  intervalMs = 2400,
+  intervalMs = 1400,
   className,
 }: RotatingSoftwareNameProps): React.ReactElement {
   const [index, setIndex] = useState(0)
@@ -71,7 +72,7 @@ export function RotatingSoftwareName({
         style={{
           display: 'inline-block',
           minWidth: '2.6em',
-          transition: 'opacity 350ms ease-out',
+          transition: 'opacity 220ms ease-out',
           opacity: 1,
         }}
         // Force re-mount par key pour redéclencher l'animation fade-in

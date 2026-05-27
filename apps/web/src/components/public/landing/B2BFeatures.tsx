@@ -28,7 +28,7 @@ const FEATURES: Feature[] = [
     number: '02',
     title: 'Exports universels',
     description:
-      'Compatible Liciel, OBBC, AnalysImmo et ORIS (Imports spécifiques XML, ZIP générique, XML CII, JSON) + PDF, Word, CSV. Aucune migration : votre logiciel certifié reste votre moteur ADEME.',
+      'Compatible Liciel, OBBC, AnalysImmo et ORIS (Imports spécifiques XML, ZIP générique, XML CII, JSON) + PDF, Word, CSV. Aucune migration : ton logiciel certifié reste ton moteur ADEME.',
   },
   {
     icon: ShieldCheck,
@@ -49,7 +49,7 @@ const FEATURES: Feature[] = [
     number: '05',
     title: 'Annuaire public — leads qualifiés',
     description:
-      'Votre fiche publique enrichie + demandes de devis directes des particuliers. Aucun frais d’acquisition de leads.',
+      'Ta fiche publique enrichie + demandes de devis directes des particuliers. Aucun frais d’acquisition de leads.',
   },
 ]
 
@@ -65,7 +65,7 @@ export function B2BFeatures() {
             02 · La solution
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">
-            Tout votre métier dans un seul outil.
+            Tout ton métier dans un seul outil.
           </h2>
           <p className="text-ink-mute leading-relaxed">
             5 piliers conçus pour les diagnostiqueurs immobiliers indépendants.

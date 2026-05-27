@@ -27,10 +27,18 @@ const withSerwist = withSerwistInit({
  */
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.vercel-insights.com",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  // unpkg.com : CDN Leaflet (JS) sur les fiches diagnostiqueurs publiques
+  // (zone d'intervention). Pas de dep npm pour rester léger sur le bundle.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.vercel-insights.com https://unpkg.com",
+  // unpkg.com : CSS Leaflet associé au script ci-dessus.
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
   "font-src 'self' https://fonts.gstatic.com",
-  "img-src 'self' data: blob: https://*.supabase.co https://*.tile.openstreetmap.org https://unpkg.com",
+  // Tuiles cartographiques :
+  //   - tile.openstreetmap.org : fallback historique.
+  //   - basemaps.cartocdn.com  : tile layer CartoDB Positron (style sage clair
+  //     cohérent DS v5, utilisé par DiagMap depuis 2026-05-27).
+  // unpkg.com : images de l'asset Leaflet (markers PNG legacy, au cas où).
+  "img-src 'self' data: blob: https://*.supabase.co https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://unpkg.com",
   // media-src : blob: requis pour la réécoute des messages vocaux (MediaRecorder
   // produit des blob: URLs). Sans ça, <audio src='blob:...'> renvoie
   // NotSupportedError (default-src 'self' rejette).

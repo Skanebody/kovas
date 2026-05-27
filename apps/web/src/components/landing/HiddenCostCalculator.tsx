@@ -102,19 +102,19 @@ export function HiddenCostCalculator() {
           Le coût caché
         </p>
         <h2 className="text-[40px] sm:text-[56px] md:text-[72px] font-semibold leading-[1.02] tracking-[-0.03em] mb-8 text-white">
-          Vous ne gagnez pas du temps.
+          Tu ne gagnes pas du temps.
           <br />
-          <span className="text-white/60">Vous récupérez ce qu'on vous prend.</span>
+          <span className="text-white/60">Tu récupères ce qu'on te prend.</span>
         </h2>
         <p className="text-[18px] sm:text-[20px] md:text-[22px] text-white/90 max-w-[720px] mx-auto leading-[1.55] mb-[60px]">
-          Ce n'est pas la mission qui vous épuise. C'est ce qui vient après — re-noter chaque
+          Ce n'est pas la mission qui t'épuise. C'est ce qui vient après — re-noter chaque
           information dans Liciel ou AnalysImmo le soir, dans le silence du bureau. Cette re-saisie
-          est votre friction numéro un. Mesurez-la.
+          est ta friction numéro un. Mesure-la.
         </p>
 
         <div className="bg-white/[0.04] border border-white/15 rounded-[32px] p-7 sm:p-12 text-left">
           <p className="font-mono text-[13px] uppercase tracking-[0.18em] text-white/60 font-medium mb-8">
-            Votre coût caché de re-saisie
+            Ton coût caché de re-saisie
           </p>
 
           {/*
@@ -156,16 +156,16 @@ export function HiddenCostCalculator() {
           </div>
 
           <div className="mt-7 px-6 py-5 bg-chartreuse/[0.08] border-l-[3px] border-chartreuse rounded-[8px] text-[15px] text-white/90 leading-[1.55]">
-            KOVAS structure vos données pendant le relevé terrain. La re-saisie tombe à environ{' '}
+            KOVAS structure tes données pendant le relevé terrain. La re-saisie tombe à environ{' '}
             <strong className="text-chartreuse font-semibold">10 minutes par mission</strong> au
-            lieu des {entryTime} actuelles. Voici ce que ça change pour vous.
+            lieu des {entryTime} actuelles. Voici ce que ça change pour toi.
           </div>
 
           <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* === CARD 1 : TEMPS RÉCUPÉRÉ (featured chartreuse) === */}
             <article className="bg-chartreuse text-[#0F1419] border border-chartreuse rounded-[24px] p-8">
               <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[#0F1419]/60 font-semibold mb-5">
-                Temps que vous récupérez par an
+                Temps que tu récupères par an
               </p>
               <div className="font-serif italic font-normal text-[48px] sm:text-[64px] md:text-[80px] leading-[0.95] tracking-[-0.02em] mb-6 text-[#0F1419]">
                 {calc.monthsSaved}
@@ -198,7 +198,7 @@ export function HiddenCostCalculator() {
             {/* === CARD 2 : CHOIX VIE PERSO / ACTIVITÉ === */}
             <article className="bg-white/[0.06] border border-white/15 rounded-[24px] p-8 text-white">
               <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-white/60 font-semibold mb-5">
-                Vous en faites ce que vous voulez
+                Tu en fais ce que tu veux
               </p>
 
               <div className="py-1">
@@ -207,7 +207,7 @@ export function HiddenCostCalculator() {
                 </p>
                 <p className="text-[19px] text-white leading-snug mb-2">
                   <strong className="font-semibold">
-                    {formatHours(calc.savedWeekHours)} chaque semaine pour vous
+                    {formatHours(calc.savedWeekHours)} chaque semaine pour toi
                   </strong>
                 </p>
                 <p className="text-sm text-white/60 leading-[1.5]">

@@ -215,7 +215,13 @@ function StaticGrid({
 }): ReactElement {
   return (
     <div className={className}>
-      <ul aria-label={ariaLabel} className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+      {/* 1 col mobile → 2 cols dès sm → 3 cols seulement en xl pour éviter
+          le chevauchement quand le composant est placé dans une colonne
+          étroite (cas homepage : lg:col-span-2 ≈ 40% d'écran). */}
+      <ul
+        aria-label={ariaLabel}
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4"
+      >
         {SOURCES.map((source) => (
           <SourceCard key={source.key} source={source} ticked />
         ))}
@@ -268,7 +274,13 @@ function AnimatedGrid({
 
   return (
     <div className={className}>
-      <ul aria-label={ariaLabel} className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+      {/* 1 col mobile → 2 cols dès sm → 3 cols seulement en xl pour éviter
+          le chevauchement quand le composant est placé dans une colonne
+          étroite (cas homepage : lg:col-span-2 ≈ 40% d'écran). */}
+      <ul
+        aria-label={ariaLabel}
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4"
+      >
         {SOURCES.map((source, idx) => (
           <SourceCard key={source.key} source={source} ticked={idx < tickedCount} animatedTick />
         ))}
@@ -436,12 +448,19 @@ function SourceCard({
       <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-[#0F1419]/[0.08] bg-sage/60 text-[#0F1419]/72">
         {source.icon}
       </span>
-      <div className="flex-1 min-w-0 pr-7">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-wide text-[#0F1419]">
+      {/* min-w-0 indispensable pour permettre au texte de se contraindre dans
+          un flex item. pr-8 réserve l'espace du tick top-right (size-5 + 12px
+          de marge) pour éviter tout chevauchement, même quand la card est
+          étroite (~150px en grille 3 cols). break-words sur les sublabel
+          longs comme "observatoire-dpe.ademe.fr". */}
+      <div className="flex-1 min-w-0 pr-8">
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-wide text-[#0F1419] break-words">
           {source.label}
         </p>
-        <p className="text-[12px] text-[#0F1419]/72 leading-snug mt-0.5">{source.description}</p>
-        <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/45 mt-1">
+        <p className="text-[12px] text-[#0F1419]/72 leading-snug mt-0.5 break-words">
+          {source.description}
+        </p>
+        <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/45 mt-1 break-all">
           {source.sublabel}
         </p>
       </div>

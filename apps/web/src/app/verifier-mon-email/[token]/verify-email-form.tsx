@@ -1,12 +1,12 @@
 'use client'
 
-import { Check, Loader2, MailCheck } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Check, Loader2, MailCheck } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface VerifyEmailFormProps {
   trackingToken: string
@@ -27,10 +27,7 @@ export function VerifyEmailForm({ trackingToken }: VerifyEmailFormProps) {
   const [state, setState] = useState<State>({ kind: 'idle' })
   const [resendCooldown, setResendCooldown] = useState(0)
   const [resendStatus, setResendStatus] = useState<
-    | { kind: 'idle' }
-    | { kind: 'sending' }
-    | { kind: 'sent' }
-    | { kind: 'error'; message: string }
+    { kind: 'idle' } | { kind: 'sending' } | { kind: 'sent' } | { kind: 'error'; message: string }
   >({ kind: 'idle' })
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -143,13 +140,13 @@ export function VerifyEmailForm({ trackingToken }: VerifyEmailFormProps) {
         </div>
         <h1 className="text-[22px] font-bold text-ink mb-2">Demande confirmée</h1>
         <p className="text-[14px] text-ink-mute leading-relaxed mb-6">
-          Votre demande a bien été transmise{' '}
-          {state.recipientCount > 0 ? `à ${state.recipientCount} diagnostiqueurs` : ''}.
-          Vous recevrez leurs réponses sous 24-48 heures.
+          Ta demande a bien été transmise{' '}
+          {state.recipientCount > 0 ? `à ${state.recipientCount} diagnostiqueurs` : ''}. Tu recevras
+          leurs réponses sous 24-48 heures.
         </p>
         <p className="text-[12px] text-ink-faint inline-flex items-center gap-2">
           <Loader2 className="size-3 animate-spin" aria-hidden />
-          Redirection vers votre suivi…
+          Redirection vers ton suivi…
         </p>
       </Card>
     )
@@ -160,12 +157,10 @@ export function VerifyEmailForm({ trackingToken }: VerifyEmailFormProps) {
       <div className="size-12 rounded-full bg-pastel-sky flex items-center justify-center mb-4">
         <MailCheck className="size-6 text-navy" aria-hidden />
       </div>
-      <h1 className="text-[22px] font-bold text-ink mb-2">
-        Confirmez votre demande
-      </h1>
+      <h1 className="text-[22px] font-bold text-ink mb-2">Confirme ta demande</h1>
       <p className="text-[13px] text-ink-mute leading-relaxed mb-6">
-        Nous venons de vous envoyer un code à 6 chiffres par email. Saisissez-le ci-dessous
-        pour finaliser l’envoi de votre demande aux diagnostiqueurs.
+        Nous venons de t'envoyer un code à 6 chiffres par email. Saisis-le ci-dessous pour finaliser
+        l’envoi de ta demande aux diagnostiqueurs.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -200,7 +195,7 @@ export function VerifyEmailForm({ trackingToken }: VerifyEmailFormProps) {
 
         {state.kind === 'expired' && (
           <div className="rounded-md border border-amber/40 bg-amber/10 p-3 text-[12px] text-ink-soft">
-            Ce code a expiré. Demandez un nouveau code ci-dessous.
+            Ce code a expiré. Demande un nouveau code ci-dessous.
           </div>
         )}
 
@@ -222,9 +217,7 @@ export function VerifyEmailForm({ trackingToken }: VerifyEmailFormProps) {
       </form>
 
       <div className="mt-6 pt-6 border-t border-rule/40 text-center">
-        <p className="text-[12px] text-ink-mute mb-2">
-          Vous n’avez pas reçu le code ?
-        </p>
+        <p className="text-[12px] text-ink-mute mb-2">Tu n’as pas reçu le code ?</p>
         <button
           type="button"
           onClick={handleResend}
@@ -238,7 +231,7 @@ export function VerifyEmailForm({ trackingToken }: VerifyEmailFormProps) {
               : 'Renvoyer un code'}
         </button>
         {resendStatus.kind === 'sent' && (
-          <p className="mt-2 text-[11px] text-success">Un nouveau code vous a été envoyé.</p>
+          <p className="mt-2 text-[11px] text-success">Un nouveau code t'a été envoyé.</p>
         )}
         {resendStatus.kind === 'error' && (
           <p className="mt-2 text-[11px] text-danger">{resendStatus.message}</p>

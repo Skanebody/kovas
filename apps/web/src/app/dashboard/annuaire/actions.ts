@@ -102,7 +102,7 @@ export async function updateAnnuaireProfile(
   if (!diag?.id) {
     return {
       error:
-        "Aucune fiche annuaire revendiquée n'est associée à votre compte. Activez votre fiche depuis le hub annuaire.",
+        "Aucune fiche annuaire revendiquée n'est associée à ton compte. Active ta fiche depuis le hub annuaire.",
     }
   }
 

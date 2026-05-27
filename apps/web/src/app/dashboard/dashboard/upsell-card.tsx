@@ -39,7 +39,7 @@ interface UpsellCardProps {
  *     sectionNumber="03"
  *     sectionTitle="Cockpit ADEME"
  *     moduleName="Cockpit ADEME monitoring rétroactif"
- *     description="Surveillance automatique de vos DPE publiés sur l'API ADEME..."
+ *     description="Surveillance automatique de tes DPE publiés sur l'API ADEME..."
  *     requiredPlanOrAddon="Découverte ou +"
  *     priceLabel="à partir de 19 € HT/mois"
  *     activateHref="/dashboard/account?module=cockpit_ademe_mode1"

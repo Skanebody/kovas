@@ -111,7 +111,13 @@ const SEVERITY_WEIGHTS: Record<RiskSeverity, number> = {
 }
 
 const ENERGY_CLASS_ORDER: Record<string, number> = {
-  A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7,
+  A: 1,
+  B: 2,
+  C: 3,
+  D: 4,
+  E: 5,
+  F: 6,
+  G: 7,
 }
 
 function classRank(letter: string | null | undefined): number | null {
@@ -189,14 +195,17 @@ function detectCadastreMismatch(m: Mission): RiskSignal | null {
   const dpe = m.surfaceDpe
   const cadastre = m.surfaceCadastre
   if (
-    dpe === null || dpe === undefined ||
-    cadastre === null || cadastre === undefined ||
-    dpe <= 0 || cadastre <= 0
-  ) return null
+    dpe === null ||
+    dpe === undefined ||
+    cadastre === null ||
+    cadastre === undefined ||
+    dpe <= 0 ||
+    cadastre <= 0
+  )
+    return null
   const diffPct = (Math.abs(dpe - cadastre) / cadastre) * 100
   if (diffPct < 15) return null
-  const severity: RiskSeverity =
-    diffPct >= 40 ? 'critical' : diffPct >= 25 ? 'high' : 'medium'
+  const severity: RiskSeverity = diffPct >= 40 ? 'critical' : diffPct >= 25 ? 'high' : 'medium'
   return {
     type: 'cadastre_mismatch',
     severity,
@@ -239,7 +248,12 @@ function detectClassJump(missions: Mission[]): RiskSignal[] {
         severity,
         missionId: cur.id,
         description: `Saut de ${improvement} classe(s) (${prev.dpeLetter} → ${cur.dpeLetter}) sans travaux documentés. À justifier.`,
-        evidence: { propertyKey: key, previousClass: prev.dpeLetter, currentClass: cur.dpeLetter, improvement },
+        evidence: {
+          propertyKey: key,
+          previousClass: prev.dpeLetter,
+          currentClass: cur.dpeLetter,
+          improvement,
+        },
       })
     }
   }
@@ -258,7 +272,12 @@ function detectAberrantData(m: Mission): RiskSignal[] {
         severity: wPerM2 < 2 ? 'high' : 'medium',
         missionId: m.id,
         description: `Puissance chauffage très faible : ${wPerM2.toFixed(1)} W/m². Vérifier la saisie.`,
-        evidence: { check: 'heating_power_low', heatingPowerKw: power, surface, wattsPerM2: Number(wPerM2.toFixed(1)) },
+        evidence: {
+          check: 'heating_power_low',
+          heatingPowerKw: power,
+          surface,
+          wattsPerM2: Number(wPerM2.toFixed(1)),
+        },
       })
     } else if (wPerM2 > 200) {
       signals.push({
@@ -266,7 +285,12 @@ function detectAberrantData(m: Mission): RiskSignal[] {
         severity: wPerM2 > 500 ? 'high' : 'medium',
         missionId: m.id,
         description: `Puissance chauffage anormalement élevée : ${wPerM2.toFixed(1)} W/m². Vérifier l'unité.`,
-        evidence: { check: 'heating_power_high', heatingPowerKw: power, surface, wattsPerM2: Number(wPerM2.toFixed(1)) },
+        evidence: {
+          check: 'heating_power_high',
+          heatingPowerKw: power,
+          surface,
+          wattsPerM2: Number(wPerM2.toFixed(1)),
+        },
       })
     }
   }
@@ -276,17 +300,29 @@ function detectAberrantData(m: Mission): RiskSignal[] {
       severity: 'high',
       missionId: m.id,
       description: `Classe A annoncée mais consommation ${m.energyValue} kWh/m².an (> 50). Incohérence méthode 3CL probable.`,
-      evidence: { check: 'class_a_with_high_consumption', dpeLetter: m.dpeLetter, energyValue: m.energyValue },
+      evidence: {
+        check: 'class_a_with_high_consumption',
+        dpeLetter: m.dpeLetter,
+        energyValue: m.energyValue,
+      },
     })
   }
-  if (typeof m.yearBuilt === 'number' && m.yearBuilt < 1948 &&
-      (m.dpeLetter === 'A' || m.dpeLetter === 'B') && m.hasTravauxDocumented !== true) {
+  if (
+    typeof m.yearBuilt === 'number' &&
+    m.yearBuilt < 1948 &&
+    (m.dpeLetter === 'A' || m.dpeLetter === 'B') &&
+    m.hasTravauxDocumented !== true
+  ) {
     signals.push({
       type: 'aberrant_data',
       severity: 'medium',
       missionId: m.id,
       description: `Construction antérieure à 1948 (${m.yearBuilt}) classée ${m.dpeLetter} sans travaux documentés.`,
-      evidence: { check: 'old_building_good_class', yearBuilt: m.yearBuilt, dpeLetter: m.dpeLetter },
+      evidence: {
+        check: 'old_building_good_class',
+        yearBuilt: m.yearBuilt,
+        dpeLetter: m.dpeLetter,
+      },
     })
   }
   return signals
@@ -317,7 +353,12 @@ function detectRecurrentPatterns(missions: Mission[], lookbackMonths: number): R
       severity,
       missionId: sample,
       description: `Erreur récurrente "${findingType}" dans ${pct.toFixed(0)}% de tes missions des ${lookbackMonths} derniers mois.`,
-      evidence: { findingType, occurrences: count, totalMissions: total, pct: Number(pct.toFixed(1)) },
+      evidence: {
+        findingType,
+        occurrences: count,
+        totalMissions: total,
+        pct: Number(pct.toFixed(1)),
+      },
     })
   }
   signals.sort((a, b) => Number(b.evidence.occurrences ?? 0) - Number(a.evidence.occurrences ?? 0))
@@ -437,7 +478,12 @@ async function loadMissions(
       const types: string[] = []
       if (Array.isArray(row.findings)) {
         for (const f of row.findings) {
-          if (f && typeof f === 'object' && 'type' in f && typeof (f as { type: unknown }).type === 'string') {
+          if (
+            f &&
+            typeof f === 'object' &&
+            'type' in f &&
+            typeof (f as { type: unknown }).type === 'string'
+          ) {
             types.push((f as { type: string }).type)
           }
         }
@@ -672,7 +718,11 @@ Deno.serve(async (req: Request) => {
     missions = await loadMissions(supabase, body.user_id)
   } catch (err) {
     return jsonResponse(
-      { ok: false, reason: 'load_missions_failed', detail: err instanceof Error ? err.message : 'unknown' },
+      {
+        ok: false,
+        reason: 'load_missions_failed',
+        detail: err instanceof Error ? err.message : 'unknown',
+      },
       500,
     )
   }
@@ -694,7 +744,9 @@ Deno.serve(async (req: Request) => {
   // 5. On ne retient que les signaux dont la mission appartient à la fenêtre
   //    primary (les historiques sont des contextes, pas des cibles du mois).
   const primaryIds = new Set(primaryMissions.map((m) => m.id))
-  const relevantSignals = signals.filter((s) => primaryIds.has(s.missionId) || s.type === 'pattern_recurrent')
+  const relevantSignals = signals.filter(
+    (s) => primaryIds.has(s.missionId) || s.type === 'pattern_recurrent',
+  )
 
   const agg = aggregateRiskSignals(relevantSignals)
 

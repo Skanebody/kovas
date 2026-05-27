@@ -93,12 +93,12 @@ const FAQ: FaqItem[] = [
   {
     question: 'Que se passe-t-il si je dépasse mon quota mensuel ?',
     answer:
-      "Les caps sont en fair-use : aucun blocage brutal. À 80 % du quota, vous recevez une notification. À 100 %, vous pouvez continuer en mode dégradé léger. Au-delà de 150 % deux mois consécutifs, nous vous suggérons la formule supérieure (plus économique pour votre profil). Aucune carte bancaire n'est redemandée.",
+      "Les caps sont en fair-use : aucun blocage brutal. À 80 % du quota, tu reçois une notification. À 100 %, tu peux continuer en mode dégradé léger. Au-delà de 150 % deux mois consécutifs, nous te suggérons la formule supérieure (plus économique pour ton profil). Aucune carte bancaire n'est redemandée.",
   },
   {
     question: "Puis-je changer de tier en cours d'abonnement ?",
     answer:
-      'Oui, depuis votre compte, à tout moment. Le changement est appliqué au prorata du mois en cours, sans pénalité. Le downgrade prend effet à la fin du cycle de facturation.',
+      'Oui, depuis ton compte, à tout moment. Le changement est appliqué au prorata du mois en cours, sans pénalité. Le downgrade prend effet à la fin du cycle de facturation.',
   },
   {
     question: 'Y a-t-il un engagement ?',
@@ -108,7 +108,7 @@ const FAQ: FaqItem[] = [
   {
     question: "L'essai gratuit nécessite-t-il une carte bancaire ?",
     answer:
-      "Oui, l'essai 30 jours requiert une carte bancaire à l'inscription (Stripe Checkout setup_intent). Aucun débit avant J+30. Vous pouvez résilier à tout moment pendant la période d'essai depuis votre compte.",
+      "Oui, l'essai 30 jours requiert une carte bancaire à l'inscription (Stripe Checkout setup_intent). Aucun débit avant J+30. Tu peux résilier à tout moment pendant la période d'essai depuis ton compte.",
   },
   {
     question: 'Les tarifs incluent-ils la TVA ?',
@@ -143,7 +143,7 @@ export default function PricingPage() {
             Tarification simple, sans surprise.
           </h1>
           <p className="text-ink-mute">
-            Toutes les fonctionnalités dans tous les tiers. La différence : votre volume mensuel.
+            Toutes les fonctionnalités dans tous les tiers. La différence : ton volume mensuel.
           </p>
         </div>
 
@@ -221,8 +221,8 @@ export default function PricingPage() {
               Visibilité auprès des particuliers
             </h2>
             <p className="text-sm text-ink-mute">
-              Boostez votre fiche annuaire pour recevoir des leads particuliers du calculateur DPE.
-              Quatre paliers cumulables avec votre abonnement logiciel.
+              Booste ta fiche annuaire pour recevoir des leads particuliers du calculateur DPE.
+              Quatre paliers cumulables avec ton abonnement logiciel.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -273,7 +273,7 @@ export default function PricingPage() {
             </li>
           </ul>
           <p className="text-xs text-ink-faint pt-2">
-            Aucun pack mensuel obligatoire — vous ne payez que ce que vous utilisez.
+            Aucun pack mensuel obligatoire — tu ne paies que ce que tu utilises.
           </p>
         </Card>
 
@@ -281,7 +281,7 @@ export default function PricingPage() {
           <div className="space-y-2 text-center">
             <Badge variant="muted">FAQ tarifs</Badge>
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Vos questions sur les tarifs
+              Tes questions sur les tarifs
             </h2>
           </div>
           <div className="space-y-3">

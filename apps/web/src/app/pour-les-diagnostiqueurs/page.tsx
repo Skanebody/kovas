@@ -129,27 +129,27 @@ const FAQ_B2B: FaqItem[] = [
   {
     question: 'Quel est le délai de mise en place ?',
     answer:
-      '15 minutes pour créer votre compte et démarrer votre première mission. Si vous souhaitez importer vos données existantes (Liciel, OBBC, AnalysImmo, ORIS ou autre), comptez 1 à 2 jours ouvrés. Notre équipe vous accompagne gratuitement.',
+      "15 minutes pour créer ton compte et démarrer ta première mission. Si tu souhaites importer tes données existantes (Liciel, OBBC, AnalysImmo, ORIS ou autre), compte 1 à 2 jours ouvrés. Notre équipe t'accompagne gratuitement.",
   },
   {
     question: 'Comment importer ma base depuis Liciel, OBBC, AnalysImmo ou ORIS ?',
     answer:
-      'KOVAS est un compagnon, pas un remplaçant : votre logiciel certifié reste votre moteur ADEME. Pour récupérer votre base existante (clients, biens, copropriétés), nous prenons en charge gratuitement l’import. Vous nous envoyez vos exports (ZIP, XML, Excel ou CSV selon votre éditeur), nous importons l’intégralité sans perte. Vous continuez à utiliser votre logiciel pour le calcul DPE et la soumission ADEME.',
+      'KOVAS est un compagnon, pas un remplaçant : ton logiciel certifié reste ton moteur ADEME. Pour récupérer ta base existante (clients, biens, copropriétés), nous prenons en charge gratuitement l’import. Tu nous envoies tes exports (ZIP, XML, Excel ou CSV selon ton éditeur), nous importons l’intégralité sans perte. Tu continues à utiliser ton logiciel pour le calcul DPE et la soumission ADEME.',
   },
   {
     question: 'Y a-t-il un engagement ?',
     answer:
-      'Aucun. Tous nos forfaits sont mensuels sans engagement, résiliables à tout moment depuis votre compte (un clic). Pas de frais cachés, pas de durée minimum.',
+      'Aucun. Tous nos forfaits sont mensuels sans engagement, résiliables à tout moment depuis ton compte (un clic). Pas de frais cachés, pas de durée minimum.',
   },
   {
     question: 'Comment puis-je résilier ?',
     answer:
-      'Depuis votre compte > Facturation > Résilier. La résiliation est immédiate, sans question. Vos données restent accessibles en lecture seule pendant 90 jours avant suppression définitive (conformément au RGPD).',
+      'Depuis ton compte > Facturation > Résilier. La résiliation est immédiate, sans question. Tes données restent accessibles en lecture seule pendant 90 jours avant suppression définitive (conformément au RGPD).',
   },
   {
     question: 'Quelles données puis-je exporter ?',
     answer:
-      '100% de vos données, à tout moment, sans frais. Formats compatibles avec les quatre éditeurs majeurs : Liciel (Imports spécifiques XML + Excel + ZIP), OBBC (Imports spécifiques XML), AnalysImmo (XML CII + ZIP), ORIS (ZIP + JSON). Plus PDF, Word, CSV portables. Vous restez propriétaire de vos données. Aucun verrou éditeur.',
+      '100% de tes données, à tout moment, sans frais. Formats compatibles avec les quatre éditeurs majeurs : Liciel (Imports spécifiques XML + Excel + ZIP), OBBC (Imports spécifiques XML), AnalysImmo (XML CII + ZIP), ORIS (ZIP + JSON). Plus PDF, Word, CSV portables. Tu restes propriétaire de tes données. Aucun verrou éditeur.',
   },
   {
     question: 'Le support est-il en français ?',
@@ -164,7 +164,7 @@ const FAQ_B2B: FaqItem[] = [
   {
     question: 'Y a-t-il une formation incluse ?',
     answer:
-      'Oui. Onboarding personnalisé gratuit : visio de 45 min avec un membre de l’équipe pour vous accompagner sur votre première mission. Base de connaissances en ligne avec 50+ articles et tutoriels vidéo.',
+      "Oui. Onboarding personnalisé gratuit : visio de 45 min avec un membre de l’équipe pour t'accompagner sur ta première mission. Base de connaissances en ligne avec 50+ articles et tutoriels vidéo.",
   },
 ]
 
@@ -223,7 +223,7 @@ export default function PourLesDiagnostiqueursPage() {
               </h2>
               <p className="text-[16px] sm:text-[17px] text-[#0F1419]/80 leading-relaxed max-w-xl">
                 Cadastre, DVF, ADEME historique, BAN, IGN, Géorisques. Si une incohérence existe
-                (DPE shopping, écart cadastre, classe énergie suspecte), KOVAS vous le signale AVANT
+                (DPE shopping, écart cadastre, classe énergie suspecte), KOVAS te le signale AVANT
                 envoi. Aucun autre logiciel certifié ne combine ces 6 sources simultanément.
               </p>
             </div>
@@ -254,8 +254,8 @@ export default function PourLesDiagnostiqueursPage() {
         />
         <CtaBanner
           eyebrow="Offre Founder · Tarif à vie · M0-M9 uniquement"
-          title="Réservez votre place dans les 50 premiers."
-          description="Bénéficiez du tarif Founder à vie sur tous nos forfaits, ainsi que d’un accès anticipé à toutes les fonctionnalités Phase 2."
+          title="Réserve ta place dans les 50 premiers."
+          description="Bénéficie du tarif Founder à vie sur tous nos forfaits, ainsi que d’un accès anticipé à toutes les fonctionnalités Phase 2."
           ctaLabel="Démarrer maintenant"
           ctaHref="/pricing/checkout?plan=solo_pro&billing=monthly"
         />

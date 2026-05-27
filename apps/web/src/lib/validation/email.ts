@@ -90,14 +90,16 @@ export function validateProEmail(rawEmail: string): EmailValidationResult {
   return { valid: true, domain }
 }
 
-export function getEmailValidationMessage(reason: Exclude<EmailValidationResult, { valid: true }>['reason']): string {
+export function getEmailValidationMessage(
+  reason: Exclude<EmailValidationResult, { valid: true }>['reason'],
+): string {
   switch (reason) {
     case 'invalid_format':
       return 'Adresse email invalide.'
     case 'free_provider':
-      return 'KOVAS est réservé aux professionnels. Merci d\'utiliser votre adresse email professionnelle (avec votre nom de domaine).'
+      return "KOVAS est réservé aux professionnels. Merci d'utiliser votre adresse email professionnelle (avec votre nom de domaine)."
     case 'disposable_provider':
-      return 'Les adresses email temporaires ne sont pas autorisées. Merci d\'utiliser votre adresse professionnelle.'
+      return "Les adresses email temporaires ne sont pas autorisées. Merci d'utiliser votre adresse professionnelle."
     case 'no_mx':
       return 'Domaine email non joignable.'
   }

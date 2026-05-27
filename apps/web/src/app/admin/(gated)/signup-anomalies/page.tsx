@@ -41,10 +41,10 @@ export default async function SignupAnomaliesPage() {
         </p>
         <h1 className="text-2xl font-display font-bold text-ink mt-1">Anomalies SIRET signup</h1>
         <p className="text-sm text-ink-mute mt-1 max-w-3xl">
-          Cabinets dont le SIRET est actif au registre SIRENE mais dont le code NAF déclaré n&apos;est
-          pas dans le périmètre diagnostic immobilier (71.20B ou 71.12B). Cas typique : cabinet
-          récemment immatriculé pas encore catégorisé, ou activité multi-secteurs. L&apos;essai
-          continue tant que vous n&apos;avez pas validé manuellement.
+          Cabinets dont le SIRET est actif au registre SIRENE mais dont le code NAF déclaré
+          n&apos;est pas dans le périmètre diagnostic immobilier (71.20B ou 71.12B). Cas typique :
+          cabinet récemment immatriculé pas encore catégorisé, ou activité multi-secteurs.
+          L&apos;essai continue tant que vous n&apos;avez pas validé manuellement.
         </p>
       </header>
 

@@ -1,9 +1,9 @@
-import { CheckCircle2, FileX, Lock } from 'lucide-react'
-import type { Metadata } from 'next'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import type { Database } from '@kovas/database/types'
 import { Card } from '@/components/ui/card'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { CheckCircle2, FileX, Lock } from 'lucide-react'
+import type { Metadata } from 'next'
 import { UploadForm } from './upload-form'
 
 export const metadata: Metadata = {
@@ -39,10 +39,7 @@ export default async function PublicUploadPage({ params }: PageProps) {
     return <InvalidTokenPage />
   }
 
-  if (
-    dossier.client_upload_expires_at &&
-    new Date(dossier.client_upload_expires_at) < new Date()
-  ) {
+  if (dossier.client_upload_expires_at && new Date(dossier.client_upload_expires_at) < new Date()) {
     return <ExpiredTokenPage />
   }
 
@@ -72,12 +69,11 @@ export default async function PublicUploadPage({ params }: PageProps) {
         <div className="mx-auto max-w-2xl space-y-8">
           <div className="space-y-2">
             <h1 className="font-sans font-light text-display-s tracking-tight text-ink leading-[1.1]">
-              Documents pour votre{' '}
-              <span className="font-serif italic font-normal">diagnostic</span>.
+              Documents pour ton <span className="font-serif italic font-normal">diagnostic</span>.
             </h1>
             <p className="text-[14px] text-ink-mute">
-              Votre diagnostiqueur a besoin de quelques documents avant son intervention.
-              Téléchargez-les ici — c&apos;est sécurisé et privé.
+              Ton diagnostiqueur a besoin de quelques documents avant son intervention.
+              Télécharge-les ici — c&apos;est sécurisé et privé.
             </p>
             {prop && (
               <p className="text-[12px] text-ink-faint font-mono">
@@ -107,7 +103,7 @@ export default async function PublicUploadPage({ params }: PageProps) {
 
           <p className="text-[11px] text-ink-faint flex items-start gap-1">
             <Lock className="size-3 mt-0.5 shrink-0" />
-            Hébergement EU (Paris), conformité RGPD. Vos documents ne sont visibles que par votre
+            Hébergement EU (Paris), conformité RGPD. Tes documents ne sont visibles que par ton
             diagnostiqueur.
           </p>
         </div>
@@ -129,7 +125,7 @@ function InvalidTokenPage() {
         <FileX className="size-10 mx-auto text-ink-mute" />
         <h1 className="font-display text-xl font-semibold text-ink">Lien invalide ou révoqué</h1>
         <p className="text-[13px] text-ink-mute">
-          Ce lien d&apos;envoi de documents n&apos;est plus actif. Contactez votre diagnostiqueur pour
+          Ce lien d&apos;envoi de documents n&apos;est plus actif. Contacte ton diagnostiqueur pour
           en obtenir un nouveau.
         </p>
       </Card>
@@ -144,8 +140,7 @@ function ExpiredTokenPage() {
         <FileX className="size-10 mx-auto text-ink-mute" />
         <h1 className="font-display text-xl font-semibold text-ink">Lien expiré</h1>
         <p className="text-[13px] text-ink-mute">
-          Ce lien a expiré (validité : 30 jours). Contactez votre diagnostiqueur pour un nouveau
-          lien.
+          Ce lien a expiré (validité : 30 jours). Contacte ton diagnostiqueur pour un nouveau lien.
         </p>
       </Card>
     </div>

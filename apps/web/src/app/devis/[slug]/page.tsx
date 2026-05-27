@@ -260,7 +260,7 @@ export default async function QuoteRequestPage({ params }: PageProps) {
             <ReassuranceItem
               icon={<Clock className="size-4" aria-hidden />}
               title="Sous 24h ouvrées"
-              text="Le diagnostiqueur vous recontacte rapidement"
+              text="Le diagnostiqueur te recontacte rapidement"
             />
             <ReassuranceItem
               icon={<ShieldCheck className="size-4" aria-hidden />}
@@ -270,7 +270,7 @@ export default async function QuoteRequestPage({ params }: PageProps) {
             <ReassuranceItem
               icon={<CheckCircle2 className="size-4" aria-hidden />}
               title="Sans engagement"
-              text="Comparez plusieurs devis avant de choisir"
+              text="Compare plusieurs devis avant de choisir"
             />
           </div>
         </section>

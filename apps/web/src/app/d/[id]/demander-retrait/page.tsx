@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { CheckCircle2, MailX } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { CheckCircle2, MailX } from 'lucide-react'
+import type { Metadata } from 'next'
 import { WithdrawalForm } from './withdrawal-form'
 
 export const metadata: Metadata = {
@@ -46,14 +46,22 @@ export default async function WithdrawalPage({ params }: PageProps) {
   return (
     <PageShell title="Demander le retrait de ma fiche">
       <p className="text-[14px] text-ink-mute leading-relaxed">
-        Vous demandez le retrait de la fiche professionnelle au nom de
-        {' '}<strong className="text-ink">{diag.first_name} {diag.last_name}</strong>
-        {diag.city ? <> à <strong className="text-ink">{diag.city}</strong></> : null}.
+        Tu demandes le retrait de la fiche professionnelle au nom de{' '}
+        <strong className="text-ink">
+          {diag.first_name} {diag.last_name}
+        </strong>
+        {diag.city ? (
+          <>
+            {' '}
+            à <strong className="text-ink">{diag.city}</strong>
+          </>
+        ) : null}
+        .
       </p>
       <p className="text-[13px] text-ink-mute leading-relaxed">
-        Une fois votre demande confirmée, votre fiche sera dépubliée sous 72&nbsp;heures et vos
-        données seront supprimées définitivement de nos systèmes (article 17 du RGPD — droit à
-        l&apos;effacement). Vous ne recevrez plus aucune communication.
+        Une fois ta demande confirmée, ta fiche sera dépubliée sous 72&nbsp;heures et tes données
+        seront supprimées définitivement de nos systèmes (article 17 du RGPD — droit à
+        l&apos;effacement). Tu ne recevras plus aucune communication.
       </p>
       <WithdrawalForm diagId={id} />
     </PageShell>
@@ -76,8 +84,11 @@ function NotFoundView() {
     <PageShell title="Lien invalide">
       <MailX className="size-10 mx-auto text-ink-mute" />
       <p className="text-[14px] text-ink-mute leading-relaxed">
-        Ce lien ne correspond à aucune fiche connue.
-        Contactez-nous à <a href="mailto:contact@kovas.fr" className="underline text-ink">contact@kovas.fr</a>.
+        Ce lien ne correspond à aucune fiche connue. Contactez-nous à{' '}
+        <a href="mailto:contact@kovas.fr" className="underline text-ink">
+          contact@kovas.fr
+        </a>
+        .
       </p>
     </PageShell>
   )
@@ -108,7 +119,9 @@ function PageShell({ title, children }: { title: string; children: React.ReactNo
 
       <main className="flex-1 px-6 py-12">
         <div className="mx-auto max-w-xl space-y-6">
-          <h1 className="font-display text-display-s tracking-tight text-ink font-light">{title}</h1>
+          <h1 className="font-display text-display-s tracking-tight text-ink font-light">
+            {title}
+          </h1>
           <Card variant="opaque" padding="default" className="space-y-4">
             {children}
           </Card>

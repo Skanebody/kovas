@@ -163,7 +163,7 @@ export default async function ImportJobPage({
         </Button>
         <AppPageHeader
           title="Récapitulatif de"
-          accent="votre import"
+          accent="ton import"
           eyebrow="📥 IMPORT · ÉTAPE 5 / 5"
           description={`Fichier : ${job.source_filename}.`}
         />
@@ -441,7 +441,7 @@ export default async function ImportJobPage({
 
       <AppPageHeader
         title="Analyse de"
-        accent="votre fichier"
+        accent="ton fichier"
         eyebrow="📥 IMPORT · ÉTAPE 4 / 5"
         description={`Fichier : ${job.source_filename}. Suivi temps réel de l'extraction, normalisation et détection des doublons.`}
       />

@@ -176,11 +176,11 @@ export default async function ConseilArticlePage({ params }: PageProps) {
         <section className="border-t border-rule/60 bg-paper">
           <div className="max-w-[760px] mx-auto px-6 py-14 sm:py-20 text-center">
             <h2 className="font-sans text-[26px] sm:text-[34px] font-semibold leading-snug tracking-tight mb-4">
-              Vous avez besoin d'un diagnostic ?
+              Tu as besoin d'un diagnostic ?
             </h2>
             <p className="text-ink/72 leading-relaxed max-w-[560px] mx-auto mb-7">
-              Obtenez un devis gratuit en moins de 2 minutes auprès d'un diagnostiqueur immobilier
-              certifié près de chez vous.
+              Obtiens un devis gratuit en moins de 2 minutes auprès d'un diagnostiqueur immobilier
+              certifié près de chez toi.
             </p>
             <Link
               href="/trouver-un-diagnostiqueur"

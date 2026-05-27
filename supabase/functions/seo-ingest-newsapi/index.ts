@@ -20,7 +20,7 @@
 //   - NEWSAPI_API_KEY (requis pour mode reel, sinon mock)
 // ============================================
 
-import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
+import { type SupabaseClient, createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.0'
 
 // ============================================
 // Types
@@ -84,18 +84,114 @@ const SEARCH_QUERIES: ReadonlyArray<{ query: string; category: string }> = [
 // Stopwords FR + bruit (titres news)
 // ============================================
 const STOPWORDS_FR = new Set<string>([
-  'a', 'au', 'aux', 'avec', 'ce', 'ces', 'cet', 'cette', 'comment',
-  'dans', 'de', 'des', 'du', 'en', 'est', 'et', 'eu', 'il', 'ils', 'je',
-  'la', 'le', 'les', 'leur', 'leurs', 'lui', 'ma', 'mais', 'me', 'mes',
-  'mon', 'ne', 'nos', 'notre', 'nous', 'on', 'ont', 'ou', 'par', 'pas',
-  'plus', 'pour', 'qu', 'que', 'qui', 'quoi', 'sa', 'sans', 'se', 'ses',
-  'son', 'sont', 'sur', 'ta', 'te', 'tes', 'toi', 'ton', 'tu', 'un',
-  'une', 'vos', 'votre', 'vous', 'y', 'cas', 'fait', 'tout', 'tous',
-  'toute', 'toutes', 'apres', 'avant', 'aussi', 'comme', 'entre',
-  'leur', 'meme', 'plus', 'sous', 'vers', 'ici', 'la', 'ya', 'etre',
-  'etait', 'ete', 'etat', 'avoir', 'eu', 'eue', 'eues', 'eus',
-  'the', 'and', 'for', 'with', 'this', 'that', 'from', 'are', 'was',
-  'were', 'has', 'have', 'will', 'can', 'all',
+  'a',
+  'au',
+  'aux',
+  'avec',
+  'ce',
+  'ces',
+  'cet',
+  'cette',
+  'comment',
+  'dans',
+  'de',
+  'des',
+  'du',
+  'en',
+  'est',
+  'et',
+  'eu',
+  'il',
+  'ils',
+  'je',
+  'la',
+  'le',
+  'les',
+  'leur',
+  'leurs',
+  'lui',
+  'ma',
+  'mais',
+  'me',
+  'mes',
+  'mon',
+  'ne',
+  'nos',
+  'notre',
+  'nous',
+  'on',
+  'ont',
+  'ou',
+  'par',
+  'pas',
+  'plus',
+  'pour',
+  'qu',
+  'que',
+  'qui',
+  'quoi',
+  'sa',
+  'sans',
+  'se',
+  'ses',
+  'son',
+  'sont',
+  'sur',
+  'ta',
+  'te',
+  'tes',
+  'toi',
+  'ton',
+  'tu',
+  'un',
+  'une',
+  'vos',
+  'votre',
+  'vous',
+  'y',
+  'cas',
+  'fait',
+  'tout',
+  'tous',
+  'toute',
+  'toutes',
+  'apres',
+  'avant',
+  'aussi',
+  'comme',
+  'entre',
+  'leur',
+  'meme',
+  'plus',
+  'sous',
+  'vers',
+  'ici',
+  'la',
+  'ya',
+  'etre',
+  'etait',
+  'ete',
+  'etat',
+  'avoir',
+  'eu',
+  'eue',
+  'eues',
+  'eus',
+  'the',
+  'and',
+  'for',
+  'with',
+  'this',
+  'that',
+  'from',
+  'are',
+  'was',
+  'were',
+  'has',
+  'have',
+  'will',
+  'can',
+  'all',
 ])
 
 // Bigrams metier "fixes" qu'on cherche en priorite
@@ -106,7 +202,11 @@ const TARGET_BIGRAMS: ReadonlyArray<{ pattern: RegExp; keyword: string; category
   { pattern: /\bdiagnostic amiante\b/i, keyword: 'diagnostic amiante', category: 'amiante' },
   { pattern: /\bdiagnostic plomb\b/i, keyword: 'diagnostic plomb', category: 'plomb' },
   { pattern: /\bdiagnostic gaz\b/i, keyword: 'diagnostic gaz', category: 'gaz' },
-  { pattern: /\bdiagnostic electrique\b/i, keyword: 'diagnostic electrique', category: 'electricite' },
+  {
+    pattern: /\bdiagnostic electrique\b/i,
+    keyword: 'diagnostic electrique',
+    category: 'electricite',
+  },
   { pattern: /\bdiagnostic termites\b/i, keyword: 'diagnostic termites', category: 'termites' },
   { pattern: /\bdiagnostic carrez\b/i, keyword: 'diagnostic carrez', category: 'carrez' },
   { pattern: /\bdiagnostic erp\b/i, keyword: 'diagnostic erp', category: 'erp' },
@@ -114,7 +214,11 @@ const TARGET_BIGRAMS: ReadonlyArray<{ pattern: RegExp; keyword: string; category
   { pattern: /\bpassoires thermiques\b/i, keyword: 'passoires thermiques', category: 'dpe' },
   { pattern: /\bloi climat\b/i, keyword: 'loi climat resilience', category: 'reglementation' },
   { pattern: /\bre2020\b/i, keyword: 're2020', category: 'reglementation' },
-  { pattern: /\binterdiction location\b/i, keyword: 'interdiction location passoire', category: 'reglementation' },
+  {
+    pattern: /\binterdiction location\b/i,
+    keyword: 'interdiction location passoire',
+    category: 'reglementation',
+  },
   { pattern: /\brenovation energetique\b/i, keyword: 'renovation energetique', category: 'audit' },
   { pattern: /\bmaprimerenov\b/i, keyword: 'maprimerenov', category: 'reglementation' },
   { pattern: /\bma prime renov\b/i, keyword: 'maprimerenov', category: 'reglementation' },
@@ -124,12 +228,7 @@ const TARGET_BIGRAMS: ReadonlyArray<{ pattern: RegExp; keyword: string; category
 // Helpers
 // ============================================
 function normalizeKeyword(raw: string): string {
-  return raw
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim()
 }
 
 function sleep(ms: number): Promise<void> {
@@ -188,10 +287,7 @@ async function upsertKeyword(
   return inserted.id as string
 }
 
-async function insertSignal(
-  supabase: SupabaseClient,
-  params: InsertSignalParams,
-): Promise<void> {
+async function insertSignal(supabase: SupabaseClient, params: InsertSignalParams): Promise<void> {
   const { error } = await supabase.from('seo_keyword_signals').insert({
     keyword_id: params.keywordId,
     source_code: params.sourceCode,
@@ -216,8 +312,7 @@ async function updateSeoSource(
     .maybeSingle()
 
   if (existing) {
-    const prev =
-      typeof existing.total_signals_count === 'number' ? existing.total_signals_count : 0
+    const prev = typeof existing.total_signals_count === 'number' ? existing.total_signals_count : 0
     await supabase
       .from('seo_sources')
       .update({
@@ -252,10 +347,7 @@ function tokenize(text: string): string[] {
     .filter((t) => t.length >= 3 && !STOPWORDS_FR.has(t))
 }
 
-function extractKeywordsFromTitle(
-  title: string,
-  fallbackCategory: string,
-): ExtractedKeyword[] {
+function extractKeywordsFromTitle(title: string, fallbackCategory: string): ExtractedKeyword[] {
   const found: ExtractedKeyword[] = []
   const seen = new Set<string>()
 
@@ -274,7 +366,9 @@ function extractKeywordsFromTitle(
   if (found.length === 0) {
     const tokens = tokenize(title)
     const filtered = tokens.filter((t) =>
-      /^(dpe|amiante|plomb|gaz|electricite|termites|carrez|erp|audit|energetique|diagnostic|renovation|passoire|thermique|climat|location|copropriete)$/i.test(t),
+      /^(dpe|amiante|plomb|gaz|electricite|termites|carrez|erp|audit|energetique|diagnostic|renovation|passoire|thermique|climat|location|copropriete)$/i.test(
+        t,
+      ),
     )
     for (const t of filtered.slice(0, 2)) {
       if (!seen.has(t)) {
@@ -359,10 +453,10 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
   if (!supabaseUrl || !serviceKey) {
-    return new Response(
-      JSON.stringify({ ok: false, error: 'missing supabase env' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ ok: false, error: 'missing supabase env' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   const supabase = createClient(supabaseUrl, serviceKey, {
@@ -373,9 +467,7 @@ Deno.serve(async (req) => {
   const mockMode = !apiKey
 
   // 30 derniers jours
-  const fromDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10)
+  const fromDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
   const ingestionRunId = crypto.randomUUID()
   const stats: IngestStats = {
@@ -460,10 +552,10 @@ Deno.serve(async (req) => {
     await updateSeoSource(supabase, 'newsapi', stats.signalsCreated)
   } catch (err) {
     stats.ok = false
-    return new Response(
-      JSON.stringify({ ok: false, error: (err as Error).message, stats }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    )
+    return new Response(JSON.stringify({ ok: false, error: (err as Error).message, stats }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   stats.durationMs = Date.now() - t0

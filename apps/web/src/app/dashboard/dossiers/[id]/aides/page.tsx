@@ -198,8 +198,8 @@ export default async function DossierAidesPage({
 
             <p className="mt-6 text-xs text-ink-mute italic">
               Sous réserve d'éligibilité et de validation par France Rénov'. KOVAS ne traite pas les
-              dossiers d'aide ; orientez votre client vers un conseiller France Rénov' au 0 808 800
-              700 pour la constitution du dossier officiel.
+              dossiers d'aide ; oriente ton client vers un conseiller France Rénov' au 0 808 800 700
+              pour la constitution du dossier officiel.
             </p>
           </section>
         </>

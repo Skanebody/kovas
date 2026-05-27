@@ -77,33 +77,33 @@ export default async function ReferralLandingPage({ params }: PageProps) {
             Programme parrainage KOVAS
           </p>
           <h1 className="font-sans font-light text-display-m md:text-display-l tracking-tight text-ink leading-[1.05]">
-            Vous avez été parrainé par{' '}
+            Tu as été parrainé par{' '}
             <span className="font-serif italic font-normal">{referrerName}</span>
             <span className="text-ink-mute">.</span>
           </h1>
           <p className="text-base text-ink-mute max-w-xl mx-auto">
-            Profitez de <strong className="text-ink">1 mois offert</strong> sur votre abonnement
-            KOVAS, quel que soit le forfait choisi.
+            Profite de <strong className="text-ink">1 mois offert</strong> sur ton abonnement KOVAS,
+            quel que soit le forfait choisi.
           </p>
         </header>
 
         {/* Avantages */}
         <Card variant="flat" padding="lg" className="space-y-5">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
-            Ce que vous obtenez
+            Ce que tu obtiens
           </h2>
           <ul className="space-y-3 text-[14px] text-ink">
             <li className="flex items-start gap-3">
               <Check className="size-4 mt-0.5 shrink-0 text-chartreuse-deep" />
               <span>
-                <strong>1 mois d'abonnement offert</strong> appliqué automatiquement à votre 1re
+                <strong>1 mois d'abonnement offert</strong> appliqué automatiquement à ta 1re
                 facture.
               </span>
             </li>
             <li className="flex items-start gap-3">
               <Check className="size-4 mt-0.5 shrink-0 text-chartreuse-deep" />
               <span>
-                30 jours d'essai libre puis le forfait de votre choix (29 € à 499 € HT/mois).
+                30 jours d'essai libre puis le forfait de ton choix (29 € à 499 € HT/mois).
               </span>
             </li>
             <li className="flex items-start gap-3">

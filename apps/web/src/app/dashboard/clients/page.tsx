@@ -140,13 +140,13 @@ export default async function ClientsPage({ searchParams }: ClientsPageProps) {
         <EmptyState
           icon={Users}
           title="Aucun client ne correspond à cette recherche."
-          description="Affinez les filtres ou videz la recherche pour retrouver vos clients."
+          description="Affine les filtres ou vide la recherche pour retrouver tes clients."
         />
       ) : (
         <EmptyState
           icon={Users}
           title="Aucun client encore."
-          description="Créez votre premier client (propriétaire, agence ou syndic) pour pouvoir lui lancer des missions."
+          description="Crée ton premier client (propriétaire, agence ou syndic) pour pouvoir lui lancer des missions."
           action={
             <Button asChild variant="accent">
               <Link href="/dashboard/clients/new">

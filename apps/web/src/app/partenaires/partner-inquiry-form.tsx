@@ -44,7 +44,8 @@ export function PartnerInquiryForm() {
       phone: String(formData.get('phone') ?? ''),
       company_name: String(formData.get('company_name') ?? ''),
       company_role: String(formData.get('company_role') ?? ''),
-      partnership_type: (formData.get('partnership_type') ?? 'autre') as PartnerInquiryInput['partnership_type'],
+      partnership_type: (formData.get('partnership_type') ??
+        'autre') as PartnerInquiryInput['partnership_type'],
       message: String(formData.get('message') ?? ''),
       honeypot: String(formData.get('website') ?? ''),
       consent_rgpd: true,
@@ -149,7 +150,7 @@ export function PartnerInquiryForm() {
           name="message"
           required
           rows={6}
-          placeholder="Décrivez votre structure, le partenariat envisagé et ses bénéfices attendus de votre côté."
+          placeholder="Décris ta structure, le partenariat envisagé et ses bénéfices attendus de ton côté."
           className={cn(
             'w-full rounded-md border bg-paper/70 px-3.5 py-2.5 text-sm text-[#0F1419] placeholder:text-[#0F1419]/40 leading-relaxed',
             'focus:outline-none focus:ring-4 focus:ring-navy/15 focus:border-[#0F1419]/40',
@@ -179,12 +180,7 @@ export function PartnerInquiryForm() {
       ) : null}
 
       <div>
-        <Button
-          type="submit"
-          variant="accent"
-          size="lg"
-          disabled={state.status === 'submitting'}
-        >
+        <Button type="submit" variant="accent" size="lg" disabled={state.status === 'submitting'}>
           {state.status === 'submitting' ? 'Envoi en cours…' : 'Envoyer la demande'}
         </Button>
       </div>

@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { CheckCircle2, MailX } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { CheckCircle2, MailX } from 'lucide-react'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Désabonnement — KOVAS',
@@ -50,7 +50,9 @@ export default async function UnsubscribePage({ params }: PageProps) {
       .eq('id', id)
 
     if (updateErr) {
-      return <ErrorView message="Une erreur est survenue. Réessayez ou contactez contact@kovas.fr." />
+      return (
+        <ErrorView message="Une erreur est survenue. Réessayez ou contactez contact@kovas.fr." />
+      )
     }
   }
 
@@ -63,12 +65,15 @@ function SuccessView() {
       <CheckCircle2 className="size-10 mx-auto text-success" />
       <h1 className="font-display text-xl font-semibold text-ink">Désabonnement confirmé</h1>
       <p className="text-[14px] text-ink-mute leading-relaxed">
-        Vous ne recevrez plus d&apos;emails de la part de KOVAS concernant votre fiche professionnelle.
+        Tu ne recevras plus d&apos;emails de la part de KOVAS concernant ta fiche professionnelle.
       </p>
       <p className="text-[13px] text-ink-faint leading-relaxed">
-        Si vous souhaitez également retirer votre fiche du site, utilisez la page
-        &laquo;&nbsp;Demander le retrait&nbsp;&raquo; depuis l&apos;un de nos emails ou
-        contactez-nous à <a href="mailto:contact@kovas.fr" className="underline text-ink">contact@kovas.fr</a>.
+        Si tu souhaites également retirer ta fiche du site, utilise la page &laquo;&nbsp;Demander le
+        retrait&nbsp;&raquo; depuis l&apos;un de nos emails ou contacte-nous à{' '}
+        <a href="mailto:contact@kovas.fr" className="underline text-ink">
+          contact@kovas.fr
+        </a>
+        .
       </p>
     </PageShell>
   )
@@ -80,9 +85,12 @@ function NotFoundView() {
       <MailX className="size-10 mx-auto text-ink-mute" />
       <h1 className="font-display text-xl font-semibold text-ink">Lien invalide</h1>
       <p className="text-[14px] text-ink-mute leading-relaxed">
-        Ce lien de désabonnement ne correspond à aucune fiche connue.
-        Si vous pensez que c&apos;est une erreur, contactez-nous à
-        {' '}<a href="mailto:contact@kovas.fr" className="underline text-ink">contact@kovas.fr</a>.
+        Ce lien de désabonnement ne correspond à aucune fiche connue. Si tu penses que c&apos;est
+        une erreur, contacte-nous à{' '}
+        <a href="mailto:contact@kovas.fr" className="underline text-ink">
+          contact@kovas.fr
+        </a>
+        .
       </p>
     </PageShell>
   )

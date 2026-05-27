@@ -26,7 +26,7 @@ const FAQ_ITEMS: FaqItem[] = [
     id: 'data-ownership',
     question: "Mes données restent-elles à moi si j'arrête KOVAS ?",
     answer:
-      "Oui, sans condition. Export complet en PDF, Word, CSV, JSON ou ZIP Liciel à tout moment, depuis votre tableau de bord. Après résiliation, votre abonnement reste actif jusqu'à la fin de la période en cours, puis votre compte bascule 90 jours en mode lecture et export pour reprendre vos dossiers à votre rythme. Au-delà, vos données opérationnelles sont supprimées ; vos factures restent conservées 10 ans (obligation légale comptable). Une demande explicite d'effacement RGPD via contact@kovas.fr est traitée sous 30 jours. Aucun verrou propriétaire, aucune négociation de sortie.",
+      "Oui, sans condition. Export complet en PDF, Word, CSV, JSON ou ZIP Liciel à tout moment, depuis ton tableau de bord. Après résiliation, ton abonnement reste actif jusqu'à la fin de la période en cours, puis ton compte bascule 90 jours en mode lecture et export pour reprendre tes dossiers à ton rythme. Au-delà, tes données opérationnelles sont supprimées ; tes factures restent conservées 10 ans (obligation légale comptable). Une demande explicite d'effacement RGPD via contact@kovas.fr est traitée sous 30 jours. Aucun verrou propriétaire, aucune négociation de sortie.",
   },
   {
     id: 'compat',
@@ -38,17 +38,17 @@ const FAQ_ITEMS: FaqItem[] = [
     id: 'offline',
     question: "Et si je n'ai pas de connexion sur le terrain ?",
     answer:
-      "KOVAS fonctionne hors ligne intégralement. Saisie vocale traitée localement sur l'appareil, photos stockées en local, validation cohérence en local. La synchronisation se déclenche dès que vous retrouvez du réseau, sans intervention de votre part. Aucune mission perdue, aucune saisie à refaire.",
+      "KOVAS fonctionne hors ligne intégralement. Saisie vocale traitée localement sur l'appareil, photos stockées en local, validation cohérence en local. La synchronisation se déclenche dès que tu retrouves du réseau, sans intervention de ta part. Aucune mission perdue, aucune saisie à refaire.",
   },
   {
     id: 'quota-overflow',
     question: 'Que se passe-t-il si je dépasse mon quota de missions ?',
     answer:
-      "Surplus facturé à l'usage à 2 € / mission au-delà du quota de votre forfait (Essential 10, Découverte 25, Pro 60). All Inclusive et Cabinet : missions illimitées, pas de surplus. Vous pouvez activer un plafond mensuel auto-protecteur : au-delà du seuil que vous fixez, le compte bascule en mode lecture pour le reste du mois. Aucune surprise sur la facture, jamais.",
+      "Surplus facturé à l'usage à 2 € / mission au-delà du quota de ton forfait (Essential 10, Découverte 25, Pro 60). All Inclusive et Cabinet : missions illimitées, pas de surplus. Tu peux activer un plafond mensuel auto-protecteur : au-delà du seuil que tu fixes, le compte bascule en mode lecture pour le reste du mois. Aucune surprise sur la facture, jamais.",
   },
   {
     id: 'proof-1h30',
-    question: 'Pourquoi vous croire sur les 1h30 gagnées par mission ?',
+    question: 'Pourquoi nous croire sur les 1h30 gagnées par mission ?',
     answer:
       'Parce que le calcul est mécanique : un DPE T3 demande en moyenne 50 minutes de relevé terrain et 90 minutes de re-saisie bureau (sources : enquête métier 2024, benchmark sur missions test). KOVAS structure la saisie pendant le relevé, ce qui réduit la re-saisie à 0–10 minutes selon la complexité. Le gain médian observé sur les bêta-tests est de 1h27 par DPE individuel.',
   },

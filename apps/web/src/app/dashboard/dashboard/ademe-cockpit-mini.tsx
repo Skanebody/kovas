@@ -74,7 +74,7 @@ export async function AdemeCockpitMini() {
         sectionNumber="03"
         sectionTitle="Cockpit ADEME"
         moduleName="Cockpit ADEME · monitoring rétroactif"
-        description="Surveillance automatique des DPE publiés sur l'API ADEME. Détection des dépassements de seuils (volume 1000/an), distances suspectes, ratios F/G hors norme. Alertes avant que l'ADEME ne vous contacte."
+        description="Surveillance automatique des DPE publiés sur l'API ADEME. Détection des dépassements de seuils (volume 1000/an), distances suspectes, ratios F/G hors norme. Alertes avant que l'ADEME ne te contacte."
         requiredPlanOrAddon="Pack Découverte ou +"
         priceLabel="à partir de 19 € HT/mois"
         activateHref="/pricing"
@@ -116,16 +116,16 @@ export async function AdemeCockpitMini() {
               </span>
               <div className="space-y-1">
                 <p className="font-serif italic text-xl text-ink leading-tight">
-                  Activez le monitoring rétroactif
+                  Active le monitoring rétroactif
                 </p>
                 <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
-                  Inclus dans votre forfait
+                  Inclus dans ton forfait
                 </p>
               </div>
             </div>
             <p className="text-[13px] text-ink-mute leading-relaxed">
-              Renseignez votre numéro de certificat <GlossaryTerm term="rge">RGE</GlossaryTerm> pour
-              démarrer la surveillance quotidienne de vos{' '}
+              Renseigne ton numéro de certificat <GlossaryTerm term="rge">RGE</GlossaryTerm> pour
+              démarrer la surveillance quotidienne de tes{' '}
               <GlossaryTerm term="dpe">DPE</GlossaryTerm> publiés sur l&apos;API{' '}
               <GlossaryTerm term="ademe">ADEME</GlossaryTerm>. Configuration en 30 secondes.
             </p>

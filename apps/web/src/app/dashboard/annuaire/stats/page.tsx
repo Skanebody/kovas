@@ -46,10 +46,10 @@ export default async function AnnuaireStatsPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-12">
       <AppPageHeader
-        title="Vos"
+        title="Tes"
         accent="statistiques"
         eyebrow={PERIOD_LABELS[period]}
-        description="Mesurez l'impact de votre fiche annuaire : vues, leads reçus, conversion, et comparaison avec les diagnostiqueurs de votre zone."
+        description="Mesure l'impact de ta fiche annuaire : vues, leads reçus, conversion, et comparaison avec les diagnostiqueurs de ta zone."
       />
 
       <PeriodToggle active={period} />
@@ -96,7 +96,7 @@ function KpiHeroGrid({ snapshot }: { snapshot: Snapshot }) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <KpiHeroCard
         icon={<Eye className="size-4" strokeWidth={1.5} />}
-        label="Vues de votre fiche"
+        label="Vues de ta fiche"
         value={snapshot.views.value.toLocaleString('fr-FR')}
         variation={computeVariation(snapshot.views.value, snapshot.views.previousValue)}
       />
@@ -285,7 +285,7 @@ function ZoneBenchmarkSection({ snapshot }: { snapshot: Snapshot }) {
     <section className="space-y-4">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="font-sans font-semibold text-[18px] text-ink leading-tight">
-          Votre place dans votre zone
+          Ta place dans ta zone
         </h2>
         <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
           Anonymisé · même département

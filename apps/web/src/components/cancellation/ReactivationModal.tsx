@@ -95,8 +95,10 @@ export function ReactivationModal({
           </DialogTitle>
           <DialogDescription>
             Bon retour ! Votre code <strong>{code}</strong> applique{' '}
-            <strong>-{discountPercent}% sur vos {discountDurationMonths} prochains mois</strong>.
-            Vos données sont intactes, vous retrouvez tout là où vous l&apos;aviez laissé.
+            <strong>
+              -{discountPercent}% sur vos {discountDurationMonths} prochains mois
+            </strong>
+            . Vos données sont intactes, vous retrouvez tout là où vous l&apos;aviez laissé.
           </DialogDescription>
         </DialogHeader>
 
@@ -119,13 +121,12 @@ export function ReactivationModal({
           >
             Plus tard
           </Button>
-          <Button
-            variant="default"
-            className="flex-1"
-            onClick={accept}
-            disabled={isPending}
-          >
-            {isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+          <Button variant="default" className="flex-1" onClick={accept} disabled={isPending}>
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Sparkles className="size-4" />
+            )}
             Réactiver maintenant
           </Button>
         </div>

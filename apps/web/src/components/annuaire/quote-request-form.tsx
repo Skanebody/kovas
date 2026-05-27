@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { OtpInput } from '@/components/forms/OtpInput'
+import { useEffect, useState } from 'react'
 
 interface Props {
   diagnosticianId: string
@@ -197,8 +197,7 @@ export function QuoteRequestForm({ diagnosticianId, diagnosticianName }: Props) 
       if (!verifyRes.ok || !verifyPayload.ok) {
         const attemptsLeft = verifyPayload.attemptsRemaining
         const baseMsg =
-          verifyPayload.message ??
-          'Code incorrect. Vérifiez votre SMS et ressaisissez-le.'
+          verifyPayload.message ?? 'Code incorrect. Vérifiez votre SMS et ressaisissez-le.'
         setOtpError(
           typeof attemptsLeft === 'number' && attemptsLeft > 0
             ? `${baseMsg} (${attemptsLeft} tentative${attemptsLeft > 1 ? 's' : ''} restante${attemptsLeft > 1 ? 's' : ''})`
@@ -237,9 +236,7 @@ export function QuoteRequestForm({ diagnosticianId, diagnosticianName }: Props) 
       const submitPayload = (await submitRes.json().catch(() => ({}))) as SubmitResponse
 
       if (!submitRes.ok || !submitPayload.ok) {
-        setOtpError(
-          submitPayload.message ?? 'Erreur lors de l’envoi de votre demande. Réessayez.',
-        )
+        setOtpError(submitPayload.message ?? 'Erreur lors de l’envoi de votre demande. Réessayez.')
         setVerifying(false)
         return
       }
@@ -307,7 +304,10 @@ export function QuoteRequestForm({ diagnosticianId, diagnosticianName }: Props) 
           <h2 className="font-semibold text-lg text-[#0B1D33]">Vérification de votre numéro</h2>
           <p className="text-sm text-neutral-600 mt-1">
             Un code à 6 chiffres a été envoyé par SMS au{' '}
-            <span className="font-mono font-medium text-[#0B1D33]">{maskPhone(normalizedPhone)}</span>.
+            <span className="font-mono font-medium text-[#0B1D33]">
+              {maskPhone(normalizedPhone)}
+            </span>
+            .
           </p>
           <p className="text-xs text-neutral-500 mt-1">Valide 5 minutes.</p>
         </div>
@@ -343,9 +343,7 @@ export function QuoteRequestForm({ diagnosticianId, diagnosticianName }: Props) 
             disabled={resendCooldown > 0 || verifying}
             className="text-[#0B1D33] font-medium hover:underline disabled:opacity-50 disabled:no-underline"
           >
-            {resendCooldown > 0
-              ? `Renvoyer le code (${resendCooldown}s)`
-              : 'Renvoyer le code'}
+            {resendCooldown > 0 ? `Renvoyer le code (${resendCooldown}s)` : 'Renvoyer le code'}
           </button>
         </div>
       </div>
@@ -452,13 +450,7 @@ export function QuoteRequestForm({ diagnosticianId, diagnosticianName }: Props) 
       {/* Honeypot anti-bot — ne JAMAIS afficher à l'utilisateur */}
       <div aria-hidden="true" className="hidden">
         <label htmlFor="website">Ne pas remplir</label>
-        <input
-          id="website"
-          name="website"
-          type="text"
-          tabIndex={-1}
-          autoComplete="off"
-        />
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
       <button
@@ -536,10 +528,12 @@ function maskPhone(phone: string): string {
   const prefix = clean.startsWith('+33') ? '+33' : clean.slice(0, 2)
   const middle = clean.slice(prefix.length, -2)
   const masked = middle.length > 1 ? `${middle[0]}${'*'.repeat(middle.length - 1)}` : middle
-  return `${prefix} ${masked.slice(0, 1)} ${masked
-    .slice(1)
-    .match(/.{1,2}/g)
-    ?.join(' ') ?? ''} ${last2}`
+  return `${prefix} ${masked.slice(0, 1)} ${
+    masked
+      .slice(1)
+      .match(/.{1,2}/g)
+      ?.join(' ') ?? ''
+  } ${last2}`
     .replace(/\s+/g, ' ')
     .trim()
 }

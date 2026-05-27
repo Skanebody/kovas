@@ -56,15 +56,15 @@ export async function Step7Confirmation() {
           ✓
         </div>
         <h1 className="font-serif italic text-3xl sm:text-4xl text-[#0F1419] leading-tight">
-          Votre compte est créé.
+          Ton compte est créé.
         </h1>
         <p className="text-[14px] text-[#0F1419]/70 max-w-md mx-auto">
-          Nous vérifions vos documents (24-48 h moyen). Pendant ce temps, configurez votre compte,
-          importez vos contacts, paramétrez votre agenda.{' '}
+          Nous vérifions tes documents (24-48 h moyen). Pendant ce temps, configure ton compte,
+          importe tes contacts, paramètre ton agenda.{' '}
           <strong className="text-[#0F1419]">
-            Dès validation, votre profil apparaîtra dans l&apos;annuaire public
+            Dès validation, ton profil apparaîtra dans l&apos;annuaire public
           </strong>{' '}
-          et vous pourrez recevoir des leads du calculateur DPE gratuit.
+          et tu pourras recevoir des leads du calculateur DPE gratuit.
         </p>
       </div>
 

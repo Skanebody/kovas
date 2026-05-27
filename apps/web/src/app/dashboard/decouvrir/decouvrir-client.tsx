@@ -8,12 +8,13 @@ import { CurrentSituationCard } from '@/components/decouvrir/CurrentSituationCar
 import { FaqComparatif } from '@/components/decouvrir/FaqComparatif'
 import { LogicielPlansGrid } from '@/components/decouvrir/LogicielPlansGrid'
 import { RecommendedOffersSection } from '@/components/decouvrir/RecommendedOffersSection'
+import { RiskReversalRow } from '@/components/decouvrir/RiskReversalRow'
 import { SectionTracker } from '@/components/decouvrir/SectionTracker'
 import { SponsorisedTiersGrid } from '@/components/decouvrir/SponsorisedTiersGrid'
 import { trackPageViewed } from '@/lib/decouvrir/analytics'
 import { useIntentTracker } from '@/lib/decouvrir/intent-tracker'
 import { type UserAccess, deriveTrack, summarizeTrack } from '@/lib/decouvrir/recommendations'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 interface DecouvrirClientProps {
   access: UserAccess
@@ -29,8 +30,17 @@ interface DecouvrirClientProps {
  * Orchestre :
  *  - le tracking des sections (SectionTracker)
  *  - la section recommandée dynamique
- *  - le scroll automatique vers la top 1 recommandée après 30s
- *    (animation subtile, pas brutal)
+ *
+ * Décision Krug (§11 "Don't Make Me Think") : l'auto-scroll 30s vers la top 1
+ * recommandée a été retiré. Il violait le principe d'agency utilisateur — le
+ * diagnostiqueur 43 ans (avatar SOBRE PROFESSIONNEL) doit garder le contrôle
+ * total de sa lecture. Le badge "Recommandé pour toi" + le rendu prioritaire
+ * en section 2 suffisent à attirer l'attention sans saut de scroll surprise.
+ *
+ * Décision Hormozi/Colucci (§9 + §14) : la RiskReversalRow est rendue avant
+ * toute grille de prix pour désamorcer les 4 peurs structurantes (engagement,
+ * débit caché, perte de données, complexité de sortie) en moins de 2 secondes
+ * de lecture. C'est le pattern "Grand Slam Offer" appliqué à un catalogue.
  */
 export function DecouvrirClient({
   access,
@@ -41,7 +51,6 @@ export function DecouvrirClient({
   const track = useMemo(() => deriveTrack(access), [access])
   const [topRecommendedCode, setTopRecommendedCode] = useState<string | null>(null)
   const reset = useIntentTracker((s) => s.reset)
-  const hasScrolledRef = useRef(false)
 
   // Initial : reset le store + tracking page view
   useEffect(() => {
@@ -49,46 +58,33 @@ export function DecouvrirClient({
     trackPageViewed(track)
   }, [reset, track])
 
-  // Scroll into view subtil quand la top 1 change pour la première fois après 30s
-  useEffect(() => {
-    if (!topRecommendedCode || hasScrolledRef.current) return
-    const timer = window.setTimeout(() => {
-      if (hasScrolledRef.current) return
-      const el = document.querySelector(
-        `[data-offer-code="${topRecommendedCode}"][data-recommended-top="1"]`,
-      )
-      if (el instanceof HTMLElement) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        hasScrolledRef.current = true
-      }
-    }, 30_000)
-    return () => window.clearTimeout(timer)
-  }, [topRecommendedCode])
-
   return (
     <div className="space-y-10 max-w-7xl mx-auto pb-12">
       <AppPageHeader
         title="Découvrir"
         accent="KOVAS"
-        description="Explore nos offres logiciel, annuaire et bundles. Les suggestions s'adaptent à ton profil et à ta navigation."
+        description="Catalogue logiciel, annuaire et bundles. Les suggestions s'adaptent à ton profil au fil de la navigation."
         eyebrow="Catalogue 2026"
       />
 
       {/* Section 1 — situation actuelle */}
       <CurrentSituationCard access={access} summary={summary} />
 
-      {/* Section 2 — recommandées dynamique */}
+      {/* Section 2 — Garanties / risque-nul (Hormozi + Colucci) */}
+      <RiskReversalRow />
+
+      {/* Section 3 — recommandées dynamique */}
       <SectionTracker
         section="recommandations"
         anchorId="decouvrir-recommandations"
         title="Recommandées"
-        accent="pour vous"
-        description="Sélection dynamique basée sur ton profil et les sections consultées. Mise à jour automatique après quelques secondes de navigation."
+        accent="pour toi"
+        description="Sélection dynamique basée sur ton profil et les sections consultées. Mise à jour après quelques secondes de navigation."
       >
         <RecommendedOffersSection track={track} onTopRecommendedChange={setTopRecommendedCode} />
       </SectionTracker>
 
-      {/* Section 3 — toutes offres logiciel */}
+      {/* Section 4 — toutes offres logiciel */}
       <SectionTracker
         section="logiciel"
         anchorId="decouvrir-logiciel"
@@ -102,7 +98,7 @@ export function DecouvrirClient({
         />
       </SectionTracker>
 
-      {/* Section 4 — toutes offres annuaire */}
+      {/* Section 5 — toutes offres annuaire */}
       <SectionTracker
         section="annuaire"
         anchorId="decouvrir-annuaire"
@@ -116,29 +112,29 @@ export function DecouvrirClient({
         />
       </SectionTracker>
 
-      {/* Section 5 — bundles */}
+      {/* Section 6 — bundles */}
       <SectionTracker
         section="bundle"
         anchorId="decouvrir-bundle"
         title="Bundles"
         accent="cross-sell"
-        description="Combine logiciel et annuaire pour profiter d'une remise et d'une synchronisation automatique de ton profil."
+        description="Logiciel et annuaire combinés : remise immédiate et profil synchronisé automatiquement."
       >
         <BundlesGrid recommendedCode={topRecommendedCode ?? undefined} />
       </SectionTracker>
 
-      {/* Section 6 — add-ons */}
+      {/* Section 7 — add-ons */}
       <SectionTracker
         section="addons"
         anchorId="decouvrir-addons"
         title="Add-ons"
         accent="à la carte"
-        description="Active uniquement ce dont tu as besoin. Activation immédiate, résiliation 1 clic."
+        description="Active uniquement ce dont tu as besoin. Activation immédiate, résiliation en 2 clics."
       >
         <AddonsGrid recommendedCode={topRecommendedCode ?? undefined} />
       </SectionTracker>
 
-      {/* Section 7 — sponsorisé */}
+      {/* Section 8 — sponsorisé */}
       <SectionTracker
         section="sponsorise"
         anchorId="decouvrir-sponsorise"
@@ -149,13 +145,13 @@ export function DecouvrirClient({
         <SponsorisedTiersGrid recommendedCode={topRecommendedCode ?? undefined} />
       </SectionTracker>
 
-      {/* Section 8 — FAQ + comparatif */}
+      {/* Section 9 — FAQ + comparatif */}
       <SectionTracker
         section="faq"
         anchorId="decouvrir-faq"
-        title="Vos"
+        title="Tes"
         accent="questions"
-        description="Tout ce qu'il faut savoir avant de s'engager. Aucune question stupide."
+        description="Tout ce qu'il faut savoir avant de s'engager."
       >
         <FaqComparatif />
       </SectionTracker>

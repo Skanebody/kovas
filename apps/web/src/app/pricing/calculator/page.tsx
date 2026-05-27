@@ -68,11 +68,11 @@ export default function PricingCalculatorPage() {
             className="font-sans font-semibold leading-[1.02] tracking-[-0.035em] mb-6"
             style={{ fontSize: 'clamp(32px, 6vw, 72px)' }}
           >
-            Composez votre KOVAS.
+            Compose ton KOVAS.
             <span className="block text-[#0F1419]/35">À l'euro près.</span>
           </h1>
           <p className="text-[16px] sm:text-[18px] text-[#0F1419]/72 max-w-[680px] mx-auto leading-relaxed">
-            Choisissez un forfait logiciel, ajoutez les modules dont vous avez vraiment besoin. Pour
+            Choisis un forfait logiciel, ajoute les modules dont tu as vraiment besoin. Pour
             combiner avec l'Annuaire, voyez les{' '}
             <Link
               href="/pricing#bundles"
@@ -93,7 +93,7 @@ export default function PricingCalculatorPage() {
                 Étape 2
               </p>
               <h2 className="text-[24px] sm:text-[32px] font-semibold tracking-[-0.02em] mb-2">
-                Ajoutez vos modules.
+                Ajoute tes modules.
               </h2>
               <p className="text-[14px] text-[#0F1419]/72 mb-6 leading-relaxed">
                 Quatre modules indépendants du forfait : signatures eIDAS, Pennylane, SMS rappel,
@@ -133,7 +133,7 @@ function PlanPicker({
         Étape 1
       </p>
       <h2 className="text-[24px] sm:text-[32px] font-semibold tracking-[-0.02em] mb-6">
-        Choisissez votre forfait KOVAS.
+        Choisis ton forfait KOVAS.
       </h2>
       <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {LOGICIEL_PLANS.map((plan: LogicielPlan) => {

@@ -157,7 +157,7 @@ export function VoiceRecorderModal({
         if (err instanceof DOMException) {
           if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
             msg =
-              'Accès au micro refusé. Autorisez-le dans les paramètres de votre navigateur, puis réessayez.'
+              'Accès au micro refusé. Autorise-le dans les paramètres de ton navigateur, puis réessaie.'
           } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
             msg = 'Aucun micro détecté sur cet appareil.'
           } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {

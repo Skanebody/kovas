@@ -29,7 +29,7 @@ interface PriorityAlert {
  *   P3 — module_trials.trial_ends_at <7j
  *
  * Tri : P1 d'abord, puis P2, puis P3. Limite 6 items totaux pour ne pas
- * surcharger. Si 0 alerte : état vide sobre "Aucune priorité — vous êtes à jour."
+ * surcharger. Si 0 alerte : état vide sobre "Aucune priorité — tu es à jour."
  *
  * AUDIT-B (2026-05-23) : sweep colonnes legacy + tables manquantes.
  *  - `regulatory_notifications` : pas de col `title` / `priority` —
@@ -285,7 +285,7 @@ export async function PrioritiesAlerts() {
         <CheckCircle2 className="size-6 text-accent-green" aria-hidden />
         <p className="text-sm text-ink font-medium">Aucune priorité.</p>
         <p className="text-xs text-ink-mute max-w-[300px] text-center">
-          Vous êtes à jour. Profitez-en pour préparer demain.
+          Tu es à jour. Profites-en pour préparer demain.
         </p>
       </div>
     )

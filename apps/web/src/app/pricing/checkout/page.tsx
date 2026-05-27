@@ -62,12 +62,12 @@ export default async function CheckoutPage({
               Étape 2 sur 3 — Récap & options
             </p>
             <h1 className="font-sans font-semibold text-3xl sm:text-4xl md:text-5xl leading-tight tracking-tight mb-4">
-              Vous avez choisi{' '}
+              Tu as choisi{' '}
               <span className="font-serif italic font-normal text-[#0F1419]/72">{plan.name}</span>.
             </h1>
             <p className="text-base sm:text-lg text-[#0F1419]/72 leading-relaxed max-w-2xl">
-              Personnalisez votre offre avec des modules optionnels — chacun en essai gratuit 14
-              jours, désactivables d'un clic. La création du compte vient juste après.
+              Personnalise ton offre avec des modules optionnels — chacun en essai gratuit 14 jours,
+              désactivables d'un clic. La création du compte vient juste après.
             </p>
           </div>
 

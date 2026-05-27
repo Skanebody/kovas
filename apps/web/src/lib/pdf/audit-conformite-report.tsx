@@ -72,8 +72,18 @@ export interface AuditConformiteReportProps {
 /* -------------------------------------------------------------------------- */
 
 const MONTHS_FR = [
-  'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-  'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
+  'janvier',
+  'février',
+  'mars',
+  'avril',
+  'mai',
+  'juin',
+  'juillet',
+  'août',
+  'septembre',
+  'octobre',
+  'novembre',
+  'décembre',
 ]
 
 function formatMonthLabel(monthYear: string): string {
@@ -87,30 +97,43 @@ function formatMonthLabel(monthYear: string): string {
 
 function severityLabel(s: RemediationSeverity): string {
   switch (s) {
-    case 'critical': return 'Critique'
-    case 'high': return 'Élevé'
-    case 'medium': return 'Modéré'
-    case 'low': return 'Faible'
+    case 'critical':
+      return 'Critique'
+    case 'high':
+      return 'Élevé'
+    case 'medium':
+      return 'Modéré'
+    case 'low':
+      return 'Faible'
   }
 }
 
 function severityColor(s: RemediationSeverity): string {
   // Palette sémantique cohérente Design System v2
   switch (s) {
-    case 'critical': return '#DC2626' // accent-red
-    case 'high': return '#F97316'     // accent-orange
-    case 'medium': return '#F59E0B'   // accent-yellow
-    case 'low': return '#3B82F6'      // accent-blue
+    case 'critical':
+      return '#DC2626' // accent-red
+    case 'high':
+      return '#F97316' // accent-orange
+    case 'medium':
+      return '#F59E0B' // accent-yellow
+    case 'low':
+      return '#3B82F6' // accent-blue
   }
 }
 
 function signalTypeLabel(t: RemediationSignalType): string {
   switch (t) {
-    case 'dpe_shopping': return 'DPE shopping'
-    case 'cadastre_mismatch': return 'Surface cadastrale'
-    case 'class_jump': return 'Saut de classe'
-    case 'aberrant_data': return 'Donnée aberrante'
-    case 'pattern_recurrent': return 'Erreur récurrente'
+    case 'dpe_shopping':
+      return 'DPE shopping'
+    case 'cadastre_mismatch':
+      return 'Surface cadastrale'
+    case 'class_jump':
+      return 'Saut de classe'
+    case 'aberrant_data':
+      return 'Donnée aberrante'
+    case 'pattern_recurrent':
+      return 'Erreur récurrente'
   }
 }
 
@@ -324,9 +347,8 @@ function CoverPage({
           lineHeight: 1.6,
         }}
       >
-        Avant que tes DPE partent à l'ADEME via Liciel, KOVAS scanne préventivement chaque
-        mission et identifie celles à risque de contrôle. Tu corriges. Tu envoies en
-        confiance.
+        Avant que tes DPE partent à l'ADEME via Liciel, KOVAS scanne préventivement chaque mission
+        et identifie celles à risque de contrôle. Tu corriges. Tu envoies en confiance.
       </p>
     </section>
   )
@@ -377,8 +399,7 @@ function RemediationPage({ data }: { data: AuditConformiteReportData }): ReactEl
 
       {remediation.trim().length === 0 ? (
         <div style={styles.emptyState}>
-          Aucun plan de remédiation généré pour ce rapport (score global :{' '}
-          {data.score_global}/100).
+          Aucun plan de remédiation généré pour ce rapport (score global : {data.score_global}/100).
         </div>
       ) : (
         <div style={styles.remediationBlock}>{remediation}</div>
@@ -393,8 +414,8 @@ function RemediationPage({ data }: { data: AuditConformiteReportData }): ReactEl
         })}
         {' · '}KOVAS — édité par Nexus 1993, SASU. Document confidentiel.
         <br />
-        Liciel calcule techniquement le DPE selon la méthode 3CL-2021. KOVAS Bouclier
-        Conformité scanne préventivement pour identifier les missions à risque de contrôle.
+        Liciel calcule techniquement le DPE selon la méthode 3CL-2021. KOVAS Bouclier Conformité
+        scanne préventivement pour identifier les missions à risque de contrôle.
       </div>
     </section>
   )

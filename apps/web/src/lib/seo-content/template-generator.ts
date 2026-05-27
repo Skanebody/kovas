@@ -84,9 +84,10 @@ function buildWhyHere(type: DiagnosticType, city: City): string {
 
   const oldStockRatio = city.population > 200000 ? 30 : city.population > 50000 ? 25 : 20
 
-  const ageContext = triggerYear !== null
-    ? ` À ${city.name}, on estime qu’environ ${oldStockRatio} % du parc immobilier a été construit avant ${triggerYear}, ce qui rend ce diagnostic particulièrement courant lors des transactions immobilières.`
-    : ` À ${city.name} comme partout en France, ce diagnostic concerne l’ensemble du parc immobilier ancien comme récent.`
+  const ageContext =
+    triggerYear !== null
+      ? ` À ${city.name}, on estime qu’environ ${oldStockRatio} % du parc immobilier a été construit avant ${triggerYear}, ce qui rend ce diagnostic particulièrement courant lors des transactions immobilières.`
+      : ` À ${city.name} comme partout en France, ce diagnostic concerne l’ensemble du parc immobilier ancien comme récent.`
 
   const variants = [
     `${desc}${ageContext} Faire appel à un diagnostiqueur certifié exerçant localement vous garantit une meilleure connaissance du tissu urbain de ${city.name} et de ses spécificités constructives.`,
@@ -220,13 +221,15 @@ function buildFaq(type: DiagnosticType, city: City): ReadonlyArray<FaqItem> {
       },
       {
         question: 'Validité 6 mois : pourquoi si court ?',
-        answer: 'Les termites se propagent rapidement. Une durée de validité courte garantit que l’état des lieux reste fiable. Si la vente prend du retard, le diagnostic doit être renouvelé avant signature.',
+        answer:
+          'Les termites se propagent rapidement. Une durée de validité courte garantit que l’état des lieux reste fiable. Si la vente prend du retard, le diagnostic doit être renouvelé avant signature.',
       },
     ],
     carrez: [
       {
         question: `Loi Carrez ou loi Boutin à ${cityFr} : laquelle s’applique ?`,
-        answer: 'La loi Carrez s’applique uniquement à la vente d’un lot de copropriété (appartement, local commercial). La loi Boutin concerne les locations vides à usage de résidence principale. Les méthodes de calcul diffèrent : Carrez exclut les surfaces < 1,80 m, Boutin aussi mais avec quelques nuances.',
+        answer:
+          'La loi Carrez s’applique uniquement à la vente d’un lot de copropriété (appartement, local commercial). La loi Boutin concerne les locations vides à usage de résidence principale. Les méthodes de calcul diffèrent : Carrez exclut les surfaces < 1,80 m, Boutin aussi mais avec quelques nuances.',
       },
       {
         question: 'Erreur de mesurage : quelles conséquences ?',
@@ -250,7 +253,8 @@ function buildFaq(type: DiagnosticType, city: City): ReadonlyArray<FaqItem> {
       },
       {
         question: `Combien coûte un audit énergétique à ${cityFr} ?`,
-        answer: 'Le prix d’un audit énergétique varie généralement entre 500 € et 1 200 € TTC. Il dépend de la complexité du bien, du nombre de scénarios étudiés et de l’expérience de l’auditeur. Des aides peuvent partiellement financer cette prestation (MaPrimeRénov audit).',
+        answer:
+          'Le prix d’un audit énergétique varie généralement entre 500 € et 1 200 € TTC. Il dépend de la complexité du bien, du nombre de scénarios étudiés et de l’expérience de l’auditeur. Des aides peuvent partiellement financer cette prestation (MaPrimeRénov audit).',
       },
     ],
   }
@@ -262,10 +266,7 @@ function buildFaq(type: DiagnosticType, city: City): ReadonlyArray<FaqItem> {
  * Génère un contenu complet pour une combinaison (type, city).
  * Stable entre builds (déterministe sur slug ville + type).
  */
-export function generateLocalContent(
-  type: DiagnosticType,
-  city: City,
-): LocalContent {
+export function generateLocalContent(type: DiagnosticType, city: City): LocalContent {
   return {
     intro: buildIntro(type, city),
     whyHere: buildWhyHere(type, city),

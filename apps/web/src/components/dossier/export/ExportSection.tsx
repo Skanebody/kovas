@@ -106,7 +106,7 @@ export function ExportSection({
         format: 'liciel_zip',
         icon: Package,
         name: 'Export ZIP Liciel',
-        description: 'Pour finaliser le calcul DPE dans votre logiciel principal.',
+        description: 'Pour finaliser le calcul DPE dans ton logiciel principal.',
         defaultFilename: `kovas-liciel-${dossierId.slice(0, 8)}.zip`,
       },
       status: licielStatus,

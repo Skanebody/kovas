@@ -399,8 +399,8 @@ export function LiveCapture({ dossierId, property, rooms, missions }: LiveCaptur
       {/* Banner support */}
       {mode === 'voice' && !supported && (
         <div className="rounded-lg border border-chartreuse/30 bg-chartreuse/5 px-3 py-2 text-[12px] text-ink-soft">
-          Saisie vocale différée — votre navigateur ne supporte pas la transcription live. Utilisez
-          le mode <strong>Texte</strong> ou la note vocale (record-then-upload) ci-dessous.
+          Saisie vocale différée — ton navigateur ne supporte pas la transcription live. Utilise le
+          mode <strong>Texte</strong> ou la note vocale (record-then-upload) ci-dessous.
         </div>
       )}
 
@@ -464,7 +464,7 @@ export function LiveCapture({ dossierId, property, rooms, missions }: LiveCaptur
           value={textareaValue}
           onChange={handleTextChange}
           rows={5}
-          placeholder="Tapez ou collez votre description… Ex : Maison de 95 m² construite en 1985, PAC Daikin, double vitrage PVC, VMC simple flux."
+          placeholder="Tape ou colle ta description… Ex : Maison de 95 m² construite en 1985, PAC Daikin, double vitrage PVC, VMC simple flux."
           className="text-[14px]"
         />
       )}

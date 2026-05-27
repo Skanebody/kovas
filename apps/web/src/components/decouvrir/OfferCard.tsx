@@ -14,7 +14,7 @@ import { useCallback } from 'react'
 
 interface OfferCardProps {
   offer: OfferDescriptor
-  /** Affiche le badge "Recommandé pour vous" si true */
+  /** Affiche le badge "Recommandé pour toi" si true */
   recommended?: boolean
   /** Affiche le badge "Plan actuel" si true */
   current?: boolean
@@ -34,7 +34,25 @@ interface OfferCardProps {
  *  - tracker le hover >500ms (signal qualifié)
  *  - tracker les clics CTA secondaires (signal fort)
  *  - tracker l'ajout en comparaison
+ *
+ * Copy CTA (Tugan §6 + Hormozi §14) : action-oriented + value-loaded.
+ *   - Essai gratuit       → "Démarrer 30 jours gratuits"
+ *   - Annuaire gratuit    → "Activer la fiche gratuite"
+ *   - Bundle              → "Activer ce bundle"
+ *   - Plan logiciel/payant → "Passer au plan {label}"
  */
+function primaryCtaLabel(offer: OfferDescriptor): string {
+  if (offer.priceMonthlyCents === 0) {
+    if (offer.code === 'logiciel_essai') return 'Démarrer 30 jours gratuits'
+    if (offer.family === 'annuaire') return 'Activer la fiche gratuite'
+    return 'Activer gratuitement'
+  }
+  if (offer.family === 'bundle') return 'Activer ce bundle'
+  if (offer.family === 'addon') return 'Ajouter cet add-on'
+  if (offer.family === 'sponsorise') return 'Sponsoriser cette commune'
+  return `Passer au plan ${offer.label}`
+}
+
 export function OfferCard({
   offer,
   recommended = false,
@@ -86,7 +104,7 @@ export function OfferCard({
           variant="default"
           className="absolute -top-3 left-4 bg-chartreuse text-[#0F1419] shadow-sm"
         >
-          Recommandé pour vous
+          Recommandé pour toi
         </Badge>
       )}
       {current && (
@@ -130,7 +148,7 @@ export function OfferCard({
         ) : ctaHref ? (
           <Button asChild variant={recommended ? 'accent' : 'default'} size="sm" className="w-full">
             <Link href={ctaHref} onClick={onPrimaryCtaClick}>
-              {offer.priceMonthlyCents === 0 ? 'Activer gratuitement' : 'Choisir cette offre'}
+              {primaryCtaLabel(offer)}
             </Link>
           </Button>
         ) : (
@@ -140,7 +158,7 @@ export function OfferCard({
             onClick={onPrimaryCtaClick}
             className="w-full"
           >
-            {offer.priceMonthlyCents === 0 ? 'Activer gratuitement' : 'Choisir cette offre'}
+            {primaryCtaLabel(offer)}
           </Button>
         )}
         <button

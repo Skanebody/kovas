@@ -23,11 +23,7 @@ interface UploadPhotoFormProps {
 
 type FormState = 'idle' | 'previewing' | 'uploading' | 'success' | 'error'
 
-export function UploadPhotoForm({
-  token,
-  photoDescription,
-  expiresAt,
-}: UploadPhotoFormProps) {
+export function UploadPhotoForm({ token, photoDescription, expiresAt }: UploadPhotoFormProps) {
   const [state, setState] = useState<FormState>('idle')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
@@ -97,24 +93,22 @@ export function UploadPhotoForm({
       </p>
 
       {state === 'idle' && (
-        <>
-          <label
-            htmlFor="photo-input"
-            className="block w-full border-2 border-dashed border-rule rounded-lg p-8 text-center cursor-pointer hover:border-chartreuse-deep transition-colors"
-          >
-            <Camera className="size-8 text-ink-mute mx-auto mb-2" aria-hidden />
-            <p className="text-[14px] font-medium text-ink mb-1">Prendre une photo</p>
-            <p className="text-[12px] text-ink-mute">ou sélectionner depuis la galerie</p>
-            <input
-              id="photo-input"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileChange}
-              className="sr-only"
-            />
-          </label>
-        </>
+        <label
+          htmlFor="photo-input"
+          className="block w-full border-2 border-dashed border-rule rounded-lg p-8 text-center cursor-pointer hover:border-chartreuse-deep transition-colors"
+        >
+          <Camera className="size-8 text-ink-mute mx-auto mb-2" aria-hidden />
+          <p className="text-[14px] font-medium text-ink mb-1">Prendre une photo</p>
+          <p className="text-[12px] text-ink-mute">ou sélectionner depuis la galerie</p>
+          <input
+            id="photo-input"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileChange}
+            className="sr-only"
+          />
+        </label>
       )}
 
       {(state === 'previewing' || state === 'uploading' || state === 'error') && previewUrl && (
@@ -123,14 +117,14 @@ export function UploadPhotoForm({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={previewUrl}
-              alt="Aperçu de la photo"
+              alt="Aperçu avant envoi"
               className="w-full h-auto max-h-[400px] object-contain bg-sage-alt"
             />
           </div>
           {state === 'error' && errorMsg && (
             <div className="bg-danger/10 border border-danger/30 rounded-lg p-3 mb-4">
               <p className="text-[12px] text-danger leading-snug">
-                Échec de l&apos;envoi : {errorMsg}. Vérifiez votre connexion ou réessayez.
+                Échec de l&apos;envoi : {errorMsg}. Vérifie ta connexion ou réessaie.
               </p>
             </div>
           )}

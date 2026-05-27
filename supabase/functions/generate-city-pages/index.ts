@@ -71,8 +71,17 @@ async function fetchDVFStats(dept: string, _cityName: string): Promise<DvfStats>
   try {
     // Mock simple basé sur le département (zones tendues ≠ rural)
     const tense = new Set([
-      '75', '92', '93', '94', '78', '95', '91', '77', // IDF
-      '06', '83', '13', // PACA littoral
+      '75',
+      '92',
+      '93',
+      '94',
+      '78',
+      '95',
+      '91',
+      '77', // IDF
+      '06',
+      '83',
+      '13', // PACA littoral
       '69', // Lyon
       '33', // Bordeaux
       '44', // Nantes
@@ -108,15 +117,11 @@ async function countDiagnosticiansForCity(citySlug: string): Promise<number> {
 // ============================================
 // Prompt builder
 // ============================================
-function buildPrompt(
-  city: PriorityCity,
-  count: number,
-  dvf: DvfStats,
-  tier: 1 | 2,
-): string {
-  const target = tier === 1
-    ? { long_words: '900-1100', faq_count: 5, faq_words: '80-120' }
-    : { long_words: '500-700', faq_count: 3, faq_words: '60-100' }
+function buildPrompt(city: PriorityCity, count: number, dvf: DvfStats, tier: 1 | 2): string {
+  const target =
+    tier === 1
+      ? { long_words: '900-1100', faq_count: 5, faq_words: '80-120' }
+      : { long_words: '500-700', faq_count: 3, faq_words: '60-100' }
 
   return `Tu es rédacteur SEO immobilier. Génère contenu pour "Diagnostiqueurs immobiliers à ${city.name}".
 
@@ -246,7 +251,10 @@ async function generateCityPage(city: PriorityCity): Promise<void> {
   }
 
   const metaTitle =
-    `Diagnostiqueur Immobilier ${city.name} — ${count} pro${count > 1 ? 's' : ''} certifié${count > 1 ? 's' : ''} | KOVAS`.slice(0, 70)
+    `Diagnostiqueur Immobilier ${city.name} — ${count} pro${count > 1 ? 's' : ''} certifié${count > 1 ? 's' : ''} | KOVAS`.slice(
+      0,
+      70,
+    )
 
   const metaDescription =
     `Trouvez votre diagnostiqueur immobilier à ${city.name}. ${count} professionnels certifiés DPE, amiante, gaz, électricité. Devis gratuit en ligne.`.slice(
@@ -342,8 +350,7 @@ Deno.serve(async (req: Request) => {
 
       if (existing?.last_regenerated_at) {
         const ageDays =
-          (Date.now() - new Date(existing.last_regenerated_at).getTime()) /
-          (1000 * 60 * 60 * 24)
+          (Date.now() - new Date(existing.last_regenerated_at).getTime()) / (1000 * 60 * 60 * 24)
         if (ageDays < 7) {
           results.push({ slug: city.slug, status: 'ok' })
           continue

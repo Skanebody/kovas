@@ -92,17 +92,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const storedSiret = String(diag.sirene_siret).replace(/\s/g, '')
   const matches = storedSiret === cleanedSiret
 
-  // Audit log dans tous les cas (succès ET échec)
+  // Audit log dans tous les cas (succès ET échec).
+  // Refonte Doctolib 2026-05-27 : status='siret_verified' (étape 1) au lieu de
+  // 'verified' direct. flow_version='v2_doctolib'. La validation finale du
+  // claim passe par les 3 étapes (SIRET + SMS + KYC + review humaine).
+  const nowIso = new Date().toISOString()
   const { data: claim, error: insertErr } = await adminAny
     .from('claim_requests')
     .insert({
       diagnostician_id: diagnosticianId,
       method: 'siret_match',
-      status: matches ? 'verified' : 'rejected',
+      status: matches ? 'siret_verified' : 'rejected',
+      flow_version: 'v2_doctolib',
       contact_siret: cleanedSiret,
       ip_address: ip,
       user_agent: userAgent,
-      verified_at: matches ? new Date().toISOString() : null,
+      siret_verified_at: matches ? nowIso : null,
       rejected_reason: matches ? null : 'siret_mismatch',
     })
     .select('id')
@@ -122,6 +127,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   return NextResponse.json({
     ok: true,
     claimId: claim.id,
-    redirect: `/signup?claim_id=${claim.id}&siret=${cleanedSiret}`,
+    status: 'siret_verified',
   })
 }

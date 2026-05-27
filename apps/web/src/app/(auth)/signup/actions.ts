@@ -79,7 +79,7 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     if (sireneVerification.error === 'network' || sireneVerification.error === 'rate_limit') {
       return {
         error:
-          "Vérification SIRET temporairement indisponible. Merci de réessayer dans quelques minutes.",
+          'Vérification SIRET temporairement indisponible. Merci de réessayer dans quelques minutes.',
       }
     }
 
@@ -87,7 +87,7 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
       return {
         fieldErrors: {
           siret:
-            "Votre SIRET ne correspond pas à un établissement enregistré au registre SIRENE. Vérifiez le numéro saisi ou contactez contact@kovas.fr.",
+            'Votre SIRET ne correspond pas à un établissement enregistré au registre SIRENE. Vérifiez le numéro saisi ou contactez contact@kovas.fr.',
         },
       }
     }
@@ -96,7 +96,7 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
       return {
         fieldErrors: {
           siret:
-            "Votre SIRET ne correspond pas à un établissement actif au registre SIRENE. Vérifiez le numéro saisi ou contactez contact@kovas.fr.",
+            'Votre SIRET ne correspond pas à un établissement actif au registre SIRENE. Vérifiez le numéro saisi ou contactez contact@kovas.fr.',
         },
       }
     }
@@ -115,17 +115,17 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     if (existingTrial.blocked_reason) {
       return {
         error:
-          'Votre cabinet a été suspendu suite à des comportements suspects. Contactez contact@kovas.fr.',
+          'Ton cabinet a été suspendu suite à des comportements suspects. Contacte contact@kovas.fr.',
       }
     }
     if (existingTrial.converted_to_paid) {
       return {
-        error: 'Un compte payant existe déjà pour ce SIRET. Connectez-vous.',
+        error: 'Un compte payant existe déjà pour ce SIRET. Connecte-toi.',
       }
     }
     return {
       error:
-        "Votre cabinet a déjà bénéficié d'un essai KOVAS. Choisissez un abonnement à partir de 29€/mois.",
+        "Ton cabinet a déjà bénéficié d'un essai KOVAS. Choisis un abonnement à partir de 29€/mois.",
     }
   }
 
@@ -160,9 +160,7 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
 
   // Enregistre le trial dans cabinet_trials avec les méta-données SIRENE
   const signupAnomaly =
-    sireneVerification && sireneVerification.found && !sireneVerification.isDiagnosticNAF
-      ? 'naf_mismatch'
-      : null
+    sireneVerification?.found && !sireneVerification.isDiagnosticNAF ? 'naf_mismatch' : null
 
   const trialPayload: Record<string, unknown> = {
     siret: cleanedSiret,

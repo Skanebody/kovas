@@ -64,15 +64,15 @@ export const LOGICIEL_OFFERS: readonly OfferDescriptor[] = [
     code: 'logiciel_essai',
     family: 'logiciel',
     section: 'logiciel',
-    label: 'Essai gratuit 14 jours',
-    tagline: 'Tester KOVAS sans engagement',
-    priceLabel: 'Gratuit · 14 jours',
+    label: 'Essai gratuit 30 jours',
+    tagline: 'Tester KOVAS sans débit immédiat',
+    priceLabel: 'Gratuit · 30 jours',
     priceMonthlyCents: 0,
     features: [
-      'Toutes les fonctionnalités KOVAS',
-      "Jusqu'à 30 missions de test",
-      'Tous les exports universels',
-      'Branding "Essai KOVAS" sur les rapports',
+      'Accès complet à toutes les fonctionnalités',
+      'Aucune limite de missions pendant 30 jours',
+      'CB demandée à l’inscription, débit à J+30',
+      'Résiliable en 2 clics depuis ton compte',
     ],
     primaryTracks: ['free'],
     excludeTracks: ['logiciel_only', 'dual'],
@@ -167,7 +167,7 @@ export const ANNUAIRE_OFFERS: readonly OfferDescriptor[] = [
     family: 'annuaire',
     section: 'annuaire',
     label: 'Annuaire Présence',
-    tagline: 'Priorité sur votre ville',
+    tagline: 'Priorité sur ta ville',
     priceLabel: '19€ HT / mois',
     priceMonthlyCents: 1900,
     features: [
@@ -536,12 +536,12 @@ export function scoreOffers(
     const reasons: string[] = []
     let score = 0
 
-    // Signal section (temps + scroll)
+    // Signal section (temps + scroll) — pondère le score sans exposer
+    // de "minutes lues" à l'utilisateur (effet surveillance perçu
+    // contre-productif sur un avatar SOBRE PROFESSIONNEL).
     const sectionTime = signals.sectionTimeMs[offer.section] ?? 0
     if (sectionTime > 0) {
-      const delta = sectionTime * SECTION_TIME_WEIGHT
-      score += delta
-      if (delta > 0.05) reasons.push(`${Math.round(sectionTime / 1000)}s lus dans la section`)
+      score += sectionTime * SECTION_TIME_WEIGHT
     }
 
     const scrollDepth = signals.sectionScrollDepth[offer.section] ?? 0
@@ -549,36 +549,37 @@ export function scoreOffers(
       score += scrollDepth * SCROLL_WEIGHT
     }
 
-    // Signal hover offre
+    // Signal hover offre — pondère sans exposer le tracking
     const hoverMs = signals.offerHoverMs[offer.code] ?? 0
     if (hoverMs >= 500) {
-      const delta = hoverMs * HOVER_WEIGHT
-      score += delta
-      if (delta > 0.1) reasons.push("Vous l'avez survolée plusieurs fois")
+      score += hoverMs * HOVER_WEIGHT
     }
 
-    // Signal CTA secondaire
+    // Signal CTA secondaire — l'utilisateur a montré un intérêt actif
     const ctaClicks = signals.offerCtaClicks[offer.code] ?? 0
     if (ctaClicks > 0) {
       score += ctaClicks * CTA_CLICK_WEIGHT
-      reasons.push('Vous avez cliqué dessus')
+      reasons.push('Tu as exploré cette offre')
     }
 
-    // Boost track ciblé
+    // Boost track ciblé — raison principale (positive framing Walter §13)
     if (offer.primaryTracks?.includes(track)) {
       score += TRACK_BOOST
-      reasons.push('Adapté à votre profil actuel')
+      reasons.push('Adapté à ton profil actuel')
     }
 
-    // Boost mise en avant éditoriale par défaut
+    // Boost mise en avant éditoriale par défaut — raison fallback
     if (offer.defaultRecommended) {
       score += DEFAULT_RECOMMENDED_BOOST
+      if (reasons.length === 0) reasons.push('Choix le plus populaire')
     }
 
-    // Boost comparaison
+    // Boost comparaison — signal d'engagement actif sur plusieurs offres
     if (signals.comparedCodes.includes(offer.code) && signals.comparedCodes.length >= 2) {
       score += 0.3
-      reasons.push('Vous avez comparé cette offre')
+      if (!reasons.some((r) => r.includes('exploré'))) {
+        reasons.push('Comparée avec d’autres offres')
+      }
     }
 
     scored.push({ offer, score, reasons })
@@ -635,33 +636,33 @@ export function summarizeTrack(access: UserAccess): TrackSummary {
     case 'dual':
       return {
         track,
-        title: 'Vous utilisez KOVAS + KOVAS Annuaire',
+        title: 'Tu utilises KOVAS + KOVAS Annuaire',
         description:
-          'Vous êtes équipé sur les deux versants : logiciel terrain et visibilité publique. Découvrez les modules avancés et les Packs Cabinet pour passer à la vitesse supérieure.',
+          'Tu es équipé sur les deux versants : logiciel terrain et visibilité publique. Découvre les modules avancés et les Packs Cabinet pour passer à la vitesse supérieure.',
         badgeLabel: 'Profil complet',
       }
     case 'logiciel_only':
       return {
         track,
-        title: 'Vous utilisez uniquement KOVAS',
+        title: 'Tu utilises uniquement KOVAS',
         description:
-          'Votre cabinet est outillé côté terrain. Une fiche annuaire vous permettrait de capter directement des demandes de particuliers — sans publicité.',
+          'Ton cabinet est outillé côté terrain. Une fiche annuaire te permettrait de capter directement des demandes de particuliers — sans publicité.',
         badgeLabel: 'Logiciel actif',
       }
     case 'annuaire_only':
       return {
         track,
-        title: 'Vous êtes référencé sur KOVAS Annuaire',
+        title: 'Tu es référencé sur KOVAS Annuaire',
         description:
-          "Vous recevez déjà des demandes via l'annuaire. KOVAS vous permettrait de produire vos rapports terrain 1h30 plus vite, et de synchroniser vos exports automatiquement.",
+          "Tu reçois déjà des demandes via l'annuaire. KOVAS te permettrait de produire tes rapports terrain 1h30 plus vite, et de synchroniser tes exports automatiquement.",
         badgeLabel: 'Annuaire actif',
       }
     default:
       return {
         track,
-        title: "Vous n'avez aucun abonnement actif",
+        title: "Tu n'as aucun abonnement actif",
         description:
-          "Essayez gratuitement KOVAS pendant 14 jours, ou inscrivez-vous gratuitement à l'annuaire pour capter vos premières demandes.",
+          "Essaie gratuitement KOVAS pendant 30 jours (CB requise, débit auto à J+30, résiliable en 2 clics) ou inscris-toi gratuitement à l'annuaire pour capter tes premières demandes.",
         badgeLabel: 'Démarrage',
       }
   }

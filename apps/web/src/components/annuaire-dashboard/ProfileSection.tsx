@@ -83,14 +83,14 @@ export function ProfileSection({ initial, isClaimed }: ProfileSectionProps) {
       <div className="space-y-1">
         <CardTitle>Profil public</CardTitle>
         <CardDescription>
-          Informations affichées en haut de votre fiche publique sur kovas.fr.
+          Informations affichées en haut de ta fiche publique sur kovas.fr.
         </CardDescription>
       </div>
 
       {!isClaimed ? (
         <div className="rounded-md border border-rule bg-cream-deep/40 px-4 py-3 text-[12px] text-ink-mute">
-          Réclamez votre fiche annuaire pour éditer ces informations. Vos modifications seront
-          publiées immédiatement après activation.
+          Réclame ta fiche annuaire pour éditer ces informations. Tes modifications seront publiées
+          immédiatement après activation.
         </div>
       ) : null}
 
@@ -99,7 +99,7 @@ export function ProfileSection({ initial, isClaimed }: ProfileSectionProps) {
         <Field
           name="displayName"
           label="Nom affiché"
-          hint="Tel qu'affiché en haut de votre fiche publique."
+          hint="Tel qu'affiché en haut de ta fiche publique."
           error={state?.fieldErrors?.displayName}
         >
           <Input
@@ -137,7 +137,7 @@ export function ProfileSection({ initial, isClaimed }: ProfileSectionProps) {
         <Field
           name="slogan"
           label="Slogan court"
-          hint="Une phrase d'accroche affichée sous votre nom."
+          hint="Une phrase d'accroche affichée sous ton nom."
           optional
           error={state?.fieldErrors?.slogan}
           counter={`${slogan.length} / ${SLOGAN_MAX}`}
@@ -148,7 +148,7 @@ export function ProfileSection({ initial, isClaimed }: ProfileSectionProps) {
             type="text"
             value={slogan}
             onChange={(e) => setSlogan(e.target.value.slice(0, SLOGAN_MAX))}
-            placeholder="Ex. Vos diagnostics en 48h, partout en Normandie."
+            placeholder="Ex. Tes diagnostics en 48h, partout en Normandie."
             maxLength={SLOGAN_MAX}
             disabled={!isClaimed || pending}
           />
@@ -158,7 +158,7 @@ export function ProfileSection({ initial, isClaimed }: ProfileSectionProps) {
         <Field
           name="bio"
           label="Présentation"
-          hint="Décrivez votre cabinet, votre approche, vos certifications principales."
+          hint="Décris ton cabinet, ton approche, tes certifications principales."
           optional
           error={state?.fieldErrors?.bio}
           counter={`${bio.length} / ${BIO_MAX}`}
@@ -179,7 +179,7 @@ export function ProfileSection({ initial, isClaimed }: ProfileSectionProps) {
         <fieldset className="space-y-3">
           <legend className="text-xs font-medium text-ink leading-none">Langues parlées</legend>
           <p className="text-[11px] text-ink-mute leading-relaxed">
-            Sélectionnez les langues dans lesquelles vous pouvez accompagner un client.
+            Sélectionne les langues dans lesquelles tu peux accompagner un client.
           </p>
           <div className="flex flex-wrap gap-2">
             {LANGUAGE_OPTIONS.map((opt) => {
@@ -215,7 +215,7 @@ export function ProfileSection({ initial, isClaimed }: ProfileSectionProps) {
         <Field
           name="yearsExperience"
           label="Années d'expérience"
-          hint="Aide les particuliers à évaluer votre ancienneté."
+          hint="Aide les particuliers à évaluer ton ancienneté."
           optional
           error={state?.fieldErrors?.yearsExperience}
         >

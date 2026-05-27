@@ -206,7 +206,7 @@ export default async function DepartmentPage({
           {topCities.length === 0 ? (
             <Card variant="opaque" padding="default" className="text-center">
               <p className="text-ink-mute">
-                Aucune ville référencée pour ce département. Vous êtes diagnostiqueur ici ?{' '}
+                Aucune ville référencée pour ce département. Tu es diagnostiqueur ici ?{' '}
                 <Link href="/signup" className="text-chartreuse-deep underline">
                   Référencer mon cabinet
                 </Link>
@@ -259,11 +259,11 @@ export default async function DepartmentPage({
             Pour les professionnels
           </Badge>
           <h3 className="font-sans font-semibold text-2xl tracking-tight">
-            Vous exercez en {deptName} ?
+            Tu exerces en {deptName} ?
           </h3>
           <p className="text-sm text-ink-mute">
-            Référencez gratuitement votre cabinet sur l&apos;annuaire KOVAS et recevez des demandes
-            de devis qualifiées des particuliers de votre zone.
+            Référence gratuitement ton cabinet sur l&apos;annuaire KOVAS et reçois des demandes de
+            devis qualifiées des particuliers de ta zone.
           </p>
           <Button asChild variant="accent" size="lg">
             <Link href="/signup">Référencer mon cabinet</Link>

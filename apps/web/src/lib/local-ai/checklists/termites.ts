@@ -9,7 +9,7 @@
  * indices et matériaux suspects / conclusion.
  */
 
-import { TRIGGER_DELAYS, type DiagnosticChecklist } from './types'
+import { type DiagnosticChecklist, TRIGGER_DELAYS } from './types'
 
 export const TERMITES_CHECKLIST: DiagnosticChecklist = {
   diagnostic: 'termites',
@@ -78,7 +78,8 @@ export const TERMITES_CHECKLIST: DiagnosticChecklist = {
           severity: 'critical',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.short,
-          trigger_question_text: 'Avez-vous effectué un sondage par poinçon sur les bois suspects ?',
+          trigger_question_text:
+            'Avez-vous effectué un sondage par poinçon sur les bois suspects ?',
           keywords: ['poinçon', 'sondage', 'tester', 'pointe', 'pic'],
           diagnostic: 'termites',
         },
@@ -86,7 +87,7 @@ export const TERMITES_CHECKLIST: DiagnosticChecklist = {
     },
     {
       id: 'indices',
-      label: 'Indices d\'infestation',
+      label: "Indices d'infestation",
       items: [
         {
           id: 'termites_cordonnets',
@@ -133,14 +134,15 @@ export const TERMITES_CHECKLIST: DiagnosticChecklist = {
         {
           id: 'termites_humidity',
           field_name: 'termites.humidity_zones',
-          description_short: 'Zones d\'humidité',
+          description_short: "Zones d'humidité",
           description_full: 'Repérage zones humides favorables (caves, vide sanitaire, sdb).',
           scope: 'global',
           required: true,
           severity: 'important',
           requires_photo: true,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Avez-vous repéré les zones humides du bâti (cave, vide sanitaire, sdb) ?',
+          trigger_question_text:
+            'Avez-vous repéré les zones humides du bâti (cave, vide sanitaire, sdb) ?',
           keywords: ['humidité', 'cave', 'vide sanitaire', 'salle de bain', 'humide'],
           diagnostic: 'termites',
         },
@@ -154,13 +156,13 @@ export const TERMITES_CHECKLIST: DiagnosticChecklist = {
           id: 'termites_other_xylophages',
           field_name: 'termites.other_xylophages',
           description_short: 'Autres insectes xylophages',
-          description_full: 'Mention d\'autres xylophages (capricorne, vrillette, lyctus, mérule).',
+          description_full: "Mention d'autres xylophages (capricorne, vrillette, lyctus, mérule).",
           scope: 'global',
           required: false,
           severity: 'important',
           requires_photo: true,
           trigger_question_after_ms: TRIGGER_DELAYS.long,
-          trigger_question_text: 'Présence d\'autres xylophages (capricorne, vrillette, mérule) ?',
+          trigger_question_text: "Présence d'autres xylophages (capricorne, vrillette, mérule) ?",
           keywords: ['capricorne', 'vrillette', 'lyctus', 'mérule', 'xylophage', 'champignon'],
           diagnostic: 'termites',
         },
@@ -168,7 +170,8 @@ export const TERMITES_CHECKLIST: DiagnosticChecklist = {
           id: 'termites_conclusion',
           field_name: 'termites.conclusion',
           description_short: 'Présence / absence formulée',
-          description_full: 'Conclusion claire : présence / absence de termites + traitement antérieur si visible.',
+          description_full:
+            'Conclusion claire : présence / absence de termites + traitement antérieur si visible.',
           scope: 'global',
           required: true,
           severity: 'critical',

@@ -14,9 +14,9 @@ export function WhyVerification() {
         communauté de diagnostiqueurs honnêtes.
       </p>
       <p>
-        Votre profil n&apos;apparaîtra dans l&apos;annuaire public qu&apos;une fois les quatre
-        phases validées (identité, COFRAC, RC Pro, SIRENE). Vous gardez l&apos;accès à votre
-        dashboard pendant l&apos;instruction.
+        Ton profil n&apos;apparaîtra dans l&apos;annuaire public qu&apos;une fois les quatre phases
+        validées (identité, COFRAC, RC Pro, SIRENE). Tu gardes l&apos;accès à ton dashboard pendant
+        l&apos;instruction.
       </p>
     </aside>
   )

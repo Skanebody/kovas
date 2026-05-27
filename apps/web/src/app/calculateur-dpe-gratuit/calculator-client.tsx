@@ -18,16 +18,16 @@ import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { estimateEnergyClass } from '@/lib/dpe-calculator/estimation-engine'
 import {
+  type CalculatorAnswers,
+  QUESTION_ORDER,
+  type QuestionKey,
+  TOTAL_QUESTIONS,
   areAllAnswersComplete,
   createEmptyAnswers,
   isAnswerComplete,
-  QUESTION_ORDER,
-  TOTAL_QUESTIONS,
-  type CalculatorAnswers,
-  type QuestionKey,
 } from '@/lib/dpe-calculator/question-tree'
-import { estimateEnergyClass } from '@/lib/dpe-calculator/estimation-engine'
 
 import { LeadForm } from './lead-form'
 import { QuestionStep } from './question-step'
@@ -51,10 +51,7 @@ interface CalculatorClientProps {
   detectedDepartment: string | null
 }
 
-export function CalculatorClient({
-  detectedCity,
-  detectedDepartment,
-}: CalculatorClientProps) {
+export function CalculatorClient({ detectedCity, detectedDepartment }: CalculatorClientProps) {
   const [answers, setAnswers] = useState<CalculatorAnswers>(() => createEmptyAnswers())
   const [stepIndex, setStepIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>('stepper')
@@ -210,11 +207,7 @@ export function CalculatorClient({
       >
         {phase === 'stepper' ? (
           <div key={transitionKey} className="animate-in fade-in duration-200">
-            <QuestionStep
-              questionKey={currentKey}
-              answers={answers}
-              onChange={onPatch}
-            />
+            <QuestionStep questionKey={currentKey} answers={answers} onChange={onPatch} />
 
             <div className="mt-8 flex items-center justify-between gap-3 border-t border-border pt-5">
               <Button
@@ -250,11 +243,9 @@ export function CalculatorClient({
             <Loader2 className="size-8 animate-spin text-chartreuse-deep" />
             <div className="text-center">
               <p className="font-display text-[18px] font-semibold text-ink">
-                Calcul de votre estimation
+                Calcul de ton estimation
               </p>
-              <p className="mt-1 text-[13px] text-ink-mute">
-                Analyse des 8 facteurs énergétiques.
-              </p>
+              <p className="mt-1 text-[13px] text-ink-mute">Analyse des 8 facteurs énergétiques.</p>
             </div>
           </div>
         ) : null}
@@ -285,16 +276,14 @@ export function CalculatorClient({
           </div>
         ) : null}
 
-        {phase === 'success' ? (
-          <SuccessPanel detectedCity={detectedCity} />
-        ) : null}
+        {phase === 'success' ? <SuccessPanel detectedCity={detectedCity} /> : null}
       </main>
 
       {/* Note de bas de page */}
       {phase === 'stepper' ? (
         <p className="mx-auto mt-5 max-w-md text-center text-[12px] leading-relaxed text-ink-mute">
-          Estimation indicative — ne remplace pas un DPE officiel établi par un
-          diagnostiqueur certifié.
+          Estimation indicative — ne remplace pas un DPE officiel établi par un diagnostiqueur
+          certifié.
         </p>
       ) : null}
     </div>
@@ -322,12 +311,12 @@ function SuccessPanel({ detectedCity }: { detectedCity: string | null }) {
         </svg>
       </div>
       <div>
-        <h2 className="font-display text-[22px] font-bold text-ink">
-          Votre demande est enregistrée
-        </h2>
+        <h2 className="font-display text-[22px] font-bold text-ink">Ta demande est enregistrée</h2>
         <p className="mt-2 max-w-md text-[14px] leading-relaxed text-ink-mute">
-          Vous allez recevoir votre estimation détaillée par email
-          {detectedCity ? ` ainsi qu’une mise en relation avec des diagnostiqueurs certifiés à proximité de ${detectedCity}` : ' ainsi qu’une mise en relation avec des diagnostiqueurs certifiés près de chez vous'}
+          Tu vas recevoir ton estimation détaillée par email
+          {detectedCity
+            ? ` ainsi qu’une mise en relation avec des diagnostiqueurs certifiés à proximité de ${detectedCity}`
+            : ' ainsi qu’une mise en relation avec des diagnostiqueurs certifiés près de chez toi'}
           . Réponse sous 24 à 48 heures ouvrées.
         </p>
       </div>

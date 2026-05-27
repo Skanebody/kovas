@@ -150,13 +150,13 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
         <EmptyState
           icon={Building2}
           title="Aucun bien ne correspond à cette recherche."
-          description="Affinez les filtres ou videz la recherche pour retrouver vos biens."
+          description="Affine les filtres ou vide la recherche pour retrouver tes biens."
         />
       ) : (
         <EmptyState
           icon={Building2}
           title="Aucun bien enregistré."
-          description="Ajoutez un bien pour mutualiser son historique de diagnostics entre plusieurs clients ou interventions."
+          description="Ajoute un bien pour mutualiser son historique de diagnostics entre plusieurs clients ou interventions."
           action={
             <Button asChild variant="accent">
               <Link href="/dashboard/properties/new">

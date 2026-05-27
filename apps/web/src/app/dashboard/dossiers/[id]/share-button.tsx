@@ -1,14 +1,5 @@
 'use client'
 
-import {
-  Cloud,
-  Download,
-  FileArchive,
-  Loader2,
-  Mail,
-  Share2,
-} from 'lucide-react'
-import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +10,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { Cloud, Download, FileArchive, Loader2, Mail, Share2 } from 'lucide-react'
+import { useState } from 'react'
 
 interface ShareMissionButtonProps {
   missionId: string
@@ -46,9 +39,7 @@ export function ShareMissionButton({
       const a = document.createElement('a')
       a.href = objectUrl
       a.download =
-        format === 'liciel'
-          ? `LICIEL_${missionReference}.zip`
-          : `KOVAS_${missionReference}.zip`
+        format === 'liciel' ? `LICIEL_${missionReference}.zip` : `KOVAS_${missionReference}.zip`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -78,7 +69,7 @@ export function ShareMissionButton({
         <DialogHeader>
           <DialogTitle>Partager la mission {missionReference}</DialogTitle>
           <DialogDescription>
-            3 modes d'envoi vers votre logiciel principal ou votre client.
+            3 modes d'envoi vers ton logiciel principal ou ton client.
           </DialogDescription>
         </DialogHeader>
 

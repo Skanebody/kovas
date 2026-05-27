@@ -11,7 +11,7 @@ interface AnnexeAggregateRow {
 
 /**
  * Compteur Gain : "X dossiers F/G enrichis avec annexe Aides → ~Y € d'aides
- * facilitées pour vos clients".
+ * facilitées pour tes clients".
  *
  * Lit la table `dossier_export_annexes` (annexe_type='aides_renovation')
  * pour la période courante de l'organisation. Pas de filtre temporel V1 :
@@ -42,7 +42,7 @@ export async function AidesRenovationCounterCard() {
     <Card variant="flat" className="relative overflow-hidden flex flex-col justify-between">
       <div>
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-mute mb-3">
-          Aides facilitées pour vos clients
+          Aides facilitées pour tes clients
         </p>
 
         {count > 0 ? (
@@ -64,8 +64,8 @@ export async function AidesRenovationCounterCard() {
               —
             </p>
             <p className="text-sm text-ink-mute max-w-sm">
-              Dès que vous exporterez un DPE de classe F ou G, KOVAS générera automatiquement
-              l'annexe officielle Aides Rénovation à remettre au propriétaire.
+              Dès que tu exporteras un DPE de classe F ou G, KOVAS générera automatiquement l'annexe
+              officielle Aides Rénovation à remettre au propriétaire.
             </p>
           </>
         )}

@@ -5,10 +5,10 @@
  * et les distribue aux sous-composants. Aucune logique I/O ici.
  */
 
-import { Button } from '@/components/ui/button'
 import type { AdemeAlertRow } from '@/app/api/ademe/alerts/route'
-import type { AdemeKpiSnapshotRow } from '@/app/api/ademe/kpi/current/route'
 import type { AdemeDpeCacheRow } from '@/app/api/ademe/dpe/historique/route'
+import type { AdemeKpiSnapshotRow } from '@/app/api/ademe/kpi/current/route'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 import { AdemeAlertsList } from './AdemeAlertsList'
@@ -98,7 +98,7 @@ export function AdemeCockpitDashboard({
         <div className="space-y-1">
           <p className="text-sm font-semibold text-ink">Avant de publier un DPE</p>
           <p className="text-[12px] text-ink-mute max-w-md">
-            Pré-validez votre saisie pour éviter une alerte ADEME a posteriori.
+            Pré-valide ta saisie pour éviter une alerte ADEME a posteriori.
           </p>
         </div>
         <Button variant="accent" size="lg" asChild>

@@ -1,5 +1,6 @@
 import { BadgeVerified } from '@/components/diagnostician/BadgeVerified'
 import { TrustBadges, type TrustBadgesData } from '@/components/marketplace/TrustBadges'
+import { LegalIdentitySection } from '@/components/trouver-un-diagnostiqueur/LegalIdentitySection'
 import type { DiagnosticianSireneBadge } from '@/lib/data-gouv/recherche-entreprises/diagnostician-badge'
 import type { AvailabilitySignals } from '@/lib/diag-availability'
 import {
@@ -367,6 +368,10 @@ export function DiagnosticianPageContent({
                       radiusKm={radiusKm}
                       name={fullName}
                       city={cityLabel}
+                      annuaireTier={resolveAnnuaireTier(d)}
+                      highlightedCities={
+                        Array.isArray(d.highlighted_cities) ? d.highlighted_cities : undefined
+                      }
                     />
                   ) : (
                     <div className="h-[240px] sm:h-[280px] md:h-[320px] rounded-2xl border border-dashed border-black/15 flex items-center justify-center text-sm text-black/50 px-4 text-center">
@@ -379,6 +384,18 @@ export function DiagnosticianPageContent({
               {/* 04 — Réactivité & vérification (B37 / GC3) */}
               {availability && availability.signalsCount > 0 ? (
                 <AvailabilitySection signals={availability} sectionNumber="04" />
+              ) : null}
+
+              {/* 04bis — Identité légale (open data INSEE / SIRENE) */}
+              {d.sirene_siret ? (
+                <LegalIdentitySection
+                  siret={d.sirene_siret}
+                  companyName={d.company_name ?? null}
+                  legalForm={d.legal_form ?? null}
+                  nafCode={d.naf_code ?? null}
+                  nafLabel={d.naf_label ?? null}
+                  creationDate={d.creation_date ?? null}
+                />
               ) : null}
 
               {/* 05 — Avis Google */}
@@ -453,7 +470,7 @@ export function DiagnosticianPageContent({
                   Contacter {companyName || initialFirst || fullName}
                 </h2>
                 <p className="mt-2 text-sm text-black/65">
-                  Décrivez votre projet, recevez un devis sous 24 heures ouvrées. Sans engagement.
+                  Décris ton projet, reçois un devis sous 24 heures ouvrées. Sans engagement.
                 </p>
                 <Link
                   href={`/devis/${diagSlug}`}
@@ -609,6 +626,23 @@ function AvatarBlock({
       {initials || '—'}
     </div>
   )
+}
+
+/**
+ * Résout le tier annuaire à partir du diagnosticien. Si pas d'abonnement,
+ * renvoie `'free'`. Source : `d.annuaire_tier` (texte 'free' | 'presence' |
+ * 'boost' | 'premium') ou fallback `'free'`. La colonne `annuaire_tier`
+ * n'existe pas encore en DB (livraison lot annuaire à venir) — le helper
+ * retourne donc `'free'` pour toutes les rows actuelles, ce qui rend déjà
+ * la carte aux couleurs KOVAS sans interconnexion abonnement payant.
+ */
+function resolveAnnuaireTier(
+  // biome-ignore lint/suspicious/noExplicitAny: DiagnosticianRow = any (types DB pas régénérés)
+  d: any,
+): 'free' | 'presence' | 'boost' | 'premium' {
+  const raw = typeof d?.annuaire_tier === 'string' ? d.annuaire_tier : null
+  if (raw === 'presence' || raw === 'boost' || raw === 'premium') return raw
+  return 'free'
 }
 
 function SectionHeader({ number, title }: { number: string; title: string }) {

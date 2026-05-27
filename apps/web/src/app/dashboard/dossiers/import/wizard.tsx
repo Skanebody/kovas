@@ -158,16 +158,16 @@ function Step1Prepare({ onNext }: { onNext: () => void }) {
         <div className="rounded-lg border border-accent-green/30 bg-accent-green/5 p-4 text-sm leading-relaxed">
           <p className="font-medium text-ink mb-1">Import légal et sécurisé.</p>
           <p className="text-ink-soft">
-            C&apos;est <strong>vous</strong> qui exportez vos données depuis votre propre logiciel
-            de diagnostic, dans le cadre de votre <strong>droit à la portabilité</strong> (article
-            20 du RGPD). KOVAS n&apos;accède jamais directement à votre logiciel et ne stocke pas
-            vos identifiants.
+            C&apos;est <strong>toi</strong> qui exportes tes données depuis ton propre logiciel de
+            diagnostic, dans le cadre de ton <strong>droit à la portabilité</strong> (article 20 du
+            RGPD). KOVAS n&apos;accède jamais directement à ton logiciel et ne stocke pas tes
+            identifiants.
           </p>
         </div>
 
         <section className="space-y-2.5">
           <h3 className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
-            Ce que vous allez importer
+            Ce que tu vas importer
           </h3>
           <ul className="space-y-2">
             <ImportItem icon={Users} title="Clients" desc="Coordonnées, identifiants, historique" />
@@ -191,14 +191,14 @@ function Step1Prepare({ onNext }: { onNext: () => void }) {
 
         <section className="space-y-2.5">
           <h3 className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-mute">
-            Ce que vous n&apos;allez pas importer
+            Ce que tu n&apos;importeras pas
           </h3>
           <ul className="space-y-1.5 text-sm text-ink-soft">
             <li className="flex gap-2">
               <span className="text-ink-mute">·</span>
               <span>
                 <strong className="text-ink">Les rapports PDF eux-mêmes</strong> — à conserver dans
-                votre logiciel d&apos;origine selon la réglementation (10 ans, 50 ans pour
+                ton logiciel d&apos;origine selon la réglementation (10 ans, 50 ans pour
                 l&apos;amiante).
               </span>
             </li>
@@ -208,14 +208,14 @@ function Step1Prepare({ onNext }: { onNext: () => void }) {
                 <strong className="text-ink">
                   Les paramètres techniques de calcul <GlossaryTerm term="dpe">DPE</GlossaryTerm>
                 </strong>{' '}
-                — propres à votre logiciel d&apos;origine.
+                — propres à ton logiciel d&apos;origine.
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-ink-mute">·</span>
               <span>
                 <strong className="text-ink">
-                  Vos certifications <GlossaryTerm term="cofrac">COFRAC</GlossaryTerm>
+                  Tes certifications <GlossaryTerm term="cofrac">COFRAC</GlossaryTerm>
                 </strong>{' '}
                 — à saisir séparément dans{' '}
                 <code className="font-mono text-xs">Compte → Certifications</code>.
@@ -230,7 +230,7 @@ function Step1Prepare({ onNext }: { onNext: () => void }) {
           </p>
           <ul className="space-y-0.5">
             <li>
-              · Export depuis votre logiciel : <span className="tabular-nums">2 à 5 minutes</span>
+              · Export depuis ton logiciel : <span className="tabular-nums">2 à 5 minutes</span>
             </li>
             <li>
               · Import et vérification : <span className="tabular-nums">5 à 15 minutes</span> selon
@@ -296,11 +296,11 @@ function Step2Export({
             <FileSpreadsheet className="size-3.5" /> Étape 2 / 5 — Exporter
           </p>
           <h2 className="font-serif italic font-normal text-2xl md:text-3xl text-ink leading-tight">
-            Quel logiciel utilisez-vous actuellement ?
+            Quel logiciel utilises-tu actuellement ?
           </h2>
           <p className="text-sm text-ink-soft max-w-2xl">
-            Sélectionnez votre logiciel de diagnostic. KOVAS adapte automatiquement le tutoriel et
-            la lecture du fichier exporté.
+            Sélectionne ton logiciel de diagnostic. KOVAS adapte automatiquement le tutoriel et la
+            lecture du fichier exporté.
           </p>
         </header>
 
@@ -347,7 +347,7 @@ function Step2Export({
             Comment exporter depuis {logicielLabel}.
           </h3>
           <p className="text-sm text-ink-soft max-w-2xl">
-            Suivez ces étapes dans votre logiciel. Le tutoriel sera affiné une fois l&apos;interface
+            Suis ces étapes dans ton logiciel. Le tutoriel sera affiné une fois l&apos;interface
             réelle validée sur les retours bêta.
           </p>
         </header>
@@ -368,7 +368,7 @@ function Step2Export({
         {/* Aide en bas */}
         <div className="rounded-xl border border-rule bg-paper/40 p-4 space-y-2.5">
           <p className="text-sm font-medium text-ink">
-            Vous ne trouvez pas la fonction d&apos;export ?
+            Tu ne trouves pas la fonction d&apos;export ?
           </p>
           <div className="flex flex-wrap gap-2">
             {TUTO_HELP_LINKS.map((link) => {
@@ -523,11 +523,11 @@ function Step3Upload({
             <FileSpreadsheet className="size-3.5" /> Étape 3 / 5 — Téléverser
           </p>
           <h2 className="font-serif italic font-normal text-2xl md:text-3xl text-ink leading-tight">
-            Glissez votre fichier ici.
+            Glisse ton fichier ici.
           </h2>
           <p className="text-sm text-ink-soft max-w-2xl">
             Le fichier est chiffré en transit et stocké temporairement (7 jours max) dans un bucket
-            privé en région Paris. Vous pourrez le supprimer à tout moment depuis votre journal
+            privé en région Paris. Tu pourras le supprimer à tout moment depuis ton journal
             d&apos;imports.
           </p>
         </header>
@@ -555,7 +555,7 @@ function Step4AnalyzePlaceholder({ jobId }: { jobId?: string }) {
     <PlaceholderStep
       stepNum={4}
       stepLabel="Analyser"
-      title="Analyse de votre fichier."
+      title="Analyse de ton fichier."
       description={
         jobId
           ? `Suivi temps réel du job ${jobId.slice(0, 8)}… — parsing + normalisation + dédoublonnage en cours.`

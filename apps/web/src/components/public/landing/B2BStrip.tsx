@@ -19,7 +19,7 @@ const B2B_BULLETS = [
     icon: Users2,
     title: 'Annuaire connecté au calculateur',
     description:
-      'Les particuliers qui estiment leur DPE peuvent vous demander un devis en deux clics.',
+      'Les particuliers qui estiment leur DPE peuvent te demander un devis en deux clics.',
   },
 ] as const
 
@@ -45,12 +45,12 @@ export function B2BStrip() {
               className="font-sans font-medium tracking-tight text-cream leading-[1.05]"
               style={{ fontSize: 'clamp(34px, 5vw, 68px)' }}
             >
-              Vous êtes{' '}
+              Tu es{' '}
               <span className="font-serif italic font-normal text-chartreuse">diagnostiqueur</span>{' '}
               ?
             </h2>
             <p className="text-cream/80 text-lg leading-relaxed max-w-xl">
-              L&apos;outil quotidien qui fait gagner 3 heures par mission, sécurise vos exports
+              L&apos;outil quotidien qui fait gagner 3 heures par mission, sécurise tes exports
               ADEME, et amène des leads qualifiés tous les jours.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-3 pt-2">

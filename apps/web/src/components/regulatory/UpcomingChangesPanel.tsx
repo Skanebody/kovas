@@ -106,8 +106,8 @@ export function UpcomingChangesPanel({ items }: UpcomingChangesPanelProps) {
             Préparation requise
           </p>
           <p className="text-[12px] text-ink leading-relaxed">
-            Vérifiez l'impact sur vos missions en cours et anticipez les ajustements
-            de rapport avant la date d'entrée en vigueur.
+            Vérifiez l'impact sur vos missions en cours et anticipez les ajustements de rapport
+            avant la date d'entrée en vigueur.
           </p>
         </Card>
       )}

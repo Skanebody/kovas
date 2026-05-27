@@ -36,10 +36,7 @@ export interface FacturesUrgencySectionProps {
   rows: readonly FactureUrgencyRow[]
 }
 
-const SECTION_META: Record<
-  FactureUrgencyKind,
-  { label: string; emptyHint: string }
-> = {
+const SECTION_META: Record<FactureUrgencyKind, { label: string; emptyHint: string }> = {
   overdue: {
     label: 'En retard',
     emptyHint: 'Aucune facture en retard — votre encours est sain.',
@@ -111,12 +108,8 @@ function FactureRow({
             {row.dateShort}
           </span>
           <span className="flex flex-col min-w-0 flex-1">
-            <span className="text-[14px] font-medium text-ink truncate">
-              {row.clientName}
-            </span>
-            <span className="font-mono text-[11px] text-ink-faint truncate">
-              {row.reference}
-            </span>
+            <span className="text-[14px] font-medium text-ink truncate">{row.clientName}</span>
+            <span className="font-mono text-[11px] text-ink-faint truncate">{row.reference}</span>
           </span>
           <span
             className={cn(
@@ -184,10 +177,7 @@ export interface FacturesPaidSummaryProps {
   totalCollectedEur: number
 }
 
-export function FacturesPaidSummary({
-  paidCount,
-  totalCollectedEur,
-}: FacturesPaidSummaryProps) {
+export function FacturesPaidSummary({ paidCount, totalCollectedEur }: FacturesPaidSummaryProps) {
   return (
     <section className="space-y-3">
       <header className="flex items-center justify-between gap-3">

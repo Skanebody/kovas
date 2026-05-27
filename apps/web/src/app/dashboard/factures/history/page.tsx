@@ -2,10 +2,7 @@ import { AppListToolbar } from '@/components/app-list-toolbar'
 import { parseListSearchParams } from '@/components/app-list-toolbar-utils'
 import { AppPageHeader } from '@/components/app-page-header'
 import { InvoiceListRow } from '@/components/invoices/InvoiceListRow'
-import {
-  AppListTable,
-  AppListTableHead,
-} from '@/components/ui/app-list-table'
+import { AppListTable, AppListTableHead } from '@/components/ui/app-list-table'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -29,18 +26,14 @@ interface FacturesHistoryPageProps {
  * Payées. V1 : tableau standard avec filtres statut et recherche par
  * référence.
  */
-export default async function FacturesHistoryPage({
-  searchParams,
-}: FacturesHistoryPageProps) {
+export default async function FacturesHistoryPage({ searchParams }: FacturesHistoryPageProps) {
   const sp = await searchParams
   const parsed = parseListSearchParams(sp, {
     pageSize: PAGE_SIZE,
     filterKeys: ['status'] as const,
   })
   const statusFilterRaw = parsed.filters.status
-  const statusFilterStr = Array.isArray(statusFilterRaw)
-    ? statusFilterRaw[0]
-    : statusFilterRaw
+  const statusFilterStr = Array.isArray(statusFilterRaw) ? statusFilterRaw[0] : statusFilterRaw
   const statusFilter: InvoiceStatus | null =
     typeof statusFilterStr === 'string' && statusFilterStr in INVOICE_STATUS_LABEL
       ? (statusFilterStr as InvoiceStatus)
@@ -148,12 +141,8 @@ export default async function FacturesHistoryPage({
             <tr>
               <th className="text-left font-medium px-4 py-3">Référence</th>
               <th className="text-left font-medium px-4 py-3">Client</th>
-              <th className="text-left font-medium px-4 py-3 hidden md:table-cell">
-                Émise le
-              </th>
-              <th className="text-left font-medium px-4 py-3 hidden md:table-cell">
-                Échéance
-              </th>
+              <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Émise le</th>
+              <th className="text-left font-medium px-4 py-3 hidden md:table-cell">Échéance</th>
               <th className="text-right font-medium px-4 py-3">TTC</th>
               <th className="text-left font-medium px-4 py-3">Statut</th>
             </tr>
@@ -168,7 +157,7 @@ export default async function FacturesHistoryPage({
         <EmptyState
           icon={Receipt}
           title="Aucune facture ne correspond à cette recherche."
-          description="Affinez les filtres ou videz la recherche pour retrouver vos factures."
+          description="Affine les filtres ou vide la recherche pour retrouver tes factures."
           action={
             <Button asChild variant="outline">
               <Link href="/dashboard/factures">Retour aux urgences</Link>

@@ -75,7 +75,7 @@ export function PrevalidationPanel({
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-3">
         <Loader2 className="size-6 animate-spin text-ink-mute" aria-hidden />
-        <p className="text-[13px] text-ink-soft">Analyse de votre mission…</p>
+        <p className="text-[13px] text-ink-soft">Analyse de ta mission…</p>
       </div>
     )
   }

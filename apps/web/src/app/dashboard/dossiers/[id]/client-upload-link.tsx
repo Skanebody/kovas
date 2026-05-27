@@ -1,9 +1,9 @@
 'use client'
 
-import { Check, Copy, Link2, Loader2, X } from 'lucide-react'
-import { useState, useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Check, Copy, Link2, Loader2, X } from 'lucide-react'
+import { useState, useTransition } from 'react'
 import { generateClientUploadLinkAction, revokeClientUploadLinkAction } from './actions'
 
 interface ClientUploadLinkProps {
@@ -16,9 +16,8 @@ export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLi
   const [isPending, startTransition] = useTransition()
   const [copied, setCopied] = useState(false)
 
-  const fullUrl = typeof window !== 'undefined' && token
-    ? `${window.location.origin}/upload/${token}`
-    : null
+  const fullUrl =
+    typeof window !== 'undefined' && token ? `${window.location.origin}/upload/${token}` : null
 
   const expired = expiresAt && new Date(expiresAt) < new Date()
 
@@ -82,9 +81,7 @@ export function ClientUploadLink({ dossierId, token, expiresAt }: ClientUploadLi
         <Button size="sm" variant="ghost" onClick={revoke} disabled={isPending}>
           <X className="size-4" /> Révoquer
         </Button>
-        <p className="text-xs text-ink-faint">
-          Envoyez ce lien par email ou SMS à votre client.
-        </p>
+        <p className="text-xs text-ink-faint">Envoie ce lien par email ou SMS à ton client.</p>
       </div>
     </div>
   )

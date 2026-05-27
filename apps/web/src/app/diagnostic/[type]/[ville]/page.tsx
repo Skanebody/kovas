@@ -159,7 +159,7 @@ export default async function DiagnosticVillePage({
       <SeoSection title={`Diagnostiqueurs ${label} certifiés à ${city.name}`}>
         <p className="mb-4">
           KOVAS référence les diagnostiqueurs certifiés exerçant à {city.name} ({city.postalCode}).
-          Voici une sélection de professionnels disponibles dans votre commune.
+          Voici une sélection de professionnels disponibles dans ta commune.
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {mockDiags.slice(0, 3).map((d) => (
@@ -199,7 +199,7 @@ export default async function DiagnosticVillePage({
 
       <SeoCtaBlock
         title={`Demander un devis ${label} à ${city.name}`}
-        description={`Recevez jusqu’à 3 devis gratuits de diagnostiqueurs certifiés à ${city.name} en moins de 24 heures.`}
+        description={`Reçois jusqu’à 3 devis gratuits de diagnostiqueurs certifiés à ${city.name} en moins de 24 heures.`}
         primary={{
           label: 'Demander un devis gratuit',
           href: `/contact?type=${diagnosticType}&ville=${city.slug}`,
@@ -226,17 +226,17 @@ export default async function DiagnosticVillePage({
 
       <div className="mt-12 pt-8 border-t border-rule text-sm text-ink-mute text-center">
         <p>
-          Vous êtes diagnostiqueur certifié à {city.name} ?{' '}
+          Tu es diagnostiqueur certifié à {city.name} ?{' '}
           <Link
             href="/pour-les-diagnostiqueurs"
             className="text-ink hover:underline underline-offset-4 font-medium"
           >
-            Référencer votre cabinet sur KOVAS
+            Référencer ton cabinet sur KOVAS
           </Link>
           .
         </p>
         <p className="mt-3 text-xs text-ink-faint">
-          Information : pour la prestation {longLabel.toLowerCase()}, vérifiez toujours la
+          Information : pour la prestation {longLabel.toLowerCase()}, vérifie toujours la
           certification COFRAC du diagnostiqueur avant signature.
         </p>
       </div>

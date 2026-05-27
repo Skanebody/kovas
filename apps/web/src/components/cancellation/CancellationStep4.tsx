@@ -47,9 +47,9 @@ export function CancellationStep4({ effectiveEndDate, userEmail, calendlyUrl }: 
               <span className="font-serif italic font-normal">enregistrée</span>
             </h1>
             <p className="text-sm text-ink-mute">
-              Aucune nouvelle facturation ne sera effectuée. Vous conservez l&apos;accès
-              complet à KOVAS jusqu&apos;au{' '}
-              <strong className="text-ink">{formatFr(effectiveEndDate)}</strong>.
+              Aucune nouvelle facturation ne sera effectuée. Vous conservez l&apos;accès complet à
+              KOVAS jusqu&apos;au <strong className="text-ink">{formatFr(effectiveEndDate)}</strong>
+              .
             </p>
           </div>
         </div>
@@ -62,9 +62,9 @@ export function CancellationStep4({ effectiveEndDate, userEmail, calendlyUrl }: 
               <strong className="text-ink">{userEmail}</strong>.
             </p>
             <p className="text-ink-mute">
-              Après expiration de votre abonnement, votre compte bascule 90 jours en mode
-              lecture et export complet (PDF, Word, CSV, JSON, ZIP Liciel). Vos factures
-              restent conservées 10 ans.
+              Après expiration de votre abonnement, votre compte bascule 90 jours en mode lecture et
+              export complet (PDF, Word, CSV, JSON, ZIP Liciel). Vos factures restent conservées 10
+              ans.
             </p>
           </div>
         </div>
@@ -79,9 +79,9 @@ export function CancellationStep4({ effectiveEndDate, userEmail, calendlyUrl }: 
                 15 minutes pour ajuster votre offre ?
               </h2>
               <p className="text-xs text-ink-soft">
-                Si vous souhaitez en discuter avec un expert KOVAS — pour identifier une
-                formule mieux adaptée ou simplement nous faire un retour structuré — nous
-                serions ravis d&apos;échanger. Aucune obligation, aucune relance ensuite.
+                Si vous souhaitez en discuter avec un expert KOVAS — pour identifier une formule
+                mieux adaptée ou simplement nous faire un retour structuré — nous serions ravis
+                d&apos;échanger. Aucune obligation, aucune relance ensuite.
               </p>
             </div>
           </div>

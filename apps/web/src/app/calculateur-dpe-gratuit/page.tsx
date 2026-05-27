@@ -15,12 +15,7 @@
 import { ShieldCheck, Sparkles, Timer } from 'lucide-react'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
-import type {
-  BreadcrumbList,
-  Service,
-  WebApplication,
-  WithContext,
-} from 'schema-dts'
+import type { BreadcrumbList, Service, WebApplication, WithContext } from 'schema-dts'
 
 import { CalculatorClient } from './calculator-client'
 
@@ -194,13 +189,11 @@ export default async function CalculateurDpeGratuitPage() {
             </p>
             <h1 className="font-display text-[32px] font-bold leading-tight text-ink sm:text-[44px]">
               Calculateur DPE gratuit{' '}
-              <span className="font-serif italic text-chartreuse-deep">
-                en 2 minutes
-              </span>
+              <span className="font-serif italic text-chartreuse-deep">en 2 minutes</span>
             </h1>
             <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-ink-mute sm:text-[16px]">
-              Estimez la classe énergétique probable de votre logement en répondant
-              à 8 questions simples. Résultat immédiat et confidentiel.
+              Estime la classe énergétique probable de ton logement en répondant à 8 questions
+              simples. Résultat immédiat et confidentiel.
             </p>
 
             <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] text-ink-mute">
@@ -209,10 +202,7 @@ export default async function CalculateurDpeGratuitPage() {
                 Moins de 2 minutes
               </li>
               <li className="inline-flex items-center gap-1.5">
-                <ShieldCheck
-                  className="size-3.5 text-chartreuse-deep"
-                  aria-hidden
-                />
+                <ShieldCheck className="size-3.5 text-chartreuse-deep" aria-hidden />
                 Confidentiel, RGPD
               </li>
               <li className="inline-flex items-center gap-1.5">
@@ -223,19 +213,15 @@ export default async function CalculateurDpeGratuitPage() {
           </div>
         </header>
 
-        <CalculatorClient
-          detectedCity={city}
-          detectedDepartment={department}
-        />
+        <CalculatorClient detectedCity={city} detectedDepartment={department} />
 
         {/* Disclaimer légal en bas */}
         <footer className="border-t border-border bg-paper">
           <div className="mx-auto max-w-3xl px-4 py-6 text-center text-[12px] leading-relaxed text-ink-mute">
             <p>
-              Cette estimation est <strong>indicative et non opposable</strong>.
-              Seul un DPE officiel établi par un diagnostiqueur certifié a une
-              valeur réglementaire pour une vente, une location ou une
-              déclaration d'audit énergétique.
+              Cette estimation est <strong>indicative et non opposable</strong>. Seul un DPE
+              officiel établi par un diagnostiqueur certifié a une valeur réglementaire pour une
+              vente, une location ou une déclaration d'audit énergétique.
             </p>
           </div>
         </footer>

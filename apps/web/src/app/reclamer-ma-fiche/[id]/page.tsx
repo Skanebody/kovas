@@ -1,30 +1,29 @@
+import { ClaimStepper } from '@/components/claim/claim-stepper'
 import { Card } from '@/components/ui/card'
-import { isFrenchMobile, maskEmail, maskPhone, maskSiret } from '@/lib/diagnosticians/mask-contact'
+import { isFrenchMobile, maskPhone, maskSiret } from '@/lib/diagnosticians/mask-contact'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { MapPin, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ClaimMethodTabs } from './claim-method-tabs'
 
 /**
- * Page publique de réclamation de fiche (Mission A4 — FIX-FF refonte 2026-05-23).
+ * Page publique de réclamation de fiche.
  *
  * Server component — charge le diag depuis le schéma canonique consolidé
  * (cf. migration 20260524110000_diagnosticians_unified.sql), masque les
- * contacts officiels, et instancie le composant client de vérification 3
- * méthodes (Email pro / Sirene / SMS) + fallback Justificatif manuel.
+ * contacts officiels, et instancie le `<ClaimStepper>` Doctolib pattern.
  *
  * URL : /reclamer-ma-fiche/<diagnostician_id>
- * Anon — pas d'auth requise (l'auth se fait après vérification → /signup?claim_id=)
+ * Anon — pas d'auth requise (l'auth se fait après l'approbation manuelle
+ * du claim par l'admin → email avec lien `/signup?claim_id=...`).
  *
- * ROOT CAUSE du bug 404 initial (FIX-FF, mai 2026) :
- *   Le code A4 ciblait les anciennes colonnes (display_name, official_email,
- *   official_phone, postal_code, official_company_name) qui ont été renommées
- *   par la consolidation de Phase A. Le SELECT échouait avec PostgREST 42703
- *   ("column does not exist") → data=null → notFound(). On lit désormais le
- *   schéma canonique : full_name, email, phone, postcode (+ pas de company_name
- *   stockée — on dérive le label cabinet du SIRET via verify-siret côté API).
+ * Historique :
+ *   - Mission A4 (mai 2026) : 4 méthodes parallèles (Email / SIRET / SMS / Manuel)
+ *   - FIX-FF (mai 2026)     : alignement schéma canonique (full_name/email/phone)
+ *   - REFONTE-2026-05-27    : refonte Doctolib pattern — 3 étapes obligatoires
+ *     séquentielles (SIRET → SMS pro → KYC CNI + revue humaine 24-48h).
+ *     Migration `20260527150000_claim_kyc_doctolib_pattern.sql`.
  */
 
 export const dynamic = 'force-dynamic'
@@ -129,8 +128,8 @@ export default async function ReclamerMaFichePage({ params }: PageProps) {
             <ShieldCheck className="size-12 text-ink mx-auto mb-4" aria-hidden />
             <h1 className="text-xl font-bold text-ink mb-2">Fiche déjà réclamée</h1>
             <p className="text-[14px] text-ink-mute mb-6">
-              Cette fiche professionnelle a déjà été réclamée par son titulaire. Si vous pensez
-              qu&apos;il s&apos;agit d&apos;une erreur, contactez{' '}
+              Cette fiche professionnelle a déjà été réclamée par son titulaire. Si tu penses
+              qu&apos;il s&apos;agit d&apos;une erreur, contacte{' '}
               <a href="mailto:contact@kovas.fr" className="underline">
                 contact@kovas.fr
               </a>
@@ -162,11 +161,11 @@ export default async function ReclamerMaFichePage({ params }: PageProps) {
             Annuaire KOVAS · Réclamation
           </p>
           <h1 className="text-[28px] md:text-[36px] font-display font-bold text-ink leading-tight">
-            Réclamez <span className="text-display-serif italic font-normal">votre fiche</span>
+            Réclame <span className="text-display-serif italic font-normal">ta fiche</span>
           </h1>
           <p className="text-[15px] text-ink-mute mt-4 leading-relaxed">
-            Vérifiez votre identité pour reprendre le contrôle de votre fiche publique. Trois
-            méthodes au choix selon votre profil. Compte gratuit — vous restez maître de vos
+            Authentification renforcée en 3 étapes obligatoires (SIRET, téléphone pro, pièce
+            d&apos;identité). Décision sous 24 à 48 heures après réception. Tu restes maître de tes
             données.
           </p>
         </div>
@@ -201,14 +200,15 @@ export default async function ReclamerMaFichePage({ params }: PageProps) {
           )}
         </Card>
 
-        {/* Vérification 3 méthodes côte à côte (Email pro / SIRET / SMS) + fallback manuel */}
-        <ClaimMethodTabs
-          diagnosticianId={diag.id}
-          maskedEmail={diag.email ? maskEmail(diag.email) : null}
-          maskedPhone={diag.phone && isFrenchMobile(diag.phone) ? maskPhone(diag.phone) : null}
-          maskedSiret={diag.sirene_siret ? maskSiret(diag.sirene_siret) : null}
-          companyName={null}
-        />
+        {/* Stepper Doctolib — 3 étapes obligatoires séquentielles (SIRET / SMS / KYC). */}
+        <div className="max-w-2xl">
+          <ClaimStepper
+            diagnosticianId={diag.id}
+            diagnosticianFullName={displayName}
+            maskedPhone={diag.phone && isFrenchMobile(diag.phone) ? maskPhone(diag.phone) : null}
+            maskedSiret={diag.sirene_siret ? maskSiret(diag.sirene_siret) : null}
+          />
+        </div>
 
         {/* Footer escape : ce n'est pas moi */}
         <div className="mt-12 text-center">

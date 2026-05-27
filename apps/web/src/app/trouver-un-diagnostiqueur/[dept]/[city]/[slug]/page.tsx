@@ -137,7 +137,16 @@ async function fetchAvailabilitySignals(
  * SIRENE 7j (table `sirene_check_cache`). Open data INSEE, lecture publique.
  */
 async function fetchSireneBadge(siret: string | null): Promise<DiagnosticianSireneBadge> {
-  if (!siret) return { isVerified: false, nafCode: null, nafLabel: null }
+  if (!siret) {
+    return {
+      isVerified: false,
+      nafCode: null,
+      nafLabel: null,
+      companyName: null,
+      legalForm: null,
+      siret: null,
+    }
+  }
   const { createAdminClient } = await import('@/lib/supabase/admin')
   const supabase = createAdminClient()
   return fetchDiagnosticianSireneBadge(supabase, siret)
@@ -456,10 +465,25 @@ function sanitizeDiagPublic(diag: any): any {
     is_published: diag.is_published,
     withdrawal_requested: diag.withdrawal_requested,
     created_at: diag.created_at,
-    // VOLONTAIREMENT OMIS — données sensibles non-publiques :
+    // Identité légale OPEN DATA INSEE — registre SIRENE accessible librement
+    // via api.gouv.fr Recherche d'Entreprises (sans clé, sans inscription).
+    // C'est l'équivalent du RPPS de Doctolib : preuve d'existence légale
+    // que l'on EXPOSE volontairement pour la transparence annuaire.
+    // Cf. CLAUDE.md §6 + docs/data-gouv-opportunities.md §2.5.
+    sirene_siret: diag.sirene_siret,
+    naf_code: diag.naf_code,
+    naf_label: diag.naf_label,
+    legal_form: diag.legal_form,
+    creation_date: diag.creation_date,
+    // Tier d'abonnement annuaire — détermine le rendu visuel de la carte
+    // d'intervention. Publique (l'utilisateur le voit visuellement, pas de
+    // données sensibles cachées derrière). Cf. migration 20260527160000.
+    annuaire_tier: diag.annuaire_tier,
+    highlighted_cities: diag.highlighted_cities,
+    // VOLONTAIREMENT OMIS — données vraiment sensibles non-publiques :
     //   phone, email, official_phone, official_email, phone_e164,
-    //   contact_email, sirene_siret, dhup_source_id, claimed_by_user_id,
-    //   fraud_flags, validation_status_reason, etc.
+    //   contact_email, dhup_source_id, claimed_by_user_id, fraud_flags,
+    //   validation_status_reason, etc.
   }
 }
 

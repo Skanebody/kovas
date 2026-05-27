@@ -69,14 +69,14 @@ export function FinalAnalysisSheet({
 }: FinalAnalysisSheetProps): React.ReactElement {
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} maxHeight="92vh">
-      <BottomSheetTitle>Analyse de votre session</BottomSheetTitle>
+      <BottomSheetTitle>Analyse de ta session</BottomSheetTitle>
 
       <BottomSheetBody>
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
             <Loader2 className="size-6 animate-spin text-[#0F1419]/72" aria-hidden />
             <p className="text-[13px] text-[#0F1419]/82 text-center max-w-sm">
-              L'assistant analyse vos captures…
+              L'assistant analyse tes captures…
               <br />
               <span className="text-[#0F1419]/72 text-[12px]">
                 Synthèse pièce par pièce + détection des champs manquants pour Liciel.

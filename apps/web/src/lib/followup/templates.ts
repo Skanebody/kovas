@@ -134,10 +134,7 @@ function unsubFooterText(unsubscribeUrl: string): string {
 // 1. Quote pending — devis sans réponse
 // ────────────────────────────────────────────────────────────
 
-export function templateSequenceQuote(
-  step: number,
-  ctx: QuoteContext,
-): SequenceStepContent {
+export function templateSequenceQuote(step: number, ctx: QuoteContext): SequenceStepContent {
   const greeting = ctx.recipientFirstName ? `Bonjour ${ctx.recipientFirstName},` : 'Bonjour,'
   const ref = ctx.quoteRef
   const amount = ctx.quoteAmountEur.toLocaleString('fr-FR', {
@@ -191,7 +188,7 @@ ${unsubFooterText(ctx.unsubscribeUrl)}`
         paragraph(greeting) +
         paragraph(`Je n'ai pas eu de retour concernant le devis ${ref} (${amount} €).`) +
         paragraph(
-          'Si votre projet a évolué (report, annulation, ajustement de périmètre), faites-le moi savoir : je peux adapter la proposition ou la clôturer si elle n\'est plus pertinente.',
+          "Si votre projet a évolué (report, annulation, ajustement de périmètre), faites-le moi savoir : je peux adapter la proposition ou la clôturer si elle n'est plus pertinente.",
         ) +
         buttonHtml('Voir le devis', ctx.viewUrl)
       return {
@@ -220,9 +217,7 @@ ${unsubFooterText(ctx.unsubscribeUrl)}`
         paragraph(
           `Sans retour de votre part dans les prochains jours, je clôturerai le devis ${ref} dans mon outil de suivi.`,
         ) +
-        paragraph(
-          'Vous pouvez bien sûr revenir vers moi à tout moment pour relancer le projet.',
-        )
+        paragraph('Vous pouvez bien sûr revenir vers moi à tout moment pour relancer le projet.')
       return {
         subject,
         text,
@@ -242,10 +237,7 @@ ${unsubFooterText(ctx.unsubscribeUrl)}`
 // 2. Invoice unpaid
 // ────────────────────────────────────────────────────────────
 
-export function templateSequenceInvoice(
-  step: number,
-  ctx: InvoiceContext,
-): SequenceStepContent {
+export function templateSequenceInvoice(step: number, ctx: InvoiceContext): SequenceStepContent {
   const greeting = ctx.recipientFirstName ? `Bonjour ${ctx.recipientFirstName},` : 'Bonjour,'
   const ref = ctx.invoiceNumber
   const amount = ctx.invoiceAmountEur.toLocaleString('fr-FR', {
@@ -270,7 +262,7 @@ ${unsubFooterText(ctx.unsubscribeUrl)}`
           `La facture ${ref} d'un montant de ${amount} € est arrivée à échéance depuis ${ctx.daysSinceDue} jours.`,
         ) +
         paragraph(
-          'Si le règlement est en cours, je vous prie de l\'ignorer. Dans le cas contraire, vous pouvez procéder au paiement en quelques clics.',
+          "Si le règlement est en cours, je vous prie de l'ignorer. Dans le cas contraire, vous pouvez procéder au paiement en quelques clics.",
         ) +
         buttonHtml('Régler la facture', ctx.paymentUrl)
       return {
@@ -301,10 +293,10 @@ ${unsubFooterText(ctx.unsubscribeUrl)}`
           `Sans nouvelle de votre part, la facture ${ref} (${amount} €) reste impayée à ce jour.`,
         ) +
         paragraph(
-          'Conformément aux CGV, les pénalités de retard s\'appliquent à compter du 31e jour suivant l\'échéance.',
+          "Conformément aux CGV, les pénalités de retard s'appliquent à compter du 31e jour suivant l'échéance.",
         ) +
         paragraph(
-          'Je préfère régler cela à l\'amiable. Contactez-moi si vous rencontrez une difficulté ponctuelle.',
+          "Je préfère régler cela à l'amiable. Contactez-moi si vous rencontrez une difficulté ponctuelle.",
         ) +
         buttonHtml('Régler en ligne', ctx.paymentUrl)
       return {
@@ -334,7 +326,7 @@ ${unsubFooterText(ctx.unsubscribeUrl)}`
           `À ce jour, la facture ${ref} d'un montant de ${amount} € n'a toujours pas été réglée malgré mes précédents rappels.`,
         ) +
         paragraph(
-          'Sans paiement sous 8 jours, je serai contraint d\'engager une procédure de recouvrement, ce que je préférerais éviter.',
+          "Sans paiement sous 8 jours, je serai contraint d'engager une procédure de recouvrement, ce que je préférerais éviter.",
         ) +
         buttonHtml('Régler immédiatement', ctx.paymentUrl)
       return {
@@ -383,10 +375,10 @@ ${unsubFooterText(ctx.unsubscribeUrl)}`
           `Suite au diagnostic réalisé sur le bien situé ${ctx.propertyAddress}, votre logement a été classé ${ctx.dpeClass}.`,
         ) +
         paragraph(
-          'Les biens F et G entrent progressivement dans le calendrier d\'interdiction de location (loi Climat et Résilience).',
+          "Les biens F et G entrent progressivement dans le calendrier d'interdiction de location (loi Climat et Résilience).",
         ) +
         paragraph(
-          'Si vous envisagez des travaux, je peux vous orienter vers les dispositifs d\'aide (MaPrimeRénov\', CEE, Éco-PTZ).',
+          "Si vous envisagez des travaux, je peux vous orienter vers les dispositifs d'aide (MaPrimeRénov', CEE, Éco-PTZ).",
         )
       return {
         subject,
@@ -415,7 +407,7 @@ ${unsubFooterText(ctx.unsubscribeUrl)}`
           `Trois mois se sont écoulés depuis votre diagnostic ${ref} (étiquette ${ctx.dpeClass}).`,
         ) +
         paragraph(
-          'Avez-vous pu avancer sur d\'éventuels travaux ? Si vous souhaitez planifier un nouveau diagnostic après travaux, je peux vous accompagner.',
+          "Avez-vous pu avancer sur d'éventuels travaux ? Si vous souhaitez planifier un nouveau diagnostic après travaux, je peux vous accompagner.",
         )
       return {
         subject,
@@ -440,13 +432,12 @@ export function templateSequencePrescriberSilent(
   step: number,
   ctx: PrescriberContext,
 ): SequenceStepContent {
-  const greeting = ctx.recipientFirstName
-    ? `Bonjour ${ctx.recipientFirstName},`
-    : `Bonjour,`
+  const greeting = ctx.recipientFirstName ? `Bonjour ${ctx.recipientFirstName},` : `Bonjour,`
 
   switch (step) {
     case 0: {
-      const subject = `Un point rapide ${ctx.recipientCompany ? `avec ${ctx.recipientCompany}` : ''}`.trim()
+      const subject =
+        `Un point rapide ${ctx.recipientCompany ? `avec ${ctx.recipientCompany}` : ''}`.trim()
       const lastMissionStr = ctx.lastMissionAt
         ? `Notre dernière collaboration remonte au ${new Date(ctx.lastMissionAt).toLocaleDateString('fr-FR')}.`
         : `Nous n'avons pas encore eu l'occasion de collaborer.`
@@ -509,7 +500,7 @@ ${unsubFooterText(ctx.unsubscribeUrl)}`
           'Si vous avez quelques minutes, votre retour me serait précieux pour faire progresser mon activité.',
         ) +
         buttonHtml('Laisser un avis', ctx.reviewUrl) +
-        paragraph('Merci d\'avance pour votre confiance.')
+        paragraph("Merci d'avance pour votre confiance.")
       return {
         subject,
         text,

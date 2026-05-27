@@ -1,16 +1,16 @@
 'use client'
 
-import {
-  type SampleCity,
-  findSampleCityByName,
-  suggestSampleCities,
-} from '@/lib/pricing/sample-cities'
 // Type B2 dependency — pricing-plans.ts refonte by parallel agent
 import {
   SPONSORED_SLOT_TIERS,
   type SponsoredSlotTier,
   getSponsoredSlotTier,
 } from '@/lib/pricing-plans'
+import {
+  type SampleCity,
+  findSampleCityByName,
+  suggestSampleCities,
+} from '@/lib/pricing/sample-cities'
 import { MapPin, Search } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 
@@ -61,9 +61,8 @@ export function SponsoredSlotPicker() {
           Quelle ville voulez-vous sponsoriser ?
         </h3>
         <p className="text-[14px] text-[#0F1419]/72 leading-relaxed mb-5">
-          Le surcoût mensuel dépend de la population. Plus la ville est peuplée, plus la
-          visibilité est rare donc valorisée. Réservation par ordre d'arrivée et score
-          d'activité.
+          Le surcoût mensuel dépend de la population. Plus la ville est peuplée, plus la visibilité
+          est rare donc valorisée. Réservation par ordre d'arrivée et score d'activité.
         </p>
 
         <div className="relative">
@@ -120,10 +119,7 @@ export function SponsoredSlotPicker() {
                     onClick={() => handleSelectCity(city)}
                     className="w-full text-left px-4 py-2.5 hover:bg-[#F5F7F4] transition-colors flex items-center gap-3"
                   >
-                    <MapPin
-                      aria-hidden
-                      className="size-3.5 text-[#0F1419]/55 shrink-0"
-                    />
+                    <MapPin aria-hidden className="size-3.5 text-[#0F1419]/55 shrink-0" />
                     <span className="flex-1 text-[14px] text-[#0F1419]">
                       {city.name}{' '}
                       <span className="text-[#0F1419]/55 text-[12px]">({city.department})</span>
@@ -140,8 +136,8 @@ export function SponsoredSlotPicker() {
 
         <p className="mt-4 text-[12px] text-[#0F1419]/55 leading-snug">
           Données indicatives sur 12 villes (Paris, Lyon, Marseille, Bordeaux, Lille, Nantes,
-          Limoges, Annecy, Reims, Dieppe, Vichy, Beauvais). La grille complète France entière
-          est disponible une fois connecté.
+          Limoges, Annecy, Reims, Dieppe, Vichy, Beauvais). La grille complète France entière est
+          disponible une fois connecté.
         </p>
       </div>
 

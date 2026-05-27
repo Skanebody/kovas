@@ -63,7 +63,8 @@ export const ACTIONABLE_ERRORS = {
   // Géolocalisation
   GEOLOCATION_DENIED: {
     message: 'Géolocalisation refusée.',
-    suggestion: "Saisissez votre adresse manuellement, ou autorisez l'accès dans les réglages du navigateur.",
+    suggestion:
+      "Saisissez votre adresse manuellement, ou autorisez l'accès dans les réglages du navigateur.",
   },
   GEOLOCATION_UNAVAILABLE: {
     message: 'Position indisponible pour le moment.',
@@ -75,7 +76,7 @@ export const ACTIONABLE_ERRORS = {
   },
   GEOLOCATION_UNSUPPORTED: {
     message: 'Géolocalisation non supportée par votre navigateur.',
-    suggestion: "Saisissez votre adresse manuellement.",
+    suggestion: 'Saisissez votre adresse manuellement.',
   },
 
   // Adresse / Code postal
@@ -85,13 +86,13 @@ export const ACTIONABLE_ERRORS = {
   },
   ADDRESS_NOT_FOUND: {
     message: 'Adresse introuvable dans la base nationale.',
-    suggestion: 'Vérifiez l\'orthographe ou complétez manuellement.',
+    suggestion: "Vérifiez l'orthographe ou complétez manuellement.",
   },
 
   // Année construction
   YEAR_BUILT_INVALID: {
     message: 'Année invalide.',
-    suggestion: 'Saisissez une année entre 1000 et l\'année en cours.',
+    suggestion: "Saisissez une année entre 1000 et l'année en cours.",
   },
   YEAR_BUILT_PLOMB_REQUIRED: {
     message: 'Bâti antérieur à 1949.',

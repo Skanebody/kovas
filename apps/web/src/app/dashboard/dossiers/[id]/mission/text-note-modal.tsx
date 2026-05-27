@@ -91,7 +91,7 @@ export function TextNoteModal({
   // silencieuse si fermeture involontaire).
   const handleCancelWithConfirm = useCallback(() => {
     if (text.trim().length > 0) {
-      const ok = window.confirm('Voulez-vous abandonner cette note ? Le texte saisi sera perdu.')
+      const ok = window.confirm('Veux-tu abandonner cette note ? Le texte saisi sera perdu.')
       if (!ok) return
     }
     onCancel()

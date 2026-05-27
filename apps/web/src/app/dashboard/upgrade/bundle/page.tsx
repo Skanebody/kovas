@@ -42,7 +42,7 @@ export default function UpgradeBundlePage() {
 
       <p className="text-xs text-foreground/55 max-w-2xl">
         Les Bundles regroupent un forfait KOVAS Annuaire (B2C lead-gen) et un forfait KOVAS (SaaS
-        B2B) à un tarif avantageux. Résiliation à tout moment depuis votre compte, conformément au
+        B2B) à un tarif avantageux. Résiliation à tout moment depuis ton compte, conformément au
         décret n°2023-417. Essai gratuit 30 jours avec carte bancaire enregistrée et débit
         automatique à l&apos;issue.
       </p>

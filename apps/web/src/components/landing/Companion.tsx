@@ -17,21 +17,21 @@ export function Companion() {
           Compagnon, pas remplaçant
         </p>
         <h2 className="text-[40px] sm:text-[56px] md:text-[72px] font-semibold leading-[1.02] tracking-[-0.03em] mb-6 max-w-[900px] mx-auto">
-          KOVAS ne remplace pas votre logiciel.
+          KOVAS ne remplace pas ton logiciel.
           <br />
-          <span className="text-[#0F1419]/35">Il enlève la friction qui vous épuisait.</span>
+          <span className="text-[#0F1419]/35">Il enlève la friction qui t'épuisait.</span>
         </h2>
         <p className="text-[17px] sm:text-[20px] text-[#0F1419]/72 max-w-[720px] mx-auto leading-relaxed mb-20">
-          Votre logiciel principal reste le même : Liciel, AnalysImmo, WinDiagnostics, peu importe.
-          KOVAS s'intercale entre vous et lui sur le seul moment où la double saisie vous fait
-          perdre de l'argent.
+          Ton logiciel principal reste le même : Liciel, AnalysImmo, WinDiagnostics, peu importe.
+          KOVAS s'intercale entre toi et lui sur le seul moment où la double saisie te fait perdre
+          de l'argent.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] gap-6 items-center max-w-[1000px] mx-auto">
           <WorkflowNode
             label="Sur place"
             title="Terrain"
-            desc="Vous, iPad ou iPhone en main, relevés à voix haute"
+            desc="Toi, iPad ou iPhone en main, relevés à voix haute"
           />
           <WorkflowArrow />
           <WorkflowNode
@@ -43,7 +43,7 @@ export function Companion() {
           <WorkflowArrow />
           <WorkflowNode
             label="Rapport officiel"
-            title="Votre logiciel"
+            title="Ton logiciel"
             desc="Import en 30 secondes, génération du DPE réglementaire"
           />
         </div>
@@ -67,17 +67,17 @@ export function Companion() {
           <Step
             n="01"
             title="Sur place"
-            desc="Démarrez une mission depuis l'iPad ou l'iPhone. Saisie vocale par pièce, photos automatiquement géolocalisées, templates T2 / T3 / T4 pré-remplis."
+            desc="Démarre une mission depuis l'iPad ou l'iPhone. Saisie vocale par pièce, photos automatiquement géolocalisées, templates T2 / T3 / T4 pré-remplis."
           />
           <Step
             n="02"
             title="Validation"
-            desc="KOVAS détecte les incohérences et les oublis avant la fin de mission. « Vous n'avez pas saisi la VMC, volontaire ? » Vous corrigez sur le palier, pas le soir."
+            desc="KOVAS détecte les incohérences et les oublis avant la fin de mission. « Tu n'as pas saisi la VMC, volontaire ? » Tu corriges sur le palier, pas le soir."
           />
           <Step
             n="03"
             title="Export & partage"
-            desc="Un bouton, trois modes : email automatique, sync Google Drive, téléchargement direct. Import dans votre logiciel en 30 secondes, génération du rapport officiel."
+            desc="Un bouton, trois modes : email automatique, sync Google Drive, téléchargement direct. Import dans ton logiciel en 30 secondes, génération du rapport officiel."
           />
         </div>
       </section>

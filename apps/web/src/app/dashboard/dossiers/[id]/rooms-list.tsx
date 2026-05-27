@@ -1,7 +1,5 @@
 'use client'
 
-import { DoorOpen, Loader2, Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react'
-import { useActionState, useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -15,11 +13,13 @@ import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { ROOM_TEMPLATES } from '@/lib/room-templates'
+import { DoorOpen, Loader2, Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react'
+import { useActionState, useState, useTransition } from 'react'
 import {
+  type RoomFormState,
   addRoomAction,
   applyRoomTemplateAction,
   deleteRoomAction,
-  type RoomFormState,
   updateRoomAction,
 } from './actions'
 
@@ -97,7 +97,9 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
                 >
                   <div className="flex flex-col items-start">
                     <span>{t.label}</span>
-                    <span className="text-xs text-ink-mute">{t.rooms.length} pièces · {t.description}</span>
+                    <span className="text-xs text-ink-mute">
+                      {t.rooms.length} pièces · {t.description}
+                    </span>
                   </div>
                 </DropdownMenuItem>
               ))}
@@ -114,7 +116,9 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
                 >
                   <div className="flex flex-col items-start">
                     <span>{t.label}</span>
-                    <span className="text-xs text-ink-mute">{t.rooms.length} pièces · {t.description}</span>
+                    <span className="text-xs text-ink-mute">
+                      {t.rooms.length} pièces · {t.description}
+                    </span>
                   </div>
                 </DropdownMenuItem>
               ))}
@@ -125,7 +129,13 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
             size="sm"
             onClick={() => setShowForm((s) => !s)}
           >
-            {showForm ? 'Annuler' : <><Plus className="size-4" /> Ajouter</>}
+            {showForm ? (
+              'Annuler'
+            ) : (
+              <>
+                <Plus className="size-4" /> Ajouter
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -148,13 +158,22 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
               <Select id="roomType" name="roomType" defaultValue="">
                 <option value="">— Non précisé —</option>
                 {Object.entries(ROOM_TYPE_LABELS).map(([v, l]) => (
-                  <option key={v} value={v}>{l}</option>
+                  <option key={v} value={v}>
+                    {l}
+                  </option>
                 ))}
               </Select>
             </FormField>
           </div>
           <FormField label="Surface (m²)" htmlFor="surfaceM2">
-            <Input id="surfaceM2" name="surfaceM2" type="number" min={0} step="0.01" placeholder="35" />
+            <Input
+              id="surfaceM2"
+              name="surfaceM2"
+              type="number"
+              min={0}
+              step="0.01"
+              placeholder="35"
+            />
           </FormField>
           {state?.error && <p className="text-sm text-accent-red">{state.error}</p>}
           <Button type="submit" size="sm" disabled={pending}>
@@ -172,7 +191,9 @@ export function RoomsList({ dossierId, rooms }: RoomsListProps) {
         </ul>
       ) : (
         !showForm && (
-          <p className="text-sm text-ink-mute">Aucune pièce — ajoutez-en pour organiser vos photos.</p>
+          <p className="text-sm text-ink-mute">
+            Aucune pièce — ajoute-en pour organiser tes photos.
+          </p>
         )
       )}
     </div>
@@ -207,14 +228,12 @@ function RoomItem({ room, onDelete }: { room: Room; onDelete: () => void }) {
             placeholder="Nom"
             className="h-9"
           />
-          <Select
-            value={roomType}
-            onChange={(e) => setRoomType(e.target.value)}
-            className="h-9"
-          >
+          <Select value={roomType} onChange={(e) => setRoomType(e.target.value)} className="h-9">
             <option value="">— Type —</option>
             {Object.entries(ROOM_TYPE_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
+              <option key={v} value={v}>
+                {l}
+              </option>
             ))}
           </Select>
           <Input
@@ -259,11 +278,7 @@ function RoomItem({ room, onDelete }: { room: Room; onDelete: () => void }) {
             · {ROOM_TYPE_LABELS[room.room_type] ?? room.room_type}
           </span>
         )}
-        {room.surface_m2 && (
-          <span className="text-xs text-ink-mute">
-            · {room.surface_m2} m²
-          </span>
-        )}
+        {room.surface_m2 && <span className="text-xs text-ink-mute">· {room.surface_m2} m²</span>}
       </div>
       <div className="flex items-center gap-1">
         <Button

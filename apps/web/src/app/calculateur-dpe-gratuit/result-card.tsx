@@ -132,7 +132,7 @@ export function ResultCard({
             <MapPin className="size-4" />
             {detectedCity
               ? `Trouver un diagnostiqueur certifié à ${detectedCity}`
-              : 'Trouver un diagnostiqueur certifié près de chez vous'}
+              : 'Trouver un diagnostiqueur certifié près de chez toi'}
           </Link>
         </Button>
 

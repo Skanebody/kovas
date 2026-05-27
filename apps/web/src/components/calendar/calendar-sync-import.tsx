@@ -84,9 +84,9 @@ export function CalendarSyncImport() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-ink-soft leading-relaxed">
-        Importez un fichier <code className="font-mono text-xs">.ics</code> exporté depuis votre
-        agenda (Google Calendar, Apple Calendar, Outlook). KOVAS lira les rendez-vous et vous
-        proposera de créer un dossier pour chacun.
+        Importe un fichier <code className="font-mono text-xs">.ics</code> exporté depuis ton agenda
+        (Google Calendar, Apple Calendar, Outlook). KOVAS lira les rendez-vous et te proposera de
+        créer un dossier pour chacun.
       </p>
 
       {showDropZone && (
@@ -193,7 +193,7 @@ export function CalendarSyncImport() {
 
       <div className="rounded-xl border border-rule/60 bg-cream-deep/30 p-3 text-xs text-ink-mute">
         <span className="font-medium text-ink-soft">À venir V1.5 :</span> import bidirectionnel
-        OAuth Google Calendar (les nouveaux RDV de votre agenda apparaissent automatiquement dans
+        OAuth Google Calendar (les nouveaux RDV de ton agenda apparaissent automatiquement dans
         KOVAS) + liaison à un dossier existant.
       </div>
     </div>

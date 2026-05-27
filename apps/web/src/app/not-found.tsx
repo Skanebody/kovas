@@ -1,6 +1,6 @@
+import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 
 export default function NotFound() {
   return (
@@ -11,7 +11,7 @@ export default function NotFound() {
           Page introuvable.
         </h1>
         <p className="text-[14px] text-ink-mute">
-          La page que vous cherchez n&apos;existe pas ou a été déplacée.
+          La page que tu cherches n&apos;existe pas ou a été déplacée.
         </p>
         <Button asChild variant="accent">
           <Link href="/">

@@ -73,6 +73,7 @@ import {
   Upload,
   XCircle,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export const metadata = buildMetadata({
@@ -972,56 +973,77 @@ function SectionFounderLetter(): React.ReactElement {
             KOVAS.
           </h2>
         </div>
-        <div className="max-w-[680px] mx-auto rounded-2xl border border-[#0F1419]/[0.08] bg-paper px-6 py-8 sm:px-12 sm:py-14">
-          <div
-            className="w-20 h-20 rounded-full bg-[#0F1419]/[0.08] mx-auto mb-6 flex items-center justify-center"
-            aria-hidden
-          >
-            <span className="font-serif italic text-[#0F1419]/30 text-2xl">B</span>
+        {/* Layout 2 colonnes (responsive) — photo + bio à gauche en sticky lg+, lettre à droite */}
+        <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-6 sm:p-10 lg:p-14">
+          <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] xl:grid-cols-[300px,1fr] gap-8 lg:gap-12 xl:gap-16 items-start">
+            {/* Colonne photo + signature */}
+            <div className="flex flex-col items-center lg:items-start gap-4 lg:sticky lg:top-24">
+              <div className="relative w-40 h-40 sm:w-48 sm:h-48 lg:w-full lg:h-auto lg:aspect-square rounded-2xl overflow-hidden bg-[#0F1419]/[0.04] border border-[#0F1419]/[0.08]">
+                <Image
+                  src="/benjamin-bel-fondateur-kovas.jpg"
+                  alt="Benjamin Bel, fondateur de KOVAS"
+                  fill
+                  sizes="(min-width: 1280px) 300px, (min-width: 1024px) 260px, 192px"
+                  className="object-cover"
+                  priority={false}
+                />
+              </div>
+              <div className="text-center lg:text-left space-y-1">
+                <p className="font-sans font-semibold text-[#0F1419] text-[15px]">Benjamin Bel</p>
+                <p className="font-mono text-[11px] uppercase tracking-wider text-[#0F1419]/60 leading-relaxed">
+                  Fondateur · Diagnostiqueur
+                  <br className="hidden lg:block" /> certifié DPE
+                </p>
+              </div>
+            </div>
+
+            {/* Colonne lettre */}
+            <div className="min-w-0">
+              <div className="text-[16px] text-[#0F1419]/82 leading-[1.65] space-y-4 max-w-[680px]">
+                <p>Salut,</p>
+                <p>Je suis Benjamin Bel, le fondateur de KOVAS.</p>
+                <p>
+                  Pendant des années, j&apos;ai observé des diagnostiqueurs faire 15 missions par
+                  semaine et rentrer à 21 h le soir, épuisés, parce qu&apos;ils passaient{' '}
+                  <em>3 h chaque soir</em> à ressaisir leurs données dans Liciel.
+                </p>
+                <p>
+                  J&apos;ai vu des solos perdre des nuits de sommeil parce qu&apos;ils avaient un
+                  doute sur un DPE qu&apos;ils venaient d&apos;envoyer à l&apos;ADEME.
+                </p>
+                <p>
+                  J&apos;ai vu des cabinets stagner parce qu&apos;ils n&apos;avaient pas le temps de
+                  prospecter pour trouver de nouveaux clients.
+                </p>
+                <p>
+                  Et j&apos;ai vu les éditeurs de logiciels — Liciel, ORIS, les autres — vendre des
+                  modules à 200, 300, parfois 400 € par mois sans changer un iota du quotidien
+                  terrain depuis 15 ans.
+                </p>
+                <p>Alors j&apos;ai décidé de construire un outil qui te rende ces 3 h par soir.</p>
+                <p>
+                  Un outil qui te dise « ton DPE est OK » <em>AVANT</em> que tu envoies à
+                  l&apos;ADEME, pas après le contrôle.
+                </p>
+                <p>
+                  Un outil qui amène les clients à toi, plutôt que de te laisser dépendant des
+                  agences immobilières.
+                </p>
+                <p>KOVAS, c&apos;est ça.</p>
+                <p>
+                  Et je le construis avec 10 diagnostiqueurs partenaires en France qui le testent au
+                  quotidien et orientent sa roadmap. Pas par un comité produit hors-sol.
+                </p>
+                <p>
+                  Si ça te parle, essaie KOVAS gratuitement 30 jours. Tu peux arrêter en 2 clics si
+                  ça ne te convient pas.
+                </p>
+              </div>
+              <p className="font-mono text-[12px] uppercase tracking-wider text-[#0F1419]/60 mt-8 pt-6 border-t border-[#0F1419]/[0.06]">
+                — Benjamin Bel · Fondateur · Diagnostiqueur certifié DPE
+              </p>
+            </div>
           </div>
-          <div className="text-[16px] text-[#0F1419]/82 leading-[1.6] space-y-4">
-            <p>Salut,</p>
-            <p>Je suis Benjamin Bel, le fondateur de KOVAS.</p>
-            <p>
-              Pendant des années, j&apos;ai observé des diagnostiqueurs faire 15 missions par
-              semaine et rentrer à 21 h le soir, épuisés, parce qu&apos;ils passaient{' '}
-              <em>3 h chaque soir</em> à ressaisir leurs données dans Liciel.
-            </p>
-            <p>
-              J&apos;ai vu des solos perdre des nuits de sommeil parce qu&apos;ils avaient un doute
-              sur un DPE qu&apos;ils venaient d&apos;envoyer à l&apos;ADEME.
-            </p>
-            <p>
-              J&apos;ai vu des cabinets stagner parce qu&apos;ils n&apos;avaient pas le temps de
-              prospecter pour trouver de nouveaux clients.
-            </p>
-            <p>
-              Et j&apos;ai vu les éditeurs de logiciels — Liciel, ORIS, les autres — vendre des
-              modules à 200, 300, parfois 400 € par mois sans changer un iota du quotidien terrain
-              depuis 15 ans.
-            </p>
-            <p>Alors j&apos;ai décidé de construire un outil qui te rende ces 3 h par soir.</p>
-            <p>
-              Un outil qui te dise « ton DPE est OK » <em>AVANT</em> que tu envoies à l&apos;ADEME,
-              pas après le contrôle.
-            </p>
-            <p>
-              Un outil qui amène les clients à toi, plutôt que de te laisser dépendant des agences
-              immobilières.
-            </p>
-            <p>KOVAS, c&apos;est ça.</p>
-            <p>
-              Et je le construis avec 10 diagnostiqueurs partenaires en France qui le testent au
-              quotidien et orientent sa roadmap. Pas par un comité produit hors-sol.
-            </p>
-            <p>
-              Si ça te parle, essaie KOVAS gratuitement 30 jours. Tu peux arrêter en 2 clics si ça
-              ne te convient pas.
-            </p>
-          </div>
-          <p className="font-mono text-[12px] uppercase tracking-wider text-[#0F1419]/60 mt-8 pt-6 border-t border-[#0F1419]/[0.06]">
-            — Benjamin Bel · Fondateur · Diagnostiqueur certifié DPE
-          </p>
         </div>
       </div>
     </section>

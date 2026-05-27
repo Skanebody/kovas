@@ -1,16 +1,5 @@
 'use client'
 
-import {
-  CheckCircle2,
-  Circle,
-  Clock,
-  Mail,
-  MapPin,
-  Phone,
-  XCircle,
-} from 'lucide-react'
-import Link from 'next/link'
-import { useMemo } from 'react'
 import type {
   TimelineRecipientView,
   TimelineResponse,
@@ -18,6 +7,9 @@ import type {
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DIAGNOSTIC_LABEL, type DiagnosticCode } from '@/lib/quote-request/diagnostics'
+import { CheckCircle2, Circle, Clock, Mail, MapPin, Phone, XCircle } from 'lucide-react'
+import Link from 'next/link'
+import { useMemo } from 'react'
 
 interface QuoteRequestTimelineProps {
   timeline: TimelineResponse
@@ -86,24 +78,22 @@ export function QuoteRequestTimeline({ timeline }: QuoteRequestTimelineProps) {
     <div className="space-y-6">
       <header>
         <p className="text-[11px] tracking-wider uppercase text-ink-faint font-medium mb-1">
-          Votre demande de devis
+          Ta demande de devis
         </p>
         <h1 className="text-[28px] font-bold text-ink mb-2">
           Bonjour {timeline.requesterFirstName},
         </h1>
         <p className="text-[14px] text-ink-mute leading-relaxed">
-          Voici le suivi de votre demande
+          Voici le suivi de ta demande
           {timeline.propertyCity ? ` à ${timeline.propertyCity}` : ''}.{' '}
           {responded > 0
             ? `${responded} diagnostiqueur${responded > 1 ? 's ont' : ' a'} déjà répondu.`
-            : 'Les diagnostiqueurs vous répondront sous 24-48 heures.'}
+            : 'Les diagnostiqueurs te répondront sous 24-48 heures.'}
         </p>
       </header>
 
       <Card variant="opaque" padding="default">
-        <h2 className="text-[14px] font-semibold text-ink mb-3">
-          Diagnostics demandés
-        </h2>
+        <h2 className="text-[14px] font-semibold text-ink mb-3">Diagnostics demandés</h2>
         <div className="flex flex-wrap gap-1.5">
           {timeline.diagnosticsRequested.map((d) => (
             <span
@@ -127,7 +117,11 @@ export function QuoteRequestTimeline({ timeline }: QuoteRequestTimelineProps) {
         </div>
 
         {timeline.recipients.length === 0 ? (
-          <Card variant="opaque" padding="default" className="text-center text-ink-mute text-[13px]">
+          <Card
+            variant="opaque"
+            padding="default"
+            className="text-center text-ink-mute text-[13px]"
+          >
             Votre demande est en cours de routage. Patientez quelques instants.
           </Card>
         ) : (
@@ -205,9 +199,7 @@ export function QuoteRequestTimeline({ timeline }: QuoteRequestTimelineProps) {
         <Card variant="warm" padding="default">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[14px] font-semibold text-ink mb-1">
-                Pas assez de réponses ?
-              </p>
+              <p className="text-[14px] font-semibold text-ink mb-1">Pas assez de réponses ?</p>
               <p className="text-[12px] text-ink-mute">
                 Élargissez la recherche à 3 diagnostiqueurs supplémentaires.
               </p>
@@ -220,8 +212,8 @@ export function QuoteRequestTimeline({ timeline }: QuoteRequestTimelineProps) {
       </section>
 
       <p className="text-[11px] text-ink-faint text-center pt-4">
-        Référence — {timeline.trackingToken.slice(0, 8)}… · Conservez cet email pour
-        consulter votre suivi ultérieurement.
+        Référence — {timeline.trackingToken.slice(0, 8)}… · Conserve cet email pour consulter ton
+        suivi ultérieurement.
       </p>
     </div>
   )

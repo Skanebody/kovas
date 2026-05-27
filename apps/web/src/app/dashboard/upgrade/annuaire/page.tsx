@@ -22,9 +22,9 @@ export default function UpgradeAnnuairePage() {
     <div className="space-y-8 pb-8">
       <AppPageHeader
         eyebrow="KOVAS Annuaire"
-        title="Recevez vos premiers"
+        title="Reçois tes premiers"
         accent="leads particuliers"
-        description="KOVAS Annuaire vous met en relation avec des vendeurs, bailleurs et acheteurs qui cherchent un diagnostiqueur près d'eux. Tarification transparente, aucun engagement."
+        description="KOVAS Annuaire te met en relation avec des vendeurs, bailleurs et acheteurs qui cherchent un diagnostiqueur près d'eux. Tarification transparente, aucun engagement."
       />
 
       <div className="flex justify-center">
@@ -42,9 +42,9 @@ export default function UpgradeAnnuairePage() {
       </section>
 
       <p className="text-xs text-foreground/55 max-w-2xl">
-        KOVAS Annuaire est un produit complémentaire de KOVAS — vous pouvez souscrire à
-        l&apos;Annuaire seul ou en bundle économique avec votre logiciel actuel pour un prix
-        avantageux. Pas d&apos;engagement de durée, résiliation conforme au décret n°2023-417.
+        KOVAS Annuaire est un produit complémentaire de KOVAS — tu peux souscrire à l&apos;Annuaire
+        seul ou en bundle économique avec ton logiciel actuel pour un prix avantageux. Pas
+        d&apos;engagement de durée, résiliation conforme au décret n°2023-417.
       </p>
     </div>
   )

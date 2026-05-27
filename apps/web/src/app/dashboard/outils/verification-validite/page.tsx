@@ -5,7 +5,7 @@ import { ScanWorkspace } from './scan-workspace'
 
 export const metadata: Metadata = {
   title: 'Vérification de validité',
-  description: "Scannez vos diagnostics existants et laissez l'IA les classer dans vos dossiers.",
+  description: "Scanne tes diagnostics existants et laisse l'IA les classer dans tes dossiers.",
 }
 
 export const dynamic = 'force-dynamic'
@@ -46,7 +46,7 @@ export default async function VerificationValiditePage() {
       <AppPageHeader
         title="Vérification de"
         accent="validité"
-        description="Scannez vos diagnostics — KOVAS détecte type, date et adresse pour les classer."
+        description="Scanne tes diagnostics — KOVAS détecte type, date et adresse pour les classer."
       />
 
       <ScanWorkspace initialScans={scans} clients={clients} properties={properties} />

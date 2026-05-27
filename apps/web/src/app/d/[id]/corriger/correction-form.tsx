@@ -1,11 +1,11 @@
 'use client'
 
-import { CheckCircle2, Loader2 } from 'lucide-react'
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { CheckCircle2, Loader2 } from 'lucide-react'
+import { useState } from 'react'
 
 interface CurrentValues {
   first_name: string
@@ -82,7 +82,7 @@ export function CorrectionForm({ diagId, currentValues }: CorrectionFormProps) {
       }
       setDone(true)
     } catch {
-      setError('Erreur réseau. Réessayez dans un instant.')
+      setError('Erreur réseau. Réessaie dans un instant.')
     } finally {
       setSubmitting(false)
     }
@@ -94,8 +94,8 @@ export function CorrectionForm({ diagId, currentValues }: CorrectionFormProps) {
         <CheckCircle2 className="size-10 mx-auto text-success" />
         <h2 className="font-display text-lg font-semibold text-ink">Correction transmise</h2>
         <p className="text-[13px] text-ink-mute leading-relaxed">
-          Merci. Nous traitons votre demande sous 72&nbsp;heures et vous tiendrons informé(e) par
-          email dès la mise à jour effectuée.
+          Merci. Nous traitons ta demande sous 72&nbsp;heures et te tiendrons informé(e) par email
+          dès la mise à jour effectuée.
         </p>
       </div>
     )
@@ -126,11 +126,11 @@ export function CorrectionForm({ diagId, currentValues }: CorrectionFormProps) {
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
           maxLength={2000}
-          placeholder="Expliquez les corrections à apporter, ajoutez des justificatifs, ou indiquez tout autre détail utile."
+          placeholder="Explique les corrections à apporter, ajoute des justificatifs, ou indique tout autre détail utile."
         />
       </FormField>
 
-      <FormField label="Email pour vous recontacter">
+      <FormField label="Email pour te recontacter">
         <Input
           type="email"
           value={contactEmail}

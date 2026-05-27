@@ -29,9 +29,9 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-6">
       <AppPageHeader
-        title="Vos"
+        title="Tes"
         accent="notifications"
-        description="Centralisation des leads, missions, alertes et événements de votre activité."
+        description="Centralisation des leads, missions, alertes et événements de ton activité."
         eyebrow="Centre de notifications"
       />
 

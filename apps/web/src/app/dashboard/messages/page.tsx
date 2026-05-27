@@ -19,7 +19,7 @@ export default function MessagesPage() {
     <EmptyState
       icon={MessagesSquare}
       title="Messagerie centralisée — bientôt disponible."
-      description="Conversations clients, suggestions IA en draft et notifications consolidées arrivent en V1.5. En attendant, l'email et le SMS sont accessibles depuis vos missions du jour."
+      description="Conversations clients, suggestions IA en draft et notifications consolidées arrivent en V1.5. En attendant, l'email et le SMS sont accessibles depuis tes missions du jour."
       action={
         <Button asChild variant="accent">
           <Link href="/dashboard/dossiers">Voir mes dossiers</Link>

@@ -23,7 +23,7 @@ const POSTS: BlogPost[] = [
     slug: 'decret-2023-417-checklist',
     title: 'Décret 2023-417 : la checklist complète pour rester conforme',
     excerpt:
-      'Les 12 obligations introduites par le décret 2023-417, leur impact concret sur votre quotidien et la checklist KOVAS pour ne rien oublier.',
+      'Les 12 obligations introduites par le décret 2023-417, leur impact concret sur ton quotidien et la checklist KOVAS pour ne rien oublier.',
     publishedAt: '2026-05-18',
     readingTimeMinutes: 8,
     category: 'Réglementation',
@@ -68,14 +68,14 @@ const POSTS: BlogPost[] = [
     slug: 'liciel-vs-kovas-cohabitation',
     title: 'Cohabiter avec Liciel, OBBC, AnalysImmo ou ORIS : workflow KOVAS compagnon',
     excerpt:
-      'Le terrain dans KOVAS, le calcul DPE certifié dans votre éditeur. Comment configurer le bouton Partager pour zéro re-saisie quel que soit votre logiciel.',
+      'Le terrain dans KOVAS, le calcul DPE certifié dans ton éditeur. Comment configurer le bouton Partager pour zéro re-saisie quel que soit ton logiciel.',
     publishedAt: '2026-05-02',
     readingTimeMinutes: 6,
     category: 'Outils',
   },
   {
     slug: 'check-list-amiante-avant-1997',
-    title: 'Amiante avant 1997 : la check-list que vous oubliez probablement',
+    title: 'Amiante avant 1997 : la check-list que tu oublies probablement',
     excerpt:
       "Les 23 matériaux à inspecter, les pièces souvent négligées, les pièges des sous-sols. Retour d'expérience cabinet.",
     publishedAt: '2026-04-28',
@@ -86,7 +86,7 @@ const POSTS: BlogPost[] = [
     slug: 'annuaire-kovas-leads-gratuits',
     title: 'Annuaire kovas.fr : 11 leads en 2 mois sans budget marketing',
     excerpt:
-      'Comment configurer votre fiche publique pour capter les leads particuliers. Témoignage Thomas R. (cabinet Lyonnais).',
+      'Comment configurer ta fiche publique pour capter les leads particuliers. Témoignage Thomas R. (cabinet Lyonnais).',
     publishedAt: '2026-04-24',
     readingTimeMinutes: 5,
     category: 'Témoignages',
@@ -102,9 +102,9 @@ const POSTS: BlogPost[] = [
   },
   {
     slug: 'facturation-laft-decret',
-    title: 'Facturation séquentielle et LAFT : ce que vous devez savoir',
+    title: "Facturation séquentielle et LAFT : ce qu'il faut savoir",
     excerpt:
-      'Article 289 du CGI, attestation LAFT, séquentialité des numéros : comment KOVAS verrouille votre conformité.',
+      'Article 289 du CGI, attestation LAFT, séquentialité des numéros : comment KOVAS verrouille ta conformité.',
     publishedAt: '2026-04-17',
     readingTimeMinutes: 7,
     category: 'Réglementation',
@@ -120,9 +120,9 @@ const POSTS: BlogPost[] = [
   },
   {
     slug: 'photos-geolocalisees-evidence',
-    title: 'Photos géolocalisées : votre meilleure défense juridique',
+    title: 'Photos géolocalisées : ta meilleure défense juridique',
     excerpt:
-      'Géolocalisation EXIF, horodatage, traçabilité. Comment KOVAS protège votre responsabilité en cas de litige.',
+      'Géolocalisation EXIF, horodatage, traçabilité. Comment KOVAS protège ta responsabilité en cas de litige.',
     publishedAt: '2026-04-10',
     readingTimeMinutes: 6,
     category: 'Bonnes pratiques',

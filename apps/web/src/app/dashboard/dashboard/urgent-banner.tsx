@@ -45,9 +45,18 @@ export async function UrgentBanner() {
       supabase as unknown as {
         from: (t: string) => {
           select: (cols: string) => {
-            eq: (col: string, val: string) => {
-              in: (col: string, vals: string[]) => {
-                order: (col: string, opts: { ascending: boolean }) => {
+            eq: (
+              col: string,
+              val: string,
+            ) => {
+              in: (
+                col: string,
+                vals: string[],
+              ) => {
+                order: (
+                  col: string,
+                  opts: { ascending: boolean },
+                ) => {
                   limit: (n: number) => Promise<{ data: LitRow[] | null }>
                 }
               }
@@ -66,10 +75,22 @@ export async function UrgentBanner() {
       supabase as unknown as {
         from: (t: string) => {
           select: (cols: string) => {
-            eq: (col1: string, val1: string) => {
-              in: (col: string, vals: string[]) => {
-                lte: (col: string, val: string) => {
-                  order: (col: string, opts: { ascending: boolean }) => {
+            eq: (
+              col1: string,
+              val1: string,
+            ) => {
+              in: (
+                col: string,
+                vals: string[],
+              ) => {
+                lte: (
+                  col: string,
+                  val: string,
+                ) => {
+                  order: (
+                    col: string,
+                    opts: { ascending: boolean },
+                  ) => {
                     limit: (n: number) => Promise<{ data: DsarRow[] | null }>
                   }
                 }
@@ -97,7 +118,7 @@ export async function UrgentBanner() {
       icon: CreditCard,
       title: 'Paiement échoué',
       description:
-        "Votre dernier prélèvement n'a pas abouti. Mettez à jour votre moyen de paiement pour éviter la suspension du compte.",
+        "Ton dernier prélèvement n'a pas abouti. Mets à jour ton moyen de paiement pour éviter la suspension du compte.",
       cta: 'Régulariser',
       href: '/dashboard/account',
     })
@@ -111,7 +132,7 @@ export async function UrgentBanner() {
       key: 'cancel_pending',
       icon: XCircle,
       title: 'Résiliation programmée',
-      description: `Votre abonnement prend fin le ${endDate}. Vous pouvez encore reprendre votre abonnement à tout moment.`,
+      description: `Ton abonnement prend fin le ${endDate}. Tu peux encore reprendre ton abonnement à tout moment.`,
       cta: "Reprendre l'abonnement",
       href: '/dashboard/account',
     })
@@ -124,7 +145,7 @@ export async function UrgentBanner() {
       icon: Gavel,
       title: 'Mise en cause à traiter',
       description:
-        'Un litige a été ouvert et nécessite votre réponse. Le bouclier de défense a préparé un brouillon.',
+        'Un litige a été ouvert et nécessite ta réponse. Le bouclier de défense a préparé un brouillon.',
       cta: 'Voir le litige',
       href: `/dashboard/dossiers/${litigation.mission_id}/litigation`,
     })
@@ -140,7 +161,7 @@ export async function UrgentBanner() {
       key: 'dsar_pending',
       icon: ShieldAlert,
       title: 'Demande RGPD à traiter',
-      description: `Demande "${dsar.type === 'export' ? "d'export" : 'd\'effacement'}" avec échéance le ${deadlineDate}. Obligation légale 30 jours max.`,
+      description: `Demande "${dsar.type === 'export' ? "d'export" : "d'effacement"}" avec échéance le ${deadlineDate}. Obligation légale 30 jours max.`,
       cta: 'Traiter',
       href: '/admin/rgpd',
     })
@@ -161,10 +182,7 @@ export async function UrgentBanner() {
       </div>
       <ul className="space-y-3">
         {items.map((item) => (
-          <li
-            key={item.key}
-            className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
-          >
+          <li key={item.key} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <div className="flex items-start gap-3 flex-1 min-w-0">
               <span
                 aria-hidden

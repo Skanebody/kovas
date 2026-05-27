@@ -218,7 +218,7 @@ export function ScanWorkspace({ initialScans, clients, properties }: ScanWorkspa
             <Upload className="size-6 text-ink-mute" strokeWidth={1.5} />
           </div>
           <p className="font-sans text-lg md:text-xl font-semibold text-ink leading-tight">
-            Glissez vos diagnostics ici
+            Glisse tes diagnostics ici
           </p>
           <p className="text-sm text-ink-mute mt-1 max-w-md">
             PDF ou image (JPG, PNG, HEIC). Taille max 20 Mo par fichier. L'analyse IA prend environ

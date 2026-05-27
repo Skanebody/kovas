@@ -692,8 +692,8 @@ function EmptyState() {
       <div className="space-y-1.5">
         <h3 className="text-lg font-bold text-ink">Aucun professionnel ne correspond</h3>
         <p className="text-[13px] text-ink-mute max-w-md mx-auto">
-          Essayez d'élargir votre recherche : retirez un filtre, élargissez la distance ou parcourez
-          les départements voisins.
+          Essaie d'élargir ta recherche : retire un filtre, élargis la distance ou parcours les
+          départements voisins.
         </p>
       </div>
       <div className="flex items-center justify-center gap-2 pt-2">
@@ -791,7 +791,7 @@ function ItemListJsonLd({ rows }: { rows: DiagRow[] }) {
             },
           }
         : {}),
-      url: `https://kovas.fr/trouver-un-diagnostiqueur/${row.department_code ?? '00'}/${row.city_slug ?? 'inconnu'}/${row.slug ?? row.id}`,
+      url: `https://kovas.fr/trouver-un-diagnostiqueur/${row.department_code ?? '00'}/${row.city_slug ?? 'commune-non-precisee'}/${row.slug ?? row.id}`,
     },
   }))
 

@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { MailX } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { MailX } from 'lucide-react'
+import type { Metadata } from 'next'
 import { CorrectionForm } from './correction-form'
 
 export const metadata: Metadata = {
@@ -57,8 +57,8 @@ export default async function CorrectionPage({ params }: PageProps) {
         Proposer une correction
       </h1>
       <p className="text-[14px] text-ink-mute leading-relaxed">
-        Vérifiez les informations ci-dessous et indiquez les corrections à apporter dans le message.
-        Nous traitons votre demande sous 72&nbsp;heures.
+        Vérifie les informations ci-dessous et indique les corrections à apporter dans le message.
+        Nous traitons ta demande sous 72&nbsp;heures.
       </p>
 
       <Card variant="opaque" padding="default">
@@ -66,8 +66,8 @@ export default async function CorrectionPage({ params }: PageProps) {
       </Card>
 
       <p className="text-[12px] text-ink-faint leading-relaxed">
-        Si vous préférez reprendre le contrôle complet de votre fiche (photo, présentation, tarifs,
-        zones d&apos;intervention), nous recommandons plutôt la réclamation de fiche, qui prend
+        Si tu préfères reprendre le contrôle complet de ta fiche (photo, présentation, tarifs, zones
+        d&apos;intervention), nous recommandons plutôt la réclamation de fiche, qui prend
         2&nbsp;minutes.
       </p>
     </PageShell>
@@ -80,9 +80,7 @@ function NotFoundView() {
       <Card variant="opaque" padding="lg" className="text-center space-y-3">
         <MailX className="size-10 mx-auto text-ink-mute" />
         <h1 className="font-display text-xl font-semibold text-ink">Lien invalide</h1>
-        <p className="text-[14px] text-ink-mute">
-          Ce lien ne correspond à aucune fiche connue.
-        </p>
+        <p className="text-[14px] text-ink-mute">Ce lien ne correspond à aucune fiche connue.</p>
       </Card>
     </PageShell>
   )

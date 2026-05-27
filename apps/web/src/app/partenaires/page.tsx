@@ -120,7 +120,7 @@ export default function PartenairesPage() {
                   </span>
                   <span>
                     Disponible en Phase 2 (à partir du second semestre 2027) pour intégrer
-                    l&apos;annuaire ou le calculateur DPE dans votre propre logiciel.
+                    l&apos;annuaire ou le calculateur DPE dans ton propre logiciel.
                   </span>
                 </li>
                 <li className="flex gap-3">
@@ -139,8 +139,7 @@ export default function PartenairesPage() {
                   </span>
                   <span>
                     Aucune exclusivité, aucun engagement de volume minimum. Si le partenariat
-                    n&apos;apporte pas la valeur attendue de votre côté, nous le clôturons sans
-                    frais.
+                    n&apos;apporte pas la valeur attendue de ton côté, nous le clôturons sans frais.
                   </span>
                 </li>
               </ul>
@@ -186,7 +185,7 @@ export default function PartenairesPage() {
                 Devenir partenaire
               </p>
               <p className="text-sm text-[#0F1419]/72 leading-relaxed">
-                Présentez votre structure et le partenariat envisagé. Nous revenons vers vous sous
+                Présente ta structure et le partenariat envisagé. Nous revenons vers toi sous
                 quarante-huit heures ouvrées pour échanger.
               </p>
             </div>

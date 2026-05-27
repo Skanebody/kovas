@@ -265,7 +265,7 @@ function buildPremiumReportSystemPrompt(context: {
       ? `IMPORTANT : le bien est classé DPE ${context.dpeLetter} (passoire énergétique). ` +
         "Vous devez MENTIONNER explicitement MaPrimeRénov' dans les recommandations de priorité 1, " +
         'en indiquant que des aides publiques peuvent couvrir 35 à 90 % du coût des travaux selon ' +
-        "les revenus du foyer. Inviter le propriétaire à faire réaliser un audit énergétique pour " +
+        'les revenus du foyer. Inviter le propriétaire à faire réaliser un audit énergétique pour ' +
         "calculer le parcours travaux optimal et débloquer le forfait Rénovation d'ampleur."
       : "Si vous mentionnez des aides publiques (MaPrimeRénov', éco-PTZ, CEE), restez factuel et " +
         "invitez le propriétaire à se rapprocher d'un opérateur agréé pour vérifier son éligibilité."
@@ -348,11 +348,7 @@ async function loadMissionContext(
           .maybeSingle()
       : Promise.resolve({ data: null }),
     m.client_id
-      ? supabase
-          .from('clients')
-          .select('id, full_name, email')
-          .eq('id', m.client_id)
-          .maybeSingle()
+      ? supabase.from('clients').select('id, full_name, email').eq('id', m.client_id).maybeSingle()
       : Promise.resolve({ data: null }),
     supabase
       .from('profiles')
@@ -446,7 +442,11 @@ async function generateNarrativeContent(args: {
       return { ok: false, error: `cloud_invalid_json: ${msg.slice(0, 200)}` }
     }
 
-    if (!parsed.intro || !Array.isArray(parsed.par_piece) || !Array.isArray(parsed.recommandations)) {
+    if (
+      !parsed.intro ||
+      !Array.isArray(parsed.par_piece) ||
+      !Array.isArray(parsed.recommandations)
+    ) {
       return { ok: false, error: 'cloud_invalid_schema' }
     }
 

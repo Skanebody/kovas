@@ -26,11 +26,11 @@ export function Step4CofracForm() {
           Étape 4 sur 7 — Certification COFRAC
         </p>
         <h1 className="font-serif italic text-3xl text-[#0F1419] leading-tight">
-          Renseignez votre certification.
+          Renseigne ta certification.
         </h1>
         <p className="text-[14px] text-[#0F1419]/70">
-          Votre numéro de certification est croisé avec l&apos;annuaire COFRAC et l&apos;annuaire de
-          votre organisme certificateur.
+          Ton numéro de certification est croisé avec l&apos;annuaire COFRAC et l&apos;annuaire de
+          ton organisme certificateur.
         </p>
       </div>
 
@@ -39,7 +39,7 @@ export function Step4CofracForm() {
           label="Numéro de certification COFRAC"
           htmlFor="cofrac_number"
           required
-          hint="Format : COFRAC-XXX-NNNNN (visible sur votre certificat)"
+          hint="Format : COFRAC-XXX-NNNNN (visible sur ton certificat)"
         >
           <Input
             id="cofrac_number"
@@ -60,7 +60,7 @@ export function Step4CofracForm() {
             defaultValue=""
           >
             <option value="" disabled>
-              Sélectionnez votre organisme
+              Sélectionne ton organisme
             </option>
             {COFRAC_BODIES.map((body) => (
               <option key={body} value={body}>
@@ -74,7 +74,7 @@ export function Step4CofracForm() {
           label="Certificat de certification PDF"
           htmlFor="certificate"
           required
-          hint="Document officiel délivré par votre organisme (10 Mo max)"
+          hint="Document officiel délivré par ton organisme (10 Mo max)"
         >
           <input
             type="file"

@@ -85,14 +85,14 @@ export default async function AnnuaireHubPage() {
         <AppPageHeader
           eyebrow="KOVAS Annuaire"
           title="Annuaire"
-          description="Gérez votre fiche publique sur kovas.fr et recevez vos leads particuliers."
+          description="Gère ta fiche publique sur kovas.fr et reçois tes leads particuliers."
         />
 
         <Card variant="flat" padding="lg">
           <EmptyState
             icon={UserCheck}
-            title="Activez votre fiche annuaire."
-            description="Réclamez votre fiche publique en deux minutes pour apparaître dans les recherches de particuliers et recevoir vos premiers leads qualifiés."
+            title="Active ta fiche annuaire."
+            description="Réclame ta fiche publique en deux minutes pour apparaître dans les recherches de particuliers et recevoir tes premiers leads qualifiés."
             action={
               <Button asChild variant="accent">
                 <Link href="/dashboard/upgrade/annuaire">
@@ -124,7 +124,7 @@ export default async function AnnuaireHubPage() {
         eyebrow="KOVAS Annuaire"
         title="Annuaire"
         accent="ta fiche publique"
-        description="Pilotez votre présence sur kovas.fr : fiche, leads, avis et statistiques au même endroit."
+        description="Pilote ta présence sur kovas.fr : fiche, leads, avis et statistiques au même endroit."
         action={
           summary.publicSlugPath ? (
             <Button asChild variant="outline">
@@ -185,7 +185,7 @@ export default async function AnnuaireHubPage() {
           href="/dashboard/annuaire/stats"
           icon={BarChart3}
           title="Statistiques"
-          description="Vues, conversions, classement, audit SEO mensuel de votre fiche."
+          description="Vues, conversions, classement, audit SEO mensuel de ta fiche."
           badge={summary.viewsThisMonth !== null ? `${summary.viewsThisMonth} vues` : undefined}
         />
       </section>

@@ -9,15 +9,15 @@
  * Incrémente `view_count` à chaque chargement (stat anonyme).
  */
 
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { createAdminClient } from '@/lib/admin/supabase-admin'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { createAdminClient } from '@/lib/admin/supabase-admin'
 import { loadBusinessCardByToken } from '@/lib/business-card/loader'
 import { isWalletPassEnabled } from '@/lib/business-card/wallet-pass'
+import { Globe, Mail, MapPin, Phone } from 'lucide-react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
 import { PublicCardActions } from './public-card-actions'
-import { Mail, MapPin, Phone, Globe } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -63,7 +63,10 @@ export default async function PublicBusinessCardPage({ params }: PageProps) {
     const client = admin as unknown as {
       from: (t: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             maybeSingle: () => Promise<{
               data: { view_count: number } | null
               error: { message: string } | null
@@ -71,7 +74,10 @@ export default async function PublicBusinessCardPage({ params }: PageProps) {
           }
         }
         update: (row: Record<string, unknown>) => {
-          eq: (col: string, val: string) => Promise<{
+          eq: (
+            col: string,
+            val: string,
+          ) => Promise<{
             error: { message: string } | null
           }>
         }
@@ -122,12 +128,8 @@ export default async function PublicBusinessCardPage({ params }: PageProps) {
             <h1 className="font-serif italic text-[40px] leading-[1.05] text-[#0F1419]">
               {v.firstName} {v.lastName}
             </h1>
-            <p className="font-sans font-semibold text-[15px] text-[#0F1419]">
-              {v.organization}
-            </p>
-            {v.title ? (
-              <p className="text-sm text-[#0F1419]/60">{v.title}</p>
-            ) : null}
+            <p className="font-sans font-semibold text-[15px] text-[#0F1419]">{v.organization}</p>
+            {v.title ? <p className="text-sm text-[#0F1419]/60">{v.title}</p> : null}
           </div>
 
           {/* QR central */}
@@ -147,9 +149,7 @@ export default async function PublicBusinessCardPage({ params }: PageProps) {
 
           {/* Note métier (cert + SIRET) — mono discret */}
           {v.note ? (
-            <p className="font-mono text-[11px] text-[#0F1419]/60 leading-relaxed">
-              {v.note}
-            </p>
+            <p className="font-mono text-[11px] text-[#0F1419]/60 leading-relaxed">{v.note}</p>
           ) : null}
 
           {/* Infos cliquables */}
@@ -231,7 +231,7 @@ export default async function PublicBusinessCardPage({ params }: PageProps) {
           <Link href="/" className="underline underline-offset-2 hover:text-[#0F1419]">
             KOVAS
           </Link>{' '}
-          · Créez votre carte
+          · Crée ta carte
         </p>
       </div>
     </div>
@@ -242,9 +242,7 @@ function InvalidTokenPage() {
   return (
     <div className="min-h-screen bg-[#F5F7F4] flex items-center justify-center px-4 py-10">
       <Card variant="opaque" padding="default" className="max-w-md text-center space-y-3">
-        <h1 className="font-serif italic text-3xl text-[#0F1419]">
-          Carte introuvable.
-        </h1>
+        <h1 className="font-serif italic text-3xl text-[#0F1419]">Carte introuvable.</h1>
         <p className="text-sm text-[#0F1419]/70">
           Ce lien n'est plus valide ou a été révoqué par son propriétaire.
         </p>

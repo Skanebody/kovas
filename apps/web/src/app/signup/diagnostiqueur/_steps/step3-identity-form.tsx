@@ -20,11 +20,11 @@ export function Step3IdentityForm() {
           Étape 3 sur 7 — Identité civile
         </p>
         <h1 className="font-serif italic text-3xl text-[#0F1419] leading-tight">
-          Vérifiez votre identité.
+          Vérifie ton identité.
         </h1>
         <p className="text-[14px] text-[#0F1419]/70">
-          Choisissez la méthode qui vous convient. La vérification est instantanée avec
-          FranceConnect, ou validée sous 24 h pour les autres méthodes.
+          Choisis la méthode qui te convient. La vérification est instantanée avec FranceConnect, ou
+          validée sous 24 h pour les autres méthodes.
         </p>
       </div>
 
@@ -39,7 +39,7 @@ export function Step3IdentityForm() {
             onSelect={() => setMethod('france_connect')}
             badge="Recommandé · Instantané"
             title="FranceConnect"
-            description="Connectez-vous avec Impôts, Ameli, La Poste ou Identité Numérique. Vérification immédiate par l'État français."
+            description="Connecte-toi avec Impôts, Ameli, La Poste ou Identité Numérique. Vérification immédiate par l'État français."
           />
 
           {/* OPTION B — KYC scan CNI + liveness */}
@@ -59,7 +59,7 @@ export function Step3IdentityForm() {
             onSelect={() => setMethod('yousign_qualified')}
             badge="Signature qualifiée eIDAS"
             title="Signature Yousign qualifiée"
-            description="Signez un document de référence avec votre signature électronique qualifiée. Niveau de preuve maximal."
+            description="Signe un document de référence avec ta signature électronique qualifiée. Niveau de preuve maximal."
           />
         </fieldset>
 

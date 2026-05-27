@@ -8,7 +8,7 @@
  * 9 items répartis sur 3 sections.
  */
 
-import { TRIGGER_DELAYS, type DiagnosticChecklist } from './types'
+import { type DiagnosticChecklist, TRIGGER_DELAYS } from './types'
 
 export const BOUTIN_CHECKLIST: DiagnosticChecklist = {
   diagnostic: 'boutin',
@@ -23,13 +23,14 @@ export const BOUTIN_CHECKLIST: DiagnosticChecklist = {
           id: 'boutin_purpose',
           field_name: 'boutin.purpose',
           description_short: 'Type de location (nue/meublée)',
-          description_full: 'Location nue, meublée ou bail commercial — impact sur clauses obligatoires.',
+          description_full:
+            'Location nue, meublée ou bail commercial — impact sur clauses obligatoires.',
           scope: 'global',
           required: true,
           severity: 'critical',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.fast,
-          trigger_question_text: 'S\'agit-il d\'une location nue ou meublée ?',
+          trigger_question_text: "S'agit-il d'une location nue ou meublée ?",
           keywords: ['location', 'nue', 'meublée', 'bail', 'résidence principale'],
           diagnostic: 'boutin',
         },
@@ -37,13 +38,13 @@ export const BOUTIN_CHECKLIST: DiagnosticChecklist = {
           id: 'boutin_norm_reference',
           field_name: 'boutin.norm_reference',
           description_short: 'Référence article R.156-1 CCH',
-          description_full: 'Mesurage conforme à l\'article R.156-1 du Code de la construction.',
+          description_full: "Mesurage conforme à l'article R.156-1 du Code de la construction.",
           scope: 'global',
           required: true,
           severity: 'important',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.short,
-          trigger_question_text: 'Le mesurage est-il bien conforme à l\'article R.156-1 CCH ?',
+          trigger_question_text: "Le mesurage est-il bien conforme à l'article R.156-1 CCH ?",
           keywords: ['r.156-1', 'cch', 'code construction', 'article'],
           diagnostic: 'boutin',
         },
@@ -91,7 +92,8 @@ export const BOUTIN_CHECKLIST: DiagnosticChecklist = {
           severity: 'important',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Avez-vous bien exclu caves, garages, balcons, vérandas non chauffées ?',
+          trigger_question_text:
+            'Avez-vous bien exclu caves, garages, balcons, vérandas non chauffées ?',
           keywords: ['cave', 'garage', 'balcon', 'véranda', 'terrasse', 'exclu'],
           diagnostic: 'boutin',
         },
@@ -119,7 +121,8 @@ export const BOUTIN_CHECKLIST: DiagnosticChecklist = {
           id: 'boutin_difference_carrez',
           field_name: 'boutin.diff_carrez',
           description_short: 'Différence vs Carrez si applicable',
-          description_full: 'Mention différence Carrez/Boutin (Boutin exclut généralement certaines annexes).',
+          description_full:
+            'Mention différence Carrez/Boutin (Boutin exclut généralement certaines annexes).',
           scope: 'global',
           required: false,
           severity: 'optional',

@@ -112,8 +112,8 @@ export function LeadsListClient({ leads, diags }: Props) {
           }
           description={
             filter === 'all'
-              ? "Vos prochains prospects arriveront ici. En attendant, soignez votre fiche annuaire — c'est ce qui les amène."
-              : 'Changez de filtre pour retrouver vos autres leads.'
+              ? "Tes prochains prospects arriveront ici. En attendant, soigne ta fiche annuaire — c'est ce qui les amène."
+              : 'Change de filtre pour retrouver tes autres leads.'
           }
         />
       ) : (

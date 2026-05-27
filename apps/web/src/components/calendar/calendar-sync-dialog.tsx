@@ -41,10 +41,10 @@ export function CalendarSyncDialog({ httpsUrl, webcalUrl }: CalendarSyncDialogPr
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif italic text-2xl text-ink">
-            Synchroniser votre agenda
+            Synchroniser ton agenda
           </DialogTitle>
           <DialogDescription>
-            Connectez KOVAS à Google Calendar, Apple Calendar ou Outlook — dans les deux sens.
+            Connecte KOVAS à Google Calendar, Apple Calendar ou Outlook — dans les deux sens.
           </DialogDescription>
         </DialogHeader>
 

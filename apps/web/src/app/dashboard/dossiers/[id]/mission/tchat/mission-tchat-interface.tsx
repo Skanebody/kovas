@@ -1305,7 +1305,7 @@ export function MissionTchatInterface({
   const handleAddRoom = useCallback(() => {
     // Démarre la conversation avec une question d'ajout — IA générera
     // ensuite une CAPTURE room=... quand l'utilisateur précisera le nom.
-    void sendMessage('Je souhaite ajouter une nouvelle pièce — laquelle me conseillez-vous ?')
+    void sendMessage('Je souhaite ajouter une nouvelle pièce — laquelle me conseilles-tu ?')
   }, [sendMessage])
 
   // ----- Lot MISSION-C : "Aller corriger" depuis le récap -----
@@ -1317,7 +1317,7 @@ export function MissionTchatInterface({
       if (roomId) setActiveRoomId(roomId)
       const item = getRequiredCheckItems().find((it) => it.key === fieldKey)
       const label = item?.label ?? fieldKey
-      void sendMessage(`Aidez-moi à renseigner : ${label}`)
+      void sendMessage(`Aide-moi à renseigner : ${label}`)
     },
     [recap, sendMessage],
   )
@@ -1338,12 +1338,12 @@ export function MissionTchatInterface({
         method: 'POST',
       })
       if (!res.ok) {
-        setErrorMsg('Impossible de terminer la mission. Vérifiez votre connexion.')
+        setErrorMsg('Impossible de terminer la mission. Vérifie ta connexion.')
         return
       }
       router.push(`/dashboard/dossiers/${dossierId}`)
     } catch {
-      setErrorMsg('Impossible de terminer la mission. Vérifiez votre connexion.')
+      setErrorMsg('Impossible de terminer la mission. Vérifie ta connexion.')
     }
   }, [recap, dossierId, router])
 
@@ -1625,7 +1625,7 @@ export function MissionTchatInterface({
             <div className="border-t border-[#0F1419]/[0.06] bg-paper px-3 sm:px-6 py-2 shrink-0">
               <div className="mx-auto max-w-3xl flex items-center justify-between gap-2">
                 <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#0F1419]/72">
-                  Mode capture silencieuse · vos messages ne déclenchent pas d'IA
+                  Mode capture silencieuse · tes messages ne déclenchent pas d'IA
                 </p>
                 <Button
                   type="button"

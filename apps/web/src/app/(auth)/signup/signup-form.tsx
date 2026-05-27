@@ -1,10 +1,10 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
-import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
+import { Loader2 } from 'lucide-react'
+import { useActionState } from 'react'
 import { type SignupState, signupAction } from './actions'
 
 export function SignupForm({ referralCode }: { referralCode?: string | null } = {}) {
@@ -45,7 +45,7 @@ export function SignupForm({ referralCode }: { referralCode?: string | null } = 
         label="Email professionnel"
         htmlFor="email"
         required
-        hint="Avec votre nom de domaine (pas gmail/yahoo)"
+        hint="Avec ton nom de domaine (pas gmail/yahoo)"
         error={errors.email}
       >
         <Input
@@ -102,7 +102,7 @@ export function SignupForm({ referralCode }: { referralCode?: string | null } = 
       </Button>
 
       <p className="text-xs text-ink-faint text-center">
-        En créant un compte, vous acceptez nos{' '}
+        En créant un compte, tu acceptes nos{' '}
         <a href="/cgu" className="underline">
           CGU
         </a>{' '}

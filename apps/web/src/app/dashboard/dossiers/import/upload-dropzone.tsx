@@ -208,8 +208,8 @@ export function UploadDropZone({ sourceLogiciel, onJobCreated }: UploadDropZoneP
             </span>
             <div className="space-y-1">
               <p className="text-sm font-medium text-ink">
-                Glissez votre fichier {logicielLabel} ici, ou{' '}
-                <span className="underline underline-offset-2">cliquez pour le choisir</span>.
+                Glisse ton fichier {logicielLabel} ici, ou{' '}
+                <span className="underline underline-offset-2">clique pour le choisir</span>.
               </p>
               <p className="text-xs text-ink-mute">
                 Formats acceptés : {ACCEPTED_EXTENSIONS.join(', ')} · max{' '}

@@ -88,8 +88,7 @@ export function CancellationStep2({
     <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-bold tracking-tight">
-          Avant de partir,{' '}
-          <span className="font-serif italic font-normal">trois options</span>
+          Avant de partir, <span className="font-serif italic font-normal">trois options</span>
         </h1>
         <p className="text-sm text-ink-mute">
           Choisissez celle qui vous convient — ou continuez vers la résiliation.
@@ -205,8 +204,7 @@ export function CancellationStep2({
             className="mt-auto"
             disabled={isPending || !downgradeTarget}
             onClick={() =>
-              downgradeTarget &&
-              accept('downgrade', { targetPlanCode: downgradeTarget.planCode })
+              downgradeTarget && accept('downgrade', { targetPlanCode: downgradeTarget.planCode })
             }
           >
             {pendingKind === 'downgrade' ? (
@@ -226,9 +224,7 @@ export function CancellationStep2({
       )}
 
       <div className="border-t border-rule pt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <p className="text-xs text-ink-mute">
-          Aucune de ces options ne vous convient ?
-        </p>
+        <p className="text-xs text-ink-mute">Aucune de ces options ne vous convient ?</p>
         <Button asChild variant="ghost" size="sm" className="text-ink-mute">
           <a href="/dashboard/account/cancellation?step=3">
             Non merci, je résilie <ArrowRight className="size-4" />

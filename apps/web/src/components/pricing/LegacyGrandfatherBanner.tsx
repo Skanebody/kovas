@@ -1,6 +1,5 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 // Type B2 dependency — pricing-plans.ts refonte by parallel agent
 import {
   type LegacyPlanCode,
@@ -8,6 +7,7 @@ import {
   getLegacyPlanMapping,
   getLogicielPlan,
 } from '@/lib/pricing-plans'
+import { cn } from '@/lib/utils'
 import { ArrowRight, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
@@ -29,9 +29,7 @@ interface LegacyGrandfatherBannerProps {
  *
  * En l'absence de prop ou en SSR sans contexte auth, retourne `null`.
  */
-export function LegacyGrandfatherBanner({
-  legacyPlanCode,
-}: LegacyGrandfatherBannerProps) {
+export function LegacyGrandfatherBanner({ legacyPlanCode }: LegacyGrandfatherBannerProps) {
   if (legacyPlanCode === null) return null
 
   const mapping = getLegacyPlanMapping(legacyPlanCode)
@@ -61,9 +59,9 @@ export function LegacyGrandfatherBanner({
           Votre prix est verrouillé à vie : {grandfatherEuros} € HT / mois.
         </h3>
         <p className="text-[14px] text-white/90 leading-relaxed">
-          Vous êtes sur le forfait <strong>{mapping.legacyDisplayName}</strong> de la grille
-          E2c (juin 2026). Vous gardez ce prix tant que votre abonnement reste actif, même
-          quand la grille V3 augmente.
+          Vous êtes sur le forfait <strong>{mapping.legacyDisplayName}</strong> de la grille E2c
+          (juin 2026). Vous gardez ce prix tant que votre abonnement reste actif, même quand la
+          grille V3 augmente.
         </p>
       </div>
 

@@ -203,7 +203,7 @@ export default async function VeillePage({ searchParams }: PageProps) {
           <RegulatoryTimeline
             items={timelineItems}
             unreadDocIds={unreadDocIds}
-            emptyMessage="Aucune évolution réglementaire pour vos critères. La veille tourne chaque nuit à 01:00 UTC — tout nouveau document détecté sera ajouté automatiquement."
+            emptyMessage="Aucune évolution réglementaire pour tes critères. La veille tourne chaque nuit à 01:00 UTC — tout nouveau document détecté sera ajouté automatiquement."
           />
         </section>
 

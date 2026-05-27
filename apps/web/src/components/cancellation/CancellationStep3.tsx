@@ -38,22 +38,22 @@ const CATEGORIES: { value: FeedbackCategory; label: string; hint: string }[] = [
   {
     value: 'missing_features',
     label: 'Manque de fonctionnalités',
-    hint: 'KOVAS ne couvre pas un besoin que j\'ai',
+    hint: "KOVAS ne couvre pas un besoin que j'ai",
   },
   {
     value: 'features_not_used',
     label: 'Fonctionnalités non utilisées',
-    hint: 'Je n\'exploite pas suffisamment l\'outil',
+    hint: "Je n'exploite pas suffisamment l'outil",
   },
   {
     value: 'better_competitor',
     label: 'Meilleur concurrent',
-    hint: 'J\'ai trouvé un outil mieux adapté',
+    hint: "J'ai trouvé un outil mieux adapté",
   },
   {
     value: 'situation_change',
     label: 'Changement de situation',
-    hint: 'Arrêt d\'activité, retraite, etc.',
+    hint: "Arrêt d'activité, retraite, etc.",
   },
   { value: 'other', label: 'Autre raison', hint: 'Précisez dans le commentaire' },
 ]
@@ -131,18 +131,11 @@ export function CancellationStep3({ cancellationId }: Step3Props) {
                 onClick={() => setCategory(c.value)}
                 className={cn(
                   'rounded-md border text-left p-3 transition-colors',
-                  selected
-                    ? 'border-navy bg-navy/5'
-                    : 'border-rule bg-paper hover:border-navy/40',
+                  selected ? 'border-navy bg-navy/5' : 'border-rule bg-paper hover:border-navy/40',
                 )}
                 aria-pressed={selected}
               >
-                <div
-                  className={cn(
-                    'text-sm font-semibold',
-                    selected ? 'text-navy' : 'text-ink',
-                  )}
-                >
+                <div className={cn('text-sm font-semibold', selected ? 'text-navy' : 'text-ink')}>
                   {c.label}
                 </div>
                 <div className="text-[11px] text-ink-mute mt-0.5">{c.hint}</div>
@@ -209,9 +202,9 @@ export function CancellationStep3({ cancellationId }: Step3Props) {
       </div>
 
       <p className="text-[11px] text-ink-mute leading-relaxed">
-        En confirmant, votre abonnement sera résilié à la fin de la période en cours.
-        Aucune nouvelle facturation. Après expiration, votre compte bascule 90 jours en mode
-        lecture et export complet conformément à notre politique RGPD.
+        En confirmant, votre abonnement sera résilié à la fin de la période en cours. Aucune
+        nouvelle facturation. Après expiration, votre compte bascule 90 jours en mode lecture et
+        export complet conformément à notre politique RGPD.
       </p>
     </Card>
   )

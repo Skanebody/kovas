@@ -123,7 +123,8 @@ function evaluateRules(
       suggestion_type: 'addon',
       suggested_target: 'facturx_ppf',
       reason_label: `Vous avez émis ${invoicesEvts} factures ce mois`,
-      reason_benefit: "Factur-X économise ~4h/mois et vous met en conformité avec l'obligation 2027",
+      reason_benefit:
+        "Factur-X économise ~4h/mois et vous met en conformité avec l'obligation 2027",
       estimated_value_eur: 80,
       priority: 80,
     })
@@ -140,7 +141,8 @@ function evaluateRules(
         suggestion_type: 'tier_upgrade',
         suggested_target: 'pro',
         reason_label: `${received} leads reçus, ${responded} réponse(s) (${Math.round(rate * 100)}%)`,
-        reason_benefit: 'Le forfait Pro débloque auto-quote email et paiement bloqué pour augmenter votre conversion',
+        reason_benefit:
+          'Le forfait Pro débloque auto-quote email et paiement bloqué pour augmenter votre conversion',
         estimated_value_eur: Math.round(received * 0.3 * 300),
         priority: 85,
       })
@@ -148,13 +150,18 @@ function evaluateRules(
   }
 
   // R3 — Pennylane attempted
-  if (hasEvent(events, 'pennylane_attempted') && !activeAddons.has('pennylane_sync') && !activePacks.has('pack_cabinet')) {
+  if (
+    hasEvent(events, 'pennylane_attempted') &&
+    !activeAddons.has('pennylane_sync') &&
+    !activePacks.has('pack_cabinet')
+  ) {
     out.push({
       user_id: '',
       suggestion_type: 'addon',
       suggested_target: 'pennylane_sync',
       reason_label: 'Vous avez tenté de synchroniser Pennylane',
-      reason_benefit: 'Activation 1 clic, sync automatique missions et factures, ~2h économisées/mois',
+      reason_benefit:
+        'Activation 1 clic, sync automatique missions et factures, ~2h économisées/mois',
       estimated_value_eur: 40,
       priority: 75,
     })
@@ -215,7 +222,8 @@ function evaluateRules(
       suggestion_type: 'tier_upgrade',
       suggested_target: 'decouverte',
       reason_label: `${usage.missionsCount30d} missions ce mois (forfait Essential plafonné à 30)`,
-      reason_benefit: 'Découverte double votre quota mensuel et ajoute templates pièces + check-lists',
+      reason_benefit:
+        'Découverte double votre quota mensuel et ajoute templates pièces + check-lists',
       estimated_value_eur: 10,
       priority: 72,
     })
@@ -311,7 +319,9 @@ Deno.serve(async (req) => {
   let totalSkipped = 0
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-  const dedupeCutoff = new Date(Date.now() - SUGGESTION_DEDUPE_DAYS * 24 * 60 * 60 * 1000).toISOString()
+  const dedupeCutoff = new Date(
+    Date.now() - SUGGESTION_DEDUPE_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString()
 
   for (const sub of subs) {
     const ownerId = sub.organizations?.owner_user_id
@@ -397,18 +407,19 @@ Deno.serve(async (req) => {
         )
         .eq('organization_id', sub.organization_id)
         .maybeSingle()
-      const q = quotasRow as
-        | {
-            whisper_seconds_used: number | null
-            whisper_seconds_cap: number | null
-            storage_bytes_used: number | null
-            storage_bytes_cap: number | null
-            vision_calls_used: number | null
-            vision_calls_cap: number | null
-          }
-        | null
+      const q = quotasRow as {
+        whisper_seconds_used: number | null
+        whisper_seconds_cap: number | null
+        storage_bytes_used: number | null
+        storage_bytes_cap: number | null
+        vision_calls_used: number | null
+        vision_calls_cap: number | null
+      } | null
       if (q?.whisper_seconds_cap && q.whisper_seconds_cap > 0) {
-        whisperUsagePct = Math.min(100, ((q.whisper_seconds_used ?? 0) / q.whisper_seconds_cap) * 100)
+        whisperUsagePct = Math.min(
+          100,
+          ((q.whisper_seconds_used ?? 0) / q.whisper_seconds_cap) * 100,
+        )
       }
       if (q?.storage_bytes_cap && q.storage_bytes_cap > 0) {
         storageUsagePct = Math.min(100, ((q.storage_bytes_used ?? 0) / q.storage_bytes_cap) * 100)
@@ -421,16 +432,22 @@ Deno.serve(async (req) => {
     }
 
     // 5. Évalue les règles
-    const suggestions = evaluateRules(sub.plan_code ?? sub.tier, activeAddons, activePacks, events, {
-      invoicesCount30d: invoicesCount30d ?? 0,
-      leadsReceived30d: leadsReceived30d ?? 0,
-      leadsResponded30d: leadsResponded30d ?? 0,
-      whisperUsagePct,
-      storageUsagePct,
-      missionsUsagePct,
-      visionUsagePct,
-      missionsCount30d: missionsCount30d ?? 0,
-    })
+    const suggestions = evaluateRules(
+      sub.plan_code ?? sub.tier,
+      activeAddons,
+      activePacks,
+      events,
+      {
+        invoicesCount30d: invoicesCount30d ?? 0,
+        leadsReceived30d: leadsReceived30d ?? 0,
+        leadsResponded30d: leadsResponded30d ?? 0,
+        whisperUsagePct,
+        storageUsagePct,
+        missionsUsagePct,
+        visionUsagePct,
+        missionsCount30d: missionsCount30d ?? 0,
+      },
+    )
 
     // 6. Pour chaque suggestion : vérifie qu'il n'y en a pas déjà une pending
     // ou shown_in_app < 30j → si non, insert.

@@ -126,7 +126,7 @@ export default async function MaFichePage({ searchParams }: MaFichePageProps) {
         eyebrow="Annuaire · Ma fiche"
         title="Ma fiche"
         accent="annuaire"
-        description="Configurez ce qui s'affiche sur kovas.fr, comment vos clients vous trouvent et vous contactent."
+        description="Configure ce qui s'affiche sur kovas.fr, comment tes clients te trouvent et te contactent."
         action={
           publicSlugPath ? (
             <Button asChild variant="outline">
@@ -209,8 +209,8 @@ function SectionPlaceholder({ section }: { section: SectionKey }) {
           <CardDescription>Section en cours de finalisation — disponible bientôt.</CardDescription>
           <p className="text-[12px] text-ink-mute leading-relaxed max-w-prose">
             Cette section sera activée dans les prochaines itérations du module annuaire. En
-            attendant, la section <strong>Profil</strong> est entièrement éditable et vos
-            modifications sont publiées immédiatement sur votre fiche publique.
+            attendant, la section <strong>Profil</strong> est entièrement éditable et tes
+            modifications sont publiées immédiatement sur ta fiche publique.
           </p>
         </div>
       </div>

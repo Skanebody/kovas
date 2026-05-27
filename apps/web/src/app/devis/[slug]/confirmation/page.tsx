@@ -100,32 +100,31 @@ export default async function QuoteConfirmationPage({ params }: PageProps) {
               <CheckCircle2 className="size-6 text-ink" aria-hidden />
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-ink">
-              Votre demande a bien été envoyée
+              Ta demande a bien été envoyée
             </h1>
             <p className="mt-3 text-[14px] text-ink-mute leading-relaxed">
-              {fullName} a reçu votre demande de devis. Vous serez recontacté sous 24 heures ouvrées
-              au maximum.
+              {fullName} a reçu ta demande de devis. Tu seras recontacté sous 24 heures ouvrées au
+              maximum.
             </p>
 
             <ul className="mt-6 grid gap-2.5 text-left text-[13px] text-ink-soft">
               <li className="flex items-start gap-2.5">
                 <Clock className="size-4 text-ink-mute mt-0.5 shrink-0" aria-hidden />
                 <span>
-                  Un email de confirmation vient de vous être envoyé. Pensez à vérifier vos spams.
+                  Un email de confirmation vient de t'être envoyé. Pense à vérifier tes spams.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <ShieldCheck className="size-4 text-ink-mute mt-0.5 shrink-0" aria-hidden />
                 <span>
-                  Vos coordonnées ont été transmises uniquement à {fullName}, conformément à notre
+                  Tes coordonnées ont été transmises uniquement à {fullName}, conformément à notre
                   politique RGPD.
                 </span>
               </li>
             </ul>
 
             <p className="mt-6 text-[12px] text-ink-faint">
-              Sans nouvelle sous 48 heures, vous pouvez le signaler depuis votre espace ou nous
-              écrire à{' '}
+              Sans nouvelle sous 48 heures, tu peux le signaler depuis ton espace ou nous écrire à{' '}
               <a href="mailto:contact@kovas.fr" className="underline hover:text-ink-soft">
                 contact@kovas.fr
               </a>
@@ -137,7 +136,7 @@ export default async function QuoteConfirmationPage({ params }: PageProps) {
           {nearby.length > 0 && deptCode && citySlug ? (
             <Card variant="opaque" padding="default">
               <h2 className="text-[15px] font-bold text-ink mb-1">
-                Souhaitez-vous comparer avec d&apos;autres diagnostiqueurs ?
+                Tu souhaites comparer avec d&apos;autres diagnostiqueurs ?
               </h2>
               <p className="text-[12px] text-ink-mute mb-4">
                 Pour un devis solide, KOVAS recommande de comparer 2 à 3 devis avant de choisir.

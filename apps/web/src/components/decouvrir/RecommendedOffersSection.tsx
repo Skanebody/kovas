@@ -16,7 +16,7 @@ interface RecommendedOffersSectionProps {
 }
 
 /**
- * Section 2 — Offres recommandées pour vous (dynamique).
+ * Section 2 — Offres recommandées pour toi (dynamique).
  *
  * Affiche les 4 meilleures offres selon le scoring. Recalcule automatiquement
  * toutes les 5s (via tick du store) après les 30 premières secondes, pour
@@ -70,7 +70,7 @@ export function RecommendedOffersSection({
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2 text-[#0F1419] font-mono text-[11px] uppercase tracking-[0.1em]">
           <Sparkles className="size-3.5 text-chartreuse-deep" />
-          Recommandées pour vous
+          Recommandées pour toi
         </div>
         <Badge variant="muted" className="text-[10px]">
           Mis à jour selon ta navigation
@@ -97,7 +97,7 @@ function RecommendedCard({ scored, isTop }: { scored: ScoredOffer; isTop: boolea
         offer={scored.offer}
         recommended={isTop}
         position="recommended"
-        ctaHref={scored.offer.priceMonthlyCents === 0 ? '/signup' : '/app/account'}
+        ctaHref={scored.offer.priceMonthlyCents === 0 ? '/signup' : '/dashboard/account'}
         secondaryCtaLabel={scored.reasons[0] ?? 'Pourquoi cette offre ?'}
       />
     </div>

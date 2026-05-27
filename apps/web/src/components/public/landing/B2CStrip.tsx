@@ -49,11 +49,11 @@ export function B2CStrip() {
               className="font-sans font-medium tracking-tight text-ink leading-[1.05]"
               style={{ fontSize: 'clamp(32px, 4.5vw, 56px)' }}
             >
-              Vous{' '}
+              Tu{' '}
               <span className="font-serif italic font-normal text-chartreuse-deep">
-                vendez ou louez
+                vends ou loues
               </span>{' '}
-              votre bien ?
+              ton bien ?
             </h2>
             <p className="text-ink-mute leading-relaxed">
               Le DPE est obligatoire avant toute mise en vente ou location. Selon l&apos;année et la
@@ -61,8 +61,8 @@ export function B2CStrip() {
               électricité, gaz, termites ou Carrez.
             </p>
             <p className="text-ink-mute leading-relaxed">
-              Pour les biens classés F ou G, un audit énergétique est désormais requis. Nous vous
-              aidons à voir clair, gratuitement.
+              Pour les biens classés F ou G, un audit énergétique est désormais requis. On t'aide
+              à voir clair, gratuitement.
             </p>
           </div>
 
@@ -79,7 +79,7 @@ export function B2CStrip() {
                 <div>
                   <h3 className="text-lg font-semibold text-ink">Calculateur DPE</h3>
                   <p className="text-sm text-ink-mute mt-1">
-                    Estimez la classe énergétique de votre bien en répondant à 8 questions.
+                    Estime la classe énergétique de ton bien en répondant à 8 questions.
                   </p>
                 </div>
               </div>
@@ -121,7 +121,7 @@ export function B2CStrip() {
                   <MapPin className="size-5" aria-hidden />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-ink">Diagnostiqueurs près de vous</h3>
+                  <h3 className="text-lg font-semibold text-ink">Diagnostiqueurs près de toi</h3>
                   <p className="text-sm text-ink-mute mt-1">
                     Certifications vérifiées, avis publiés, devis en ligne sous 24h.
                   </p>

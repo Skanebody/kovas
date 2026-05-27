@@ -190,7 +190,7 @@ export function LeadForm({
       onSuccess()
     } catch (err) {
       console.error('[lead-form] submit failed', err)
-      setGlobalError('Erreur réseau. Vérifiez votre connexion et réessayez dans un instant.')
+      setGlobalError('Erreur réseau. Vérifie ta connexion et réessaie dans un instant.')
     } finally {
       setSubmitting(false)
     }
@@ -200,11 +200,11 @@ export function LeadForm({
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
       <header className="space-y-1.5">
         <h2 className="font-display text-[22px] font-bold text-ink sm:text-[26px]">
-          Recevez votre estimation détaillée
+          Reçois ton estimation détaillée
         </h2>
         <p className="text-[14px] text-ink-mute">
-          Vos coordonnées nous permettent de vous envoyer le détail du calcul et, si vous le
-          souhaitez, des devis de diagnostiqueurs certifiés.
+          Tes coordonnées nous permettent de t'envoyer le détail du calcul et, si tu le souhaites,
+          des devis de diagnostiqueurs certifiés.
         </p>
       </header>
 

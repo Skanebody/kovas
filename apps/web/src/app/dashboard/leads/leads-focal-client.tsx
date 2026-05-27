@@ -28,9 +28,7 @@ interface LeadsFocalClientProps {
 export function LeadsFocalClient({ leads }: LeadsFocalClientProps) {
   const pendingLeads = useMemo(() => leads.filter((l) => l.status === 'pending'), [leads])
 
-  const [currentId, setCurrentId] = useState<string | null>(
-    pendingLeads[0]?.id ?? null,
-  )
+  const [currentId, setCurrentId] = useState<string | null>(pendingLeads[0]?.id ?? null)
   const [postCallOpen, setPostCallOpen] = useState(false)
   const [queueOpen, setQueueOpen] = useState(false)
   // Marqueur "appel lancé" — au retour focus on ouvre le sheet
@@ -114,7 +112,7 @@ export function LeadsFocalClient({ leads }: LeadsFocalClientProps) {
       <EmptyState
         icon={Inbox}
         title="Aucun lead en attente. Bien joué."
-        description="Tous les leads ont été traités. Consultez l'historique pour revoir vos décisions."
+        description="Tous les leads ont été traités. Consulte l'historique pour revoir tes décisions."
         action={
           <Button asChild variant="outline">
             <Link href="/dashboard/leads/history">
@@ -132,12 +130,7 @@ export function LeadsFocalClient({ leads }: LeadsFocalClientProps) {
     return (
       <div className="text-center py-12">
         <p className="text-[14px] text-ink-mute">Sélectionnez un lead pour commencer.</p>
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-4"
-          onClick={() => setQueueOpen(true)}
-        >
+        <Button variant="outline" size="sm" className="mt-4" onClick={() => setQueueOpen(true)}>
           Voir la file
         </Button>
       </div>

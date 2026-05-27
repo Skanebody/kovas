@@ -15,7 +15,7 @@
  *   3. Documenter dans docs/upsell-architecture.md §Règles
  */
 
-import { tierAtLeast, type UserAccess } from './access-control'
+import { type UserAccess, tierAtLeast } from './access-control'
 import type { BehaviorEventType } from './track-event'
 
 export interface BehaviorEvent {
@@ -100,8 +100,7 @@ function r1FacturX(ctx: BehaviorContext): TriggerRuleResult {
     suggestionType: 'addon',
     target: 'facturx_ppf',
     reasonLabel: `Vous avez émis ${total} factures ce mois`,
-    reasonBenefit:
-      "Factur-X économise ~4h/mois et vous met en conformité avec l'obligation 2027",
+    reasonBenefit: "Factur-X économise ~4h/mois et vous met en conformité avec l'obligation 2027",
     estimatedValueEur: 80,
     priority: 80,
   }
@@ -124,7 +123,8 @@ function r2LeadsResponseRate(ctx: BehaviorContext): TriggerRuleResult {
     suggestionType: 'tier_upgrade',
     target: 'pro',
     reasonLabel: `${received} leads reçus, ${responded} réponse${responded > 1 ? 's' : ''} (${Math.round(rate * 100)}%)`,
-    reasonBenefit: 'Le forfait Pro débloque auto-quote email et paiement bloqué pour augmenter votre conversion',
+    reasonBenefit:
+      'Le forfait Pro débloque auto-quote email et paiement bloqué pour augmenter votre conversion',
     estimatedValueEur: Math.round(received * 0.3 * 300),
     priority: 85,
   }

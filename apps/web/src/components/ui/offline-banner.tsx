@@ -49,9 +49,7 @@ export function OfflineBanner() {
       )}
     >
       <WifiOff className="size-3.5 shrink-0" strokeWidth={2} />
-      <span>
-        Mode hors ligne · vos données seront synchronisées au retour du réseau.
-      </span>
+      <span>Mode hors ligne · vos données seront synchronisées au retour du réseau.</span>
     </div>
   )
 }

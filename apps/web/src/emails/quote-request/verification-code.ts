@@ -23,9 +23,11 @@ export interface VerificationCodeEmailParams {
   base_url: string
 }
 
-export function renderVerificationCodeEmail(
-  params: VerificationCodeEmailParams,
-): { subject: string; html: string; text: string } {
+export function renderVerificationCodeEmail(params: VerificationCodeEmailParams): {
+  subject: string
+  html: string
+  text: string
+} {
   const subject = `Confirmez votre demande de devis — code ${params.code}`
   const verifyUrl = `${params.base_url}/verifier-mon-email/${params.tracking_token}`
 

@@ -78,7 +78,7 @@ export function PrevalidationStep2Results({ values, onChange, onBack, onContinue
       <div className="space-y-1">
         <h3 className="text-[15px] font-semibold text-[#0F1419]">Résultats DPE prévus</h3>
         <p className="text-[11px] text-[#0F1419]/72">
-          Étiquettes et équipements tels que vous comptez les publier sur l&apos;ADEME.
+          Étiquettes et équipements tels que tu comptes les publier sur l&apos;ADEME.
         </p>
       </div>
 
@@ -97,7 +97,7 @@ export function PrevalidationStep2Results({ values, onChange, onBack, onContinue
             ))}
           </Select>
           <FieldHint tooltip="Indiquer l'énergie qui couvre le plus grand pourcentage des besoins de chauffage (méthode 3CL-2021).">
-            Doit correspondre à ce que vous publierez sur l&apos;ADEME.
+            Doit correspondre à ce que tu publieras sur l&apos;ADEME.
           </FieldHint>
         </FormField>
 

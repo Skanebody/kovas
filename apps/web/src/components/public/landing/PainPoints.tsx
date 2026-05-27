@@ -14,7 +14,7 @@ const PAIN_POINTS: PainPoint[] = [
   },
   {
     emphasis: 'Factures variables imprévisibles',
-    rest: 'avec votre logiciel actuel — vous ne savez jamais ce que vous allez payer.',
+    rest: 'avec ton logiciel actuel — tu ne sais jamais ce que tu vas payer.',
   },
 ]
 
@@ -31,7 +31,7 @@ export function PainPoints() {
             01 · Le constat
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">
-            Vous reconnaissez-vous dans ce quotidien&nbsp;?
+            Tu te reconnais dans ce quotidien&nbsp;?
           </h2>
         </div>
 

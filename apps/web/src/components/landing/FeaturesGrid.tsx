@@ -19,7 +19,7 @@ const FEATURES: Feature[] = [
     icon: Mic,
     title: 'Saisie vocale terrain',
     description:
-      "Décrivez l'état d'une pièce à voix haute. KOVAS structure les données automatiquement, en arrière-plan, pendant que vous continuez le relevé.",
+      "Décris l'état d'une pièce à voix haute. KOVAS structure les données automatiquement, en arrière-plan, pendant que tu continues le relevé.",
   },
   {
     icon: Camera,
@@ -37,13 +37,13 @@ const FEATURES: Feature[] = [
     icon: Upload,
     title: 'Bouton Partager',
     description:
-      "Trois modes vers votre logiciel principal : email, sync Google Drive automatique, téléchargement direct. 30 secondes au lieu d'1h30 de re-saisie.",
+      "Trois modes vers ton logiciel principal : email, sync Google Drive automatique, téléchargement direct. 30 secondes au lieu d'1h30 de re-saisie.",
   },
   {
     icon: FileText,
     title: 'Exports universels',
     description:
-      'PDF, Word, CSV, JSON, ZIP Liciel. Aucune dépendance à un éditeur unique. Vos données vous appartiennent et restent exportables sans condition.',
+      "PDF, Word, CSV, JSON, ZIP Liciel. Aucune dépendance à un éditeur unique. Tes données t'appartiennent et restent exportables sans condition.",
   },
   {
     icon: ShieldCheck,
@@ -71,7 +71,7 @@ export function FeaturesGrid() {
           <span className="text-[#0F1419]/35">Le retour bureau quasi inutile.</span>
         </h2>
         <p className="text-[17px] sm:text-[20px] text-[#0F1419]/72 leading-relaxed">
-          KOVAS ne remplace pas votre logiciel principal. Il élimine la friction terrain, valide vos
+          KOVAS ne remplace pas ton logiciel principal. Il élimine la friction terrain, valide tes
           données avant export, et envoie vers Liciel, AnalysImmo ou tout autre outil en un bouton.
         </p>
       </div>

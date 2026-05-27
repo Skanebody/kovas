@@ -9,12 +9,12 @@
  * classement de chaque unité.
  */
 
-import { TRIGGER_DELAYS, type DiagnosticChecklist } from './types'
+import { type DiagnosticChecklist, TRIGGER_DELAYS } from './types'
 
 export const PLOMB_CHECKLIST: DiagnosticChecklist = {
   diagnostic: 'plomb',
   short_label: 'PLOMB',
-  long_label: 'CREP — Constat de Risque d\'Exposition au Plomb',
+  long_label: "CREP — Constat de Risque d'Exposition au Plomb",
   sections: [
     {
       id: 'scope',
@@ -24,7 +24,8 @@ export const PLOMB_CHECKLIST: DiagnosticChecklist = {
           id: 'plomb_pre_1949',
           field_name: 'plomb.pre_1949_check',
           description_short: 'PC déposé avant 1949',
-          description_full: 'Confirmation que le permis de construire est antérieur au 1er janvier 1949 (sinon CREP non requis).',
+          description_full:
+            'Confirmation que le permis de construire est antérieur au 1er janvier 1949 (sinon CREP non requis).',
           scope: 'global',
           required: true,
           severity: 'critical',
@@ -58,14 +59,23 @@ export const PLOMB_CHECKLIST: DiagnosticChecklist = {
           id: 'plomb_xrf_brand',
           field_name: 'plomb.xrf_device',
           description_short: 'Marque/modèle appareil XRF',
-          description_full: 'Marque + modèle + n° de série de l\'appareil fluorescence X (Niton, Thermo, Innov-X, Olympus).',
+          description_full:
+            "Marque + modèle + n° de série de l'appareil fluorescence X (Niton, Thermo, Innov-X, Olympus).",
           scope: 'global',
           required: true,
           severity: 'critical',
           requires_photo: true,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Quelle marque/modèle d\'appareil XRF utilisez-vous ?',
-          keywords: ['xrf', 'fluorescence', 'niton', 'innov-x', 'olympus', 'thermo', 'appareil plomb'],
+          trigger_question_text: "Quelle marque/modèle d'appareil XRF utilisez-vous ?",
+          keywords: [
+            'xrf',
+            'fluorescence',
+            'niton',
+            'innov-x',
+            'olympus',
+            'thermo',
+            'appareil plomb',
+          ],
           diagnostic: 'plomb',
         },
         {
@@ -78,7 +88,7 @@ export const PLOMB_CHECKLIST: DiagnosticChecklist = {
           severity: 'critical',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'L\'appareil XRF est-il bien étalonné (vérification < 1 an) ?',
+          trigger_question_text: "L'appareil XRF est-il bien étalonné (vérification < 1 an) ?",
           keywords: ['étalonnage', 'calibration', 'vérification', 'certificat', 'cofrac'],
           diagnostic: 'plomb',
         },
@@ -91,14 +101,14 @@ export const PLOMB_CHECKLIST: DiagnosticChecklist = {
         {
           id: 'plomb_unit_count',
           field_name: 'plomb.units_count',
-          description_short: 'Nombre total d\'unités diag',
-          description_full: 'Nombre total d\'unités de diagnostic (UD) à mesurer par pièce.',
+          description_short: "Nombre total d'unités diag",
+          description_full: "Nombre total d'unités de diagnostic (UD) à mesurer par pièce.",
           scope: 'global',
           required: true,
           severity: 'critical',
           requires_photo: false,
           trigger_question_after_ms: TRIGGER_DELAYS.medium,
-          trigger_question_text: 'Combien d\'unités de diagnostic au total ?',
+          trigger_question_text: "Combien d'unités de diagnostic au total ?",
           keywords: ['unité', 'unités', 'ud', 'unité de diagnostic'],
           diagnostic: 'plomb',
         },
@@ -168,7 +178,8 @@ export const PLOMB_CHECKLIST: DiagnosticChecklist = {
           id: 'plomb_class_per_unit',
           field_name: 'plomb.class_per_unit',
           description_short: 'Classe 0/1/2/3 par UD',
-          description_full: 'Classement chaque UD : 0 (rien) / 1 (non dégradé) / 2 (peu dégradé) / 3 (dégradé risque).',
+          description_full:
+            'Classement chaque UD : 0 (rien) / 1 (non dégradé) / 2 (peu dégradé) / 3 (dégradé risque).',
           scope: 'per_room',
           required: true,
           severity: 'critical',
@@ -210,7 +221,8 @@ export const PLOMB_CHECKLIST: DiagnosticChecklist = {
           id: 'plomb_recommendations',
           field_name: 'plomb.recommendations',
           description_short: 'Recommandations propriétaire',
-          description_full: 'Notice information remise au propriétaire (obligation si UD classes 1/2/3 ou EHS).',
+          description_full:
+            'Notice information remise au propriétaire (obligation si UD classes 1/2/3 ou EHS).',
           scope: 'global',
           required: true,
           severity: 'important',

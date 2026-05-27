@@ -40,7 +40,7 @@ const CATEGORIES: CategoryGroup[] = [
       {
         title: 'Templates pièces pré-remplis',
         description:
-          'T2, T3, T4, T5, maison, appartement. Les pièces standards sont déjà créées, vous validez ou modifiez.',
+          'T2, T3, T4, T5, maison, appartement. Les pièces standards sont déjà créées, tu valides ou modifies.',
         status: 'Inclus',
       },
       {
@@ -81,7 +81,7 @@ const CATEGORIES: CategoryGroup[] = [
   {
     name: 'Validation IA',
     intro:
-      "8 analyseurs métier vérifient vos données avant l'export. Les erreurs sortent du flux avant l'ADEME.",
+      "8 analyseurs métier vérifient tes données avant l'export. Les erreurs sortent du flux avant l'ADEME.",
     features: [
       {
         title: 'Pré-vérification ADEME intelligente',
@@ -124,7 +124,7 @@ const CATEGORIES: CategoryGroup[] = [
   {
     name: 'Exports',
     intro:
-      'Vos données vous appartiennent. Compatibles avec les quatre éditeurs majeurs du marché — Liciel, OBBC, AnalysImmo, ORIS — plus formats universels portables.',
+      "Tes données t'appartiennent. Compatibles avec les quatre éditeurs majeurs du marché — Liciel, OBBC, AnalysImmo, ORIS — plus formats universels portables.",
     features: [
       {
         title: 'Export PDF',
@@ -139,7 +139,7 @@ const CATEGORIES: CategoryGroup[] = [
       },
       {
         title: 'Export CSV',
-        description: 'Format universel pour vos tableurs et outils statistiques.',
+        description: 'Format universel pour tes tableurs et outils statistiques.',
         status: 'Inclus',
       },
       {
@@ -167,13 +167,13 @@ const CATEGORIES: CategoryGroup[] = [
       {
         title: 'Export ZIP + JSON ORIS',
         description:
-          'Format ORIS via ZIP générique + JSON structuré. Import direct dans votre passerelle ADEME ORIS.',
+          'Format ORIS via ZIP générique + JSON structuré. Import direct dans ta passerelle ADEME ORIS.',
         status: 'Inclus',
       },
       {
         title: 'Bouton « Partager » 3 modes',
         description:
-          'Email vers vous-même, sync Google Drive automatique, téléchargement direct. 30 secondes vs 1h30 quel que soit votre éditeur (Liciel, OBBC, AnalysImmo, ORIS).',
+          'Email vers toi-même, sync Google Drive automatique, téléchargement direct. 30 secondes vs 1h30 quel que soit ton éditeur (Liciel, OBBC, AnalysImmo, ORIS).',
         status: 'Inclus',
       },
     ],
@@ -181,11 +181,11 @@ const CATEGORIES: CategoryGroup[] = [
   {
     name: 'Annuaire & Leads',
     intro:
-      'Votre présence publique sur kovas.fr. Les particuliers vous trouvent, vous recevez des demandes qualifiées.',
+      'Ta présence publique sur kovas.fr. Les particuliers te trouvent, tu reçois des demandes qualifiées.',
     features: [
       {
         title: 'Fiche publique professionnelle',
-        description: 'URL kovas.fr/diag/votre-nom. Référencement Google natif, optimisé SEO local.',
+        description: 'URL kovas.fr/diag/ton-nom. Référencement Google natif, optimisé SEO local.',
         status: 'Inclus',
       },
       {
@@ -243,7 +243,7 @@ const CATEGORIES: CategoryGroup[] = [
   {
     name: 'Comptabilité',
     intro:
-      'Connecteurs PDP avec les comptables et banques pros. Vos exports comptables en un clic.',
+      'Connecteurs PDP avec les comptables et banques pros. Tes exports comptables en un clic.',
     features: [
       {
         title: 'Connecteur Qonto',
@@ -252,7 +252,7 @@ const CATEGORIES: CategoryGroup[] = [
       },
       {
         title: 'Connecteur Pennylane',
-        description: 'Export automatique des factures vers votre cabinet comptable.',
+        description: 'Export automatique des factures vers ton cabinet comptable.',
         status: 'Inclus',
       },
       {

@@ -676,18 +676,18 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
             {[
               {
                 num: '01',
-                title: 'Vous décrivez votre bien',
+                title: 'Tu décris ton bien',
                 desc: `Surface, type de bien et localisation à ${cityName}. 2 minutes maximum.`,
               },
               {
                 num: '02',
-                title: 'Vous recevez 3 devis',
-                desc: `3 diagnostiqueurs certifiés intervenant à ${cityName} vous contactent sous 24h.`,
+                title: 'Tu reçois 3 devis',
+                desc: `3 diagnostiqueurs certifiés intervenant à ${cityName} te contactent sous 24h.`,
               },
               {
                 num: '03',
-                title: 'Vous choisissez',
-                desc: 'Comparez prix, délais et avis. Le rapport est livré sous 5-7 jours.',
+                title: 'Tu choisis',
+                desc: 'Compare prix, délais et avis. Le rapport est livré sous 5-7 jours.',
               },
             ].map((step) => (
               <Card key={step.num} className="p-5 space-y-2">
@@ -1226,7 +1226,7 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
 
         {/* ── CTA final dual ─────────────────────────────────────── */}
         <div className="mt-16 pt-8 border-t border-rule text-center space-y-4">
-          <p className="text-sm text-ink-mute">Vous êtes diagnostiqueur à {cityName} ?</p>
+          <p className="text-sm text-ink-mute">Tu es diagnostiqueur à {cityName} ?</p>
           <div className="flex gap-3 justify-center flex-wrap">
             <Button asChild>
               <Link href="/pros">Référencer mon cabinet</Link>

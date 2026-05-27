@@ -74,7 +74,7 @@ export function Step2PlanForm() {
           Étape 2 sur 7 — Choix de la formule
         </p>
         <h1 className="font-serif italic text-3xl text-[#0F1419] leading-tight">
-          Choisissez votre formule.
+          Choisis ta formule.
         </h1>
         <p className="text-[14px] text-[#0F1419]/70">
           <span className="font-semibold text-[#0F1419]">Essai gratuit 30 jours</span> pour toutes

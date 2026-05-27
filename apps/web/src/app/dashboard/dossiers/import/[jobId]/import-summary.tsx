@@ -50,7 +50,7 @@ export function ImportSummary({ jobId, filename, imported, merged }: ImportSumma
           <p className="text-sm text-paper/85">
             {totalImported} nouvel{totalImported > 1 ? 's' : ''} élément
             {totalImported > 1 ? 's' : ''} ajouté
-            {totalImported > 1 ? 's' : ''} à votre base
+            {totalImported > 1 ? 's' : ''} à ta base
             {totalMerged > 0 && (
               <>
                 {' '}

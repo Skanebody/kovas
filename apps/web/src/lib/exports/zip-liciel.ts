@@ -1,3 +1,6 @@
+import { applyZipLicielWatermark } from '@/lib/watermark'
+import type { Database } from '@kovas/database/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 /**
  * Stub ZIP Liciel — V1 génère la structure XML + photos (sans .mdb).
  * Le .mdb réel sera généré par le microservice Java/Jackcess en J11-J12 réel
@@ -7,9 +10,6 @@
  * Cf. docs/liciel-parser-specs.md
  */
 import JSZip from 'jszip'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import type { Database } from '@kovas/database/types'
-import { applyZipLicielWatermark } from '@/lib/watermark'
 import type { MissionExportData } from './build-mission-data'
 
 export async function buildLicielZip(data: MissionExportData): Promise<Buffer> {
@@ -22,12 +22,12 @@ export async function buildLicielZip(data: MissionExportData): Promise<Buffer> {
       'ZIP Liciel — version stub KOVAS V1',
       '',
       'Cette archive contient les fichiers XML générés à partir de votre mission KOVAS.',
-      'Le fichier LICIEL_Dossiers.mdb (base Access) n\'est PAS encore généré en V1 —',
+      "Le fichier LICIEL_Dossiers.mdb (base Access) n'est PAS encore généré en V1 —",
       'la fonctionnalité complète arrive courant 2026 via notre microservice Java.',
       '',
       'En attendant, vous pouvez :',
       '  1. Ouvrir les XMLs dans Liciel via "Importer XML spécifique"',
-      '  2. Ou utiliser l\'export PDF/Word/CSV (rapport.pdf dans le ZIP universel)',
+      "  2. Ou utiliser l'export PDF/Word/CSV (rapport.pdf dans le ZIP universel)",
       '',
       'Référence mission : ' + data.mission.reference,
       'Date export : ' + new Date(data.exportedAt).toLocaleString('fr-FR'),
@@ -69,7 +69,9 @@ export async function buildLicielZip(data: MissionExportData): Promise<Buffer> {
       if (!blob) continue
       const buffer = Buffer.from(await blob.arrayBuffer())
       const ext = p.storage_path.split('.').pop() ?? 'webp'
-      const folder = p.room_id ? `Photos/PIECE_${roomNumById[p.room_id] ?? '000'}` : 'Photos/SANS_PIECE'
+      const folder = p.room_id
+        ? `Photos/PIECE_${roomNumById[p.room_id] ?? '000'}`
+        : 'Photos/SANS_PIECE'
       zip.file(`${folder}/photo_${p.id.slice(0, 8)}.${ext}`, buffer)
     }
   }

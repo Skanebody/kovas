@@ -90,9 +90,9 @@ export default async function LeadsEnAttentePage({ params }: PageProps) {
             <div>
               <h2 className="font-semibold text-lg">Coordonnées verrouillées</h2>
               <p className="text-sm text-white/80 mt-1">
-                Pour découvrir les téléphones et emails de ces prospects, réclamez votre fiche
-                KOVAS. Activation immédiate, essai 30 jours puis débit automatique à J+30.
-                Résiliation libre en 2 clics.
+                Pour découvrir les téléphones et emails de ces prospects, réclame ta fiche KOVAS.
+                Activation immédiate, essai 30 jours puis débit automatique à J+30. Résiliation
+                libre en 2 clics.
               </p>
               <Link
                 href={claimUrl}

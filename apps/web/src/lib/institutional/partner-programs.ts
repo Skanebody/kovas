@@ -30,7 +30,7 @@ export const PARTNER_PROFILES: PartnerProfile[] = [
     id: 'notaires',
     title: 'Notaires',
     description:
-      "Pour les études notariales qui souhaitent fluidifier la production des diagnostics avant signature et garantir la conformité des dossiers transmis aux acquéreurs.",
+      'Pour les études notariales qui souhaitent fluidifier la production des diagnostics avant signature et garantir la conformité des dossiers transmis aux acquéreurs.',
     benefits: [
       'Annuaire de diagnostiqueurs vérifiés et géolocalisés en France métropolitaine',
       'Commission de 8 % HT sur les missions générées par votre étude',
@@ -48,7 +48,7 @@ export const PARTNER_PROFILES: PartnerProfile[] = [
     id: 'agences-immobilieres',
     title: 'Agences immobilières',
     description:
-      "Pour les agences mandantes qui veulent proposer un service diagnostic intégré à leurs vendeurs et accélérer la mise en marché des biens.",
+      'Pour les agences mandantes qui veulent proposer un service diagnostic intégré à leurs vendeurs et accélérer la mise en marché des biens.',
     benefits: [
       "Annuaire intégrable dans votre logiciel d'agence via widget ou API (Phase 2)",
       'Tarification préférentielle pour vos vendeurs (5 % de remise sur le prix médian local)',
@@ -57,7 +57,7 @@ export const PARTNER_PROFILES: PartnerProfile[] = [
     ],
     testimonial: {
       quote:
-        "Le réflexe diagnostic est devenu un argument à la prise de mandat. Nos vendeurs apprécient la transparence des délais et des prix.",
+        'Le réflexe diagnostic est devenu un argument à la prise de mandat. Nos vendeurs apprécient la transparence des délais et des prix.',
       author: 'Y. [placeholder]',
       role: "Directrice d'agence — Réseau indépendant Île-de-France",
     },
@@ -66,11 +66,11 @@ export const PARTNER_PROFILES: PartnerProfile[] = [
     id: 'banques-courtiers',
     title: 'Banques et courtiers en crédit immobilier',
     description:
-      "Pour les établissements financiers qui souhaitent proposer un service estimation DPE en amont du financement, dans une logique de prévention du risque énergétique.",
+      'Pour les établissements financiers qui souhaitent proposer un service estimation DPE en amont du financement, dans une logique de prévention du risque énergétique.',
     benefits: [
       'Intégration du calculateur DPE gratuit dans votre simulateur immobilier',
       "Alerte automatique sur les biens classés F ou G dans les dossiers d'emprunt",
-      "Rapport mensuel sur le risque énergétique de votre portefeuille de prêts immobiliers",
+      'Rapport mensuel sur le risque énergétique de votre portefeuille de prêts immobiliers',
       'Communication conjointe sur les obligations rénovation 2025-2034',
     ],
     testimonial: {
@@ -84,16 +84,16 @@ export const PARTNER_PROFILES: PartnerProfile[] = [
     id: 'fournisseurs-energie',
     title: 'Fournisseurs énergie',
     description:
-      "Pour les énergéticiens et installateurs qui veulent proposer un parcours rénovation cohérent à leurs clients : diagnostic, recommandation, devis travaux.",
+      'Pour les énergéticiens et installateurs qui veulent proposer un parcours rénovation cohérent à leurs clients : diagnostic, recommandation, devis travaux.',
     benefits: [
-      "Lead qualifié : profil énergétique du logement + contact opt-in (selon consentement RGPD du propriétaire)",
+      'Lead qualifié : profil énergétique du logement + contact opt-in (selon consentement RGPD du propriétaire)',
       'Carte de chaleur des biens F-G en France pour orienter votre prospection commerciale',
       "Co-construction d'offres rénovation packagées avec les diagnostiqueurs partenaires",
       'Aucun engagement minimum : facturation au lead qualifié uniquement',
     ],
     testimonial: {
       quote:
-        "Les leads transmis sont qualifiés, le propriétaire connaît déjà sa classe énergétique. Nos commerciaux entrent en relation sur une conversation concrète, pas un appel à froid.",
+        'Les leads transmis sont qualifiés, le propriétaire connaît déjà sa classe énergétique. Nos commerciaux entrent en relation sur une conversation concrète, pas un appel à froid.',
       author: 'A. [placeholder]',
       role: 'Directeur commercial — Installateur pompes à chaleur',
     },

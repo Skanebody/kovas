@@ -58,9 +58,9 @@ export default async function AnnuaireReviewsPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-8 animate-fade-in max-w-4xl mx-auto pb-12">
       <AppPageHeader
-        title="Vos"
+        title="Tes"
         accent="avis"
-        description="Construisez votre réputation locale : les avis Google et KOVAS influencent directement votre classement dans l'annuaire."
+        description="Construis ta réputation locale : les avis Google et KOVAS influencent directement ton classement dans l'annuaire."
       />
 
       {hasAnyReview ? (
@@ -78,7 +78,7 @@ export default async function AnnuaireReviewsPage({ searchParams }: PageProps) {
         <EmptyState
           icon={MessageSquareDashed}
           title="Aucun avis pour l'instant"
-          description="Demandez à vos anciens clients de partager leur expérience. Les avis vérifiés boostent votre classement annuaire de +35 % en moyenne."
+          description="Demande à tes anciens clients de partager leur expérience. Les avis vérifiés boostent ton classement annuaire de +35 % en moyenne."
           action={
             <Button variant="accent" size="lg">
               Demander un avis à mes anciens clients
@@ -188,7 +188,7 @@ function ReviewsList({ reviews, filter }: ReviewsListProps) {
       <Card variant="flat" padding="lg">
         <p className="text-sm text-ink-mute text-center">
           {filter === 'pending'
-            ? 'Tous vos avis ont reçu une réponse. Continuez comme ça.'
+            ? 'Tous tes avis ont reçu une réponse. Continue comme ça.'
             : filter === 'this-week'
               ? 'Aucun avis reçu sur les 7 derniers jours.'
               : 'Aucun avis dans cette sélection.'}
@@ -309,11 +309,11 @@ function RequestReviewCta() {
     <Card variant="flat" padding="lg" className="text-center space-y-4">
       <div className="space-y-2">
         <h2 className="font-serif italic font-normal text-2xl md:text-3xl tracking-tight text-ink">
-          Demandez un avis à vos clients
+          Demande un avis à tes clients
         </h2>
         <p className="text-sm text-ink-mute max-w-md mx-auto">
-          Un client satisfait est rarement spontané. Envoyez-lui un lien sécurisé pour publier son
-          avis sur votre fiche annuaire en 30 secondes.
+          Un client satisfait est rarement spontané. Envoie-lui un lien sécurisé pour publier son
+          avis sur ta fiche annuaire en 30 secondes.
         </p>
       </div>
       <div className="flex justify-center">

@@ -74,7 +74,9 @@ function levenshtein(a: string, b: string): number {
   if (a === b) return 0
   if (!a.length) return b.length
   if (!b.length) return a.length
-  const matrix: number[][] = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0))
+  const matrix: number[][] = Array.from({ length: a.length + 1 }, () =>
+    new Array(b.length + 1).fill(0),
+  )
   for (let i = 0; i <= a.length; i++) matrix[i]![0] = i
   for (let j = 0; j <= b.length; j++) matrix[0]![j] = j
   for (let i = 1; i <= a.length; i++) {
@@ -138,7 +140,10 @@ export async function validateEmailMx(
   const result = validateProEmail(trimmed)
   if (!result.valid) {
     // En mode lax on accepte free providers (un client peut avoir un gmail)
-    if (mode === 'lax' && (result.reason === 'free_provider' || result.reason === 'disposable_provider')) {
+    if (
+      mode === 'lax' &&
+      (result.reason === 'free_provider' || result.reason === 'disposable_provider')
+    ) {
       // Vérification format seulement
       const formatOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)
       if (formatOk) {
@@ -153,10 +158,10 @@ export async function validateEmailMx(
         reason = 'Format email invalide.'
         break
       case 'free_provider':
-        reason = "Utilisez votre email professionnel (avec votre nom de domaine)."
+        reason = 'Utilisez votre email professionnel (avec votre nom de domaine).'
         break
       case 'disposable_provider':
-        reason = "Les emails temporaires ne sont pas autorisés."
+        reason = 'Les emails temporaires ne sont pas autorisés.'
         break
       case 'no_mx':
         reason = "Le domaine de cet email n'est pas joignable."

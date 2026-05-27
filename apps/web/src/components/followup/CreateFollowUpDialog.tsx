@@ -15,6 +15,7 @@
  * font-serif italic pour titre, ton SOBRE professionnel.
  */
 
+import { createFollowUpSequenceAction } from '@/app/dashboard/relances/actions'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -29,7 +30,6 @@ import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { createFollowUpSequenceAction } from '@/app/dashboard/relances/actions'
 
 export type FollowUpDialogTargetType = 'quote' | 'invoice' | 'mission'
 export type FollowUpDialogPreset = 'standard' | 'soft' | 'insistant'
@@ -182,9 +182,9 @@ export function CreateFollowUpDialog({
           </DialogTitle>
           <DialogDescription>
             Pour {targetLabel(targetType)}{' '}
-            <span className="font-mono text-ink">{targetReference}</span>. Choisissez la
-            cadence appropriée — vous pourrez mettre en pause ou annuler à tout moment depuis{' '}
-            <span className="text-ink">Vos relances</span>.
+            <span className="font-mono text-ink">{targetReference}</span>. Choisis la cadence
+            appropriée — tu pourras mettre en pause ou annuler à tout moment depuis{' '}
+            <span className="text-ink">Tes relances</span>.
           </DialogDescription>
         </DialogHeader>
 

@@ -1,10 +1,10 @@
 'use client'
 
-import { CheckCircle2, FileText, Loader2, Upload } from 'lucide-react'
-import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/ui/form-field'
 import { Select } from '@/components/ui/select'
+import { CheckCircle2, FileText, Loader2, Upload } from 'lucide-react'
+import { useRef, useState } from 'react'
 
 const DOC_KINDS = [
   { value: 'facture_energie', label: 'Facture énergie (gaz / électricité / fioul)' },
@@ -77,11 +77,7 @@ export function UploadForm({ token }: UploadFormProps) {
   return (
     <div className="space-y-5">
       <FormField label="Type de document" htmlFor="docKind">
-        <Select
-          id="docKind"
-          value={docKind}
-          onChange={(e) => setDocKind(e.target.value)}
-        >
+        <Select id="docKind" value={docKind} onChange={(e) => setDocKind(e.target.value)}>
           {DOC_KINDS.map((k) => (
             <option key={k.value} value={k.value}>
               {k.label}
@@ -93,7 +89,7 @@ export function UploadForm({ token }: UploadFormProps) {
       <div className="rounded-xl border-2 border-dashed border-rule p-8 text-center space-y-3">
         <Upload className="size-8 mx-auto text-ink-mute" />
         <div className="space-y-1">
-          <p className="font-semibold">Glissez vos fichiers ici</p>
+          <p className="font-semibold">Glisse tes fichiers ici</p>
           <p className="text-xs text-ink-mute">
             PDF, images (JPG/PNG), Word, Excel · max 20 Mo par fichier
           </p>
@@ -109,7 +105,11 @@ export function UploadForm({ token }: UploadFormProps) {
         />
         <Button variant="accent" asChild disabled={uploading}>
           <label htmlFor="file-input" className="cursor-pointer">
-            {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+            {uploading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Upload className="size-4" />
+            )}
             {uploading ? 'Envoi…' : 'Choisir des fichiers'}
           </label>
         </Button>
@@ -128,9 +128,7 @@ export function UploadForm({ token }: UploadFormProps) {
               </div>
               {u.status === 'pending' && <Loader2 className="size-4 animate-spin text-ink-mute" />}
               {u.status === 'success' && <CheckCircle2 className="size-4 text-accent-green" />}
-              {u.status === 'error' && (
-                <span className="text-xs text-accent-red">{u.error}</span>
-              )}
+              {u.status === 'error' && <span className="text-xs text-accent-red">{u.error}</span>}
             </li>
           ))}
         </ul>

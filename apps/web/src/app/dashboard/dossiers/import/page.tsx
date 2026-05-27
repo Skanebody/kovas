@@ -6,9 +6,9 @@ import Link from 'next/link'
 import { ImportWizard } from './wizard'
 
 export const metadata: Metadata = {
-  title: 'Importer depuis votre logiciel',
+  title: 'Importer depuis ton logiciel',
   description:
-    'Récupérez votre base de clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC, ORIS ou tout autre logiciel diag en 5 minutes.',
+    'Récupère ta base de clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC, ORIS ou tout autre logiciel diag en 5 minutes.',
 }
 
 /**
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
  */
 export default function ImportPage() {
   return (
-    <div className="max-w-3xl space-y-6 animate-fade-in">
+    <div className="max-w-5xl space-y-6 animate-fade-in">
       <Button variant="ghost" size="sm" asChild>
         <Link href="/dashboard/dossiers">
           <ArrowLeft className="size-4" /> Retour aux dossiers
@@ -41,7 +41,7 @@ export default function ImportPage() {
 
       <AppPageHeader
         title="Importer depuis"
-        accent="votre logiciel"
+        accent="ton logiciel"
         eyebrow="Import base existante"
         description="Clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC, ORIS (droit à la portabilité, art. 20 RGPD)."
         action={

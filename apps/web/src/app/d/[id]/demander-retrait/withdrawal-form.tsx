@@ -1,9 +1,9 @@
 'use client'
 
-import { CheckCircle2, Loader2 } from 'lucide-react'
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { CheckCircle2, Loader2 } from 'lucide-react'
+import { useState } from 'react'
 
 interface WithdrawalFormProps {
   diagId: string
@@ -45,8 +45,8 @@ export function WithdrawalForm({ diagId }: WithdrawalFormProps) {
         <CheckCircle2 className="size-10 mx-auto text-success" />
         <h2 className="font-display text-lg font-semibold text-ink">Demande enregistrée</h2>
         <p className="text-[13px] text-ink-mute leading-relaxed">
-          Votre fiche sera dépubliée sous 72&nbsp;heures et vos données seront supprimées définitivement.
-          Vous recevrez un email de confirmation lorsque le retrait sera effectif.
+          Ta fiche sera dépubliée sous 72&nbsp;heures et tes données seront supprimées
+          définitivement. Tu recevras un email de confirmation lorsque le retrait sera effectif.
         </p>
       </div>
     )
@@ -63,11 +63,11 @@ export function WithdrawalForm({ diagId }: WithdrawalFormProps) {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           rows={4}
-          placeholder="Si vous souhaitez nous expliquer votre raison, vos retours nous aident à améliorer notre approche."
+          placeholder="Si tu souhaites nous expliquer ta raison, tes retours nous aident à améliorer notre approche."
           maxLength={1000}
         />
         <p className="text-[11px] text-ink-faint">
-          Ce champ est optionnel. Aucun motif n&apos;est requis pour exercer votre droit au retrait.
+          Ce champ est optionnel. Aucun motif n&apos;est requis pour exercer ton droit au retrait.
         </p>
       </div>
 

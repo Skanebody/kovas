@@ -40,7 +40,7 @@ export async function InsightsIASection() {
             <div className="min-w-0 flex-1">
               <p className="text-[14px] font-medium text-[#0F1419]">Pas d'insight aujourd'hui.</p>
               <p className="text-[13px] leading-relaxed text-[#0F1419]/72 mt-1">
-                Continuez sur votre lancée — votre activité est régulière et sans signal d'alerte.
+                Continue sur ta lancée — ton activité est régulière et sans signal d'alerte.
               </p>
             </div>
           </div>
