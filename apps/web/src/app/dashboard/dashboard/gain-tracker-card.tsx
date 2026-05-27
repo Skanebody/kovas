@@ -1,10 +1,10 @@
 import { Card } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
-import { ArrowRight } from 'lucide-react'
 import { parisMonthBounds } from '@/lib/paris-dates'
+import { getOrgBaselineMinutes } from '@/lib/preferences/baseline-minutes'
+import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
-const MINUTES_SAVED_PER_MISSION = 90 // CLAUDE.md §2 : 1h30 par DPE typique
 const EUROS_PER_HOUR_PRODUCTIVITY = 50 // hypothèse productivité libérée
 
 /**
@@ -13,24 +13,31 @@ const EUROS_PER_HOUR_PRODUCTIVITY = 50 // hypothèse productivité libérée
  * Instrument Serif italic 120px, microcopy productivité euros.
  * CTA glass discret bottom-right vers /app/gain (drill-down V1.5).
  *
- * Estimation basée sur missions terminées × 1h30 (CLAUDE.md §2).
+ * Estimation basée sur missions terminées × baseline configurable (default
+ * 90 min, modifiable depuis /dashboard/account, range 15-240 min).
+ * Cf. `lib/preferences/baseline-minutes.ts`.
+ *
  * Tracking détaillé V1.5.
  */
 export async function GainTrackerCard() {
   const { supabase, orgId } = await getCurrentUser()
   const { startIso, nextIso } = parisMonthBounds()
 
-  const { count: missionsThisMonth } = await supabase
-    .from('missions')
-    .select('*', { count: 'exact', head: true })
-    .eq('organization_id', orgId)
-    .is('deleted_at', null)
-    .in('status', ['done', 'exported'])
-    .gte('completed_at', startIso)
-    .lt('completed_at', nextIso)
+  // Préférence baseline configurable (default 90 min). Lue en parallèle du count.
+  const [{ count: missionsThisMonth }, baselineMinutes] = await Promise.all([
+    supabase
+      .from('missions')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .is('deleted_at', null)
+      .in('status', ['done', 'exported'])
+      .gte('completed_at', startIso)
+      .lt('completed_at', nextIso),
+    getOrgBaselineMinutes(supabase, orgId),
+  ])
 
   const count = missionsThisMonth ?? 0
-  const totalMinutesSaved = count * MINUTES_SAVED_PER_MISSION
+  const totalMinutesSaved = count * baselineMinutes
   const hoursSaved = Math.floor(totalMinutesSaved / 60)
   const remainderMinutes = totalMinutesSaved % 60
   const eurosProductivity = Math.round((totalMinutesSaved / 60) * EUROS_PER_HOUR_PRODUCTIVITY)
@@ -46,8 +53,7 @@ export async function GainTrackerCard() {
         aria-hidden
         className="absolute -top-20 -right-20 size-72 rounded-full pointer-events-none"
         style={{
-          background:
-            'radial-gradient(circle, hsl(var(--accent-warm) / 0.18) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, hsl(var(--accent-warm) / 0.18) 0%, transparent 70%)',
         }}
       />
 
@@ -75,9 +81,7 @@ export async function GainTrackerCard() {
             de productivité libérée sur{' '}
             <span className="font-semibold text-card-accent-foreground">{count}</span> mission
             {count > 1 ? 's' : ''}. À ce rythme,{' '}
-            <span className="font-semibold text-card-accent-foreground">
-              {yearlyProjection}h
-            </span>{' '}
+            <span className="font-semibold text-card-accent-foreground">{yearlyProjection}h</span>{' '}
             sur l&apos;année.
           </p>
         ) : (

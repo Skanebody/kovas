@@ -2,11 +2,60 @@
 
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { joinFullName } from '@/lib/name-utils'
+import { MAX_BASELINE_MINUTES, MIN_BASELINE_MINUTES } from '@/lib/preferences/baseline-minutes'
 import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 export type FormState = { error?: string; success?: boolean } | undefined
+
+// ============================================
+// Préférence "temps moyen par mission AVANT KOVAS"
+// (utilisée par Gain Tracker — cf. lib/preferences/baseline-minutes.ts)
+// ============================================
+
+const baselineSchema = z.object({
+  baseline_minutes_per_mission: z.coerce
+    .number({ invalid_type_error: 'Indiquez un nombre de minutes' })
+    .int('Indiquez un nombre entier de minutes')
+    .min(MIN_BASELINE_MINUTES, `Minimum ${MIN_BASELINE_MINUTES} minutes`)
+    .max(MAX_BASELINE_MINUTES, `Maximum ${MAX_BASELINE_MINUTES} minutes (4 h)`),
+})
+
+export async function updateBaselineMinutesAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const parsed = baselineSchema.safeParse({
+    baseline_minutes_per_mission: formData.get('baseline_minutes_per_mission'),
+  })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Valeur invalide' }
+  }
+
+  const { supabase, orgId } = await getCurrentUser()
+
+  // Cast minimal — la colonne `baseline_minutes_per_mission` est arrivée par
+  // la migration 20260627100000, les types DB Database ne sont pas regen.
+  const { error } = await (
+    supabase as unknown as {
+      from: (t: string) => {
+        update: (row: Record<string, unknown>) => {
+          eq: (k: string, v: string) => Promise<{ error: { message: string } | null }>
+        }
+      }
+    }
+  )
+    .from('organizations')
+    .update({ baseline_minutes_per_mission: parsed.data.baseline_minutes_per_mission })
+    .eq('id', orgId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard/account')
+  revalidatePath('/dashboard/dashboard')
+  return { success: true }
+}
 
 // ============================================
 // Profil utilisateur (table profiles)
@@ -173,9 +222,7 @@ export async function updateOrganizationAction(
  * Toggle l'opt-in/opt-out du rapport mensuel d'activité (CLAUDE.md §21bis).
  * Upsert sur user_preferences — table créée 20260520180000_capture_first_mode.sql.
  */
-export async function updateMonthlyReportPreferenceAction(
-  enabled: boolean,
-): Promise<FormState> {
+export async function updateMonthlyReportPreferenceAction(enabled: boolean): Promise<FormState> {
   const { supabase, user } = await getCurrentUser()
 
   // user_preferences pas encore dans Database types (regen requise) → cast minimal
@@ -225,9 +272,10 @@ const ademeSettingsSchema = z.object({
  * le worker lit `profiles.linguistic_profile.certificat_rge` et ne synchronise
  * que les profils où `linguistic_profile.ademe_monitoring_enabled === true`.
  */
-export async function updateAdemeSettingsAction(
-  input: { certificat_rge: string | null; monitoring_enabled: boolean },
-): Promise<FormState> {
+export async function updateAdemeSettingsAction(input: {
+  certificat_rge: string | null
+  monitoring_enabled: boolean
+}): Promise<FormState> {
   const parsed = ademeSettingsSchema.safeParse(input)
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Données invalides' }
@@ -278,9 +326,7 @@ export async function updateAdemeSettingsAction(
  * Le worker `module-trial-reminders` envoie J+1 / J-5 / J-2 par email.
  * À J14 sans décision → status='expired', accès coupé.
  */
-export async function startModuleTrialAction(
-  moduleCode: string,
-): Promise<FormState> {
+export async function startModuleTrialAction(moduleCode: string): Promise<FormState> {
   if (!moduleCode || moduleCode.length > 60) {
     return { error: 'Code module invalide' }
   }
@@ -296,8 +342,7 @@ export async function startModuleTrialAction(
 
   if (!subRow || !['trialing', 'active', 'past_due'].includes(subRow.status)) {
     return {
-      error:
-        'Aucun abonnement actif. Souscrivez à un forfait avant de démarrer un essai module.',
+      error: 'Aucun abonnement actif. Souscrivez à un forfait avant de démarrer un essai module.',
     }
   }
 
@@ -307,7 +352,10 @@ export async function startModuleTrialAction(
     supabase as unknown as {
       from: (t: string) => {
         select: (cols: string) => {
-          eq: (col: string, val: string) => {
+          eq: (
+            col: string,
+            val: string,
+          ) => {
             maybeSingle: () => Promise<{ data: AddonRow | null }>
           }
         }
@@ -350,13 +398,9 @@ export async function startModuleTrialAction(
     if (insertError.code === '23505') {
       return { error: 'Un essai est déjà en cours sur ce module' }
     }
-    if (
-      insertError.code === '42P01' ||
-      insertError.message?.includes('does not exist')
-    ) {
+    if (insertError.code === '42P01' || insertError.message?.includes('does not exist')) {
       return {
-        error:
-          "Module d'essai indisponible — les essais module seront activés prochainement.",
+        error: "Module d'essai indisponible — les essais module seront activés prochainement.",
       }
     }
     return { error: insertError.message }

@@ -49,6 +49,7 @@ import Link from 'next/link'
 import { type ReactNode, useEffect, useState } from 'react'
 
 import { AdemeForm } from './ademe-form'
+import { BaselineMinutesForm } from './baseline-minutes-form'
 import { CompanyForm } from './company-form'
 import { DeleteAccountButton } from './delete-account-button'
 import { NotificationPrefsForm } from './notification-prefs-form'
@@ -82,6 +83,7 @@ interface AccountSettingsClientProps {
     postal_code: string | null
     city: string | null
     certification_n: string | null
+    baseline_minutes_per_mission: number | null
   }
   subscription: {
     status: string
@@ -515,6 +517,16 @@ function CabinetTab({ props }: { props: AccountSettingsClientProps }) {
         <div className="pt-4 border-t border-[#0F1419]/[0.08]">
           <CompanyForm initial={props.organization} />
         </div>
+      </Card>
+
+      {/* Préférence gain de temps personnalisé (CLAUDE.md §2 + KOVAS_TABLEAU_DE_BORD préambule) */}
+      <Card variant="opaque" padding="default" className="space-y-4">
+        <SectionTitle
+          icon={Calculator}
+          title="Gain de temps · personnalisation"
+          iconColor="#34C759"
+        />
+        <BaselineMinutesForm initialMinutes={props.organization.baseline_minutes_per_mission} />
       </Card>
 
       <Card variant="opaque" padding="default" className="space-y-4">

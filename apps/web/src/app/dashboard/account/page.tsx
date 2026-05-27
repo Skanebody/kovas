@@ -186,9 +186,34 @@ export default async function AccountPage({
       .eq('organization_id', orgId)
       .is('deleted_at', null)
       .gte('created_at', monthStartIso),
-    supabase
-      .from('organizations')
-      .select('name, siret, vat_number, address, postal_code, city, certification_n')
+    // Note : `baseline_minutes_per_mission` ajoutée par migration
+    // 20260627100000 — les types Database générés ne la connaissent pas
+    // encore, on cast localement (cf. helper `getOrgBaselineMinutes`).
+    (
+      supabase
+        .from('organizations')
+        .select(
+          'name, siret, vat_number, address, postal_code, city, certification_n, baseline_minutes_per_mission',
+        ) as unknown as {
+        eq: (
+          k: string,
+          v: string,
+        ) => {
+          maybeSingle: () => Promise<{
+            data: {
+              name: string | null
+              siret: string | null
+              vat_number: string | null
+              address: string | null
+              postal_code: string | null
+              city: string | null
+              certification_n: string | null
+              baseline_minutes_per_mission: number | null
+            } | null
+          }>
+        }
+      }
+    )
       .eq('id', orgId)
       .maybeSingle(),
     supabase.from('profiles').select('linguistic_profile').eq('id', user.id).maybeSingle(),
@@ -358,6 +383,9 @@ export default async function AccountPage({
           postal_code: organization?.postal_code ?? null,
           city: organization?.city ?? null,
           certification_n: organization?.certification_n ?? null,
+          baseline_minutes_per_mission:
+            (organization as { baseline_minutes_per_mission?: number | null } | null)
+              ?.baseline_minutes_per_mission ?? null,
         }}
         subscription={
           subscription
