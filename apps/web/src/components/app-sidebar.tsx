@@ -22,7 +22,7 @@
  */
 
 import { cn } from '@/lib/utils'
-import { ChevronLeft, HelpCircle, Inbox, LayoutGrid, Settings } from 'lucide-react'
+import { ChevronLeft, HelpCircle, Inbox, LayoutGrid, Settings, UserSquare } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
@@ -326,6 +326,10 @@ function AppSidebarFallback({ access, suggestions, track }: AppSidebarFallbackPr
             label: "Aujourd'hui",
             icon: SYSTEM_ITEMS.parametres.icon,
           },
+          // Hub annuaire (Ma fiche · Reviews · Stats) — créé pour le track
+          // annuaire-only afin que le diag ait un point d'entrée centralisé
+          // vers la gestion de sa fiche publique.
+          { href: '/dashboard/annuaire', label: 'Ma fiche', icon: UserSquare },
           { href: '/dashboard/leads/incoming', label: 'Leads reçus', icon: Inbox },
         ]
       : [{ href: '/dashboard/dashboard', label: "Aujourd'hui", icon: LayoutGrid }]
