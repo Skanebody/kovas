@@ -608,18 +608,23 @@ function SectionCrossCheckSignature(): React.ReactElement {
 
           {/* Colonne droite : composant CrossCheck6Sources animé (2/5 ≈ 40%)
               Lot B+ — bascule du markup inline vers le composant réutilisable
-              `<CrossCheck6Sources mode="animated" />` : ticks chartreuse en
-              cascade (300ms initial + 150ms par source) qui matérialisent
+              `<CrossCheck6Sources mode="animated" compact />` : ticks chartreuse
+              en cascade (300ms initial + 150ms par source) qui matérialisent
               visuellement le contrôle automatique avant ADEME. Respect
               `prefers-reduced-motion`. La constante `sources` ci-dessus
-              reste utilisée pour le ledger SEO (sr-only) mais l'UI passe
-              par le composant. */}
+              reste utilisée pour le ledger SEO (sr-only) mais l'UI passe par
+              le composant.
+              Prop `compact` 2026-05-27 : la colonne droite ne fait que ~480px à
+              lg+. Sans compact, la grille interne `sm:grid-cols-2 xl:grid-cols-3`
+              fait des cards de ~140px où le sublabel URL débordait et
+              chevauchait le tick. Mode compact = layout horizontal serré
+              (icon + label + tick) sans description ni sublabel URL. */}
           <div className="lg:col-span-2">
             <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper p-6 sm:p-7">
               <p className="font-mono uppercase tracking-wider text-[10px] text-[#0F1419]/55 mb-5">
                 Les 6 sources croisées
               </p>
-              <CrossCheck6Sources mode="animated" />
+              <CrossCheck6Sources mode="animated" compact />
               {/* Ledger SEO : conserve les anciennes descriptions pour le crawl */}
               <ul className="sr-only">
                 {sources.map((s) => (

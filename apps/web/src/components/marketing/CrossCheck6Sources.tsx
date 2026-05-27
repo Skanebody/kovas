@@ -118,6 +118,14 @@ interface BaseProps {
   ariaLabel?: string
   /** Classe additionnelle conteneur. */
   className?: string
+  /**
+   * Layout dense pour placement en colonne étroite (≤ ~500px) — typiquement
+   * `lg:col-span-2` sur la homepage. Quand `true` :
+   * - Grille `grid-cols-1 sm:grid-cols-2` (jamais 3 cols)
+   * - SourceCard sans description ni sublabel URL (seul label + tick visibles)
+   * Sinon (default) : grille `sm:grid-cols-2 xl:grid-cols-3` + cards complètes.
+   */
+  compact?: boolean
 }
 
 interface StaticProps extends BaseProps {
@@ -155,12 +163,19 @@ export function CrossCheck6Sources(props: CrossCheck6SourcesProps): ReactElement
 
   switch (props.mode) {
     case 'static':
-      return <StaticGrid ariaLabel={ariaLabel} className={props.className} />
+      return (
+        <StaticGrid
+          ariaLabel={ariaLabel}
+          className={props.className}
+          compact={props.compact ?? false}
+        />
+      )
     case 'animated':
       return (
         <AnimatedGrid
           ariaLabel={ariaLabel}
           className={props.className}
+          compact={props.compact ?? false}
           stepDelayMs={props.stepDelayMs ?? 150}
         />
       )
@@ -209,21 +224,23 @@ function usePrefersReducedMotion(): boolean {
 function StaticGrid({
   ariaLabel,
   className,
+  compact,
 }: {
   ariaLabel: string
   className?: string
+  compact: boolean
 }): ReactElement {
+  /* Grille adaptative selon mode :
+     - `compact=true` (col étroite ≤500px : homepage col-span-2) : jamais 3 cols
+     - `compact=false` (pleine largeur) : 1 col mobile → 2 sm → 3 xl */
+  const gridCls = compact
+    ? 'grid grid-cols-1 sm:grid-cols-2 gap-3'
+    : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4'
   return (
     <div className={className}>
-      {/* 1 col mobile → 2 cols dès sm → 3 cols seulement en xl pour éviter
-          le chevauchement quand le composant est placé dans une colonne
-          étroite (cas homepage : lg:col-span-2 ≈ 40% d'écran). */}
-      <ul
-        aria-label={ariaLabel}
-        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4"
-      >
+      <ul aria-label={ariaLabel} className={gridCls}>
         {SOURCES.map((source) => (
-          <SourceCard key={source.key} source={source} ticked />
+          <SourceCard key={source.key} source={source} ticked compact={compact} />
         ))}
       </ul>
       <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55 text-center pt-4">
@@ -240,10 +257,12 @@ function StaticGrid({
 function AnimatedGrid({
   ariaLabel,
   className,
+  compact,
   stepDelayMs,
 }: {
   ariaLabel: string
   className?: string
+  compact: boolean
   stepDelayMs: number
 }): ReactElement {
   const reduced = usePrefersReducedMotion()
@@ -272,17 +291,22 @@ function AnimatedGrid({
     }
   }, [reduced, stepDelayMs])
 
+  /* Grille adaptative — voir StaticGrid pour la logique compact. */
+  const gridCls = compact
+    ? 'grid grid-cols-1 sm:grid-cols-2 gap-3'
+    : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4'
+
   return (
     <div className={className}>
-      {/* 1 col mobile → 2 cols dès sm → 3 cols seulement en xl pour éviter
-          le chevauchement quand le composant est placé dans une colonne
-          étroite (cas homepage : lg:col-span-2 ≈ 40% d'écran). */}
-      <ul
-        aria-label={ariaLabel}
-        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4"
-      >
+      <ul aria-label={ariaLabel} className={gridCls}>
         {SOURCES.map((source, idx) => (
-          <SourceCard key={source.key} source={source} ticked={idx < tickedCount} animatedTick />
+          <SourceCard
+            key={source.key}
+            source={source}
+            ticked={idx < tickedCount}
+            animatedTick
+            compact={compact}
+          />
         ))}
       </ul>
       <p className="font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55 text-center pt-4">
@@ -438,11 +462,47 @@ function SourceCard({
   source,
   ticked,
   animatedTick = false,
+  compact = false,
 }: {
   source: SourceDefinition
   ticked: boolean
   animatedTick?: boolean
+  compact?: boolean
 }): ReactElement {
+  /* Mode compact : carte allégée pour colonne étroite (≤500px).
+     - Pas de description ni sublabel URL (sources problématiques sur card
+       ~200px : `observatoire-dpe.ademe.fr` débordait avec break-all moche).
+     - Layout horizontal serré : icon + label + tick.
+     - min-h réduite (54px au lieu de 78px). */
+  if (compact) {
+    return (
+      <li className="relative flex items-center gap-3 rounded-xl border border-[#0F1419]/[0.08] bg-paper px-3.5 py-3 min-h-[54px]">
+        <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[#0F1419]/[0.08] bg-sage/60 text-[#0F1419]/72">
+          {source.icon}
+        </span>
+        <p className="flex-1 min-w-0 font-mono text-[11px] font-semibold uppercase tracking-wide text-[#0F1419] truncate pr-6">
+          {source.label}
+        </p>
+        <span
+          aria-hidden
+          className={[
+            'absolute top-1/2 -translate-y-1/2 right-3 inline-flex size-5 items-center justify-center rounded-full bg-chartreuse text-[#0F1419]',
+            animatedTick
+              ? 'transition-all duration-300 ease-out motion-reduce:transition-none'
+              : '',
+            ticked ? 'opacity-100 scale-100' : 'opacity-0 scale-50',
+          ].join(' ')}
+        >
+          <Check className="size-3" strokeWidth={3} aria-hidden />
+        </span>
+        <span className="sr-only">
+          {source.description} — {ticked ? 'vérifiée' : 'en attente'}
+        </span>
+      </li>
+    )
+  }
+
+  /* Mode comfortable (default) : carte complète avec description + sublabel. */
   return (
     <li className="relative flex items-start gap-3 rounded-xl border border-[#0F1419]/[0.08] bg-paper px-4 py-3.5 min-h-[78px]">
       <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-[#0F1419]/[0.08] bg-sage/60 text-[#0F1419]/72">
@@ -450,9 +510,8 @@ function SourceCard({
       </span>
       {/* min-w-0 indispensable pour permettre au texte de se contraindre dans
           un flex item. pr-8 réserve l'espace du tick top-right (size-5 + 12px
-          de marge) pour éviter tout chevauchement, même quand la card est
-          étroite (~150px en grille 3 cols). break-words sur les sublabel
-          longs comme "observatoire-dpe.ademe.fr". */}
+          de marge) pour éviter tout chevauchement. break-words sur les
+          sublabel longs comme "observatoire-dpe.ademe.fr". */}
       <div className="flex-1 min-w-0 pr-8">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-wide text-[#0F1419] break-words">
           {source.label}
