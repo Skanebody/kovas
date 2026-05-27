@@ -20,6 +20,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { safeLog } from '@/lib/security/safe-logger'
+
 export const runtime = 'nodejs'
 export const maxDuration = 15
 
@@ -65,7 +67,7 @@ export async function POST(request: Request): Promise<Response> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceRoleKey) {
-    console.error('[leads/verify-otp] missing Supabase env vars')
+    safeLog.error('[leads/verify-otp] missing Supabase env vars')
     return NextResponse.json({ error: 'server_misconfigured' }, { status: 500 })
   }
 
@@ -86,7 +88,7 @@ export async function POST(request: Request): Promise<Response> {
       }),
     })
   } catch (err) {
-    console.error('[leads/verify-otp] edge fetch failed', err)
+    safeLog.error('[leads/verify-otp] edge fetch failed', err)
     return NextResponse.json(
       { error: 'verify_failed', message: 'Service temporairement indisponible.' },
       { status: 502 },

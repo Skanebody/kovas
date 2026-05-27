@@ -1,0 +1,21 @@
+# KOVAS — Responsible Disclosure Policy (RFC 9116)
+# https://kovas.fr/.well-known/security.txt
+
+Contact: mailto:contact@kovas.fr
+Contact: https://kovas.fr/contact
+
+Preferred-Languages: fr, en
+
+Policy: https://kovas.fr/security-policy
+
+Acknowledgments: https://kovas.fr/security/thanks
+
+Hiring: https://kovas.fr/carrieres
+
+# Expires 1 an après création — à renouveler
+Expires: 2027-05-27T00:00:00.000Z
+
+# Encryption (PGP key à ajouter manuellement par Benjamin si souhaité)
+# Encryption: https://kovas.fr/.well-known/pgp-key.asc
+
+Canonical: https://kovas.fr/.well-known/security.txt

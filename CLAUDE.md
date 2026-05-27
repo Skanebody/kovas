@@ -916,3 +916,32 @@ Si marché FR saturé (50%+ de part KOVAS) :
 | Checklist migration prod (refonte 2026-05) | [`docs/refonte-2026-05/MIGRATION-PROD-CHECKLIST.md`](docs/refonte-2026-05/MIGRATION-PROD-CHECKLIST.md) — séquence Supabase + Vercel + Stripe, rollback, smoke tests post-bascule |
 | CGV v1.4 (Annuaire + Logiciel + essai 30j CB) | [`docs/legal/03-cgv.md`](docs/legal/03-cgv.md) — 4 tiers Phase 1, débit auto J+30, Customer Portal Stripe, dual track Annuaire/Logiciel, clauses API publique Upstash |
 | Variables d'environnement (source unique) | [`.env.example`](.env.example) à la racine du monorepo (PAS `apps/web/.env.example`). Next.js consomme via symlink `apps/web/.env.local → ../../.env.local`. Cf. FAQ UPSTASH-SETUP.md §9 |
+
+### Sécurité (audit 360° 2026-05-27)
+
+| Sujet | Document / Code de référence |
+|---|---|
+| Audit sécurité 360° + 11 actions Benjamin | [`docs/security/SECURITY-AUDIT-2026-05-27.md`](docs/security/SECURITY-AUDIT-2026-05-27.md) — rapport complet anti-piratage + anti-fuite, hardening transverse |
+| Procédure incident response RGPD | [`docs/INCIDENT-RESPONSE.md`](docs/INCIDENT-RESPONSE.md) — détection / containment / investigation / notification CNIL (72h) / eradication / post-mortem / contacts urgence |
+| Wrapper console avec scrub PII auto en prod | [`apps/web/src/lib/security/safe-logger.ts`](apps/web/src/lib/security/safe-logger.ts) — remplacer `console.*` par `safeLogger.*` (scrub emails, tokens, SIRET, IBAN, phone en NODE_ENV=production) |
+| Helper Sentry beforeSend scrub PII | [`apps/web/src/lib/security/scrub-pii.ts`](apps/web/src/lib/security/scrub-pii.ts) — câblé dans Sentry init pour purger payloads d'erreur |
+| Banner consent cookies CNIL-compliant | [`apps/web/src/lib/cookies/`](apps/web/src/lib/cookies/) (`consent-storage.ts` + `use-cookie-consent.ts`) — stockage 13 mois, opt-in granulaire, retrait 1 clic |
+| Composants banner cookies | [`apps/web/src/components/cookies/`](apps/web/src/components/cookies/) — banner + provider + bouton "Gérer mes cookies" footer |
+| Endpoint CSP report violations | [`apps/web/src/app/api/security/csp-report/route.ts`](apps/web/src/app/api/security/csp-report/route.ts) — collecte rapports CSP du navigateur pour détection injections |
+
+### IA Autonome (15 systèmes + 6 algos self-learning)
+
+| Sujet | Document / Code de référence |
+|---|---|
+| Vision SaaS auto-piloté 95% | [`docs/strategy/AI_AUTONOMY_V1.md`](docs/strategy/AI_AUTONOMY_V1.md) — 15 systèmes autonomes + 6 algos self-learning + roadmap activation par phase |
+| Mapping état réel par système | [`docs/strategy/AI_AUTONOMY_STATUS.md`](docs/strategy/AI_AUTONOMY_STATUS.md) — 10/15 systèmes complets, 3 différés stratégiquement (paid ads M9+, chat IA M19+, args optimizer M12+) |
+| Algo 22 — Upsell timing prediction | [`apps/web/src/lib/algos/upsell-timing.ts`](apps/web/src/lib/algos/upsell-timing.ts) — prédit fenêtre optimale d'offre upsell selon comportement user |
+| Algo 23 — LTV forecasting | [`apps/web/src/lib/algos/ltv-forecasting.ts`](apps/web/src/lib/algos/ltv-forecasting.ts) — projection LTV par cohorte avec churn factoring |
+| Algo 24 — Personalization engine | [`apps/web/src/lib/algos/personalization-engine.ts`](apps/web/src/lib/algos/personalization-engine.ts) — adaptation UI/copy selon profil + comportement |
+| Système 2 — Email subject auto-optimization | [`apps/web/src/lib/email-bandit/`](apps/web/src/lib/email-bandit/) — templates + scorer + selector + prompts Thompson Sampling sur subject lines |
+| Système 5 — Upsell engine contextuel | [`apps/web/src/lib/upsell-engine/`](apps/web/src/lib/upsell-engine/) — triggers + scorer + offer-selector (basé sur Algo 22) |
+| Système 8 — Lead scoring visiteurs site | [`apps/web/src/lib/visitor-scoring/`](apps/web/src/lib/visitor-scoring/) — behavior + score + classifier sur visiteurs anonymes (extension Algo A1.3.5 B2C) |
+| Système 9 — Sentiment monitoring | [`apps/web/src/lib/sentiment/`](apps/web/src/lib/sentiment/) — analyzer + prompts + trends sur tickets support + reviews via Claude Haiku |
+| Système 10 — Feature usage learner | [`apps/web/src/lib/feature-usage/`](apps/web/src/lib/feature-usage/) — catalog + analyzer + retention-uplift + promotion-engine (PostHog → hebdo) |
+| Système 11 — Customer success retention | [`apps/web/src/lib/customer-success/`](apps/web/src/lib/customer-success/) — health score + actions + templates emails auto (PAS chat IA, différé Phase 3 M19+) |
+| Système 14 — Competitive intelligence | [`apps/web/src/lib/competitive/`](apps/web/src/lib/competitive/) — extractor + diff + analyze (scraping daily Liciel/ORIS/OBBC + Claude Sonnet analyse) |

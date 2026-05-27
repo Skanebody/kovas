@@ -25,6 +25,7 @@
 
 import { dispatchRecipients } from '@/lib/leads/dispatch-recipients'
 import { quoteRequestPayloadSchema } from '@/lib/quote-request/schema'
+import { safeLog } from '@/lib/security/safe-logger'
 import type { Database } from '@kovas/database/types'
 import { type SupabaseClient, createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
@@ -109,7 +110,7 @@ export async function POST(request: Request): Promise<Response> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceRoleKey) {
-    console.error('[leads/submit] missing Supabase env vars')
+    safeLog.error('[leads/submit] missing Supabase env vars')
     return NextResponse.json({ error: 'server_misconfigured' }, { status: 500 })
   }
 
@@ -190,7 +191,7 @@ export async function POST(request: Request): Promise<Response> {
     .single()
 
   if (insertResp.error || !insertResp.data) {
-    console.error('[leads/submit] insert failed', insertResp.error)
+    safeLog.error('[leads/submit] insert failed', insertResp.error)
     return NextResponse.json(
       { error: 'insert_failed', message: insertResp.error?.message ?? 'unknown' },
       { status: 500 },
@@ -230,7 +231,7 @@ export async function POST(request: Request): Promise<Response> {
       .eq('id', inserted.id)
   } catch (err) {
     // Le scoring est best-effort — un échec ne bloque pas le routing du lead.
-    console.error('[leads/submit] intent scoring failed (non-blocking)', err)
+    safeLog.error('[leads/submit] intent scoring failed (non-blocking)', err)
   }
 
   // 4. Lie l'OTP au lead (pour audit) si pas déjà lié
@@ -250,7 +251,7 @@ export async function POST(request: Request): Promise<Response> {
     const dispatchResult = await dispatchRecipients(admin, inserted.id, baseUrl)
     recipientCount = dispatchResult.totalRecipients
   } catch (err) {
-    console.error('[leads/submit] dispatch failed', err)
+    safeLog.error('[leads/submit] dispatch failed', err)
     routingStrategy = 'failed'
   }
 

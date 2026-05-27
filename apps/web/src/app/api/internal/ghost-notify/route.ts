@@ -2,7 +2,9 @@
  * KOVAS — Endpoint interne appelé par l'Edge Function `ghost-lifecycle-cron`.
  *
  * POST /api/internal/ghost-notify
- * Headers : Authorization: Bearer <INTERNAL_CRON_SECRET | CRON_SECRET>
+ * Headers : Authorization: Bearer <INTERNAL_GHOST_NOTIFY_SECRET>
+ *           Fallback temporaire (legacy migration) : INTERNAL_CRON_SECRET → CRON_SECRET.
+ *           Cf. docs/security/INTERNAL-SECRETS-MIGRATION.md
  * Body    : { diagnosticianId: string, status: 'warned' | 'demoted' | 'soft_disabled' }
  *
  * Charge le template HTML approprié + envoie via Resend.
@@ -37,13 +39,37 @@ interface DiagRow {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  // Auth interne
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-  const internalSecret = process.env.INTERNAL_CRON_SECRET ?? cronSecret
+  // Auth interne : secret dédié par endpoint (anti-single-point-of-failure)
+  // Phase 1 (actuelle) : fallback vers INTERNAL_CRON_SECRET puis CRON_SECRET avec warning.
+  // Phase 2 (à venir, action Benjamin) : configurer INTERNAL_GHOST_NOTIFY_SECRET dédié
+  //   en prod via Vercel env vars, puis retirer CRON_SECRET du fallback global.
+  let internalSecret: string | undefined = process.env.INTERNAL_GHOST_NOTIFY_SECRET
   if (!internalSecret) {
-    return NextResponse.json({ error: 'INTERNAL_CRON_SECRET not configured' }, { status: 500 })
+    // Fallback legacy : INTERNAL_CRON_SECRET partagé
+    internalSecret = process.env.INTERNAL_CRON_SECRET
+    if (internalSecret) {
+      console.warn(
+        '[security] /api/internal/ghost-notify utilise INTERNAL_CRON_SECRET (partagé legacy). ' +
+          'Configurer INTERNAL_GHOST_NOTIFY_SECRET dédié. Cf. docs/security/INTERNAL-SECRETS-MIGRATION.md',
+      )
+    } else {
+      // Fallback final : CRON_SECRET global (déprécié)
+      internalSecret = process.env.CRON_SECRET
+      if (internalSecret) {
+        console.warn(
+          '[security] /api/internal/ghost-notify utilise CRON_SECRET fallback (single-point-of-failure). ' +
+            'Configurer INTERNAL_GHOST_NOTIFY_SECRET dédié. Cf. docs/security/INTERNAL-SECRETS-MIGRATION.md',
+        )
+      }
+    }
   }
+  if (!internalSecret) {
+    return NextResponse.json(
+      { error: 'INTERNAL_GHOST_NOTIFY_SECRET not configured' },
+      { status: 500 },
+    )
+  }
+  const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${internalSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

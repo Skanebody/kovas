@@ -5,6 +5,7 @@ import {
   sendTrialEndingReminder,
 } from '@/lib/email/billing'
 import { onFirstInvoicePaid } from '@/lib/referral/referral-engine'
+import { safeLog } from '@/lib/security/safe-logger'
 import { getStripe, isStripeConfigured } from '@/lib/stripe'
 import { getTier } from '@/lib/stripe-config'
 import type { Database } from '@kovas/database/types'
@@ -236,7 +237,7 @@ export async function POST(request: Request) {
         try {
           await onFirstInvoicePaid({ supabase: admin, paidUserId: ownerUserId })
         } catch (refErr) {
-          console.warn('referral reward failed:', refErr)
+          safeLog.warn('referral reward failed:', refErr)
         }
         break
       }

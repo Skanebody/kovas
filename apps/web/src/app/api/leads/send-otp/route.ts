@@ -19,6 +19,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { safeLog } from '@/lib/security/safe-logger'
+
 export const runtime = 'nodejs'
 export const maxDuration = 15
 
@@ -62,7 +64,7 @@ export async function POST(request: Request): Promise<Response> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceRoleKey) {
-    console.error('[leads/send-otp] missing Supabase env vars')
+    safeLog.error('[leads/send-otp] missing Supabase env vars')
     return NextResponse.json({ error: 'server_misconfigured' }, { status: 500 })
   }
 
@@ -84,7 +86,7 @@ export async function POST(request: Request): Promise<Response> {
       body: JSON.stringify({ phone, purpose, leadId: leadId ?? null }),
     })
   } catch (err) {
-    console.error('[leads/send-otp] edge fetch failed', err)
+    safeLog.error('[leads/send-otp] edge fetch failed', err)
     return NextResponse.json(
       { error: 'sms_send_failed', message: 'Service temporairement indisponible.' },
       { status: 502 },

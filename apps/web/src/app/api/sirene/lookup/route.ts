@@ -1,3 +1,4 @@
+import { safeLog } from '@/lib/security/safe-logger'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isFakeSiretAllowed, validateSiret } from '@/lib/validation/siret'
 import { NextResponse } from 'next/server'
@@ -41,7 +42,7 @@ export async function GET(request: Request) {
       return NextResponse.json(data)
     }
   } catch (e) {
-    console.warn('verify-sirene invoke failed, using mock:', e)
+    safeLog.warn('verify-sirene invoke failed, using mock:', e)
   }
 
   // 2) Fallback mock — utile en dev / preview deploy

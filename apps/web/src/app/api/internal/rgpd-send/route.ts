@@ -2,7 +2,10 @@
  * Endpoint interne pour envoi d'un email RGPD préalable.
  * Appelé exclusivement par la cron Supabase Edge Function `diagnostician-rgpd-cron`.
  *
- * Auth : Bearer ${INTERNAL_RGPD_SECRET} (fallback CRON_SECRET).
+ * Auth : Bearer ${INTERNAL_RGPD_SEND_SECRET} (secret dédié par endpoint).
+ * Fallback temporaire (legacy migration) : INTERNAL_RGPD_SECRET → CRON_SECRET.
+ * Cf. docs/security/INTERNAL-SECRETS-MIGRATION.md
+ *
  * Body : { diag_id: string, step: 1 | 2 | 3 }
  *
  * Note : route séparée du cron Edge car Next.js a accès au système de fichiers
@@ -14,14 +17,37 @@ import {
   sendPreNotificationEmail2,
   sendPreNotificationEmail3,
 } from '@/lib/emails/diagnostician-rgpd-sender'
+import { safeLog } from '@/lib/security/safe-logger'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
-  // Auth
-  const secret = process.env.INTERNAL_RGPD_SECRET ?? process.env.CRON_SECRET
+  // Auth : secret dédié par endpoint (anti-single-point-of-failure)
+  // Phase 1 (actuelle) : fallback vers CRON_SECRET avec warning pour backward compat
+  // Phase 2 (à venir, action Benjamin) : configurer INTERNAL_RGPD_SEND_SECRET dédié
+  //   en prod via Vercel env vars, puis retirer CRON_SECRET du fallback global.
+  let secret: string | undefined = process.env.INTERNAL_RGPD_SEND_SECRET
+  if (!secret) {
+    // Fallback legacy : INTERNAL_RGPD_SECRET historique
+    secret = process.env.INTERNAL_RGPD_SECRET
+    if (secret) {
+      console.warn(
+        '[security] /api/internal/rgpd-send utilise INTERNAL_RGPD_SECRET (legacy). ' +
+          'Configurer INTERNAL_RGPD_SEND_SECRET dédié. Cf. docs/security/INTERNAL-SECRETS-MIGRATION.md',
+      )
+    } else {
+      // Fallback final : CRON_SECRET global (déprécié)
+      secret = process.env.CRON_SECRET
+      if (secret) {
+        console.warn(
+          '[security] /api/internal/rgpd-send utilise CRON_SECRET fallback (single-point-of-failure). ' +
+            'Configurer INTERNAL_RGPD_SEND_SECRET dédié. Cf. docs/security/INTERNAL-SECRETS-MIGRATION.md',
+        )
+      }
+    }
+  }
   if (!secret) {
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
   }
@@ -59,7 +85,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, diag_id: body.diag_id, step: body.step })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    console.error(`[rgpd-send] Failed diag=${body.diag_id} step=${body.step}: ${message}`)
+    safeLog.error(`[rgpd-send] Failed diag=${body.diag_id} step=${body.step}: ${message}`)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

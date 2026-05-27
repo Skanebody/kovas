@@ -149,3 +149,86 @@ rules:
       - pattern-inside: |
           "use client"
           ...
+
+  # ============================================================
+  # 8. Anthropic API keys (sk-ant-*)
+  # ============================================================
+  - id: no-hardcoded-anthropic-key
+    pattern-regex: 'sk-ant-(?:api03-)?[A-Za-z0-9_\-]{40,}'
+    message: |
+      Clé API Anthropic hardcodée détectée. Utilise process.env.ANTHROPIC_API_KEY ou un secret Vault Supabase.
+    languages: [typescript, javascript, tsx, jsx]
+    severity: ERROR
+    paths:
+      exclude:
+        - .env.example
+        - docs/
+        - "**/*.md"
+        - "**/*.test.ts"
+        - "**/*.test.tsx"
+
+  # ============================================================
+  # 9. OpenAI API keys (sk-proj-* ou sk-*)
+  # ============================================================
+  - id: no-hardcoded-openai-key
+    pattern-regex: 'sk-(?:proj-)?[A-Za-z0-9_\-]{40,}'
+    message: |
+      Clé API OpenAI hardcodée détectée. Utilise process.env.OPENAI_API_KEY.
+    languages: [typescript, javascript, tsx, jsx]
+    severity: ERROR
+    paths:
+      exclude:
+        - .env.example
+        - docs/
+        - "**/*.md"
+        - "**/*.test.ts"
+        - "**/*.test.tsx"
+
+  # ============================================================
+  # 10. Stripe keys (sk_live_, sk_test_, pk_live_, whsec_)
+  # ============================================================
+  - id: no-hardcoded-stripe-key
+    pattern-regex: '(?:sk|pk|rk|whsec)_(?:test|live)_[A-Za-z0-9]{20,}'
+    message: |
+      Clé Stripe hardcodée détectée. Utilise process.env.STRIPE_SECRET_KEY ou process.env.STRIPE_WEBHOOK_SECRET.
+    languages: [typescript, javascript, tsx, jsx]
+    severity: ERROR
+    paths:
+      exclude:
+        - .env.example
+        - docs/
+        - "**/*.md"
+        - "**/*.test.ts"
+        - "**/*.test.tsx"
+
+  # ============================================================
+  # 11. Supabase PAT (sbp_) ou service role (sb_secret_)
+  # ============================================================
+  - id: no-hardcoded-supabase-pat
+    pattern-regex: '(?:sbp_|sb_secret_|sb_publishable_)[A-Za-z0-9_\-]{20,}'
+    message: |
+      Token Supabase hardcodé détecté. Utilise process.env.SUPABASE_ACCESS_TOKEN ou SUPABASE_SERVICE_ROLE_KEY.
+    languages: [typescript, javascript, tsx, jsx]
+    severity: ERROR
+    paths:
+      exclude:
+        - .env.example
+        - docs/
+        - "**/*.md"
+        - "**/*.test.ts"
+        - "**/*.test.tsx"
+
+  # ============================================================
+  # 12. Mot de passe DB en clair (DATABASE_URL / POSTGRES_URL / etc.)
+  # ============================================================
+  - id: no-hardcoded-db-password
+    pattern-regex: '(?:DATABASE_URL|POSTGRES_URL|SUPABASE_DB_PASSWORD)\s*=\s*[''"](?!\$\{|XXX|placeholder|example|YOUR_)[^''"]+[''"]'
+    message: |
+      Mot de passe DB hardcodé détecté. Utilise toujours des secrets env vars (Vercel, Supabase Vault).
+    languages: [typescript, javascript, tsx, jsx]
+    severity: ERROR
+    paths:
+      exclude:
+        - .env.example
+        - docs/
+        - "**/*.md"

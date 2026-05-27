@@ -20,6 +20,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { safeLog } from '@/lib/security/safe-logger'
 import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
@@ -80,7 +81,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceRoleKey) {
-    console.error('[recovery/request-client-photo] missing env vars')
+    safeLog.error('[recovery/request-client-photo] missing env vars')
     return NextResponse.json({ error: 'server_misconfigured' }, { status: 500 })
   }
 
@@ -102,7 +103,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       }),
     })
   } catch (err) {
-    console.error('[recovery/request-client-photo] edge_unreachable', err)
+    safeLog.error('[recovery/request-client-photo] edge_unreachable', err)
     return NextResponse.json({ error: 'edge_unreachable' }, { status: 502 })
   }
 

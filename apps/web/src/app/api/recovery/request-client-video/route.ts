@@ -15,6 +15,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+import { safeLog } from '@/lib/security/safe-logger'
 import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
@@ -88,7 +89,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       }),
     })
   } catch (err) {
-    console.error('[recovery/request-client-video] edge_unreachable', err)
+    safeLog.error('[recovery/request-client-video] edge_unreachable', err)
     return NextResponse.json({ error: 'edge_unreachable' }, { status: 502 })
   }
 
