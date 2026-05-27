@@ -36,7 +36,6 @@
  */
 
 import { CrossCheck6Sources } from '@/components/marketing/CrossCheck6Sources'
-import { RotatingSoftwareName } from '@/components/marketing/RotatingSoftwareName'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -77,7 +76,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export const metadata = buildMetadata({
-  title: 'Plus jamais 21 h devant Liciel | KOVAS · Logiciel diagnostiqueur immobilier',
+  // Title raccourci pour SERP Google (~64 chars avant troncature à 60-70).
+  // Suffix "KOVAS" omis : présent dans le canonical + Open Graph site_name.
+  title: 'Terminé les 3 heures par jour sur Liciel, OBBC, AnalysImmo, ORIS',
   description:
     'Capture vocale et photos pendant ta mission. Tes données arrivent dans Liciel prêtes à l’envoi ADEME. 35 minutes gagnées par mission, mesuré sur 30 diagnostiqueurs partenaires. Essai 30 jours.',
   path: '/',
@@ -96,27 +97,24 @@ function SectionHero(): React.ReactElement {
           Logiciel SaaS · Diagnostic immobilier
         </p>
         {/*
-          Big Idea Tugan révisée (cf. KOVAS_COPY_FOUNDATIONS §4.3) :
-            - Loss aversion forte ("Plus jamais")
-            - Specificity chiffrée ("21h")
-            - Polarization (Liciel mentionné = parle aux 65% du marché)
+          Big Idea Tugan révisée 2026-05-27 (cf. KOVAS_COPY_FOUNDATIONS §4.3) :
+            - Loss aversion ("Terminé") plus doux que "Plus jamais" mais
+              toujours présupposition de soulagement
+            - Specificity chiffrée ("3 heures par jour") — pain quotidien
+              plus large que les "21h" (soirées tardives uniquement)
+            - Polarization complète : les 4 concurrents listés explicitement
+              au lieu du cyclage dynamique — parle aux 100% du marché FR sans
+              attendre la rotation
             - Language match (vocabulaire vrai du diagnostiqueur)
-            - Clarity en 5 mots = max retention
-            - Pain dominant adressé (les soirées tardives = #1 dans avatar)
+            - Pain dominant adressé : temps perdu en saisie post-terrain
+            - "Liciel" conservé en première position pour SEO + 65% PdM
         */}
         <h1
           className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
           style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
         >
-          <span className="font-serif italic font-normal">Plus jamais</span> 21 h devant{' '}
-          {/* Cyclage dynamique des 4 logiciels concurrents compatibles (Liciel ·
-              OBBC · AnalysImmo · ORIS) — parle aux 100% du marché au lieu des
-              65% Liciel-only. Le GlossaryTerm est conservé sur la première
-              occurrence rendue (Liciel) pour le SEO. */}
-          <GlossaryTerm term="liciel">
-            <RotatingSoftwareName />
-          </GlossaryTerm>
-          .
+          <span className="font-serif italic font-normal">Terminé</span> les 3 heures par jour sur{' '}
+          <GlossaryTerm term="liciel">Liciel</GlossaryTerm>, OBBC, AnalysImmo ou ORIS.
         </h1>
         <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
           Capture vocale et photos pendant ta mission. Tes données arrivent dans Liciel prêtes à
