@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 70" fill="none">
+  <!-- "O" remplace par triangle orange pointe haut (signature OBBC) -->
+  <g transform="translate(8,8)">
+    <path d="M22 4 L40 34 L4 34 Z" fill="none" stroke="#E84E2A" stroke-width="4" stroke-linejoin="round"/>
+    <!-- pastille interieure triangle -->
+    <circle cx="22" cy="24" r="2.5" fill="#E84E2A"/>
+  </g>
+  <!-- "BBC" lettres epaisses orange -->
+  <text x="58" y="38"
+    font-family="'Helvetica Neue', Arial, sans-serif"
+    font-size="36"
+    font-weight="900"
+    fill="#E84E2A"
+    letter-spacing="-1">BBC</text>
+  <!-- sous-titre "WINDIAGNOSTICS" navy bleu -->
+  <text x="8" y="58"
+    font-family="'Helvetica Neue', Arial, sans-serif"
+    font-size="11"
+    font-weight="700"
+    fill="#1B3A6E"
+    letter-spacing="3.2">WINDIAGNOSTICS</text>
+</svg>

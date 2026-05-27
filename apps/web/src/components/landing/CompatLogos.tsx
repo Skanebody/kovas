@@ -1,186 +1,105 @@
 /* eslint-disable @next/next/no-img-element */
-import type { ReactNode } from 'react'
 
 /**
- * Wordmarks SVG des 8 logiciels métier compatibles KOVAS.
+ * Logos SVG des 8 logiciels métier compatibles KOVAS.
  *
- * Stratégie hybride documentée dans `apps/web/public/logos/compat/MANIFEST.md` :
+ * Stratégie documentée dans `apps/web/public/logos/compat/MANIFEST.md`
+ * (refonte 2026-05-28) : chaque logo a désormais son identité visuelle
+ * propre (couleurs, glyphes) au lieu du wordmark uniforme précédent.
  *
- *  - **LICIEL** : SVG officiel récupéré depuis liciel.fr (logo figuratif rouge
- *    #E84242 + wordmark). Affiché tel quel via <img>, hauteur normalisée 28px.
+ * Sources :
+ *  - **Liciel** : SVG officiel récupéré sur liciel.fr (rouge `#E84242`)
+ *  - **4 logos retracés fidèlement** depuis sources officielles PNG/AVIF :
+ *    AnalysImmo (atlibitum.com), WinDiagnostics (obbc.fr), GestionDiag
+ *    (gestiondiag.fr), Argos (ithaque-renovation.fr)
+ *  - **3 wordmarks stylés** créés ex-nihilo faute de source officielle :
+ *    Im'Diag, ORIS, DPEWin — couleurs d'accent uniques pour différenciation
  *
- *  - **7 autres** (AnalysImmo, WinDiagnostics, GestionDiag, Im'Diag, ORIS,
- *    Argos, DPEWin) : wordmarks SVG inline en typographie KOVAS (Urbanist
- *    600, fill currentColor). Les éléments figuratifs propriétaires (couleurs
- *    spécifiques, glyphes, icônes) **ne sont PAS reproduits** — uniquement le
- *    nom du logiciel en typographie neutre. Cette approche :
- *      (a) garantit l'uniformité visuelle dans la grille
- *      (b) évite la contrefaçon de marque figurative (jurisprudence FR :
- *          la marque verbale reste citable en usage informatif, art. L.713-3
- *          CPI + droit à l'information du consommateur)
- *      (c) reste défendable comme citation factuelle de compatibilité
+ * Tous les SVG sont autonomes (couleurs hex hardcodées, pas de currentColor)
+ * et chargés via `<img src>` — pas d'inline SVG (HTML/CSS plus simple, cache
+ * navigateur efficace, et le scope copyright reste sur fichiers statiques
+ * versionnés).
  *
- * Disclaimer à afficher dans CompatGrid : "Les marques citées appartiennent à
- * leurs propriétaires respectifs. KOVAS n'est ni affilié à, ni endossé par
- * ces éditeurs." (rendu en font-mono petit format sous la grille).
+ * Cadre juridique : art. L.713-3 CPI (usage informatif descriptif de marques
+ * tierces) + CJUE BMW c/ Deenik (C-63/97) (compatibilité réelle signalable).
+ * Disclaimer en pied de CompatGrid. Procédure de retrait sous 7 jours
+ * documentée dans MANIFEST.md si demande amiable d'un éditeur.
  */
 
-interface WordmarkProps {
+const RENDER_HEIGHT = 32 // h-8 du grid wrapper
+
+interface LogoProps {
   className?: string
-  ariaLabel: string
-  /** viewBox width — calibré pour text-anchor middle centré. */
-  width: number
-  /** Texte du wordmark. */
-  text: string
-  /** Si présent : point accent rendu après le texte (mimétisme "LICIEL." du mockup original). */
-  trailingDot?: boolean
-  /** Lettrage spécial : letter-spacing custom (ex: ORIS étiré). */
-  letterSpacing?: number
 }
-
-const VIEWBOX_HEIGHT = 40
-const FONT_SIZE = 22
-const RENDER_HEIGHT = 28
 
 /**
- * Wordmark générique — SVG inline, font-family hérité du DOM parent (Urbanist
- * via next/font). fill `currentColor` permet de styler depuis le parent.
+ * Factory : crée un composant logo `<img>` standardisé pointant vers le
+ * fichier SVG dans `/public/logos/compat/`.
+ *
+ * Sizing "fit-within" :
+ *  - max-height = 32px (cale sur la hauteur du wrapper h-8)
+ *  - max-width = plafond logo selon ratio (évite les SVG trop étirés)
+ *  - height/width = auto + object-contain → le navigateur scale-down
+ *    proportionnellement quand la cellule mobile est plus étroite que le
+ *    plafond, sans déformer ni couper le logo.
  */
-function Wordmark({
-  className,
-  ariaLabel,
-  width,
-  text,
-  trailingDot = false,
-  letterSpacing = 0,
-}: WordmarkProps): ReactNode {
-  return (
-    <svg
-      role="img"
-      aria-label={ariaLabel}
-      viewBox={`0 0 ${width} ${VIEWBOX_HEIGHT}`}
-      height={RENDER_HEIGHT}
-      width="auto"
-      className={className}
-      style={{ display: 'block' }}
-    >
-      <text
-        x="0"
-        y="28"
-        fontFamily="Urbanist, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
-        fontWeight={600}
-        fontSize={FONT_SIZE}
-        letterSpacing={letterSpacing}
-        fill="currentColor"
-      >
-        {text}
-      </text>
-      {trailingDot && <circle cx={width - 6} cy={32} r={3.5} fill="#95B11A" aria-hidden />}
-    </svg>
-  )
+function makeLogoComponent(
+  slug: string,
+  alt: string,
+  options: { maxWidth?: number } = {},
+): (props: LogoProps) => React.ReactElement {
+  const maxWidth = options.maxWidth ?? 140
+  return function LogoImage({ className }: LogoProps) {
+    return (
+      <img
+        src={`/logos/compat/${slug}-logo.svg`}
+        alt={alt}
+        className={className}
+        style={{
+          maxHeight: RENDER_HEIGHT,
+          maxWidth,
+          width: 'auto',
+          height: 'auto',
+          objectFit: 'contain',
+          display: 'block',
+        }}
+      />
+    )
+  }
 }
 
 /* ============================================================
-   LICIEL — logo officiel (récupéré depuis liciel.fr)
-   ============================================================ */
-export function LicielLogo({ className }: { className?: string }) {
-  return (
-    <img
-      src="/logos/compat/liciel-logo.svg"
-      alt="LICIEL — logo officiel"
-      width={120}
-      height={RENDER_HEIGHT}
-      className={className}
-      style={{
-        height: RENDER_HEIGHT,
-        width: 'auto',
-        maxWidth: 130,
-        display: 'block',
-      }}
-    />
-  )
-}
-
-/* ============================================================
-   7 wordmarks SVG style KOVAS
+   8 logos compatibles — identités visuelles propres
    ============================================================ */
 
-export function AnalysImmoLogo({ className }: { className?: string }) {
-  return (
-    <Wordmark
-      className={className}
-      ariaLabel="AnalysImmo — logiciel diagnostic Atlibitum"
-      width={138}
-      text="AnalysImmo"
-    />
-  )
-}
+export const LicielLogo = makeLogoComponent('liciel', 'Liciel — logo officiel', { maxWidth: 130 })
 
-export function WinDiagnosticsLogo({ className }: { className?: string }) {
-  // Plus long — viewBox étiré pour préserver la lisibilité.
-  return (
-    <Wordmark
-      className={className}
-      ariaLabel="WinDiagnostics — logiciel diagnostic"
-      width={172}
-      text="WinDiagnostics"
-    />
-  )
-}
+export const AnalysImmoLogo = makeLogoComponent('analysimmo', 'AnalysImmo — logiciel Atlibitum', {
+  maxWidth: 140,
+})
 
-export function GestionDiagLogo({ className }: { className?: string }) {
-  return (
-    <Wordmark
-      className={className}
-      ariaLabel="GestionDiag — logiciel CRM diagnostic"
-      width={142}
-      text="GestionDiag"
-    />
-  )
-}
+export const WinDiagnosticsLogo = makeLogoComponent(
+  'windiagnostics',
+  'WinDiagnostics — logiciel OBBC',
+  { maxWidth: 150 },
+)
 
-export function ImDiagLogo({ className }: { className?: string }) {
-  return (
-    <Wordmark
-      className={className}
-      ariaLabel="Im'Diag — logiciel multi-modules diagnostic"
-      width={86}
-      text="Im'Diag"
-    />
-  )
-}
+export const GestionDiagLogo = makeLogoComponent('gestiondiag', 'GestionDiag — CRM diagnostic', {
+  maxWidth: 145,
+})
 
-export function OrisLogo({ className }: { className?: string }) {
-  // Court (4 lettres) — letter-spacing élargi pour densité visuelle.
-  return (
-    <Wordmark
-      className={className}
-      ariaLabel="ORIS — logiciel diagnostic immobilier"
-      width={82}
-      text="ORIS"
-      letterSpacing={2.5}
-    />
-  )
-}
+export const ImDiagLogo = makeLogoComponent('imdiag', "Im'Diag — multi-modules diagnostic", {
+  maxWidth: 125,
+})
 
-export function ArgosLogo({ className }: { className?: string }) {
-  return (
-    <Wordmark
-      className={className}
-      ariaLabel="Argos — logiciel Ithaque audit & diagnostic"
-      width={74}
-      text="Argos"
-    />
-  )
-}
+export const OrisLogo = makeLogoComponent('oris', 'ORIS — diagnostic immobilier', {
+  maxWidth: 115,
+})
 
-export function DpeWinLogo({ className }: { className?: string }) {
-  return (
-    <Wordmark
-      className={className}
-      ariaLabel="DPEWin — logiciel Perrenoud thermique"
-      width={86}
-      text="DPEWin"
-    />
-  )
-}
+export const ArgosLogo = makeLogoComponent('argos', 'Argos — Ithaque audit & diagnostic', {
+  maxWidth: 125,
+})
+
+export const DpeWinLogo = makeLogoComponent('dpewin', 'DPEWin — logiciel Perrenoud', {
+  maxWidth: 125,
+})

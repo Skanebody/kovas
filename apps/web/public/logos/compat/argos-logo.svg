@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" fill="none">
+  <!-- Icone maison stylisee verte degradee (signature Argos) -->
+  <defs>
+    <linearGradient id="argosGreen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3DD68C"/>
+      <stop offset="100%" stop-color="#1A6E50"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(4,10)">
+    <!-- toit pointu -->
+    <path d="M22 2 L42 22 L42 38 L22 38 L4 38 L4 22 Z" fill="url(#argosGreen)"/>
+    <!-- coin replie effet origami -->
+    <path d="M4 22 L4 38 L18 30 L4 22 Z" fill="#2A9F70" opacity="0.6"/>
+  </g>
+  <!-- Wordmark "Argos" charcoal arrondi bold -->
+  <text x="58" y="42"
+    font-family="'Helvetica Neue', Arial, sans-serif"
+    font-size="38"
+    font-weight="800"
+    fill="#1F2A2A"
+    letter-spacing="-1.6">Argos</text>
+</svg>

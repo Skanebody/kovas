@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" fill="none">
+  <!-- Icone livres empiles (bleu marine) + livre orange dessus -->
+  <g transform="translate(4,8)">
+    <!-- livre bleu marine fond -->
+    <path d="M2 30 L2 8 Q2 4 6 4 L34 4 Q38 4 38 8 L38 30 L34 32 L6 32 Z" fill="#1F3A6E"/>
+    <!-- separation tranche -->
+    <path d="M2 30 L38 30" stroke="#0F1F3F" stroke-width="1.2"/>
+    <!-- livre orange ouvert dessus -->
+    <path d="M0 18 L8 14 L20 18 L20 32 L8 28 L0 32 Z" fill="#F39C1F"/>
+    <path d="M20 18 L32 14 L40 18 L40 32 L32 28 L20 32 Z" fill="#F39C1F"/>
+    <path d="M20 18 L20 32" stroke="#D67E0A" stroke-width="1"/>
+  </g>
+  <!-- Wordmark : "Analys" orange + "immo" bleu, italique bold -->
+  <text x="54" y="40"
+    font-family="'Helvetica Neue', Arial, sans-serif"
+    font-size="32"
+    font-weight="800"
+    font-style="italic"
+    letter-spacing="-0.5">
+    <tspan fill="#F39C1F">Analys</tspan><tspan fill="#1F3A6E">immo</tspan>
+  </text>
+</svg>
