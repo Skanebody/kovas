@@ -26,10 +26,13 @@ import type { ComponentType } from 'react'
 interface TileSpec {
   key: string
   icon: ComponentType<{ className?: string }>
+  /** Label court (1 mot, visible en grille étroite) */
   label: string
+  /** Sous-label optionnel (plus descriptif, visible quand l'espace le permet) */
+  sublabel?: string
   count: number
   href: string
-  /** Couleur d'accent pour les tiles avec count > 0 (rouge pour facture impayée, ambre pour devis sans réponse, etc.) */
+  /** Couleur d'accent pour les tiles avec count > 0 */
   accent?: 'neutral' | 'amber' | 'red'
 }
 
@@ -76,7 +79,8 @@ export async function ATraiterSection() {
     {
       key: 'leads',
       icon: Inbox,
-      label: 'Leads non répondus',
+      label: 'Leads',
+      sublabel: 'non répondus',
       count: counts.leads,
       href: '/dashboard/leads',
       accent: counts.leads > 0 ? 'amber' : 'neutral',
@@ -84,7 +88,8 @@ export async function ATraiterSection() {
     {
       key: 'quotes',
       icon: FileCheck2,
-      label: 'Devis sans réponse',
+      label: 'Devis',
+      sublabel: 'sans réponse',
       count: counts.quotes,
       href: '/dashboard/facturation?tab=devis',
       accent: counts.quotes > 0 ? 'amber' : 'neutral',
@@ -92,12 +97,15 @@ export async function ATraiterSection() {
     {
       key: 'invoices',
       icon: Receipt,
-      label: 'Factures impayées',
+      label: 'Factures',
+      sublabel: 'impayées',
       count: counts.invoices,
       href: '/dashboard/facturation?tab=factures&filter=overdue',
       accent: counts.invoices > 0 ? 'red' : 'neutral',
     },
   ]
+
+  const totalCount = tiles.reduce((sum, t) => sum + t.count, 0)
 
   return (
     <section className="space-y-3">
@@ -106,14 +114,20 @@ export async function ATraiterSection() {
           À traiter
         </h2>
         <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#0F1419]/55">
-          {tiles.reduce((sum, t) => sum + t.count, 0)} item
-          {tiles.reduce((sum, t) => sum + t.count, 0) > 1 ? 's' : ''}
+          {totalCount} item{totalCount > 1 ? 's' : ''}
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/*
+        Layout : grille 1 col mobile → 3 cols md+ (768px+).
+        En md+, chaque tile fait au moins ~200px de large dans une colonne
+        dashboard de 600-800px, ce qui suffit pour label court + sublabel
+        + count gros + arrow.
+        Layout vertical interne (stack icon + textes en haut, count + arrow
+        en bas) pour éviter la troncature horizontale "L..." vue précédemment
+        en grille trop dense.
+      */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         {tiles.map((tile) => {
-          // Couleurs explicites garanties lisibles (navy plein sur cream).
-          // Count : couleur sémantique selon urgence (rouge factures, ambre devis/leads, neutre si 0).
           const countColor =
             tile.count === 0
               ? 'text-[#0F1419]/40'
@@ -123,29 +137,41 @@ export async function ATraiterSection() {
                   ? 'text-amber-600'
                   : 'text-[#0F1419]'
 
+          const Icon = tile.icon
+
           return (
             <Link
               key={tile.key}
               href={tile.href}
-              className="group flex items-center justify-between gap-3 rounded-xl border border-[#0F1419]/[0.08] bg-paper px-4 py-3.5 transition-colors hover:bg-[#0F1419]/[0.03] hover:border-[#0F1419]/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/30 focus-visible:ring-offset-2"
+              className="group flex flex-col gap-2 rounded-xl border border-[#0F1419]/[0.08] bg-paper px-4 py-3 transition-colors hover:bg-[#0F1419]/[0.03] hover:border-[#0F1419]/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1419]/30 focus-visible:ring-offset-2"
+              style={{ borderRadius: '12px' }}
             >
-              <span className="flex items-center gap-2.5 min-w-0">
-                <tile.icon className="size-4 shrink-0 text-[#0F1419]/60" aria-hidden />
-                <span className="text-[13px] font-medium text-[#0F1419] truncate">
-                  {tile.label}
-                </span>
-              </span>
-              <span className="flex items-center gap-1.5 shrink-0">
+              {/* Ligne 1 — icon + label/sublabel (vertical stack si sublabel) */}
+              <div className="flex items-start gap-2.5 min-w-0">
+                <Icon className="size-4 shrink-0 mt-0.5 text-[#0F1419]/60" aria-hidden />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-[#0F1419] leading-tight">
+                    {tile.label}
+                  </p>
+                  {tile.sublabel ? (
+                    <p className="text-[11px] text-[#0F1419]/55 leading-tight mt-0.5">
+                      {tile.sublabel}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+              {/* Ligne 2 — count XXL + arrow droite */}
+              <div className="flex items-end justify-between mt-1">
                 <span
-                  className={`font-mono tabular-nums text-[20px] font-semibold leading-none ${countColor}`}
+                  className={`font-mono tabular-nums text-[28px] font-semibold leading-none ${countColor}`}
                 >
                   {tile.count}
                 </span>
                 <ArrowRight
-                  className="size-3.5 text-[#0F1419]/40 group-hover:text-[#0F1419]/72 transition-colors"
+                  className="size-4 text-[#0F1419]/30 group-hover:text-[#0F1419]/72 transition-colors mb-0.5"
                   aria-hidden
                 />
-              </span>
+              </div>
             </Link>
           )
         })}
