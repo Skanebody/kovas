@@ -1,0 +1,87 @@
+/*
+ * KOVAS — Slot machine pour cyclage des noms de logiciels concurrents.
+ *
+ * Effet : défilement vertical à la "roue de loterie" sur 4 noms
+ * (Liciel · OBBC · AnalysImmo · ORIS) avec arrêt sur chaque nom pendant
+ * ~1.5s, transition courte 0.4s en ease-out-expo (cubic-bezier(0.16, 1,
+ * 0.3, 1)) qui donne le caractéristique "spin & stop" d'une slot machine.
+ *
+ * Durée totale 8s. Premier rendu SSR = "Liciel" (translateY 0) → SEO
+ * préservé. La stack inclut Liciel à la fin (5e item) pour assurer une
+ * boucle seamless (transition ORIS → Liciel invisible au reset 100%→0%).
+ *
+ * Respect `prefers-reduced-motion` → animation désactivée + affichage
+ * statique du premier nom.
+ *
+ * Largeur stabilisée via inline-block + un span fantôme avec le nom le
+ * plus long ("AnalysImmo") qui réserve l'espace en width.
+ */
+
+.slot {
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+  overflow: hidden;
+  /* Hauteur = 1 ligne de texte du parent. line-height:1 ici car le
+     conteneur fait 1em — les items à l'intérieur héritent. */
+  height: 1em;
+  line-height: 1;
+}
+
+/* Reserve la largeur pour éviter le reflow horizontal pendant les spins.
+   On utilise le mot le plus long ("AnalysImmo") en visibility:hidden pour
+   garder son footprint mais le rendre invisible. */
+.widthSpacer {
+  visibility: hidden;
+  display: inline-block;
+}
+
+.stack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  animation: slotSpin 8s infinite cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.item {
+  display: block;
+  height: 1em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Keyframes : 4 pauses de ~1.5s, transitions de ~0.4s entre chaque stop.
+   5e item (Liciel dupliqué) pour boucle seamless ORIS → Liciel sans flash.
+   À 100% l'animation reset à 0% qui affiche le 1er Liciel (même rendu). */
+@keyframes slotSpin {
+  0%,
+  18.75% {
+    transform: translateY(0);
+  } /* Liciel — 1.5s */
+  23.75%,
+  42.5% {
+    transform: translateY(-1em);
+  } /* OBBC — 1.5s */
+  47.5%,
+  66.25% {
+    transform: translateY(-2em);
+  } /* AnalysImmo — 1.5s */
+  71.25%,
+  90% {
+    transform: translateY(-3em);
+  } /* ORIS — 1.5s */
+  95%,
+  100% {
+    transform: translateY(-4em);
+  } /* Liciel boucle seamless */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack {
+    animation: none;
+    transform: translateY(0);
+  }
+}

@@ -36,6 +36,7 @@
  */
 
 import { CrossCheck6Sources } from '@/components/marketing/CrossCheck6Sources'
+import { SoftwareNameSlotMachine } from '@/components/marketing/SoftwareNameSlotMachine'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -102,19 +103,22 @@ function SectionHero(): React.ReactElement {
               toujours présupposition de soulagement
             - Specificity chiffrée ("3 heures par jour") — pain quotidien
               plus large que les "21h" (soirées tardives uniquement)
-            - Polarization complète : les 4 concurrents listés explicitement
-              au lieu du cyclage dynamique — parle aux 100% du marché FR sans
-              attendre la rotation
+            - Polarization compacte + dynamique : slot machine cyclant
+              Liciel · OBBC · AnalysImmo · ORIS (Benjamin 2026-05-27 v3) —
+              parle aux 100% du marché FR sans prendre toute la largeur du H1.
+              Premier rendu SSR = Liciel pour SEO + 65% PdM.
             - Language match (vocabulaire vrai du diagnostiqueur)
             - Pain dominant adressé : temps perdu en saisie post-terrain
-            - "Liciel" conservé en première position pour SEO + 65% PdM
         */}
         <h1
           className="font-sans font-medium tracking-tight text-[#0F1419] leading-[1.02] max-w-[1100px]"
           style={{ fontSize: 'clamp(40px, 7vw, 104px)' }}
         >
           <span className="font-serif italic font-normal">Terminé</span> les 3 heures par jour sur{' '}
-          <GlossaryTerm term="liciel">Liciel</GlossaryTerm>, OBBC, AnalysImmo ou ORIS.
+          <GlossaryTerm term="liciel">
+            <SoftwareNameSlotMachine />
+          </GlossaryTerm>
+          .
         </h1>
         <p className="mt-8 max-w-2xl text-lg sm:text-xl text-[#0F1419]/72 leading-relaxed">
           Capture vocale et photos pendant ta mission. Tes données arrivent dans Liciel prêtes à
