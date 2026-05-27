@@ -36,6 +36,8 @@
  */
 
 import { CrossCheck6Sources } from '@/components/marketing/CrossCheck6Sources'
+import { InlineCta } from '@/components/marketing/InlineCta'
+import { MobileStickyCta } from '@/components/marketing/MobileStickyCta'
 import { SoftwareNameSlotMachine } from '@/components/marketing/SoftwareNameSlotMachine'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
@@ -1389,16 +1391,28 @@ export default async function HomePage() {
         <SectionTrustBar stats={stats} />
         <SectionThreePromises />
         <SectionLicielVsKovas />
+        {/* CTA inline #1 — desktop only, après pic rationnel (vraie économie).
+            Mobile : couvert par la MobileStickyCta apparue après le hero. */}
+        <InlineCta variant="rational" visibility="desktopOnly" />
         <SectionHowItWorks />
         <SectionCrossCheckSignature />
         <SectionMechanismRevealed />
         <SectionAlgosCatalog />
         <SectionFounderLetter />
+        {/* CTA inline #2 — TOUS supports, après pic émotionnel (lettre fondateur).
+            Le seul CTA inline présent en mobile : la lettre est le meilleur
+            moment pour ramener l'utilisateur à l'action après une longue lecture. */}
+        <InlineCta variant="emotional" visibility="all" />
         <SectionAntiPitch />
         <SectionPricingTeaser />
+        {/* CTA inline #3 — desktop only, après pricing teaser.
+            Le visiteur vient de voir les bundles : on lui donne un raccourci
+            "Voir tous les tarifs" en primary (intention déjà ouverte au prix). */}
+        <InlineCta variant="pricing" visibility="desktopOnly" />
         <SectionFaq />
         <SectionFinalCta />
       </main>
+      <MobileStickyCta />
       <SiteFooter />
     </div>
   )
