@@ -1,5 +1,6 @@
 import { AnnuaireUpgradeBanner } from '@/components/annuaire-dashboard/AnnuaireUpgradeBanner'
 import { AppPageHeader } from '@/components/app-page-header'
+import { InsightsIASection } from '@/components/dashboard/dashboard/insights-ia-section'
 import { ProfessionStatsWidget } from '@/components/dashboard/widgets/ProfessionStatsWidget'
 import { RenewalsWidget } from '@/components/dashboard/widgets/RenewalsWidget'
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -60,6 +61,9 @@ export default async function DashboardPage() {
 
         {/* Mini-stats semaine */}
         <CetteSemaineSection />
+
+        {/* Section 5 — Insights IA contextuels (2-4 cartes actionnables) */}
+        <InsightsIASection />
 
         {/* Widget renouvellements certifications (A1.3.10) — Lot B82 */}
         <RenewalsWidget />
