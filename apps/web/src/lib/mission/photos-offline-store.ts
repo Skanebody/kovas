@@ -166,6 +166,55 @@ export async function getPendingPhotos(missionSessionId: string): Promise<Pendin
     .sortBy('created_at')
 }
 
+/**
+ * Liste des mission_session_id ayant au moins une photo à synchroniser
+ * (pending OU error), toutes sessions confondues.
+ *
+ * Sert au sync global (P0-4) : au retour réseau / au montage de l'app, on
+ * draine toutes les sessions, même celles dont l'écran mission n'est plus
+ * monté (sinon une photo capturée hier en sous-sol resterait coincée tant
+ * que le diagnostiqueur ne rouvre pas EXACTEMENT cette mission).
+ */
+export async function getSessionsWithPendingPhotos(): Promise<string[]> {
+  const db = getPhotosDb()
+  const ids = new Set<string>()
+  await db.photos
+    .where('sync_status')
+    .anyOf('pending', 'error')
+    .each((p) => {
+      ids.add(p.mission_session_id)
+    })
+  return [...ids]
+}
+
+/**
+ * Remet en `pending` toutes les photos en `error` (et réinitialise le
+ * compteur de tentatives) pour redonner une chance au sync au retour réseau.
+ *
+ * Correctif P0-3 : sans ce reset, une photo ayant atteint le plafond de
+ * tentatives restait exclue À VIE des éligibles — perte définitive alors que
+ * le réseau est revenu. On l'appelle sur l'événement `online`.
+ *
+ * @param missionSessionId — limite le reset à une session, ou toutes si null.
+ * @returns nombre de photos réarmées.
+ */
+export async function resetErroredPhotosToPending(
+  missionSessionId: string | null = null,
+): Promise<number> {
+  const db = getPhotosDb()
+  const collection =
+    missionSessionId === null
+      ? db.photos.where('sync_status').equals('error')
+      : db.photos
+          .where('mission_session_id')
+          .equals(missionSessionId)
+          .and((p) => p.sync_status === 'error')
+  return collection.modify((p) => {
+    p.sync_status = 'pending'
+    p.upload_attempts = 0
+  })
+}
+
 /** Toutes les photos liées à une pièce (pour vue groupée). */
 export async function getPhotosByRoom(
   missionSessionId: string,

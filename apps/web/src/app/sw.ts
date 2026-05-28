@@ -36,7 +36,22 @@ self.addEventListener('periodicsync', ((
 }) as EventListener)
 
 async function syncOfflineQueue(): Promise<void> {
-  // TODO Task 3.3 sprint MVP J10 : drain outbox IndexedDB Dexie + sync Supabase
+  // HORS-SCOPE P0-4 — vrai Background Sync API (drain depuis le Service Worker
+  // même app FERMÉE).
+  //
+  // État actuel : le drain des photos mission pending tourne côté client React
+  // via PhotosSyncManager.syncAllSessions(), monté en permanence dans le layout
+  // dashboard (cf. GlobalPhotosSync.tsx). Cela couvre le cas terrain courant
+  // (app KOVAS ouverte quand le réseau revient), mais PAS le cas "app fermée".
+  //
+  // Pour drainer ici, il faudrait :
+  //   1. instancier Dexie dans le contexte Service Worker (pas de window) ;
+  //   2. ré-authentifier Supabase sans cookie de session navigateur (token
+  //      stocké côté SW, RLS respectée) ;
+  //   3. reproduire la logique upsert idempotente (client_local_id) du manager.
+  // À planifier quand le Background Sync API sera priorisé (post-MVP).
   // eslint-disable-next-line no-console
-  console.log('[SW] Periodic sync triggered — outbox drain à implémenter')
+  console.log(
+    '[SW] Periodic sync triggered — drain Service Worker hors-scope P0-4 (cf. GlobalPhotosSync.tsx)',
+  )
 }

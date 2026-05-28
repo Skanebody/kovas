@@ -6,6 +6,7 @@ import { CommandPaletteTrigger } from '@/components/command-palette-trigger'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
 import { NotificationsBell } from '@/components/dashboard/NotificationsBell'
 import { SyncStatusBadge } from '@/components/dashboard/SyncStatusBadge'
+import { GlobalPhotosSync } from '@/components/mission/GlobalPhotosSync'
 import { MissionFabMobile } from '@/components/mission/MissionFabMobile'
 import { RegulatoryNotificationsBadge } from '@/components/regulatory/RegulatoryNotificationsBadge'
 import { MobileQuickActionsFab } from '@/components/ui/mobile-quick-actions'
@@ -127,6 +128,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <MobileQuickActionsFab />
       {/* FIX-JJ multi-accès #5 — FAB mission dédié, bottom-right mobile */}
       <MissionFabMobile />
+      {/* P0-4 — Sync global photos mission en arrière-plan : draine toutes les
+          sessions pending au montage de l'app + au retour réseau, même si
+          l'écran mission n'est pas ouvert. */}
+      <GlobalPhotosSync orgId={orgId} />
       {/* Palette canonique (Cmd+K, dossiers/clients/biens/factures/devis/récents) — listener interne. */}
       <CommandPalette />
     </AppShell>
