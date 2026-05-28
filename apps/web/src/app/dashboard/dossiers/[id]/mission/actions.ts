@@ -177,6 +177,134 @@ export async function renameRoomAction(
 }
 
 // ============================================
+// createRoomItemAction — INSERT mission_room_items (Phase 2 "tous les éléments")
+// ============================================
+
+// Items d'une pièce : équipements / observations / mesures capturés à la voix
+// (captures IA) ou manuellement. Persistés best-effort uniquement si la pièce
+// a un UUID DB (les pièces locales `ai-...` / `slug-N` restent state-only).
+
+const createRoomItemSchema = z.object({
+  dossierRoomId: z.string().uuid(),
+  kind: z.enum(['equipment', 'observation', 'measurement']),
+  label: z.string().trim().min(1).max(160),
+  // Données structurées brutes de la capture (kind, brand, severity, value…).
+  // On reste tolérant sur le contenu mais on borne la profondeur via JSON.stringify.
+  data: z.record(z.string(), z.unknown()).default({}),
+  // Id local client (crypto.randomUUID) pour l'idempotence offline.
+  clientLocalId: z.string().trim().min(1).max(64).nullable(),
+})
+
+export async function createRoomItemAction(
+  dossierRoomId: string,
+  kind: 'equipment' | 'observation' | 'measurement',
+  label: string,
+  data: Record<string, unknown>,
+  clientLocalId: string | null,
+): Promise<{ itemId: string } | { error: string }> {
+  const parsed = createRoomItemSchema.safeParse({
+    dossierRoomId,
+    kind,
+    label,
+    data,
+    clientLocalId,
+  })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+  }
+  const { supabase, orgId } = await getCurrentUser()
+
+  // RPC atomique `create_or_get_mission_room_item` (migration 20260528100000) :
+  //   - check is_member_of(org_id) côté DB
+  //   - vérifie que la pièce appartient à l'org
+  //   - idempotence offline via UNIQUE (dossier_room_id, client_local_id)
+  const rpc = supabase.rpc as unknown as (
+    fn: 'create_or_get_mission_room_item',
+    args: {
+      p_org_id: string
+      p_dossier_room_id: string
+      p_kind: string
+      p_label: string
+      p_data: Record<string, unknown>
+      p_client_local_id?: string | null
+    },
+  ) => Promise<{
+    data: Array<{ id: string; created: boolean }> | null
+    error: { message: string; code?: string } | null
+  }>
+
+  const { data: rows, error } = await rpc('create_or_get_mission_room_item', {
+    p_org_id: orgId,
+    p_dossier_room_id: parsed.data.dossierRoomId,
+    p_kind: parsed.data.kind,
+    p_label: parsed.data.label,
+    p_data: parsed.data.data,
+    p_client_local_id: parsed.data.clientLocalId,
+  })
+
+  if (error || !rows || rows.length === 0) {
+    if (error?.code === '42501') return { error: 'Accès refusé à cette organisation' }
+    if (error?.code === 'P0002') return { error: 'Pièce introuvable ou accès refusé' }
+    return { error: error?.message ?? 'Création de l’élément impossible' }
+  }
+
+  const row = rows[0]
+  if (!row) return { error: 'Création de l’élément impossible' }
+  return { itemId: row.id }
+}
+
+// ============================================
+// deleteRoomItemAction — soft-delete d'un item de pièce
+// ============================================
+
+// On supprime par (dossierRoomId, clientLocalId) plutôt que par l'UUID DB :
+// le client conserve son `client_local_id` (crypto.randomUUID) comme id canonique
+// dans le state, mais ne connaît pas l'UUID DB généré côté serveur. Soft-delete
+// par client_local_id évite tout aller-retour d'id (cohérent avec l'idempotence
+// de createRoomItemAction). Best-effort : no-op silencieux si l'item n'est pas
+// en DB (pièce locale jamais persistée).
+
+const deleteRoomItemSchema = z.object({
+  dossierRoomId: z.string().uuid(),
+  clientLocalId: z.string().trim().min(1).max(64),
+})
+
+export async function deleteRoomItemAction(
+  dossierRoomId: string,
+  clientLocalId: string,
+): Promise<{ ok: true; deleted: boolean } | { error: string }> {
+  const parsed = deleteRoomItemSchema.safeParse({ dossierRoomId, clientLocalId })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+  }
+  const { supabase, orgId } = await getCurrentUser()
+
+  // Soft-delete (deleted_at) calqué sur deleteRoomAction. La RLS org + le filtre
+  // organization_id garantissent qu'on ne supprime qu'un item de sa propre org.
+  // La table mission_room_items n'est pas encore reflétée dans le type généré
+  // Supabase (migration récente) → cast `as never` localement.
+  // TODO : régénérer les types Supabase après application de la migration
+  // 20260528100000_mission_room_items.sql.
+  const { data, error } = await supabase
+    .from('mission_room_items' as never)
+    .update({ deleted_at: new Date().toISOString() } as never)
+    .eq('dossier_room_id', parsed.data.dossierRoomId)
+    .eq('client_local_id', parsed.data.clientLocalId)
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .select('id')
+    .maybeSingle()
+
+  if (error) {
+    if (error.code === '42501') return { error: 'Accès refusé à cette organisation' }
+    return { error: error.message }
+  }
+  // data null = aucun item trouvé (jamais persisté en DB) → no-op best-effort,
+  // pas une erreur : le state local reste la source de vérité.
+  return { ok: true, deleted: data != null }
+}
+
+// ============================================
 // uploadCapturePhotoAction — INSERT row photos après upload Storage
 // ============================================
 

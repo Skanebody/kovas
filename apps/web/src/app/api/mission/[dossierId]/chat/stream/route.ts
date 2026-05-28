@@ -90,6 +90,7 @@ interface ParsedCapture {
     | 'observation'
     | 'photo_taken'
     | 'measurement'
+    | 'item_delete'
   data: Record<string, unknown>
 }
 
@@ -211,8 +212,9 @@ function buildMissionSystemPrompt(ctx: MissionContext, activeRoomName: string | 
     '- `observation` : `category="humidite" room="Salle de bain" severity="medium" note="trace plafond"`',
     '- `photo_taken` : `room="Salon" angle="vue_generale"`',
     '- `measurement` : `type="surface_carrez" room="Salon" value=22.5 unit="m2"`',
+    '- `item_delete` : `room="Salon" kind="equipment" label="chaudiere gaz"` (supprime un élément — équipement/observation/mesure — saisi par erreur). `kind` parmi equipment/observation/mesure. `label` = mot-clé du résumé de l\'élément à retirer.',
     '',
-    'IMPORTANT — `room_delete` et `room_rename` ne doivent être émis QUE si le diagnostiqueur demande EXPLICITEMENT de supprimer ou renommer une pièce (ex : "supprime la salle à manger", "renomme le salon en séjour"). Ne les émettez JAMAIS spontanément.',
+    'IMPORTANT — `room_delete`, `room_rename` et `item_delete` ne doivent être émis QUE si le diagnostiqueur demande EXPLICITEMENT de supprimer ou renommer (ex : "supprime la salle à manger", "renomme le salon en séjour", "enlève la chaudière du salon, je me suis trompé"). Ne les émettez JAMAIS spontanément.',
     '',
     'Vous pouvez émettre 0, 1 ou 2 captures par réponse (jamais 3+). NE COMMENTEZ PAS la ligne CAPTURE — elle est invisible côté UI.',
     '',
@@ -422,6 +424,7 @@ function parseCaptureBody(body: string): ParsedCapture | null {
     'observation',
     'photo_taken',
     'measurement',
+    'item_delete',
   ]
   if (!allowed.includes(typeStr as ParsedCapture['capture_type'])) return null
   return { capture_type: typeStr as ParsedCapture['capture_type'], data }

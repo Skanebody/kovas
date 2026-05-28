@@ -143,6 +143,58 @@ export default async function MissionTchatPage({
     .eq('organization_id', orgId)
     .order('position', { ascending: true })
 
+  // Charge les éléments (équipements/observations/mesures) déjà saisis par pièce
+  // pour la reprise après pause/refresh (Phase 2 "tous les éléments").
+  // La table mission_room_items n'est pas encore reflétée dans les types générés
+  // (migration récente) → cast `as never`. TODO : régénérer les types après
+  // application de 20260528100000_mission_room_items.sql.
+  type RoomItemRow = {
+    id: string
+    dossier_room_id: string
+    kind: string
+    label: string
+    data: Record<string, unknown> | null
+    client_local_id: string | null
+    created_at: string
+  }
+  const roomIds = (rooms ?? []).map((r) => r.id as string)
+  let roomItemRows: RoomItemRow[] = []
+  if (roomIds.length > 0) {
+    const itemsRes = await supabase
+      .from('mission_room_items' as never)
+      .select('id, dossier_room_id, kind, label, data, client_local_id, created_at')
+      .in('dossier_room_id', roomIds)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: true })
+    roomItemRows = Array.isArray(itemsRes.data) ? (itemsRes.data as unknown as RoomItemRow[]) : []
+  }
+  // Regroupe par pièce. L'id exposé au client = client_local_id si présent
+  // (id canonique côté state + clé de suppression DB), sinon l'UUID DB.
+  const itemsByRoom = new Map<
+    string,
+    Array<{
+      id: string
+      kind: 'equipment' | 'observation' | 'measurement'
+      label: string
+      data: Record<string, unknown>
+      createdAt: number
+    }>
+  >()
+  for (const row of roomItemRows) {
+    if (row.kind !== 'equipment' && row.kind !== 'observation' && row.kind !== 'measurement') {
+      continue
+    }
+    const list = itemsByRoom.get(row.dossier_room_id) ?? []
+    list.push({
+      id: row.client_local_id ?? row.id,
+      kind: row.kind,
+      label: row.label,
+      data: row.data ?? {},
+      createdAt: new Date(row.created_at).getTime(),
+    })
+    itemsByRoom.set(row.dossier_room_id, list)
+  }
+
   // Charge l'historique conversation pour reprise au refresh.
   // Fusionne 2 sources (cf. audit P0-4 mode mission) :
   //   - mission_chat_messages : messages user/assistant en mode Conversation IA
@@ -212,6 +264,7 @@ export default async function MissionTchatPage({
         name: r.name as string,
         roomType: (r.room_type as string | null) ?? null,
         surfaceM2: (r.surface_m2 as number | null) ?? null,
+        items: itemsByRoom.get(r.id as string) ?? [],
       }))}
       initialStats={{
         photos: photosCount ?? 0,

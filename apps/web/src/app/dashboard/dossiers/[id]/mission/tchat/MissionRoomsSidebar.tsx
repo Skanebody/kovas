@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import type { RoomType } from '@/lib/mission/room-completion'
+import { ROOM_ITEM_KIND_LABEL, type RoomItem } from '@/lib/mission/room-items'
 import { cn } from '@/lib/utils'
 import {
   ArchiveRestore,
@@ -75,6 +76,11 @@ export interface MissionSidebarRoom {
   requiredFields: number
   filledFields: number
   completionStatus: 'empty' | 'partial' | 'complete'
+  /**
+   * Éléments saisis dans la pièce (équipements / observations / mesures).
+   * Affichés sous la pièce + supprimables unitairement (Phase 2 mode mission).
+   */
+  items?: RoomItem[]
 }
 
 interface MissionRoomsSidebarProps {
@@ -86,6 +92,8 @@ interface MissionRoomsSidebarProps {
   onRenameRoom?: (roomId: string, newName: string) => void
   /** Supprime une pièce (state + DB best-effort côté parent). */
   onDeleteRoom?: (roomId: string) => void
+  /** Supprime un élément (équipement/observation/mesure) d'une pièce. */
+  onDeleteItem?: (roomId: string, itemId: string) => void
   /** Variant mobile (rendu BottomSheet sans le wrapper aside). */
   variant?: 'desktop' | 'mobile'
 }
@@ -120,6 +128,7 @@ export function MissionRoomsSidebar({
   onAddRoom,
   onRenameRoom,
   onDeleteRoom,
+  onDeleteItem,
   variant = 'desktop',
 }: MissionRoomsSidebarProps): React.ReactElement {
   // Confirmation de suppression — pièce ciblée (null = dialog fermé).
@@ -177,6 +186,7 @@ export function MissionRoomsSidebar({
                 onSelect={() => onSelectRoom(room.id)}
                 onRename={onRenameRoom ? (newName) => onRenameRoom(room.id, newName) : undefined}
                 onRequestDelete={onDeleteRoom ? () => setRoomToDelete(room) : undefined}
+                onDeleteItem={onDeleteItem ? (itemId) => onDeleteItem(room.id, itemId) : undefined}
               />
             ))}
           </ul>
@@ -255,6 +265,8 @@ interface RoomListItemProps {
   onRename?: (newName: string) => void
   /** Demande la suppression (le parent ouvre la confirmation) ; absent = masqué. */
   onRequestDelete?: () => void
+  /** Supprime un élément de la pièce ; absent = bouton masqué. */
+  onDeleteItem?: (itemId: string) => void
 }
 
 function RoomListItem({
@@ -263,6 +275,7 @@ function RoomListItem({
   onSelect,
   onRename,
   onRequestDelete,
+  onDeleteItem,
 }: RoomListItemProps): React.ReactElement {
   const Icon = ROOM_ICON_BY_TYPE[room.type] ?? BookOpen
 
@@ -358,6 +371,8 @@ function RoomListItem({
     )
   }
 
+  const items = room.items ?? []
+
   return (
     <li>
       <div
@@ -445,6 +460,87 @@ function RoomListItem({
           </DropdownMenu>
         ) : null}
       </div>
+
+      {/* Éléments de la pièce (équipements / observations / mesures) — Phase 2.
+          Affichés en retrait sous la pièce, chacun supprimable unitairement. */}
+      {items.length > 0 ? (
+        <ul className="ml-11 mr-1 mb-1 mt-0.5 space-y-0.5">
+          {items.map((item) => (
+            <RoomItemRow
+              key={item.id}
+              item={item}
+              onDelete={onDeleteItem ? () => onDeleteItem(item.id) : undefined}
+            />
+          ))}
+        </ul>
+      ) : null}
+    </li>
+  )
+}
+
+// -----------------------------------------------------------------------------
+// RoomItemRow — une ligne élément (équipement/observation/mesure) + suppression
+// -----------------------------------------------------------------------------
+
+interface RoomItemRowProps {
+  item: RoomItem
+  /** Supprime l'élément ; absent = bouton masqué. */
+  onDelete?: () => void
+}
+
+function RoomItemRow({ item, onDelete }: RoomItemRowProps): React.ReactElement {
+  // Confirmation légère inline (pas de Dialog) : 1er clic arme, 2e confirme.
+  // Cohérent avec le delete de pièce (action explicite) mais plus léger pour un
+  // élément unitaire dicté au fil de l'eau.
+  const [armed, setArmed] = useState(false)
+
+  return (
+    <li className="group/item flex items-center gap-2 rounded-md px-2 py-1 hover:bg-sage-alt/60 transition-colors">
+      <span
+        className="text-[10px] font-mono uppercase tracking-[0.08em] text-[#0F1419]/55 shrink-0"
+        aria-hidden
+      >
+        {ROOM_ITEM_KIND_LABEL[item.kind].slice(0, 3)}
+      </span>
+      <span className="min-w-0 flex-1 truncate text-[12px] text-[#0F1419]/82">{item.label}</span>
+      {onDelete ? (
+        armed ? (
+          <span className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                onDelete()
+                setArmed(false)
+              }}
+              aria-label={`Confirmer la suppression de ${item.label}`}
+              className="inline-flex size-6 items-center justify-center rounded-md text-accent-red hover:bg-paper transition-colors"
+            >
+              <Check className="size-3.5" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => setArmed(false)}
+              aria-label="Annuler la suppression"
+              className="inline-flex size-6 items-center justify-center rounded-md text-[#0F1419]/55 hover:bg-paper transition-colors"
+            >
+              <X className="size-3.5" aria-hidden />
+            </button>
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setArmed(true)}
+            aria-label={`Supprimer ${item.label}`}
+            className={cn(
+              'shrink-0 inline-flex size-6 items-center justify-center rounded-md',
+              'text-[#0F1419]/40 hover:bg-paper hover:text-accent-red transition-colors',
+              'opacity-100 lg:opacity-0 lg:group-hover/item:opacity-100 lg:focus-visible:opacity-100',
+            )}
+          >
+            <Trash2 className="size-3.5" aria-hidden />
+          </button>
+        )
+      ) : null}
     </li>
   )
 }

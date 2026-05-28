@@ -58,6 +58,7 @@ import {
   getRequiredFieldsCount,
   inferRoomTypeFromName,
 } from '@/lib/mission/room-completion'
+import { type RoomItem, type RoomItemKind, buildRoomItemLabel } from '@/lib/mission/room-items'
 import {
   useMissionPhotosSyncStatus,
   usePhotoSyncStatus,
@@ -81,7 +82,13 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { createRoomAction, deleteRoomAction, renameRoomAction } from '../actions'
+import {
+  createRoomAction,
+  createRoomItemAction,
+  deleteRoomAction,
+  deleteRoomItemAction,
+  renameRoomAction,
+} from '../actions'
 import { type CaptureMode, CaptureModeToggle } from './CaptureModeToggle'
 import {
   type FinalAnalysisGap,
@@ -111,6 +118,8 @@ interface ExistingRoom {
   name: string
   roomType: string | null
   surfaceM2: number | null
+  /** Éléments déjà saisis (équipements/observations/mesures) — reprise refresh. */
+  items?: RoomItem[]
 }
 
 interface InitialChatMessage {
@@ -495,20 +504,23 @@ export function MissionTchatInterface({
       return existingRooms.map((r) => {
         const type: RoomType = (r.roomType as RoomType | null) ?? inferRoomTypeFromName(r.name)
         const required = getRequiredFieldsCount(type)
+        const items = r.items ?? []
         // En l'absence de tracking persisté, on suppose "partial" pour les
-        // pièces existantes (au moins le nom + la surface saisis).
-        const filled = r.surfaceM2 != null ? 2 : 1
+        // pièces existantes (au moins le nom + la surface saisis) + 1 champ par
+        // élément déjà saisi (cohérent avec applyRoomItemCapture).
+        const filled = (r.surfaceM2 != null ? 2 : 1) + items.length
+        const cappedFilled = Math.min(filled, required)
+        // Réutilise computeRoomStatus en simulant N items "remplis".
+        const simulated = new Array<string>(cappedFilled).fill('x')
         return {
           id: r.id,
           name: r.name,
           type,
           surfaceSqm: r.surfaceM2 ?? null,
           requiredFields: required,
-          filledFields: Math.min(filled, required),
-          completionStatus: computeRoomStatus(
-            r.surfaceM2 != null ? ['name', 'surface'] : ['name'],
-            type,
-          ),
+          filledFields: cappedFilled,
+          completionStatus: computeRoomStatus(simulated, type),
+          items,
         }
       })
     }
@@ -965,12 +977,53 @@ export function MissionTchatInterface({
               }
             }
             next = renameRoomFromCapture(next, cap.data)
-          } else if (cap.type === 'measurement' && cap.data) {
-            next = applyMeasurementCapture(next, cap.data)
-          } else if (cap.type === 'equipment' && cap.data) {
-            next = applyEquipmentCapture(next, cap.data)
-          } else if (cap.type === 'observation' && cap.data) {
-            next = applyObservationCapture(next, cap.data)
+          } else if (
+            (cap.type === 'measurement' ||
+              cap.type === 'equipment' ||
+              cap.type === 'observation') &&
+            cap.data
+          ) {
+            // Phase 2 "tous les éléments" : on matérialise l'élément comme un
+            // RoomItem stocké dans la pièce (en plus de garder filledFields).
+            // Le label lisible est dérivé une seule fois ici puis réutilisé.
+            const kind = cap.type as RoomItemKind
+            const item: RoomItem = {
+              id: crypto.randomUUID(),
+              kind,
+              label: buildRoomItemLabel(kind, cap.data),
+              data: cap.data,
+              createdAt: Date.now(),
+            }
+            const roomName = typeof cap.data.room === 'string' ? cap.data.room : null
+            const target =
+              roomName != null
+                ? next.find((r) => r.name.toLowerCase() === roomName.toLowerCase())
+                : undefined
+            next = applyRoomItemCapture(next, cap.data, item)
+            // Persistence DB best-effort si la pièce a un UUID (pas `ai-...`).
+            if (target && isDbRoomId(target.id)) {
+              void createRoomItemAction(target.id, kind, item.label, item.data, item.id).catch(
+                () => {
+                  // Offline / erreur — le state local reste la vérité.
+                },
+              )
+            }
+          } else if (cap.type === 'item_delete' && cap.data) {
+            const roomName = typeof cap.data.room === 'string' ? cap.data.room : null
+            const target =
+              roomName != null
+                ? next.find((r) => r.name.toLowerCase() === roomName.toLowerCase())
+                : undefined
+            const removed = target ? findRoomItemFromCapture(target, cap.data) : null
+            next = deleteRoomItemFromCapture(next, cap.data)
+            // DB best-effort : on supprime par (roomId, clientLocalId). La server
+            // action est un no-op silencieux si l'item n'a jamais été persisté
+            // (pièce locale `ai-...`). On ne tente que si la pièce a un UUID DB.
+            if (removed && target && isDbRoomId(target.id)) {
+              void deleteRoomItemAction(target.id, removed.id).catch(() => {
+                // Offline / erreur — le state local reste la vérité.
+              })
+            }
           }
         }
         return next
@@ -1485,6 +1538,25 @@ export function MissionTchatInterface({
     [dossierId],
   )
 
+  // ----- Sidebar pièces : suppression manuelle d'un élément (Phase 2) -----
+  const handleDeleteItem = useCallback((roomId: string, itemId: string) => {
+    let roomDbId: string | null = null
+    setRooms((prev) =>
+      prev.map((r) => {
+        if (r.id !== roomId) return r
+        roomDbId = r.id
+        return { ...r, items: (r.items ?? []).filter((it) => it.id !== itemId) }
+      }),
+    )
+    // DB best-effort : la server action est un no-op si l'item n'est pas persisté
+    // (pièce locale). On ne tente que si la pièce a un UUID DB.
+    if (roomDbId != null && isDbRoomId(roomDbId)) {
+      void deleteRoomItemAction(roomDbId, itemId).catch(() => {
+        // Offline / erreur — le state local reste la vérité.
+      })
+    }
+  }, [])
+
   // ----- Lot MISSION-C : "Aller corriger" depuis le récap -----
   // Ferme le sheet, sélectionne la pièce si fournie, envoie une question
   // contextuelle à l'IA pour amorcer la saisie du champ.
@@ -1948,6 +2020,7 @@ export function MissionTchatInterface({
           onAddRoom={handleAddRoom}
           onRenameRoom={handleRenameRoom}
           onDeleteRoom={handleDeleteRoom}
+          onDeleteItem={handleDeleteItem}
           variant="desktop"
         />
       </div>
@@ -1964,6 +2037,7 @@ export function MissionTchatInterface({
             onAddRoom={handleAddRoom}
             onRenameRoom={handleRenameRoom}
             onDeleteRoom={handleDeleteRoom}
+            onDeleteItem={handleDeleteItem}
             variant="mobile"
           />
         </div>
@@ -2142,28 +2216,80 @@ function renameRoomFromCapture(
   return next
 }
 
-function applyMeasurementCapture(
+/**
+ * Phase 2 "tous les éléments" — pousse un RoomItem (équipement/observation/
+ * mesure) déjà construit dans la pièce ciblée (match par nom, case-insensitive)
+ * + garde la cohérence de complétude (`filledFields`) comme avant (1 champ par
+ * élément). Pour une mesure de surface, met aussi à jour `surfaceSqm` de la
+ * pièce (comportement legacy conservé). Fonction pure.
+ */
+function applyRoomItemCapture(
   rooms: MissionSidebarRoom[],
   data: Record<string, unknown>,
+  item: RoomItem,
 ): MissionSidebarRoom[] {
   const roomName = typeof data.room === 'string' ? data.room : null
   if (!roomName) return rooms
   const idx = rooms.findIndex((r) => r.name.toLowerCase() === roomName.toLowerCase())
   if (idx < 0) return rooms
+
+  // Mesure de surface Carrez → on hydrate aussi la surface affichée de la pièce.
   const surface =
-    typeof data.value === 'number' && data.type === 'surface_carrez' ? data.value : null
+    item.kind === 'measurement' && typeof data.value === 'number' && data.type === 'surface_carrez'
+      ? data.value
+      : null
+
   const next = [...rooms]
-  next[idx] = bumpRoomFilled(
-    {
-      ...next[idx],
-      surfaceSqm: surface ?? next[idx].surfaceSqm,
-    },
-    1,
-  )
+  const withItem: MissionSidebarRoom = {
+    ...next[idx],
+    surfaceSqm: surface ?? next[idx].surfaceSqm,
+    items: [...(next[idx].items ?? []), item],
+  }
+  // Conserve le comportement de complétude existant : chaque élément = 1 champ.
+  next[idx] = bumpRoomFilled(withItem, 1)
   return next
 }
 
-function applyEquipmentCapture(
+/**
+ * Trouve dans une pièce l'item ciblé par une capture `item_delete`. Match souple :
+ * 1) par `label` exact (case-insensitive) si fourni, sinon
+ * 2) par `kind` + sous-chaîne du label (ex : `kind="equipment" label="chaudiere"`).
+ * Retourne l'item le plus récemment ajouté qui matche (les diagnostiqueurs
+ * corrigent généralement la dernière saisie). Fonction pure.
+ */
+function findRoomItemFromCapture(
+  room: MissionSidebarRoom,
+  data: Record<string, unknown>,
+): RoomItem | null {
+  const items = room.items ?? []
+  if (items.length === 0) return null
+  const labelQuery = typeof data.label === 'string' ? data.label.toLowerCase().trim() : null
+  const kindQuery =
+    data.kind === 'equipment' || data.kind === 'observation' || data.kind === 'measurement'
+      ? (data.kind as RoomItemKind)
+      : null
+
+  // On parcourt du plus récent au plus ancien.
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i]
+    if (kindQuery && it.kind !== kindQuery) continue
+    if (labelQuery) {
+      const lbl = it.label.toLowerCase()
+      if (lbl === labelQuery || lbl.includes(labelQuery)) return it
+      continue
+    }
+    // Pas de label → match par kind uniquement (dernier item du kind).
+    if (kindQuery) return it
+  }
+  return null
+}
+
+/**
+ * Supprime du state l'item ciblé par une capture `item_delete`
+ * (`room="Salon" kind="equipment" label="chaudiere gaz"`). Fonction pure :
+ * la suppression DB éventuelle est gérée par l'appelant (best-effort).
+ */
+function deleteRoomItemFromCapture(
   rooms: MissionSidebarRoom[],
   data: Record<string, unknown>,
 ): MissionSidebarRoom[] {
@@ -2171,18 +2297,12 @@ function applyEquipmentCapture(
   if (!roomName) return rooms
   const idx = rooms.findIndex((r) => r.name.toLowerCase() === roomName.toLowerCase())
   if (idx < 0) return rooms
+  const room = rooms[idx]
+  const target = findRoomItemFromCapture(room, data)
+  if (!target) return rooms
   const next = [...rooms]
-  next[idx] = bumpRoomFilled(next[idx], 1)
+  next[idx] = { ...room, items: (room.items ?? []).filter((it) => it.id !== target.id) }
   return next
-}
-
-function applyObservationCapture(
-  rooms: MissionSidebarRoom[],
-  data: Record<string, unknown>,
-): MissionSidebarRoom[] {
-  // Les observations comptent comme 1 champ supplémentaire (humidite_observation
-  // dans les schémas 3CL pour basement/attic notamment).
-  return applyEquipmentCapture(rooms, data)
 }
 
 // -----------------------------------------------------------------------------
