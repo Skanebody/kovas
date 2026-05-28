@@ -90,11 +90,30 @@ export function VoiceMessageButton({
   // browser fire un événement click automatique → on doit l'ignorer sinon
   // handleClick commit immédiatement et l'enregistrement ne reste pas actif.
   const ignoreNextClickRef = useRef<boolean>(false)
-  // Cache la dernière valeur pour cleanup au unmount sans dépendance instable.
+  // Miroirs SYNCHRONES de `mode` et `isRecording`, mis à jour à la fois par les
+  // props (re-render parent) ET par les handlers (décision de geste immédiate).
+  // CRITIQUE : `isRecording` (= isListening du hook) devient vrai de façon ASYNC
+  // après getUserMedia. Sans miroir synchrone, le pointerup du 1er tap lit une
+  // valeur périmée (false), fait un return anticipé, ne bascule jamais en
+  // tap-toggle → le tap suivant relance un nouvel enregistrement (bug terrain).
   const modeRef = useRef<VoiceButtonMode>(mode)
+  const isRecordingRef = useRef<boolean>(isRecording)
   useEffect(() => {
     modeRef.current = mode
   }, [mode])
+  useEffect(() => {
+    isRecordingRef.current = isRecording
+  }, [isRecording])
+
+  // Change le mode de façon synchrone (ref lu par les handlers suivants dans la
+  // même séquence de geste) + remonte au parent (prop arrive au prochain render).
+  const changeMode = useCallback(
+    (m: VoiceButtonMode) => {
+      modeRef.current = m
+      onModeChange(m)
+    },
+    [onModeChange],
+  )
 
   // ── Haptic helper (best-effort, ignore si non supporté) ─────────────
   const haptic = useCallback((ms: number): void => {
@@ -122,13 +141,13 @@ export function VoiceMessageButton({
       if (disabled) return
 
       // Cas 1 : texte présent → envoyer le texte (tap simple)
-      if (hasText && !isRecording) {
+      if (hasText && !isRecordingRef.current) {
         // On laisse onClick gérer l'envoi (évite double-trigger)
         return
       }
 
       // Cas 2 : en cours d'enregistrement tap-toggle → tap sur stop
-      if (isRecording && modeRef.current === 'tap-toggle') {
+      if (isRecordingRef.current && modeRef.current === 'tap-toggle') {
         // Idem : laisser onClick faire le stop+envoi
         return
       }
@@ -140,32 +159,36 @@ export function VoiceMessageButton({
       pointerDownAtRef.current = performance.now()
       pointerStartXRef.current = e.clientX
       tapToggleCommittedRef.current = false
+      // Optimistic synchrone : on sait qu'un enregistrement démarre. On le note
+      // dans le ref pour que le pointerup (même séquence de geste) ne lise pas un
+      // isRecording périmé et bascule correctement en tap-toggle.
+      isRecordingRef.current = true
       haptic(30)
       onRecordStart()
       // On démarre en press-hold par défaut — sera converti en tap-toggle au pointerup si court+stable.
-      onModeChange('press-hold')
+      changeMode('press-hold')
     },
-    [disabled, hasText, isRecording, onRecordStart, onModeChange, haptic],
+    [disabled, hasText, onRecordStart, changeMode, haptic],
   )
 
   // ── PointerMove : détecte la zone cancel pendant un press-hold ──────
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLButtonElement>) => {
       if (pointerIdRef.current !== e.pointerId) return
-      if (!isRecording) return
+      if (!isRecordingRef.current) return
       if (modeRef.current === 'tap-toggle') return // déjà passé en tap-toggle, plus de drag
 
       const deltaX = e.clientX - pointerStartXRef.current
 
       if (deltaX <= CANCEL_ENTER_PX && modeRef.current !== 'press-hold-cancel') {
         haptic(60)
-        onModeChange('press-hold-cancel')
+        changeMode('press-hold-cancel')
       } else if (deltaX > CANCEL_ENTER_PX && modeRef.current === 'press-hold-cancel') {
         // Le user est revenu vers la droite, on repasse en mode normal
-        onModeChange('press-hold')
+        changeMode('press-hold')
       }
     },
-    [isRecording, onModeChange, haptic],
+    [changeMode, haptic],
   )
 
   // ── PointerUp : décide tap-toggle vs commit vs cancel ───────────────
@@ -179,7 +202,7 @@ export function VoiceMessageButton({
         /* déjà relâché */
       }
 
-      if (!isRecording) return // sécurité
+      if (!isRecordingRef.current) return // sécurité
 
       const heldMs = performance.now() - pointerDownAtRef.current
       const deltaX = e.clientX - pointerStartXRef.current
@@ -193,7 +216,7 @@ export function VoiceMessageButton({
       if (heldMs < HOLD_THRESHOLD_MS && absDelta < MOVE_THRESHOLD_PX) {
         tapToggleCommittedRef.current = true
         ignoreNextClickRef.current = true
-        onModeChange('tap-toggle')
+        changeMode('tap-toggle')
         return
       }
 
@@ -201,16 +224,18 @@ export function VoiceMessageButton({
       // → vérif si on est entré dans la zone "commit cancel"
       if (deltaX <= CANCEL_COMMIT_PX) {
         haptic(50)
+        isRecordingRef.current = false
         onRecordCancel()
-        onModeChange('idle')
+        changeMode('idle')
         return
       }
 
       // Cas C : press-hold release normal → on envoie
+      isRecordingRef.current = false
       onRecordCommit()
-      onModeChange('idle')
+      changeMode('idle')
     },
-    [isRecording, onModeChange, onRecordCommit, onRecordCancel, haptic],
+    [changeMode, onRecordCommit, onRecordCancel, haptic],
   )
 
   // ── PointerCancel (système annule, ex: appel téléphone) : drop ──────
@@ -218,14 +243,15 @@ export function VoiceMessageButton({
     (e: React.PointerEvent<HTMLButtonElement>) => {
       if (pointerIdRef.current !== e.pointerId) return
       pointerIdRef.current = null
-      if (isRecording && modeRef.current !== 'tap-toggle') {
+      if (isRecordingRef.current && modeRef.current !== 'tap-toggle') {
         // Pas un tap-toggle commit → on drop pour éviter un envoi accidentel
         haptic(50)
+        isRecordingRef.current = false
         onRecordCancel()
-        onModeChange('idle')
+        changeMode('idle')
       }
     },
-    [isRecording, onRecordCancel, onModeChange, haptic],
+    [onRecordCancel, changeMode, haptic],
   )
 
   // ── Click : géré uniquement pour le cas "send text" et "stop tap-toggle" ─
@@ -237,17 +263,18 @@ export function VoiceMessageButton({
       ignoreNextClickRef.current = false
       return
     }
-    if (isRecording && modeRef.current === 'tap-toggle') {
+    if (isRecordingRef.current && modeRef.current === 'tap-toggle') {
       // Stop + envoi (clic réel sur le bouton stop après que l'utilisateur
       // ait relâché son tap initial — c'est ici qu'on commit pour de vrai).
+      isRecordingRef.current = false
       onRecordCommit()
-      onModeChange('idle')
+      changeMode('idle')
       return
     }
-    if (hasText && !isRecording) {
+    if (hasText && !isRecordingRef.current) {
       onSendText()
     }
-  }, [disabled, hasText, isRecording, onSendText, onRecordCommit, onModeChange])
+  }, [disabled, hasText, onSendText, onRecordCommit, changeMode])
 
   // ── Keyboard support : Space = toggle mode A (clavier-only) ─────────
   const handleKeyDown = useCallback(
@@ -255,19 +282,21 @@ export function VoiceMessageButton({
       if (e.key !== ' ' && e.key !== 'Enter') return
       if (disabled) return
       // En mode "send" : on laisse le click natif gérer (Enter/Space déclenche click)
-      if (hasText && !isRecording) return
+      if (hasText && !isRecordingRef.current) return
       // Sinon, on toggle tap-toggle
       e.preventDefault()
-      if (isRecording && modeRef.current === 'tap-toggle') {
+      if (isRecordingRef.current && modeRef.current === 'tap-toggle') {
+        isRecordingRef.current = false
         onRecordCommit()
-        onModeChange('idle')
-      } else if (!isRecording) {
+        changeMode('idle')
+      } else if (!isRecordingRef.current) {
+        isRecordingRef.current = true
         haptic(30)
         onRecordStart()
-        onModeChange('tap-toggle')
+        changeMode('tap-toggle')
       }
     },
-    [disabled, hasText, isRecording, onRecordCommit, onRecordStart, onModeChange, haptic],
+    [disabled, hasText, onRecordCommit, onRecordStart, changeMode, haptic],
   )
 
   // ── Render ──────────────────────────────────────────────────────────

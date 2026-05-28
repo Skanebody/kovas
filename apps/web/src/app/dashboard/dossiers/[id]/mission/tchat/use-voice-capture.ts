@@ -190,9 +190,25 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
    * Le stream micro est ouvert via AudioRecorder.start() puis exposé au VU-mètre.
    */
   const startListening = useCallback(() => {
+    // GARDE ANTI-RÉENTRÉE (fix bug terrain "le 2e tap relance un nouvel audio") :
+    // si un AudioRecorder est déjà actif, on NE relance PAS. Sans cette garde,
+    // un 2e tap mal détecté créerait un 2e MediaRecorder + getUserMedia simultané
+    // = double enregistrement (et le 1er est orphelin, micro jamais relâché).
+    if (audioRecorderRef.current) return
+
     if (recognitionRef.current) recognitionRef.current.abort()
     voiceTranscriptRef.current = ''
     setInput('')
+
+    // OPTIMISTIC STATE (fix racine du bug toggle) : on bascule en listening
+    // IMMÉDIATEMENT, de façon synchrone, AVANT la résolution async de
+    // getUserMedia. Auparavant `setIsListening(true)` était dans le `.then()`,
+    // donc au pointerup du 1er tap le bouton lisait encore isRecording=false
+    // (périmé) → handlePointerUp faisait un return anticipé → ne passait jamais
+    // en tap-toggle → le tap suivant relançait un nouvel enregistrement.
+    // En settant l'état tout de suite, le re-render arrive avant le pointerup.
+    setIsListening(true)
+    setVoiceStartedAt(Date.now())
 
     const ctrl = createSpeechRecognition({
       lang: 'fr-FR',
@@ -221,14 +237,11 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
         // Le user contrôle l'arrêt via le bouton (tap-toggle OU release press-hold).
       },
     })
-    if (!ctrl.isSupported) {
-      setErrorMsg(
-        'Reconnaissance vocale non supportée par ce navigateur — utilise Chrome/Edge ou tape ta réponse.',
-      )
-      return
-    }
 
     // Démarre l'AudioRecorder D'ABORD (lui ouvre le getUserMedia) puis le speech.
+    // NB : le blob audio + Whisper serveur suffisent à transcrire même si Web
+    // Speech n'est pas supporté (Safari/iOS) — on ne bloque donc PAS le record
+    // sur ctrl.isSupported, on dégrade juste le transcript live.
     const recorder = new AudioRecorder()
     audioRecorderRef.current = recorder
     void recorder
@@ -239,19 +252,24 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
           meterStreamRef.current = stream
           setMeterStream(stream)
         }
-        // Démarre Web Speech API après l'ouverture du micro pour éviter double-prompt permission.
-        try {
-          ctrl.start()
-          recognitionRef.current = ctrl
-        } catch {
-          /* InvalidState — on continue avec juste le blob (sans live transcript) */
+        // Démarre Web Speech API (si supporté) après l'ouverture du micro pour
+        // éviter le double-prompt permission. Sinon : blob seul + Whisper.
+        if (ctrl.isSupported) {
+          try {
+            ctrl.start()
+            recognitionRef.current = ctrl
+          } catch {
+            /* InvalidState — on continue avec juste le blob (sans live transcript) */
+          }
         }
-        setIsListening(true)
-        setVoiceStartedAt(Date.now())
+        // setIsListening / setVoiceStartedAt déjà faits de façon optimistic.
       })
       .catch(() => {
         setErrorMsg("Impossible d'accéder au micro. Vérifiez les autorisations du navigateur.")
         audioRecorderRef.current = null
+        // Rollback de l'optimistic state puisque le micro n'a pas pu démarrer.
+        setIsListening(false)
+        setVoiceStartedAt(0)
         setVoiceMode('idle')
       })
   }, [stopMeterStream, setInput, setErrorMsg])
