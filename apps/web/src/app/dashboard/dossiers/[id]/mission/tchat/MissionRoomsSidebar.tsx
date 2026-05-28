@@ -19,6 +19,22 @@
  * Authority : CLAUDE.md §3 features 4+5+10 + spec MISSION-A.
  */
 
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
 import type { RoomType } from '@/lib/mission/room-completion'
 import { cn } from '@/lib/utils'
 import {
@@ -28,6 +44,7 @@ import {
   BookOpen,
   Briefcase,
   Car,
+  Check,
   CheckCircle2,
   ChefHat,
   Circle,
@@ -35,11 +52,16 @@ import {
   CornerDownRight,
   Home,
   Layers,
+  MoreVertical,
+  Pencil,
   Plus,
   Sofa,
   Toilet,
+  Trash2,
   Warehouse,
+  X,
 } from 'lucide-react'
+import { useState } from 'react'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -60,6 +82,10 @@ interface MissionRoomsSidebarProps {
   activeRoomId: string | null
   onSelectRoom: (roomId: string) => void
   onAddRoom: () => void
+  /** Renomme une pièce (state + DB best-effort côté parent). */
+  onRenameRoom?: (roomId: string, newName: string) => void
+  /** Supprime une pièce (state + DB best-effort côté parent). */
+  onDeleteRoom?: (roomId: string) => void
   /** Variant mobile (rendu BottomSheet sans le wrapper aside). */
   variant?: 'desktop' | 'mobile'
 }
@@ -92,8 +118,12 @@ export function MissionRoomsSidebar({
   activeRoomId,
   onSelectRoom,
   onAddRoom,
+  onRenameRoom,
+  onDeleteRoom,
   variant = 'desktop',
 }: MissionRoomsSidebarProps): React.ReactElement {
+  // Confirmation de suppression — pièce ciblée (null = dialog fermé).
+  const [roomToDelete, setRoomToDelete] = useState<MissionSidebarRoom | null>(null)
   const completedCount = rooms.filter((r) => r.completionStatus === 'complete').length
   const totalCount = rooms.length
   const ratio = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100)
@@ -145,6 +175,8 @@ export function MissionRoomsSidebar({
                 room={room}
                 isActive={activeRoomId === room.id}
                 onSelect={() => onSelectRoom(room.id)}
+                onRename={onRenameRoom ? (newName) => onRenameRoom(room.id, newName) : undefined}
+                onRequestDelete={onDeleteRoom ? () => setRoomToDelete(room) : undefined}
               />
             ))}
           </ul>
@@ -171,6 +203,42 @@ export function MissionRoomsSidebar({
           />
         </div>
       </div>
+
+      {/* Confirmation de suppression — la pièce peut contenir des données saisies,
+          on impose donc une confirmation explicite (tutoiement, ton sobre). */}
+      <Dialog
+        open={roomToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setRoomToDelete(null)
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Supprimer cette pièce ?</DialogTitle>
+            <DialogDescription>
+              {roomToDelete
+                ? `« ${roomToDelete.name} » et les données saisies seront définitivement retirées de la mission. Cette action est définitive.`
+                : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setRoomToDelete(null)}>
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                if (roomToDelete && onDeleteRoom) onDeleteRoom(roomToDelete.id)
+                setRoomToDelete(null)
+              }}
+            >
+              <Trash2 className="size-4" aria-hidden />
+              Supprimer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </aside>
   )
 }
@@ -183,10 +251,26 @@ interface RoomListItemProps {
   room: MissionSidebarRoom
   isActive: boolean
   onSelect: () => void
+  /** Renomme la pièce ; absent = action masquée. */
+  onRename?: (newName: string) => void
+  /** Demande la suppression (le parent ouvre la confirmation) ; absent = masqué. */
+  onRequestDelete?: () => void
 }
 
-function RoomListItem({ room, isActive, onSelect }: RoomListItemProps): React.ReactElement {
+function RoomListItem({
+  room,
+  isActive,
+  onSelect,
+  onRename,
+  onRequestDelete,
+}: RoomListItemProps): React.ReactElement {
   const Icon = ROOM_ICON_BY_TYPE[room.type] ?? BookOpen
+
+  // Mode renommage inline : input qui remplace le nom dans la ligne.
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [draftName, setDraftName] = useState(room.name)
+
+  const hasMenu = onRename != null || onRequestDelete != null
 
   // Choix des couleurs d'anneau selon statut.
   // empty -> rule/30 ; partial -> amber ; complete -> chartreuse-deep
@@ -213,51 +297,154 @@ function RoomListItem({ room, isActive, onSelect }: RoomListItemProps): React.Re
         ? 'partielle'
         : 'à saisir'
 
+  function startRenaming(): void {
+    setDraftName(room.name)
+    setIsRenaming(true)
+  }
+
+  function commitRename(): void {
+    const trimmed = draftName.trim()
+    if (trimmed.length > 0 && trimmed !== room.name && onRename) {
+      onRename(trimmed)
+    }
+    setIsRenaming(false)
+  }
+
+  function cancelRename(): void {
+    setDraftName(room.name)
+    setIsRenaming(false)
+  }
+
+  // Mode renommage : input + valider / annuler.
+  if (isRenaming) {
+    return (
+      <li>
+        <div className="flex items-center gap-2 rounded-md px-2 py-2 bg-sage-alt border border-[#0F1419]/20">
+          <Input
+            autoFocus
+            value={draftName}
+            maxLength={60}
+            onChange={(e) => setDraftName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                commitRename()
+              } else if (e.key === 'Escape') {
+                e.preventDefault()
+                cancelRename()
+              }
+            }}
+            aria-label="Nouveau nom de la pièce"
+            className="h-8 flex-1 text-[13px]"
+          />
+          <button
+            type="button"
+            onClick={commitRename}
+            aria-label="Valider le nouveau nom"
+            className="shrink-0 inline-flex size-7 items-center justify-center rounded-md text-chartreuse-deep hover:bg-paper transition-colors"
+          >
+            <Check className="size-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            onClick={cancelRename}
+            aria-label="Annuler le renommage"
+            className="shrink-0 inline-flex size-7 items-center justify-center rounded-md text-[#0F1419]/72 hover:bg-paper transition-colors"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        </div>
+      </li>
+    )
+  }
+
   return (
     <li>
-      <button
-        type="button"
-        onClick={onSelect}
-        aria-pressed={isActive}
-        aria-label={`${room.name} — ${room.filledFields} champ${room.filledFields > 1 ? 's' : ''} sur ${room.requiredFields} (${statusLabel})`}
+      <div
         className={cn(
-          'w-full flex items-center gap-3 rounded-md px-2 py-2',
-          'text-left transition-all duration-200',
+          'group/room flex items-center gap-1 rounded-md pr-1',
+          'transition-all duration-200',
           isActive
             ? 'bg-sage-alt border border-[#0F1419]/20'
             : 'border border-transparent hover:bg-sage-alt/60',
         )}
       >
-        {/* Avatar circulaire 32px avec icône type */}
-        <div
-          className={cn(
-            'shrink-0 size-8 rounded-full bg-paper flex items-center justify-center',
-            ringClass,
-            'transition-shadow duration-200',
-          )}
-          aria-hidden
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-pressed={isActive}
+          aria-label={`${room.name} — ${room.filledFields} champ${room.filledFields > 1 ? 's' : ''} sur ${room.requiredFields} (${statusLabel})`}
+          className="flex min-w-0 flex-1 items-center gap-3 px-2 py-2 text-left"
         >
-          <Icon className="size-4 text-[#0F1419]/82" />
-        </div>
+          {/* Avatar circulaire 32px avec icône type */}
+          <div
+            className={cn(
+              'shrink-0 size-8 rounded-full bg-paper flex items-center justify-center',
+              ringClass,
+              'transition-shadow duration-200',
+            )}
+            aria-hidden
+          >
+            <Icon className="size-4 text-[#0F1419]/82" />
+          </div>
 
-        {/* Info pièce */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[13px] font-medium text-[#0F1419] truncate">{room.name}</span>
-            {room.surfaceSqm != null ? (
-              <span className="text-[11px] font-mono text-[#0F1419]/72 shrink-0">
-                · {room.surfaceSqm}m²
+          {/* Info pièce */}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[13px] font-medium text-[#0F1419] truncate">{room.name}</span>
+              {room.surfaceSqm != null ? (
+                <span className="text-[11px] font-mono text-[#0F1419]/72 shrink-0">
+                  · {room.surfaceSqm}m²
+                </span>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-1 mt-0.5">
+              {statusIcon}
+              <span className="text-[11px] font-mono text-[#0F1419]/72 tabular-nums">
+                {room.filledFields}/{room.requiredFields}
               </span>
-            ) : null}
+            </div>
           </div>
-          <div className="flex items-center gap-1 mt-0.5">
-            {statusIcon}
-            <span className="text-[11px] font-mono text-[#0F1419]/72 tabular-nums">
-              {room.filledFields}/{room.requiredFields}
-            </span>
-          </div>
-        </div>
-      </button>
+        </button>
+
+        {/* Menu contextuel — Renommer / Supprimer */}
+        {hasMenu ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label={`Actions pour la pièce ${room.name}`}
+                className={cn(
+                  'shrink-0 inline-flex size-7 items-center justify-center rounded-md',
+                  'text-[#0F1419]/55 hover:bg-paper hover:text-[#0F1419] transition-colors',
+                  // Toujours visible sur mobile (pas de hover) ; révélé au survol desktop.
+                  'opacity-100 lg:opacity-0 lg:group-hover/room:opacity-100 lg:focus-visible:opacity-100',
+                  'data-[state=open]:opacity-100',
+                )}
+              >
+                <MoreVertical className="size-4" aria-hidden />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              {onRename ? (
+                <DropdownMenuItem onSelect={() => startRenaming()}>
+                  <Pencil className="size-4" aria-hidden />
+                  Renommer
+                </DropdownMenuItem>
+              ) : null}
+              {onRequestDelete ? (
+                <DropdownMenuItem
+                  onSelect={() => onRequestDelete()}
+                  className="text-accent-red focus:text-accent-red"
+                >
+                  <Trash2 className="size-4" aria-hidden />
+                  Supprimer
+                </DropdownMenuItem>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
+      </div>
     </li>
   )
 }

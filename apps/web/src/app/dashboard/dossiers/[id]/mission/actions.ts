@@ -74,6 +74,109 @@ export async function createRoomAction(
 }
 
 // ============================================
+// deleteRoomAction — suppression (soft-delete) d'une pièce
+// ============================================
+
+const deleteRoomSchema = z.object({
+  dossierId: z.string().uuid(),
+  roomId: z.string().uuid(),
+})
+
+export async function deleteRoomAction(
+  dossierId: string,
+  roomId: string,
+): Promise<{ ok: true } | { error: string }> {
+  const parsed = deleteRoomSchema.safeParse({ dossierId, roomId })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+  }
+  const { supabase, orgId } = await getCurrentUser()
+
+  // Soft-delete : la table dossier_rooms possède une colonne `deleted_at`
+  // (migration 20260615100000). On la renseigne plutôt qu'un DELETE physique
+  // pour préserver les photos/notes liées (FK ON DELETE SET NULL) + l'historique.
+  // Le UNIQUE INDEX partiel `WHERE deleted_at IS NULL` libère ainsi le nom.
+  const { data, error } = await supabase
+    .from('dossier_rooms')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', parsed.data.roomId)
+    .eq('dossier_id', parsed.data.dossierId)
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .select('id')
+    .maybeSingle()
+
+  if (error) {
+    if (error.code === '42501') return { error: 'Accès refusé à cette organisation' }
+    return { error: error.message }
+  }
+  if (!data) {
+    return { error: 'Pièce introuvable ou déjà supprimée' }
+  }
+
+  revalidatePath(`/dashboard/dossiers/${parsed.data.dossierId}/mission`)
+  return { ok: true }
+}
+
+// ============================================
+// renameRoomAction — renommage d'une pièce
+// ============================================
+
+const renameRoomSchema = z.object({
+  dossierId: z.string().uuid(),
+  roomId: z.string().uuid(),
+  newName: z.string().trim().min(1).max(60),
+  // room_type recalculé côté client (inferRoomTypeFromName) et passé ici ;
+  // optionnel pour rester tolérant si l'appelant ne le fournit pas.
+  roomType: z.string().trim().min(1).max(40).nullable().optional(),
+})
+
+export async function renameRoomAction(
+  dossierId: string,
+  roomId: string,
+  newName: string,
+  roomType?: string | null,
+): Promise<{ ok: true } | { error: string }> {
+  const parsed = renameRoomSchema.safeParse({ dossierId, roomId, newName, roomType })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+  }
+  const { supabase, orgId } = await getCurrentUser()
+
+  // On met à jour le nom (+ room_type si fourni). Le UNIQUE INDEX partiel
+  // (dossier_id, lower(name)) WHERE deleted_at IS NULL peut rejeter le rename
+  // si une autre pièce active porte déjà ce nom → on remonte un message clair.
+  const updatePayload: { name: string; room_type?: string | null } = {
+    name: parsed.data.newName,
+  }
+  if (parsed.data.roomType != null) {
+    updatePayload.room_type = parsed.data.roomType
+  }
+
+  const { data, error } = await supabase
+    .from('dossier_rooms')
+    .update(updatePayload)
+    .eq('id', parsed.data.roomId)
+    .eq('dossier_id', parsed.data.dossierId)
+    .eq('organization_id', orgId)
+    .is('deleted_at', null)
+    .select('id')
+    .maybeSingle()
+
+  if (error) {
+    if (error.code === '42501') return { error: 'Accès refusé à cette organisation' }
+    if (error.code === '23505') return { error: 'Une autre pièce porte déjà ce nom' }
+    return { error: error.message }
+  }
+  if (!data) {
+    return { error: 'Pièce introuvable ou déjà supprimée' }
+  }
+
+  revalidatePath(`/dashboard/dossiers/${parsed.data.dossierId}/mission`)
+  return { ok: true }
+}
+
+// ============================================
 // uploadCapturePhotoAction — INSERT row photos après upload Storage
 // ============================================
 

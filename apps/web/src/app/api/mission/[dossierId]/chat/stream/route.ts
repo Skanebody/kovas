@@ -82,7 +82,14 @@ interface PersistedMessage {
 }
 
 interface ParsedCapture {
-  capture_type: 'room' | 'equipment' | 'observation' | 'photo_taken' | 'measurement'
+  capture_type:
+    | 'room'
+    | 'room_delete'
+    | 'room_rename'
+    | 'equipment'
+    | 'observation'
+    | 'photo_taken'
+    | 'measurement'
   data: Record<string, unknown>
 }
 
@@ -198,10 +205,14 @@ function buildMissionSystemPrompt(ctx: MissionContext, activeRoomName: string | 
     '',
     'Types autorisés et clés conseillées :',
     '- `room` : `name="Salon" surface=22.5 floor=1 features=parquet,radiateur` (features séparées par virgules sans espace)',
+    '- `room_delete` : `name="Salle à manger"` (supprime une pièce ajoutée par erreur)',
+    '- `room_rename` : `from="Salon" to="Séjour"` (corrige le nom d\'une pièce existante)',
     '- `equipment` : `kind="chaudiere_gaz" room="Cuisine" age_years=8 brand="Saunier Duval" power_kw=24`',
     '- `observation` : `category="humidite" room="Salle de bain" severity="medium" note="trace plafond"`',
     '- `photo_taken` : `room="Salon" angle="vue_generale"`',
     '- `measurement` : `type="surface_carrez" room="Salon" value=22.5 unit="m2"`',
+    '',
+    'IMPORTANT — `room_delete` et `room_rename` ne doivent être émis QUE si le diagnostiqueur demande EXPLICITEMENT de supprimer ou renommer une pièce (ex : "supprime la salle à manger", "renomme le salon en séjour"). Ne les émettez JAMAIS spontanément.',
     '',
     'Vous pouvez émettre 0, 1 ou 2 captures par réponse (jamais 3+). NE COMMENTEZ PAS la ligne CAPTURE — elle est invisible côté UI.',
     '',
@@ -405,6 +416,8 @@ function parseCaptureBody(body: string): ParsedCapture | null {
 
   const allowed: ParsedCapture['capture_type'][] = [
     'room',
+    'room_delete',
+    'room_rename',
     'equipment',
     'observation',
     'photo_taken',

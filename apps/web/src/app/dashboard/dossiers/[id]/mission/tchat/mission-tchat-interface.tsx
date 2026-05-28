@@ -81,6 +81,7 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createRoomAction, deleteRoomAction, renameRoomAction } from '../actions'
 import { type CaptureMode, CaptureModeToggle } from './CaptureModeToggle'
 import {
   type FinalAnalysisGap,
@@ -879,18 +880,91 @@ export function MissionTchatInterface({
     getInput,
   })
 
+  // ----- Persistence DB des pièces créées par l'IA (gap V1.5) -----
+  // Quand l'IA insère une nouvelle pièce locale `ai-...`, on la persiste en DB
+  // (best-effort) et on remplace l'id local par l'UUID retourné pour que les
+  // delete/rename ultérieurs s'appliquent côté serveur. Si offline / erreur,
+  // on conserve l'id local `ai-...` (le state reste la source de vérité).
+  const persistingAiRoomIdsRef = useRef<Set<string>>(new Set())
+  const persistAiRoom = useCallback(
+    (localId: string, name: string) => {
+      // Garde anti double-persist (StrictMode dev + captures rapprochées).
+      if (persistingAiRoomIdsRef.current.has(localId)) return
+      persistingAiRoomIdsRef.current.add(localId)
+      void createRoomAction(dossierId, name)
+        .then((res) => {
+          if ('roomId' in res) {
+            const dbId = res.roomId
+            // Swap id local → UUID DB dans le state + activeRoomId si concerné.
+            setRooms((prev) => prev.map((r) => (r.id === localId ? { ...r, id: dbId } : r)))
+            setActiveRoomId((cur) => (cur === localId ? dbId : cur))
+          }
+        })
+        .catch(() => {
+          // Offline / erreur — on garde l'id local, pas bloquant.
+        })
+        .finally(() => {
+          persistingAiRoomIdsRef.current.delete(localId)
+        })
+    },
+    [dossierId],
+  )
+
   // ----- Apply captures → state rooms -----
   // Quand Claude renvoie une capture `room` ou `measurement` ou autres
   // qui touchent une pièce, on met à jour le state local. Implémentation
   // V1 simple : on cherche par nom, sinon on insère la pièce.
-  // V1.5 : sync DB côté serveur (TODO non bloquant).
+  // V1.5 : delete/rename + persistence des pièces IA syncées en DB best-effort.
   const applyCapturesToRooms = useCallback(
     (captures: Array<{ type: string; data?: Record<string, unknown> }>) => {
       setRooms((prev) => {
         let next = prev
         for (const cap of captures) {
           if (cap.type === 'room' && cap.data) {
+            // Pièce déjà connue ? on note son id avant upsert pour distinguer
+            // création vs simple mise à jour (persistence DB best-effort plus bas).
+            const name = typeof cap.data.name === 'string' ? cap.data.name : null
+            const existedBefore =
+              name != null && next.some((r) => r.name.toLowerCase() === name.toLowerCase())
             next = upsertRoomFromCapture(next, cap.data)
+            // Nouvelle pièce locale `ai-...` → on tente la persistence DB pour
+            // que delete/rename ultérieurs fonctionnent côté serveur.
+            if (!existedBefore && name != null) {
+              const created = next.find((r) => r.name.toLowerCase() === name.toLowerCase())
+              if (created?.id.startsWith('ai-')) {
+                persistAiRoom(created.id, name)
+              }
+            }
+          } else if (cap.type === 'room_delete' && cap.data) {
+            const name = typeof cap.data.name === 'string' ? cap.data.name : null
+            if (name != null) {
+              const target = next.find((r) => r.name.toLowerCase() === name.toLowerCase())
+              if (target) {
+                // DB : soft-delete best-effort si la pièce y est persistée.
+                if (isDbRoomId(target.id)) {
+                  void deleteRoomAction(dossierId, target.id).catch(() => {
+                    // Offline / erreur réseau — le state local reste la vérité.
+                  })
+                }
+                // Si la pièce supprimée était active, on libère le contexte de saisie.
+                setActiveRoomId((cur) => (cur === target.id ? null : cur))
+              }
+            }
+            next = deleteRoomFromCapture(next, cap.data)
+          } else if (cap.type === 'room_rename' && cap.data) {
+            const from = typeof cap.data.from === 'string' ? cap.data.from : null
+            const to = typeof cap.data.to === 'string' ? cap.data.to : null
+            if (from != null && to != null) {
+              const target = next.find((r) => r.name.toLowerCase() === from.toLowerCase())
+              if (target && isDbRoomId(target.id)) {
+                void renameRoomAction(dossierId, target.id, to, inferRoomTypeFromName(to)).catch(
+                  () => {
+                    // Offline / erreur réseau — le state local reste la vérité.
+                  },
+                )
+              }
+            }
+            next = renameRoomFromCapture(next, cap.data)
           } else if (cap.type === 'measurement' && cap.data) {
             next = applyMeasurementCapture(next, cap.data)
           } else if (cap.type === 'equipment' && cap.data) {
@@ -902,7 +976,8 @@ export function MissionTchatInterface({
         return next
       })
     },
-    [],
+    // persistAiRoom est défini plus bas via useCallback stable → inclus en dép.
+    [dossierId, persistAiRoom],
   )
 
   // ----- Streaming IA -----
@@ -1371,6 +1446,45 @@ export function MissionTchatInterface({
     void sendMessage('Je souhaite ajouter une nouvelle pièce — laquelle me conseilles-tu ?')
   }, [sendMessage])
 
+  // ----- Sidebar pièces : renommage / suppression manuels -----
+  const handleRenameRoom = useCallback(
+    (roomId: string, newName: string) => {
+      const trimmed = newName.trim()
+      if (trimmed.length === 0) return
+      // State local (optimiste) + recalcul du type via le nouveau nom.
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.id === roomId ? { ...r, name: trimmed, type: inferRoomTypeFromName(trimmed) } : r,
+        ),
+      )
+      // DB best-effort si la pièce y est persistée (UUID).
+      if (isDbRoomId(roomId)) {
+        void renameRoomAction(dossierId, roomId, trimmed, inferRoomTypeFromName(trimmed)).catch(
+          () => {
+            // Offline / erreur — le state local reste la vérité.
+          },
+        )
+      }
+    },
+    [dossierId],
+  )
+
+  const handleDeleteRoom = useCallback(
+    (roomId: string) => {
+      // State local (optimiste).
+      setRooms((prev) => prev.filter((r) => r.id !== roomId))
+      // Libère le contexte de saisie si la pièce active vient d'être supprimée.
+      setActiveRoomId((cur) => (cur === roomId ? null : cur))
+      // DB best-effort si la pièce y est persistée (UUID).
+      if (isDbRoomId(roomId)) {
+        void deleteRoomAction(dossierId, roomId).catch(() => {
+          // Offline / erreur — le state local reste la vérité.
+        })
+      }
+    },
+    [dossierId],
+  )
+
   // ----- Lot MISSION-C : "Aller corriger" depuis le récap -----
   // Ferme le sheet, sélectionne la pièce si fournie, envoie une question
   // contextuelle à l'IA pour amorcer la saisie du champ.
@@ -1832,6 +1946,8 @@ export function MissionTchatInterface({
           activeRoomId={activeRoomId}
           onSelectRoom={handleSelectRoom}
           onAddRoom={handleAddRoom}
+          onRenameRoom={handleRenameRoom}
+          onDeleteRoom={handleDeleteRoom}
           variant="desktop"
         />
       </div>
@@ -1846,6 +1962,8 @@ export function MissionTchatInterface({
             activeRoomId={activeRoomId}
             onSelectRoom={handleSelectRoom}
             onAddRoom={handleAddRoom}
+            onRenameRoom={handleRenameRoom}
+            onDeleteRoom={handleDeleteRoom}
             variant="mobile"
           />
         </div>
@@ -1911,6 +2029,17 @@ export function MissionTchatInterface({
 // -----------------------------------------------------------------------------
 // Helpers state rooms — application des captures Claude → MissionSidebarRoom[]
 // -----------------------------------------------------------------------------
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * Vrai si l'id correspond à une pièce persistée en DB (UUID `dossier_rooms.id`).
+ * Les pièces locales (créées par l'IA `ai-...` ou par défaut `slug-N`) ne le sont
+ * pas → on n'appelle pas la server action delete/rename pour elles.
+ */
+function isDbRoomId(id: string): boolean {
+  return UUID_RE.test(id)
+}
 
 /**
  * Bump le nombre de champs renseignés d'une pièce, recalcule le statut.
@@ -1978,6 +2107,39 @@ function upsertRoomFromCapture(
     completionStatus: computeRoomStatus(new Array<string>(initialFilled).fill('x'), type),
   }
   return [...rooms, newRoom]
+}
+
+/**
+ * Supprime une pièce du state à partir d'une capture `room_delete`
+ * (`name="Salle à manger"`). Match par nom (case-insensitive). Fonction pure :
+ * la suppression DB éventuelle est gérée par l'appelant (best-effort).
+ */
+function deleteRoomFromCapture(
+  rooms: MissionSidebarRoom[],
+  data: Record<string, unknown>,
+): MissionSidebarRoom[] {
+  const name = typeof data.name === 'string' ? data.name : null
+  if (!name) return rooms
+  return rooms.filter((r) => r.name.toLowerCase() !== name.toLowerCase())
+}
+
+/**
+ * Renomme une pièce du state à partir d'une capture `room_rename`
+ * (`from="Salon" to="Séjour"`). Match par nom (case-insensitive) sur `from`,
+ * recalcule le type via le nouveau nom. Fonction pure.
+ */
+function renameRoomFromCapture(
+  rooms: MissionSidebarRoom[],
+  data: Record<string, unknown>,
+): MissionSidebarRoom[] {
+  const from = typeof data.from === 'string' ? data.from : null
+  const to = typeof data.to === 'string' ? data.to : null
+  if (!from || !to) return rooms
+  const idx = rooms.findIndex((r) => r.name.toLowerCase() === from.toLowerCase())
+  if (idx < 0) return rooms
+  const next = [...rooms]
+  next[idx] = { ...next[idx], name: to, type: inferRoomTypeFromName(to) }
+  return next
 }
 
 function applyMeasurementCapture(
