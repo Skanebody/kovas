@@ -114,6 +114,11 @@ export function AudioMessageBubble({
   }, [])
 
   // ── Reset les états quand l'URL change (swap blob:… → signed URL Whisper) ──
+  // FIX (audit P1-4) : deps `[audioUrl]` (et non `[]`). Sans la dep, le reset ne
+  // tournait qu'au montage → après le swap blob→signed URL, l'état
+  // useWebAudioFallback restait collé sur l'ANCIENNE URL et le replay jouait/
+  // échouait sur le blob périmé. On reset bien à chaque changement d'URL.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset volontaire sur changement d'URL uniquement
   useEffect(() => {
     // Si l'URL change après un fallback, on tente d'abord à nouveau le <audio>.
     setUseWebAudioFallback(false)
@@ -123,7 +128,7 @@ export function AudioMessageBubble({
     setCurrentTime(0)
     webAudioBufferRef.current = null
     webAudioOffsetRef.current = 0
-  }, [])
+  }, [audioUrl])
 
   // ── Fallback : tente de décoder le blob via Web Audio API ───────────
   const tryWebAudioFallback = useCallback(async (): Promise<boolean> => {

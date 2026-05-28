@@ -439,6 +439,13 @@ export function MissionTchatInterface({
   // AbortController du stream Claude en cours — abort au unmount (sinon le
   // ReadableStream continue + setState post-unmount, audit P0-6).
   const streamAbortRef = useRef<AbortController | null>(null)
+  // File d'attente d'UN message si un envoi arrive pendant qu'un stream est en
+  // cours (cas : commit vocal Whisper qui aboutit alors qu'une réponse IA
+  // précédente streame encore, audit P0-2). Rejoué à la fin du stream courant
+  // au lieu d'être jeté silencieusement.
+  const pendingSendRef = useRef<{ text: string; opts?: { suppressUserBubble?: boolean } } | null>(
+    null,
+  )
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
@@ -902,8 +909,15 @@ export function MissionTchatInterface({
   const sendMessage = useCallback(
     async (rawText: string, opts?: { suppressUserBubble?: boolean }) => {
       const text = rawText.trim()
+      if (!text) return
       // Garde synchrone (ref, pas le state async) contre le double-envoi.
-      if (!text || isStreamingRef.current) return
+      // Si un stream est déjà en cours, on NE jette PAS le message (cas commit
+      // vocal qui aboutit pendant un stream précédent, audit P0-2) : on le met
+      // en file pour le rejouer à la fin du stream courant.
+      if (isStreamingRef.current) {
+        pendingSendRef.current = { text, opts }
+        return
+      }
       const suppressUserBubble = opts?.suppressUserBubble === true
 
       setErrorMsg(null)
@@ -1169,6 +1183,14 @@ export function MissionTchatInterface({
           prev.map((m) => (m.id === assistantId && m.streaming ? { ...m, streaming: false } : m)),
         )
         scrollToBottom('smooth')
+        // Rejoue un éventuel message mis en file pendant ce stream (audit P0-2).
+        const pending = pendingSendRef.current
+        if (pending) {
+          pendingSendRef.current = null
+          queueMicrotask(() => {
+            void sendMessageRef.current?.(pending.text, pending.opts)
+          })
+        }
       }
     },
     [

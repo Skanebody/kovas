@@ -71,6 +71,11 @@ export class AudioRecorder {
       // intermédiaires ne forment pas un fichier complet — bug Safari + bug Chrome
       // avec certains codecs opus → <audio> renvoie NotSupportedError).
       this.recorder.start()
+      // Le navigateur peut renégocier le mimeType (notamment si on a passé
+      // undefined faute de type supporté). On capture le type RÉEL pour que la
+      // durée, l'extension du File envoyé à Whisper et le type du Blob soient
+      // exacts (audit P2-1/P2-5 — Safari produit du mp4, pas du webm).
+      if (this.recorder.mimeType) this.mimeType = this.recorder.mimeType
     } catch (err) {
       // Si MediaRecorder constructeur throw (codec non supporté, etc.), le
       // getUserMedia stream est déjà ouvert → on doit le libérer manuellement
@@ -104,14 +109,12 @@ export class AudioRecorder {
           reject(err)
         }
       }
-      // requestData() force MediaRecorder à flush le buffer dans
-      // ondataavailable AVANT que onstop ne tire. Sinon sur certains browsers
-      // (Safari notamment), la dernière trame audio peut être perdue.
-      try {
-        if (recorder.state === 'recording') recorder.requestData()
-      } catch {
-        // requestData peut throw sur certains polyfills — non bloquant
-      }
+      // IMPORTANT (audit P1-1) : on N'appelle PAS requestData() ici.
+      // L'enregistrement est démarré SANS timeslice (start() sans argument),
+      // donc stop() flush déjà tout le buffer en UN seul chunk valide. Appeler
+      // requestData() avant stop() provoquerait un 2e dataavailable → 2 chunks
+      // concaténés pouvant former un WebM/MP4 invalide (deux segments) →
+      // <audio> NotSupportedError. stop() seul garantit le chunk unique.
       recorder.stop()
     })
   }

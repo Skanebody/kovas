@@ -115,6 +115,11 @@ export function useAudioLevel(
       return
     }
     audioCtxRef.current = ctx
+    // L'AudioContext peut démarrer "suspended" (autoplay policy) quand il n'est
+    // pas créé directement dans un geste utilisateur (ici post-getUserMedia).
+    // Sans resume(), getFloatTimeDomainData renvoie des zéros → VU-mètre figé à
+    // "silence" alors que l'utilisateur parle (audit P2-3). resume() best-effort.
+    if (ctx.state === 'suspended') void ctx.resume()
 
     let source: MediaStreamAudioSourceNode
     try {

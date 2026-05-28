@@ -348,7 +348,7 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
       return
     }
 
-    let rec: { blob: Blob; durationSeconds: number }
+    let rec: { blob: Blob; durationSeconds: number; mimeType: string }
     try {
       rec = await recorder.stop()
     } catch {
@@ -399,9 +399,12 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
 
     try {
       const form = new FormData()
-      const file = new File([rec.blob], 'voice.webm', {
-        type: rec.blob.type || 'audio/webm',
-      })
+      // Extension cohérente avec le mimeType réel (audit P2-1) : sur Safari le
+      // blob est audio/mp4 — un filename .webm faisait échouer le décodage côté
+      // OpenAI (l'API s'appuie sur l'extension du File). On dérive de rec.mimeType.
+      const mime = rec.mimeType || rec.blob.type || 'audio/webm'
+      const ext = mime.includes('mp4') || mime.includes('mpeg') ? 'mp4' : 'webm'
+      const file = new File([rec.blob], `voice.${ext}`, { type: mime })
       form.append('audio', file)
       form.append('dossierId', dossierId)
       form.append('sessionId', sessionId)
@@ -549,6 +552,23 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
       stopMeterStream()
     }
   }, [stopMeterStream])
+
+  // Appel entrant / passage en arrière-plan pendant un enregistrement (audit
+  // P0-4) : sur iOS l'OS suspend MediaRecorder + réquisitionne le micro. Sans
+  // gestion, isListening resterait bloqué, l'overlay figé, l'audio corrompu.
+  // Politique : quand la page devient cachée pendant un record actif, on
+  // COMMIT ce qui a été capturé (on préserve la note plutôt que de la perdre ;
+  // si le blob est cassé, le commit a son propre fallback transcript).
+  useEffect(() => {
+    if (!isListening) return
+    const onHidden = (): void => {
+      if (document.visibilityState === 'hidden' && audioRecorderRef.current) {
+        void commitVoiceMessage()
+      }
+    }
+    document.addEventListener('visibilitychange', onHidden)
+    return () => document.removeEventListener('visibilitychange', onHidden)
+  }, [isListening, commitVoiceMessage])
 
   // Cleanup : libère tous les objectURL locaux des messages vocaux au démontage
   // (sinon memory leak Browser sur les blobs Audio retenues).
