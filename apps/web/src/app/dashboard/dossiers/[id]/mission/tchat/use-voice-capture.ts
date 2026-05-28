@@ -170,6 +170,13 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
   const voiceBlobsRef = useRef<Map<string, Blob>>(new Map())
   // Map messageId → objectURL local (pour revokeObjectURL au moment du swap).
   const voiceLocalUrlsRef = useRef<Map<string, string>>(new Map())
+  // True tant que le composant est monté — testé avant tout setState async
+  // (post-Whisper, post-getUserMedia) pour éviter les "state update on unmounted
+  // component" + leaks quand le diagnostiqueur quitte la mission en plein vol.
+  const mountedRef = useRef<boolean>(true)
+  // AbortController du POST /api/transcribe en cours — abort au unmount/cancel
+  // pour ne pas laisser le fetch Whisper tourner après départ de la page.
+  const whisperAbortRef = useRef<AbortController | null>(null)
 
   const [isListening, setIsListening] = useState<boolean>(false)
 
@@ -219,10 +226,21 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
         setInput(voiceTranscriptRef.current)
       },
       onError: (err) => {
-        if (err === 'not-allowed') {
-          setErrorMsg("Autorisez l'accès au micro dans les réglages du navigateur pour la dictée.")
-          // Erreur fatale — on cleanup
+        // Erreurs FATALES (cleanup complet) :
+        //  - not-allowed       : permission micro refusée
+        //  - audio-capture     : micro indisponible/réquisitionné (appel entrant,
+        //    autre app a pris le micro) → le MediaRecorder est probablement mort
+        //    aussi ; sans cleanup, isListening resterait bloqué à true et l'overlay
+        //    figé (bug terrain P0-3).
+        //  - service-not-allowed : service de reconnaissance bloqué
+        if (err === 'not-allowed' || err === 'audio-capture' || err === 'service-not-allowed') {
+          setErrorMsg(
+            err === 'audio-capture'
+              ? 'Le micro est devenu indisponible (appel en cours ?). Enregistrement interrompu.'
+              : "Autorisez l'accès au micro dans les réglages du navigateur pour la dictée.",
+          )
           setIsListening(false)
+          setVoiceStartedAt(0)
           stopMeterStream()
           if (audioRecorderRef.current) {
             audioRecorderRef.current.cancel()
@@ -230,7 +248,8 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
           }
           setVoiceMode('idle')
         }
-        // Pour les autres erreurs (no-speech, network), on laisse le record continuer.
+        // Pour les autres erreurs (no-speech, network), on laisse le record continuer
+        // (le blob + Whisper serveur prennent le relais).
       },
       onEnd: () => {
         // Web Speech se ferme tout seul après silence — on NE coupe PAS le record.
@@ -247,6 +266,13 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
     void recorder
       .start()
       .then(() => {
+        // Composant démonté pendant getUserMedia (départ mission) → on coupe
+        // immédiatement le micro qui vient de s'ouvrir (sinon micro zombie).
+        if (!mountedRef.current) {
+          recorder.cancel()
+          audioRecorderRef.current = null
+          return
+        }
         const stream = recorder.getStream()
         if (stream) {
           meterStreamRef.current = stream
@@ -368,6 +394,7 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
 
     // ── 2) Upload + Whisper en arrière-plan ────────────────────────────────
     const controller = new AbortController()
+    whisperAbortRef.current = controller
     const timeoutId = window.setTimeout(() => controller.abort(), 30_000)
 
     try {
@@ -385,6 +412,9 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
         signal: controller.signal,
       })
       window.clearTimeout(timeoutId)
+      whisperAbortRef.current = null
+      // Composant démonté entre-temps (départ mission) → on stoppe sans setState.
+      if (!mountedRef.current) return
 
       if (!res.ok) {
         // Lit le body même en erreur pour récupérer le vrai message serveur
@@ -476,21 +506,46 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
    * Drop l'audio + transcript, retourne en idle.
    */
   const cancelVoiceMessage = useCallback((): void => {
-    if (recognitionRef.current) recognitionRef.current.abort()
+    if (recognitionRef.current) {
+      recognitionRef.current.abort()
+      recognitionRef.current = null
+    }
     if (audioRecorderRef.current) {
       audioRecorderRef.current.cancel()
       audioRecorderRef.current = null
     }
+    // Abort un éventuel POST Whisper en cours (cancel pendant la transcription).
+    if (whisperAbortRef.current) {
+      whisperAbortRef.current.abort()
+      whisperAbortRef.current = null
+    }
     voiceTranscriptRef.current = ''
     setIsListening(false)
+    setVoiceStartedAt(0)
     setVoiceMode('idle')
     setInput('')
     stopMeterStream()
   }, [stopMeterStream, setInput])
 
-  // Cleanup VU-mètre stream au unmount
+  // Cleanup au unmount : coupe TOUT (micro, Web Speech, fetch Whisper, VU-mètre)
+  // pour éviter un micro zombie (voyant rouge + batterie) ou un setState
+  // post-unmount quand le diagnostiqueur quitte la mission en plein enregistrement
+  // ou pendant la transcription (audit P0-1 + P0-5).
   useEffect(() => {
     return () => {
+      mountedRef.current = false
+      if (recognitionRef.current) {
+        recognitionRef.current.abort()
+        recognitionRef.current = null
+      }
+      if (audioRecorderRef.current) {
+        audioRecorderRef.current.cancel()
+        audioRecorderRef.current = null
+      }
+      if (whisperAbortRef.current) {
+        whisperAbortRef.current.abort()
+        whisperAbortRef.current = null
+      }
       stopMeterStream()
     }
   }, [stopMeterStream])

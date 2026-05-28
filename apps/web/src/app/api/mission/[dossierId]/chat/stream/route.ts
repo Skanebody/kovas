@@ -333,11 +333,16 @@ async function loadConversationHistory(sessionId: string): Promise<PersistedMess
   const { supabase } = await getCurrentUser()
 
   type MsgRow = { role: string; content: string }
+  // FIX (audit P1-6) : on veut les MAX_HISTORY_MESSAGES messages les plus
+  // RÉCENTS (pas les plus anciens). Avant : `ascending: true` + limit prenait
+  // les 16 PREMIERS → sur une mission longue (100+ msgs) Claude recevait
+  // toujours le tout début et "oubliait" tout le contexte récent. On lit donc
+  // en DESC (derniers d'abord) puis on ré-inverse pour l'ordre chronologique.
   const res = await supabase
     .from('mission_chat_messages' as never)
     .select('role, content')
     .eq('session_id', sessionId)
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
     .limit(MAX_HISTORY_MESSAGES)
 
   const rows = Array.isArray(res.data) ? (res.data as unknown as MsgRow[]) : []
@@ -347,6 +352,7 @@ async function loadConversationHistory(sessionId: string): Promise<PersistedMess
         (r.role === 'user' || r.role === 'assistant') && typeof r.content === 'string',
     )
     .map((r) => ({ role: r.role, content: r.content }))
+    .reverse() // remet l'ordre chronologique ASC pour le prompt Claude
 }
 
 /**
