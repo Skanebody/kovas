@@ -431,6 +431,14 @@ export function MissionTchatInterface({
   const [isPaused, setIsPaused] = useState<boolean>(() => _sessionPausedAt != null)
   const [stats, setStats] = useState(initialStats)
   const [isStreaming, setIsStreaming] = useState<boolean>(false)
+  // Miroir SYNCHRONE de isStreaming : la garde anti-double-envoi doit être
+  // posée AVANT tout await (le setState async laisse une fenêtre où un 2e
+  // Enter rapide passe le guard `if (isStreaming) return` périmé → 2 fetch SSE
+  // = 2 INSERT user + 2 réponses Claude facturées, audit P0-3).
+  const isStreamingRef = useRef<boolean>(false)
+  // AbortController du stream Claude en cours — abort au unmount (sinon le
+  // ReadableStream continue + setState post-unmount, audit P0-6).
+  const streamAbortRef = useRef<AbortController | null>(null)
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
@@ -894,7 +902,8 @@ export function MissionTchatInterface({
   const sendMessage = useCallback(
     async (rawText: string, opts?: { suppressUserBubble?: boolean }) => {
       const text = rawText.trim()
-      if (!text || isStreaming) return
+      // Garde synchrone (ref, pas le state async) contre le double-envoi.
+      if (!text || isStreamingRef.current) return
       const suppressUserBubble = opts?.suppressUserBubble === true
 
       setErrorMsg(null)
@@ -906,7 +915,7 @@ export function MissionTchatInterface({
       if (captureMode === 'capture') {
         if (!suppressUserBubble) {
           const userMsg: ChatMessage = {
-            id: `user-${Date.now()}`,
+            id: `user-${crypto.randomUUID()}`,
             role: 'user',
             content: text,
             createdAt: Date.now(),
@@ -1003,7 +1012,7 @@ export function MissionTchatInterface({
       // Si réponse locale et offline, on traite en local uniquement
       if (localResponse && !isOnline) {
         const assistantMsg: ChatMessage = {
-          id: `assistant-${Date.now() + 1}`,
+          id: `assistant-${crypto.randomUUID()}`,
           role: 'assistant',
           content: localResponse,
           createdAt: Date.now() + 1,
@@ -1013,7 +1022,7 @@ export function MissionTchatInterface({
           setMessages((prev) => [...prev, assistantMsg])
         } else {
           const userMsg: ChatMessage = {
-            id: `user-${Date.now()}`,
+            id: `user-${crypto.randomUUID()}`,
             role: 'user',
             content: text,
             createdAt: Date.now(),
@@ -1026,7 +1035,7 @@ export function MissionTchatInterface({
       }
 
       // Prépare un placeholder assistant streaming
-      const assistantId = `assistant-${Date.now() + 1}`
+      const assistantId = `assistant-${crypto.randomUUID()}`
       const assistantPlaceholder: ChatMessage = {
         id: assistantId,
         role: 'assistant',
@@ -1040,7 +1049,7 @@ export function MissionTchatInterface({
         setMessages((prev) => [...prev, assistantPlaceholder])
       } else {
         const userMsg: ChatMessage = {
-          id: `user-${Date.now()}`,
+          id: `user-${crypto.randomUUID()}`,
           role: 'user',
           content: text,
           createdAt: Date.now(),
@@ -1049,6 +1058,8 @@ export function MissionTchatInterface({
         setMessages((prev) => [...prev, userMsg, assistantPlaceholder])
       }
       setInput('')
+      // Garde synchrone posée AVANT le fetch (le state async suit pour l'UI).
+      isStreamingRef.current = true
       setIsStreaming(true)
 
       // Contextualise l'IA avec la pièce active si l'utilisateur l'a sélectionnée
@@ -1057,6 +1068,11 @@ export function MissionTchatInterface({
       const activeRoomName = activeRoomId
         ? (rooms.find((r) => r.id === activeRoomId)?.name ?? null)
         : null
+
+      // AbortController du stream — abort au unmount (départ mission) pour ne
+      // pas laisser le ReadableStream + les setState tourner après démontage.
+      const controller = new AbortController()
+      streamAbortRef.current = controller
 
       try {
         const res = await fetch(`/api/mission/${dossierId}/chat/stream`, {
@@ -1067,6 +1083,7 @@ export function MissionTchatInterface({
             message: text,
             activeRoomName,
           }),
+          signal: controller.signal,
         })
         if (!res.ok || !res.body) {
           throw new Error(`HTTP ${res.status}`)
@@ -1134,11 +1151,23 @@ export function MissionTchatInterface({
           }
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Erreur réseau'
-        setErrorMsg(msg)
-        setMessages((prev) => prev.filter((m) => m.id !== assistantId))
+        // Abort volontaire (unmount/départ mission) → pas un message d'erreur.
+        const isAbort = err instanceof DOMException && err.name === 'AbortError'
+        if (!isAbort) {
+          const msg = err instanceof Error ? err.message : 'Erreur réseau'
+          setErrorMsg(msg)
+          setMessages((prev) => prev.filter((m) => m.id !== assistantId))
+        }
       } finally {
+        streamAbortRef.current = null
+        isStreamingRef.current = false
         setIsStreaming(false)
+        // Filet de sécurité (audit P1-1) : si le flux s'est fermé proprement
+        // SANS event `done` (proxy qui coupe le SSE), la bulle resterait coincée
+        // avec streaming:true (curseur clignotant éternel). On force false.
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId && m.streaming ? { ...m, streaming: false } : m)),
+        )
         scrollToBottom('smooth')
       }
     },
@@ -1167,6 +1196,18 @@ export function MissionTchatInterface({
   useLayoutEffect(() => {
     sendMessageRef.current = sendMessage
   }, [sendMessage])
+
+  // Cleanup au unmount : abort le stream Claude en cours (départ mission /
+  // navigation) — sinon le ReadableStream continue + setState post-unmount
+  // (audit P0-6 chat).
+  useEffect(() => {
+    return () => {
+      if (streamAbortRef.current) {
+        streamAbortRef.current.abort()
+        streamAbortRef.current = null
+      }
+    }
+  }, [])
 
   // ----- Submit avec cross-check métier (MISSION-E niveau 4 local) -----
   const handleSubmit = useCallback(() => {
