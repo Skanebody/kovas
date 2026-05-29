@@ -16,7 +16,8 @@
  * la logique côté DB est posée par l'Edge Function lors du prevalidate).
  */
 
-import { AlertTriangle, ArrowRight, CheckCircle2, Info, XCircle } from 'lucide-react'
+import { AlertTriangle, ArrowRight, CheckCircle2, Info, Lock, XCircle } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -46,6 +47,10 @@ export interface PrevalidationResultProps {
     message: string
     suggested_fix?: string
   }>
+  /** Freemium : détail des corrections verrouillé (réservé Pack Conformité). */
+  detailLocked?: boolean
+  /** Nombre total de points détectés (affiché même quand le détail est verrouillé). */
+  issuesCount?: number
   onReset: () => void
 }
 
@@ -97,6 +102,8 @@ export function PrevalidationResult({
   globalScore,
   axisScores,
   warnings,
+  detailLocked = false,
+  issuesCount = 0,
   onReset,
 }: PrevalidationResultProps) {
   const [decisionPending, setDecisionPending] = useState<string | null>(null)
@@ -237,8 +244,32 @@ export function PrevalidationResult({
         </div>
       </Card>
 
+      {/* Freemium : détail verrouillé → paywall Pack Conformité */}
+      {detailLocked && issuesCount > 0 ? (
+        <Card variant="opaque" padding="default" className="space-y-3 border border-accent-warm/30">
+          <div className="flex items-start gap-3">
+            <div className="shrink-0 rounded-full bg-accent-warm/15 p-2 text-accent-warm">
+              <Lock className="size-4" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <h3 className="text-[15px] font-semibold text-[#0F1419]">
+                {issuesCount} point{issuesCount > 1 ? 's' : ''} à corriger détecté
+                {issuesCount > 1 ? 's' : ''}
+              </h3>
+              <p className="text-[13px] text-[#0F1419]/72">
+                Le verdict est gratuit. Le détail des corrections (quel champ revoir, comment) est
+                inclus dans le Pack Conformité.
+              </p>
+            </div>
+          </div>
+          <Button variant="warm" size="sm" asChild className="w-fit">
+            <Link href="/dashboard/decouvrir#decouvrir-addons">Débloquer le détail</Link>
+          </Button>
+        </Card>
+      ) : null}
+
       {/* Warnings */}
-      {warnings.length > 0 ? (
+      {!detailLocked && warnings.length > 0 ? (
         <Card variant="opaque" padding="default" className="space-y-3">
           <h3 className="text-[15px] font-semibold text-[#0F1419]">
             {warnings.length} avertissement{warnings.length > 1 ? 's' : ''}

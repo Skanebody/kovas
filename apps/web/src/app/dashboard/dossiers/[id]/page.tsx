@@ -176,6 +176,21 @@ export default async function DossierDetailPage({
       .limit(100),
   ])
 
+  // Dernière pré-validation ADEME de ce dossier → badge statut « sur le fichier ».
+  const { data: latestPrevalidation } = await supabase
+    .from('ademe_prevalidations')
+    .select('quality_score, status, created_at')
+    .eq('dossier_id', id)
+    .eq('organization_id', orgId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  // quality_score 0-1 (1 = parfait). PreExportSection attend un score /100 où
+  // ≥90 = prêt. On le dérive directement.
+  const ademePrevalidationScore = latestPrevalidation
+    ? Math.round(Number(latestPrevalidation.quality_score ?? 0) * 100)
+    : null
+
   // -------------------------------------------------------------
   // 3. État conceptuel + sections visibles
   // -------------------------------------------------------------
@@ -544,7 +559,7 @@ export default async function DossierDetailPage({
       preExport={
         visibleSections.preExport ? (
           <PreExportSection
-            ademeScore={null}
+            ademeScore={ademePrevalidationScore}
             findings={[
               ...(roomsList.length === 0
                 ? [

@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
-import { Camera, Download, Link2, Mail, Mic, Phone, Share2 } from 'lucide-react'
+import { Camera, Download, Link2, Mail, Mic, Phone, Share2, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import type { ComponentType } from 'react'
 import { useState } from 'react'
@@ -37,8 +37,9 @@ interface QuickActionsBlockProps {
  * - Phone   : `tel:` si téléphone client présent, sinon toast d'info
  * - Share   : ouvre Dialog "Partager le dossier" (3 modes : lien copiable,
  *             email pré-rempli, téléchargement ZIP)
- * - Download: `/dashboard/dossiers/[id]/prevalidation` (export/validation
- *             ADEME + génération PDF — ALWAYS rendered)
+ * - Shield  : `/dashboard/dossiers/[id]/prevalidation` (pré-validation ADEME
+ *             pré-remplie depuis le dossier — ALWAYS rendered). L'export ZIP
+ *             est dans le Dialog Partager.
  */
 export function QuickActionsBlock({ dossierId, clientPhone, clientEmail }: QuickActionsBlockProps) {
   const missionUrl = `/dashboard/dossiers/${dossierId}/mission`
@@ -54,7 +55,7 @@ export function QuickActionsBlock({ dossierId, clientPhone, clientEmail }: Quick
         <ActionMail clientEmail={clientEmail} dossierId={dossierId} />
         <ActionPhone clientPhone={clientPhone} />
         <ActionShare dossierId={dossierId} clientEmail={clientEmail} />
-        <ActionLink href={prevalidationUrl} label="Exporter" icon={Download} />
+        <ActionLink href={prevalidationUrl} label="Pré-valider" icon={ShieldCheck} />
       </div>
     </Card>
   )

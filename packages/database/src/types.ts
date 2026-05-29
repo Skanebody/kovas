@@ -761,9 +761,10 @@ export type Database = {
           acknowledged_by: string | null
           completed_at: string | null
           created_at: string
+          dossier_id: string | null
           findings: Json
           id: string
-          mission_id: string
+          mission_id: string | null
           organization_id: string
           override_reason: string | null
           quality_score: number | null
@@ -784,9 +785,10 @@ export type Database = {
           acknowledged_by?: string | null
           completed_at?: string | null
           created_at?: string
+          dossier_id?: string | null
           findings?: Json
           id?: string
-          mission_id: string
+          mission_id?: string | null
           organization_id: string
           override_reason?: string | null
           quality_score?: number | null
@@ -807,9 +809,10 @@ export type Database = {
           acknowledged_by?: string | null
           completed_at?: string | null
           created_at?: string
+          dossier_id?: string | null
           findings?: Json
           id?: string
-          mission_id?: string
+          mission_id?: string | null
           organization_id?: string
           override_reason?: string | null
           quality_score?: number | null
@@ -825,6 +828,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: 'ademe_prevalidations_dossier_id_fkey'
+            columns: ['dossier_id']
+            isOneToOne: false
+            referencedRelation: 'dossiers'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'ademe_prevalidations_mission_id_fkey'
             columns: ['mission_id']

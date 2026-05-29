@@ -61,6 +61,10 @@ interface ApiResponse {
     message: string
     suggested_fix?: string
   }>
+  /** Freemium : détail des corrections verrouillé (réservé Pack Conformité). */
+  detailLocked?: boolean
+  /** Nombre de points détectés (affiché même verrouillé). */
+  issuesCount?: number
 }
 
 /**
@@ -146,6 +150,7 @@ export function PrevalidationForm({ initialValues }: PrevalidationFormProps = {}
       latitude: addr?.latitude,
       longitude: addr?.longitude,
       address_label: addr?.label,
+      source_dossier_id: initialValues?.source_dossier_id,
     }
 
     setSubmitting(true)
@@ -181,6 +186,8 @@ export function PrevalidationForm({ initialValues }: PrevalidationFormProps = {}
         globalScore={result.globalScore}
         axisScores={result.axisScores}
         warnings={result.warnings}
+        detailLocked={result.detailLocked}
+        issuesCount={result.issuesCount}
         onReset={handleReset}
       />
     )
