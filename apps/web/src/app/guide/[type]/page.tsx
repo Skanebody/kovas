@@ -6,6 +6,7 @@ import { GuideSection } from '@/components/guide/GuideSection'
 import { GuideTOC } from '@/components/guide/GuideTOC'
 import { GuideSources } from '@/components/guides/GuideSources'
 import { RelatedGuides } from '@/components/guides/RelatedGuides'
+import { AuthorBio } from '@/components/public/AuthorBio'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { getMergedRelatedGuides } from '@/data/guides/internal-linking'
 import { GUIDE_SLUGS, getGuideBySlug } from '@/lib/guides/registry'
@@ -177,6 +178,12 @@ export default async function GuideDetailPage({ params }: PageProps) {
                `INTERNAL_LINKING_MAP`. Remplace l'ancienne section
                "Continuer la lecture" hard-codée. */}
             <RelatedGuides guide={guide} />
+
+            {/* Signature humaine E-E-A-T (méthode Amandine Bart §3/§7) —
+               obligatoire sur les pages YMYL contenu. */}
+            <div className="mt-12">
+              <AuthorBio lastUpdatedIso={guide.updatedAt} />
+            </div>
           </article>
         </div>
       </div>

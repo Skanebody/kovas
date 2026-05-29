@@ -1,3 +1,4 @@
+import { AuthorBio } from '@/components/public/AuthorBio'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { GlossaryTerm } from '@/components/ui/glossary-term'
@@ -438,6 +439,14 @@ export default async function ObservatoirePage() {
               est obligatoire à la vente des classes F, G depuis avril 2023 et E depuis janvier
               2025.
             </p>
+          </div>
+        </section>
+
+        {/* Signature humaine E-E-A-T (méthode Amandine Bart §3/§7) — page
+           YMYL data : auteur identifié Benjamin Bel + date de mise à jour. */}
+        <section className="px-5 sm:px-12 pb-12">
+          <div className="max-w-[1240px] mx-auto">
+            <AuthorBio lastUpdatedIso={stats.lastUpdated} />
           </div>
         </section>
       </main>

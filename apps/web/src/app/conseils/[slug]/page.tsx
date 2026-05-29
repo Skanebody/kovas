@@ -1,3 +1,4 @@
+import { AuthorBio } from '@/components/public/AuthorBio'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -130,7 +131,7 @@ export default async function ConseilArticlePage({ params }: PageProps) {
             description: article.seoDescription,
             slug: article.slug,
             datePublished: article.publishedAt,
-            authorName: 'KOVAS',
+            authorName: 'Benjamin Bel',
           }),
           buildBreadcrumbList([
             { name: 'Accueil', path: '/' },
@@ -171,6 +172,13 @@ export default async function ConseilArticlePage({ params }: PageProps) {
           </header>
 
           <MarkdownArticle html={article.contentHtml} markdown={article.contentMarkdown} />
+
+          {/* Signature humaine E-E-A-T (méthode Amandine Bart §3/§7). */}
+          {article.publishedAt ? (
+            <div className="mt-12">
+              <AuthorBio lastUpdatedIso={article.publishedAt} />
+            </div>
+          ) : null}
         </article>
 
         <section className="border-t border-rule/60 bg-paper">
