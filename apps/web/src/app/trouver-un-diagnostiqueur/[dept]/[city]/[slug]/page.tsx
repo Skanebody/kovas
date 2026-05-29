@@ -456,6 +456,9 @@ function sanitizeDiagPublic(diag: any): any {
     longitude: diag.longitude,
     geo_lat: diag.geo_lat,
     geo_lng: diag.geo_lng,
+    // Rayon d'intervention (km) — whitelisté pour que la carte affiche le rayon
+    // réel du diagnostiqueur (sinon fallback 30 km côté client).
+    intervention_radius_km: diag.intervention_radius_km,
     certifications: diag.certifications,
     years_active: diag.years_active,
     years_experience: diag.years_experience, // alias legacy, lecture safe

@@ -76,12 +76,16 @@ export function getInterventionVisualConfig(tier: AnnuaireTier): InterventionVis
         showHighlightedCities: true,
         concentricRings: 3,
       }
-    case 'free':
     default:
+      // `free` (et tout tier inconnu) — fiche non revendiquée.
       return {
         primaryColor: TOKEN.navy,
-        fillOpacity: 0.06,
-        borderWeight: 1,
+        // Rayon clairement visible même sur fiche non revendiquée (free) :
+        // un cercle trop discret (6 % / 1px) donnait l'impression que la zone
+        // d'intervention n'était pas affichée. On garde le navy sobre DS v5
+        // mais on rend le périmètre lisible.
+        fillOpacity: 0.12,
+        borderWeight: 2,
         pulseAnimation: false,
         showDepartmentBoundary: false,
         showHighlightedCities: false,
