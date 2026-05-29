@@ -159,6 +159,12 @@ export async function POST(request: Request) {
   const dossierId = (formData.get('dossierId') ?? formData.get('missionId')) as string | null
   // sessionId optionnel — permet de scoper le replay segment par session mission.
   const sessionId = (formData.get('sessionId') ?? null) as string | null
+  // clientLocalId optionnel (BUG 2) — UUID local Dexie de la note vocale offline.
+  // Quand fourni, l'INSERT voice_notes devient un UPSERT idempotent : un rejeu de
+  // sync (réponse perdue après transcription réussie) retombe sur la même ligne.
+  const rawClientLocalId = formData.get('clientLocalId')
+  const clientLocalId =
+    typeof rawClientLocalId === 'string' && rawClientLocalId.length > 0 ? rawClientLocalId : null
   // meta JSON optionnel (Lot B60) : { length_seconds, noise_level, sample_rate?, channels? }
   const rawMeta = formData.get('meta')
 
@@ -298,29 +304,36 @@ export async function POST(request: Request) {
         noSpeechProb: s.noSpeechProb,
         confidence: s.confidence,
       }))
-      const { data: vn, error: vnErr } = await supabase
-        .from('voice_notes')
-        .insert({
-          dossier_id: dossierId,
-          organization_id: orgId,
-          recorded_by: user.id,
-          storage_path: audioStoragePath,
-          duration_seconds: Math.round(duration),
-          language: (result as { language?: string }).language ?? 'fr',
-          provider: 'openai',
-          transcript_raw: result.text,
-          transcript_structured: { segments: segmentsPayload, markedText } as never,
-          ai_cost_eur: costEur,
-          status: 'transcribed',
-          transcribed_at: new Date().toISOString(),
-          file_size_bytes: file.size,
-          // CHECK constraint : ne tolère que pending|processing|transcribed|failed|skipped
-          transcription_status: 'transcribed',
-          transcription_model: model,
-          transcription_cost_usd: costEur,
-        } as never)
-        .select('id')
-        .single()
+      // BUG 2 : client_local_id ajouté par migration 20260528120000 (pas dans
+      // les types générés) → cast `as never`. Avec clef → upsert idempotent ;
+      // sans clef (mode online classique) → insert direct (legacy préservé).
+      const voiceInsertPayload = {
+        dossier_id: dossierId,
+        organization_id: orgId,
+        recorded_by: user.id,
+        storage_path: audioStoragePath,
+        duration_seconds: Math.round(duration),
+        language: (result as { language?: string }).language ?? 'fr',
+        provider: 'openai',
+        transcript_raw: result.text,
+        transcript_structured: { segments: segmentsPayload, markedText },
+        ai_cost_eur: costEur,
+        status: 'transcribed',
+        transcribed_at: new Date().toISOString(),
+        file_size_bytes: file.size,
+        // CHECK constraint : ne tolère que pending|processing|transcribed|failed|skipped
+        transcription_status: 'transcribed',
+        transcription_model: model,
+        transcription_cost_usd: costEur,
+        client_local_id: clientLocalId,
+      }
+      const voiceQuery = clientLocalId
+        ? supabase.from('voice_notes').upsert(voiceInsertPayload as never, {
+            onConflict: 'dossier_id,client_local_id',
+            ignoreDuplicates: false,
+          })
+        : supabase.from('voice_notes').insert(voiceInsertPayload as never)
+      const { data: vn, error: vnErr } = await voiceQuery.select('id').single()
       if (vnErr) {
         console.warn('[transcribe] voice_notes insert failed (non blocking)', vnErr.message)
       } else if (vn && typeof (vn as { id?: unknown }).id === 'string') {

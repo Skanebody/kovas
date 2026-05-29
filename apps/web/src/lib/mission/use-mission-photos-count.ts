@@ -11,6 +11,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
+import { type NoteSyncStatus, getNotesDb } from './mission-notes-offline-store'
 import {
   type PhotoSyncStatus,
   type PhotosSyncSnapshot,
@@ -79,6 +80,25 @@ export function usePhotoSyncStatus(localId: string | null): PhotoSyncStatus | un
       const db = getPhotosDb()
       const p = await db.photos.get(localId)
       return p?.sync_status
+    } catch {
+      return undefined
+    }
+  }, [localId])
+}
+
+/**
+ * Statut de sync live d'une seule note texte/vocal (par id local Dexie) — pour
+ * badge sur la bulle USER du mode Capture (parité avec usePhotoSyncStatus).
+ * Retourne undefined si la note n'existe pas (ou hors window).
+ */
+export function useNoteSyncStatus(localId: string | null): NoteSyncStatus | undefined {
+  return useLiveQuery(async () => {
+    if (!localId) return undefined
+    if (typeof window === 'undefined') return undefined
+    try {
+      const db = getNotesDb()
+      const n = await db.notes.get(localId)
+      return n?.sync_status
     } catch {
       return undefined
     }

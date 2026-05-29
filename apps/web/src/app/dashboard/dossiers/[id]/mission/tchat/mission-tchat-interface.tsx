@@ -25,6 +25,7 @@
  */
 
 import { AudioMessageBubble } from '@/components/chat/AudioMessageBubble'
+import { useToast } from '@/components/shared/Toast'
 import { BottomSheet, BottomSheetTitle } from '@/components/ui/bottom-sheet'
 import { Button } from '@/components/ui/button'
 import { RecordingOverlay } from '@/components/voice/RecordingOverlay'
@@ -44,12 +45,16 @@ import {
   detectContradictions,
 } from '@/lib/3cl/contradictions-detector'
 import { computeMissionCompletionPct, useMissionRiskFlags } from '@/lib/3cl/use-mission-risk-flags'
+import { addAiRoom, addAiRoomItem } from '@/lib/mission/ai-rooms-offline-store'
+import { aiRoomsSyncManager } from '@/lib/mission/ai-rooms-sync-manager'
 import { generateDefaultRooms } from '@/lib/mission/default-rooms'
 import {
   type ExtractedMissionData,
   extractStructuredData,
   generateLocalResponse,
 } from '@/lib/mission/local-extraction'
+import { addTextNote } from '@/lib/mission/mission-notes-offline-store'
+import { notesSyncManager } from '@/lib/mission/notes-sync-manager'
 import { photosSyncManager } from '@/lib/mission/photos-sync-manager'
 import {
   type RoomCompletionStatus,
@@ -61,6 +66,7 @@ import {
 import { type RoomItem, type RoomItemKind, buildRoomItemLabel } from '@/lib/mission/room-items'
 import {
   useMissionPhotosSyncStatus,
+  useNoteSyncStatus,
   usePhotoSyncStatus,
 } from '@/lib/mission/use-mission-photos-count'
 import { cn } from '@/lib/utils'
@@ -83,7 +89,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
-  createRoomAction,
   createRoomItemAction,
   deleteRoomAction,
   deleteRoomItemAction,
@@ -478,6 +483,9 @@ export function MissionTchatInterface({
   )
   const [photoModalLocalId, setPhotoModalLocalId] = useState<string | null>(null)
 
+  // Toast d'échec visible (BUG 4) : photo/note non enregistrée localement.
+  const { showToast } = useToast()
+
   // ----- MISSION-B : sync manager photos rafale -----
   // Démarre le job background photos pending → Supabase Storage + mission_photos.
   // Le snapshot { pending, uploading, synced, errors } est exposé via hook.
@@ -488,6 +496,43 @@ export function MissionTchatInterface({
       photosSyncManager.stop()
     }
   }, [orgId, dossierId, sessionId])
+
+  // ----- BUG 1/2 : sync manager notes texte/vocal -----
+  // Démarre le job background notes pending (mission_text_notes / voice_notes).
+  // La transcription d'une note vocale offline enfin transcrite rafraîchit la
+  // bulle correspondante (par client_local_id) via onVoiceTranscribed.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    notesSyncManager.start({ dossierId, missionSessionId: sessionId })
+    const unsubscribe = notesSyncManager.onVoiceTranscribed(({ noteLocalId, transcript }) => {
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.noteLocalId !== noteLocalId) return m
+          return { ...m, content: transcript, isTranscribing: false }
+        }),
+      )
+    })
+    return () => {
+      unsubscribe()
+      notesSyncManager.stop()
+    }
+  }, [dossierId, sessionId])
+
+  // ----- BUG 3 : sync manager pièces IA + items -----
+  // Persiste les pièces `ai-...` en attente + leurs items rattachés. Au swap
+  // id local → UUID DB, on met à jour le state React (rooms + activeRoomId).
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    aiRoomsSyncManager.start({ dossierId, missionSessionId: sessionId })
+    const unsubscribe = aiRoomsSyncManager.onRoomPersisted((localId, serverRoomId) => {
+      setRooms((prev) => prev.map((r) => (r.id === localId ? { ...r, id: serverRoomId } : r)))
+      setActiveRoomId((cur) => (cur === localId ? serverRoomId : cur))
+    })
+    return () => {
+      unsubscribe()
+      aiRoomsSyncManager.stop()
+    }
+  }, [dossierId, sessionId])
 
   const photosSyncSnapshot = useMissionPhotosSyncStatus(sessionId)
 
@@ -871,6 +916,16 @@ export function MissionTchatInterface({
   inputRef.current = input
   const getInput = useCallback((): string => inputRef.current, [])
 
+  // Refs shadow (BUG 2) : exposent les valeurs courantes du mode + pièce active
+  // au hook vocal de façon STABLE, pour que commitVoiceMessage décide s'il doit
+  // persister le blob dans la queue offline et à quelle pièce le rattacher.
+  const captureModeRef = useRef<CaptureMode>(captureMode)
+  captureModeRef.current = captureMode
+  const getCaptureMode = useCallback((): CaptureMode => captureModeRef.current, [])
+  const activeRoomIdRef = useRef<string | null>(activeRoomId)
+  activeRoomIdRef.current = activeRoomId
+  const getActiveRoomId = useCallback((): string | null => activeRoomIdRef.current, [])
+
   const {
     isListening,
     voiceMode,
@@ -890,36 +945,42 @@ export function MissionTchatInterface({
     setErrorMsg,
     setInput,
     getInput,
+    getCaptureMode,
+    getActiveRoomId,
   })
 
-  // ----- Persistence DB des pièces créées par l'IA (gap V1.5) -----
-  // Quand l'IA insère une nouvelle pièce locale `ai-...`, on la persiste en DB
-  // (best-effort) et on remplace l'id local par l'UUID retourné pour que les
-  // delete/rename ultérieurs s'appliquent côté serveur. Si offline / erreur,
-  // on conserve l'id local `ai-...` (le state reste la source de vérité).
+  // ----- Persistence DB des pièces créées par l'IA (BUG 3 — durabilité) -----
+  // Quand l'IA insère une nouvelle pièce locale `ai-...`, on la POUSSE dans la
+  // queue offline (ai-rooms-offline-store) au lieu d'une seule tentative
+  // `createRoomAction` best-effort. Le AiRoomsSyncManager rejoue jusqu'au succès
+  // (retry online + montage app), swap id local → UUID DB (via le callback
+  // onRoomPersisted câblé plus haut qui met à jour le state + activeRoomId), PUIS
+  // re-persiste les items en attente de cette pièce. Si offline, l'id `ai-...`
+  // reste (le state local est la source de vérité) mais la pièce n'est plus
+  // perdue au refresh : elle est durable dans IndexedDB.
   const persistingAiRoomIdsRef = useRef<Set<string>>(new Set())
   const persistAiRoom = useCallback(
     (localId: string, name: string) => {
-      // Garde anti double-persist (StrictMode dev + captures rapprochées).
+      // Garde anti double-enqueue (StrictMode dev + captures rapprochées).
       if (persistingAiRoomIdsRef.current.has(localId)) return
       persistingAiRoomIdsRef.current.add(localId)
-      void createRoomAction(dossierId, name)
-        .then((res) => {
-          if ('roomId' in res) {
-            const dbId = res.roomId
-            // Swap id local → UUID DB dans le state + activeRoomId si concerné.
-            setRooms((prev) => prev.map((r) => (r.id === localId ? { ...r, id: dbId } : r)))
-            setActiveRoomId((cur) => (cur === localId ? dbId : cur))
-          }
+      void addAiRoom({
+        local_id: localId,
+        dossier_id: dossierId,
+        mission_session_id: sessionId,
+        name,
+      })
+        .then(() => {
+          void aiRoomsSyncManager.kick()
         })
         .catch(() => {
-          // Offline / erreur — on garde l'id local, pas bloquant.
+          // IndexedDB indispo — le state local reste la vérité (fallback dégradé).
         })
         .finally(() => {
           persistingAiRoomIdsRef.current.delete(localId)
         })
     },
-    [dossierId],
+    [dossierId, sessionId],
   )
 
   // ----- Apply captures → state rooms -----
@@ -1000,13 +1061,34 @@ export function MissionTchatInterface({
                 ? next.find((r) => r.name.toLowerCase() === roomName.toLowerCase())
                 : undefined
             next = applyRoomItemCapture(next, cap.data, item)
-            // Persistence DB best-effort si la pièce a un UUID (pas `ai-...`).
             if (target && isDbRoomId(target.id)) {
+              // Pièce déjà persistée (UUID) : persistence DB best-effort directe
+              // (createRoomItemAction est idempotent via client_local_id).
               void createRoomItemAction(target.id, kind, item.label, item.data, item.id).catch(
                 () => {
                   // Offline / erreur — le state local reste la vérité.
                 },
               )
+            } else if (target?.id.startsWith('ai-')) {
+              // BUG 3 : pièce IA pas encore persistée → on QUEUE l'item dans le
+              // store offline rattaché au room_local_id. Le AiRoomsSyncManager le
+              // rejouera dès que la pièce aura son UUID DB (au lieu de le perdre
+              // au refresh comme avant, où isDbRoomId écartait ces items à vie).
+              void addAiRoomItem({
+                id: item.id,
+                room_local_id: target.id,
+                dossier_id: dossierId,
+                mission_session_id: sessionId,
+                kind,
+                label: item.label,
+                data: item.data,
+              })
+                .then(() => {
+                  void aiRoomsSyncManager.kick()
+                })
+                .catch(() => {
+                  // IndexedDB indispo — state local reste la vérité (dégradé).
+                })
             }
           } else if (cap.type === 'item_delete' && cap.data) {
             const roomName = typeof cap.data.room === 'string' ? cap.data.room : null
@@ -1030,7 +1112,7 @@ export function MissionTchatInterface({
       })
     },
     // persistAiRoom est défini plus bas via useCallback stable → inclus en dép.
-    [dossierId, persistAiRoom],
+    [dossierId, sessionId, persistAiRoom],
   )
 
   // ----- Streaming IA -----
@@ -1052,34 +1134,60 @@ export function MissionTchatInterface({
 
       // ===== MISSION-H lot 1 : mode Capture silencieuse =====
       // En mode Capture, on ajoute la bulle user mais on n'appelle PAS Claude.
-      // Le message est persisté en background (mission_text_notes via API) — on
-      // garde le state local pour l'affichage instantané.
+      //
+      // BUG 1 (P0) : avant, le message était POSTé en best-effort SANS
+      // client_local_id, SANS queue offline, avec un .catch() VIDE → offline = la
+      // note n'existait que dans le state React → perdue au refresh/crash, et un
+      // retry manuel créait un doublon.
+      //
+      // Désormais on route la note via la queue Dexie (mission-notes-offline-store)
+      // avec un client_local_id idempotent + un sync manager qui rejoue au retour
+      // `online`. La bulle porte `noteLocalId` pour afficher le badge de sync.
+      //
+      // NB : quand `suppressUserBubble` est vrai (commit vocal en mode Capture),
+      // la note vocale + son BLOB AUDIO ont DÉJÀ été poussés dans la queue par
+      // `commitVoiceMessage` (BUG 2). On ne re-queue donc PAS ici pour éviter le
+      // doublon — on se contente de rendre la bulle si besoin (déjà gérée côté
+      // commit) et on sort.
       if (captureMode === 'capture') {
-        if (!suppressUserBubble) {
-          const userMsg: ChatMessage = {
-            id: `user-${crypto.randomUUID()}`,
-            role: 'user',
-            content: text,
-            createdAt: Date.now(),
-            isVoice: isListening,
-          }
-          setMessages((prev) => [...prev, userMsg])
+        if (suppressUserBubble) {
+          // Voix : déjà géré (bulle + blob + queue) par commitVoiceMessage.
+          setInput('')
+          return
+        }
+        const userMsg: ChatMessage = {
+          id: `user-${crypto.randomUUID()}`,
+          role: 'user',
+          content: text,
+          createdAt: Date.now(),
+          isVoice: isListening,
         }
         setInput('')
-        // Persistence background (best-effort, non bloquant)
-        void fetch(`/api/dossiers/${dossierId}/notes`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            sessionId,
-            text,
-            roomId: activeRoomId,
-            source: isListening ? 'voice' : 'text',
-          }),
-        }).catch(() => {
-          // Le state local reste la source de vérité ; la queue de retry
-          // est gérée par le manager photos/voice existant.
+        // Persistence durable via la queue offline (idempotente, rejouée online).
+        void addTextNote({
+          dossier_id: dossierId,
+          mission_session_id: sessionId,
+          room_id: activeRoomId,
+          text,
+          source: isListening ? 'voice' : 'text',
         })
+          .then((noteLocalId) => {
+            // Attache l'id local à la bulle pour le badge de sync (BUG 4).
+            setMessages((prev) => [...prev, { ...userMsg, noteLocalId }])
+            // Best-effort : tente un sync immédiat si en ligne.
+            void notesSyncManager.kick()
+          })
+          .catch(() => {
+            // L'écriture IndexedDB a échoué (stockage saturé / mode privé) →
+            // on affiche quand même la bulle ET un toast d'échec visible (BUG 4) :
+            // l'utilisateur sait que la note n'est PAS sauvegardée localement.
+            setMessages((prev) => [...prev, userMsg])
+            showToast({
+              title: 'Note non enregistrée',
+              body: 'Réessaie — le stockage local est indisponible.',
+              variant: 'error',
+            })
+          })
         return
       }
 
@@ -1335,6 +1443,7 @@ export function MissionTchatInterface({
       roomsCompleted,
       roomsSaved,
       captureMode,
+      showToast,
     ],
   )
 
@@ -1931,6 +2040,13 @@ export function MissionTchatInterface({
                   activeRoomId ? (rooms.find((r) => r.id === activeRoomId)?.name ?? null) : null
                 }
                 onPhotoCaptured={handlePhotoCaptured}
+                onCaptureError={() =>
+                  showToast({
+                    title: 'Photo non enregistrée',
+                    body: 'Réessaie — la photo n’a pas pu être sauvegardée.',
+                    variant: 'error',
+                  })
+                }
                 disabled={isPaused}
               />
 
@@ -2420,9 +2536,63 @@ function MessageBubble({ message }: { message: ChatMessage }): React.ReactElemen
               minute: '2-digit',
             })}
           </span>
+          {/* BUG 4 : badge de sync des notes texte/vocal du mode Capture, cohérent
+              avec le badge photo (PhotoSyncStatusBadge). */}
+          {message.noteLocalId ? <NoteSyncStatusBadge localId={message.noteLocalId} /> : null}
         </div>
       </div>
     </div>
+  )
+}
+
+// -----------------------------------------------------------------------------
+// NoteSyncStatusBadge (BUG 4) — pastille ⏳ / ☁️ / ✓ / ⚠ sur la bulle USER
+// -----------------------------------------------------------------------------
+
+/**
+ * Badge inline du footer d'une bulle USER (mode Capture) reflétant l'état de
+ * sync de la note texte/vocal en file offline. Réactif au store Dexie via
+ * useNoteSyncStatus — mis à jour par le NotesSyncManager. Cohérent avec
+ * PhotoSyncStatusBadge (mêmes icônes + couleurs sémantiques).
+ */
+function NoteSyncStatusBadge({ localId }: { localId: string }): React.ReactElement | null {
+  const status = useNoteSyncStatus(localId)
+  if (!status) return null
+
+  const config: Record<
+    'pending' | 'uploading' | 'synced' | 'error',
+    { icon: React.ReactElement; label: string; className: string }
+  > = {
+    pending: {
+      icon: <Hourglass className="size-2.5" />,
+      label: 'En attente de sync',
+      className: 'text-[#0F1419]/55',
+    },
+    uploading: {
+      icon: <CloudUpload className="size-2.5 animate-pulse" />,
+      label: 'Enregistrement en cours',
+      className: 'text-accent-blue',
+    },
+    synced: {
+      icon: <Cloud className="size-2.5" />,
+      label: 'Enregistrée',
+      className: 'text-accent-green',
+    },
+    error: {
+      icon: <AlertTriangle className="size-2.5" />,
+      label: 'Échec — sera retentée',
+      className: 'text-accent-red',
+    },
+  }
+  const conf = config[status]
+  return (
+    <span
+      className={cn('inline-flex items-center', conf.className)}
+      title={conf.label}
+      aria-label={conf.label}
+    >
+      {conf.icon}
+    </span>
   )
 }
 

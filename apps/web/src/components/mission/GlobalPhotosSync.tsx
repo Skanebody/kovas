@@ -24,6 +24,8 @@
  * Authority : CLAUDE.md §3 features 2 + 10 (offline complet) + MISSION-B.
  */
 
+import { aiRoomsSyncManager } from '@/lib/mission/ai-rooms-sync-manager'
+import { notesSyncManager } from '@/lib/mission/notes-sync-manager'
 import { photosSyncManager } from '@/lib/mission/photos-sync-manager'
 import { useEffect } from 'react'
 
@@ -32,6 +34,14 @@ interface GlobalPhotosSyncProps {
   orgId: string
 }
 
+/**
+ * BUG 1/2/3 : ce composant draine désormais NON SEULEMENT les photos, mais
+ * AUSSI les notes texte/vocal (mission-notes-offline-store) et les pièces IA +
+ * items (ai-rooms-offline-store) en attente, avec la même politique : drain au
+ * montage + réarmement au retour réseau, toutes sessions confondues. Le pattern
+ * est identique aux photos (cf. JSDoc d'origine ci-dessous), seul le périmètre
+ * s'élargit aux deux nouvelles files offline.
+ */
 export function GlobalPhotosSync({ orgId }: GlobalPhotosSyncProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -39,11 +49,15 @@ export function GlobalPhotosSync({ orgId }: GlobalPhotosSyncProps) {
 
     // 1. Drain initial au montage de l'app (si en ligne).
     void photosSyncManager.syncAllSessions(orgId)
+    void notesSyncManager.syncAllSessions()
+    void aiRoomsSyncManager.syncAllSessions()
 
-    // 2. Au retour réseau : réarme les photos en erreur (toutes sessions) puis
-    //    relance un drain global.
+    // 2. Au retour réseau : réarme les éléments en erreur (toutes sessions) puis
+    //    relance un drain global pour chaque file offline.
     const onOnline = () => {
       void photosSyncManager.resetAndSyncAllSessions(orgId)
+      void notesSyncManager.resetAndSyncAllSessions()
+      void aiRoomsSyncManager.resetAndSyncAllSessions()
     }
     window.addEventListener('online', onOnline)
 

@@ -25,6 +25,8 @@
 
 import type { RecordingMode } from '@/components/voice/RecordingOverlay'
 import { AudioRecorder } from '@/lib/audio-record'
+import { addVoiceNote } from '@/lib/mission/mission-notes-offline-store'
+import { notesSyncManager } from '@/lib/mission/notes-sync-manager'
 import {
   type SpeechRecognitionController,
   createSpeechRecognition,
@@ -67,6 +69,11 @@ export interface ChatMessage {
   photoUrl?: string
   /** UUID local Dexie (MISSION-B) — sert à mapper le status de sync. */
   photoLocalId?: string
+  /**
+   * UUID local Dexie de la note texte/vocal du mode Capture (BUG 1/2) — sert à
+   * mapper le badge de sync sur la bulle USER (pending/synced/error).
+   */
+  noteLocalId?: string
   /** Pièce auto-associée à la photo (sidebar active au moment du tap). */
   photoRoomName?: string | null
   /** Indique si ce message assistant est encore en cours de streaming. */
@@ -108,6 +115,18 @@ export interface UseVoiceCaptureProps {
    * fonction stable (lit via closure / useRef côté composant).
    */
   getInput: () => string
+  /**
+   * BUG 2 : lecture courante du mode (capture | conversation). En mode Capture,
+   * le blob audio doit être PERSISTÉ dans la queue offline AVANT tout réseau
+   * (sinon il est révoqué au unmount → audio + texte perdus si offline).
+   * Fonction stable (lit via ref côté composant).
+   */
+  getCaptureMode: () => 'capture' | 'conversation'
+  /**
+   * BUG 2 : lecture courante de la pièce active (sidebar). Pour rattacher la
+   * note vocale offline à la bonne pièce. Fonction stable.
+   */
+  getActiveRoomId: () => string | null
 }
 
 export interface UseVoiceCaptureReturn {
@@ -143,8 +162,17 @@ export interface UseVoiceCaptureReturn {
 // -----------------------------------------------------------------------------
 
 export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureReturn {
-  const { dossierId, sessionId, sendMessageRef, setMessages, setErrorMsg, setInput, getInput } =
-    props
+  const {
+    dossierId,
+    sessionId,
+    sendMessageRef,
+    setMessages,
+    setErrorMsg,
+    setInput,
+    getInput,
+    getCaptureMode,
+    getActiveRoomId,
+  } = props
 
   // MISSION-E niveau 2 : stream parallèle pour le VU-mètre (anti-bruit)
   // pendant la dictée Web Speech API (qui ne nous donne pas accès au stream micro).
@@ -369,7 +397,13 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
     // Cas edge : audio très court (< 1s) → on n'appelle pas Whisper (coût inutile,
     // résultat peu fiable). On affiche juste la bulle audio sans texte transcrit.
     const isTooShort = rec.durationSeconds < 1
-    const optimisticContent = isTooShort ? '(message vocal court)' : 'Transcription en cours…'
+    const captureMode = getCaptureMode()
+    const isCapture = captureMode === 'capture'
+    const optimisticContent = isTooShort
+      ? '(message vocal court)'
+      : isCapture
+        ? 'Transcription en attente…'
+        : 'Transcription en cours…'
 
     const optimisticMsg: ChatMessage = {
       id: messageId,
@@ -381,6 +415,55 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
       audioDuration: rec.durationSeconds,
       isTranscribing: !isTooShort,
     }
+
+    // ── BUG 2 : mode Capture → PERSISTER le blob AVANT tout réseau ──────────
+    // En mode Capture on ne parle pas à Claude. On pousse la note vocale (avec
+    // son blob audio) dans la queue offline Dexie ; le NotesSyncManager se
+    // chargera de l'upload + transcription + INSERT voice_notes au retour réseau
+    // (idempotent). Le blob est ainsi DURABLE : si la transcription échoue
+    // offline, il sera réessayé au lieu d'être perdu avec l'objectURL révoqué.
+    // On n'appelle donc PAS l'inline /api/transcribe (le manager s'en charge),
+    // ce qui évite une double transcription.
+    if (isCapture) {
+      try {
+        const noteLocalId = await addVoiceNote({
+          dossier_id: dossierId,
+          mission_session_id: sessionId,
+          room_id: getActiveRoomId(),
+          audio_blob: rec.blob,
+          audio_mime: rec.mimeType || rec.blob.type || 'audio/webm',
+          audio_duration: rec.durationSeconds,
+          fallback_text: webSpeechTranscript,
+        })
+        setMessages((prev) => [
+          ...prev,
+          {
+            ...optimisticMsg,
+            noteLocalId,
+            // Trop court → pas de transcription attendue ; sinon spinner jusqu'au sync.
+            isTranscribing: !isTooShort,
+            content: isTooShort
+              ? '(message vocal court)'
+              : webSpeechTranscript || optimisticContent,
+          },
+        ])
+        void notesSyncManager.kick()
+      } catch {
+        // Écriture IndexedDB impossible — on affiche quand même la bulle avec le
+        // transcript Web Speech de secours pour ne pas perdre l'info à l'écran.
+        setErrorMsg("La note vocale n'a pas pu être enregistrée localement. Réessaie.")
+        setMessages((prev) => [
+          ...prev,
+          {
+            ...optimisticMsg,
+            isTranscribing: false,
+            content: webSpeechTranscript || '(message vocal — non enregistré)',
+          },
+        ])
+      }
+      return
+    }
+
     setMessages((prev) => [...prev, optimisticMsg])
 
     if (isTooShort) {
@@ -392,7 +475,7 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
       return
     }
 
-    // ── 2) Upload + Whisper en arrière-plan ────────────────────────────────
+    // ── 2) Upload + Whisper en arrière-plan (mode Conversation uniquement) ──
     const controller = new AbortController()
     whisperAbortRef.current = controller
     const timeoutId = window.setTimeout(() => controller.abort(), 30_000)
@@ -500,8 +583,11 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
     getInput,
     setInput,
     setMessages,
+    setErrorMsg,
     sendMessageRef,
     releaseLocalBlob,
+    getCaptureMode,
+    getActiveRoomId,
   ])
 
   /**

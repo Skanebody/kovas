@@ -46,6 +46,12 @@ interface PhotoCaptureButtonProps {
     roomName: string | null
     takenAt: string
   }) => void
+  /**
+   * BUG 4 : appelé si une photo n'a PAS pu être enregistrée localement
+   * (compression ou écriture IndexedDB échouée). Le parent affiche un toast
+   * visible ("Photo non enregistrée — réessaie") au lieu d'un simple console.warn.
+   */
+  onCaptureError?: () => void
   disabled?: boolean
 }
 
@@ -158,6 +164,7 @@ export function PhotoCaptureButton({
   activeRoomId,
   activeRoomName,
   onPhotoCaptured,
+  onCaptureError,
   disabled = false,
 }: PhotoCaptureButtonProps): React.ReactElement {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -235,11 +242,22 @@ export function PhotoCaptureButton({
         void photosSyncManager.kick()
       } catch (e) {
         console.warn('[PhotoCaptureButton] processing failed', e)
+        // BUG 4 : échec invisible auparavant (console.warn seul). On notifie le
+        // parent pour afficher un toast visible ("Photo non enregistrée — réessaie").
+        onCaptureError?.()
       } finally {
         setIsProcessing(false)
       }
     },
-    [dossierId, missionSessionId, activeRoomId, activeRoomName, onPhotoCaptured, getPosition],
+    [
+      dossierId,
+      missionSessionId,
+      activeRoomId,
+      activeRoomName,
+      onPhotoCaptured,
+      onCaptureError,
+      getPosition,
+    ],
   )
 
   // ----- Tap court : ouvre l'input file natif -----
