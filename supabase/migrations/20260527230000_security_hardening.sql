@@ -32,10 +32,25 @@ BEGIN
         SELECT 1 FROM unnest(coalesce(p.proconfig, ARRAY[]::text[])) AS cfg
         WHERE cfg LIKE 'search_path=%'
       )
+      -- Exclure les fonctions appartenant à une EXTENSION (PostGIS, pg_cron,
+      -- etc.) : elles sont owned par le rôle de l'extension, pas par le rôle
+      -- de migration → ALTER échoue avec "must be owner" (SQLSTATE 42501) et
+      -- casse tout le DO block. On ne pin que NOS fonctions applicatives.
+      AND NOT EXISTS (
+        SELECT 1 FROM pg_depend d
+        WHERE d.objid = p.oid
+          AND d.deptype = 'e'
+      )
   LOOP
-    EXECUTE format('ALTER FUNCTION %s SET search_path = public, pg_temp', v_func.sig);
-    v_count := v_count + 1;
-    RAISE NOTICE 'Pinned search_path on function: %', v_func.sig;
+    -- Belt-and-suspenders : si malgré le filtre une fonction reste non-ALTERable
+    -- (privilège insuffisant), on la saute au lieu d'avorter la migration.
+    BEGIN
+      EXECUTE format('ALTER FUNCTION %s SET search_path = public, pg_temp', v_func.sig);
+      v_count := v_count + 1;
+      RAISE NOTICE 'Pinned search_path on function: %', v_func.sig;
+    EXCEPTION WHEN insufficient_privilege THEN
+      RAISE NOTICE 'Skip (non-owner): %', v_func.sig;
+    END;
   END LOOP;
   RAISE NOTICE 'Total fonctions ALTER : %', v_count;
 END $$;
