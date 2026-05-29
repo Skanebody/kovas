@@ -44,6 +44,7 @@ import {
   FileSearch,
   MapPin,
   Mic,
+  Minus,
   PlayCircle,
   Send,
   ShieldCheck,
@@ -153,31 +154,37 @@ interface ComparisonRow {
   readonly with: string
   /** Si vrai, ligne mise en avant car réglementaire (Liciel/ADEME inchangés) */
   readonly isRegulatory: boolean
+  /** Métrique de gain chiffrée affichée en chip sur la colonne KOVAS (étapes amplifiées). */
+  readonly gain?: string
 }
 
 const COMPARISON_ROWS: readonly ComparisonRow[] = [
   {
     step: '1. Préparation mission',
     without: 'Saisie manuelle adresse, client, biens',
-    with: 'Auto-complétion BAN + cadastre + INSEE en 8 secondes',
+    with: 'Auto-complétion BAN + cadastre + INSEE',
+    gain: '8 secondes',
     isRegulatory: false,
   },
   {
     step: '2. Saisie terrain',
     without: 'Calepin papier ou app mobile basique de ton éditeur (saisie manuelle)',
-    with: 'Saisie vocale FR structurée par pièce + photos géolocalisées + détection IA des équipements',
+    with: 'Saisie vocale FR par pièce + photos géolocalisées + détection IA des équipements',
+    gain: 'Mains libres',
     isRegulatory: false,
   },
   {
     step: '3. Retour bureau',
     without: '30 à 45 minutes de re-saisie complète dans ton logiciel (Liciel, OBBC, AnalysImmo…)',
-    with: 'Bouton Partager 3 modes : email / GDrive auto-sync / téléchargement direct → 30 secondes',
+    with: 'Bouton Partager 3 modes : email / GDrive auto-sync / téléchargement direct',
+    gain: '−35 min / mission',
     isRegulatory: false,
   },
   {
     step: '4. Pré-vérification',
     without: 'Découverte des erreurs à la soumission ADEME (refus possible)',
     with: '8 analyseurs détectent les incohérences en amont (cohérence DPE, vélocité, géoloc, signature)',
+    gain: '0 refus ADEME',
     isRegulatory: false,
   },
   {
@@ -199,6 +206,9 @@ const COMPARISON_ROWS: readonly ComparisonRow[] = [
     isRegulatory: true,
   },
 ]
+
+/** Nombre d'étapes que KOVAS amplifie (non réglementaires) — pour le sous-titre. */
+const AMPLIFIED_STEPS_COUNT = COMPARISON_ROWS.filter((r) => !r.isRegulatory).length
 
 // ───────────────────────────────────────────────────────────────────────────
 // Données : compatibilité éditeurs
@@ -605,62 +615,126 @@ function SectionComparisonTable(): React.ReactElement {
           </h2>
           <p className="text-[15px] text-[#0F1419]/72 max-w-2xl leading-relaxed">
             Pas de comparaison &laquo;&nbsp;X versus Y&nbsp;&raquo;. Une lecture honnête de ce qui
-            change concrètement quand KOVAS s&apos;ajoute à ton logiciel certifié.
+            change concrètement quand KOVAS s&apos;ajoute à ton logiciel certifié :{' '}
+            <span className="font-medium text-[#0F1419]">
+              {AMPLIFIED_STEPS_COUNT} étapes accélérées
+            </span>
+            , 3 étapes réglementaires intactes.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden">
+        <div className="rounded-2xl border border-[#0F1419]/[0.08] bg-paper overflow-hidden shadow-glass-sm">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-[13px] sm:text-[14px]">
+            <table className="w-full min-w-[860px] text-[13px] sm:text-[14px] border-collapse">
               <thead>
-                <tr className="border-b border-[#0F1419]/[0.08] bg-[#F5F7F4]/60">
+                <tr className="border-b border-[#0F1419]/[0.08]">
                   <th
                     scope="col"
-                    className="px-5 py-4 text-left font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55"
+                    className="bg-[#F5F7F4]/60 px-5 py-4 text-left font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55"
                   >
                     Étape
                   </th>
                   <th
                     scope="col"
-                    className="px-5 py-4 text-left font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55"
+                    className="bg-[#F5F7F4]/60 px-5 py-4 text-left font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/45"
                   >
-                    Sans KOVAS (logiciel certifié seul)
+                    Sans KOVAS
+                    <span className="block normal-case tracking-normal text-[10px] text-[#0F1419]/35 mt-0.5">
+                      logiciel certifié seul
+                    </span>
                   </th>
+                  {/* Colonne KOVAS = la colonne gagnante : fond chartreuse-soft + bordures
+                      latérales chartreuse pour la détacher visuellement comme une carte. */}
                   <th
                     scope="col"
-                    className="px-5 py-4 text-left font-mono text-[10px] uppercase tracking-wider text-[#0F1419]/55"
+                    className="bg-chartreuse-soft border-x-2 border-chartreuse px-5 py-4 text-left"
                   >
-                    Avec KOVAS + ton logiciel
+                    <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-[#0F1419] font-semibold">
+                      <CheckCircle2 className="size-3.5 text-chartreuse-deep" aria-hidden />
+                      Avec KOVAS
+                    </span>
+                    <span className="block normal-case tracking-normal text-[10px] text-[#0F1419]/55 mt-0.5">
+                      + ton logiciel certifié
+                    </span>
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {COMPARISON_ROWS.map((row, idx) => (
-                  <tr
-                    key={row.step}
-                    className={[
-                      idx < COMPARISON_ROWS.length - 1 ? 'border-b border-[#0F1419]/[0.06]' : '',
-                      row.isRegulatory ? 'bg-[#F5F7F4]/50' : '',
-                    ].join(' ')}
-                  >
-                    <th
-                      scope="row"
-                      className={[
-                        'px-5 py-4 text-left align-top font-medium text-[#0F1419]',
-                        row.isRegulatory ? 'border-l-4 border-chartreuse-deep' : '',
-                      ].join(' ')}
-                    >
-                      {row.step}
-                      {row.isRegulatory && (
-                        <div className="mt-1 font-mono text-[10px] font-normal uppercase tracking-wider text-chartreuse-deep">
-                          Réglementaire — inchangé
-                        </div>
-                      )}
-                    </th>
-                    <td className="px-5 py-4 align-top text-[#0F1419]/72">{row.without}</td>
-                    <td className="px-5 py-4 align-top text-[#0F1419]">{row.with}</td>
-                  </tr>
-                ))}
+                {COMPARISON_ROWS.map((row, idx) => {
+                  const isLast = idx === COMPARISON_ROWS.length - 1
+                  return (
+                    <tr key={row.step}>
+                      <th
+                        scope="row"
+                        className={[
+                          'px-5 py-4 text-left align-top font-medium text-[#0F1419] bg-paper',
+                          isLast ? '' : 'border-b border-[#0F1419]/[0.06]',
+                        ].join(' ')}
+                      >
+                        {row.step}
+                        {row.isRegulatory && (
+                          <div className="mt-1 font-mono text-[10px] font-normal uppercase tracking-wider text-[#0F1419]/40">
+                            Réglementaire — inchangé
+                          </div>
+                        )}
+                      </th>
+
+                      {/* Colonne SANS : atténuée (la friction). Pour les étapes amplifiées,
+                          petit tiret muet qui signale « rien ne t'aide ». */}
+                      <td
+                        className={[
+                          'px-5 py-4 align-top text-[#0F1419]/55 bg-paper',
+                          isLast ? '' : 'border-b border-[#0F1419]/[0.06]',
+                        ].join(' ')}
+                      >
+                        <span className="flex gap-2">
+                          {!row.isRegulatory && (
+                            <Minus
+                              className="size-4 shrink-0 mt-0.5 text-[#0F1419]/25"
+                              aria-hidden
+                            />
+                          )}
+                          <span>{row.without}</span>
+                        </span>
+                      </td>
+
+                      {/* Colonne AVEC : la colonne héros. Fond chartreuse-soft continu +
+                          bordures latérales chartreuse + check vert + chip métrique de gain.
+                          Lignes réglementaires = neutres (pas un avantage KOVAS). */}
+                      <td
+                        className={[
+                          'px-5 py-4 align-top border-x-2 border-chartreuse',
+                          row.isRegulatory
+                            ? 'bg-chartreuse-soft/30 text-[#0F1419]/60'
+                            : 'bg-chartreuse-soft/60 text-[#0F1419]',
+                          isLast ? 'border-b-2' : '',
+                        ].join(' ')}
+                      >
+                        <span className="flex gap-2">
+                          {row.isRegulatory ? (
+                            <ShieldCheck
+                              className="size-4 shrink-0 mt-0.5 text-[#0F1419]/35"
+                              aria-hidden
+                            />
+                          ) : (
+                            <CheckCircle2
+                              className="size-4 shrink-0 mt-0.5 text-chartreuse-deep"
+                              aria-hidden
+                            />
+                          )}
+                          <span className="space-y-1.5">
+                            <span className="block font-medium">{row.with}</span>
+                            {row.gain && (
+                              <span className="inline-flex items-center rounded-pill bg-[#0F1419] px-2.5 py-1 font-mono text-[11px] font-semibold tracking-tight text-chartreuse">
+                                {row.gain}
+                              </span>
+                            )}
+                          </span>
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
