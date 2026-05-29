@@ -455,15 +455,107 @@ export function getOffer(code: string): OfferDescriptor | undefined {
 // User access — décrit la situation actuelle de l'utilisateur
 // ---------------------------------------------------------------------------
 
+/**
+ * Toutes les valeurs de tier logiciel possibles en base : grille actuelle
+ * (solo/pro/cabinet/cabinet_plus), ancienne grille (discovery/standard/volume)
+ * et variantes `_legacy` des abonnés grandfathered. On reste permissif (string)
+ * pour ne jamais afficher une valeur brute non mappée.
+ */
+export type LogicielTier =
+  | 'solo'
+  | 'pro'
+  | 'cabinet'
+  | 'cabinet_plus'
+  | 'discovery'
+  | 'standard'
+  | 'volume'
+  | (string & {})
+
+export type AnnuaireTier = 'local' | 'regional' | 'national' | (string & {})
+
 export interface UserAccess {
   /** A un abonnement actif sur le logiciel KOVAS */
   hasLogiciel: boolean
   /** A une fiche annuaire payante active (Local, Régional, National) */
   hasAnnuaire: boolean
   /** Tier logiciel actif (si présent) — pour info, pas pour filtrage strict */
-  logicielTier?: 'discovery' | 'standard' | 'volume'
+  logicielTier?: LogicielTier
   /** Tier annuaire actif (si présent) */
-  annuaireTier?: 'local' | 'regional' | 'national'
+  annuaireTier?: AnnuaireTier
+}
+
+/** Libellés humains des tiers logiciel (base, hors suffixe `_legacy`). */
+const LOGICIEL_TIER_LABEL: Record<string, string> = {
+  solo: 'Solo',
+  pro: 'Pro',
+  cabinet: 'Cabinet',
+  cabinet_plus: 'Cabinet+',
+  // Ancienne grille (abonnés historiques)
+  discovery: 'Découverte',
+  standard: 'Standard',
+  volume: 'Volume',
+}
+
+/** Libellés humains des plans annuaire. */
+const ANNUAIRE_TIER_LABEL: Record<string, string> = {
+  local: 'Présence',
+  regional: 'Boost',
+  national: 'Premium',
+}
+
+/** Code d'offre logiciel (LOGICIEL_OFFERS) correspondant à un tier DB. */
+const LOGICIEL_TIER_TO_OFFER: Record<string, string> = {
+  solo: 'logiciel_solo_light',
+  pro: 'logiciel_solo_pro',
+  cabinet: 'logiciel_cabinet',
+  cabinet_plus: 'logiciel_cabinet_plus',
+  discovery: 'logiciel_solo_light',
+  standard: 'logiciel_solo_pro',
+  volume: 'logiciel_cabinet',
+}
+
+/** Code d'offre annuaire (ANNUAIRE_OFFERS) correspondant à un tier DB. */
+const ANNUAIRE_TIER_TO_OFFER: Record<string, string> = {
+  local: 'annuaire_local',
+  regional: 'annuaire_regional',
+  national: 'annuaire_national',
+}
+
+/** Retire le suffixe `_legacy` et indique si le tier est historique. */
+function splitLegacy(tier: string): { base: string; isLegacy: boolean } {
+  const isLegacy = tier.endsWith('_legacy')
+  return { base: isLegacy ? tier.slice(0, -'_legacy'.length) : tier, isLegacy }
+}
+
+/**
+ * Libellé lisible d'un tier logiciel (ex. `volume_legacy` → « Volume (historique) »).
+ * Ne renvoie jamais la valeur brute de l'enum à l'utilisateur.
+ */
+export function formatLogicielTierLabel(tier?: string | null): string | null {
+  if (!tier) return null
+  const { base, isLegacy } = splitLegacy(tier)
+  const label = LOGICIEL_TIER_LABEL[base] ?? base.charAt(0).toUpperCase() + base.slice(1)
+  return isLegacy ? `${label} (historique)` : label
+}
+
+/** Libellé lisible d'un plan annuaire (ex. `regional` → « Boost »). */
+export function formatAnnuaireTierLabel(tier?: string | null): string | null {
+  if (!tier) return null
+  const { base, isLegacy } = splitLegacy(tier)
+  const label = ANNUAIRE_TIER_LABEL[base] ?? base.charAt(0).toUpperCase() + base.slice(1)
+  return isLegacy ? `${label} (historique)` : label
+}
+
+/** Code d'offre logiciel actif, pour surligner « Plan actuel » dans la grille. */
+export function logicielTierToOfferCode(tier?: string | null): string | undefined {
+  if (!tier) return undefined
+  return LOGICIEL_TIER_TO_OFFER[splitLegacy(tier).base]
+}
+
+/** Code d'offre annuaire actif, pour surligner « Plan actuel » dans la grille. */
+export function annuaireTierToOfferCode(tier?: string | null): string | undefined {
+  if (!tier) return undefined
+  return ANNUAIRE_TIER_TO_OFFER[splitLegacy(tier).base]
 }
 
 export function deriveTrack(access: UserAccess): UserTrack {

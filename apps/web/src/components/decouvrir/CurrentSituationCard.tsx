@@ -2,7 +2,12 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-import type { TrackSummary, UserAccess } from '@/lib/decouvrir/recommendations'
+import {
+  type TrackSummary,
+  type UserAccess,
+  formatAnnuaireTierLabel,
+  formatLogicielTierLabel,
+} from '@/lib/decouvrir/recommendations'
 import { Check, Compass } from 'lucide-react'
 
 interface CurrentSituationCardProps {
@@ -39,13 +44,13 @@ export function CurrentSituationCard({ access, summary }: CurrentSituationCardPr
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
         <SituationLine
           label="KOVAS (logiciel)"
-          activeLabel={access.logicielTier ? `Tier ${access.logicielTier}` : 'Actif'}
+          activeLabel={formatLogicielTierLabel(access.logicielTier) ?? 'Actif'}
           active={access.hasLogiciel}
           inactiveLabel="Aucun abonnement"
         />
         <SituationLine
           label="KOVAS Annuaire"
-          activeLabel={access.annuaireTier ? `Plan ${access.annuaireTier}` : 'Actif'}
+          activeLabel={formatAnnuaireTierLabel(access.annuaireTier) ?? 'Actif'}
           active={access.hasAnnuaire}
           inactiveLabel="Non référencé payant"
         />

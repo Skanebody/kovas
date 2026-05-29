@@ -1,5 +1,9 @@
 import { getCurrentUser } from '@/lib/auth/current-user'
-import type { UserAccess } from '@/lib/decouvrir/recommendations'
+import {
+  type UserAccess,
+  annuaireTierToOfferCode,
+  logicielTierToOfferCode,
+} from '@/lib/decouvrir/recommendations'
 import type { Metadata } from 'next'
 import { DecouvrirClient } from './decouvrir-client'
 
@@ -41,19 +45,10 @@ export default async function DecouvrirPage() {
     annuaireTier,
   }
 
-  const logicielTierToCode: Record<NonNullable<UserAccess['logicielTier']>, string> = {
-    discovery: 'logiciel_solo_light',
-    standard: 'logiciel_solo_pro',
-    volume: 'logiciel_cabinet',
-  }
-  const annuaireTierToCode: Record<NonNullable<UserAccess['annuaireTier']>, string> = {
-    local: 'annuaire_local',
-    regional: 'annuaire_regional',
-    national: 'annuaire_national',
-  }
-
-  const currentLogicielCode = logicielTier ? logicielTierToCode[logicielTier] : undefined
-  const currentAnnuaireCode = annuaireTier ? annuaireTierToCode[annuaireTier] : undefined
+  // Mapping tier DB → code d'offre (gère grilles actuelle/ancienne + `_legacy`)
+  // pour surligner « Plan actuel » dans les grilles.
+  const currentLogicielCode = logicielTierToOfferCode(logicielTier)
+  const currentAnnuaireCode = annuaireTierToOfferCode(annuaireTier)
 
   return (
     <DecouvrirClient
