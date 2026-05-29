@@ -120,7 +120,7 @@ CREATE OR REPLACE FUNCTION public.create_or_get_dossier_room(
   p_name TEXT,
   p_room_type TEXT DEFAULT NULL
 )
-RETURNS TABLE (id UUID, position INTEGER, name TEXT, created BOOLEAN)
+RETURNS TABLE (id UUID, "position" INTEGER, name TEXT, created BOOLEAN)
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
