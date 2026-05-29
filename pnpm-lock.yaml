@@ -114,8 +114,8 @@ importers:
         specifier: ^4.0.10
         version: 4.4.2
       dexie-react-hooks:
-        specifier: ^1.1.7
-        version: 1.1.7(@types/react@19.2.14)(dexie@4.4.2)(react@19.2.6)
+        specifier: ^4.4.0
+        version: 4.4.0(dexie@4.4.2)(react@19.2.6)
       docx:
         specifier: ^9.6.1
         version: 9.6.1
@@ -4627,11 +4627,10 @@ packages:
   devtools-protocol@0.0.1312386:
     resolution: {integrity: sha512-DPnhUXvmvKT2dFA/j7B+riVLUt9Q6RKJlcppojL5CoRywJJKLDYnRlw0gTFKfgDPHP5E04UoB71SxoJlVZy8FA==}
 
-  dexie-react-hooks@1.1.7:
-    resolution: {integrity: sha512-Lwv5W0Hk+uOW3kGnsU9GZoR1er1B7WQ5DSdonoNG+focTNeJbHW6vi6nBoX534VKI3/uwHebYzSw1fwY6a7mTw==}
+  dexie-react-hooks@4.4.0:
+    resolution: {integrity: sha512-ObLXBS5+4BJU8vtSvBx6b9fY6zZYgniAtwxzjCHsUQadgbqYN6935X2/1TWw4Rf2N1aZV1io5/ziox4vKuxABA==}
     peerDependencies:
-      '@types/react': '>=16'
-      dexie: ^3.2 || ^4.0.1-alpha
+      dexie: '>=4.2.0-alpha.1 <5.0.0'
       react: '>=16'
 
   dexie@4.4.2:
@@ -12320,9 +12319,8 @@ snapshots:
 
   devtools-protocol@0.0.1312386: {}
 
-  dexie-react-hooks@1.1.7(@types/react@19.2.14)(dexie@4.4.2)(react@19.2.6):
+  dexie-react-hooks@4.4.0(dexie@4.4.2)(react@19.2.6):
     dependencies:
-      '@types/react': 19.2.14
       dexie: 4.4.2
       react: 19.2.6
 
