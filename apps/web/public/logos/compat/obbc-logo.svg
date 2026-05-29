@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60" viewBox="0 0 200 60" fill="none">
+  <!-- "OBBC" wordmark — éditeur du logiciel WinDiagnostics. Wordmark stylé
+       ex-nihilo (pas de source officielle), couleur d'accent unique vert
+       sapin pour différenciation dans la grille de compatibilité. -->
+  <text x="18" y="42"
+    font-family="'Helvetica Neue', Arial, sans-serif"
+    font-size="36"
+    font-weight="700"
+    fill="#1F5C4A"
+    letter-spacing="3">OBBC</text>
+  <!-- Pastille carrée d'accent (signature visuelle distincte des autres). -->
+  <rect x="170" y="14" width="9" height="9" rx="2" fill="#3FA67E"/>
+</svg>

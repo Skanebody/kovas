@@ -1,14 +1,5 @@
 import type { ReactNode } from 'react'
-import {
-  AnalysImmoLogo,
-  ArgosLogo,
-  DpeWinLogo,
-  GestionDiagLogo,
-  ImDiagLogo,
-  LicielLogo,
-  OrisLogo,
-  WinDiagnosticsLogo,
-} from './CompatLogos'
+import { AnalysImmoLogo, LicielLogo, ObbcLogo, OrisLogo } from './CompatLogos'
 
 interface CompatLogo {
   name: string
@@ -17,20 +8,18 @@ interface CompatLogo {
   meta: string
 }
 
+// Les 4 logiciels du marché FR du diagnostic couverts par KOVAS (Benjamin
+// 2026-05-28). Ce sont les 4 cités partout sur le site — pas d'autre éditeur.
 const COMPAT_LOGOS: CompatLogo[] = [
-  { name: 'Liciel', Logo: LicielLogo, meta: 'Leader marché · 50%' },
+  { name: 'Liciel', Logo: LicielLogo, meta: 'Leader marché' },
+  { name: 'OBBC', Logo: ObbcLogo, meta: 'WinDiagnostics' },
   { name: 'AnalysImmo', Logo: AnalysImmoLogo, meta: 'Atlibitum' },
-  { name: 'WinDiagnostics', Logo: WinDiagnosticsLogo, meta: 'Top 3' },
-  { name: 'GestionDiag', Logo: GestionDiagLogo, meta: 'CRM & diag' },
-  { name: "Im'Diag", Logo: ImDiagLogo, meta: 'Multi-modules' },
   { name: 'ORIS', Logo: OrisLogo, meta: 'Diagnostic immo' },
-  { name: 'Argos', Logo: ArgosLogo, meta: 'Ithaque · Audit' },
-  { name: 'DPEWin', Logo: DpeWinLogo, meta: 'Perrenoud' },
 ]
 
 /**
- * Section "Compagnon de votre logiciel actuel" — grid 4×2 (2×4 mobile) avec 8
- * logos vectoriels des éditeurs métier français du diagnostic.
+ * Section "Compagnon de votre logiciel actuel" — grid des 4 logiciels du
+ * marché FR du diagnostic couverts par KOVAS (Liciel, OBBC, AnalysImmo, ORIS).
  *
  * Stratégie logos détaillée dans `apps/web/public/logos/compat/MANIFEST.md` :
  *   - Liciel : SVG officiel récupéré sur liciel.fr (logo figuratif rouge)

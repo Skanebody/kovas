@@ -150,7 +150,9 @@ describe('flow ZIP export — DPE F/G', () => {
     const pdfFile = zip.file('annexe_aides_renovation.pdf')
     const pdfData = await pdfFile!.async('uint8array')
     expect(pdfData.byteLength).toBeGreaterThan(500)
-  })
+    // 20s : buildExportZip génère PDF + DOCX + CSV + JSON + XML + annexe PDF,
+    // le rendu PDF (pdfkit) prend légitimement ~7s en CI froid (> 5s défaut).
+  }, 20_000)
 
   it("n'inclut PAS d'annexe pour un DPE C", async () => {
     const data = fixture({
@@ -159,5 +161,5 @@ describe('flow ZIP export — DPE F/G', () => {
     const zipBuf = await buildExportZip(data)
     const zip = await JSZip.loadAsync(zipBuf)
     expect(zip.file('annexe_aides_renovation.pdf')).toBeNull()
-  })
+  }, 20_000)
 })

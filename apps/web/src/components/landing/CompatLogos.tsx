@@ -68,6 +68,7 @@ function makeLogoComponent(slug: string, alt: string): (props: LogoProps) => Rea
 
 export const LicielLogo = makeLogoComponent('liciel', 'Liciel — logo officiel')
 export const AnalysImmoLogo = makeLogoComponent('analysimmo', 'AnalysImmo — logiciel Atlibitum')
+export const ObbcLogo = makeLogoComponent('obbc', 'OBBC — éditeur du logiciel WinDiagnostics')
 export const WinDiagnosticsLogo = makeLogoComponent(
   'windiagnostics',
   'WinDiagnostics — logiciel OBBC',

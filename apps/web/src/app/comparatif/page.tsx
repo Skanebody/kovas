@@ -225,26 +225,26 @@ interface EditorCompatibility {
 const EDITOR_COMPATIBILITY: readonly EditorCompatibility[] = [
   {
     editor: 'Liciel',
-    format: 'Imports spécifiques XML + Excel + ZIP Liciel',
-    status: 'Priorité 1, supporté dès J0',
+    format: 'Export XML dédié + formats universels (CSV, JSON, Word, PDF)',
+    status: 'Priorité 1 · supporté dès J0',
     priority: 'p1',
   },
   {
     editor: 'OBBC',
-    format: 'Imports spécifiques XML',
-    status: 'Priorité 2, supporté dès J0',
+    format: 'Formats universels : XML structuré, CSV, JSON, Word',
+    status: 'Compatible dès J0',
     priority: 'p2',
   },
   {
     editor: 'AnalysImmo',
-    format: 'XML CII + ZIP générique',
-    status: 'Compatible (testé)',
+    format: 'Formats universels : XML structuré, CSV, JSON, Word',
+    status: 'Compatible dès J0',
     priority: 'compatible',
   },
   {
     editor: 'ORIS',
-    format: 'ZIP générique + JSON',
-    status: 'Compatible (à valider)',
+    format: 'Formats universels : XML structuré, CSV, JSON, Word',
+    status: 'Compatible dès J0',
     priority: 'compatible',
   },
 ]

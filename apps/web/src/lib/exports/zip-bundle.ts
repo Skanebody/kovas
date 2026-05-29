@@ -20,6 +20,7 @@ import { generateCsv } from './csv'
 import { generateDocx } from './docx'
 import { generateJson } from './json'
 import { generatePdf } from './pdf'
+import { generateUniversalXml } from './xml'
 
 export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
   const zip = new JSZip()
@@ -36,6 +37,7 @@ export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
     '  - rapport.docx : Word éditable',
     '  - donnees.csv : tableur Excel',
     '  - donnees.json : structuré (import logiciel tiers)',
+    '  - donnees.xml : XML structuré (import Liciel / OBBC / AnalysImmo / ORIS)',
     '  - photos/ : photos terrain organisées par pièce',
     data.isTrial ? '' : null,
     data.isTrial ? "⚠ Document généré pendant l'essai gratuit KOVAS — kovas.fr" : null,
@@ -59,6 +61,11 @@ export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
 
   // JSON
   zip.file('donnees.json', generateJson(data))
+
+  // XML structuré universel — format pivot d'import pour les logiciels métier
+  // (Liciel « Importer XML spécifique », OBBC, AnalysImmo, ORIS). Indépendant
+  // de tout format propriétaire (cf. différenciateur #2 « Plan B sans Liciel »).
+  zip.file('donnees.xml', generateUniversalXml(data))
 
   // Annexe Aides Rénovation (DPE F/G uniquement)
   // On l'inclut systématiquement si la mission est éligible. En cas d'échec
