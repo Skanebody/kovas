@@ -28,10 +28,21 @@ export interface MissionExportData {
     year_built: number | null
     surface_total: number | null
     surface_carrez: number | null
+    // Champs additionnels requis par le mapping Liciel exact
+    // (cf. docs/liciel-parser-specs.md §A — identité du bien).
+    surface_boutin: number | null
+    floors: number | null
+    cadastre_section: string | null
+    cadastre_number: string | null
+    cadastre_prefix: string | null
+    /** PostGIS point sérialisé (GeoJSON ou WKB hex). Type DB : `unknown`. */
+    location: unknown
   } | null
   client: {
     display_name: string
     type: string
+    first_name: string | null
+    last_name: string | null
     email: string | null
     phone: string | null
     address: string | null
@@ -76,17 +87,20 @@ export async function buildMissionExportData(
   missionId: string,
   orgId: string,
 ): Promise<MissionExportData> {
-  const admin = createAdminClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  )
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Configuration Supabase manquante (URL / service role key)')
+  }
+  const admin = createAdminClient<Database>(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
 
   // 1. Récupère la mission + le dossier parent + property/client (via dossier)
   const { data: mission } = await admin
     .from('missions')
     .select(
-      'id, reference, type, status, completed_at, created_at, dossier_id, dossiers(scheduled_at, started_at, notes, property_id, client_id, properties(address, postal_code, city, property_type, year_built, surface_total, surface_carrez), clients(display_name, type, email, phone, address))',
+      'id, reference, type, status, completed_at, created_at, dossier_id, dossiers(scheduled_at, started_at, notes, property_id, client_id, properties(address, postal_code, city, property_type, year_built, surface_total, surface_carrez, surface_boutin, floors, cadastre_section, cadastre_number, cadastre_prefix, location), clients(display_name, type, first_name, last_name, email, phone, address))',
     )
     .eq('id', missionId)
     .eq('organization_id', orgId)
