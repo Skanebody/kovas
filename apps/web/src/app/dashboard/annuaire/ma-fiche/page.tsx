@@ -67,6 +67,26 @@ interface DiagnosticianRow {
   slug_dept: string | null
 }
 
+// Liste blanche des langues attendues côté formulaire (ISO 639-1).
+const PROFILE_LANGUAGE_CODES = ['fr', 'en', 'es', 'de'] as const
+type ProfileLanguageCode = (typeof PROFILE_LANGUAGE_CODES)[number]
+
+// Profil public éditable (colonnes marketing — migration 20260628300000).
+interface PublicProfileRow {
+  display_name: string | null
+  title: string | null
+  slogan: string | null
+  languages: string[] | null
+  bio_short: string | null
+}
+
+function toLanguageCodes(value: string[] | null | undefined): ProfileLanguageCode[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((v): v is ProfileLanguageCode =>
+    (PROFILE_LANGUAGE_CODES as readonly string[]).includes(v),
+  )
+}
+
 async function loadInitialProfile(): Promise<{
   isClaimed: boolean
   publicSlugPath: string | null
@@ -86,7 +106,20 @@ async function loadInitialProfile(): Promise<{
 
   const diag = (data ?? null) as DiagnosticianRow | null
 
+  // Profil public éditable (colonnes marketing — migration 20260628300000).
+  // On préremplit en priorité depuis ce profil, sinon on dérive des champs DHUP.
+  let publicProfile: PublicProfileRow | null = null
+  if (diag?.id) {
+    const { data: ppData } = await sb
+      .from('diagnostician_public_profile')
+      .select('display_name, title, slogan, languages, bio_short')
+      .eq('diagnostician_id', diag.id)
+      .maybeSingle()
+    publicProfile = (ppData ?? null) as PublicProfileRow | null
+  }
+
   const displayName =
+    publicProfile?.display_name?.trim() ||
     diag?.full_name?.trim() ||
     [diag?.first_name, diag?.last_name].filter(Boolean).join(' ').trim() ||
     profile.full_name ||
@@ -102,13 +135,12 @@ async function loadInitialProfile(): Promise<{
     publicSlugPath,
     initial: {
       displayName,
-      // TODO: migration column `title` — pour l'instant on dérive depuis company_name
-      title: diag?.company_name ?? '',
-      // TODO: migration column `slogan`
-      slogan: '',
-      bio: diag?.bio ?? '',
-      // TODO: migration column `languages`
-      languages: [],
+      // Titre persisté ; fallback sur la raison sociale DHUP si vide.
+      title: publicProfile?.title ?? diag?.company_name ?? '',
+      slogan: publicProfile?.slogan ?? '',
+      // bio_short (vitrine) prioritaire sur diagnosticians.bio.
+      bio: publicProfile?.bio_short ?? diag?.bio ?? '',
+      languages: toLanguageCodes(publicProfile?.languages),
       yearsExperience:
         typeof diag?.years_active === 'number' && diag.years_active > 0 ? diag.years_active : null,
     },

@@ -403,6 +403,8 @@ function buildLocalBusinessListJsonLd(
   diags: DiagnosticianCard[],
   cityName: string,
   regionName: string | null,
+  dept: string,
+  city: string,
 ): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
@@ -414,7 +416,9 @@ function buildLocalBusinessListJsonLd(
       position: idx + 1,
       item: {
         '@type': 'LocalBusiness',
-        '@id': `${SITE_URL}/trouver-un-diagnostiqueur/diag/${d.slug}`,
+        // FIX — route réelle de la fiche diagnostiqueur : [dept]/[city]/[slug].
+        // L'ancien `/diag/[slug]` n'existe pas (404 → @id orphelin pour Google).
+        '@id': `${SITE_URL}/trouver-un-diagnostiqueur/${dept}/${city}/${d.slug}`,
         // FIX-RR — Schema.org `name` = nom commercial public (raison sociale)
         // si dispo, sinon nom du gerant. Cf. Google guidelines LocalBusiness.
         name: getDiagDisplayName(d) || d.full_name,
@@ -543,7 +547,13 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
   // Build all JSON-LD blocs
   const breadcrumbJsonLd = buildBreadcrumbJsonLd(dept, city, cityName, deptName)
   const articleJsonLd = buildArticleJsonLd(pageUrl, cityName, description)
-  const localBusinessListJsonLd = buildLocalBusinessListJsonLd(diagnosticians, cityName, regionName)
+  const localBusinessListJsonLd = buildLocalBusinessListJsonLd(
+    diagnosticians,
+    cityName,
+    regionName,
+    dept,
+    city,
+  )
   const placeJsonLd = buildPlaceJsonLd(
     cityName,
     postalCode,
@@ -643,11 +653,15 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         >
           <Card className="p-5 flex items-center justify-between gap-3 hover:shadow-glass transition-shadow">
             <div className="min-w-0">
-              <p className="font-semibold text-ink text-sm">Demander 3 devis gratuits</p>
+              <p className="font-semibold text-ink text-sm">Demander un devis gratuit</p>
               <p className="text-xs text-ink-mute">Comparer les diagnostiqueurs locaux</p>
             </div>
+            {/* Le funnel de devis live passe par /devis/[slug] (fiche d'un diagnostiqueur).
+                Sur une page ville il n'y a pas de slug unique : on ancre vers la liste
+                des diagnostiqueurs locaux ci-dessous, où chaque carte mène à sa fiche
+                puis au formulaire de devis. Évite tout 404 et garde l'intention "demander un devis". */}
             <Button asChild size="sm">
-              <Link href={`/devis-diagnostic?ville=${encodeURIComponent(cityName)}`}>
+              <Link href="#diagnostiqueurs-locaux">
                 Demander
                 <ChevronRight className="size-3.5" />
               </Link>
@@ -812,7 +826,8 @@ export default async function CityPage({ params }: { params: Promise<RouteParams
         ) : null}
 
         {/* ── ÉLÉMENT UNIQUE 3 : Diagnostiqueurs locaux réels ──── */}
-        <section className="space-y-4 mb-8">
+        {/* Cible de l'ancre CTA "Demander un devis" (scroll-margin pour header sticky). */}
+        <section id="diagnostiqueurs-locaux" className="space-y-4 mb-8 scroll-mt-24">
           <div className="flex items-baseline justify-between flex-wrap gap-2">
             <h2 className="font-sans font-bold text-2xl tracking-tight">
               Diagnostiqueurs certifiés à {cityName}

@@ -12,8 +12,9 @@ import { z } from 'zod'
  *    de la fiche `diagnosticians` rattachée à `auth.uid()`.
  *  - Le bio long/short + zones d'intervention vivent dans
  *    `diagnostician_public_profile` (migration 20260524290000).
- *  - Les champs marketing additionnels (title, slogan, languages,
- *    years_experience) ne sont pas encore en DB — laissés en TODO.
+ *  - Les champs marketing additionnels (display_name, title, slogan,
+ *    languages) vivent aussi sur `diagnostician_public_profile`
+ *    (migration 20260628300000). `years_experience` → diagnosticians.years_active.
  */
 
 export type AnnuaireProfileFormState =
@@ -29,16 +30,16 @@ const LANGUAGE_CODES = ['fr', 'en', 'es', 'de'] as const
 type LanguageCode = (typeof LANGUAGE_CODES)[number]
 
 const profileFormSchema = z.object({
-  // `display_name` n'existe pas encore — TODO: migration column `display_name` sur diagnosticians.
+  // → diagnostician_public_profile.display_name (migration 20260628300000).
   displayName: z.string().trim().min(2, 'Nom trop court').max(80, 'Nom trop long'),
-  // `title` n'existe pas encore — TODO: migration column `title`.
+  // → diagnostician_public_profile.title (migration 20260628300000).
   title: z.string().trim().max(120, 'Titre trop long').optional().or(z.literal('')),
-  // `slogan` n'existe pas encore — TODO: migration column `slogan` (max 80c).
+  // → diagnostician_public_profile.slogan (migration 20260628300000, max 80c).
   slogan: z.string().trim().max(80, 'Slogan max 80 caractères').optional().or(z.literal('')),
   // `bio` (text) existe sur `diagnosticians` + bio_short/bio_long sur
   // `diagnostician_public_profile`. On utilise bio_short pour V1.
   bio: z.string().trim().max(500, 'Bio max 500 caractères').optional().or(z.literal('')),
-  // `languages` n'existe pas encore — TODO: migration column `languages text[]`.
+  // → diagnostician_public_profile.languages text[] (migration 20260628300000).
   languages: z.array(z.enum(LANGUAGE_CODES)).max(LANGUAGE_CODES.length).default([]),
   // `years_active` existe (integer) sur diagnosticians. On le réutilise pour
   // l'expérience années.
@@ -62,10 +63,12 @@ function zodFieldErrors(
 /**
  * Update du profil annuaire (section Profil de "Ma fiche").
  *
- * V1 : seuls `bio` (→ diagnosticians.bio + diagnostician_public_profile.bio_short)
- * et `yearsExperience` (→ diagnosticians.years_active) sont persistés.
- * Les autres champs (displayName, title, slogan, languages) sont validés
- * mais leur persistence est en attente des colonnes DB associées.
+ * Persistance :
+ *  - `bio`            → diagnosticians.bio + diagnostician_public_profile.bio_short
+ *  - `yearsExperience`→ diagnosticians.years_active
+ *  - `displayName` / `title` / `slogan` / `languages`
+ *                     → diagnostician_public_profile (colonnes ajoutées par la
+ *                       migration 20260628300000_diagnostician_profile_fields.sql).
  */
 export async function updateAnnuaireProfile(
   _prev: AnnuaireProfileFormState,
@@ -127,31 +130,25 @@ export async function updateAnnuaireProfile(
     }
   }
 
-  // 3. Upsert dans `diagnostician_public_profile` (bio_short pour la vitrine
-  // publique). Bio long reste éditable depuis la section "Bio complète" future.
-  if (bioTrimmed !== null) {
-    const { error: profileErr } = await sb.from('diagnostician_public_profile').upsert(
-      {
-        diagnostician_id: diagnosticianId,
-        bio_short: bioTrimmed,
-      },
-      { onConflict: 'diagnostician_id' },
-    )
-    if (profileErr) {
-      return { error: `Échec de la sauvegarde du profil public : ${profileErr.message}` }
-    }
+  // 3. Upsert dans `diagnostician_public_profile` — vitrine publique éditable.
+  //    bio_short + champs marketing (display_name, title, slogan, languages).
+  //    Colonnes marketing ajoutées par 20260628300000_diagnostician_profile_fields.sql.
+  const profileUpdate: Record<string, unknown> = {
+    diagnostician_id: diagnosticianId,
+    display_name: parsed.data.displayName,
+    title: parsed.data.title?.trim() || null,
+    slogan: parsed.data.slogan?.trim() || null,
+    languages: parsed.data.languages,
   }
+  // bio_short conservé tel quel : null efface la bio, valeur la met à jour.
+  if (bioTrimmed !== undefined) profileUpdate.bio_short = bioTrimmed
 
-  // TODO: migration column displayName / title / slogan / languages
-  //  Quand la migration sera appliquée, ajouter ici :
-  //   diagUpdate.display_name = parsed.data.displayName
-  //   diagUpdate.title         = parsed.data.title || null
-  //   diagUpdate.slogan        = parsed.data.slogan || null
-  //   diagUpdate.languages     = parsed.data.languages
-  void parsed.data.displayName
-  void parsed.data.title
-  void parsed.data.slogan
-  void parsed.data.languages
+  const { error: profileErr } = await sb
+    .from('diagnostician_public_profile')
+    .upsert(profileUpdate, { onConflict: 'diagnostician_id' })
+  if (profileErr) {
+    return { error: `Échec de la sauvegarde du profil public : ${profileErr.message}` }
+  }
 
   revalidatePath('/dashboard/annuaire/ma-fiche')
   revalidatePath('/dashboard/annuaire')

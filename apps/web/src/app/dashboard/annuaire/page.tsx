@@ -156,12 +156,15 @@ export default async function AnnuaireHubPage() {
           Navigation annuaire
         </h2>
 
+        {/* Honnêteté : en V1 seule la section Profil est éditable ; le reste arrive
+            progressivement. On évite un compteur "11 sections" mensonger (8/11 sont
+            encore des placeholders "disponible bientôt"). */}
         <HubCard
           href="/dashboard/annuaire/ma-fiche"
           icon={IdCard}
           title="Ma fiche"
-          description="Profil, photos, certifications, zones d'intervention, tarifs et disponibilités."
-          badge="11 sections"
+          description="Profil éditable (nom, titre, slogan, bio, langues, expérience). Photos, certifications et zones arrivent progressivement."
+          badge="Profil éditable"
         />
         <HubCard
           href="/dashboard/leads"
