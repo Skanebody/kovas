@@ -87,7 +87,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   createRoomItemAction,
   deleteRoomAction,
@@ -926,6 +926,18 @@ export function MissionTchatInterface({
   activeRoomIdRef.current = activeRoomId
   const getActiveRoomId = useCallback((): string | null => activeRoomIdRef.current, [])
 
+  // PERF-2 : refs shadow synchronisées à CHAQUE render vers messages/rooms.
+  // `sendMessage` (et la dérivation de phase / quick replies) lit ces refs au
+  // lieu de mettre `messages`/`rooms` dans ses deps. Sans ça, le SSE qui fait
+  // `setMessages` à chaque token recréait `sendMessage` à chaque delta →
+  // cascade : useLayoutEffect réassigne sendMessageRef, applyCapturesToRooms
+  // consommateurs recalculés, etc. La lecture via ref donne TOUJOURS la valeur
+  // courante (pas de stale closure) tout en gardant le callback stable.
+  const messagesRef = useRef<ChatMessage[]>(messages)
+  messagesRef.current = messages
+  const roomsRef = useRef<MissionSidebarRoom[]>(rooms)
+  roomsRef.current = rooms
+
   const {
     isListening,
     voiceMode,
@@ -1196,8 +1208,11 @@ export function MissionTchatInterface({
       // simple (saisie pièce/surface) ET qu'on a une réponse locale pertinente,
       // on évite l'appel Claude. Sinon on continue le SSE habituel.
       const extracted: ExtractedMissionData = extractStructuredData(text)
+      // PERF-2 : on lit rooms/messages via ref (valeur courante, pas de dep).
+      const currentRooms = roomsRef.current
+      const currentMessages = messagesRef.current
       const activeRoomNameLocal = activeRoomId
-        ? (rooms.find((r) => r.id === activeRoomId)?.name ?? null)
+        ? (currentRooms.find((r) => r.id === activeRoomId)?.name ?? null)
         : null
 
       // Push les données extraites dans le state local (sans bloquer le flux)
@@ -1227,7 +1242,7 @@ export function MissionTchatInterface({
         })
         // Si on a un activeRoom + données scoped, on met à jour roomCheckFields
         if (activeRoomId) {
-          const activeRoom = rooms.find((r) => r.id === activeRoomId)
+          const activeRoom = currentRooms.find((r) => r.id === activeRoomId)
           if (activeRoom) {
             setRoomCheckFields((prev) => {
               const existing = prev[activeRoomId] ?? { roomType: activeRoom.type, fields: {} }
@@ -1245,15 +1260,22 @@ export function MissionTchatInterface({
         }
       }
 
-      // Tentative de réponse locale (économie tokens Claude)
+      // Tentative de réponse locale (économie tokens Claude).
+      // PERF-2 : on recalcule les compteurs depuis currentRooms/currentMessages
+      // (refs) au lieu de dépendre des memos roomsCompleted/roomsSaved (qui
+      // changent à chaque mutation de rooms) — même résultat, deps stables.
+      const localRoomsSaved = currentRooms.filter((r) => r.completionStatus !== 'empty').length
+      const localRoomsCompleted = currentRooms.filter(
+        (r) => r.completionStatus === 'complete',
+      ).length
       const localResponse = generateLocalResponse(text, {
         currentRoomName: activeRoomNameLocal,
-        roomsCount: rooms.length,
-        roomsCompleteCount: roomsCompleted,
+        roomsCount: currentRooms.length,
+        roomsCompleteCount: localRoomsCompleted,
         phase:
-          roomsSaved === 0 && messages.filter((m) => m.role === 'user').length < 2
+          localRoomsSaved === 0 && currentMessages.filter((m) => m.role === 'user').length < 2
             ? 'start'
-            : roomsCompleted >= 4
+            : localRoomsCompleted >= 4
               ? 'end'
               : 'mid',
         alreadyExtracted: extracted,
@@ -1315,8 +1337,9 @@ export function MissionTchatInterface({
       // Contextualise l'IA avec la pièce active si l'utilisateur l'a sélectionnée
       // dans la sidebar — l'API serveur enrichira le system prompt avec
       // "L'utilisateur travaille sur la pièce: X" (cf. route stream).
+      // PERF-2 : lecture via ref (valeur courante des pièces, pas de dep).
       const activeRoomName = activeRoomId
-        ? (rooms.find((r) => r.id === activeRoomId)?.name ?? null)
+        ? (currentRooms.find((r) => r.id === activeRoomId)?.name ?? null)
         : null
 
       // AbortController du stream — abort au unmount (départ mission) pour ne
@@ -1429,19 +1452,22 @@ export function MissionTchatInterface({
         }
       }
     },
+    // PERF-2 : `messages`, `rooms`, `roomsCompleted`, `roomsSaved` retirés des
+    // deps — lus via refs (messagesRef/roomsRef) ou recalculés localement à
+    // partir de currentRooms/currentMessages. `isStreaming` retiré aussi : la
+    // garde anti-double-envoi lit isStreamingRef.current (synchrone), pas le
+    // state. Conséquence : `sendMessage` n'est PLUS recréé à chaque token
+    // streamé → plus de cascade (sendMessageRef réassigné, etc.). Les deps
+    // restantes (isListening/isOnline/captureMode/activeRoomId) ne changent pas
+    // pendant un stream, donc pas de stale closure sur le chemin chaud.
     [
       dossierId,
       sessionId,
       isListening,
-      isStreaming,
       scrollToBottom,
       applyCapturesToRooms,
       activeRoomId,
-      rooms,
       isOnline,
-      messages,
-      roomsCompleted,
-      roomsSaved,
       captureMode,
       showToast,
     ],
@@ -1832,16 +1858,34 @@ export function MissionTchatInterface({
   }, [photoModalLocalId, photoModalOpen])
 
   // ----- Phase conversation pour quick replies -----
+  // PERF-2 : on dérive d'abord des PRIMITIVES stables (nombre de messages user,
+  // contenu du dernier message assistant). Ces deux memos parcourent `messages`
+  // (O(n) trivial) mais retournent une valeur primitive : tant qu'elle ne change
+  // pas, `phase` et `quickReplies` ne recréent PAS leur résultat. Pendant le
+  // streaming, le nombre de messages user ne bouge pas (seul le contenu d'une
+  // bulle assistant mute) → `phase` reste figé, et `getQuickReplies` (un simple
+  // switch) ne tourne que sur changement réel du dernier message assistant.
+  const userMessagesCount = useMemo(
+    () => messages.reduce((acc, m) => (m.role === 'user' ? acc + 1 : acc), 0),
+    [messages],
+  )
+  const lastAssistantContent = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'assistant') return messages[i].content
+    }
+    return ''
+  }, [messages])
+
   const phase: ConversationPhase = useMemo(() => {
-    if (roomsSaved === 0 && messages.filter((m) => m.role === 'user').length < 2) return 'start'
+    if (roomsSaved === 0 && userMessagesCount < 2) return 'start'
     if (roomsCompleted >= 4) return 'end'
     return 'mid'
-  }, [roomsSaved, roomsCompleted, messages])
+  }, [roomsSaved, roomsCompleted, userMessagesCount])
 
-  const quickReplies = useMemo(() => {
-    const lastAssistant = messages.filter((m) => m.role === 'assistant').slice(-1)[0]
-    return getQuickReplies(phase, lastAssistant?.content ?? '')
-  }, [phase, messages])
+  const quickReplies = useMemo(
+    () => getQuickReplies(phase, lastAssistantContent),
+    [phase, lastAssistantContent],
+  )
 
   // Mapping rooms → variant sidebar (props normalisées).
   const sidebarRooms: MissionSidebarRoom[] = rooms
@@ -2425,7 +2469,45 @@ function deleteRoomItemFromCapture(
 // MessageBubble
 // -----------------------------------------------------------------------------
 
-function MessageBubble({ message }: { message: ChatMessage }): React.ReactElement {
+/**
+ * PERF-1 : comparateur de mémoïsation. Le SSE Claude fait
+ * `setMessages(prev => prev.map(...))` à CHAQUE token streamé → sans mémo,
+ * toutes les bulles (et leurs MarkdownBlock qui re-parsent) re-render à chaque
+ * delta. Sur 100-300 bulles = lag + CPU + batterie sur milieu de gamme.
+ *
+ * Les bulles non concernées par le stream conservent la MÊME référence d'objet
+ * `message` (le `.map` ne renvoie un nouvel objet QUE pour la bulle dont l'id
+ * matche). On compare donc les champs qui pilotent réellement le rendu : un
+ * changement de l'un d'eux (la bulle en cours de stream) re-render, les autres
+ * sont skippées. On reste sur une égalité de référence d'objet en fast-path,
+ * puis on compare les champs mutables (content/streaming/transcription/audio).
+ */
+function areMessagesEqual(prev: { message: ChatMessage }, next: { message: ChatMessage }): boolean {
+  const a = prev.message
+  const b = next.message
+  if (a === b) return true
+  // Champs susceptibles de muter pour une même bulle pendant la session
+  // (streaming token-par-token, swap blob→signed URL, fin de transcription).
+  return (
+    a.id === b.id &&
+    a.content === b.content &&
+    a.role === b.role &&
+    a.streaming === b.streaming &&
+    a.isTranscribing === b.isTranscribing &&
+    a.audioUrl === b.audioUrl &&
+    a.audioDuration === b.audioDuration &&
+    a.audioStoragePath === b.audioStoragePath &&
+    a.audioSegments === b.audioSegments &&
+    a.photoUrl === b.photoUrl &&
+    a.photoLocalId === b.photoLocalId &&
+    a.noteLocalId === b.noteLocalId &&
+    a.isVoice === b.isVoice
+  )
+}
+
+const MessageBubble = memo(MessageBubbleImpl, areMessagesEqual)
+
+function MessageBubbleImpl({ message }: { message: ChatMessage }): React.ReactElement {
   const isAssistant = message.role === 'assistant'
   const isUser = message.role === 'user'
   const isSystem = message.role === 'system'

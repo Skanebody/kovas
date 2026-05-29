@@ -24,8 +24,11 @@
  * Authority : CLAUDE.md §3 features 2 + 10 (offline complet) + MISSION-B.
  */
 
+import { purgeOldAiRooms } from '@/lib/mission/ai-rooms-offline-store'
 import { aiRoomsSyncManager } from '@/lib/mission/ai-rooms-sync-manager'
+import { purgeOldNotes } from '@/lib/mission/mission-notes-offline-store'
 import { notesSyncManager } from '@/lib/mission/notes-sync-manager'
+import { purgeOldPhotos } from '@/lib/mission/photos-offline-store'
 import { photosSyncManager } from '@/lib/mission/photos-sync-manager'
 import { useEffect } from 'react'
 
@@ -51,6 +54,14 @@ export function GlobalPhotosSync({ orgId }: GlobalPhotosSyncProps) {
     void photosSyncManager.syncAllSessions(orgId)
     void notesSyncManager.syncAllSessions()
     void aiRoomsSyncManager.syncAllSessions()
+
+    // PERF-4 : purge best-effort des éléments offline déjà syncés > 30j.
+    // Idempotent + ne supprime QUE les rows `synced` (les pending/error sont
+    // conservés). Appelé une seule fois au montage de l'app pour empêcher le
+    // ballonnement IndexedDB sur les sessions longues / appareils milieu de gamme.
+    void purgeOldPhotos().catch(() => undefined)
+    void purgeOldNotes().catch(() => undefined)
+    void purgeOldAiRooms().catch(() => undefined)
 
     // 2. Au retour réseau : réarme les éléments en erreur (toutes sessions) puis
     //    relance un drain global pour chaque file offline.

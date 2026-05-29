@@ -38,6 +38,17 @@ import {
 } from './photos-offline-store'
 
 const POLL_INTERVAL_MS = 15_000
+/**
+ * (PERF-3) Backoff idle : quand N cycles consécutifs ne trouvent RIEN à
+ * synchroniser, on ralentit le polling jusqu'à `POLL_INTERVAL_IDLE_MS` pour ne
+ * pas réveiller Dexie/CPU/batterie inutilement (sessions terrain 1h+ sur
+ * milieu de gamme). Le tick ré-accélère immédiatement à `POLL_INTERVAL_MS` dès
+ * qu'un élément est ajouté (`kick`), au retour réseau (`online`), ou dès qu'un
+ * cycle a effectivement traité des photos.
+ */
+const POLL_INTERVAL_IDLE_MS = 90_000
+/** Nombre de cycles vides consécutifs avant de basculer en rythme idle. */
+const IDLE_CYCLES_THRESHOLD = 3
 const BATCH_CONCURRENCY = 3
 /**
  * Backoff exponentiel : 2s, 8s, 32s, 128s, puis plafonné.
@@ -61,7 +72,10 @@ export class PhotosSyncManager {
   private running = false
   /** Verrou dédié au sync global (P0-4) pour ne pas se télescoper avec syncAll. */
   private globalRunning = false
-  private intervalId: ReturnType<typeof setInterval> | null = null
+  /** (PERF-3) Timeout auto-replanifié à délai adaptatif (remplace setInterval). */
+  private pollTimeoutId: ReturnType<typeof setTimeout> | null = null
+  /** (PERF-3) Compteur de cycles vides consécutifs (rythme idle au-delà du seuil). */
+  private idleCycles = 0
   private context: PhotosSyncContext | null = null
   private onlineListener: (() => void) | null = null
   /** Anti-rebond inflight ids. */
@@ -86,11 +100,28 @@ export class PhotosSyncManager {
     }
     window.addEventListener('online', this.onlineListener)
 
-    // Premier sync immédiat (si déjà online) + polling périodique
+    // Premier sync immédiat (si déjà online) + polling auto-replanifié.
+    this.idleCycles = 0
     void this.syncAll()
-    this.intervalId = setInterval(() => {
+    this.scheduleNextPoll()
+  }
+
+  /**
+   * (PERF-3) Replanifie le prochain cycle de polling avec un délai adaptatif :
+   * rythme normal (15s) tant qu'il y a de l'activité, rythme idle (90s) après
+   * `IDLE_CYCLES_THRESHOLD` cycles vides consécutifs. Auto-replanifié à la fin
+   * de chaque `syncAll`.
+   */
+  private scheduleNextPoll(): void {
+    if (typeof window === 'undefined') return
+    if (this.pollTimeoutId !== null) clearTimeout(this.pollTimeoutId)
+    const delay =
+      this.idleCycles >= IDLE_CYCLES_THRESHOLD ? POLL_INTERVAL_IDLE_MS : POLL_INTERVAL_MS
+    this.pollTimeoutId = setTimeout(() => {
+      // syncAll() se replanifie lui-même via scheduleNextPoll dans son finally.
       if (navigator.onLine) void this.syncAll()
-    }, POLL_INTERVAL_MS)
+      else this.scheduleNextPoll()
+    }, delay)
   }
 
   /**
@@ -99,6 +130,8 @@ export class PhotosSyncManager {
    */
   private async handleOnline(): Promise<void> {
     if (!this.context) return
+    // (PERF-3) Le réseau revient → on ré-accélère immédiatement le polling.
+    this.idleCycles = 0
     try {
       await resetErroredPhotosToPending(this.context.missionSessionId)
       this.nextAttemptAt.clear()
@@ -110,10 +143,11 @@ export class PhotosSyncManager {
 
   stop(): void {
     if (typeof window === 'undefined') return
-    if (this.intervalId !== null) {
-      clearInterval(this.intervalId)
-      this.intervalId = null
+    if (this.pollTimeoutId !== null) {
+      clearTimeout(this.pollTimeoutId)
+      this.pollTimeoutId = null
     }
+    this.idleCycles = 0
     if (this.onlineListener) {
       window.removeEventListener('online', this.onlineListener)
       this.onlineListener = null
@@ -144,7 +178,11 @@ export class PhotosSyncManager {
 
   /** Force un sync immédiat (depuis composant après capture). */
   async kick(): Promise<void> {
+    // (PERF-3) Un ajout explicite ré-accélère le polling (sort du rythme idle).
+    this.idleCycles = 0
     await this.syncAll()
+    // Replanifie au rythme normal si un poll idle était en attente.
+    if (this.context) this.scheduleNextPoll()
   }
 
   async syncAll(): Promise<void> {
@@ -152,6 +190,8 @@ export class PhotosSyncManager {
     if (typeof window === 'undefined') return
     if (!navigator.onLine) {
       await this.notifySubscribers()
+      // (PERF-3) Replanifie même hors-ligne (le tick se contentera de notifier).
+      if (this.context) this.scheduleNextPoll()
       return
     }
     if (!this.context) return
@@ -159,6 +199,12 @@ export class PhotosSyncManager {
     this.running = true
     try {
       const pending = await getPendingPhotos(this.context.missionSessionId)
+      // (PERF-3) File vide → cycle idle. On incrémente le compteur et on
+      // court-circuite SANS notifier (rien n'a changé) pour épargner CPU/batterie.
+      if (pending.length === 0) {
+        this.idleCycles += 1
+        return
+      }
       // (P0-3) Plus d'exclusion définitive après N tentatives : on filtre
       // uniquement les inflight et le cooldown de backoff. Une photo qui a
       // beaucoup échoué reste éligible — son cooldown est juste plafonné.
@@ -168,6 +214,9 @@ export class PhotosSyncManager {
         return Date.now() >= cooldown
       })
 
+      // (PERF-3) Il reste des photos à traiter → on est actif, reset idle.
+      this.idleCycles = 0
+
       // Batch parallèle (BATCH_CONCURRENCY simultanés)
       for (let i = 0; i < eligibles.length; i += BATCH_CONCURRENCY) {
         const slice = eligibles.slice(i, i + BATCH_CONCURRENCY)
@@ -176,6 +225,8 @@ export class PhotosSyncManager {
       await this.notifySubscribers()
     } finally {
       this.running = false
+      // (PERF-3) Replanifie le prochain cycle au délai adaptatif courant.
+      if (this.context) this.scheduleNextPoll()
     }
   }
 

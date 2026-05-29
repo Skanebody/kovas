@@ -174,6 +174,27 @@ export function AudioMessageBubble({
     const buffer = webAudioBufferRef.current
     if (!ctx || !buffer) return
     if (ctx.state === 'suspended') void ctx.resume()
+    // PERF-5 : stop + disconnect la source précédente AVANT d'en créer une
+    // nouvelle. Un double-tap play rapide créait un BufferSourceNode à chaque
+    // appel sans libérer le précédent → accumulation de nœuds Web Audio (fuite
+    // mémoire + lectures superposées). On nettoie en tête, idempotent.
+    if (webAudioSourceRef.current) {
+      // On détache d'abord l'`onended` de l'ancienne source : sinon le stop()
+      // déclencherait son handler de fin qui remettrait isPlaying=false APRÈS
+      // qu'on ait relancé la lecture (race async sur le double-tap).
+      webAudioSourceRef.current.onended = null
+      try {
+        webAudioSourceRef.current.stop()
+      } catch {
+        /* déjà stoppé */
+      }
+      webAudioSourceRef.current.disconnect()
+      webAudioSourceRef.current = null
+    }
+    if (timeRafRef.current != null) {
+      cancelAnimationFrame(timeRafRef.current)
+      timeRafRef.current = null
+    }
     const src = ctx.createBufferSource()
     src.buffer = buffer
     src.connect(ctx.destination)

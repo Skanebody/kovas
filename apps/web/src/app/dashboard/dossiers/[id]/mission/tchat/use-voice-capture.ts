@@ -639,6 +639,13 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
     }
   }, [stopMeterStream])
 
+  // PERF-6 : ref stable vers commitVoiceMessage. Le listener visibilitychange
+  // lit la ref au lieu de dépendre du callback (recréé à chaque render pendant
+  // un enregistrement → remove+add du listener à chaque frame). On garde donc
+  // l'effet stable sur [isListening] seul.
+  const commitVoiceMessageRef = useRef<() => Promise<void>>(commitVoiceMessage)
+  commitVoiceMessageRef.current = commitVoiceMessage
+
   // Appel entrant / passage en arrière-plan pendant un enregistrement (audit
   // P0-4) : sur iOS l'OS suspend MediaRecorder + réquisitionne le micro. Sans
   // gestion, isListening resterait bloqué, l'overlay figé, l'audio corrompu.
@@ -649,12 +656,12 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
     if (!isListening) return
     const onHidden = (): void => {
       if (document.visibilityState === 'hidden' && audioRecorderRef.current) {
-        void commitVoiceMessage()
+        void commitVoiceMessageRef.current()
       }
     }
     document.addEventListener('visibilitychange', onHidden)
     return () => document.removeEventListener('visibilitychange', onHidden)
-  }, [isListening, commitVoiceMessage])
+  }, [isListening])
 
   // Cleanup : libère tous les objectURL locaux des messages vocaux au démontage
   // (sinon memory leak Browser sur les blobs Audio retenues).

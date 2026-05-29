@@ -49,6 +49,13 @@ import {
 } from './ai-rooms-offline-store'
 
 const POLL_INTERVAL_MS = 15_000
+/**
+ * (PERF-3) Backoff idle — parité photos-sync-manager : on ralentit le polling
+ * (15s → 90s) après `IDLE_CYCLES_THRESHOLD` cycles vides consécutifs. Le tick
+ * ré-accélère dès `kick`, `online`, ou un cycle non vide.
+ */
+const POLL_INTERVAL_IDLE_MS = 90_000
+const IDLE_CYCLES_THRESHOLD = 3
 const BACKOFF_BASE_MS = 2_000
 const BACKOFF_MAX_MS = 5 * 60_000
 
@@ -72,7 +79,10 @@ export type OnRoomPersistedFn = (localId: string, serverRoomId: string) => void
 export class AiRoomsSyncManager {
   private running = false
   private globalRunning = false
-  private intervalId: ReturnType<typeof setInterval> | null = null
+  /** (PERF-3) Timeout auto-replanifié à délai adaptatif (remplace setInterval). */
+  private pollTimeoutId: ReturnType<typeof setTimeout> | null = null
+  /** (PERF-3) Compteur de cycles vides consécutifs (rythme idle au-delà du seuil). */
+  private idleCycles = 0
   private context: AiRoomsSyncContext | null = null
   private onlineListener: (() => void) | null = null
   private inflight = new Set<string>()
@@ -92,14 +102,26 @@ export class AiRoomsSyncManager {
     }
     window.addEventListener('online', this.onlineListener)
 
+    this.idleCycles = 0
     void this.syncAll()
-    this.intervalId = setInterval(() => {
+    this.scheduleNextPoll()
+  }
+
+  /** (PERF-3) Replanifie le prochain cycle au délai adaptatif (parité photos). */
+  private scheduleNextPoll(): void {
+    if (typeof window === 'undefined') return
+    if (this.pollTimeoutId !== null) clearTimeout(this.pollTimeoutId)
+    const delay =
+      this.idleCycles >= IDLE_CYCLES_THRESHOLD ? POLL_INTERVAL_IDLE_MS : POLL_INTERVAL_MS
+    this.pollTimeoutId = setTimeout(() => {
       if (navigator.onLine) void this.syncAll()
-    }, POLL_INTERVAL_MS)
+      else this.scheduleNextPoll()
+    }, delay)
   }
 
   private async handleOnline(): Promise<void> {
     if (!this.context) return
+    this.idleCycles = 0
     try {
       await resetErroredAiRoomsToPending(this.context.missionSessionId)
       this.nextAttemptAt.clear()
@@ -111,10 +133,11 @@ export class AiRoomsSyncManager {
 
   stop(): void {
     if (typeof window === 'undefined') return
-    if (this.intervalId !== null) {
-      clearInterval(this.intervalId)
-      this.intervalId = null
+    if (this.pollTimeoutId !== null) {
+      clearTimeout(this.pollTimeoutId)
+      this.pollTimeoutId = null
     }
+    this.idleCycles = 0
     if (this.onlineListener) {
       window.removeEventListener('online', this.onlineListener)
       this.onlineListener = null
@@ -138,20 +161,31 @@ export class AiRoomsSyncManager {
 
   /** Force un sync immédiat (depuis composant après ajout pièce/item). */
   async kick(): Promise<void> {
+    // (PERF-3) Un ajout explicite ré-accélère le polling (sort du rythme idle).
+    this.idleCycles = 0
     await this.syncAll()
+    if (this.context) this.scheduleNextPoll()
   }
 
   async syncAll(): Promise<void> {
     if (this.running) return
     if (typeof window === 'undefined') return
-    if (!navigator.onLine) return
+    if (!navigator.onLine) {
+      // (PERF-3) Replanifie même hors-ligne pour ne pas geler le polling.
+      if (this.context) this.scheduleNextPoll()
+      return
+    }
     if (!this.context) return
 
     this.running = true
     try {
-      await this.drainSession(this.context.missionSessionId)
+      const hadWork = await this.drainSession(this.context.missionSessionId)
+      // (PERF-3) Rien à drainer → cycle idle ; sinon on est actif (reset).
+      if (hadWork) this.idleCycles = 0
+      else this.idleCycles += 1
     } finally {
       this.running = false
+      if (this.context) this.scheduleNextPoll()
     }
   }
 
@@ -187,9 +221,13 @@ export class AiRoomsSyncManager {
    * Draine une session : persiste les pièces pending puis, pour CHAQUE pièce
    * (pending nouvellement synced OU déjà synced avec items restants), persiste
    * ses items en attente.
+   *
+   * @returns true si la session avait au moins une pièce pending à traiter
+   *   (sert au backoff idle PERF-3 : un drain vide ralentit le polling).
    */
-  private async drainSession(sessionId: string): Promise<void> {
+  private async drainSession(sessionId: string): Promise<boolean> {
     const rooms = await getPendingAiRooms(sessionId)
+    const hadWork = rooms.length > 0
     for (const room of this.filterEligible(rooms, (r) => r.local_id)) {
       await this.persistRoom(room)
     }
@@ -204,6 +242,7 @@ export class AiRoomsSyncManager {
         await this.persistItemsForRoom(localId, serverRoomId)
       }
     }
+    return hadWork
   }
 
   private filterEligible<T>(rows: T[], idOf: (row: T) => string): T[] {
