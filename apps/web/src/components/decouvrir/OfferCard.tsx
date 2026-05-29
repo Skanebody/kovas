@@ -22,6 +22,8 @@ interface OfferCardProps {
   secondaryCtaLabel?: string
   /** Lien pour le CTA principal (Stripe / checkout / signup) */
   ctaHref?: Route
+  /** Libellé du CTA principal — surcharge le libellé dérivé de la famille. */
+  ctaLabel?: string
   /** Position (utilisée pour analytics) */
   position: string
   className?: string
@@ -59,9 +61,11 @@ export function OfferCard({
   current = false,
   secondaryCtaLabel = 'En savoir plus',
   ctaHref,
+  ctaLabel,
   position,
   className,
 }: OfferCardProps) {
+  const resolvedCtaLabel = ctaLabel ?? primaryCtaLabel(offer)
   const startHover = useIntentTracker((s) => s.startHover)
   const endHover = useIntentTracker((s) => s.endHover)
   const recordCtaClick = useIntentTracker((s) => s.recordCtaClick)
@@ -148,7 +152,7 @@ export function OfferCard({
         ) : ctaHref ? (
           <Button asChild variant={recommended ? 'accent' : 'default'} size="sm" className="w-full">
             <Link href={ctaHref} onClick={onPrimaryCtaClick}>
-              {primaryCtaLabel(offer)}
+              {resolvedCtaLabel}
             </Link>
           </Button>
         ) : (
@@ -158,7 +162,7 @@ export function OfferCard({
             onClick={onPrimaryCtaClick}
             className="w-full"
           >
-            {primaryCtaLabel(offer)}
+            {resolvedCtaLabel}
           </Button>
         )}
         <button

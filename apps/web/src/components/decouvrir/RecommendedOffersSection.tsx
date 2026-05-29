@@ -13,6 +13,8 @@ interface RecommendedOffersSectionProps {
   /** Permet au parent de connaître le code recommandé top1 (pour faire matcher les
    *  grilles plus bas qui affichent aussi le badge). */
   onTopRecommendedChange?: (code: string | null) => void
+  /** Codes d'offres à ne jamais recommander (ex. anti-downgrade logiciel). */
+  excludeCodes?: ReadonlySet<string>
 }
 
 /**
@@ -27,9 +29,10 @@ interface RecommendedOffersSectionProps {
 export function RecommendedOffersSection({
   track,
   onTopRecommendedChange,
+  excludeCodes,
 }: RecommendedOffersSectionProps) {
   const tick = useIntentTracker((s) => s.tick)
-  const recommendations = useTopRecommendations(track, 4)
+  const recommendations = useTopRecommendations(track, 4, excludeCodes)
   const previousTopRef = useRef<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<number>(() => Date.now())
 

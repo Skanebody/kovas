@@ -77,7 +77,7 @@ export async function UsageWidget() {
       >
         <InfinityIcon className="size-3.5 text-ink-mute" strokeWidth={1.5} />
         <span className="text-ink-mute">
-          {count} mission{count > 1 ? 's' : ''} · Illimité
+          {count} mission{count > 1 ? 's' : ''} ce mois
         </span>
       </Link>
     )

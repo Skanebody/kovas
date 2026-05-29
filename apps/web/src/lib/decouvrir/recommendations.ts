@@ -303,75 +303,33 @@ export const BUNDLE_OFFERS: readonly OfferDescriptor[] = [
   },
 ] as const
 
+/**
+ * Add-ons réellement disponibles en V1.
+ *
+ * Décision Benjamin (2026-05-29) : ne lister que ce qui EXISTE et fonctionne.
+ * Les anciens add-ons « Volume IA / Pack International / Sync Compta /
+ * Utilisateur supplémentaire » étaient des cartes sans tunnel d'activation ni
+ * feature-gate réel — retirés tant qu'ils ne sont pas branchés (pas de vaporware,
+ * cf. avatar SOBRE PROFESSIONNEL).
+ *
+ * Seule la Pré-validation ADEME existe et fonctionne. Elle est incluse dans
+ * l'offre (gating par plan, cf. `feature-gates.ts` cockpit_ademe_mode1/2) : on
+ * la présente donc comme un OUTIL à ouvrir, pas comme un achat. Le CTA pointe
+ * vers la vraie page (`/dashboard/cockpit-ademe/prevalidation`).
+ */
 export const ADDON_OFFERS: readonly OfferDescriptor[] = [
-  {
-    code: 'addon_volume_ia',
-    family: 'addon',
-    section: 'addons',
-    label: 'Volume IA',
-    tagline: 'Augmenter les caps Whisper / Vision',
-    priceLabel: '15€ HT / mois',
-    priceMonthlyCents: 1500,
-    features: [
-      '+ 60h de transcription mensuelle',
-      '+ 1000 analyses Vision IA',
-      'Activation immédiate',
-    ],
-  },
   {
     code: 'addon_pack_conformite',
     family: 'addon',
     section: 'addons',
     label: 'Pack Conformité',
-    tagline: 'Validation cohérence + audit qualité',
-    priceLabel: '12€ HT / mois',
-    priceMonthlyCents: 1200,
+    tagline: 'Pré-validation ADEME avant publication',
+    priceLabel: 'Inclus dans ton offre',
+    priceMonthlyCents: null,
     features: [
-      'Audit qualité automatique pré-export',
-      'Modèles validés ADEME 3CL-2021',
-      'Journal de conformité PDF',
-    ],
-  },
-  {
-    code: 'addon_pack_international',
-    family: 'addon',
-    section: 'addons',
-    label: 'Pack International',
-    tagline: 'Rapports bilingues FR/EN',
-    priceLabel: '9€ HT / mois',
-    priceMonthlyCents: 900,
-    features: [
-      'Tous les PDF en bilingue FR/EN',
-      'Templates clients étrangers',
-      'Support email anglais',
-    ],
-  },
-  {
-    code: 'addon_sync_compta',
-    family: 'addon',
-    section: 'addons',
-    label: 'Sync Compta',
-    tagline: 'Pennylane · Gestiondiag · CSV',
-    priceLabel: '14€ HT / mois',
-    priceMonthlyCents: 1400,
-    features: [
-      'Sync factures Pennylane bidirectionnelle',
-      'Export Factur-X automatique',
-      'Webhook personnalisé',
-    ],
-  },
-  {
-    code: 'addon_user_supp',
-    family: 'addon',
-    section: 'addons',
-    label: 'Utilisateur supplémentaire',
-    tagline: 'Pour les cabinets en croissance',
-    priceLabel: '25€ HT / mois / user',
-    priceMonthlyCents: 2500,
-    features: [
-      'Compte collaborateur séparé',
-      'Permissions granulaires',
-      'Activité collaborative en temps réel',
+      'Risque de contrôle évalué avant envoi',
+      'Détection des incohérences 3CL-2021',
+      'Score de pré-validation par dossier',
     ],
   },
 ] as const
@@ -558,6 +516,37 @@ export function annuaireTierToOfferCode(tier?: string | null): string | undefine
   return ANNUAIRE_TIER_TO_OFFER[splitLegacy(tier).base]
 }
 
+/**
+ * Rang des offres logiciel (croissant). Sert à ne JAMAIS recommander une offre
+ * logiciel égale ou inférieure à celle déjà souscrite (anti-downgrade).
+ */
+const LOGICIEL_OFFER_RANK: Record<string, number> = {
+  logiciel_essai: 0,
+  logiciel_solo_light: 1,
+  logiciel_solo_pro: 2,
+  logiciel_cabinet: 3,
+  logiciel_cabinet_plus: 4,
+}
+
+/**
+ * Codes d'offres logiciel à exclure des recommandations pour un abonné donné :
+ * son offre actuelle + toutes les offres logiciel de rang inférieur (downgrades).
+ * Seules les offres logiciel STRICTEMENT supérieures restent recommandables.
+ * Renvoie un set vide si l'utilisateur n'a pas d'offre logiciel.
+ */
+export function logicielDowngradeExclusions(
+  currentLogicielCode?: string | null,
+): ReadonlySet<string> {
+  if (!currentLogicielCode) return new Set()
+  const currentRank = LOGICIEL_OFFER_RANK[currentLogicielCode]
+  if (currentRank === undefined) return new Set()
+  const excluded = new Set<string>()
+  for (const [code, rank] of Object.entries(LOGICIEL_OFFER_RANK)) {
+    if (rank <= currentRank) excluded.add(code)
+  }
+  return excluded
+}
+
 export function deriveTrack(access: UserAccess): UserTrack {
   if (access.hasLogiciel && access.hasAnnuaire) return 'dual'
   if (access.hasLogiciel) return 'logiciel_only'
@@ -606,7 +595,12 @@ const DEFAULT_RECOMMENDED_BOOST = 0.25
 /**
  * Détermine si une offre est pertinente pour un track donné.
  */
-function isOfferEligible(offer: OfferDescriptor, track: UserTrack): boolean {
+function isOfferEligible(
+  offer: OfferDescriptor,
+  track: UserTrack,
+  excludeCodes?: ReadonlySet<string>,
+): boolean {
+  if (excludeCodes?.has(offer.code)) return false
   if (offer.excludeTracks?.includes(track)) return false
   return true
 }
@@ -614,16 +608,21 @@ function isOfferEligible(offer: OfferDescriptor, track: UserTrack): boolean {
 /**
  * Calcule un score d'intention par offre, retourne la liste triée
  * décroissante.
+ *
+ * `excludeCodes` permet d'écarter des offres déjà souscrites ou non pertinentes
+ * (ex. anti-downgrade : offres logiciel ≤ tier actuel, cf.
+ * `logicielDowngradeExclusions`).
  */
 export function scoreOffers(
   signals: IntentSignals,
   track: UserTrack,
   catalog: readonly OfferDescriptor[] = ALL_OFFERS,
+  excludeCodes?: ReadonlySet<string>,
 ): readonly ScoredOffer[] {
   const scored: ScoredOffer[] = []
 
   for (const offer of catalog) {
-    if (!isOfferEligible(offer, track)) continue
+    if (!isOfferEligible(offer, track, excludeCodes)) continue
 
     const reasons: string[] = []
     let score = 0
@@ -690,8 +689,9 @@ export function getTopRecommendations(
   signals: IntentSignals,
   track: UserTrack,
   count = 4,
+  excludeCodes?: ReadonlySet<string>,
 ): readonly ScoredOffer[] {
-  const all = scoreOffers(signals, track)
+  const all = scoreOffers(signals, track, ALL_OFFERS, excludeCodes)
   if (all.length <= count) return all
 
   const result: ScoredOffer[] = []

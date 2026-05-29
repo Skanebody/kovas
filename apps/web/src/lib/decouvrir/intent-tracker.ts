@@ -185,9 +185,13 @@ const signalsSelector = (s: IntentTrackerState): IntentSignals & { _ticks: numbe
  * Hook helper : retourne les top N offres recommandées pour le track donné,
  * recalculées à chaque mutation du store.
  */
-export function useTopRecommendations(track: UserTrack, count = 4): readonly ScoredOffer[] {
+export function useTopRecommendations(
+  track: UserTrack,
+  count = 4,
+  excludeCodes?: ReadonlySet<string>,
+): readonly ScoredOffer[] {
   const signals = useIntentTracker(useShallow(signalsSelector))
-  return getTopRecommendations(signals, track, count)
+  return getTopRecommendations(signals, track, count, excludeCodes)
 }
 
 /**

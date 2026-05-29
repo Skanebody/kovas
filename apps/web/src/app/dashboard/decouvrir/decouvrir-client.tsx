@@ -13,7 +13,12 @@ import { SectionTracker } from '@/components/decouvrir/SectionTracker'
 import { SponsorisedTiersGrid } from '@/components/decouvrir/SponsorisedTiersGrid'
 import { trackPageViewed } from '@/lib/decouvrir/analytics'
 import { useIntentTracker } from '@/lib/decouvrir/intent-tracker'
-import { type UserAccess, deriveTrack, summarizeTrack } from '@/lib/decouvrir/recommendations'
+import {
+  type UserAccess,
+  deriveTrack,
+  logicielDowngradeExclusions,
+  summarizeTrack,
+} from '@/lib/decouvrir/recommendations'
 import { useEffect, useMemo, useState } from 'react'
 
 interface DecouvrirClientProps {
@@ -49,6 +54,11 @@ export function DecouvrirClient({
 }: DecouvrirClientProps) {
   const summary = useMemo(() => summarizeTrack(access), [access])
   const track = useMemo(() => deriveTrack(access), [access])
+  // Anti-downgrade : ne jamais recommander une offre logiciel ≤ tier actuel.
+  const excludeCodes = useMemo(
+    () => logicielDowngradeExclusions(currentLogicielCode),
+    [currentLogicielCode],
+  )
   const [topRecommendedCode, setTopRecommendedCode] = useState<string | null>(null)
   const reset = useIntentTracker((s) => s.reset)
 
@@ -81,7 +91,11 @@ export function DecouvrirClient({
         accent="pour toi"
         description="Sélection dynamique basée sur ton profil et les sections consultées. Mise à jour après quelques secondes de navigation."
       >
-        <RecommendedOffersSection track={track} onTopRecommendedChange={setTopRecommendedCode} />
+        <RecommendedOffersSection
+          track={track}
+          onTopRecommendedChange={setTopRecommendedCode}
+          excludeCodes={excludeCodes}
+        />
       </SectionTracker>
 
       {/* Section 4 — toutes offres logiciel */}
@@ -123,13 +137,13 @@ export function DecouvrirClient({
         <BundlesGrid recommendedCode={topRecommendedCode ?? undefined} />
       </SectionTracker>
 
-      {/* Section 7 — add-ons */}
+      {/* Section 7 — outils inclus */}
       <SectionTracker
         section="addons"
         anchorId="decouvrir-addons"
-        title="Add-ons"
-        accent="à la carte"
-        description="Active uniquement ce dont tu as besoin. Activation immédiate, résiliation en 2 clics."
+        title="Outils"
+        accent="inclus"
+        description="Les outils déjà compris dans ton offre, prêts à l'emploi."
       >
         <AddonsGrid recommendedCode={topRecommendedCode ?? undefined} />
       </SectionTracker>
