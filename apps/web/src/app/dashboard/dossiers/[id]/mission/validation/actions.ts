@@ -58,6 +58,194 @@ interface MissionSessionRow {
 }
 
 // ============================================
+// rooms_state — vérité terrain validée par le diagnostiqueur
+// ============================================
+// Format consommé par l'Edge Function `process-mission-payload` (champ
+// `rooms_state`). Quand `source === 'mission_capture'` ET `rooms` est non vide,
+// l'Edge Function traite ces pièces + items comme la VÉRITÉ TERRAIN confirmée :
+// elle ne réinvente/renomme/supprime aucune pièce et n'utilise transcript/vision
+// QUE pour enrichir les champs 3CL manquants. Cf. CLAUDE.md §3 feature 1.
+
+interface RoomStateItem {
+  label: string
+  data: Record<string, unknown>
+}
+
+interface RoomState {
+  name: string
+  room_type: string | null
+  surface_sqm: number | null
+  ceiling_height_m: number | null
+  floor: number | null
+  features: string[]
+  items: {
+    equipment: RoomStateItem[]
+    observation: RoomStateItem[]
+    measurement: RoomStateItem[]
+  }
+}
+
+interface RoomsState {
+  rooms: RoomState[]
+  source: 'mission_capture'
+}
+
+// Lignes DB minimales nécessaires à l'agrégation. Les nouvelles tables ne sont
+// pas encore régénérées dans `@kovas/database/types` (régen DEPLOY-4) — on type
+// localement le strict nécessaire.
+interface DossierRoomRow {
+  id: string
+  name: string
+  room_type: string | null
+  surface_m2: number | null
+  ceiling_height_m: number | null
+}
+
+interface RoomItemRow {
+  dossier_room_id: string
+  kind: 'equipment' | 'observation' | 'measurement' | string
+  label: string
+  data: Record<string, unknown> | null
+}
+
+interface RoomCaptureRow {
+  capture_type: string
+  data: Record<string, unknown> | null
+}
+
+/**
+ * Agrège les pièces réelles du dossier (`dossier_rooms`), leurs éléments
+ * (`mission_room_items`) et les captures pièce du tchat (`mission_session_captures`
+ * type='room', porteuses de floor/features dictés) en un `rooms_state` structuré.
+ *
+ * Best-effort : si aucune pièce n'est trouvée (mission 100% vocale sans capture
+ * structurée), retourne `null` → l'appelant retombe sur le comportement historique
+ * (rooms_state minimal, déduction IA depuis le transcript). Ne casse pas l'existant.
+ */
+async function buildRoomsStateFromCaptures(
+  admin: ReturnType<typeof adminClient>,
+  dossierId: string,
+  missionSessionId: string,
+): Promise<RoomsState | null> {
+  // 1. Pièces réelles du dossier (non supprimées) = source de vérité de la liste.
+  const roomsTable = admin.from('dossier_rooms') as unknown as {
+    select: (q: string) => {
+      eq: (
+        k: string,
+        v: string,
+      ) => {
+        is: (
+          k: string,
+          v: null,
+        ) => {
+          order: (
+            k: string,
+            o: { ascending: boolean },
+          ) => Promise<{ data: DossierRoomRow[] | null }>
+        }
+      }
+    }
+  }
+  const { data: rooms } = await roomsTable
+    .select('id, name, room_type, surface_m2, ceiling_height_m')
+    .eq('dossier_id', dossierId)
+    .is('deleted_at', null)
+    .order('position', { ascending: true })
+
+  if (!rooms || rooms.length === 0) return null
+
+  const roomIds = rooms.map((r) => r.id)
+
+  // 2. Éléments capturés/corrigés par pièce (équipements / observations / mesures).
+  const itemsTable = admin.from('mission_room_items') as unknown as {
+    select: (q: string) => {
+      in: (
+        k: string,
+        v: string[],
+      ) => {
+        is: (k: string, v: null) => Promise<{ data: RoomItemRow[] | null }>
+      }
+    }
+  }
+  const { data: items } = await itemsTable
+    .select('dossier_room_id, kind, label, data')
+    .in('dossier_room_id', roomIds)
+    .is('deleted_at', null)
+
+  // 3. Captures pièce du tchat — portent floor/features dictés non stockés sur
+  //    dossier_rooms. On les indexe par nom de pièce (normalisé) pour enrichir.
+  const capturesTable = admin.from('mission_session_captures') as unknown as {
+    select: (q: string) => {
+      eq: (
+        k: string,
+        v: string,
+      ) => {
+        eq: (k: string, v: string) => Promise<{ data: RoomCaptureRow[] | null }>
+      }
+    }
+  }
+  const { data: roomCaptures } = await capturesTable
+    .select('capture_type, data')
+    .eq('session_id', missionSessionId)
+    .eq('capture_type', 'room')
+
+  // Map nom de pièce normalisé → { floor, features, surface } issue des captures.
+  const captureByName = new Map<
+    string,
+    { floor: number | null; features: string[]; surface: number | null }
+  >()
+  for (const cap of roomCaptures ?? []) {
+    const d = cap.data ?? {}
+    const name = typeof d.name === 'string' ? d.name.trim().toLowerCase() : null
+    if (!name) continue
+    const floor = typeof d.floor === 'number' ? d.floor : null
+    const surface = typeof d.surface === 'number' ? d.surface : null
+    const features = Array.isArray(d.features)
+      ? d.features.filter((f): f is string => typeof f === 'string')
+      : typeof d.features === 'string'
+        ? [d.features]
+        : []
+    captureByName.set(name, { floor, features, surface })
+  }
+
+  // Index items par pièce.
+  const itemsByRoom = new Map<string, RoomItemRow[]>()
+  for (const it of items ?? []) {
+    const arr = itemsByRoom.get(it.dossier_room_id) ?? []
+    arr.push(it)
+    itemsByRoom.set(it.dossier_room_id, arr)
+  }
+
+  const roomsStateRooms: RoomState[] = rooms.map((room) => {
+    const cap = captureByName.get(room.name.trim().toLowerCase())
+    const roomItems = itemsByRoom.get(room.id) ?? []
+
+    const equipment: RoomStateItem[] = []
+    const observation: RoomStateItem[] = []
+    const measurement: RoomStateItem[] = []
+    for (const it of roomItems) {
+      const entry: RoomStateItem = { label: it.label, data: it.data ?? {} }
+      if (it.kind === 'equipment') equipment.push(entry)
+      else if (it.kind === 'observation') observation.push(entry)
+      else if (it.kind === 'measurement') measurement.push(entry)
+    }
+
+    return {
+      name: room.name,
+      room_type: room.room_type,
+      // La surface stockée sur la pièce prime ; à défaut la dernière capture vocale.
+      surface_sqm: room.surface_m2 ?? cap?.surface ?? null,
+      ceiling_height_m: room.ceiling_height_m,
+      floor: cap?.floor ?? null,
+      features: cap?.features ?? [],
+      items: { equipment, observation, measurement },
+    }
+  })
+
+  return { rooms: roomsStateRooms, source: 'mission_capture' }
+}
+
+// ============================================
 // 1. triggerProcessMissionPayloadAction
 // ============================================
 
@@ -137,6 +325,20 @@ export async function triggerProcessMissionPayloadAction(
     .filter(Boolean)
     .join('\n')
 
+  // VÉRITÉ TERRAIN : agréger les pièces + éléments capturés/corrigés par le
+  // diagnostiqueur dans le tchat. Si présents, ils deviennent la source de vérité
+  // de l'export (l'Edge Function ne re-déduit plus tout depuis l'audio brut).
+  // Best-effort : null si mission 100% vocale sans capture structurée → l'Edge
+  // Function retombe sur la déduction IA (comportement historique préservé).
+  let roomsState: RoomsState | Record<string, never> = {}
+  try {
+    const built = await buildRoomsStateFromCaptures(admin, session.dossier_id, missionSessionId)
+    if (built) roomsState = built
+  } catch (err) {
+    // Ne JAMAIS bloquer la sync sur l'agrégation : on log et on retombe sur {}.
+    console.error('buildRoomsStateFromCaptures failed', err)
+  }
+
   const url = `${SUPABASE_URL}/functions/v1/process-mission-payload`
   // SÉCURITÉ — On utilise MISSION_PAYLOAD_INVOKE_SECRET et NON le service_role_key.
   // L'Edge Function vérifie ce header dédié en début de handler. Si le secret est
@@ -159,7 +361,7 @@ export async function triggerProcessMissionPayloadAction(
         room_id: p.room_id,
         perceptual_hash: p.perceptual_hash,
       })),
-      rooms_state: {},
+      rooms_state: roomsState,
       checklist_3cl_state: {},
     }),
   }).catch((err: unknown) => {

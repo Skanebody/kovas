@@ -59,12 +59,41 @@ interface PhotoInput {
   metadata?: Record<string, unknown> | null
 }
 
+// rooms_state — vérité terrain validée par le diagnostiqueur (cf. Server Action
+// triggerProcessMissionPayloadAction). Quand `source === 'mission_capture'` et
+// `rooms` non vide, ces pièces + items sont traités comme la VÉRITÉ confirmée :
+// on n'invente/renomme/supprime aucune pièce, transcript+vision n'ENRICHISSENT
+// que les champs 3CL manquants. Sinon → déduction IA historique.
+interface RoomsStateItem {
+  label: string
+  data: Record<string, unknown>
+}
+
+interface RoomsStateRoom {
+  name: string
+  room_type: string | null
+  surface_sqm: number | null
+  ceiling_height_m: number | null
+  floor: number | null
+  features: string[]
+  items: {
+    equipment: RoomsStateItem[]
+    observation: RoomsStateItem[]
+    measurement: RoomsStateItem[]
+  }
+}
+
+interface RoomsStateInput {
+  rooms?: RoomsStateRoom[]
+  source?: string
+}
+
 interface RequestBody {
   mission_session_id: string
   transcript_text?: string
   vocal_audio_urls?: string[]
   photos?: PhotoInput[]
-  rooms_state?: Record<string, unknown>
+  rooms_state?: RoomsStateInput | Record<string, unknown>
   checklist_3cl_state?: Record<string, unknown>
 }
 
@@ -452,18 +481,63 @@ async function analyzePhotoWithClaudeVision(
 // Claude tool use — structuration 3CL
 // ────────────────────────────────────────────────────────────
 
+// Extrait les pièces validées du rooms_state si le marqueur `mission_capture`
+// est présent ET qu'au moins une pièce existe. Retourne null sinon (→ déduction
+// IA historique). Le marqueur évite de traiter un rooms_state legacy/vide comme
+// vérité par erreur.
+function extractValidatedRooms(
+  rooms_state: RoomsStateInput | Record<string, unknown>,
+): RoomsStateRoom[] | null {
+  const rs = rooms_state as RoomsStateInput
+  if (rs?.source !== 'mission_capture') return null
+  if (!Array.isArray(rs.rooms) || rs.rooms.length === 0) return null
+  return rs.rooms
+}
+
 async function structurePayloadWithClaude(opts: {
   transcript: string
   visionResults: Array<{ photo_id: string; room_id: string | null; analysis: VisionResult }>
-  rooms_state: Record<string, unknown>
+  rooms_state: RoomsStateInput | Record<string, unknown>
   checklist_3cl_state: Record<string, unknown>
 }): Promise<{
   rooms: Array<Record<string, unknown>>
   globals: Record<string, unknown> | null
   tokensIn: number
   tokensOut: number
+  // Noms (normalisés lowercase) des pièces issues du rooms_state validé : ces
+  // pièces seront marquées source='user_validated' à l'insertion.
+  validatedRoomNames: Set<string>
 }> {
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY missing')
+
+  const validatedRooms = extractValidatedRooms(opts.rooms_state)
+  const validatedRoomNames = new Set<string>(
+    (validatedRooms ?? []).map((r) => r.name.trim().toLowerCase()),
+  )
+
+  // Bloc d'instruction : VÉRITÉ TERRAIN si rooms_state validé, sinon déduction IA.
+  const truthInstruction = validatedRooms
+    ? [
+        '## VÉRITÉ TERRAIN — RÈGLE ABSOLUE (rooms_state confirmé par le diagnostiqueur)',
+        'Le bloc PIÈCES CONFIRMÉES ci-dessous est la VÉRITÉ TERRAIN saisie et corrigée par le diagnostiqueur (renommages, surfaces, suppressions, éléments). Tu DOIS la respecter strictement :',
+        '1. Appelle record_room_complete EXACTEMENT UNE FOIS par pièce listée — ni plus, ni moins.',
+        '2. INTERDIT : inventer une pièce absente de la liste, renommer une pièce, fusionner ou supprimer une pièce fournie.',
+        '3. Reprends room_name, room_type, surface_sqm, ceiling_height_m, étage et features TELS QUELS (ne les écrase pas avec le transcript).',
+        '4. Reporte chaque equipment → heating_emitters/ventilation/lighting, chaque observation → observations[], chaque measurement → champ 3CL ou measurements correspondant.',
+        '5. Utilise transcript + photos UNIQUEMENT pour ENRICHIR les champs 3CL MANQUANTS (isolation, vitrage, menuiseries, chauffage, ECS, ventilation) de ces pièces.',
+        '6. ai_confidence proche de 1.0 pour les données confirmées par le diagnostiqueur.',
+        '',
+        'PIÈCES CONFIRMÉES (vérité terrain) :',
+        JSON.stringify(validatedRooms, null, 2),
+        '',
+      ].join('\n')
+    : ['PRÉ-EXTRACTION LOCALE (rooms_state) :', JSON.stringify(opts.rooms_state, null, 2), ''].join(
+        '\n',
+      )
+
+  const closing = validatedRooms
+    ? 'Appelle record_building_globals UNE FOIS puis record_room_complete pour CHAQUE pièce confirmée (et seulement celles-là).'
+    : 'Appelle record_building_globals UNE FOIS puis record_room_complete pour chaque pièce.'
 
   const userText = [
     'TRANSCRIPT MISSION TERRAIN :',
@@ -472,13 +546,11 @@ async function structurePayloadWithClaude(opts: {
     'PHOTOS ANALYSÉES (Vision IA) :',
     JSON.stringify(opts.visionResults, null, 2),
     '',
-    'PRÉ-EXTRACTION LOCALE (rooms_state) :',
-    JSON.stringify(opts.rooms_state, null, 2),
-    '',
+    truthInstruction,
     'ÉTAT CHECKLIST 3CL :',
     JSON.stringify(opts.checklist_3cl_state, null, 2),
     '',
-    'Appelle record_building_globals UNE FOIS puis record_room_complete pour chaque pièce.',
+    closing,
   ].join('\n')
 
   const body = {
@@ -523,6 +595,7 @@ async function structurePayloadWithClaude(opts: {
     globals,
     tokensIn: json.usage.input_tokens,
     tokensOut: json.usage.output_tokens,
+    validatedRoomNames,
   }
 }
 
@@ -561,6 +634,9 @@ function buildXmlFromTools(opts: {
   reference: string
   rooms: Array<Record<string, unknown>>
   globals: Record<string, unknown> | null
+  // Noms (normalisés lowercase) des pièces validées par le diagnostiqueur :
+  // reflétées dans source_donnees / valide_diagnostiqueur du XML exporté.
+  validatedRoomNames?: Set<string>
 }): { xml: string; warnings: string[] } {
   const warnings: string[] = []
   const g = opts.globals ?? {}
@@ -568,8 +644,12 @@ function buildXmlFromTools(opts: {
   if (!g.surface_habitable) warnings.push('surface_habitable manquante')
   if (opts.rooms.length === 0) warnings.push('aucune piece')
 
+  const validated = opts.validatedRoomNames ?? new Set<string>()
+
   const roomsXml = opts.rooms
     .map((r, i) => {
+      const name = typeof r.room_name === 'string' ? r.room_name : ''
+      const isUserValidated = validated.has(name.trim().toLowerCase())
       const inner = [
         tag('nom', r.room_name),
         tag('type', r.room_type),
@@ -577,8 +657,8 @@ function buildXmlFromTools(opts: {
         tag('hauteur_sous_plafond_m', r.ceiling_height_m),
         tag('orientation', r.orientation),
         tag('confiance_ia', r.ai_confidence),
-        tag('source_donnees', 'ai_extracted'),
-        tag('valide_diagnostiqueur', 'non'),
+        tag('source_donnees', isUserValidated ? 'user_validated' : 'ai_extracted'),
+        tag('valide_diagnostiqueur', isUserValidated ? 'oui' : 'non'),
         tag('data_json', JSON.stringify(r)),
       ].join('\n')
       return blockTag('piece', inner, { id: `PIECE-${String(i + 1).padStart(3, '0')}` })
@@ -869,20 +949,27 @@ async function processPayload(req: RequestBody): Promise<{
   totalCostEurCents += Math.round(structCost)
 
   // 5) INSERT mission_rooms_3cl_data
+  // Les pièces issues du rooms_state validé (vérité terrain) sont marquées
+  // source='user_validated' : elles viennent du diagnostiqueur, pas d'une
+  // déduction IA. Les autres restent 'ai_extracted'.
   if (structured.rooms.length > 0) {
-    const rows = structured.rooms.map((r) => ({
-      mission_session_id: req.mission_session_id,
-      organization_id: session.organization_id,
-      room_name: (r.room_name as string) ?? 'Pièce sans nom',
-      room_type: (r.room_type as string) ?? 'other',
-      surface_sqm: (r.surface_sqm as number | null) ?? null,
-      ceiling_height_m: (r.ceiling_height_m as number | null) ?? null,
-      orientation: (r.orientation as string | null) ?? null,
-      data_3cl: r,
-      ai_confidence_score: (r.ai_confidence as number | null) ?? null,
-      source: 'ai_extracted',
-      validated_by_user: false,
-    }))
+    const rows = structured.rooms.map((r) => {
+      const name = typeof r.room_name === 'string' ? r.room_name : 'Pièce sans nom'
+      const isUserValidated = structured.validatedRoomNames.has(name.trim().toLowerCase())
+      return {
+        mission_session_id: req.mission_session_id,
+        organization_id: session.organization_id,
+        room_name: name,
+        room_type: (r.room_type as string) ?? 'other',
+        surface_sqm: (r.surface_sqm as number | null) ?? null,
+        ceiling_height_m: (r.ceiling_height_m as number | null) ?? null,
+        orientation: (r.orientation as string | null) ?? null,
+        data_3cl: r,
+        ai_confidence_score: (r.ai_confidence as number | null) ?? null,
+        source: isUserValidated ? 'user_validated' : 'ai_extracted',
+        validated_by_user: isUserValidated,
+      }
+    })
     await client.from('mission_rooms_3cl_data').insert(rows)
   }
 
@@ -891,6 +978,7 @@ async function processPayload(req: RequestBody): Promise<{
     reference: dossier?.reference ?? `MS-${req.mission_session_id.slice(0, 8)}`,
     rooms: structured.rooms,
     globals: structured.globals,
+    validatedRoomNames: structured.validatedRoomNames,
   })
 
   const storagePath = `dossier-exports/${session.organization_id}/${session.dossier_id}/mission-${req.mission_session_id}-3cl.xml`
