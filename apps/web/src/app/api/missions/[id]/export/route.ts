@@ -1,7 +1,7 @@
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { getEditorAdapter } from '@/lib/exports/adapters/registry'
 import { buildMissionExportData } from '@/lib/exports/build-mission-data'
 import { buildExportZip } from '@/lib/exports/zip-bundle'
-import { buildLicielZip } from '@/lib/exports/zip-liciel'
 import { buildZipFileName } from '@/lib/file-naming'
 import { NextResponse } from 'next/server'
 
@@ -9,9 +9,13 @@ export const runtime = 'nodejs'
 export const maxDuration = 90
 
 /**
- * Génère un export mission :
- *  - ?format=zip (default) : ZIP universel PDF + Word + CSV + JSON + photos
- *  - ?format=liciel : ZIP Liciel (stub V1 : XMLs + photos sans .mdb)
+ * Génère un export mission, routé via le registre d'adaptateurs éditeur :
+ *  - ?format=zip (default)        : ZIP universel PDF + Word + CSV + JSON + XML + photos
+ *  - ?format=liciel               : ZIP Liciel NATIF EXACT (cf. lib/liciel/export)
+ *  - ?format=obbc|analysimmo|oris : fallback universel honnête (spec native à venir)
+ *
+ * Tout identifiant d'éditeur inconnu retombe sur l'export universel.
+ * Rétrocompat : `?format=liciel` et `?format=zip` se comportent comme avant.
  *
  * Réponse : binary stream (Content-Disposition attachment).
  */
@@ -33,26 +37,23 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   let buffer: Buffer
   let filename: string
 
-  const ctx = {
-    date: data.exportedAt,
-    reference: data.mission.reference,
-    client: data.client ? { display_name: data.client.display_name } : null,
-    property: data.property
-      ? {
-          address: data.property.address,
-          city: data.property.city ?? null,
-          apartment_detail: null,
-          building_letter: null,
-        }
-      : null,
-  }
-
-  if (format === 'liciel') {
-    buffer = await buildLicielZip(data)
-    filename = buildZipFileName({ ctx, target: 'LICIEL' })
+  // Adaptateur éditeur (liciel natif / obbc·analysimmo·oris fallback universel).
+  const adapter = getEditorAdapter(format)
+  if (adapter) {
+    const result = await adapter.build(data)
+    buffer = result.buffer
+    filename = result.filename
   } else {
+    // `format=zip` ou identifiant inconnu → export universel KOVAS par défaut.
     buffer = await buildExportZip(data)
-    filename = buildZipFileName({ ctx, target: 'KOVAS' })
+    filename = buildZipFileName({
+      ctx: {
+        date: data.exportedAt,
+        reference: data.mission.reference,
+        client: data.client ? { display_name: data.client.display_name } : null,
+      },
+      target: 'KOVAS',
+    })
   }
 
   return new NextResponse(new Uint8Array(buffer), {
