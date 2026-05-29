@@ -35,7 +35,8 @@ type DiagMapProps = {
  * Carte Leaflet — zone d'intervention diagnostiqueur, rendu adapté au tier
  * d'abonnement annuaire (free/presence/boost/premium).
  *
- * Charge Leaflet via CDN unpkg (pas de dep npm). Tile layer CartoDB Positron
+ * Charge Leaflet auto-hébergé (`/vendor/leaflet/`, origine self — plus de CDN
+ * unpkg qui était injoignable depuis certains réseaux). Tile layer CartoDB Positron
  * (palette beige clair cohérente Design System v5 KOVAS sage `#F5F7F4`).
  *
  * Marker custom (divIcon HTML) : pin navy `#0F1419` + halo chartreuse subtle,
@@ -64,15 +65,13 @@ export function DiagMap({
     let mapInstance: { remove: () => void } | null = null
 
     async function init() {
-      // 1) CSS Leaflet (CDN unpkg, idempotent)
-      const cssId = 'leaflet-css-cdn'
+      // 1) CSS Leaflet (auto-hébergé, même origine — idempotent)
+      const cssId = 'leaflet-css-local'
       if (!document.getElementById(cssId)) {
         const link = document.createElement('link')
         link.id = cssId
         link.rel = 'stylesheet'
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-        link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY='
-        link.crossOrigin = ''
+        link.href = '/vendor/leaflet/leaflet.css'
         document.head.appendChild(link)
       }
 
@@ -226,17 +225,18 @@ async function loadLeaflet(): Promise<any> {
   const w = window as any
   if (w.L) return w.L
   return new Promise((resolve, reject) => {
-    const existing = document.getElementById('leaflet-js-cdn') as HTMLScriptElement | null
+    const existing = document.getElementById('leaflet-js-local') as HTMLScriptElement | null
     if (existing) {
       existing.addEventListener('load', () => resolve(w.L))
       existing.addEventListener('error', reject)
       return
     }
     const script = document.createElement('script')
-    script.id = 'leaflet-js-cdn'
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
-    script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo='
-    script.crossOrigin = ''
+    script.id = 'leaflet-js-local'
+    // Auto-hébergé (origine `self`) — le CDN unpkg était injoignable depuis
+    // certains réseaux, la carte ne s'affichait alors jamais. Le fichier est
+    // servi depuis /public, garanti disponible et couvert par la CSP `'self'`.
+    script.src = '/vendor/leaflet/leaflet.js'
     script.async = true
     script.addEventListener('load', () => resolve(w.L))
     script.addEventListener('error', reject)
@@ -312,8 +312,8 @@ function describeTierAria(tier: AnnuaireTier): string {
       return ' (abonnement Premium — visibilité régionale)'
     case 'presence':
       return ' (abonnement Présence)'
-    case 'free':
     default:
+      // `free` ou tier inconnu — pas de suffixe.
       return ''
   }
 }
