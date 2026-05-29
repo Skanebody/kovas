@@ -108,6 +108,8 @@ export function DiagMap({
       const pulse = config.pulseAnimation && !prefersReducedMotion
 
       const baseRadiusMeters = radiusKm * 1000
+      // biome-ignore lint/suspicious/noExplicitAny: Leaflet types non installés
+      let outerCircle: any = null
       for (let i = 0; i < config.concentricRings; i++) {
         // Premium : 3 cercles concentriques (1x, 1.5x, 2x)
         const ringMultiplier = config.concentricRings === 1 ? 1 : 1 + i * 0.5
@@ -127,6 +129,17 @@ export function DiagMap({
           className: pulse && i === 0 ? 'kovas-pulse-ring' : '',
         })
         circle.addTo(map)
+        outerCircle = circle // le dernier = le plus grand
+      }
+
+      // Cadre la vue sur le cercle entier (+ marge) plutôt qu'un zoom figé :
+      // sinon le périmètre déborde du cadre et la carte paraît trop zoomée.
+      if (outerCircle) {
+        try {
+          map.fitBounds(outerCircle.getBounds(), { padding: [24, 24] })
+        } catch {
+          /* getBounds peut échouer si la carte n'a pas de taille — on garde le zoom par défaut */
+        }
       }
 
       // 7) Marker principal — divIcon SVG navy + halo chartreuse
