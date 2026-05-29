@@ -1,24 +1,23 @@
 /**
  * /dashboard/annuaire/reviews — gestion des avis annuaire KOVAS.
  *
- * Server Component pur. Filtrage via query param `?filter=all|pending|this-week`
+ * Server Component. Filtrage via query param `?filter=all|pending|this-week`
  * (Server-side, pas de state client = navigation pillules SSR-friendly).
  *
  * Sections :
  *  1. Header rating (note moyenne serif italic + nb avis mono + distribution 5 barres)
- *  2. Filtres pillules (PageTabs server-side)
- *  3. Liste reviews (cards verticales avec stars + critères + bouton Répondre)
- *  4. CTA bas : demander un avis (placeholder)
- *  5. Empty state si zéro avis
+ *  2. Synthèse Google (gmb_rating / gmb_review_count) si disponible
+ *  3. Filtres pillules (PageTabs server-side)
+ *  4. Liste reviews (cards verticales avec stars + réponse / formulaire de réponse)
+ *  5. Empty state honnête si zéro avis
  *
- * Data source : V1 mock (cf. `apps/web/src/lib/annuaire/mock-data.ts`).
- * Le jour où `marketplace_reviews` existe, on remplace l'implémentation des
- * helpers sans changer leur signature ni ce composant.
+ * Data source : VRAIES données du diagnostiqueur connecté (table
+ * `marketplace_reviews`, migration 20260628400000) + synthèse Google agrégée.
+ * Cf. apps/web/src/lib/annuaire/mock-data.ts (data-access).
  */
 
 import { AppPageHeader } from '@/components/app-page-header'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PageTabs } from '@/components/ui/page-tabs'
@@ -27,7 +26,6 @@ import {
   type ReviewFilter,
   formatReviewDate,
   getClaimedDiagnosticianId,
-  getCriterionLabel,
   getReviewsForDiagnostician,
   getReviewsSummary,
   isReviewFilter,
@@ -35,20 +33,9 @@ import {
 import { getCurrentUser } from '@/lib/auth/current-user'
 import { MessageSquareDashed, Star } from 'lucide-react'
 import type { Metadata } from 'next'
+import { ReviewReplyForm } from './review-reply-form'
 
 export const metadata: Metadata = { title: 'Avis annuaire' }
-
-/**
- * Feature flag V1 → V1.5.
- *
- * En V1, la table `marketplace_reviews` n'existe pas encore et aucune Server
- * Action n'est branchée pour répondre / modifier / demander des avis. On masque
- * donc les boutons interactifs plutôt que de les laisser visibles mais inertes
- * (= UX frustrante "produit pas fini").
- *
- * À basculer à `true` en V1.5 quand les actions seront branchées.
- */
-const FEATURE_REVIEWS_INTERACTIVE = false // TODO V1.5
 
 interface PageProps {
   searchParams: Promise<{ filter?: string }>
@@ -59,20 +46,23 @@ export default async function AnnuaireReviewsPage({ searchParams }: PageProps) {
   const params = await searchParams
   const filter: ReviewFilter = isReviewFilter(params.filter) ? params.filter : 'all'
 
-  const diagnosticianId = await getClaimedDiagnosticianId(supabase, user.id)
+  // biome-ignore lint/suspicious/noExplicitAny: types DB Supabase en attente de régénération (migration 20260628400000)
+  const sb = supabase as any
+  const diagnosticianId = await getClaimedDiagnosticianId(sb, user.id)
   const [summary, reviews] = await Promise.all([
-    getReviewsSummary(diagnosticianId),
-    getReviewsForDiagnostician(diagnosticianId, filter),
+    getReviewsSummary(sb, diagnosticianId),
+    getReviewsForDiagnostician(sb, diagnosticianId, filter),
   ])
 
   const hasAnyReview = summary.totalCount > 0
+  const hasGoogle = summary.google !== null
 
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       <AppPageHeader
         title="Tes"
         accent="avis"
-        description="Construis ta réputation locale : les avis Google et KOVAS influencent directement ton classement dans l'annuaire."
+        description="Construis ta réputation locale : les avis influencent directement ton classement dans l'annuaire."
       />
 
       {hasAnyReview ? (
@@ -84,28 +74,23 @@ export default async function AnnuaireReviewsPage({ searchParams }: PageProps) {
             summary={summary}
           />
           <ReviewsList reviews={reviews} filter={filter} />
-          {FEATURE_REVIEWS_INTERACTIVE ? <RequestReviewCta /> : null}
         </>
       ) : (
-        <EmptyState
-          icon={MessageSquareDashed}
-          title="Aucun avis pour l'instant"
-          description="Demande à tes anciens clients de partager leur expérience. Les avis vérifiés boostent ton classement annuaire de +35 % en moyenne."
-          action={
-            FEATURE_REVIEWS_INTERACTIVE ? (
-              <Button variant="accent" size="lg">
-                Demander un avis à mes anciens clients
-              </Button>
-            ) : undefined
-          }
-        />
+        <>
+          {hasGoogle ? <GoogleSynthesisCard summary={summary} /> : null}
+          <EmptyState
+            icon={MessageSquareDashed}
+            title="Tu n'as pas encore d'avis"
+            description="Aucun avis natif n'a encore été publié sur ta fiche KOVAS. Invite tes anciens clients à partager leur expérience : les avis vérifiés renforcent ta crédibilité et ton classement dans l'annuaire."
+          />
+        </>
       )}
     </div>
   )
 }
 
 /* ------------------------------------------------------------------ */
-/* HEADER : note moyenne + distribution 5 barres                       */
+/* HEADER : note moyenne + distribution 5 barres + synthèse Google     */
 /* ------------------------------------------------------------------ */
 
 interface ReviewsRatingHeaderProps {
@@ -113,7 +98,7 @@ interface ReviewsRatingHeaderProps {
 }
 
 function ReviewsRatingHeader({ summary }: ReviewsRatingHeaderProps) {
-  const { averageRating, totalCount, distribution } = summary
+  const { averageRating, totalCount, distribution, google } = summary
   const maxBarValue = Math.max(...Object.values(distribution), 1)
 
   return (
@@ -132,8 +117,13 @@ function ReviewsRatingHeader({ summary }: ReviewsRatingHeaderProps) {
             />
           </div>
           <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.1em] text-ink-mute">
-            {totalCount} {totalCount > 1 ? 'avis' : 'avis'}
+            {totalCount} avis KOVAS
           </p>
+          {google ? (
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-faint">
+              + {google.rating.toLocaleString('fr-FR')}/5 sur {google.reviewCount} avis Google
+            </p>
+          ) : null}
         </div>
 
         {/* Distribution 5 → 1 (top down) */}
@@ -157,6 +147,28 @@ function ReviewsRatingHeader({ summary }: ReviewsRatingHeaderProps) {
             )
           })}
         </div>
+      </div>
+    </Card>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* SYNTHÈSE GOOGLE (affichée seule quand 0 avis natif mais data GMB)   */
+/* ------------------------------------------------------------------ */
+
+function GoogleSynthesisCard({ summary }: ReviewsRatingHeaderProps) {
+  const google = summary.google
+  if (!google) return null
+  return (
+    <Card variant="flat" padding="default" className="flex items-center gap-4">
+      <Star className="size-8 fill-amber text-amber shrink-0" strokeWidth={1.5} aria-hidden />
+      <div>
+        <p className="font-serif italic text-[28px] leading-none text-ink">
+          {google.rating.toLocaleString('fr-FR')} / 5
+        </p>
+        <p className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
+          Synthèse Google · {google.reviewCount} avis
+        </p>
       </div>
     </Card>
   )
@@ -229,9 +241,13 @@ interface ReviewCardProps {
 }
 
 function ReviewCard({ review }: ReviewCardProps) {
+  const authorMeta = [review.authorCity, formatReviewDate(review.publishedAt)]
+    .filter(Boolean)
+    .join(' · ')
+
   return (
     <Card variant="flat" padding="default" className="space-y-4">
-      {/* En-tête : stars + auteur + date */}
+      {/* En-tête : stars + auteur + date + source */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <StarRating value={review.rating} />
@@ -239,49 +255,34 @@ function ReviewCard({ review }: ReviewCardProps) {
             {review.authorDisplayName}
           </p>
           <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
-            {formatReviewDate(review.publishedAt)}
+            {authorMeta}
           </p>
         </div>
+        {review.source === 'google' ? (
+          <Badge variant="muted" className="font-mono text-[10px]">
+            Google
+          </Badge>
+        ) : null}
       </div>
 
-      {/* Corps de l'avis — truncate CSS line-clamp-3 plutôt qu'un bouton
-          "Lire plus" inerte (V1 : pas de page détail avis). */}
-      <p className="text-[14px] leading-relaxed text-ink/85 line-clamp-3">{review.body}</p>
-
-      {/* Critères validés */}
-      {review.criteria.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5">
-          {review.criteria.map((c) => (
-            <Badge key={c} variant="green" className="font-mono text-[10px] gap-1">
-              <span aria-hidden>✓</span>
-              {getCriterionLabel(c)}
-            </Badge>
-          ))}
-        </div>
+      {/* Corps de l'avis */}
+      {review.body ? (
+        <p className="text-[14px] leading-relaxed text-ink/85 whitespace-pre-line">{review.body}</p>
       ) : null}
 
-      {/* Footer : réponse existante OU bouton Répondre (V1.5+) */}
+      {/* Footer : réponse existante OU formulaire de réponse */}
       {review.response ? (
         <div className="rounded-lg bg-sage-alt/40 border border-rule/50 p-4 space-y-2">
-          <div className="flex items-center justify-between gap-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
-              Votre réponse · {formatReviewDate(review.response.respondedAt)}
-            </p>
-            {FEATURE_REVIEWS_INTERACTIVE ? (
-              <Button variant="ghost" size="sm" className="font-medium">
-                Modifier
-              </Button>
-            ) : null}
-          </div>
-          <p className="text-[13px] leading-relaxed text-ink/85">{review.response.body}</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-mute">
+            Ta réponse · {formatReviewDate(review.response.respondedAt)}
+          </p>
+          <p className="text-[13px] leading-relaxed text-ink/85 whitespace-pre-line">
+            {review.response.body}
+          </p>
         </div>
-      ) : FEATURE_REVIEWS_INTERACTIVE ? (
-        <div className="flex justify-end">
-          <Button variant="default" size="sm">
-            Répondre
-          </Button>
-        </div>
-      ) : null}
+      ) : (
+        <ReviewReplyForm reviewId={review.id} />
+      )}
     </Card>
   )
 }
@@ -302,30 +303,5 @@ function StarRating({ value }: { value: number }) {
         />
       ))}
     </div>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/* CTA BAS DE PAGE                                                     */
-/* ------------------------------------------------------------------ */
-
-function RequestReviewCta() {
-  return (
-    <Card variant="flat" padding="lg" className="text-center space-y-4">
-      <div className="space-y-2">
-        <h2 className="font-serif italic font-normal text-2xl md:text-3xl tracking-tight text-ink">
-          Demande un avis à tes clients
-        </h2>
-        <p className="text-sm text-ink-mute max-w-md mx-auto">
-          Un client satisfait est rarement spontané. Envoie-lui un lien sécurisé pour publier son
-          avis sur ta fiche annuaire en 30 secondes.
-        </p>
-      </div>
-      <div className="flex justify-center">
-        <Button variant="accent" size="lg">
-          Envoyer une demande d'avis
-        </Button>
-      </div>
-    </Card>
   )
 }

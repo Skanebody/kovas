@@ -155,3 +155,75 @@ export async function updateAnnuaireProfile(
 
   return { ok: true }
 }
+
+/* ------------------------------------------------------------------ */
+/* Réponse aux avis annuaire (marketplace_reviews)                    */
+/* ------------------------------------------------------------------ */
+
+export type ReplyToReviewState =
+  | {
+      ok?: boolean
+      error?: string
+    }
+  | undefined
+
+const replySchema = z.object({
+  reviewId: z.string().uuid('Avis introuvable'),
+  reply: z
+    .string()
+    .trim()
+    .min(2, 'Réponse trop courte')
+    .max(1000, 'Réponse trop longue (1000 max)'),
+})
+
+/**
+ * Répond à un avis annuaire (reply + reply_at).
+ *
+ * Sécurité : l'écriture passe par le client Supabase authentifié de l'user, donc
+ * la policy RLS `marketplace_reviews_owner_update` garantit qu'il ne peut
+ * répondre qu'aux avis d'une fiche `diagnosticians` qu'il a réclamée. On
+ * re-vérifie quand même l'ownership côté serveur (defense-in-depth) avant
+ * l'UPDATE pour renvoyer un message clair plutôt qu'un échec RLS silencieux.
+ */
+export async function replyToReview(
+  _prev: ReplyToReviewState,
+  formData: FormData,
+): Promise<ReplyToReviewState> {
+  const parsed = replySchema.safeParse({
+    reviewId: formData.get('reviewId') ?? '',
+    reply: formData.get('reply') ?? '',
+  })
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Données invalides' }
+  }
+
+  const { user, supabase } = await getCurrentUser()
+  // biome-ignore lint/suspicious/noExplicitAny: types DB Supabase en attente de régénération (migration 20260628400000)
+  const sb = supabase as any
+
+  // 1. Vérifie que l'avis appartient à une fiche réclamée par l'utilisateur.
+  const { data: review } = await sb
+    .from('marketplace_reviews')
+    .select('id, diagnostician_id, diagnosticians!inner(claimed_by_user_id)')
+    .eq('id', parsed.data.reviewId)
+    .maybeSingle()
+
+  const ownerId = review?.diagnosticians?.claimed_by_user_id as string | undefined
+  if (!review?.id || ownerId !== user.id) {
+    return { error: "Cet avis n'est pas rattaché à ta fiche." }
+  }
+
+  // 2. Persiste la réponse (reply + reply_at). RLS protège déjà l'écriture.
+  const { error } = await sb
+    .from('marketplace_reviews')
+    .update({ reply: parsed.data.reply, reply_at: new Date().toISOString() })
+    .eq('id', parsed.data.reviewId)
+
+  if (error) {
+    return { error: `Échec de l'enregistrement de la réponse : ${error.message}` }
+  }
+
+  revalidatePath('/dashboard/annuaire/reviews')
+  return { ok: true }
+}

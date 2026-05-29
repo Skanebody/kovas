@@ -1,22 +1,48 @@
 /**
- * Mock data V1 pour le dashboard annuaire — Reviews + Stats.
+ * Data-access annuaire dashboard — Reviews + Stats.
  *
- * Pourquoi mock ?
- * --------------
- * À date (2026-05-27) il n'existe pas de table `marketplace_reviews` ou
- * `diagnostician_reviews` dans `supabase/migrations`. La colonne
- * `diagnosticians.gmb_rating` stocke uniquement la moyenne agrégée Google My
- * Business, sans les avis détaillés.
+ * Historique
+ * ----------
+ * Ce fichier exposait jusqu'au 2026-06-28 des données 100% mockées (avis
+ * "Sophie M.", stats générées par multiplicateurs). Bloc C l'a rebranché sur
+ * de VRAIES données du diagnostiqueur connecté :
+ *  - Reviews : table `marketplace_reviews` (migration 20260628400000) +
+ *    synthèse Google agrégée (`diagnosticians.gmb_rating` / `gmb_review_count`).
+ *  - Stats   : `diagnosticians.view_count` / `quote_request_count`,
+ *    `lead_assignments` (leads reçus / acceptés), `marketplace_reviews` (note).
  *
- * Plutôt que d'ajouter une nouvelle migration (interdit par la spec agent),
- * on expose ici une interface typée + données mockées calibrées sur un
- * diagnostiqueur réaliste à ~50 avis. Le jour où la table existe, on
- * remplacera l'implémentation des helpers sans changer leur signature.
+ * Le nom de fichier (`mock-data.ts`) est conservé pour ne pas casser les imports
+ * existants (reviews/page.tsx + stats/page.tsx). Les signatures des helpers
+ * publics restent stables (mêmes noms), mais prennent désormais le client
+ * Supabase en premier argument pour interroger la base.
  *
- * Aucune dépendance Supabase ici → utilisable en Server Component pur.
+ * Honnêteté des données (cf. spec Bloc C)
+ * ---------------------------------------
+ * Certaines métriques n'existent pas en base et ne sont donc PAS inventées :
+ *  - séries temporelles / variation période N-1 : pas d'historique snapshot →
+ *    `previousValue` retourné = `value` (variation 0 %, marquée "Bientôt" en UI).
+ *  - sources de trafic détaillées : pas de tracking par source → retiré.
+ *  - benchmark zone précis : pas d'agrégat par département en base → retiré.
+ *  - temps de réponse moyen aux leads : pas de mesure fiable → retiré.
+ * Cf. AnnuaireStatsSnapshot ci-dessous (champs supprimés vs ancien mock).
  */
 
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// Le type Database n'est pas régénéré pour `marketplace_reviews` (migration non
+// encore appliquée). On utilise un client non typé localisé plutôt qu'un `any`
+// global — chaque requête caste explicitement la shape attendue.
+// biome-ignore lint/suspicious/noExplicitAny: types DB Supabase en attente de régénération (migration 20260628400000 non appliquée)
+type UntypedSupabase = SupabaseClient<any, any, any>
+
+/* ------------------------------------------------------------------ */
+/* TYPES — Reviews                                                    */
+/* ------------------------------------------------------------------ */
+
 export type ReviewCriterion = 'ponctualite' | 'professionnalisme' | 'qualite' | 'prix'
+
+/** Provenance d'un avis natif. */
+export type ReviewSource = 'kovas' | 'google' | 'import'
 
 export interface AnnuaireReview {
   id: string
@@ -24,18 +50,26 @@ export interface AnnuaireReview {
   rating: 1 | 2 | 3 | 4 | 5
   /** Prénom + initiale nom — pseudonymisation type GMB. */
   authorDisplayName: string
+  /** Ville déclarée par l'auteur (peut être null). */
+  authorCity: string | null
+  /** Provenance (kovas / google / import). */
+  source: ReviewSource
   /** ISO date string — moment de publication. */
   publishedAt: string
-  /** Texte de l'avis (peut faire +500 chars). */
+  /** Texte de l'avis. */
   body: string
-  /** Critères validés par le client lors du dépôt d'avis. */
+  /**
+   * Critères validés par le client. La table `marketplace_reviews` ne stocke
+   * pas (encore) ce détail → tableau vide en V1. Conservé dans le type pour ne
+   * pas casser le rendu existant.
+   */
   criteria: ReadonlyArray<ReviewCriterion>
   /** Réponse du diagnostiqueur (si répondu). null sinon. */
   response: {
     body: string
     respondedAt: string
   } | null
-  /** Helper "cette semaine" (calculé côté mock pour stabilité tests). */
+  /** Helper "cette semaine" (calculé depuis publishedAt). */
   isThisWeek: boolean
 }
 
@@ -50,49 +84,60 @@ export interface ReviewsSummary {
   pendingResponses: number
   /** Nombre d'avis publiés sur les 7 derniers jours. */
   thisWeekCount: number
+  /**
+   * Synthèse Google agrégée (depuis diagnosticians.gmb_*), affichée en
+   * complément des avis natifs. null si la fiche n'a pas de données GMB.
+   */
+  google: {
+    rating: number
+    reviewCount: number
+  } | null
 }
+
+export type ReviewFilter = 'all' | 'pending' | 'this-week'
+
+export function isReviewFilter(value: string | undefined): value is ReviewFilter {
+  return value === 'all' || value === 'pending' || value === 'this-week'
+}
+
+/* ------------------------------------------------------------------ */
+/* TYPES — Stats                                                      */
+/* ------------------------------------------------------------------ */
 
 export interface StatsPeriodDelta {
   /** Valeur sur la période courante. */
   value: number
-  /** Valeur sur la période précédente — pour calcul variation. */
+  /**
+   * Valeur sur la période précédente. En V1 aucun historique snapshot n'est
+   * stocké → vaut `value` (variation = 0 %, signalée "Bientôt" côté UI).
+   */
   previousValue: number
-}
-
-export interface TrafficSource {
-  label: string
-  visits: number
-}
-
-export interface ResponseTimeBucket {
-  /** Libellé tranche : "<30min", "30min-2h", etc. */
-  label: string
-  /** Nombre de leads tombant dans cette tranche. */
-  count: number
-}
-
-export interface ZoneBenchmark {
-  label: string
-  /** Décile de l'utilisateur dans sa zone : 10 = top 10%, 25 = top 25%, etc. */
-  percentile: 10 | 25 | 50
-  /** Valeur formatée affichée (ex: "1 240" ou "4,9★"). */
-  displayValue: string
-  /** Position 0..1 sur la barre (1 = meilleur). */
-  positionRatio: number
 }
 
 export interface AnnuaireStatsSnapshot {
   period: AnnuaireStatsPeriod
+  /** Vues de la fiche (diagnosticians.view_count, cumul). */
   views: StatsPeriodDelta
+  /** Leads reçus (count lead_assignments du diagnostiqueur). */
   leads: StatsPeriodDelta
-  conversionRate: StatsPeriodDelta
-  trafficSources: ReadonlyArray<TrafficSource>
-  responseTime: {
-    /** Temps moyen en minutes. */
-    averageMinutes: number
-    distribution: ReadonlyArray<ResponseTimeBucket>
-  }
-  zoneBenchmark: ReadonlyArray<ZoneBenchmark>
+  /** Demandes de devis (diagnosticians.quote_request_count, cumul). */
+  quoteRequests: StatsPeriodDelta
+  /** Leads acceptés (status='accepted'). */
+  acceptedLeads: number
+  /**
+   * Taux de conversion leads acceptés / leads reçus, en % (0-100, 1 décimale).
+   * null si aucun lead reçu (non calculable, affiché "—").
+   */
+  acceptanceRate: number | null
+  /** Note moyenne avis natifs KOVAS (null si 0 avis). */
+  averageRating: number | null
+  /** Nombre d'avis natifs KOVAS. */
+  reviewsCount: number
+  /**
+   * true si la métrique correspondante repose sur un cumul non historisé
+   * (vues / devis). Permet à l'UI d'être honnête : pas de variation période.
+   */
+  isCumulative: boolean
 }
 
 export type AnnuaireStatsPeriod = '7d' | '30d' | '90d' | '1y'
@@ -104,177 +149,160 @@ export const PERIOD_LABELS: Record<AnnuaireStatsPeriod, string> = {
   '1y': '12 derniers mois',
 }
 
-/* ------------------------------------------------------------------ */
-/* MOCK DATASET                                                       */
-/* ------------------------------------------------------------------ */
-
-const MOCK_REVIEWS: ReadonlyArray<AnnuaireReview> = [
-  {
-    id: 'rev-001',
-    rating: 5,
-    authorDisplayName: 'Sophie M.',
-    publishedAt: '2026-05-24T10:14:00Z',
-    body: 'Diagnostic DPE réalisé sur notre maison à Dieppe. Très ponctuel, explications claires, rapport reçu dès le lendemain. Je recommande sans hésiter, prestation très professionnelle et tarif honnête.',
-    criteria: ['ponctualite', 'professionnalisme', 'qualite', 'prix'],
-    response: null,
-    isThisWeek: true,
-  },
-  {
-    id: 'rev-002',
-    rating: 5,
-    authorDisplayName: 'Jean-Paul R.',
-    publishedAt: '2026-05-22T09:00:00Z',
-    body: 'Intervention pour un pack DPE + amiante + plomb avant vente. Tout a été fait en une seule visite, gain de temps appréciable. Rapport très complet et bien documenté avec photos.',
-    criteria: ['ponctualite', 'professionnalisme', 'qualite'],
-    response: {
-      body: "Merci Jean-Paul pour votre retour. Le pack groupé est en effet la solution la plus efficace pour les ventes. Au plaisir d'intervenir à nouveau si besoin.",
-      respondedAt: '2026-05-22T18:30:00Z',
-    },
-    isThisWeek: true,
-  },
-  {
-    id: 'rev-003',
-    rating: 5,
-    authorDisplayName: 'Claire D.',
-    publishedAt: '2026-05-18T14:42:00Z',
-    body: 'Excellent travail sur le diagnostic plomb. Très pédagogue, a pris le temps de tout expliquer à mes parents âgés. Tarif transparent annoncé dès le devis, aucune mauvaise surprise.',
-    criteria: ['ponctualite', 'professionnalisme', 'qualite', 'prix'],
-    response: null,
-    isThisWeek: true,
-  },
-  {
-    id: 'rev-004',
-    rating: 4,
-    authorDisplayName: 'Marc L.',
-    publishedAt: '2026-05-10T11:20:00Z',
-    body: 'Bonne prestation pour le DPE de mon appartement. Petit retard de 20 minutes le jour du rendez-vous mais sinon rien à redire. Rapport reçu rapidement.',
-    criteria: ['professionnalisme', 'qualite'],
-    response: {
-      body: 'Merci Marc. Je note le retard, dû à un client précédent qui a souhaité plus de détails. La prochaine fois je préviendrai par SMS, promis.',
-      respondedAt: '2026-05-10T19:05:00Z',
-    },
-    isThisWeek: false,
-  },
-  {
-    id: 'rev-005',
-    rating: 5,
-    authorDisplayName: 'Isabelle T.',
-    publishedAt: '2026-05-05T08:55:00Z',
-    body: 'Diagnostic ERP et état des risques pour location saisonnière. Très réactif, devis le jour même, intervention sous 48h. Parfait.',
-    criteria: ['ponctualite', 'professionnalisme', 'prix'],
-    response: null,
-    isThisWeek: false,
-  },
-  {
-    id: 'rev-006',
-    rating: 5,
-    authorDisplayName: 'Pierre B.',
-    publishedAt: '2026-04-28T16:10:00Z',
-    body: 'Pack DPE + amiante + termites pour la vente de la maison familiale. Tout est nickel, photos très propres, schémas clairs. Le notaire a tout validé sans aucune réserve.',
-    criteria: ['ponctualite', 'professionnalisme', 'qualite', 'prix'],
-    response: {
-      body: 'Merci Pierre. Bonne suite pour la vente.',
-      respondedAt: '2026-04-28T20:00:00Z',
-    },
-    isThisWeek: false,
-  },
-  {
-    id: 'rev-007',
-    rating: 4,
-    authorDisplayName: 'Nathalie F.',
-    publishedAt: '2026-04-20T13:30:00Z',
-    body: "Diagnostic gaz et électricité réalisé sérieusement. J'aurais aimé un peu plus de pédagogie sur les points de non-conformité relevés, mais le rapport écrit compense bien.",
-    criteria: ['professionnalisme', 'qualite'],
-    response: null,
-    isThisWeek: false,
-  },
-  {
-    id: 'rev-008',
-    rating: 5,
-    authorDisplayName: 'Olivier C.',
-    publishedAt: '2026-04-12T09:45:00Z',
-    body: "Très satisfait. Le diagnostiqueur est arrivé pile à l'heure, équipement professionnel, méthodique. Le rapport DPE est très lisible et j'ai apprécié les recommandations de travaux personnalisées.",
-    criteria: ['ponctualite', 'professionnalisme', 'qualite', 'prix'],
-    response: {
-      body: "Merci Olivier. Pour les recommandations travaux, n'hésitez pas si vous souhaitez un accompagnement complémentaire avant de lancer un devis MAR.",
-      respondedAt: '2026-04-12T22:30:00Z',
-    },
-    isThisWeek: false,
-  },
-  {
-    id: 'rev-009',
-    rating: 5,
-    authorDisplayName: 'Aurélie V.',
-    publishedAt: '2026-04-03T11:00:00Z',
-    body: 'Carrez/Boutin pour mise en location. Mesures précises, rapport envoyé le soir même. Tarif aligné sur la concurrence et qualité supérieure. Je rappellerai pour mes autres biens.',
-    criteria: ['ponctualite', 'professionnalisme', 'qualite', 'prix'],
-    response: null,
-    isThisWeek: false,
-  },
-  {
-    id: 'rev-010',
-    rating: 5,
-    authorDisplayName: 'Thomas G.',
-    publishedAt: '2026-03-28T15:20:00Z',
-    body: 'Pack complet avant vente. Communication impeccable du devis au rapport final. Je recommande à tous mes proches qui ont des projets immobiliers.',
-    criteria: ['ponctualite', 'professionnalisme', 'qualite'],
-    response: {
-      body: 'Merci Thomas pour la confiance et les recommandations. À bientôt.',
-      respondedAt: '2026-03-29T08:15:00Z',
-    },
-    isThisWeek: false,
-  },
-]
+export function isAnnuaireStatsPeriod(value: string | undefined): value is AnnuaireStatsPeriod {
+  return value === '7d' || value === '30d' || value === '90d' || value === '1y'
+}
 
 /* ------------------------------------------------------------------ */
-/* PUBLIC HELPERS — signatures stables pour migration future          */
+/* HELPERS INTERNES                                                   */
+/* ------------------------------------------------------------------ */
+
+/** Borne une note brute (int) dans 1..5 pour satisfaire le type littéral. */
+function clampRating(raw: number): 1 | 2 | 3 | 4 | 5 {
+  const r = Math.round(raw)
+  if (r <= 1) return 1
+  if (r >= 5) return 5
+  return r as 2 | 3 | 4
+}
+
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+
+function isWithinLastWeek(isoDate: string): boolean {
+  const t = new Date(isoDate).getTime()
+  if (Number.isNaN(t)) return false
+  return Date.now() - t <= SEVEN_DAYS_MS
+}
+
+/** Borne d'ancienneté (ISO) correspondant à une période, ou null pour '1y'+. */
+function periodSinceIso(period: AnnuaireStatsPeriod): string {
+  const days: Record<AnnuaireStatsPeriod, number> = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 }
+  return new Date(Date.now() - days[period] * 24 * 60 * 60 * 1000).toISOString()
+}
+
+/** Shape brute d'une ligne marketplace_reviews (sélection partielle). */
+interface RawReviewRow {
+  id: string
+  rating: number | null
+  author_name: string | null
+  author_city: string | null
+  source: string | null
+  comment: string | null
+  reply: string | null
+  reply_at: string | null
+  created_at: string
+}
+
+function normalizeReview(row: RawReviewRow): AnnuaireReview {
+  const source: ReviewSource =
+    row.source === 'google' || row.source === 'import' ? row.source : 'kovas'
+  return {
+    id: row.id,
+    rating: clampRating(row.rating ?? 0),
+    authorDisplayName: row.author_name?.trim() || 'Client',
+    authorCity: row.author_city?.trim() || null,
+    source,
+    publishedAt: row.created_at,
+    body: row.comment?.trim() || '',
+    criteria: [],
+    response: row.reply ? { body: row.reply, respondedAt: row.reply_at ?? row.created_at } : null,
+    isThisWeek: isWithinLastWeek(row.created_at),
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* PUBLIC — Reviews                                                   */
 /* ------------------------------------------------------------------ */
 
 /**
- * Récupère la liste des avis pour le diagnostiqueur courant.
- *
- * V1 = mock. V1.5+ = SELECT depuis `marketplace_reviews` filtré par
- * `diagnostician_id`. Filtre `filter` côté serveur via query param.
+ * Liste des avis publiés du diagnostiqueur, du plus récent au plus ancien.
+ * Filtre optionnel : 'pending' (sans réponse) | 'this-week'.
+ * Retourne un tableau vide si la fiche n'est pas réclamée (id null) ou en cas
+ * d'erreur / table absente (RLS isole déjà les avis du propriétaire).
  */
 export async function getReviewsForDiagnostician(
-  _diagnosticianId: string | null,
+  supabase: UntypedSupabase,
+  diagnosticianId: string | null,
   filter: ReviewFilter = 'all',
 ): Promise<ReadonlyArray<AnnuaireReview>> {
-  // Tri du plus récent au plus ancien (déjà ordonné dans le mock).
-  const all = [...MOCK_REVIEWS]
-  if (filter === 'pending') {
-    return all.filter((r) => r.response === null)
-  }
-  if (filter === 'this-week') {
-    return all.filter((r) => r.isThisWeek)
-  }
-  return all
-}
+  if (!diagnosticianId) return []
 
-export type ReviewFilter = 'all' | 'pending' | 'this-week'
+  try {
+    const { data, error } = await supabase
+      .from('marketplace_reviews')
+      .select('id, rating, author_name, author_city, source, comment, reply, reply_at, created_at')
+      .eq('diagnostician_id', diagnosticianId)
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(200)
 
-export function isReviewFilter(value: string | undefined): value is ReviewFilter {
-  return value === 'all' || value === 'pending' || value === 'this-week'
+    if (error || !data) return []
+
+    const all = (data as RawReviewRow[]).map(normalizeReview)
+    if (filter === 'pending') return all.filter((r) => r.response === null)
+    if (filter === 'this-week') return all.filter((r) => r.isThisWeek)
+    return all
+  } catch {
+    return []
+  }
 }
 
 /**
- * Résumé agrégé des avis (note moyenne, distribution, pending).
+ * Résumé agrégé des avis natifs (note moyenne, distribution, pending) +
+ * synthèse Google (gmb_rating / gmb_review_count) en complément.
  *
- * Toujours basé sur l'ensemble du dataset (pas filtré) — l'utilisateur veut
- * voir sa note globale même quand il filtre "sans réponse".
+ * Toujours basé sur l'ensemble des avis publiés (pas filtré).
  */
-export async function getReviewsSummary(_diagnosticianId: string | null): Promise<ReviewsSummary> {
-  const all = [...MOCK_REVIEWS]
-  const totalCount = all.length
+export async function getReviewsSummary(
+  supabase: UntypedSupabase,
+  diagnosticianId: string | null,
+): Promise<ReviewsSummary> {
+  const empty = (): ReviewsSummary => ({
+    averageRating: null,
+    totalCount: 0,
+    distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+    pendingResponses: 0,
+    thisWeekCount: 0,
+    google: null,
+  })
+
+  if (!diagnosticianId) return empty()
+
+  let google: ReviewsSummary['google'] = null
+  try {
+    const { data: diag } = await supabase
+      .from('diagnosticians')
+      .select('gmb_rating, gmb_review_count')
+      .eq('id', diagnosticianId)
+      .maybeSingle()
+
+    const gmbRating =
+      typeof diag?.gmb_rating === 'number' ? diag.gmb_rating : Number(diag?.gmb_rating)
+    const gmbCount = typeof diag?.gmb_review_count === 'number' ? diag.gmb_review_count : 0
+    if (Number.isFinite(gmbRating) && gmbRating > 0 && gmbCount > 0) {
+      google = { rating: gmbRating, reviewCount: gmbCount }
+    }
+  } catch {
+    google = null
+  }
+
+  let rows: RawReviewRow[] = []
+  try {
+    const { data } = await supabase
+      .from('marketplace_reviews')
+      .select('id, rating, author_name, author_city, source, comment, reply, reply_at, created_at')
+      .eq('diagnostician_id', diagnosticianId)
+      .eq('status', 'published')
+      .limit(500)
+    rows = (data as RawReviewRow[] | null) ?? []
+  } catch {
+    rows = []
+  }
+
+  const reviews = rows.map(normalizeReview)
+  const totalCount = reviews.length
 
   if (totalCount === 0) {
-    return {
-      averageRating: null,
-      totalCount: 0,
-      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-      pendingResponses: 0,
-      thisWeekCount: 0,
-    }
+    return { ...empty(), google }
   }
 
   const distribution: Record<1 | 2 | 3 | 4 | 5, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
@@ -282,7 +310,7 @@ export async function getReviewsSummary(_diagnosticianId: string | null): Promis
   let pendingResponses = 0
   let thisWeekCount = 0
 
-  for (const review of all) {
+  for (const review of reviews) {
     distribution[review.rating] += 1
     sumRatings += review.rating
     if (review.response === null) pendingResponses += 1
@@ -295,90 +323,98 @@ export async function getReviewsSummary(_diagnosticianId: string | null): Promis
     distribution,
     pendingResponses,
     thisWeekCount,
+    google,
   }
 }
 
 /* ------------------------------------------------------------------ */
-/* STATS                                                              */
+/* PUBLIC — Stats                                                     */
 /* ------------------------------------------------------------------ */
-
-export function isAnnuaireStatsPeriod(value: string | undefined): value is AnnuaireStatsPeriod {
-  return value === '7d' || value === '30d' || value === '90d' || value === '1y'
-}
 
 /**
- * Récupère le snapshot stats annuaire pour une période donnée.
+ * Snapshot stats annuaire branché sur de VRAIES données :
+ *  - views / quoteRequests : compteurs cumulés `diagnosticians`.
+ *  - leads / acceptedLeads : count `lead_assignments` (filtré période pour les
+ *    leads reçus via notified_at).
+ *  - averageRating / reviewsCount : `marketplace_reviews`.
  *
- * V1 = mock calibré sur un Diagnostiqueur Boost-tier moyen (~1200 vues/mo).
- * Variations cohérentes par période pour donner un sentiment réaliste.
+ * Aucune valeur n'est inventée : faute d'historique snapshot, `previousValue`
+ * vaut `value` (l'UI marque alors "Bientôt" plutôt qu'une fausse variation).
  */
 export async function getAnnuaireStatsSnapshot(
-  _diagnosticianId: string | null,
+  supabase: UntypedSupabase,
+  diagnosticianId: string | null,
   period: AnnuaireStatsPeriod,
 ): Promise<AnnuaireStatsSnapshot> {
-  // Multiplicateurs simulant le passage 7d -> 30d -> 90d -> 1y
-  const periodMultiplier: Record<AnnuaireStatsPeriod, number> = {
-    '7d': 0.25,
-    '30d': 1,
-    '90d': 3.1,
-    '1y': 11.4,
-  }
-  const mult = periodMultiplier[period]
+  const empty = (): AnnuaireStatsSnapshot => ({
+    period,
+    views: { value: 0, previousValue: 0 },
+    leads: { value: 0, previousValue: 0 },
+    quoteRequests: { value: 0, previousValue: 0 },
+    acceptedLeads: 0,
+    acceptanceRate: null,
+    averageRating: null,
+    reviewsCount: 0,
+    isCumulative: true,
+  })
 
-  const viewsCurrent = Math.round(1248 * mult)
-  const viewsPrevious = Math.round(1116 * mult)
-  const leadsCurrent = Math.round(34 * mult)
-  const leadsPrevious = Math.round(28 * mult)
-  // Conversion en % (0-100, 1 décimale conservée *10 pour précision)
-  const conversionCurrent = Math.round((leadsCurrent / Math.max(viewsCurrent, 1)) * 1000) / 10
-  const conversionPrevious = Math.round((leadsPrevious / Math.max(viewsPrevious, 1)) * 1000) / 10
+  if (!diagnosticianId) return empty()
+
+  // 1. Compteurs cumulés de la fiche (vues + demandes de devis).
+  let views = 0
+  let quoteRequests = 0
+  try {
+    const { data: diag } = await supabase
+      .from('diagnosticians')
+      .select('view_count, quote_request_count')
+      .eq('id', diagnosticianId)
+      .maybeSingle()
+    views = typeof diag?.view_count === 'number' ? diag.view_count : 0
+    quoteRequests = typeof diag?.quote_request_count === 'number' ? diag.quote_request_count : 0
+  } catch {
+    /* laisse 0 */
+  }
+
+  // 2. Leads reçus sur la période (lead_assignments.notified_at >= since).
+  const since = periodSinceIso(period)
+  let leadsReceived = 0
+  let acceptedLeads = 0
+  try {
+    const { count: receivedCount } = await supabase
+      .from('lead_assignments')
+      .select('id', { count: 'exact', head: true })
+      .eq('diagnostician_id', diagnosticianId)
+      .gte('notified_at', since)
+    leadsReceived = receivedCount ?? 0
+
+    const { count: acceptedCount } = await supabase
+      .from('lead_assignments')
+      .select('id', { count: 'exact', head: true })
+      .eq('diagnostician_id', diagnosticianId)
+      .eq('status', 'accepted')
+      .gte('notified_at', since)
+    acceptedLeads = acceptedCount ?? 0
+  } catch {
+    leadsReceived = 0
+    acceptedLeads = 0
+  }
+
+  const acceptanceRate =
+    leadsReceived > 0 ? Math.round((acceptedLeads / leadsReceived) * 1000) / 10 : null
+
+  // 3. Note moyenne + nb avis natifs.
+  const summary = await getReviewsSummary(supabase, diagnosticianId)
 
   return {
     period,
-    views: { value: viewsCurrent, previousValue: viewsPrevious },
-    leads: { value: leadsCurrent, previousValue: leadsPrevious },
-    conversionRate: { value: conversionCurrent, previousValue: conversionPrevious },
-    trafficSources: [
-      { label: 'Recherche Google', visits: Math.round(viewsCurrent * 0.48) },
-      { label: 'Annuaire KOVAS', visits: Math.round(viewsCurrent * 0.29) },
-      { label: 'Google My Business', visits: Math.round(viewsCurrent * 0.16) },
-      { label: 'Accès direct', visits: Math.round(viewsCurrent * 0.07) },
-    ],
-    responseTime: {
-      averageMinutes: 42,
-      distribution: [
-        { label: 'Moins de 30 min', count: Math.round(leadsCurrent * 0.45) },
-        { label: '30 min à 2 h', count: Math.round(leadsCurrent * 0.32) },
-        { label: '2 h à 24 h', count: Math.round(leadsCurrent * 0.18) },
-        { label: 'Plus de 24 h', count: Math.round(leadsCurrent * 0.05) },
-      ],
-    },
-    zoneBenchmark: [
-      {
-        label: 'Vues fiche',
-        percentile: 25,
-        displayValue: viewsCurrent.toLocaleString('fr-FR'),
-        positionRatio: 0.78,
-      },
-      {
-        label: 'Note moyenne',
-        percentile: 10,
-        displayValue: '4,9 / 5',
-        positionRatio: 0.94,
-      },
-      {
-        label: 'Réactivité',
-        percentile: 10,
-        displayValue: '42 min',
-        positionRatio: 0.91,
-      },
-      {
-        label: 'Conversion',
-        percentile: 25,
-        displayValue: `${conversionCurrent.toLocaleString('fr-FR')} %`,
-        positionRatio: 0.74,
-      },
-    ],
+    views: { value: views, previousValue: views },
+    leads: { value: leadsReceived, previousValue: leadsReceived },
+    quoteRequests: { value: quoteRequests, previousValue: quoteRequests },
+    acceptedLeads,
+    acceptanceRate,
+    averageRating: summary.averageRating,
+    reviewsCount: summary.totalCount,
+    isCumulative: true,
   }
 }
 
@@ -419,16 +455,9 @@ export function formatReviewDate(isoDate: string): string {
   return `${FR_MONTHS[d.getMonth()]} ${d.getFullYear()}`
 }
 
-/** Calcul variation % entre deux valeurs (positive ou négative). */
-export function computeVariation(current: number, previous: number): number {
-  if (previous === 0) return current === 0 ? 0 : 100
-  return Math.round(((current - previous) / previous) * 1000) / 10
-}
-
-/** Helper : récupère le diagnostician_id réclamé par l'user courant (V1 = null OK pour mock). */
+/** Helper : récupère le diagnostician_id réclamé par l'user courant. */
 export async function getClaimedDiagnosticianId(
-  // biome-ignore lint/suspicious/noExplicitAny: Supabase typed client en attente regen
-  supabase: any,
+  supabase: UntypedSupabase,
   userId: string,
 ): Promise<string | null> {
   try {
