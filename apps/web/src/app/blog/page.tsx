@@ -66,7 +66,7 @@ const POSTS: BlogPost[] = [
   },
   {
     slug: 'liciel-vs-kovas-cohabitation',
-    title: 'Cohabiter avec Liciel, OBBC, AnalysImmo ou ORIS : workflow KOVAS compagnon',
+    title: 'Cohabiter avec Liciel, OBBC ou AnalysImmo : workflow KOVAS compagnon',
     excerpt:
       'Le terrain dans KOVAS, le calcul DPE certifié dans ton éditeur. Comment configurer le bouton Partager pour zéro re-saisie quel que soit ton logiciel.',
     publishedAt: '2026-05-02',

@@ -81,7 +81,7 @@ const COMPARISON_ROWS: ComparisonRow[] = [
     kovas: 'yes',
   },
   {
-    feature: 'Import base depuis Liciel · OBBC · AnalysImmo · ORIS',
+    feature: 'Import base depuis Liciel · OBBC · AnalysImmo',
     competitors: ['no', 'no', 'no'],
     kovas: 'yes',
   },
@@ -129,10 +129,10 @@ const FAQ_B2B: FaqItem[] = [
   {
     question: 'Quel est le délai de mise en place ?',
     answer:
-      "15 minutes pour créer ton compte et démarrer ta première mission. Si tu souhaites importer tes données existantes (Liciel, OBBC, AnalysImmo, ORIS ou autre), compte 1 à 2 jours ouvrés. Notre équipe t'accompagne gratuitement.",
+      "15 minutes pour créer ton compte et démarrer ta première mission. Si tu souhaites importer tes données existantes (Liciel, OBBC, AnalysImmo ou autre), compte 1 à 2 jours ouvrés. Notre équipe t'accompagne gratuitement.",
   },
   {
-    question: 'Comment importer ma base depuis Liciel, OBBC, AnalysImmo ou ORIS ?',
+    question: 'Comment importer ma base depuis Liciel, OBBC ou AnalysImmo ?',
     answer:
       'KOVAS est un compagnon, pas un remplaçant : ton logiciel certifié reste ton moteur ADEME. Pour récupérer ta base existante (clients, biens, copropriétés), nous prenons en charge gratuitement l’import. Tu nous envoies tes exports (ZIP, XML, Excel ou CSV selon ton éditeur), nous importons l’intégralité sans perte. Tu continues à utiliser ton logiciel pour le calcul DPE et la soumission ADEME.',
   },
@@ -149,7 +149,7 @@ const FAQ_B2B: FaqItem[] = [
   {
     question: 'Quelles données puis-je exporter ?',
     answer:
-      '100% de tes données, à tout moment, sans frais. Formats compatibles avec les quatre éditeurs majeurs : Liciel (Imports spécifiques XML + Excel + ZIP), OBBC (Imports spécifiques XML), AnalysImmo (XML CII + ZIP), ORIS (ZIP + JSON). Plus PDF, Word, CSV portables. Tu restes propriétaire de tes données. Aucun verrou éditeur.',
+      '100% de tes données, à tout moment, sans frais. Formats compatibles avec les trois éditeurs majeurs : Liciel (Imports spécifiques XML + Excel + ZIP), OBBC (Imports spécifiques XML) et AnalysImmo (XML CII + ZIP). Plus PDF, Word, CSV portables. Tu restes propriétaire de tes données. Aucun verrou éditeur.',
   },
   {
     question: 'Le support est-il en français ?',

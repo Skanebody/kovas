@@ -197,7 +197,7 @@ export function getUpgradeMessage(args: GetUpgradeMessageArgs): UpgradeMessage |
       benefits: [
         'Capture mission terrain (vocal + photos IA)',
         'Cross-Check 6 sources avant ADEME',
-        'Pré-export Liciel / ORIS / OBBC',
+        'Pré-export Liciel / OBBC / AnalysImmo',
         '35 minutes gagnées par mission',
       ],
       ctaHref: '/dashboard/upgrade/logiciel',
@@ -220,7 +220,7 @@ export function getUpgradeMessage(args: GetUpgradeMessageArgs): UpgradeMessage |
       benefits: [
         'Capture vocale + photos IA terrain',
         'Cross-Check 6 sources avant ADEME',
-        'Export auto Liciel / ORIS / OBBC',
+        'Export auto Liciel / OBBC / AnalysImmo',
         '100 missions / mois incluses',
         'Inclut Premium annuaire (bundle Croissance)',
       ],

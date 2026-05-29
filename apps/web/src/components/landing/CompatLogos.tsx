@@ -12,8 +12,8 @@
  *  - **4 logos retracés fidèlement** depuis sources officielles PNG/AVIF :
  *    AnalysImmo (atlibitum.com), WinDiagnostics (obbc.fr), GestionDiag
  *    (gestiondiag.fr), Argos (ithaque-renovation.fr)
- *  - **3 wordmarks stylés** créés ex-nihilo faute de source officielle :
- *    Im'Diag, ORIS, DPEWin — couleurs d'accent uniques pour différenciation
+ *  - **2 wordmarks stylés** créés ex-nihilo faute de source officielle :
+ *    Im'Diag, DPEWin — couleurs d'accent uniques pour différenciation
  *
  * Tous les SVG sont autonomes (couleurs hex hardcodées, pas de currentColor)
  * et chargés via `<img src>` — pas d'inline SVG (HTML/CSS plus simple, cache
@@ -75,6 +75,5 @@ export const WinDiagnosticsLogo = makeLogoComponent(
 )
 export const GestionDiagLogo = makeLogoComponent('gestiondiag', 'GestionDiag — CRM diagnostic')
 export const ImDiagLogo = makeLogoComponent('imdiag', "Im'Diag — multi-modules diagnostic")
-export const OrisLogo = makeLogoComponent('oris', 'ORIS — diagnostic immobilier')
 export const ArgosLogo = makeLogoComponent('argos', 'Argos — Ithaque audit & diagnostic')
 export const DpeWinLogo = makeLogoComponent('dpewin', 'DPEWin — logiciel Perrenoud')

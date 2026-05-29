@@ -124,7 +124,7 @@ const CATEGORIES: CategoryGroup[] = [
   {
     name: 'Exports',
     intro:
-      "Tes données t'appartiennent. Compatibles avec les quatre éditeurs majeurs du marché — Liciel, OBBC, AnalysImmo, ORIS — plus formats universels portables.",
+      "Tes données t'appartiennent. Compatibles avec les trois éditeurs majeurs du marché — Liciel, OBBC, AnalysImmo — plus formats universels portables.",
     features: [
       {
         title: 'Export PDF',
@@ -165,15 +165,9 @@ const CATEGORIES: CategoryGroup[] = [
         status: 'Inclus',
       },
       {
-        title: 'Export ZIP + JSON ORIS',
-        description:
-          'Format ORIS via ZIP générique + JSON structuré. Import direct dans ta passerelle ADEME ORIS.',
-        status: 'Inclus',
-      },
-      {
         title: 'Bouton « Partager » 3 modes',
         description:
-          'Email vers toi-même, sync Google Drive automatique, téléchargement direct. 30 secondes vs 1h30 quel que soit ton éditeur (Liciel, OBBC, AnalysImmo, ORIS).',
+          'Email vers toi-même, sync Google Drive automatique, téléchargement direct. 30 secondes vs 1h30 quel que soit ton éditeur (Liciel, OBBC, AnalysImmo).',
         status: 'Inclus',
       },
     ],

@@ -1,6 +1,6 @@
 /**
  * Normalisation des entités parsées (multi-source : Liciel / AnalysImmo / OBBC /
- * ORIS / Autre — le normalizer est agnostique de la source car le schéma
+ * Autre — le normalizer est agnostique de la source car le schéma
  * Parsed* est unifié) :
  *  - Téléphones → E.164 (libphonenumber-js)
  *  - Emails → validation + détection typos communs

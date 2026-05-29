@@ -18,9 +18,8 @@ Pivot 2026-05-28 : abandon de la stratégie "wordmark KOVAS uniforme" pour les 7
 | 3 | **WinDiagnostics (OBBC)** | `windiagnostics-logo.svg` | `#E84E2A` orange + `#1B3A6E` navy | Retracé fidèle (PNG officiel OBBC observé) |
 | 4 | **GestionDiag** | `gestiondiag-logo.svg` | `#0F0F0F` noir + `#F7931E` orange (renard) | Retracé fidèle (PNG officiel observé) |
 | 5 | **Im'Diag** | `imdiag-logo.svg` | `#1F2937` charcoal + `#9D174D` magenta accent | Wordmark stylé créé (aucune source) |
-| 6 | **ORIS** | `oris-logo.svg` | `#334155` slate + `#0EA5E9` cyan accent | Wordmark stylé créé (aucune source univoque) |
-| 7 | **Argos** | `argos-logo.svg` | `#1F2A2A` charcoal + dégradé vert `#3DD68C → #1A6E50` | Retracé fidèle (AVIF officiel observé) |
-| 8 | **DPEWin** | `dpewin-logo.svg` | `#1E40AF` bleu Perrenoud + `#16A34A` vert (éclair énergie) | Wordmark stylé créé (DPEWin = produit boîte, pas de wordmark autonome trouvé) |
+| 6 | **Argos** | `argos-logo.svg` | `#1F2A2A` charcoal + dégradé vert `#3DD68C → #1A6E50` | Retracé fidèle (AVIF officiel observé) |
+| 7 | **DPEWin** | `dpewin-logo.svg` | `#1E40AF` bleu Perrenoud + `#16A34A` vert (éclair énergie) | Wordmark stylé créé (DPEWin = produit boîte, pas de wordmark autonome trouvé) |
 
 ---
 
@@ -66,15 +65,7 @@ Pivot 2026-05-28 : abandon de la stratégie "wordmark KOVAS uniforme" pour les 7
 - **Justification** : aucune marque verbale Im'Diag identifiable comme protégée → reproduction nominative en typographie neutre = citation factuelle (L.713-3 CPI, pas de risque)
 - **Création** : 2026-05-28
 
-### 6. ORIS — `oris-logo.svg` (wordmark créé)
-- **Source** : aucune source officielle exploitable. Plusieurs entités "ORIS" coexistent (oris-it.fr en parc informatique, oris-connect.com en infrastructure BIM) mais aucun produit "ORIS diagnostic immobilier" n'a de site officiel identifiable, malgré sa mention récurrente dans les comparatifs comme cloud-based concurrent de Liciel.
-- **Format source** : wordmark stylé créé ex-nihilo
-- **Description créée** : wordmark "ORIS" en majuscules espacées (letter-spacing 4) bold sans-serif slate `#334155`, petite pastille cyan `#0EA5E9` en exposant après le "S" (évocation cloud/sync — référence à sa position cloud-first)
-- **Couleur principale** : `#334155` slate (couleur d'accent demandée parmi la palette autorisée)
-- **Justification** : reproduction nominative neutre, aucun élément figuratif spécifique reproduit
-- **Création** : 2026-05-28
-
-### 7. Argos — `argos-logo.svg`
+### 6. Argos — `argos-logo.svg`
 - **Source** : https://cdn.prod.website-files.com/6645d4883e8630f9ce74e8b1/67fe2d1ba55e697b6d94e943_ARGOS-LOGO_Couleurs.avif (AVIF officiel converti localement en PNG via `sips`)
 - **Format source** : AVIF observé visuellement → SVG retracé
 - **Description observée** : icône à gauche d'une maison stylisée pointue avec un coin de "feuille pliée" (effet origami) en dégradé vert `#3DD68C → #1A6E50` du haut vers le bas ; à droite wordmark "Argos" en charcoal très foncé `#1F2A2A`, sans-serif arrondi bold (style Eudoxus Sans ou similaire).
@@ -82,7 +73,7 @@ Pivot 2026-05-28 : abandon de la stratégie "wordmark KOVAS uniforme" pour les 7
 - **Note fidélité** : reproduction approximative — silhouette maison simplifiée + coin origami suggéré par superposition, glyphe correct mais courbes du tracé original (qui ont des courbures subtiles) approximées par polygones droits.
 - **Création** : 2026-05-28
 
-### 8. DPEWin — `dpewin-logo.svg` (wordmark créé)
+### 7. DPEWin — `dpewin-logo.svg` (wordmark créé)
 - **Source** : aucune. Le produit DPEWin de Logiciels Perrenoud est commercialisé en boîte/clé USB physique, sans wordmark autonome distinct du logo Perrenoud (maison-mère). Le site logicielsperrenoud.com ne sert qu'un PNG de "clé USB" produit, pas un logo DPEWin.
 - **Format source** : wordmark stylé créé ex-nihilo
 - **Description créée** : petite icône éclair (énergie / DPE) en vert `#16A34A` à gauche, puis wordmark "DPE" en bleu Perrenoud `#1E40AF` ultra-bold + "Win" en bleu plus clair `#3B82F6` weight medium — visuellement la marque verbale est claire et énergétique, cohérente avec l'identité Perrenoud sans la copier.
@@ -111,7 +102,7 @@ L'ancienne stratégie "wordmark KOVAS uniforme dark sur tous les 7" a été aban
 1. **Crédibilise la grille** auprès du diagnostiqueur qui reconnaît visuellement ses logiciels connus (Liciel rouge, OBBC orange, AnalysImmo bleu/orange, Argos vert)
 2. **Établit KOVAS comme connaisseur du marché** — l'éditeur sait précisément qui sont ses concurrents, pas juste leur nom
 3. **Renforce le message de compatibilité réelle** — un logo générique suggère un placeholder, un logo coloré suggère une compatibilité technique éprouvée
-4. **Reste légalement sûr** : logos officiels reproduits fidèlement (jurisprudence CJUE BMW c/ Deenik C-63/97 + L.713-3 CPI). Wordmarks créés ex-nihilo (Im'Diag, ORIS, DPEWin) = reproduction nominative neutre sans appropriation d'éléments figuratifs propriétaires.
+4. **Reste légalement sûr** : logos officiels reproduits fidèlement (jurisprudence CJUE BMW c/ Deenik C-63/97 + L.713-3 CPI). Wordmarks créés ex-nihilo (Im'Diag, DPEWin) = reproduction nominative neutre sans appropriation d'éléments figuratifs propriétaires.
 
 ---
 
@@ -125,7 +116,6 @@ apps/web/public/logos/compat/
 ├── windiagnostics-logo.svg (retracé OBBC)
 ├── gestiondiag-logo.svg  (retracé)
 ├── imdiag-logo.svg       (wordmark créé)
-├── oris-logo.svg         (wordmark créé)
 ├── argos-logo.svg        (retracé)
 └── dpewin-logo.svg       (wordmark créé)
 ```
@@ -156,7 +146,6 @@ Fondement légal :
 | WinDiagnostics | https://obbc.fr/ (windiagnostics.fr inaccessible) | PNG officiel OBBC |
 | GestionDiag | https://gestiondiag.fr/ | PNG Canva officiel |
 | Im'Diag | aucun site officiel identifié | n/a — wordmark créé |
-| ORIS | sites multiples non univoques (oris-it.fr, oris-connect.com — pas la marque diag) | n/a — wordmark créé |
 | Argos | https://argos.ithaque-renovation.fr/ | AVIF officiel |
 | DPEWin | https://logicielsperrenoud.com/ | pas de wordmark autonome — wordmark créé |
 
@@ -165,7 +154,7 @@ Fondement légal :
 ## Risques juridiques résiduels
 
 - **Logos officiels retracés** (AnalysImmo, OBBC/WinDiagnostics, GestionDiag, Argos) : reproduction fidèle d'éléments visuels propriétaires (icônes, couleurs, dispositions). Couvert par **L.713-3 CPI** (usage informatif) + **CJUE BMW c/ Deenik (C-63/97)** + disclaimer. **Risque résiduel faible** mais existant si un éditeur estime que le tracé porte atteinte à sa marque figurative déposée — procédure de retrait à 7 jours déjà prévue ci-dessous.
-- **Wordmarks créés** (Im'Diag, ORIS, DPEWin) : reproduction nominative neutre, **aucun risque juridique**.
+- **Wordmarks créés** (Im'Diag, DPEWin) : reproduction nominative neutre, **aucun risque juridique**.
 - **Sous-titre "WINDIAGNOSTICS" sur le logo OBBC** : l'OBBC commercialise plusieurs produits, dont WinDiagnostics. La substitution du sous-titre "DÉVELOPPEMENT" (corporate) par "WINDIAGNOSTICS" (produit) n'altère pas la marque figurative principale (triangle + BBC + couleurs), mais est techniquement une adaptation. Si l'éditeur préfère garder son logo corporate intact, on pourra basculer sur "OBBC DÉVELOPPEMENT" sans changer le nom métier "WinDiagnostics" dans le composant TSX de la grille.
 
 ---

@@ -24,7 +24,7 @@ import { NextResponse } from 'next/server'
  *
  * Champs form-data attendus :
  *   - file : binaire (csv/xlsx/xml/zip)
- *   - source_logiciel : 'liciel' | 'analysimmo' | 'obbc' | 'oris' | 'autre'
+ *   - source_logiciel : 'liciel' | 'analysimmo' | 'obbc' | 'autre'
  *                       (défaut 'autre' si absent)
  *
  * Conventions storage : `<orgId>/<uuid>.<ext>`.
@@ -122,11 +122,14 @@ export async function POST(request: Request) {
   }
 
   // ── Upload Storage via service-role ───────────────────────────────
-  const admin = createAdminClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  )
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !serviceRoleKey) {
+    return NextResponse.json({ error: 'Configuration serveur incomplète.' }, { status: 500 })
+  }
+  const admin = createAdminClient<Database>(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
 
   const fileUuid = randomUUID()
   const storagePath = `${orgId}/${fileUuid}.${ext}`

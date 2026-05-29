@@ -111,7 +111,7 @@ interface CoproRow {
 
 /**
  * Page de suivi + validation d'un job d'import (multi-source : Liciel /
- * AnalysImmo / OBBC / ORIS / Autre).
+ * AnalysImmo / OBBC / Autre).
  *
  * Logique d'affichage selon `job.status` :
  *   - completed → ImportSummary (récap final + CTA)

@@ -1,38 +1,40 @@
 /**
  * KOVAS — Cyclage des noms de logiciels concurrents (crossfade).
  *
- * Composant qui cycle les 4 noms du marché FR du diagnostic immobilier
- * (Liciel · OBBC · AnalysImmo · ORIS) par crossfade : chaque nom apparaît
- * en fondu enchaîné, l'un après l'autre, cycle 8s en boucle.
+ * Composant qui cycle les 3 noms du marché FR du diagnostic immobilier
+ * (Liciel · OBBC · AnalysImmo) par crossfade : chaque nom apparaît
+ * en fondu enchaîné, l'un après l'autre, cycle 6s en boucle.
  *
  * Historique de l'effet :
  *  - v1 : RotatingSoftwareName à crossfade JS (commit 0fb0399)
- *  - v2 : liste statique "Liciel, OBBC, AnalysImmo ou ORIS" (commit 02bf693)
+ *  - v2 : liste statique "Liciel, OBBC ou AnalysImmo" (commit 02bf693)
  *  - v3 : slot machine défilement vertical translateY (commit 640e029)
- *  - v4 (présent) : crossfade pur CSS (Benjamin : "faut pas qu'ils défilent,
+ *  - v4 : crossfade pur CSS (Benjamin : "faut pas qu'ils défilent,
  *    faut qu'ils apparaissent à la suite")
+ *  - v5 (présent) : retrait de l'éditeur ORIS → 3 noms (Liciel, OBBC,
+ *    AnalysImmo). Cycle ramené de 8s/4 items à 6s/3 items.
  *
  * Stratégie :
  *  - Animation CSS pure (zéro JS state, zéro tick) — performante, pas de
  *    re-renders React, fonctionne offline, ne consomme pas de batterie.
- *  - 4 items absolument positionnés sur la même origine, animation
+ *  - 3 items absolument positionnés sur la même origine, animation
  *    décalée de 2s pour chacun avec fondu enchaîné de 0.4s aux transitions.
  *  - Server Component (pas `'use client'`) car aucune interactivité JS.
  *  - SSR-friendly : item 1 (Liciel) utilise `animation-delay: -0.4s` →
- *    à t=0 il est déjà à 5% du cycle = opacity 1. Premier paint = Liciel
+ *    à t=0 il est déjà à ~6.7% du cycle = opacity 1. Premier paint = Liciel
  *    immédiatement visible, sans fade-in initial. SEO préservé.
  *  - Largeur stabilisée : widthSpacer avec le mot le plus long
  *    "AnalysImmo" (suffix compris) en `visibility: hidden` → zéro reflow.
  *
  * Accessibilité :
  *  - `aria-hidden` sur l'animation visuelle (décoration).
- *  - `sr-only` exposant tous les 4 noms en clair pour screen readers + SEO.
+ *  - `sr-only` exposant les 3 noms en clair pour screen readers + SEO.
  *  - Respect `prefers-reduced-motion` : animation désactivée, Liciel figé.
  */
 
 import styles from './SoftwareNameSlotMachine.module.css'
 
-const SOFTWARE_NAMES = ['Liciel', 'OBBC', 'AnalysImmo', 'ORIS'] as const
+const SOFTWARE_NAMES = ['Liciel', 'OBBC', 'AnalysImmo'] as const
 
 /** Mot le plus long parmi les 4 noms (pour réservation largeur). */
 const LONGEST_NAME = 'AnalysImmo'
@@ -64,7 +66,7 @@ export function SoftwareNameSlotMachine({
         <span className={styles.widthSpacer} aria-hidden>
           {`${LONGEST_NAME}${suffix}`}
         </span>
-        {/* Les 4 noms positionnés absolument à la même origine. Le décalage
+        {/* Les 3 noms positionnés absolument à la même origine. Le décalage
             d'animation (configuré en CSS via :nth-child) crée le crossfade
             séquentiel. */}
         {SOFTWARE_NAMES.map((name) => (
@@ -73,10 +75,10 @@ export function SoftwareNameSlotMachine({
           </span>
         ))}
       </span>
-      {/* SEO + a11y : tous les 4 noms exposés en clair dans le DOM. */}
+      {/* SEO + a11y : les 3 noms exposés en clair dans le DOM. */}
       <span className="sr-only">
-        Compatible avec les principaux logiciels de diagnostic immobilier : Liciel, OBBC, AnalysImmo
-        et ORIS.
+        Compatible avec les principaux logiciels de diagnostic immobilier : Liciel, OBBC et
+        AnalysImmo.
       </span>
     </>
   )

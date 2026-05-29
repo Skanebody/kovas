@@ -65,7 +65,7 @@ const INCLUDED_FEATURES = [
   '8 diagnostics standards (DPE, amiante, plomb, gaz, électricité, termites, Carrez/Boutin, ERP)',
   'Saisie vocale terrain illimitée',
   'Photos géolocalisées illimitées',
-  'Exports universels (PDF, Word, CSV, JSON) + compatibilité Liciel · OBBC · AnalysImmo · ORIS',
+  'Exports universels (PDF, Word, CSV, JSON) + compatibilité Liciel · OBBC · AnalysImmo',
   'Bouton Partager 3 modes',
   'Sync iPad / iPhone / Web temps réel',
   'Mode offline complet',

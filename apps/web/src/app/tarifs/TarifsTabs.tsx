@@ -31,7 +31,7 @@ const TABS: ReadonlyArray<{
     key: 'logiciel',
     label: 'Logiciel',
     pricing: '29 – 499 €/mois',
-    helper: 'Outil terrain compagnon de Liciel · OBBC · AnalysImmo · ORIS',
+    helper: 'Outil terrain compagnon de Liciel · OBBC · AnalysImmo',
   },
   {
     key: 'annuaire',

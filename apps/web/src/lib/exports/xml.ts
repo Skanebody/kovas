@@ -7,7 +7,7 @@ import type { MissionExportData } from './build-mission-data'
  * Objectif compatibilité (CLAUDE.md §13 + différenciateur #2) : fournir un
  * fichier XML propre et documenté, importable par les logiciels métier qui
  * acceptent un import XML structuré (Liciel « Importer XML spécifique », et
- * en complément des CSV/JSON pour OBBC, AnalysImmo, ORIS). C'est le format
+ * en complément des CSV/JSON pour OBBC, AnalysImmo). C'est le format
  * pivot « Plan B » indépendant de tout éditeur — pas un format propriétaire.
  *
  * Le XML reprend exactement la même donnée que `generateJson` (parité totale)
@@ -40,10 +40,7 @@ function el(tag: string, value: unknown, indent: string): string {
 }
 
 /** Sérialise un objet plat en une suite d'éléments (clés = noms de balises). */
-function objectToElements(
-  obj: Record<string, unknown> | null,
-  indent: string,
-): string {
+function objectToElements(obj: Record<string, unknown> | null, indent: string): string {
   if (!obj) return ''
   return Object.entries(obj)
     .filter(([, v]) => typeof v !== 'object' || v === null)

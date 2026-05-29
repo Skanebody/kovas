@@ -72,7 +72,7 @@ const ONBOARDING_STEPS = [
   {
     title: 'Importe ta première mission',
     description:
-      'Liciel ZIP, ORIS, OBBC ou mission test fictive si tu préfères explorer sans données réelles.',
+      'Liciel ZIP, OBBC, AnalysImmo ou mission test fictive si tu préfères explorer sans données réelles.',
   },
   {
     title: 'KOVAS croise 6 sources publiques sur la propriété',

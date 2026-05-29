@@ -82,7 +82,7 @@ import Link from 'next/link'
 export const metadata = buildMetadata({
   // Title raccourci pour SERP Google (~64 chars avant troncature à 60-70).
   // Suffix "KOVAS" omis : présent dans le canonical + Open Graph site_name.
-  title: 'Terminé les 3 heures par jour sur Liciel, OBBC, AnalysImmo, ORIS',
+  title: 'Terminé les 3 heures par jour sur Liciel, OBBC, AnalysImmo',
   description:
     'Capture vocale et photos pendant ta mission. Tes données arrivent dans Liciel prêtes à l’envoi ADEME. 35 minutes gagnées par mission, mesuré sur 30 diagnostiqueurs partenaires. Essai 30 jours.',
   path: '/',
@@ -107,7 +107,7 @@ function SectionHero(): React.ReactElement {
             - Specificity chiffrée ("3 heures par jour") — pain quotidien
               plus large que les "21h" (soirées tardives uniquement)
             - Polarization compacte + dynamique : slot machine cyclant
-              Liciel · OBBC · AnalysImmo · ORIS (Benjamin 2026-05-27 v3) —
+              Liciel · OBBC · AnalysImmo (Benjamin 2026-05-29) —
               parle aux 100% du marché FR sans prendre toute la largeur du H1.
               Premier rendu SSR = Liciel pour SEO + 65% PdM.
             - Language match (vocabulaire vrai du diagnostiqueur)
@@ -122,8 +122,8 @@ function SectionHero(): React.ReactElement {
               de la phrase. GlossaryTerm retiré pour supprimer le point d'info
               qui séparait visuellement le nom du logiciel du point final.
               Le suffix="." voyage avec chaque nom (vs point figé après le
-              widthSpacer) → reste collé à "Liciel"/"OBBC"/"ORIS" malgré
-              les largeurs différentes des 4 noms. */}
+              widthSpacer) → reste collé à "Liciel"/"OBBC"/"AnalysImmo" malgré
+              les largeurs différentes des 3 noms. */}
           Terminé les 3 heures par jour sur{' '}
           <SoftwareNameSlotMachine className="font-serif italic font-normal" suffix="." />
         </h1>
@@ -150,8 +150,7 @@ function SectionHero(): React.ReactElement {
         <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-[#0F1419]/72">
           <li className="flex items-center gap-2">
             <CheckCircle2 className="size-4 text-chartreuse-deep shrink-0" aria-hidden />
-            Compatible Liciel, <GlossaryTerm term="oris">ORIS</GlossaryTerm>,{' '}
-            <GlossaryTerm term="obbc">OBBC</GlossaryTerm>
+            Compatible Liciel, <GlossaryTerm term="obbc">OBBC</GlossaryTerm>, AnalysImmo
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="size-4 text-chartreuse-deep shrink-0" aria-hidden />
@@ -1029,7 +1028,7 @@ function SectionFounderLetter(): React.ReactElement {
                   prospecter pour trouver de nouveaux clients.
                 </p>
                 <p>
-                  Et j&apos;ai vu les éditeurs de logiciels — Liciel, ORIS, les autres — vendre des
+                  Et j&apos;ai vu les éditeurs de logiciels — Liciel, OBBC, les autres — vendre des
                   modules à 200, 300, parfois 400 € par mois sans changer un iota du quotidien
                   terrain depuis 15 ans.
                 </p>
@@ -1073,7 +1072,7 @@ function SectionFounderLetter(): React.ReactElement {
 function SectionAntiPitch(): React.ReactElement {
   const notForYou: ReadonlyArray<string> = [
     'Tu fais moins de 5 missions par mois (le ROI ne sera pas suffisant, reste sur Excel).',
-    'Tu veux remplacer Liciel ou ORIS (KOVAS s’utilise EN PLUS, pas À LA PLACE).',
+    'Tu veux remplacer Liciel ou OBBC (KOVAS s’utilise EN PLUS, pas À LA PLACE).',
     'Tu cherches un logiciel certifié ADEME qui envoie tes DPE (c’est Liciel qui fait l’envoi final).',
     'Tu refuses d’apprendre un nouvel outil (prévois 15 min d’onboarding la première fois).',
     'Tu veux une solution gratuite (le tier le moins cher est à 29 €/mois, et la valeur livrée est très au-dessus).',
@@ -1235,7 +1234,7 @@ const HOME_FAQ: ReadonlyArray<{ q: string; a: string }> = [
   },
   {
     q: 'KOVAS est-il certifié ADEME pour le calcul DPE ?',
-    a: "Non, et c'est volontaire. Le moteur de calcul certifié 3CL-2021 reste dans Liciel (ou ORIS, OBBC selon ton logiciel). KOVAS n'envoie jamais directement à l'ADEME. Cette séparation des responsabilités protège ta certification et évite tout risque de signalement.",
+    a: "Non, et c'est volontaire. Le moteur de calcul certifié 3CL-2021 reste dans Liciel (ou OBBC, AnalysImmo selon ton logiciel). KOVAS n'envoie jamais directement à l'ADEME. Cette séparation des responsabilités protège ta certification et évite tout risque de signalement.",
   },
   {
     q: "Mes données restent-elles à moi si j'arrête KOVAS ?",
@@ -1394,10 +1393,10 @@ export default async function HomePage() {
       <main className="flex-1">
         <SectionHero />
         <SectionTrustBar stats={stats} />
-        {/* Grille 8 logos éditeurs compatibles — confirmation visuelle de la
-            promesse du H1 ("Compatible avec Liciel, OBBC, AnalysImmo, ORIS").
-            Cite 8 logiciels (les 4 du slot machine + 4 outsiders) pour
-            maximiser la couverture du marché FR diag immobilier. */}
+        {/* Grille 3 logos éditeurs compatibles — confirmation visuelle de la
+            promesse du H1 ("Compatible avec Liciel, OBBC, AnalysImmo").
+            Cite les 3 logiciels couverts pour maximiser la couverture du
+            marché FR diag immobilier. */}
         <CompatGrid />
         <SectionThreePromises />
         <SectionLicielVsKovas />

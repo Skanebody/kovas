@@ -528,7 +528,11 @@ function BundlesSection(): React.ReactElement {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function SectionHero(): React.ReactElement {
-  const metas = ['À partir de 29€/mois', 'Compatible Liciel, ORIS, OBBC', 'Support en français']
+  const metas = [
+    'À partir de 29€/mois',
+    'Compatible Liciel, OBBC, AnalysImmo',
+    'Support en français',
+  ]
   return (
     <section className="px-5 sm:px-12 pt-16 sm:pt-24 pb-12 sm:pb-20 animate-fade-in motion-reduce:animate-none">
       <div className="max-w-[1240px] mx-auto">

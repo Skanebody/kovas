@@ -43,7 +43,6 @@ const SOFTWARES = [
   { value: 'Liciel', label: 'Liciel' },
   { value: 'OBBC', label: 'OBBC' },
   { value: 'AnalysImmo', label: 'AnalysImmo' },
-  { value: 'ORIS', label: 'ORIS' },
   { value: 'Autre', label: 'Autre' },
   { value: 'Aucun', label: 'Aucun pour le moment' },
 ]

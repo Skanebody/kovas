@@ -6,7 +6,7 @@
  *
  *   Q1. Tu es ? Solo / Petit cabinet / Cabinet structuré / Franchise
  *   Q2. Combien de missions / mois ?       (slider 5-500)
- *   Q3. Tu utilises quel logiciel principal ? (Liciel / ORIS / OBBC / Autre / Aucun)
+ *   Q3. Tu utilises quel logiciel principal ? (Liciel / OBBC / AnalysImmo / Autre / Aucun)
  *
  * Soumission → /signup/recommendation?team=...&volume=...&editor=...
  *

@@ -3,7 +3,7 @@ import type { MissionExportData } from '@/lib/exports/build-mission-data'
 /**
  * Architecture d'adaptateurs d'export par éditeur de logiciel de diagnostic.
  *
- * Chaque éditeur cible (Liciel, OBBC, AnalysImmo, ORIS) est branché via un
+ * Chaque éditeur cible (Liciel, OBBC, AnalysImmo) est branché via un
  * module isolé implémentant `EditorExportAdapter`. Brancher un nouvel éditeur =
  * créer un module `adapters/<id>.ts` + l'enregistrer dans `registry.ts`.
  *
@@ -43,4 +43,4 @@ export interface EditorExportAdapter {
 }
 
 /** Identifiants d'éditeurs supportés par le registre. */
-export type EditorAdapterId = 'liciel' | 'obbc' | 'analysimmo' | 'oris'
+export type EditorAdapterId = 'liciel' | 'obbc' | 'analysimmo'

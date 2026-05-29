@@ -6,7 +6,7 @@
  * /blog, /api-publique, /pour-les-diagnostiqueurs.
  *
  * Note : ces pages ciblent le SEO B2B "logiciel diagnostic immobilier",
- * "compagnon Liciel / OBBC / AnalysImmo / ORIS", "couche terrain diagnostic",
+ * "compagnon Liciel / OBBC / AnalysImmo", "couche terrain diagnostic",
  * "automatisation diagnostic". Priorité 0.7-0.9 selon intent commercial.
  */
 

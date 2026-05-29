@@ -213,11 +213,6 @@ export const GLOSSARY: Readonly<Record<string, GlossaryEntry>> = Object.freeze({
     definition:
       'Logiciel de diagnostic immobilier français, alternative à Liciel. Couvre les diagnostics DPE, amiante, plomb, gaz, électricité et termites.',
   },
-  oris: {
-    title: 'ORIS',
-    definition:
-      'Logiciel de diagnostic immobilier français, positionné sur le segment des cabinets de taille moyenne. Concurrent direct de Liciel et OBBC.',
-  },
   ademe: {
     title: 'ADEME — Agence de la transition écologique',
     definition:

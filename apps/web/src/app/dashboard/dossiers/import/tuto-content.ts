@@ -13,7 +13,7 @@
  * Stocké en TypeScript (pas MDX) pour rester simple + typé. Si besoin
  * de rich text plus tard, migrer vers content/tutos/*.mdx.
  *
- * V1 : Liciel a 6 steps détaillés, AnalysImmo / OBBC / ORIS ont des
+ * V1 : Liciel a 6 steps détaillés, AnalysImmo / OBBC ont des
  * placeholders structurés, Autre a un tuto générique court.
  */
 
@@ -136,36 +136,6 @@ const OBBC_EXPORT_STEPS: TutoStepContent[] = [
   },
 ]
 
-const ORIS_EXPORT_STEPS: TutoStepContent[] = [
-  {
-    num: 1,
-    title: 'Ouvre ORIS et connecte-toi',
-    body: "Lance ORIS sur ton poste habituel avec un compte ayant les droits d'export.",
-    hint: 'TODO ORIS : libellés exacts à vérifier sur fixture terrain (Sprint 15+).',
-  },
-  {
-    num: 2,
-    title: "Accédez à l'export de la base",
-    body: "Clique sur **« [TODO ORIS : chemin du menu d'export ]»**.",
-  },
-  {
-    num: 3,
-    title: 'Sélectionne les éléments',
-    body: 'Coche **Clients**, **Biens**, **Copropriétés** et **Historique des diagnostics**.',
-    hint: 'TODO ORIS : libellés exacts à vérifier.',
-  },
-  {
-    num: 4,
-    title: 'Format CSV ou Excel',
-    body: 'Choisis CSV (recommandé) ou Excel (.xlsx).',
-  },
-  {
-    num: 5,
-    title: 'Télécharge le fichier',
-    body: "Sauvegarde le fichier sur ton ordinateur. Tu l'enverras à KOVAS à l'étape suivante.",
-  },
-]
-
 const AUTRE_EXPORT_STEPS: TutoStepContent[] = [
   {
     num: 1,
@@ -205,7 +175,6 @@ export const EXPORT_TUTORIALS: Record<SourceLogiciel, TutoStepContent[]> = {
   liciel: LICIEL_EXPORT_STEPS,
   analysimmo: ANALYSIMMO_EXPORT_STEPS,
   obbc: OBBC_EXPORT_STEPS,
-  oris: ORIS_EXPORT_STEPS,
   autre: AUTRE_EXPORT_STEPS,
 }
 

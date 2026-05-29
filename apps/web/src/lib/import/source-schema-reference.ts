@@ -12,7 +12,7 @@
  * KOVAS (cf. `ParsedClient`, `ParsedProperty`, etc.).
  *
  * V1 : seuls les mappings Liciel sont implémentés. Pour AnalysImmo / OBBC /
- * ORIS / Autre, le pipeline tombe sur le fallback Claude Haiku — efficace
+ * Autre, le pipeline tombe sur le fallback Claude Haiku — efficace
  * en attendant les fixtures terrain (Sprint 15+).
  */
 
@@ -200,7 +200,7 @@ export type EntityKind = 'client' | 'property' | 'copropriete' | 'lot'
 
 /**
  * Maps de headers par logiciel source. V1 : seul Liciel est rempli.
- * AnalysImmo / OBBC / ORIS / Autre sont des maps vides → fallback Claude Haiku.
+ * AnalysImmo / OBBC / Autre sont des maps vides → fallback Claude Haiku.
  */
 export type HeadersMap = {
   client: Record<string, keyof ParsedClient>
@@ -222,8 +222,6 @@ export const SOURCE_CSV_HEADERS: Record<SourceLogiciel, HeadersMap> = {
   analysimmo: EMPTY_HEADERS,
   // TODO OBBC : compléter avec fixtures terrain (Sprint 15+)
   obbc: EMPTY_HEADERS,
-  // TODO ORIS : compléter avec fixtures terrain (Sprint 15+)
-  oris: EMPTY_HEADERS,
   // Toujours vide — fallback Claude Haiku 100 %
   autre: EMPTY_HEADERS,
 }
@@ -235,7 +233,7 @@ export const SOURCE_CSV_HEADERS: Record<SourceLogiciel, HeadersMap> = {
  * pour éviter les faux positifs sur "id" seul).
  *
  * Si `headersMap` est vide pour toutes les entités (cas Autre/AnalysImmo/
- * OBBC/ORIS V1), renvoie `kind: null` → le caller bascule sur Claude Haiku.
+ * OBBC V1), renvoie `kind: null` → le caller bascule sur Claude Haiku.
  */
 export function detectEntityKind(
   normalizedHeaders: string[],

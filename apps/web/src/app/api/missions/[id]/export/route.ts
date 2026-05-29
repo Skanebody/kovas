@@ -12,7 +12,7 @@ export const maxDuration = 90
  * Génère un export mission, routé via le registre d'adaptateurs éditeur :
  *  - ?format=zip (default)        : ZIP universel PDF + Word + CSV + JSON + XML + photos
  *  - ?format=liciel               : ZIP Liciel NATIF EXACT (cf. lib/liciel/export)
- *  - ?format=obbc|analysimmo|oris : fallback universel honnête (spec native à venir)
+ *  - ?format=obbc|analysimmo     : fallback universel honnête (spec native à venir)
  *
  * Tout identifiant d'éditeur inconnu retombe sur l'export universel.
  * Rétrocompat : `?format=liciel` et `?format=zip` se comportent comme avant.
@@ -37,7 +37,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   let buffer: Buffer
   let filename: string
 
-  // Adaptateur éditeur (liciel natif / obbc·analysimmo·oris fallback universel).
+  // Adaptateur éditeur (liciel natif / obbc·analysimmo fallback universel).
   const adapter = getEditorAdapter(format)
   if (adapter) {
     const result = await adapter.build(data)

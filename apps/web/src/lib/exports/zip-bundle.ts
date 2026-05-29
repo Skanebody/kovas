@@ -37,7 +37,7 @@ export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
     '  - rapport.docx : Word éditable',
     '  - donnees.csv : tableur Excel',
     '  - donnees.json : structuré (import logiciel tiers)',
-    '  - donnees.xml : XML structuré (import Liciel / OBBC / AnalysImmo / ORIS)',
+    '  - donnees.xml : XML structuré (import Liciel / OBBC / AnalysImmo)',
     '  - photos/ : photos terrain organisées par pièce',
     data.isTrial ? '' : null,
     data.isTrial ? "⚠ Document généré pendant l'essai gratuit KOVAS — kovas.fr" : null,
@@ -63,7 +63,7 @@ export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
   zip.file('donnees.json', generateJson(data))
 
   // XML structuré universel — format pivot d'import pour les logiciels métier
-  // (Liciel « Importer XML spécifique », OBBC, AnalysImmo, ORIS). Indépendant
+  // (Liciel « Importer XML spécifique », OBBC, AnalysImmo). Indépendant
   // de tout format propriétaire (cf. différenciateur #2 « Plan B sans Liciel »).
   zip.file('donnees.xml', generateUniversalXml(data))
 
@@ -80,12 +80,12 @@ export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
   }
 
   // Photos — download from Supabase Storage, group by room
-  if (data.photos.length > 0) {
-    const admin = createAdminClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } },
-    )
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (data.photos.length > 0 && supabaseUrl && serviceRoleKey) {
+    const admin = createAdminClient<Database>(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
 
     const roomNameById: Record<string, string> = {}
     for (const r of data.rooms) roomNameById[r.id] = r.name
@@ -110,10 +110,14 @@ export async function buildExportZip(data: MissionExportData): Promise<Buffer> {
 }
 
 function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
+  return (
+    s
+      .toLowerCase()
+      .normalize('NFD')
+      // Retire les marques diacritiques combinantes (accents) post-NFD via une
+      // Unicode property escape pour eviter noMisleadingCharacterClass de Biome.
+      .replace(/\p{Diacritic}/gu, '')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+  )
 }

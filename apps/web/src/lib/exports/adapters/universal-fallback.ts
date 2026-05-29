@@ -5,7 +5,7 @@ import type { EditorExportResult } from './types'
 
 /**
  * Fabrique de fallback universel partagée par les adaptateurs sans spec native
- * (OBBC, AnalysImmo, ORIS).
+ * (OBBC, AnalysImmo).
  *
  * Tant que la spec d'import propriétaire de l'éditeur n'a pas été reçue, on
  * délègue à l'export UNIVERSEL (`buildExportZip` : PDF + Word + CSV + JSON +
@@ -16,7 +16,7 @@ import type { EditorExportResult } from './types'
  * marqueur spécifique à l'éditeur est le nom de fichier (lisibilité utilisateur).
  *
  * @param editorTag Suffixe éditeur en MAJUSCULES pour le nom de fichier
- *   (ex. `OBBC`, `ANALYSIMMO`, `ORIS`).
+ *   (ex. `OBBC`, `ANALYSIMMO`).
  */
 export async function buildUniversalFallback(
   data: MissionExportData,

@@ -307,9 +307,9 @@ export default function AProposPage() {
               </p>
               <p>
                 Cette friction n&apos;est pas une fatalité. Elle vient du fait que les éditeurs
-                historiques — Liciel, OBBC, AnalysImmo, ORIS — ont été conçus à une époque où le
-                terrain et le bureau étaient deux moments séparés. Aujourd&apos;hui, un smartphone
-                ou une tablette dispose de l&apos;essentiel pour capter la visite en direct : photos
+                historiques — Liciel, OBBC, AnalysImmo — ont été conçus à une époque où le terrain
+                et le bureau étaient deux moments séparés. Aujourd&apos;hui, un smartphone ou une
+                tablette dispose de l&apos;essentiel pour capter la visite en direct : photos
                 géolocalisées, dictée vocale structurée, signature électronique, géocodage adresse,
                 alerte de cohérence en temps réel.
               </p>
@@ -472,9 +472,9 @@ export default function AProposPage() {
                   </span>
                   <span>
                     Aucun verrouillage propriétaire : tes dossiers s&apos;exportent au format ZIP
-                    officiel des quatre éditeurs majeurs (Liciel, OBBC, AnalysImmo, ORIS) et en PDF,
-                    Word, CSV, JSON. Si tu quittes KOVAS, tes données partent avec toi, sans frais
-                    ni délai.
+                    officiel des trois éditeurs majeurs (Liciel, OBBC, AnalysImmo) et en PDF, Word,
+                    CSV, JSON. Si tu quittes KOVAS, tes données partent avec toi, sans frais ni
+                    délai.
                   </span>
                 </li>
                 <li className="flex gap-3">

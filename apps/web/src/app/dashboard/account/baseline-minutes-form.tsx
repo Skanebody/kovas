@@ -59,7 +59,7 @@ export function BaselineMinutesForm({ initialMinutes }: BaselineMinutesFormProps
           <p>
             On l'utilise pour calculer ton temps économisé sur le tableau de bord. Mets le temps que
             tu passais en moyenne par mission <strong>avant</strong> KOVAS (terrain + ressaisie
-            Liciel/ORIS/OBBC). Par défaut : 1 h 30. Modifiable à tout moment.
+            Liciel/OBBC/AnalysImmo). Par défaut : 1 h 30. Modifiable à tout moment.
           </p>
         </div>
       </div>

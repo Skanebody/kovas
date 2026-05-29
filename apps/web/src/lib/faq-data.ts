@@ -348,7 +348,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: 'integration-logiciels-tiers',
         question: "KOVAS s'intègre-t-il avec d'autres logiciels que Liciel ?",
         answer:
-          "Oui, KOVAS propose des exports universels qui permettent l'intégration avec la plupart des logiciels métier :\n\n- **PDF** : rapports lisibles pour archivage ou envoi client\n- **Word** : exports modifiables pour personnalisation\n- **CSV** : tableurs structurés pour reporting ou import dans CRM\n- **JSON** : format technique pour intégrations sur mesure\n- **ZIP Liciel** : format officiel Liciel (base MDB + XML + photos)\n\nKOVAS est testé pour fonctionner avec Liciel (priorité), AnalysImmo, OBBC, et ORIS. Pour d'autres logiciels, les exports universels suffisent généralement. Si tu as un besoin d'intégration spécifique, contacte-nous : nous étudions les demandes au cas par cas.",
+          "Oui, KOVAS propose des exports universels qui permettent l'intégration avec la plupart des logiciels métier :\n\n- **PDF** : rapports lisibles pour archivage ou envoi client\n- **Word** : exports modifiables pour personnalisation\n- **CSV** : tableurs structurés pour reporting ou import dans CRM\n- **JSON** : format technique pour intégrations sur mesure\n- **ZIP Liciel** : format officiel Liciel (base MDB + XML + photos)\n\nKOVAS est testé pour fonctionner avec Liciel (priorité), OBBC et AnalysImmo. Pour d'autres logiciels, les exports universels suffisent généralement. Si tu as un besoin d'intégration spécifique, contacte-nous : nous étudions les demandes au cas par cas.",
       },
     ],
   },

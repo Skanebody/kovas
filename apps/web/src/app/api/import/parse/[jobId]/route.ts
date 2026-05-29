@@ -248,7 +248,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ jo
     } catch (err) {
       // Fallback Claude si :
       //  - détection de format CSV ambiguë (FORMAT_DETECTION_FAILED), OU
-      //  - mapping headers vide pour ce logiciel (cas Autre/AnalysImmo/OBBC/ORIS V1)
+      //  - mapping headers vide pour ce logiciel (cas Autre/AnalysImmo/OBBC V1)
       if (err instanceof ImportError && err.code === 'FORMAT_DETECTION_FAILED') {
         const text = buffer.toString('utf8').replace(/^﻿/, '').slice(0, 8000)
         await logStep({

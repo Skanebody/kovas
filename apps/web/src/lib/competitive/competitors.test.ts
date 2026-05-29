@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { COMPETITORS, type CompetitorSlug, getCompetitor } from './competitors'
 
 describe('COMPETITORS registry', () => {
-  it('contient exactement les 6 concurrents attendus', () => {
-    expect(COMPETITORS).toHaveLength(6)
+  it('contient exactement les 5 concurrents attendus', () => {
+    expect(COMPETITORS).toHaveLength(5)
     const slugs = COMPETITORS.map((c) => c.slug)
     expect(slugs).toEqual(
-      expect.arrayContaining(['liciel', 'obbc', 'analysimmo', 'oris', 'bc2e', 'mhdiag']),
+      expect.arrayContaining(['liciel', 'obbc', 'analysimmo', 'bc2e', 'mhdiag']),
     )
   })
 
@@ -29,9 +29,8 @@ describe('COMPETITORS registry', () => {
     expect(obbc?.is_major_threat).toBe(true)
   })
 
-  it('marque AnalysImmo, ORIS, BC2E, MH Diag comme concurrents secondaires', () => {
+  it('marque AnalysImmo, BC2E, MH Diag comme concurrents secondaires', () => {
     expect(getCompetitor('analysimmo')?.is_major_threat).toBe(false)
-    expect(getCompetitor('oris')?.is_major_threat).toBe(false)
     expect(getCompetitor('bc2e')?.is_major_threat).toBe(false)
     expect(getCompetitor('mhdiag')?.is_major_threat).toBe(false)
   })
@@ -57,8 +56,8 @@ describe('getCompetitor()', () => {
     expect(c).toBeUndefined()
   })
 
-  it('peut récupérer les 6 concurrents nominaux', () => {
-    const slugs: CompetitorSlug[] = ['liciel', 'obbc', 'analysimmo', 'oris', 'bc2e', 'mhdiag']
+  it('peut récupérer les 5 concurrents nominaux', () => {
+    const slugs: CompetitorSlug[] = ['liciel', 'obbc', 'analysimmo', 'bc2e', 'mhdiag']
     for (const s of slugs) {
       const c = getCompetitor(s)
       expect(c).toBeDefined()

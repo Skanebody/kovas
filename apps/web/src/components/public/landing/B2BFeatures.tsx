@@ -28,7 +28,7 @@ const FEATURES: Feature[] = [
     number: '02',
     title: 'Exports universels',
     description:
-      'Compatible Liciel, OBBC, AnalysImmo et ORIS (Imports spécifiques XML, ZIP générique, XML CII, JSON) + PDF, Word, CSV. Aucune migration : ton logiciel certifié reste ton moteur ADEME.',
+      'Compatible Liciel, OBBC et AnalysImmo (Imports spécifiques XML, ZIP générique, XML CII) + PDF, Word, CSV. Aucune migration : ton logiciel certifié reste ton moteur ADEME.',
   },
   {
     icon: ShieldCheck,

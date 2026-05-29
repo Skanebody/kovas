@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: '%s | KOVAS',
   },
   description:
-    "L'app iPad qui transforme 3h de DPE en 30 minutes. Couche terrain compagnon de Liciel, OBBC, AnalysImmo et ORIS — IA-first.",
+    "L'app iPad qui transforme 3h de DPE en 30 minutes. Couche terrain compagnon de Liciel, OBBC et AnalysImmo — IA-first.",
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -43,7 +43,6 @@ export const metadata: Metadata = {
     'Liciel',
     'OBBC',
     'AnalysImmo',
-    'ORIS',
     'amiante',
     'plomb',
   ],
@@ -68,7 +67,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'KOVAS — Diagnostic immobilier IA',
     description:
-      "L'app iPad qui transforme 3h de DPE en 30 minutes. Couche terrain compagnon de Liciel, OBBC, AnalysImmo et ORIS — IA-first.",
+      "L'app iPad qui transforme 3h de DPE en 30 minutes. Couche terrain compagnon de Liciel, OBBC et AnalysImmo — IA-first.",
     images: ['/og-image.png'],
   },
   alternates: {

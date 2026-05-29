@@ -12,7 +12,7 @@
  *
  * Multi-source : selon `sourceLogiciel`, on sélectionne le bon mapping
  * de headers dans `SOURCE_CSV_HEADERS`. V1 : seul Liciel a un mapping
- * non-vide. Pour AnalysImmo/OBBC/ORIS/Autre, la détection d'entité échoue
+ * non-vide. Pour AnalysImmo/OBBC/Autre, la détection d'entité échoue
  * et le caller bascule sur le fallback Claude Haiku (cf. claude-extractor.ts).
  *
  * Cf. CLAUDE.md §13 (stratégie défensive logiciels concurrents) — toujours basé
@@ -107,11 +107,11 @@ function looksLikeText(buffer: Buffer): boolean {
 // ============================================================================
 
 /**
- * Parse un export depuis un logiciel diag (Liciel / AnalysImmo / OBBC / ORIS /
+ * Parse un export depuis un logiciel diag (Liciel / AnalysImmo / OBBC /
  * Autre).
  *
  * Le parser CSV sélectionne le bon mapping selon `sourceLogiciel`. Si le
- * mapping est vide (AnalysImmo/OBBC/ORIS/Autre V1) ou si la détection
+ * mapping est vide (AnalysImmo/OBBC/Autre V1) ou si la détection
  * d'entité échoue, le caller (route /api/import/parse) bascule sur le
  * fallback Claude Haiku.
  */

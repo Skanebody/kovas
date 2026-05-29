@@ -21,7 +21,7 @@ import type { LogicielPlanCode } from '@/lib/pricing-plans'
 export type TeamSizeBand = 'solo' | 'small_cabinet' | 'structured_cabinet' | 'network'
 
 /** Éditeur principal aujourd'hui (utile pour copy "import depuis…"). */
-export type CurrentEditor = 'liciel' | 'oris' | 'obbc' | 'none' | 'other'
+export type CurrentEditor = 'liciel' | 'obbc' | 'analysimmo' | 'none' | 'other'
 
 export interface QuizAnswers {
   /** Taille équipe (Q1). */
@@ -184,10 +184,10 @@ function buildRationale(params: {
   const editorLabel =
     answers.currentEditor === 'liciel'
       ? 'Liciel'
-      : answers.currentEditor === 'oris'
-        ? 'ORIS'
-        : answers.currentEditor === 'obbc'
-          ? 'OBBC'
+      : answers.currentEditor === 'obbc'
+        ? 'OBBC'
+        : answers.currentEditor === 'analysimmo'
+          ? 'AnalysImmo'
           : answers.currentEditor === 'other'
             ? 'un autre éditeur'
             : null
@@ -221,7 +221,13 @@ export function decodeQuizAnswersFromSearchParams(
     'structured_cabinet',
     'network',
   ]
-  const validEditors: ReadonlyArray<CurrentEditor> = ['liciel', 'oris', 'obbc', 'none', 'other']
+  const validEditors: ReadonlyArray<CurrentEditor> = [
+    'liciel',
+    'obbc',
+    'analysimmo',
+    'none',
+    'other',
+  ]
 
   const teamSize = validTeams.includes(teamRaw as TeamSizeBand) ? (teamRaw as TeamSizeBand) : 'solo'
   const currentEditor = validEditors.includes(editorRaw as CurrentEditor)

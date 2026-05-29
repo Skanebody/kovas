@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { AnalysImmoLogo, LicielLogo, ObbcLogo, OrisLogo } from './CompatLogos'
+import { AnalysImmoLogo, LicielLogo, ObbcLogo } from './CompatLogos'
 
 interface CompatLogo {
   name: string
@@ -8,18 +8,17 @@ interface CompatLogo {
   meta: string
 }
 
-// Les 4 logiciels du marché FR du diagnostic couverts par KOVAS (Benjamin
-// 2026-05-28). Ce sont les 4 cités partout sur le site — pas d'autre éditeur.
+// Les 3 logiciels du marché FR du diagnostic couverts par KOVAS (Benjamin
+// 2026-05-29). Ce sont les 3 cités partout sur le site — pas d'autre éditeur.
 const COMPAT_LOGOS: CompatLogo[] = [
   { name: 'Liciel', Logo: LicielLogo, meta: 'Leader marché' },
   { name: 'OBBC', Logo: ObbcLogo, meta: 'WinDiagnostics' },
   { name: 'AnalysImmo', Logo: AnalysImmoLogo, meta: 'Atlibitum' },
-  { name: 'ORIS', Logo: OrisLogo, meta: 'Diagnostic immo' },
 ]
 
 /**
- * Section "Compagnon de votre logiciel actuel" — grid des 4 logiciels du
- * marché FR du diagnostic couverts par KOVAS (Liciel, OBBC, AnalysImmo, ORIS).
+ * Section "Compagnon de votre logiciel actuel" — grid des 3 logiciels du
+ * marché FR du diagnostic couverts par KOVAS (Liciel, OBBC, AnalysImmo).
  *
  * Stratégie logos détaillée dans `apps/web/public/logos/compat/MANIFEST.md` :
  *   - Liciel : SVG officiel récupéré sur liciel.fr (logo figuratif rouge)
@@ -46,11 +45,11 @@ export function CompatGrid() {
           Compagnon de <span className="font-serif italic font-normal">ton logiciel actuel.</span>
         </h2>
         <p className="text-base sm:text-lg text-[#0F1419]/68 max-w-xl mx-auto leading-relaxed mb-14">
-          Tes données arrivent prêtes à l&apos;import dans les 8 logiciels métier majeurs du marché
+          Tes données arrivent prêtes à l&apos;import dans les 3 logiciels métier majeurs du marché
           français.
         </p>
 
-        <ul className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-[1000px] mx-auto">
+        <ul className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-[760px] mx-auto">
           {COMPAT_LOGOS.map(({ name, Logo, meta }) => (
             <li
               key={name}

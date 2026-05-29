@@ -24,7 +24,6 @@ vi.mock('@/lib/exports/zip-bundle', () => ({ buildExportZip }))
 import { analysimmoAdapter } from '../analysimmo'
 import { licielAdapter } from '../liciel'
 import { obbcAdapter } from '../obbc'
-import { orisAdapter } from '../oris'
 import {
   EDITOR_ADAPTERS,
   EDITOR_ADAPTER_IDS,
@@ -64,15 +63,14 @@ beforeEach(() => {
 })
 
 describe('registry', () => {
-  it('expose exactement les 4 éditeurs cibles', () => {
-    expect(EDITOR_ADAPTER_IDS.sort()).toEqual(['analysimmo', 'liciel', 'obbc', 'oris'])
+  it('expose exactement les 3 éditeurs cibles', () => {
+    expect(EDITOR_ADAPTER_IDS.sort()).toEqual(['analysimmo', 'liciel', 'obbc'])
   })
 
   it('getEditorAdapter retourne le bon adaptateur par identifiant', () => {
     expect(getEditorAdapter('liciel')).toBe(licielAdapter)
     expect(getEditorAdapter('obbc')).toBe(obbcAdapter)
     expect(getEditorAdapter('analysimmo')).toBe(analysimmoAdapter)
-    expect(getEditorAdapter('oris')).toBe(orisAdapter)
   })
 
   it('getEditorAdapter retourne undefined pour un identifiant inconnu', () => {
@@ -109,11 +107,10 @@ describe('liciel adapter (NATIF EXACT)', () => {
   })
 })
 
-describe('adaptateurs fallback universel (OBBC / AnalysImmo / ORIS)', () => {
+describe('adaptateurs fallback universel (OBBC / AnalysImmo)', () => {
   const fallbacks = [
     { adapter: obbcAdapter, tag: 'OBBC' },
     { adapter: analysimmoAdapter, tag: 'ANALYSIMMO' },
-    { adapter: orisAdapter, tag: 'ORIS' },
   ] as const
 
   for (const { adapter, tag } of fallbacks) {

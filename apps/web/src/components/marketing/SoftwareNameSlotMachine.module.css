@@ -1,15 +1,16 @@
 /*
  * KOVAS — Cyclage des noms de logiciels concurrents par cross-fade.
  *
- * Effet : 4 noms (Liciel · OBBC · AnalysImmo · ORIS) apparaissent l'un
+ * Effet : 3 noms (Liciel · OBBC · AnalysImmo) apparaissent l'un
  * après l'autre par fondu enchaîné. Chaque nom est visible ~1.6s à 100%
  * d'opacité, avec des transitions de 0.4s entre chacun (crossfade). Cycle
- * total 8s en boucle infinie.
+ * total 6s en boucle infinie.
  *
  * Historique :
  *  - v3 (640e029) : slot machine défilement vertical (translateY)
- *  - v4 (présent) : crossfade pur (Benjamin : "faut pas qu'ils défilent,
+ *  - v4 : crossfade pur (Benjamin : "faut pas qu'ils défilent,
  *    faut qu'ils apparaissent à la suite")
+ *  - v5 (présent) : retrait éditeur ORIS → 3 noms, cycle 8s/4 → 6s/3
  *
  * Avantages crossfade vs défilement :
  *  - Aucun clipping des ascenders italiques Instrument Serif (haut du "A",
@@ -19,7 +20,7 @@
  *
  * SSR-friendly :
  *  - L'item Liciel (1er) utilise animation-delay négatif -0.4s → à t=0 il
- *    est déjà à 5% de son cycle = opacity 1. Premier paint = "Liciel."
+ *    est déjà à ~6.7% de son cycle = opacity 1. Premier paint = "Liciel."
  *    visible immédiatement, pas de fade-in initial. SEO préservé.
  *
  * Respect prefers-reduced-motion :
@@ -53,11 +54,11 @@
   left: 0;
   white-space: nowrap;
   opacity: 0;
-  animation: slotFade 8s infinite;
+  animation: slotFade 6s infinite;
 }
 
-/* Décalage de 2s entre chaque item (cycle 8s / 4 items = 2s par tour).
-   Item 1 (Liciel) : delay -0.4s → à t=0 il est déjà à 5% du cycle = opacity 1
+/* Décalage de 2s entre chaque item (cycle 6s / 3 items = 2s par tour).
+   Item 1 (Liciel) : delay -0.4s → à t=0 il est déjà à ~6.7% du cycle = opacity 1
    → SSR / premier paint affiche directement "Liciel." sans fade-in initial. */
 .item:nth-child(2) {
   animation-delay: -0.4s;
@@ -68,16 +69,13 @@
 .item:nth-child(4) {
   animation-delay: 3.6s;
 } /* AnalysImmo — visible 4-6s */
-.item:nth-child(5) {
-  animation-delay: 5.6s;
-} /* ORIS — visible 6-8s */
 
-/* Animation d'un item sur son cycle 8s :
- *   0% (t=0s)    : opacity 0 (avant fade-in)
- *   5% (t=0.4s)  : opacity 1 (fade-in terminé, 0.4s)
- *   25% (t=2s)   : opacity 1 (encore visible, fenêtre de 1.6s à 100%)
- *   30% (t=2.4s) : opacity 0 (fade-out terminé, 0.4s)
- *   30-100%      : opacity 0 (invisible pendant que les 3 autres défilent)
+/* Animation d'un item sur son cycle 6s :
+ *   0% (t=0s)       : opacity 0 (avant fade-in)
+ *   6.7% (t=0.4s)   : opacity 1 (fade-in terminé, 0.4s)
+ *   33.3% (t=2s)    : opacity 1 (encore visible, fenêtre de 1.6s à 100%)
+ *   40% (t=2.4s)    : opacity 0 (fade-out terminé, 0.4s)
+ *   40-100%         : opacity 0 (invisible pendant que les 2 autres défilent)
  *
  * Avec les delays décalés de 2s + delay -0.4s sur Liciel, les fade-in du
  * suivant et fade-out du précédent se chevauchent exactement → crossfade
@@ -87,11 +85,11 @@
   0% {
     opacity: 0;
   }
-  5%,
-  25% {
+  6.7%,
+  33.3% {
     opacity: 1;
   }
-  30%,
+  40%,
   100% {
     opacity: 0;
   }

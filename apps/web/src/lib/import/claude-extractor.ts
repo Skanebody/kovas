@@ -1,7 +1,7 @@
 /**
  * Fallback Claude Haiku pour les exports logiciel diag dont les en-têtes ne
  * sont pas reconnus par le parser CSV maison (cas Autre / AnalysImmo /
- * OBBC / ORIS V1 sans mapping, ou Liciel avec headers exotiques).
+ * OBBC V1 sans mapping, ou Liciel avec headers exotiques).
  *
  * Stratégie :
  *  - Parser CSV maison gère 90 % des cas (0 €)
@@ -26,7 +26,7 @@ const HAIKU_MODEL = process.env.ANTHROPIC_MODEL_VOICE ?? 'claude-haiku-4-5'
 const MAX_INPUT_LINES = 50
 const MAX_RETRIES = 3
 
-const SYSTEM_PROMPT = `Tu extrais les entités d'un export de logiciel de diagnostic immobilier français (Liciel, AnalysImmo, OBBC, ORIS ou équivalent).
+const SYSTEM_PROMPT = `Tu extrais les entités d'un export de logiciel de diagnostic immobilier français (Liciel, AnalysImmo, OBBC ou équivalent).
 
 Règles ABSOLUES :
 - Tu n'inventes JAMAIS de données manquantes. Si un champ n'est pas dans le texte, omets-le.

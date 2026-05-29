@@ -2,8 +2,8 @@
  * Types de la feature « Import logiciel diag » (multi-source).
  *
  * Cadre légal : art. 20 RGPD (droit à la portabilité) — l'utilisateur
- * exporte lui-même depuis son logiciel diag (Liciel, AnalysImmo, OBBC,
- * ORIS ou autre) et upload dans KOVAS. Aucun scraping de l'interface
+ * exporte lui-même depuis son logiciel diag (Liciel, OBBC, AnalysImmo
+ * ou autre) et upload dans KOVAS. Aucun scraping de l'interface
  * du logiciel source (CLAUDE.md §13).
  *
  * State machine d'un job :
@@ -16,14 +16,13 @@
 // SOURCE LOGICIEL
 // ============================================================================
 
-export const SOURCE_LOGICIELS = ['liciel', 'analysimmo', 'obbc', 'oris', 'autre'] as const
+export const SOURCE_LOGICIELS = ['liciel', 'analysimmo', 'obbc', 'autre'] as const
 export type SourceLogiciel = (typeof SOURCE_LOGICIELS)[number]
 
 export const SOURCE_LOGICIEL_LABELS: Record<SourceLogiciel, string> = {
   liciel: 'Liciel',
   analysimmo: 'AnalysImmo',
   obbc: 'OBBC',
-  oris: 'ORIS',
   autre: 'Autre logiciel',
 }
 
@@ -442,7 +441,7 @@ export interface CommitResponse {
  * sont pré-mappés sur le schéma KOVAS.
  *
  * V1 : seuls les mappings Liciel sont implémentés dans
- * `SOURCE_CSV_HEADERS.liciel`. Pour AnalysImmo/OBBC/ORIS/Autre, le pipeline
+ * `SOURCE_CSV_HEADERS.liciel`. Pour AnalysImmo/OBBC/Autre, le pipeline
  * tombe sur le fallback Claude Haiku qui renvoie le même schéma.
  */
 export interface ParsedClient {

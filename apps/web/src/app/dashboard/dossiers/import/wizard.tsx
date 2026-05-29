@@ -38,7 +38,7 @@ interface ImportWizardProps {
  * Wizard 5 étapes pour l'import depuis un logiciel diag (multi-source).
  *
  * Étape 1 — Préparer (statique, RGPD-friendly)
- * Étape 2 — Choisir + Exporter (pillules Liciel/AnalysImmo/OBBC/ORIS/Autre + tuto)
+ * Étape 2 — Choisir + Exporter (pillules Liciel/AnalysImmo/OBBC/Autre + tuto)
  * Étape 3 — Téléverser (drag-drop, passe source_logiciel à l'API)
  * Étape 4 — Analyser (polling status)
  * Étape 5 — Valider (review doublons + commit)

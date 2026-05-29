@@ -8,7 +8,7 @@ import { ImportWizard } from './wizard'
 export const metadata: Metadata = {
   title: 'Importer depuis ton logiciel',
   description:
-    'Récupère ta base de clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC, ORIS ou tout autre logiciel diag en 5 minutes.',
+    'Récupère ta base de clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC ou tout autre logiciel diag en 5 minutes.',
 }
 
 /**
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
  *
  * Logiciels supportés V1 :
  *   - Liciel (mappings headers complets)
- *   - AnalysImmo / OBBC / ORIS (placeholders + fallback Claude Haiku)
+ *   - AnalysImmo / OBBC (placeholders + fallback Claude Haiku)
  *   - Autre logiciel (fallback Claude Haiku direct)
  *
  * Le wizard est un composant client (state local). Cette page server ne fait
@@ -43,7 +43,7 @@ export default function ImportPage() {
         title="Importer depuis"
         accent="ton logiciel"
         eyebrow="Import base existante"
-        description="Clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC, ORIS (droit à la portabilité, art. 20 RGPD)."
+        description="Clients, biens et copropriétés depuis Liciel, AnalysImmo, OBBC (droit à la portabilité, art. 20 RGPD)."
         action={
           <Button variant="outline" size="sm" asChild>
             <a

@@ -18,7 +18,7 @@ const PROS: readonly FooterLink[] = [
   { label: 'Fonctionnalités', href: '/pros' },
   { label: 'Tarifs', href: '/tarifs' },
   { label: 'Témoignages', href: '/temoignages' },
-  { label: 'Comparatif Liciel · OBBC · AnalysImmo · ORIS', href: '/comparatif' },
+  { label: 'Comparatif Liciel · OBBC · AnalysImmo', href: '/comparatif' },
   { label: 'Démo', href: '/demo' },
   { label: 'API', href: '/api-publique' },
   { label: "Centre d'aide", href: '/pros/aide' },

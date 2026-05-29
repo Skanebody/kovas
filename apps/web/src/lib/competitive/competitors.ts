@@ -3,7 +3,7 @@
  *
  * Source : `docs/strategy/AI_AUTONOMY_V1.md` §17 + CLAUDE.md §1 (concurrence).
  *
- * Registry statique des 6 concurrents principaux du marché diagnostic
+ * Registry statique des 5 concurrents principaux du marché diagnostic
  * immobilier FR à surveiller en daily scraping. Chaque concurrent expose
  * son URL homepage + (si dispo) URL pricing/features/blog.
  *
@@ -14,7 +14,7 @@
  * pour piloter les fetches quotidiens.
  */
 
-export type CompetitorSlug = 'liciel' | 'obbc' | 'analysimmo' | 'oris' | 'bc2e' | 'mhdiag'
+export type CompetitorSlug = 'liciel' | 'obbc' | 'analysimmo' | 'bc2e' | 'mhdiag'
 
 export interface Competitor {
   /** Identifiant stable (utilisé en DB + clé de cache) */
@@ -77,19 +77,6 @@ export const COMPETITORS: ReadonlyArray<Competitor> = [
     notes:
       'Éditeur secondaire, positionné cabinet milieu de gamme. Surveillance des évolutions ' +
       "pricing et de l'ouverture API.",
-  },
-  {
-    slug: 'oris',
-    name: 'ORIS',
-    homepage_url: 'https://oris-immobilier.com',
-    pricing_url: null,
-    features_url: 'https://oris-immobilier.com/logiciel',
-    blog_url: 'https://oris-immobilier.com/blog',
-    market_share_pct: 5,
-    is_major_threat: false,
-    notes:
-      'Éditeur secondaire avec module DTG. Positionnement premium cabinets. Surveillance ' +
-      'des évolutions ADEME + audit énergétique.',
   },
   {
     slug: 'bc2e',

@@ -22,9 +22,8 @@ export function Companion() {
           <span className="text-[#0F1419]/35">Il enlève la friction qui t'épuisait.</span>
         </h2>
         <p className="text-[17px] sm:text-[20px] text-[#0F1419]/72 max-w-[720px] mx-auto leading-relaxed mb-20">
-          Ton logiciel principal reste le même : Liciel, OBBC, AnalysImmo ou ORIS. KOVAS
-          s'intercale entre toi et lui sur le seul moment où la double saisie te fait perdre de
-          l'argent.
+          Ton logiciel principal reste le même : Liciel, OBBC ou AnalysImmo. KOVAS s'intercale entre
+          toi et lui sur le seul moment où la double saisie te fait perdre de l'argent.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] gap-6 items-center max-w-[1000px] mx-auto">

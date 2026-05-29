@@ -32,7 +32,7 @@ const FAQ_ITEMS: FaqItem[] = [
     id: 'compat',
     question: 'Quels logiciels métier sont vraiment compatibles ?',
     answer:
-      "Liciel (versions 2024 et 2025 testées en priorité, c'est l'export natif), AnalysImmo via CSV structuré, WinDiagnostics, GestionDiag, Im'Diag, ORIS, Argos (Ithaque) et DPEWin (Perrenoud). Pour tout autre logiciel, l'export Word et PDF couvre 100 % des cas en import manuel. La compatibilité Liciel est notre engagement de niveau 1, contractuellement maintenue à chaque release du logiciel.",
+      "Liciel (versions 2024 et 2025 testées en priorité, c'est l'export natif), OBBC, AnalysImmo via CSV structuré, WinDiagnostics, GestionDiag, Im'Diag, Argos (Ithaque) et DPEWin (Perrenoud). Pour tout autre logiciel, l'export Word et PDF couvre 100 % des cas en import manuel. La compatibilité Liciel est notre engagement de niveau 1, contractuellement maintenue à chaque release du logiciel.",
   },
   {
     id: 'offline',

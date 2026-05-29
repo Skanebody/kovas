@@ -48,8 +48,8 @@ interface EditorOption {
 
 const EDITOR_OPTIONS: ReadonlyArray<EditorOption> = [
   { value: 'liciel', label: 'Liciel' },
-  { value: 'oris', label: 'ORIS' },
   { value: 'obbc', label: 'OBBC' },
+  { value: 'analysimmo', label: 'AnalysImmo' },
   { value: 'other', label: 'Un autre éditeur' },
   { value: 'none', label: 'Aucun (je démarre)' },
 ]
