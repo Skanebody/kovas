@@ -17,7 +17,7 @@ import { revalidatePath } from 'next/cache'
 
 interface AssignmentLookupRow {
   id: string
-  quote_request_id: string
+  lead_id: string
   diagnostician_id: string
   status: string | null
   diagnosticians?: {
@@ -55,7 +55,7 @@ export interface DeclineLeadResult {
 
 /**
  * Verifie que l'assignment cible un diagnostician claime par l'user
- * et retourne la row (avec quote_request_id) ou null si refus d'acces.
+ * et retourne la row (avec lead_id) ou null si refus d'acces.
  */
 async function loadAndAuthorize(
   assignmentId: string,
@@ -71,9 +71,7 @@ async function loadAndAuthorize(
 
   const { data, error } = await supabase
     .from('lead_assignments')
-    .select(
-      'id, quote_request_id, diagnostician_id, status, diagnosticians(id, claimed_by_user_id)',
-    )
+    .select('id, lead_id, diagnostician_id, status, diagnosticians(id, claimed_by_user_id)')
     .eq('id', assignmentId)
     .maybeSingle<AssignmentLookupRow>()
 
@@ -120,7 +118,7 @@ export async function acceptLeadAssignment(assignmentId: string): Promise<Accept
     .select(
       'requester_first_name, requester_last_name, requester_email, requester_phone, property_address, message, acceptance_count',
     )
-    .eq('id', row.quote_request_id)
+    .eq('id', row.lead_id)
     .maybeSingle<QuoteRequestUnlockedRow & { acceptance_count: number | null }>()
 
   if (qrRow) {
@@ -128,7 +126,7 @@ export async function acceptLeadAssignment(assignmentId: string): Promise<Accept
     await supabase
       .from('quote_requests')
       .update({ acceptance_count: nextCount })
-      .eq('id', row.quote_request_id)
+      .eq('id', row.lead_id)
   }
 
   revalidatePath('/dashboard/leads/incoming')

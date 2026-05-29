@@ -37,15 +37,19 @@ interface QuoteRequestNested {
   created_at: string | null
   intent_score: number | null
   intent_bucket: IntentBucket | null
+  // routing_strategy / acceptance_count / closed_at vivent sur quote_requests
+  // (l'attribution est dans lead_assignments, mais le contexte de routing reste
+  // porté par la demande parente).
+  routing_strategy: RoutingStrategy | null
+  acceptance_count: number | null
+  closed_at: string | null
 }
 
 interface LeadAssignmentJoinedRow {
   id: string
-  quote_request_id: string
-  routing_strategy: RoutingStrategy | null
-  acceptance_count: number | null
-  assigned_count: number | null
-  closed_at: string | null
+  // FK vers quote_requests.id (la colonne s'appelle lead_id en prod, pas
+  // quote_request_id — héritage de naming).
+  lead_id: string
   created_at: string | null
   quote_requests?: QuoteRequestNested | QuoteRequestNested[] | null
 }
@@ -88,7 +92,7 @@ async function fetchRecentLeads(): Promise<LeadQueueRow[]> {
   )
     .from('lead_assignments')
     .select(
-      'id, quote_request_id, routing_strategy, acceptance_count, assigned_count, closed_at, created_at, quote_requests(id, requester_first_name, requester_last_name, property_city, property_surface_m2, diagnostics_requested, created_at, intent_score, intent_bucket)',
+      'id, lead_id, created_at, quote_requests(id, requester_first_name, requester_last_name, property_city, property_surface_m2, diagnostics_requested, created_at, intent_score, intent_bucket, routing_strategy, acceptance_count, closed_at)',
     )
     .gte('created_at', thirtyDaysAgo)
     .order('created_at', { ascending: false })
@@ -105,11 +109,13 @@ async function fetchRecentLeads(): Promise<LeadQueueRow[]> {
     const qr = firstQuote(r.quote_requests)
     return {
       id: r.id,
-      quoteRequestId: r.quote_request_id,
-      routingStrategy: r.routing_strategy ?? 'none',
-      acceptanceCount: r.acceptance_count ?? 0,
-      assignedCount: r.assigned_count ?? 0,
-      closedAt: r.closed_at,
+      quoteRequestId: r.lead_id,
+      routingStrategy: qr?.routing_strategy ?? 'none',
+      acceptanceCount: qr?.acceptance_count ?? 0,
+      // assigned_count n'existe pas en base : le nb de destinataires d'un lead
+      // = nb de lignes lead_assignments du même lead_id (non agrégé ici).
+      assignedCount: 0,
+      closedAt: qr?.closed_at ?? null,
       createdAt: r.created_at,
       requesterFirstName: qr?.requester_first_name ?? null,
       requesterLastName: qr?.requester_last_name ?? null,

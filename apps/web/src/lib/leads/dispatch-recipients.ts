@@ -9,6 +9,7 @@
 import { renderEmailToDiagnostician } from '@/emails/quote-request/render'
 import { renderQuoteSentToMultipleEmail } from '@/emails/quote-request/verification-code'
 import { sendEmail } from '@/lib/email/send'
+import { createLeadAssignments } from '@/lib/leads/create-lead-assignments'
 import {
   DEFAULT_ROUTING_OPTIONS,
   insertRecipientsBatch,
@@ -94,11 +95,44 @@ export async function dispatchRecipients(
     return { totalRecipients: 0, notifiedDiagnosticianIds: [] }
   }
 
-  // 3. Insert recipients (DB)
+  // 3. Insert recipients (DB) — miroir K1 pour le tracking email + ghost lifecycle.
   const inserted = await insertRecipientsBatch(supabase, quoteRequestId, recipients)
   if (inserted.length === 0) {
     return { totalRecipients: 0, notifiedDiagnosticianIds: [] }
   }
+
+  // 3bis. Crée les lead_assignments (SOURCE DE VÉRITÉ in-app — lue par le dashboard
+  //       diagnostiqueur, l'admin et les stats). Même sélection que les recipients
+  //       ci-dessus : cohérence stricte email ↔ in-app. Idempotent.
+  await createLeadAssignments(
+    supabase,
+    quoteRequestId,
+    inserted.map((r) => ({ diagnosticianId: r.diagnostician_id, tier: r.recipient_tier })),
+  )
+
+  // 3ter. Marque le lead comme routé (routed_at + routing_strategy). Indispensable
+  //       pour expire_pending_lead_assignments() qui ne ferme que les leads routés.
+  //       Heuristique strategy : tier max présent (premium > verified > basic).
+  const tiers = new Set(inserted.map((r) => r.recipient_tier))
+  const routingStrategy = tiers.has('premium')
+    ? 'subscribed_nearby'
+    : tiers.has('verified')
+      ? 'claimed_non_subscribed'
+      : 'onboarding_gift'
+  // biome-ignore lint/suspicious/noExplicitAny: dynamic table non typée (régen pending)
+  await (supabase as any)
+    .from('quote_requests')
+    .update({
+      routed_at: new Date().toISOString(),
+      routing_strategy: routingStrategy,
+      routing_metadata: {
+        recipients_count: inserted.length,
+        tiers: Array.from(tiers),
+        source: 'dispatch_recipients',
+      },
+    })
+    .eq('id', quoteRequestId)
+    .is('routed_at', null)
 
   // 4. Récupère les infos diag (email + claimed_by) pour envoi
   // Colonnes canoniques diagnosticians : full_name (PAS display_name post-FIX-AA).

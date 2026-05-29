@@ -20,8 +20,12 @@
  * d'emoji, brand V5 sage/navy/chartreuse.
  */
 
+// Funnel devis canonique (refonte 2026-06-28) : on expose le formulaire OTP SMS
+// (chemin /api/leads/* → dispatchRecipients → lead_assignments source de vérité),
+// PAS l'ancien formulaire email legacy (components/public/QuoteRequestForm) qui
+// n'alimentait que quote_request_recipients (invisible du dashboard diagnostiqueur).
+import { QuoteRequestForm } from '@/components/annuaire/quote-request-form'
 import { BadgeVerified } from '@/components/diagnostician/BadgeVerified'
-import { QuoteRequestForm } from '@/components/public/QuoteRequestForm'
 import { SiteFooter } from '@/components/public/footer/SiteFooter'
 import { PublicHeader } from '@/components/public/header/PublicHeader'
 import { Badge } from '@/components/ui/badge'
@@ -278,11 +282,7 @@ export default async function QuoteRequestPage({ params }: PageProps) {
         {/* Formulaire */}
         <section className="px-4 sm:px-6 py-8 sm:py-10">
           <div className="mx-auto max-w-2xl">
-            <QuoteRequestForm
-              diagnosticianId={String(diag.id)}
-              diagnosticianName={fullName}
-              diagnosticianCity={cityLabel || undefined}
-            />
+            <QuoteRequestForm diagnosticianId={String(diag.id)} diagnosticianName={fullName} />
 
             <p className="mt-5 text-center text-[11px] text-ink-faint leading-relaxed">
               En soumettant ce formulaire, vous acceptez que vos données soient transmises au
