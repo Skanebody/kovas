@@ -4175,36 +4175,48 @@ export type Database = {
           bio_long: string | null
           bio_short: string | null
           diagnostician_id: string
+          display_name: string | null
           indicative_prices: Json
           intervention_zones: Json
+          languages: string[]
           opening_hours: Json
           portfolio_photo_urls: Json
           profile_photo_url: string | null
+          slogan: string | null
           specialties: Json
+          title: string | null
           updated_at: string
         }
         Insert: {
           bio_long?: string | null
           bio_short?: string | null
           diagnostician_id: string
+          display_name?: string | null
           indicative_prices?: Json
           intervention_zones?: Json
+          languages?: string[]
           opening_hours?: Json
           portfolio_photo_urls?: Json
           profile_photo_url?: string | null
+          slogan?: string | null
           specialties?: Json
+          title?: string | null
           updated_at?: string
         }
         Update: {
           bio_long?: string | null
           bio_short?: string | null
           diagnostician_id?: string
+          display_name?: string | null
           indicative_prices?: Json
           intervention_zones?: Json
+          languages?: string[]
           opening_hours?: Json
           portfolio_photo_urls?: Json
           profile_photo_url?: string | null
+          slogan?: string | null
           specialties?: Json
+          title?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -7735,6 +7747,87 @@ export type Database = {
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      marketplace_reviews: {
+        Row: {
+          author_city: string | null
+          author_name: string
+          comment: string | null
+          created_at: string
+          diagnostician_id: string
+          id: string
+          rating: number
+          reply: string | null
+          reply_at: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          author_city?: string | null
+          author_name: string
+          comment?: string | null
+          created_at?: string
+          diagnostician_id: string
+          id?: string
+          rating: number
+          reply?: string | null
+          reply_at?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          author_city?: string | null
+          author_name?: string
+          comment?: string | null
+          created_at?: string
+          diagnostician_id?: string
+          id?: string
+          rating?: number
+          reply?: string | null
+          reply_at?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'marketplace_reviews_diagnostician_id_fkey'
+            columns: ['diagnostician_id']
+            isOneToOne: false
+            referencedRelation: 'admin_verification_queue'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'marketplace_reviews_diagnostician_id_fkey'
+            columns: ['diagnostician_id']
+            isOneToOne: false
+            referencedRelation: 'diagnostician_email_next_step'
+            referencedColumns: ['diagnostician_id']
+          },
+          {
+            foreignKeyName: 'marketplace_reviews_diagnostician_id_fkey'
+            columns: ['diagnostician_id']
+            isOneToOne: false
+            referencedRelation: 'diagnosticians'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'marketplace_reviews_diagnostician_id_fkey'
+            columns: ['diagnostician_id']
+            isOneToOne: false
+            referencedRelation: 'v_diagnostician_listing_level'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'marketplace_reviews_diagnostician_id_fkey'
+            columns: ['diagnostician_id']
+            isOneToOne: false
+            referencedRelation: 'v_diagnostician_routing_score'
             referencedColumns: ['id']
           },
         ]
