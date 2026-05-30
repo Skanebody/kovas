@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { GUIDES_LIST } from '@/lib/guides/registry'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { MobileMenu } from './MobileMenu'
 
 export function PublicHeader() {
   return (
@@ -71,12 +72,13 @@ export function PublicHeader() {
           {/* "Se connecter" masqué entre md (768) et lg (1024) pour éviter overflow,
               re-apparaît dès lg+. Sur mobile (&lt; md) il reste visible — le header
               n'a pas la nav donc l'espace est libre. */}
-          <Button variant="ghost" size="sm" asChild className="md:hidden lg:inline-flex">
+          <Button variant="ghost" size="sm" asChild className="hidden lg:inline-flex">
             <Link href="/login">Se connecter</Link>
           </Button>
           <Button size="sm" variant="accent" asChild>
             <Link href="/signup">Essai 30j</Link>
           </Button>
+          <MobileMenu />
         </div>
       </div>
     </header>
