@@ -264,7 +264,10 @@ export async function generateStaticParams(): Promise<Array<{ dept: string; city
   if (process.env.NEXT_BUILD_SSG_DISABLE === '1') {
     return CITIES.slice(0, 20).map((c) => ({ dept: c.dept, city: c.slug }))
   }
-  return getAllTop5000Slugs().slice()
+  // Pré-build limité aux 300 villes prioritaires pour rester sous la limite de
+  // build Vercel (45 min, plan Hobby). Les ~4700 autres villes restent
+  // indexables via génération à la demande + ISR 24h (dynamicParams défaut true).
+  return getAllTop5000Slugs().slice(0, 300)
 }
 
 // Revalidate ISR — 24h pour les pages on-demand

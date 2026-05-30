@@ -39,18 +39,26 @@ import { notFound } from 'next/navigation'
  * Pattern : 9 diagnostics × 213 villes = 1917 pages indexables.
  */
 
-export const dynamic = 'force-static'
+// Pas de `force-static` : on veut le rendu À LA DEMANDE pour les villes hors
+// pré-build (sinon elles renverraient 404). Pré-build limité (cf.
+// generateStaticParams) + ISR 24h ; le reste est généré au 1er accès puis caché.
 export const revalidate = 86400
+export const dynamicParams = true
 
 interface RouteParams {
   type: string
   ville: string
 }
 
+// Pré-build = types × top 50 villes prioritaires (~400 pages) pour tenir sous la
+// limite de build Vercel. CITIES est trié par priorité (top 50 d'abord), donc
+// slice(0, 50) = les métropoles. Le reste est rendu à la demande + ISR 24h.
+const SSG_TOP_CITIES = 50
+
 export function generateStaticParams(): ReadonlyArray<RouteParams> {
   const out: RouteParams[] = []
   for (const type of DIAGNOSTIC_TYPES) {
-    for (const city of CITIES) {
+    for (const city of CITIES.slice(0, SSG_TOP_CITIES)) {
       out.push({ type, ville: city.slug })
     }
   }
@@ -132,19 +140,25 @@ export default async function DiagnosticVillePage({
         <Card className="p-4 sm:p-6 mt-4">
           <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center min-w-0">
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-ink-mute font-mono">Minimum</p>
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-ink-mute font-mono">
+                Minimum
+              </p>
               <p className="font-mono text-lg sm:text-2xl font-semibold text-ink mt-1">
                 {DIAGNOSTIC_PRICE_RANGES[diagnosticType].min} €
               </p>
             </div>
             <div className="border-x border-rule min-w-0">
-              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-ink-mute font-mono">Médiane</p>
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-ink-mute font-mono">
+                Médiane
+              </p>
               <p className="font-serif italic text-xl sm:text-3xl text-chartreuse-deep mt-1">
                 {DIAGNOSTIC_PRICE_RANGES[diagnosticType].median} €
               </p>
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-ink-mute font-mono">Maximum</p>
+              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-ink-mute font-mono">
+                Maximum
+              </p>
               <p className="font-mono text-lg sm:text-2xl font-semibold text-ink mt-1">
                 {DIAGNOSTIC_PRICE_RANGES[diagnosticType].max} €
               </p>
