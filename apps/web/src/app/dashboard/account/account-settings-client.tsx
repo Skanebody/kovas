@@ -72,6 +72,23 @@ const TABS: ReadonlyArray<{ key: TabKey; label: string; icon: LucideIcon }> = [
   { key: 'facturation', label: 'Factures KOVAS', icon: Receipt },
 ]
 
+/**
+ * Modules add-ons RÉELLEMENT proposés à l'abonné (grille officielle V4).
+ *
+ * Les modules V3 historiques (signatures eIDAS, Pennylane, SMS, Communauté Pro)
+ * restent dans `ADDON_MODULES` pour la rétro-compat de facturation des abonnés
+ * déjà engagés, mais ne sont PLUS proposés ici : en V5 eIDAS et SMS sont devenus
+ * des options ponctuelles à l'usage (2 €/sig, 0,15 €/SMS), et eIDAS est déjà
+ * inclus dans le « Pack Conformité Avancée ». Les afficher créait des doublons
+ * et une grille périmée (fix 2026-05-30).
+ */
+const OFFERABLE_ADDON_CODES: ReadonlySet<string> = new Set([
+  'addon_extra_user',
+  'addon_ia_volume',
+  'addon_conformite_avancee',
+  'addon_international',
+])
+
 interface AccountSettingsClientProps {
   initialTab: TabKey
   profile: { full_name: string | null; email: string; phone: string | null }
@@ -298,6 +315,7 @@ function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
     ? (PRICING_PLANS.find((p) => p.code === props.planCode) ?? null)
     : null
   const periodEnd = props.subscription?.current_period_end ?? null
+  const offerableAddons = ADDON_MODULES.filter((m) => OFFERABLE_ADDON_CODES.has(m.code))
 
   return (
     <div className="space-y-5">
@@ -408,7 +426,7 @@ function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <SectionTitle
             icon={Layers}
-            title={`Modules add-ons · ${ADDON_MODULES.length}`}
+            title={`Modules add-ons · ${offerableAddons.length}`}
             iconColor="#D4F542"
             iconFg="#0F1419"
           />
@@ -418,7 +436,7 @@ function AbonnementTab({ props }: { props: AccountSettingsClientProps }) {
         </p>
 
         <ul className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {ADDON_MODULES.map((m) => {
+          {offerableAddons.map((m) => {
             const included = props.modulesIncludedMap[m.code] === true
             return (
               <li
