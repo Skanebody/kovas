@@ -464,10 +464,15 @@ export function MissionTchatInterface({
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  // ----- Mode Capture (par défaut) vs Conversation IA (MISSION-H lot 1) -----
+  // ----- Mode Conversation IA (par défaut) vs Capture silencieux (MISSION-H lot 1) -----
   // Persisté dans mission_sessions.captured_data.capture_mode via PATCH.
-  // Le mode Capture ne déclenche AUCUNE réponse Claude → flow terrain silencieux.
-  const [captureMode, setCaptureMode] = useState<CaptureMode>('capture')
+  // Conversation (défaut) : le vocal est transcrit inline ET le texte tapé reçoit
+  //   une vraie réponse Claude → l'assistant terrain répond.
+  // Capture : flow silencieux robuste offline (le diag dicte/écrit, ses messages
+  //   restent là, AUCUNE réponse Claude) — activable via le toggle pour le terrain
+  //   sans réseau. Défaut basculé en Conversation le 2026-05-30 : en mode Capture le
+  //   micro et l'IA semblaient « ne rien faire » car aucun retour n'était produit.
+  const [captureMode, setCaptureMode] = useState<CaptureMode>('conversation')
   const [captureModeLoaded, setCaptureModeLoaded] = useState<boolean>(false)
 
   // ----- Analyse finale (MISSION-H lot 2) -----

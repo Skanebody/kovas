@@ -1,7 +1,7 @@
 /**
  * KOVAS — API route : capture_mode d'une session mission (MISSION-H).
  *
- * GET  → lit mission_sessions.captured_data.capture_mode (défaut 'capture')
+ * GET  → lit mission_sessions.captured_data.capture_mode (défaut 'conversation')
  * PATCH → met à jour capture_mode dans captured_data jsonb
  *
  * Authority : brief MISSION-H lot 1 + CLAUDE.md §3.
@@ -53,7 +53,10 @@ export async function GET(
   if (!data) return NextResponse.json({ error: 'session not found' }, { status: 404 })
 
   const captured = isRecord(data.captured_data) ? data.captured_data : {}
-  const mode = isCaptureMode(captured.capture_mode) ? captured.capture_mode : 'capture'
+  // Défaut 'conversation' (basculé le 2026-05-30) : sans préférence explicite,
+  // l'assistant doit répondre au vocal et au texte. Le mode 'capture' silencieux
+  // reste accessible via le toggle pour le terrain offline.
+  const mode = isCaptureMode(captured.capture_mode) ? captured.capture_mode : 'conversation'
 
   return NextResponse.json({ capture_mode: mode })
 }
