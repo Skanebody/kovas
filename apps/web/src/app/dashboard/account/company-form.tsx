@@ -46,7 +46,7 @@ export function CompanyForm({ initial }: CompanyFormProps) {
         />
       </FormField>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label="SIRET" htmlFor="siret" hint="14 chiffres">
           <Input
             id="siret"
@@ -79,7 +79,7 @@ export function CompanyForm({ initial }: CompanyFormProps) {
         />
       </FormField>
 
-      <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-4">
         <FormField label="Code postal" htmlFor="postal_code">
           <Input
             id="postal_code"
@@ -118,8 +118,8 @@ export function CompanyForm({ initial }: CompanyFormProps) {
         />
       </FormField>
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={pending}>
+      <div className="flex justify-end pt-2">
+        <Button type="submit" disabled={pending} className="w-full sm:w-auto">
           {pending && <Loader2 className="size-4 animate-spin" />}
           Enregistrer
         </Button>

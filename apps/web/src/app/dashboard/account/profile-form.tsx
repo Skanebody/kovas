@@ -33,7 +33,7 @@ export function ProfileForm({ initial }: ProfileFormProps) {
 
   return (
     <form action={formAction} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label="Prénom" htmlFor="first_name" required>
           <Input
             id="first_name"
@@ -59,26 +59,28 @@ export function ProfileForm({ initial }: ProfileFormProps) {
           />
         </FormField>
       </div>
-      <FormField label="Email" htmlFor="email" hint="L'email se modifie via Supabase Auth.">
-        <Input id="email" type="email" defaultValue={initial.email} disabled />
-      </FormField>
-      <FormField
-        label="Téléphone"
-        htmlFor="phone"
-        hint="Format français. Stocké en E.164 (+33...)."
-      >
-        <Input
-          id="phone"
-          name="phone"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          placeholder="06 12 34 56 78"
-          defaultValue={initial.phone ?? ''}
-        />
-      </FormField>
-      <div className="flex justify-end">
-        <Button type="submit" disabled={pending}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField label="Email" htmlFor="email" hint="L'email se modifie via Supabase Auth.">
+          <Input id="email" type="email" defaultValue={initial.email} disabled />
+        </FormField>
+        <FormField
+          label="Téléphone"
+          htmlFor="phone"
+          hint="Format français. Stocké en E.164 (+33...)."
+        >
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder="06 12 34 56 78"
+            defaultValue={initial.phone ?? ''}
+          />
+        </FormField>
+      </div>
+      <div className="flex justify-end pt-2">
+        <Button type="submit" disabled={pending} className="w-full sm:w-auto">
           {pending && <Loader2 className="size-4 animate-spin" />}
           Enregistrer
         </Button>

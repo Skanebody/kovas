@@ -295,7 +295,7 @@ export default async function AccountPage({
   ]
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-5xl mx-auto w-full">
+    <div className="space-y-6 animate-fade-in w-full">
       {winbackValid && (
         <ReactivationModal
           code={winbackValid.code}
@@ -322,13 +322,13 @@ export default async function AccountPage({
       {/* ============================================
           Header — V5 sobre (plus de glass / backdrop-blur)
           ============================================ */}
-      <section className="-mx-4 sm:mx-0 rounded-none sm:rounded-xl border-b sm:border border-[#0F1419]/[0.08] bg-paper px-4 sm:px-7 py-5">
+      <section className="rounded-xl border border-[#0F1419]/[0.08] bg-paper px-5 sm:px-7 py-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 flex-1 space-y-1">
             <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-[#0F1419]/72">
               Compte
             </p>
-            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-[#0F1419] truncate">
+            <h1 className="font-sans text-[28px] font-semibold leading-tight tracking-tight text-[#0F1419]">
               {profile.full_name ?? 'Mon'}{' '}
               <span className="font-serif italic font-normal text-[#0F1419]/72">profil</span>
               <span className="text-[#0F1419]/72">.</span>
@@ -437,7 +437,7 @@ function KpiTopCell({ item }: { item: KpiTopItem }) {
       </div>
       <div
         className={cn(
-          'text-base font-semibold text-[#0F1419] tabular-nums truncate',
+          'text-base font-semibold text-[#0F1419] tabular-nums leading-tight break-words',
           item.mono ? 'font-mono' : 'font-sans',
         )}
       >

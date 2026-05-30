@@ -91,10 +91,16 @@ export function BaselineMinutesForm({ initialMinutes }: BaselineMinutesFormProps
         Plage acceptée : entre {MIN_BASELINE_MINUTES} min et {MAX_BASELINE_MINUTES} min (4 h).
       </p>
 
-      <Button type="submit" disabled={pending || value === startValue}>
-        {pending ? <Loader2 className="size-4 animate-spin" /> : null}
-        {pending ? 'Enregistrement…' : 'Enregistrer'}
-      </Button>
+      <div className="flex justify-end pt-2">
+        <Button
+          type="submit"
+          disabled={pending || value === startValue}
+          className="w-full sm:w-auto"
+        >
+          {pending ? <Loader2 className="size-4 animate-spin" /> : null}
+          {pending ? 'Enregistrement…' : 'Enregistrer'}
+        </Button>
+      </div>
     </form>
   )
 }

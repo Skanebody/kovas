@@ -1,9 +1,9 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { FormField } from '@/components/ui/form-field'
 import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/toaster'
 import { Loader2, Radar } from 'lucide-react'
 import { useState, useTransition } from 'react'
@@ -59,7 +59,7 @@ export function AdemeForm({
     : null
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} className="space-y-4">
       <p className="text-xs text-[#0F1419]/72 leading-relaxed">
         Renseigne ton numéro de certificat <GlossaryTerm term="rge">RGE</GlossaryTerm> pour activer
         le monitoring rétroactif de tes <GlossaryTerm term="dpe">DPE</GlossaryTerm> publiés sur
@@ -69,10 +69,11 @@ export function AdemeForm({
       </p>
 
       {/* Certificat RGE */}
-      <div className="space-y-1.5">
-        <Label htmlFor="certificat_rge" className="text-xs font-semibold uppercase tracking-wider">
-          Certificat RGE
-        </Label>
+      <FormField
+        label="Certificat RGE"
+        htmlFor="certificat_rge"
+        hint="Visible sur ta certification de diagnostiqueur. Format libre, généralement alphanumérique 8-20 caractères."
+      >
         <Input
           id="certificat_rge"
           name="certificat_rge"
@@ -83,11 +84,7 @@ export function AdemeForm({
           maxLength={40}
           className="font-mono"
         />
-        <p className="text-[11px] text-[#0F1419]/72">
-          Visible sur ta certification de diagnostiqueur. Format libre, généralement alphanumérique
-          8-20 caractères.
-        </p>
-      </div>
+      </FormField>
 
       {/* Toggle monitoring */}
       <div className="flex items-start justify-between gap-3 rounded-md border border-[#0F1419]/[0.08] p-3 bg-paper">
@@ -124,10 +121,12 @@ export function AdemeForm({
         </div>
       )}
 
-      <Button type="submit" disabled={pending} size="sm">
-        {pending && <Loader2 className="size-4 animate-spin" />}
-        Enregistrer
-      </Button>
+      <div className="flex justify-end pt-2">
+        <Button type="submit" disabled={pending} className="w-full sm:w-auto">
+          {pending && <Loader2 className="size-4 animate-spin" />}
+          Enregistrer
+        </Button>
+      </div>
     </form>
   )
 }

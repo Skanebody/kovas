@@ -123,14 +123,14 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
   }, [tab])
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto w-full">
+    <div className="space-y-6 w-full">
       {/* ════════════════════════════════════════════════════════════
           PAGE TABS — style canonique (idem clients/[id])
           ══════════════════════════════════════════════════════════ */}
       <nav
         aria-label="Sections compte"
         role="tablist"
-        className="flex items-center gap-1 overflow-x-auto rounded-pill border border-[#0F1419]/[0.08] bg-paper p-1"
+        className="flex w-fit max-w-full items-center gap-1 overflow-x-auto rounded-pill border border-[#0F1419]/[0.08] bg-paper p-1"
       >
         {TABS.map((t) => {
           const Icon = t.icon
@@ -162,37 +162,16 @@ export function AccountSettingsClient(props: AccountSettingsClientProps) {
           ══════════════════════════════════════════════════════════ */}
       <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={tab}>
         {/*
-          Tab panels centrés avec mx-auto + w-full :
-          - max-w-3xl (~768px) pour formulaires standards (Profil / Sécurité / Cabinet / Facturation)
-          - max-w-4xl (~896px) pour Abonnement (matrice de plans + addons plus large)
-          Sans mx-auto, les sections étaient collées à gauche avec un énorme vide
-          à droite sur écran large vs les tabs nav full width (asymétrie visuelle).
+          Panneaux pleine largeur du conteneur racine (max-w-4xl unique défini
+          dans page.tsx). Plus de re-bridage max-w-3xl/4xl par onglet : header,
+          KPI, bannière, barre d'onglets ET contenu partagent désormais
+          exactement les mêmes bords gauche/droite (fix « escalier » 2026-05-30).
         */}
-        {tab === 'profil' && (
-          <div className="max-w-3xl w-full mx-auto">
-            <ProfilTab props={props} />
-          </div>
-        )}
-        {tab === 'securite' && (
-          <div className="max-w-3xl w-full mx-auto">
-            <SecuriteTab props={props} />
-          </div>
-        )}
-        {tab === 'abonnement' && (
-          <div className="max-w-4xl w-full mx-auto">
-            <AbonnementTab props={props} />
-          </div>
-        )}
-        {tab === 'cabinet' && (
-          <div className="max-w-3xl w-full mx-auto">
-            <CabinetTab props={props} />
-          </div>
-        )}
-        {tab === 'facturation' && (
-          <div className="max-w-3xl w-full mx-auto">
-            <FacturationTab props={props} />
-          </div>
-        )}
+        {tab === 'profil' && <ProfilTab props={props} />}
+        {tab === 'securite' && <SecuriteTab props={props} />}
+        {tab === 'abonnement' && <AbonnementTab props={props} />}
+        {tab === 'cabinet' && <CabinetTab props={props} />}
+        {tab === 'facturation' && <FacturationTab props={props} />}
       </div>
     </div>
   )

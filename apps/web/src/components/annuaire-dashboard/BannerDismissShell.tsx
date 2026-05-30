@@ -83,23 +83,27 @@ export function BannerDismissShell({
   return (
     <div data-banner-dismiss-shell className="relative">
       {children}
-      {/* Bouton "Pas maintenant" rendu en bas à droite, à l'intérieur du
-          padding visuel du banner. Sur mobile il se place sous le contenu,
-          sur desktop il s'aligne discrètement en bottom-right. */}
-      <div className="flex justify-center md:justify-end px-5 sm:px-6 pb-3 sm:pb-4 -mt-2">
-        <button
-          type="button"
-          onClick={handleDismiss}
-          className={cn(
-            'text-[12px] text-ink-mute hover:text-ink underline-offset-2 hover:underline',
-            'font-sans transition-colors',
-            'focus-visible:outline-none focus-visible:underline',
-          )}
-          aria-label="Masquer cette suggestion pendant 7 jours"
-        >
-          Pas maintenant
-        </button>
-      </div>
+      {/*
+        Bouton "Pas maintenant" :
+        - Mobile : en flux, centré, sous le contenu (évite tout chevauchement
+          avec le CTA pleine largeur de la carte).
+        - Desktop (sm+) : ancré en bas-droite À L'INTÉRIEUR de la carte (le
+          wrapper est `relative`), aligné sur son padding droit. Fini le lien
+          qui flottait sous la carte (fix 2026-05-30).
+      */}
+      <button
+        type="button"
+        onClick={handleDismiss}
+        className={cn(
+          'text-[12px] text-ink-mute hover:text-ink underline-offset-2 hover:underline',
+          'font-sans transition-colors focus-visible:outline-none focus-visible:underline',
+          'block w-full pb-4 text-center',
+          'sm:absolute sm:bottom-4 sm:right-6 sm:w-auto sm:pb-0 sm:text-right',
+        )}
+        aria-label="Masquer cette suggestion pendant 7 jours"
+      >
+        Pas maintenant
+      </button>
     </div>
   )
 }
