@@ -158,6 +158,29 @@ export interface UseVoiceCaptureReturn {
 }
 
 // -----------------------------------------------------------------------------
+// Détection environnement — la Web Speech API (dictée live) est CONFORT, pas la
+// source de transcription (Whisper serveur fait foi). En PWA installée
+// (standalone) et sur iOS, elle est non fiable : webkitSpeechRecognition y
+// renvoie souvent `service-not-allowed`/`not-allowed` ALORS QUE le micro
+// getUserMedia fonctionne, et garde sa propre instance micro ouverte (voyant
+// rouge). On la désactive dans ces contextes et on s'appuie sur MediaRecorder +
+// Whisper (fiables, offline-ready).
+// -----------------------------------------------------------------------------
+
+function isStandaloneDisplayMode(): boolean {
+  if (typeof window === 'undefined') return false
+  const nav = window.navigator as Navigator & { standalone?: boolean }
+  if (nav.standalone === true) return true
+  return window.matchMedia?.('(display-mode: standalone)').matches === true
+}
+
+function isIosDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
+}
+
+// -----------------------------------------------------------------------------
 // useVoiceCapture
 // -----------------------------------------------------------------------------
 
@@ -253,31 +276,25 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
         voiceTranscriptRef.current = final.length > 0 ? final : interim
         setInput(voiceTranscriptRef.current)
       },
-      onError: (err) => {
-        // Erreurs FATALES (cleanup complet) :
-        //  - not-allowed       : permission micro refusée
-        //  - audio-capture     : micro indisponible/réquisitionné (appel entrant,
-        //    autre app a pris le micro) → le MediaRecorder est probablement mort
-        //    aussi ; sans cleanup, isListening resterait bloqué à true et l'overlay
-        //    figé (bug terrain P0-3).
-        //  - service-not-allowed : service de reconnaissance bloqué
-        if (err === 'not-allowed' || err === 'audio-capture' || err === 'service-not-allowed') {
-          setErrorMsg(
-            err === 'audio-capture'
-              ? 'Le micro est devenu indisponible (appel en cours ?). Enregistrement interrompu.'
-              : "Autorisez l'accès au micro dans les réglages du navigateur pour la dictée.",
-          )
-          setIsListening(false)
-          setVoiceStartedAt(0)
-          stopMeterStream()
-          if (audioRecorderRef.current) {
-            audioRecorderRef.current.cancel()
-            audioRecorderRef.current = null
+      onError: () => {
+        // CORRECTIF TERRAIN (PWA standalone / iOS) : une erreur Web Speech ne doit
+        // JAMAIS tuer l'enregistrement micro. La Web Speech ne sert qu'au transcript
+        // LIVE (confort) ; la vraie transcription vient de Whisper (serveur) à partir
+        // du blob MediaRecorder. Avant, `not-allowed`/`audio-capture`/`service-not-allowed`
+        // déclenchaient un cleanup complet (cancel recorder + idle + message d'erreur)
+        // alors que le micro getUserMedia fonctionnait → en PWA standalone iOS, CHAQUE
+        // enregistrement était avorté ("le bouton déconne / rien ne s'enregistre" + voyant
+        // rouge bloqué). On se contente donc de COUPER la dictée live ; le blob +
+        // Whisper continuent normalement. La vraie panne d'accès micro est détectée
+        // par `recorder.start().catch` (getUserMedia), pas ici.
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.abort()
+          } catch {
+            /* noop — l'instance Web Speech est déjà morte */
           }
-          setVoiceMode('idle')
+          recognitionRef.current = null
         }
-        // Pour les autres erreurs (no-speech, network), on laisse le record continuer
-        // (le blob + Whisper serveur prennent le relais).
       },
       onEnd: () => {
         // Web Speech se ferme tout seul après silence — on NE coupe PAS le record.
@@ -306,9 +323,14 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
           meterStreamRef.current = stream
           setMeterStream(stream)
         }
-        // Démarre Web Speech API (si supporté) après l'ouverture du micro pour
-        // éviter le double-prompt permission. Sinon : blob seul + Whisper.
-        if (ctrl.isSupported) {
+        // Démarre Web Speech API (transcript live) APRÈS l'ouverture du micro pour
+        // éviter le double-prompt permission. DÉSACTIVÉE en PWA standalone + iOS
+        // (non fiable + tue l'enregistrement, cf. bug terrain) : on s'appuie alors
+        // uniquement sur MediaRecorder + Whisper serveur. Sinon (Chrome desktop /
+        // Android navigateur), on l'active pour le confort du transcript live.
+        const liveTranscriptAllowed =
+          ctrl.isSupported && !isStandaloneDisplayMode() && !isIosDevice()
+        if (liveTranscriptAllowed) {
           try {
             ctrl.start()
             recognitionRef.current = ctrl
@@ -326,7 +348,7 @@ export function useVoiceCapture(props: UseVoiceCaptureProps): UseVoiceCaptureRet
         setVoiceStartedAt(0)
         setVoiceMode('idle')
       })
-  }, [stopMeterStream, setInput, setErrorMsg])
+  }, [setInput, setErrorMsg])
 
   /**
    * Revoke l'objectURL local + drop la blob du cache pour un messageId donné.
