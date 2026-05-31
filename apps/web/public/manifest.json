@@ -2,7 +2,7 @@
   "name": "KOVAS — Diagnostic immobilier IA",
   "short_name": "KOVAS",
   "description": "L'app iPad qui transforme 3h de DPE en 30 minutes",
-  "start_url": "/app/dashboard",
+  "start_url": "/dashboard/dashboard",
   "display": "standalone",
   "orientation": "any",
   "theme_color": "#0A0A0A",
@@ -32,12 +32,12 @@
     {
       "name": "Nouvelle mission",
       "short_name": "Mission",
-      "url": "/app/missions/new"
+      "url": "/dashboard/dossiers/new"
     },
     {
       "name": "Tableau de bord",
       "short_name": "Dashboard",
-      "url": "/app/dashboard"
+      "url": "/dashboard/dashboard"
     }
   ]
 }

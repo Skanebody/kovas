@@ -1,4 +1,5 @@
 import { AppPageHeader } from '@/components/app-page-header'
+import { PwaInstallGuide } from '@/components/pwa/PwaInstallGuide'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -9,9 +10,27 @@ import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Bienvenue' }
 
+/** URL canonique de l'app installée (matche `start_url` du manifest). */
+const APP_URL = 'https://kovas.fr/dashboard/dashboard' as const
+
 export default async function OnboardingPage() {
   const { profile } = await getCurrentUser()
   const firstName = profile.full_name?.split(' ')[0] ?? ''
+
+  // QR code généré côté serveur (SVG, pas de module natif `canvas`) pour le
+  // parcours desktop du guide d'installation. Non bloquant : null si échec.
+  let qrSvg: string | null = null
+  try {
+    const QRCode = await import('qrcode')
+    qrSvg = await QRCode.toString(APP_URL, {
+      type: 'svg',
+      margin: 1,
+      width: 200,
+      errorCorrectionLevel: 'M',
+    })
+  } catch {
+    qrSvg = null
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
@@ -27,13 +46,10 @@ export default async function OnboardingPage() {
           n={1}
           icon={Smartphone}
           title="Installer KOVAS sur ton iPad / iPhone"
-          description="Pour utiliser KOVAS sur le terrain, ajoute-le à ton écran d'accueil — il fonctionnera comme une vraie app, même sans réseau."
-          bullets={[
-            "Safari iOS : touche ⎘ (Partager) → Sur l'écran d'accueil",
-            "Chrome Android : menu ⋮ → Installer l'application",
-            "Sur Mac : l'app fonctionne directement dans Safari ou Chrome",
-          ]}
-        />
+          description="Pour utiliser KOVAS sur le terrain, ajoute-le à ton écran d'accueil — il fonctionnera comme une vraie app, même sans réseau. Suis le guide ci-dessous, il s'adapte à ton appareil."
+        >
+          <PwaInstallGuide appUrl={APP_URL} qrSvg={qrSvg} />
+        </Step>
         <Step
           n={2}
           icon={Plus}
@@ -107,6 +123,7 @@ function Step({
   description,
   bullets,
   actions,
+  children,
 }: {
   n: number
   icon: React.ComponentType<{ className?: string }>
@@ -114,6 +131,7 @@ function Step({
   description: string
   bullets?: string[]
   actions?: React.ReactNode
+  children?: React.ReactNode
 }) {
   return (
     <Card variant="flat" padding="default">
@@ -121,7 +139,7 @@ function Step({
         <div className="shrink-0 size-9 rounded-full bg-[#0F1419] text-[#D4F542] flex items-center justify-center text-sm font-semibold">
           {n}
         </div>
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 min-w-0 space-y-3">
           <div className="flex items-center gap-2">
             <Icon className="size-4 text-[#0F1419]/72" />
             <h2 className="font-semibold text-[#0F1419]">{title}</h2>
@@ -137,6 +155,7 @@ function Step({
               ))}
             </ul>
           )}
+          {children}
           {actions}
         </div>
       </CardContent>

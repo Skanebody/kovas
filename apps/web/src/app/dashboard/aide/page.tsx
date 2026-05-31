@@ -19,6 +19,7 @@ import {
   type LucideIcon,
   Play,
   ShieldCheck,
+  Smartphone,
 } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -39,6 +40,14 @@ interface Tutorial {
 }
 
 const TUTORIALS: ReadonlyArray<Tutorial> = [
+  {
+    slug: 'installer-l-application',
+    title: "Installer l'app sur ton téléphone (iPhone/Android)",
+    description:
+      "Ajoute KOVAS à ton écran d'accueil en 15 secondes, sans passer par un store. Fonctionne hors-ligne sur le terrain.",
+    readTime: '2 min',
+    icon: Smartphone,
+  },
   {
     slug: 'premiere-mission',
     title: 'Ta première mission en 10 minutes',
