@@ -109,11 +109,10 @@ export function QuoteDetailActions({
     return (
       <Card variant="opaque" padding="sm">
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" size="sm" disabled>
-            {/* Édition d'un brouillon : V1 retour wizard (TODO V1.1 réutiliser wizard avec id) */}
-            <span aria-disabled="true" className="opacity-60 cursor-not-allowed">
-              <Pencil className="size-4" /> Modifier (V1.1)
-            </span>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/dashboard/devis/${quoteId}/edit`}>
+              <Pencil className="size-4" /> Modifier
+            </Link>
           </Button>
           <Button variant="accent" size="sm" onClick={handleSend} disabled={pending}>
             {pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}

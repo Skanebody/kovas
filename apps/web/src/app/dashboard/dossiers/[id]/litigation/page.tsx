@@ -34,9 +34,8 @@ interface DossierRow {
  * Reflète les colonnes réelles de `litigation_workflows` (migration
  * 20260525121000). La plainte du client est stockée dans `notes` (+ copie
  * dans `metadata.client_complaint`), le type UI d'origine dans
- * `metadata.ui_litigation_type`. Les champs « brouillon IA »
- * (draft_response_md / cited_references / draft_generated_at) ne sont PAS
- * des colonnes : ils sont optionnels et lus défensivement (cf. note report).
+ * `metadata.ui_litigation_type`. Le brouillon IA n'a PAS de colonne dédiée :
+ * il vit dans `metadata.draft` (cf. /api/litigation/draft-response/[id]).
  */
 interface LitigationRow {
   id: string
@@ -46,11 +45,31 @@ interface LitigationRow {
   status: string
   notes: string | null
   metadata: Record<string, unknown> | null
-  draft_response_md?: string | null
-  cited_references?: string[] | null
-  draft_generated_at?: string | null
   created_at: string
   updated_at: string
+}
+
+/** Forme du brouillon IA stocké dans `litigation_workflows.metadata.draft`. */
+interface LitigationDraft {
+  responseMd: string | null
+  citedReferences: string[]
+  generatedAt: string | null
+}
+
+/** Extrait défensivement le brouillon IA depuis `metadata.draft`. */
+function readDraft(row: LitigationRow): LitigationDraft {
+  const raw =
+    row.metadata && typeof row.metadata.draft === 'object' && row.metadata.draft !== null
+      ? (row.metadata.draft as Record<string, unknown>)
+      : null
+  if (!raw) return { responseMd: null, citedReferences: [], generatedAt: null }
+  return {
+    responseMd: typeof raw.response_md === 'string' ? raw.response_md : null,
+    citedReferences: Array.isArray(raw.cited_references)
+      ? raw.cited_references.filter((r): r is string => typeof r === 'string')
+      : [],
+    generatedAt: typeof raw.generated_at === 'string' ? raw.generated_at : null,
+  }
 }
 
 const STATUS_META: Record<
@@ -149,6 +168,8 @@ export default async function DossierLitigationPage({
     litigation = (litigationRaw as unknown as LitigationRow | null) ?? null
   }
 
+  const draft = litigation ? readDraft(litigation) : null
+
   return (
     <div className="space-y-8 animate-fade-in pb-16">
       <Button variant="ghost" size="sm" asChild>
@@ -209,7 +230,7 @@ export default async function DossierLitigationPage({
           <LitigationActions
             litigationId={litigation.id}
             status={litigation.status}
-            hasDraft={Boolean(litigation.draft_response_md)}
+            hasDraft={Boolean(draft?.responseMd)}
           />
 
           {/* Réponse IA */}
@@ -219,15 +240,15 @@ export default async function DossierLitigationPage({
                 <Scale className="size-5 text-[#0F1419]" />
                 <h3 className="text-[15px] font-semibold text-[#0F1419]">Projet de réponse</h3>
               </div>
-              {litigation.draft_generated_at ? (
+              {draft?.generatedAt ? (
                 <span className="text-[11px] font-mono text-[#0F1419]/72">
-                  Généré le {formatDate(litigation.draft_generated_at)}
+                  Généré le {formatDate(draft.generatedAt)}
                 </span>
               ) : null}
             </div>
-            {litigation.draft_response_md ? (
+            {draft?.responseMd ? (
               <div className="rounded-md border border-[#0F1419]/[0.08] bg-paper p-4 text-[13px] text-[#0F1419] whitespace-pre-wrap leading-relaxed font-sans">
-                {litigation.draft_response_md}
+                {draft.responseMd}
               </div>
             ) : (
               <p className="text-sm text-[#0F1419]/72">
@@ -238,14 +259,14 @@ export default async function DossierLitigationPage({
           </Card>
 
           {/* Références citées */}
-          {litigation.cited_references && litigation.cited_references.length > 0 ? (
+          {draft && draft.citedReferences.length > 0 ? (
             <Card variant="opaque" padding="default" className="space-y-3">
               <div className="flex items-center gap-2.5">
                 <BookOpen className="size-5 text-[#0F1419]" />
                 <h3 className="text-[15px] font-semibold text-[#0F1419]">Références citées</h3>
               </div>
               <ul className="flex flex-wrap gap-2">
-                {litigation.cited_references.map((ref, idx) => (
+                {draft.citedReferences.map((ref, idx) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: liste statique servie par l'IA, ordre stable
                   <li key={`${ref}-${idx}`}>
                     <Badge variant="outline">{ref}</Badge>

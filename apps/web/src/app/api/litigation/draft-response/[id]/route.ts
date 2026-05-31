@@ -2,13 +2,17 @@
  * KOVAS — POST /api/litigation/draft-response/:id
  *
  * Génère un brouillon de réponse au litige via Claude Haiku, sur la base
- * du contenu du `litigation_workflows` et du `defense_dossiers` associé.
+ * du `litigation_workflows` associé.
  *
  * Cite des références jurisprudentielles via une short-list locale (V1).
- * Le résultat est stocké dans `litigation_workflows.draft_response_md`.
+ *
+ * Persistance : il N'EXISTE PAS de colonnes dédiées dans `litigation_workflows`.
+ * Le résultat IA est stocké dans `metadata.draft` (merge non destructif) :
+ *   metadata.draft = { response_md, cited_references, generated_at }
  */
 
 import Anthropic from '@anthropic-ai/sdk'
+import type { Json } from '@kovas/database/types'
 import { NextResponse } from 'next/server'
 
 import { getCurrentUser } from '@/lib/auth/current-user'
@@ -17,17 +21,55 @@ export const runtime = 'nodejs'
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
-interface LitigationRow {
+/** Sous-ensemble des colonnes `litigation_workflows` lues ici. */
+interface LitigationWorkflowRow {
   id: string
   organization_id: string
-  mission_id: string | null
-  dossier_id: string | null
-  defense_dossier_id: string | null
-  litigation_type: string
-  client_complaint: string
-  status: string
-  draft_response_md: string | null
-  cited_references: string[] | null
+  litigation_kind: string
+  notes: string | null
+  metadata: { [key: string]: Json | undefined } | null
+}
+
+/** Libellés humains de la taxonomie UI (metadata.ui_litigation_type). */
+const UI_TYPE_LABEL: Record<string, string> = {
+  dpe_contestation: 'Contestation étiquette DPE',
+  erreur_surface_carrez: 'Erreur surface Carrez/Boutin',
+  oubli_diagnostic: 'Oubli de diagnostic',
+  amiante_non_detecte: 'Amiante non détecté',
+  plomb_non_detecte: 'Plomb non détecté',
+  gaz_securite: 'Anomalie gaz / sécurité',
+  electricite_securite: 'Anomalie électricité / sécurité',
+  demande_remboursement: 'Demande de remboursement',
+  autre: 'Autre',
+}
+
+/** Libellés humains de la taxonomie DB `litigation_kind`. */
+const KIND_LABEL: Record<string, string> = {
+  claim_client: 'Réclamation client',
+  mediation: 'Médiation',
+  rcp_insurer: 'Assurance RC Pro',
+  judicial: 'Judiciaire',
+  administrative: 'Administratif',
+  other: 'Autre',
+}
+
+/** Résout un libellé de type lisible : type UI d'origine sinon kind DB. */
+function litigationTypeLabel(row: LitigationWorkflowRow): string {
+  const uiType =
+    row.metadata && typeof row.metadata.ui_litigation_type === 'string'
+      ? row.metadata.ui_litigation_type
+      : null
+  if (uiType && UI_TYPE_LABEL[uiType]) return UI_TYPE_LABEL[uiType]
+  return KIND_LABEL[row.litigation_kind] ?? row.litigation_kind
+}
+
+/** Plainte du client : `notes` en priorité, sinon `metadata.client_complaint`. */
+function clientComplaint(row: LitigationWorkflowRow): string {
+  if (row.notes && row.notes.trim().length > 0) return row.notes
+  if (row.metadata && typeof row.metadata.client_complaint === 'string') {
+    return row.metadata.client_complaint
+  }
+  return '—'
 }
 
 const SYSTEM_PROMPT = `Tu es un juriste senior spécialisé en diagnostic immobilier français.
@@ -53,11 +95,10 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     )
   }
 
-  // 1. Charge le litige
+  // 1. Charge le litige depuis litigation_workflows (scope org)
   const { data: litigationRaw, error } = await supabase
-    // biome-ignore lint/suspicious/noExplicitAny: types DB pas encore régénérés
-    .from('litigation_workflows' as any)
-    .select('*')
+    .from('litigation_workflows')
+    .select('id, organization_id, litigation_kind, notes, metadata')
     .eq('id', id)
     .eq('organization_id', orgId)
     .maybeSingle()
@@ -66,17 +107,17 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ error: 'Litigation not found' }, { status: 404 })
   }
 
-  const litigation = litigationRaw as unknown as LitigationRow
+  const litigation = litigationRaw as LitigationWorkflowRow
 
   // 2. Appel Claude Haiku
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const model = process.env.ANTHROPIC_MODEL_VOICE ?? 'claude-haiku-4-5'
 
   const userPrompt = [
-    `Type de litige : ${litigation.litigation_type}`,
+    `Type de litige : ${litigationTypeLabel(litigation)}`,
     '',
     'Plainte client :',
-    litigation.client_complaint,
+    clientComplaint(litigation),
     '',
     'Rédige le projet de réponse en markdown selon les contraintes du système.',
   ].join('\n')
@@ -110,14 +151,21 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     )
   }
 
-  // 3. Persiste dans la table
+  // 3. Persiste le brouillon dans metadata.draft (merge non destructif)
+  const generatedAt = new Date().toISOString()
+  const existingMetadata = litigation.metadata ?? {}
   const { error: updateError } = await supabase
-    // biome-ignore lint/suspicious/noExplicitAny: types DB pas encore régénérés
-    .from('litigation_workflows' as any)
+    .from('litigation_workflows')
     .update({
-      draft_response_md: draftMarkdown,
-      cited_references: citedReferences,
-      draft_generated_at: new Date().toISOString(),
+      metadata: {
+        ...existingMetadata,
+        draft: {
+          response_md: draftMarkdown,
+          cited_references: citedReferences,
+          generated_at: generatedAt,
+        },
+      },
+      updated_at: generatedAt,
     })
     .eq('id', id)
     .eq('organization_id', orgId)
@@ -132,6 +180,7 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
   return NextResponse.json({
     draftMarkdown,
     citedReferences,
+    generatedAt,
     latencyMs: Date.now() - startedAt,
   })
 }

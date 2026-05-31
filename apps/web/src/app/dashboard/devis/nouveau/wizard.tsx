@@ -63,6 +63,7 @@ import {
   createQuickClientAction,
   createQuoteDraftAction,
   sendQuoteAction,
+  updateQuoteAction,
 } from '../actions'
 
 // ============================================
@@ -103,6 +104,20 @@ export interface QuoteWizardPricingConfig {
   organizationLng: number | null
 }
 
+/**
+ * Données d'un devis brouillon existant pour pré-remplir le wizard en mode édition.
+ * Champs alignés sur l'état du wizard et sur ce que `updateQuoteAction` attend.
+ */
+export interface QuoteWizardInitial {
+  clientId: string
+  propertyId: string | null
+  lines: QuoteLineItem[]
+  notes: string | null
+  paymentMethod: QuotePaymentMethod
+  paymentTermsDays: number
+  expiresInDays: number
+}
+
 export interface QuoteWizardProps {
   clients: QuoteWizardClient[]
   properties: QuoteWizardProperty[]
@@ -113,6 +128,10 @@ export interface QuoteWizardProps {
   logoUrl: string | null
   defaultClientId?: string
   defaultPropertyId?: string
+  /** Si fourni avec `editQuoteId` : pré-remplit toutes les étapes (mode édition). */
+  initialQuote?: QuoteWizardInitial
+  /** Id du brouillon en cours d'édition. Présent → mode édition (sinon création). */
+  editQuoteId?: string
 }
 
 // ============================================
@@ -133,7 +152,31 @@ interface WizardState {
   manualTravelOverride: number | null
 }
 
+function hasMajorationLine(
+  lines: QuoteLineItem[],
+  kind: 'urgency' | 'weekend' | 'evening',
+): boolean {
+  return lines.some((l) => l.kind === 'majoration' && l.majorationKind === kind)
+}
+
 function makeInitial(props: QuoteWizardProps): WizardState {
+  // Mode édition : pré-remplit toutes les étapes depuis le devis existant.
+  if (props.initialQuote) {
+    const init = props.initialQuote
+    return {
+      clientId: init.clientId,
+      propertyId: init.propertyId ?? '',
+      lines: init.lines,
+      notes: init.notes ?? '',
+      paymentMethod: init.paymentMethod,
+      paymentTermsDays: init.paymentTermsDays,
+      expiresInDays: init.expiresInDays,
+      applyUrgency: hasMajorationLine(init.lines, 'urgency'),
+      applyWeekend: hasMajorationLine(init.lines, 'weekend'),
+      applyEvening: hasMajorationLine(init.lines, 'evening'),
+      manualTravelOverride: null,
+    }
+  }
   return {
     clientId: props.defaultClientId ?? '',
     propertyId: props.defaultPropertyId ?? '',
@@ -165,6 +208,7 @@ function addDays(iso: string, days: number): string {
 
 export function QuoteWizard(props: QuoteWizardProps) {
   const router = useRouter()
+  const isEditMode = Boolean(props.editQuoteId)
   const [state, setState] = useState<WizardState>(() => makeInitial(props))
   const [pending, startTransition] = useTransition()
   const [intent, setIntent] = useState<'draft' | 'send' | null>(null)
@@ -348,6 +392,23 @@ export function QuoteWizard(props: QuoteWizardProps) {
       }
       toast.success('Devis envoyé au client.')
       router.push(`/dashboard/devis/${draft.quoteId}`)
+    })
+  }
+
+  function submitUpdate() {
+    const payload = buildPayload()
+    if (!payload || !props.editQuoteId) return
+    const editId = props.editQuoteId
+    setIntent('draft')
+    startTransition(async () => {
+      const res = await updateQuoteAction({ id: editId, ...payload })
+      if (!res.success) {
+        toast.error(res.error ?? 'Mise à jour impossible.')
+        setIntent(null)
+        return
+      }
+      toast.success('Modifications enregistrées.')
+      router.push(`/dashboard/devis/${editId}`)
     })
   }
 
@@ -589,34 +650,53 @@ export function QuoteWizard(props: QuoteWizardProps) {
             >
               <Eye className="size-4" /> Aperçu plein écran
             </Button>
-            <Button
-              variant="outline"
-              size="default"
-              onClick={submitDraft}
-              type="button"
-              disabled={pending}
-            >
-              {pending && intent === 'draft' ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Save className="size-4" />
-              )}
-              Sauvegarder brouillon
-            </Button>
-            <Button
-              variant="accent"
-              size="default"
-              onClick={submitSend}
-              type="button"
-              disabled={pending}
-            >
-              {pending && intent === 'send' ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Send className="size-4" />
-              )}
-              Envoyer au client
-            </Button>
+            {isEditMode ? (
+              <Button
+                variant="accent"
+                size="default"
+                onClick={submitUpdate}
+                type="button"
+                disabled={pending}
+              >
+                {pending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Save className="size-4" />
+                )}
+                Enregistrer les modifications
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={submitDraft}
+                  type="button"
+                  disabled={pending}
+                >
+                  {pending && intent === 'draft' ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Save className="size-4" />
+                  )}
+                  Sauvegarder brouillon
+                </Button>
+                <Button
+                  variant="accent"
+                  size="default"
+                  onClick={submitSend}
+                  type="button"
+                  disabled={pending}
+                >
+                  {pending && intent === 'send' ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Send className="size-4" />
+                  )}
+                  Envoyer au client
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -675,28 +755,48 @@ export function QuoteWizard(props: QuoteWizardProps) {
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={submitDraft}
-            type="button"
-            disabled={pending}
-            className="flex-1"
-          >
-            {pending && intent === 'draft' ? <Loader2 className="size-3.5 animate-spin" /> : null}
-            Brouillon
-          </Button>
-          <Button
-            variant="accent"
-            size="sm"
-            onClick={submitSend}
-            type="button"
-            disabled={pending}
-            className="flex-1"
-          >
-            {pending && intent === 'send' ? <Loader2 className="size-3.5 animate-spin" /> : null}
-            Envoyer
-          </Button>
+          {isEditMode ? (
+            <Button
+              variant="accent"
+              size="sm"
+              onClick={submitUpdate}
+              type="button"
+              disabled={pending}
+              className="flex-1"
+            >
+              {pending ? <Loader2 className="size-3.5 animate-spin" /> : null}
+              Enregistrer
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={submitDraft}
+                type="button"
+                disabled={pending}
+                className="flex-1"
+              >
+                {pending && intent === 'draft' ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : null}
+                Brouillon
+              </Button>
+              <Button
+                variant="accent"
+                size="sm"
+                onClick={submitSend}
+                type="button"
+                disabled={pending}
+                className="flex-1"
+              >
+                {pending && intent === 'send' ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : null}
+                Envoyer
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

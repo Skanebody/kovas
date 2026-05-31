@@ -2,53 +2,106 @@
  * KOVAS — Gestion d'un litige (lecture + transitions de statut).
  *
  *   GET   /api/litigation/[id]
- *   PATCH /api/litigation/[id]  { status?, regenerate?, escalateReason? }
+ *   PATCH /api/litigation/[id]  { status?, regenerate?, escalateReason?, resolutionOutcome? }
+ *
+ * Source de vérité : table `litigation_workflows` (migration 20260525121000).
+ * Les statuts sont contraints par le CHECK SQL :
+ *   opened | in_progress | awaiting_third_party | escalated | resolved | closed | dropped
+ * « Escalader au tribunal » → `escalated` (l'UI legacy envoie `court`, traduit ici).
+ * « Marquer résolu » → `resolved` + `resolved_at = now()` + `resolution_outcome`.
  */
 
-import type {
-  Jurisprudence,
-  LitigationData,
-  LitigationStatus,
-} from '@/components/defense/LitigationWorkflow'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import type { Json } from '@kovas/database/types'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 
-interface LitigationRow {
+/** Forme du brouillon IA persisté dans `litigation_workflows.metadata.draft`. */
+interface DraftMetadata {
+  response_md?: string | null
+  cited_references?: string[] | null
+  generated_at?: string | null
+}
+
+/** Sous-ensemble des colonnes `litigation_workflows` lues ici. */
+interface LitigationWorkflowRow {
   id: string
-  status: LitigationStatus
+  status: string
   opened_at: string
+  notes: string | null
+  metadata: Record<string, unknown> | null
+}
+
+/** Payload de réponse exposé à l'UI (litige + brouillon IA éventuel). */
+interface LitigationResponse {
+  id: string
+  status: string
+  openedAt: string
   reason: string
-  ai_suggested_response: string | null
-  jurisprudences: Jurisprudence[] | null
-  lawyer_letter_url: string | null
+  aiSuggestedResponse: string
+  citedReferences: string[]
+  draftGeneratedAt: string | null
+}
+
+/** Statuts réels acceptés par le CHECK `litigation_workflows.status`. */
+type DbStatus =
+  | 'opened'
+  | 'in_progress'
+  | 'awaiting_third_party'
+  | 'escalated'
+  | 'resolved'
+  | 'closed'
+  | 'dropped'
+
+/** Issues réelles attendues dans `resolution_outcome`. */
+type ResolutionOutcome = 'in_favor' | 'against' | 'compromise' | 'dropped'
+
+const VALID_RESOLUTION_OUTCOMES: ResolutionOutcome[] = [
+  'in_favor',
+  'against',
+  'compromise',
+  'dropped',
+]
+
+function readDraft(metadata: Record<string, unknown> | null): DraftMetadata {
+  if (!metadata || typeof metadata.draft !== 'object' || metadata.draft === null) {
+    return {}
+  }
+  return metadata.draft as DraftMetadata
+}
+
+function readReason(row: LitigationWorkflowRow): string {
+  if (row.notes && row.notes.trim().length > 0) return row.notes
+  if (row.metadata && typeof row.metadata.client_complaint === 'string') {
+    return row.metadata.client_complaint
+  }
+  return ''
 }
 
 async function load(
   supabase: Awaited<ReturnType<typeof getCurrentUser>>['supabase'],
   orgId: string,
   id: string,
-): Promise<LitigationData | null> {
+): Promise<LitigationResponse | null> {
   const { data } = await supabase
-    .from('litigations' as never)
-    .select(
-      'id, status, opened_at, reason, ai_suggested_response, jurisprudences, lawyer_letter_url',
-    )
+    .from('litigation_workflows')
+    .select('id, status, opened_at, notes, metadata')
     .eq('id', id)
     .eq('organization_id', orgId)
     .maybeSingle()
 
-  const row = data as unknown as LitigationRow | null
+  const row = data as LitigationWorkflowRow | null
   if (!row) return null
+  const draft = readDraft(row.metadata)
   return {
     id: row.id,
     status: row.status,
     openedAt: row.opened_at,
-    reason: row.reason,
-    aiSuggestedResponse: row.ai_suggested_response ?? '',
-    jurisprudences: Array.isArray(row.jurisprudences) ? row.jurisprudences : [],
-    lawyerLetterUrl: row.lawyer_letter_url,
+    reason: readReason(row),
+    aiSuggestedResponse: draft.response_md ?? '',
+    citedReferences: Array.isArray(draft.cited_references) ? draft.cited_references : [],
+    draftGeneratedAt: draft.generated_at ?? null,
   }
 }
 
@@ -71,17 +124,31 @@ export async function GET(
 }
 
 interface PatchBody {
-  status?: LitigationStatus
+  /** Statut cible UI ; `court` (legacy) est traduit en `escalated`. */
+  status?: DbStatus | 'court'
   regenerate?: boolean
   escalateReason?: string
+  /** Issue du litige quand on marque résolu (défaut `compromise`). */
+  resolutionOutcome?: ResolutionOutcome
 }
 
-const ALLOWED_TRANSITIONS: LitigationStatus[] = [
+/**
+ * Traduit le statut demandé par l'UI vers une valeur acceptée par le CHECK DB.
+ * `court` (taxonomie UI legacy) → `escalated`.
+ */
+function normalizeStatus(status: DbStatus | 'court'): DbStatus {
+  return status === 'court' ? 'escalated' : status
+}
+
+const ALLOWED_INCOMING: (DbStatus | 'court')[] = [
   'opened',
   'in_progress',
+  'awaiting_third_party',
+  'escalated',
+  'court',
   'resolved',
   'closed',
-  'court',
+  'dropped',
 ]
 
 export async function PATCH(
@@ -101,50 +168,80 @@ export async function PATCH(
   }
 
   let orgId: string
-  let userId: string
   let supabase: Awaited<ReturnType<typeof getCurrentUser>>['supabase']
   try {
     const u = await getCurrentUser()
     orgId = u.orgId
-    userId = u.user.id
     supabase = u.supabase
   } catch {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  if (body.status && !ALLOWED_TRANSITIONS.includes(body.status)) {
+  if (body.status && !ALLOWED_INCOMING.includes(body.status)) {
     return NextResponse.json({ error: 'invalid_status' }, { status: 400 })
   }
 
-  if (body.status === 'court' && (body.escalateReason ?? '').trim().length < 20) {
+  const nextStatus = body.status ? normalizeStatus(body.status) : null
+
+  if (nextStatus === 'escalated' && (body.escalateReason ?? '').trim().length < 20) {
     return NextResponse.json({ error: 'escalate_reason_required' }, { status: 400 })
   }
 
-  if (body.status) {
+  if (body.resolutionOutcome && !VALID_RESOLUTION_OUTCOMES.includes(body.resolutionOutcome)) {
+    return NextResponse.json({ error: 'invalid_resolution_outcome' }, { status: 400 })
+  }
+
+  if (nextStatus) {
+    // Recharge le metadata existant pour un merge non destructif (escalade).
+    const { data: current } = await supabase
+      .from('litigation_workflows')
+      .select('metadata')
+      .eq('id', id)
+      .eq('organization_id', orgId)
+      .maybeSingle()
+
+    if (!current) {
+      return NextResponse.json({ error: 'not_found' }, { status: 404 })
+    }
+
+    const existingMetadata: { [key: string]: Json | undefined } =
+      (current as { metadata: { [key: string]: Json | undefined } | null }).metadata ?? {}
+
+    const update: {
+      status: DbStatus
+      updated_at: string
+      resolved_at?: string
+      resolution_outcome?: ResolutionOutcome
+      metadata?: Json
+    } = {
+      status: nextStatus,
+      updated_at: new Date().toISOString(),
+    }
+
+    if (nextStatus === 'resolved') {
+      update.resolved_at = new Date().toISOString()
+      update.resolution_outcome = body.resolutionOutcome ?? 'compromise'
+    }
+
+    if (nextStatus === 'escalated' && body.escalateReason) {
+      update.metadata = {
+        ...existingMetadata,
+        escalate_reason: body.escalateReason.trim(),
+        escalated_at: new Date().toISOString(),
+      }
+    }
+
     const { error } = await supabase
-      .from('litigations' as never)
-      .update({
-        status: body.status,
-        updated_at: new Date().toISOString(),
-        ...(body.escalateReason ? { escalate_reason: body.escalateReason.trim() } : {}),
-      } as never)
+      .from('litigation_workflows')
+      .update(update)
       .eq('id', id)
       .eq('organization_id', orgId)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-    await supabase.from('audit_log' as never).insert({
-      organization_id: orgId,
-      user_id: userId,
-      action: `litigation.status.${body.status}`,
-      resource_type: 'litigation',
-      resource_id: id,
-      metadata: body.escalateReason
-        ? ({ escalate_reason: body.escalateReason.trim() } as never)
-        : (null as never),
-    } as never)
   }
 
   if (body.regenerate) {
+    // Best-effort : déclenche l'Edge Function IA si configurée. Échec ignoré
+    // (l'UI peut re-tenter via /api/litigation/draft-response/:id).
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (supabaseUrl) {
       const { data: sessionData } = await supabase.auth.getSession()
