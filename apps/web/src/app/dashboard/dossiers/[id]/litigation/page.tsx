@@ -30,33 +30,46 @@ interface DossierRow {
   missions: Array<{ id: string; type: string }>
 }
 
+/**
+ * Reflète les colonnes réelles de `litigation_workflows` (migration
+ * 20260525121000). La plainte du client est stockée dans `notes` (+ copie
+ * dans `metadata.client_complaint`), le type UI d'origine dans
+ * `metadata.ui_litigation_type`. Les champs « brouillon IA »
+ * (draft_response_md / cited_references / draft_generated_at) ne sont PAS
+ * des colonnes : ils sont optionnels et lus défensivement (cf. note report).
+ */
 interface LitigationRow {
   id: string
   organization_id: string
-  dossier_id: string | null
   mission_id: string | null
-  litigation_type: string
-  client_complaint: string
-  status: 'opened' | 'in_progress' | 'resolved' | 'closed' | 'court'
-  draft_response_md: string | null
-  cited_references: string[] | null
-  draft_generated_at: string | null
+  litigation_kind: string
+  status: string
+  notes: string | null
+  metadata: Record<string, unknown> | null
+  draft_response_md?: string | null
+  cited_references?: string[] | null
+  draft_generated_at?: string | null
   created_at: string
   updated_at: string
 }
 
 const STATUS_META: Record<
-  LitigationRow['status'],
+  string,
   { label: string; variant: 'blue' | 'yellow' | 'green' | 'red' | 'muted' }
 > = {
   opened: { label: 'Ouvert', variant: 'blue' },
   in_progress: { label: 'En cours', variant: 'yellow' },
+  awaiting_third_party: { label: 'En attente d’un tiers', variant: 'yellow' },
+  escalated: { label: 'Escaladé', variant: 'red' },
   resolved: { label: 'Résolu', variant: 'green' },
   closed: { label: 'Clos', variant: 'muted' },
-  court: { label: 'Tribunal', variant: 'red' },
+  dropped: { label: 'Abandonné', variant: 'muted' },
 }
 
-const TYPE_LABEL: Record<string, string> = {
+const FALLBACK_STATUS_META = { label: 'Ouvert', variant: 'blue' as const }
+
+/** Libellés de la taxonomie UI (metadata.ui_litigation_type). */
+const UI_TYPE_LABEL: Record<string, string> = {
   dpe_contestation: 'Contestation étiquette DPE',
   erreur_surface_carrez: 'Erreur surface Carrez/Boutin',
   oubli_diagnostic: 'Oubli de diagnostic',
@@ -66,6 +79,35 @@ const TYPE_LABEL: Record<string, string> = {
   electricite_securite: 'Anomalie électricité / sécurité',
   demande_remboursement: 'Demande de remboursement',
   autre: 'Autre',
+}
+
+/** Libellés de la taxonomie DB `litigation_kind`. */
+const KIND_LABEL: Record<string, string> = {
+  claim_client: 'Réclamation client',
+  mediation: 'Médiation',
+  rcp_insurer: 'Assurance RC Pro',
+  judicial: 'Judiciaire',
+  administrative: 'Administratif',
+  other: 'Autre',
+}
+
+/** Résout le libellé du type de litige : type UI d'origine sinon kind DB. */
+function litigationTypeLabel(row: LitigationRow): string {
+  const uiType =
+    row.metadata && typeof row.metadata.ui_litigation_type === 'string'
+      ? (row.metadata.ui_litigation_type as string)
+      : null
+  if (uiType && UI_TYPE_LABEL[uiType]) return UI_TYPE_LABEL[uiType]
+  return KIND_LABEL[row.litigation_kind] ?? row.litigation_kind
+}
+
+/** Plainte du client : `notes` en priorité, sinon `metadata.client_complaint`. */
+function clientComplaint(row: LitigationRow): string {
+  if (row.notes && row.notes.trim().length > 0) return row.notes
+  if (row.metadata && typeof row.metadata.client_complaint === 'string') {
+    return row.metadata.client_complaint as string
+  }
+  return '—'
 }
 
 export default async function DossierLitigationPage({
@@ -88,17 +130,24 @@ export default async function DossierLitigationPage({
   const dossier = dossierRaw as unknown as DossierRow
   const primaryMission = dossier.missions?.[0] ?? null
 
-  const { data: litigationRaw } = await supabase
-    // biome-ignore lint/suspicious/noExplicitAny: types DB pas encore régénérés
-    .from('litigation_workflows' as any)
-    .select('*')
-    .eq('dossier_id', id)
-    .eq('organization_id', orgId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  // Le litige est rattaché à la mission (litigation_workflows.mission_id) :
+  // c'est la clé fiable partagée entre la création et l'affichage. Sans
+  // mission rattachée, aucun litige n'a pu être ouvert → on montre le form.
+  let litigation: LitigationRow | null = null
+  if (primaryMission) {
+    const { data: litigationRaw } = await supabase
+      .from('litigation_workflows')
+      .select(
+        'id, organization_id, mission_id, litigation_kind, status, notes, metadata, created_at, updated_at',
+      )
+      .eq('mission_id', primaryMission.id)
+      .eq('organization_id', orgId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
-  const litigation = (litigationRaw ?? null) as LitigationRow | null
+    litigation = (litigationRaw as unknown as LitigationRow | null) ?? null
+  }
 
   return (
     <div className="space-y-8 animate-fade-in pb-16">
@@ -115,8 +164,8 @@ export default async function DossierLitigationPage({
         description="Suivi du litige + projet de réponse argumentée."
         action={
           litigation ? (
-            <Badge variant={STATUS_META[litigation.status].variant}>
-              {STATUS_META[litigation.status].label}
+            <Badge variant={(STATUS_META[litigation.status] ?? FALLBACK_STATUS_META).variant}>
+              {(STATUS_META[litigation.status] ?? FALLBACK_STATUS_META).label}
             </Badge>
           ) : null
         }
@@ -137,9 +186,7 @@ export default async function DossierLitigationPage({
                 <dt className="text-[10px] font-mono uppercase tracking-wide text-[#0F1419]/72">
                   Type
                 </dt>
-                <dd className="text-[#0F1419]">
-                  {TYPE_LABEL[litigation.litigation_type] ?? litigation.litigation_type}
-                </dd>
+                <dd className="text-[#0F1419]">{litigationTypeLabel(litigation)}</dd>
               </div>
               <div>
                 <dt className="text-[10px] font-mono uppercase tracking-wide text-[#0F1419]/72">
@@ -153,7 +200,7 @@ export default async function DossierLitigationPage({
                 Plainte du client
               </p>
               <div className="rounded-md border border-[#0F1419]/[0.08] bg-sage-alt/60 p-4 text-[13px] text-[#0F1419] whitespace-pre-wrap leading-relaxed">
-                {litigation.client_complaint}
+                {clientComplaint(litigation)}
               </div>
             </div>
           </Card>

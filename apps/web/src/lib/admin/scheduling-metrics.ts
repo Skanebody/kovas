@@ -119,14 +119,6 @@ interface DurationCoefRow {
   enabled: boolean | null
 }
 
-interface DossierDpeRow {
-  created_by: string | null
-  completed_at: string | null
-  type: string | null
-  status: string | null
-  property_id: string | null
-}
-
 interface ProfileRow {
   id: string
   email: string | null
@@ -212,11 +204,33 @@ export async function getDpeQuotaTopUsers(
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
   const sinceIso = twelveMonthsAgo.toISOString()
 
-  // Récupère tous les dossiers DPE-like complétés sur 12 mois (status done/exported)
+  // Le type de diagnostic vit sur `missions.type` (PAS sur `dossiers` — qui n'a
+  // jamais eu de colonne `type`). On récupère donc d'abord les dossiers porteurs
+  // d'au moins une mission DPE, puis on filtre ces dossiers (statut + fenêtre).
+  const { data: dpeMissions, error: missionsErr } = await supabase
+    .from('missions')
+    .select('dossier_id')
+    .in('type', ['dpe_vente', 'dpe_location'])
+
+  if (missionsErr) {
+    throw new Error(`getDpeQuotaTopUsers missions: ${missionsErr.message}`)
+  }
+
+  const dpeDossierIds = [
+    ...new Set(
+      ((dpeMissions ?? []) as { dossier_id: string | null }[])
+        .map((m) => m.dossier_id)
+        .filter((id): id is string => id !== null),
+    ),
+  ]
+
+  if (dpeDossierIds.length === 0) return []
+
+  // Dossiers DPE complétés sur 12 mois (status done/exported), un dossier = un DPE.
   const { data: dossiers, error } = await supabase
     .from('dossiers')
-    .select('created_by, completed_at, type, status, property_id')
-    .in('type', ['dpe_vente', 'dpe_location', 'copropriete'])
+    .select('created_by')
+    .in('id', dpeDossierIds)
     .in('status', ['done', 'exported'])
     .gte('completed_at', sinceIso)
     .not('created_by', 'is', null)
@@ -225,7 +239,7 @@ export async function getDpeQuotaTopUsers(
     throw new Error(`getDpeQuotaTopUsers dossiers: ${error.message}`)
   }
 
-  const rows = (dossiers ?? []) as unknown as DossierDpeRow[]
+  const rows = (dossiers ?? []) as { created_by: string | null }[]
 
   // Compter par user
   const countByUser = new Map<string, number>()

@@ -4,9 +4,9 @@
  * KOVAS — Formulaire de création d'un litige.
  *
  * Appelé quand aucun litige n'existe pour le dossier.
- * Soumet à POST /api/litigation/create — body attendu : { missionId, reason }.
- * Le type de litige (litigation_type) est préfixé à la raison pour ne pas
- * perdre l'information côté serveur (la route create ne stocke qu'un champ libre).
+ * Soumet à POST /api/litigation/create — body : { missionId, litigationType, reason }.
+ * La route mappe `litigationType` (taxonomie UI) vers `litigation_kind` (DB) et
+ * stocke la plainte dans `notes` + `metadata.client_complaint`.
  */
 
 import { Loader2 } from 'lucide-react'
@@ -57,13 +57,12 @@ export function LitigationCreateForm({ missionId }: LitigationCreateFormProps) {
       return
     }
 
-    // La route /api/litigation/create attend { missionId, reason }. On préfixe
-    // le type de litige à la raison pour conserver cette qualification.
-    const typeLabel =
-      LITIGATION_TYPES.find((t) => t.value === litigationType)?.label ?? litigationType
+    // La route /api/litigation/create attend { missionId, litigationType, reason }.
+    // Elle dérive `litigation_kind` du type et stocke la plainte telle quelle.
     const payload = {
       missionId,
-      reason: `[${typeLabel}] ${clientComplaint}`,
+      litigationType,
+      reason: clientComplaint,
     }
 
     setSubmitting(true)
