@@ -13,10 +13,12 @@
  * le secret en clair dans le DOM.
  */
 
+import { Button } from '@/components/ui/button'
 import { verifyAdminAccess } from '@/lib/admin/admin-middleware'
 import { buildOtpauthUrl, generateSecret } from '@/lib/admin/totp'
 import { COMPANY_IDENTITY } from '@/lib/legal/company-identity'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { SetupTwoFaForm } from './setup-form'
 
@@ -72,8 +74,8 @@ export default async function SetupTwoFaPage() {
             KOVAS Admin
           </span>
         </div>
-        <span className="rounded-pill bg-warning/15 text-warning px-3 py-1 text-[11px] font-mono uppercase tracking-wider">
-          Setup 2FA requis
+        <span className="rounded-pill bg-ink/10 text-ink-mute px-3 py-1 text-[11px] font-mono uppercase tracking-wider">
+          2FA recommandée
         </span>
       </header>
 
@@ -81,14 +83,15 @@ export default async function SetupTwoFaPage() {
         <div className="w-full max-w-lg glass-opaque rounded-xl p-8 border border-rule/80 shadow-glass-sm space-y-7">
           <div className="space-y-3 text-center">
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute">
-              🔐 Première connexion admin
+              🔐 Sécurité de l'espace admin
             </p>
             <h1 className="font-serif italic font-normal text-4xl md:text-5xl tracking-tight text-ink leading-[1.05]">
               Activer la 2FA.
             </h1>
             <p className="text-sm text-ink-mute">
-              Scannez le code dans Google Authenticator, Authy ou 1Password, puis entrez le code à 6
-              chiffres pour activer.
+              La double authentification est <strong>recommandée</strong> pour protéger l'espace
+              admin, sans être obligatoire. Scannez le code dans Google Authenticator, Authy ou
+              1Password, puis entrez le code à 6 chiffres pour l'activer.
             </p>
           </div>
 
@@ -131,9 +134,17 @@ export default async function SetupTwoFaPage() {
 
           <SetupTwoFaForm secret={secret} />
 
-          <div className="rounded-md bg-warning/10 px-4 py-3 text-[12px] text-ink-mute leading-relaxed">
-            ⚠️ Ce secret n'est <strong>jamais persisté</strong> tant que vous n'avez pas validé un
-            premier code. Si vous fermez cette page sans activer, vous devrez régénérer.
+          {/* Échappatoire : la 2FA étant OPTIONNELLE, l'admin peut entrer sans
+              l'activer. Il pourra l'activer plus tard depuis les réglages
+              (/dashboard/account onglet Sécurité) ou cette même page. */}
+          <Button asChild variant="ghost" size="default" className="w-full">
+            <Link href="/admin">Configurer plus tard</Link>
+          </Button>
+
+          <div className="rounded-md bg-ink/5 px-4 py-3 text-[12px] text-ink-mute leading-relaxed">
+            Ce secret n'est <strong>jamais persisté</strong> tant que vous n'avez pas validé un
+            premier code. Si vous fermez cette page sans activer, vous devrez régénérer. Vous
+            pourrez activer la 2FA à tout moment depuis les réglages de votre compte.
           </div>
 
           <p className="text-center text-[11px] text-ink-faint pt-2 border-t border-rule/40">

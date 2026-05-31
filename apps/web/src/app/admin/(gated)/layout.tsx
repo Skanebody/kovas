@@ -7,8 +7,17 @@ import type { ReactNode } from 'react'
 /**
  * Layout des pages admin protégées (route group `(gated)`).
  *
- * Toutes les pages enfants (/, /croissance, /finance, etc.) passent par cette
- * gate : auth + admin actif + secret 2FA configuré + cookie 2FA validé.
+ * Gate : auth + admin actif + (si la 2FA est VOLONTAIREMENT activée) cookie
+ * 2FA validé.
+ *
+ * 2FA OPTIONNELLE (refonte 2026-05-31) : on ne force PLUS la configuration de
+ * la 2FA à la première connexion. Un admin sans 2FA activée entre directement.
+ * La 2FA reste fortement recommandée et s'active/désactive depuis les réglages
+ * (/dashboard/account onglet Sécurité) ou via /admin/setup-2fa.
+ *
+ * SÉCURITÉ : pour un admin qui A activé sa 2FA (secret `enabled=true` →
+ * `hasNoSecret=false`), la vérification reste OBLIGATOIRE. Si son cookie 2FA
+ * est absent/expiré (`needs2FA=true`), il est renvoyé vers /admin/verify-2fa.
  *
  * Les pages /admin/setup-2fa et /admin/verify-2fa sont DELIBEREMENT hors du
  * groupe (gated) pour ne pas créer de boucle de redirect (un user qui
@@ -24,13 +33,11 @@ export default async function AdminGatedLayout({ children }: { children: ReactNo
     redirect('/')
   }
 
-  // 2. Admin sans secret 2FA configuré → page de setup.
-  if (access.hasNoSecret) {
-    redirect('/admin/setup-2fa')
-  }
-
-  // 3. Admin avec secret mais cookie 2FA absent/expiré → vérification.
-  if (access.needs2FA) {
+  // 2. 2FA OPTIONNELLE : on n'exige la vérification que si l'admin a
+  //    VOLONTAIREMENT activé sa 2FA (secret enabled=true → hasNoSecret=false)
+  //    ET que son cookie 2FA est absent/expiré. Un admin sans 2FA activée
+  //    (hasNoSecret=true) entre directement, sans setup forcé.
+  if (!access.hasNoSecret && access.needs2FA) {
     redirect('/admin/verify-2fa')
   }
 

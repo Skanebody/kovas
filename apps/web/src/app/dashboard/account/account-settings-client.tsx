@@ -42,14 +42,17 @@ import {
   Radar,
   Receipt,
   Shield,
+  ShieldCheck,
   User as UserIcon,
   XCircle,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useState, useTransition } from 'react'
 
 import { toast } from '@/components/ui/toaster'
 
+import { disableAdminTwoFaAction } from './actions-2fa'
 import { AdemeForm } from './ademe-form'
 import { BaselineMinutesForm } from './baseline-minutes-form'
 import { CompanyForm } from './company-form'
@@ -126,6 +129,10 @@ interface AccountSettingsClientProps {
   calendarWebcalUrl: string
   storageUsage: { usedBytes: number; quotaBytes: number } | null
   modulesIncludedMap: Record<string, boolean>
+  /** true si l'utilisateur courant est un admin actif (carte 2FA admin visible). */
+  isAdmin: boolean
+  /** true si la 2FA admin de l'utilisateur est activée (secret enabled=true). */
+  twoFaEnabled: boolean
 }
 
 export function AccountSettingsClient(props: AccountSettingsClientProps) {
@@ -259,6 +266,9 @@ function SecuriteTab({ props }: { props: AccountSettingsClientProps }) {
         </div>
       </Card>
 
+      {/* Carte 2FA admin — visible UNIQUEMENT pour un admin actif. */}
+      {props.isAdmin && <AdminTwoFaCard enabled={props.twoFaEnabled} />}
+
       <Card variant="opaque" padding="default" className="space-y-4">
         <SectionTitle icon={Shield} title="Données personnelles · RGPD" iconColor="#48484A" />
         <p className="text-[13px] text-[#0F1419]/65 leading-relaxed">
@@ -300,6 +310,84 @@ function SecuriteTab({ props }: { props: AccountSettingsClientProps }) {
         </div>
       </Card>
     </div>
+  )
+}
+
+/**
+ * Carte « Double authentification (espace admin) ».
+ *
+ * 2FA admin OPTIONNELLE (refonte 2026-05-31). Affichée uniquement aux admins.
+ *  - Activée  → bouton « Désactiver » (confirmation + server action + refresh)
+ *  - Désactivée → lien « Activer » vers /admin/setup-2fa (setup TOTP requis)
+ */
+function AdminTwoFaCard({ enabled }: { enabled: boolean }): ReactNode {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+
+  const handleDisable = () => {
+    if (
+      !window.confirm(
+        'Désactiver la double authentification de l’espace admin ? Tu pourras la réactiver à tout moment.',
+      )
+    ) {
+      return
+    }
+    startTransition(async () => {
+      try {
+        const result = await disableAdminTwoFaAction()
+        if (!result.ok) {
+          toast.error(result.error ?? 'Erreur lors de la désactivation.')
+          return
+        }
+        toast.success('Double authentification désactivée.')
+        router.refresh()
+      } catch {
+        toast.error('Erreur réseau. Réessaie dans quelques instants.')
+      }
+    })
+  }
+
+  return (
+    <Card variant="opaque" padding="default" className="space-y-4">
+      <SectionTitle
+        icon={ShieldCheck}
+        title="Double authentification (espace admin)"
+        iconColor={enabled ? '#34C759' : '#0F1419'}
+      />
+      <div className="flex items-center gap-2 flex-wrap">
+        <Badge variant={enabled ? 'green' : 'muted'} className="text-[10px]">
+          {enabled ? 'Activée' : 'Désactivée'}
+        </Badge>
+        <span className="text-[12px] text-[#0F1419]/55">
+          {enabled
+            ? 'Un code à 6 chiffres est demandé à chaque accès à l’espace admin.'
+            : 'Recommandée pour protéger l’accès à l’espace admin.'}
+        </span>
+      </div>
+      <p className="text-[13px] text-[#0F1419]/65 leading-relaxed">
+        La double authentification (TOTP) protège l’accès à l’espace admin. Elle est facultative :
+        tu peux l’activer ou la désactiver à tout moment.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-2">
+        {enabled ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="default"
+            onClick={handleDisable}
+            disabled={pending}
+          >
+            {pending ? 'Désactivation…' : 'Désactiver'}
+          </Button>
+        ) : (
+          <Button asChild variant="default" size="default">
+            <Link href="/admin/setup-2fa">
+              <ShieldCheck className="size-4" /> Activer la 2FA
+            </Link>
+          </Button>
+        )}
+      </div>
+    </Card>
   )
 }
 

@@ -224,6 +224,43 @@ export default async function AccountPage({
 
   const monthlyReportEnabled = userPrefs.data?.monthly_report_email_enabled !== false
 
+  // ============================================
+  // Statut 2FA admin (carte Sécurité, visible UNIQUEMENT si admin)
+  // ============================================
+  // `admin_users` / `admin_2fa_secrets` absentes du Database type généré
+  // (migration 2026-05-21) — on type localement le builder (pas de `any`).
+  // RLS : `is_admin(auth.uid())` autorise la lecture de admin_users ;
+  // `2fa_secrets_self` autorise la lecture de son propre secret. Pour un user
+  // non-admin, les deux requêtes renvoient 0 ligne (attendu).
+  const adminScoped = supabase as unknown as {
+    from: (t: string) => {
+      select: (cols: string) => {
+        eq: (
+          col: string,
+          val: string,
+        ) => {
+          maybeSingle: <T>() => Promise<{ data: T | null }>
+        }
+      }
+    }
+  }
+
+  const [{ data: adminRow }, { data: twoFaRow }] = await Promise.all([
+    adminScoped
+      .from('admin_users')
+      .select('is_active')
+      .eq('user_id', user.id)
+      .maybeSingle<{ is_active: boolean }>(),
+    adminScoped
+      .from('admin_2fa_secrets')
+      .select('enabled')
+      .eq('user_id', user.id)
+      .maybeSingle<{ enabled: boolean }>(),
+  ])
+
+  const isAdmin = adminRow?.is_active === true
+  const twoFaEnabled = isAdmin && twoFaRow?.enabled === true
+
   const linguisticProfile = (profileFull?.linguistic_profile ?? {}) as Record<string, unknown>
   const certificatRge =
     typeof linguisticProfile.certificat_rge === 'string' ? linguisticProfile.certificat_rge : null
@@ -413,6 +450,8 @@ export default async function AccountPage({
         calendarWebcalUrl={buildCalendarWebcalUrl(orgId)}
         storageUsage={storageProps}
         modulesIncludedMap={modulesIncludedMap}
+        isAdmin={isAdmin}
+        twoFaEnabled={twoFaEnabled}
       />
     </div>
   )
