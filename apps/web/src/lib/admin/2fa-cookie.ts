@@ -4,17 +4,21 @@
  * Encode : userId || timestamp (ms) → HMAC-SHA256 avec ADMIN_2FA_ENCRYPTION_KEY.
  * Payload final : base64url(`${userId}.${ts}.${hmacHex}`).
  *
- * Validité : 30 minutes glissantes (pas de refresh — re-prompt 2FA après 30 min).
+ * Validité : 72 heures glissantes. Le cookie est ré-émis avec un timestamp
+ * frais à chaque navigation admin (sliding window, cf.
+ * /api/admin/2fa/refresh + composant TwoFaSlidingRefresh), si bien que la 2FA
+ * n'est re-demandée qu'après 72 h SANS activité, ou sur un nouvel appareil
+ * (cookie absent car httpOnly + lié au userId).
  *
  * Le cookie ne contient AUCUN secret. Il atteste que ce user_id a validé 2FA
- * à ce timestamp. Si un attaquant vole le cookie, il a 30 min, mais ne peut pas
+ * à ce timestamp. Si un attaquant vole le cookie, il a 72 h, mais ne peut pas
  * le forger pour un autre user (HMAC binding sur userId).
  */
 
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
 export const TWO_FA_COOKIE_NAME = 'admin_2fa_validated'
-export const TWO_FA_COOKIE_TTL_MS = 30 * 60 * 1000 // 30 minutes
+export const TWO_FA_COOKIE_TTL_MS = 72 * 60 * 60 * 1000 // 72 heures (glissantes)
 
 function getSigningKey(): string {
   const key = process.env.ADMIN_2FA_ENCRYPTION_KEY

@@ -17,6 +17,7 @@
  *  - ADDON_MODULES catalog + PRICING_PLANS canonique
  */
 
+import { UserTwoFaCard } from '@/components/account/UserTwoFaCard'
 import { CalendarSyncExport } from '@/components/calendar/calendar-sync-export'
 import { StorageQuotaCard } from '@/components/storage/StorageQuotaCard'
 import { Badge } from '@/components/ui/badge'
@@ -265,6 +266,10 @@ function SecuriteTab({ props }: { props: AccountSettingsClientProps }) {
           </Button>
         </div>
       </Card>
+
+      {/* Carte 2FA diagnostiqueur (MFA native Supabase TOTP) — OPT-IN, pour
+          TOUS les comptes. Distincte de la carte 2FA admin ci-dessous. */}
+      <UserTwoFaCard />
 
       {/* Carte 2FA admin — visible UNIQUEMENT pour un admin actif. */}
       {props.isAdmin && <AdminTwoFaCard enabled={props.twoFaEnabled} />}

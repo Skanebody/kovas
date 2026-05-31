@@ -57,6 +57,28 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const rawPath = h.get('x-invoke-path') ?? h.get('referer') ?? ''
   const currentPath = rawPath.startsWith('/dashboard') ? rawPath : '/dashboard'
 
+  // ════════════════════════════════════════════════════════════════════
+  // Garde 2FA OPT-IN + FAIL-OPEN (refonte 2026-05-31).
+  //
+  // CONTRAINTE DE SÉCURITÉ N°1 : ne JAMAIS bloquer un utilisateur SANS 2FA.
+  // On redirige vers le challenge UNIQUEMENT si l'utilisateur possède un
+  // facteur TOTP vérifié (nextLevel === 'aal2') mais n'a pas encore validé
+  // son code pour cette session (currentLevel === 'aal1'). Dans TOUS les
+  // autres cas — pas de facteur, déjà aal2, ou la moindre erreur de check —
+  // on NE redirige PAS (fail-open).
+  //
+  // Anti-lockout / anti-boucle : la garde ne s'applique pas sur la page de
+  // challenge elle-même NI sur /dashboard/account (pour que l'utilisateur
+  // puisse toujours désactiver sa 2FA même sans pouvoir passer le challenge).
+  const isMfaWhitelisted =
+    currentPath.startsWith('/dashboard/verify-2fa') || currentPath.startsWith('/dashboard/account')
+  if (!isMfaWhitelisted) {
+    const { data: aal, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (!aalError && aal && aal.nextLevel === 'aal2' && aal.currentLevel === 'aal1') {
+      redirect('/dashboard/verify-2fa')
+    }
+  }
+
   // Garde "essai expiré sans paiement" — redirige vers /dashboard/account?expired=1.
   if (trialVerdict.kind === 'expired' && !isPathWhitelisted(currentPath)) {
     redirect('/dashboard/account?expired=1')

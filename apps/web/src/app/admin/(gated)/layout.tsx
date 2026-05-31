@@ -1,5 +1,6 @@
 import { AdminHeader } from '@/components/admin/AdminHeader'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { TwoFaSlidingRefresh } from '@/components/admin/TwoFaSlidingRefresh'
 import { verifyAdminAccess } from '@/lib/admin/admin-middleware'
 import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
@@ -43,6 +44,10 @@ export default async function AdminGatedLayout({ children }: { children: ReactNo
 
   return (
     <div className="min-h-dvh flex bg-sage">
+      {/* Sliding window 2FA : repousse la fenêtre de 72 h à chaque navigation,
+          uniquement pour les admins ayant une 2FA active (cookie déjà validé,
+          puisque needs2FA=false ici sinon on aurait redirigé). */}
+      {!access.hasNoSecret && <TwoFaSlidingRefresh />}
       <AdminSidebar role={access.role} />
       <div className="flex-1 flex flex-col min-w-0">
         <AdminHeader email={access.user.email} role={access.role} />
