@@ -108,6 +108,13 @@ const SECURITY_HEADERS = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
+  // Build prod : on saute le type-check ET le lint pendant `next build`. Ils sont
+  // exécutés séparément (tsc local + pre-commit Biome + CI GitHub Actions). Sur ce
+  // gros monorepo, la phase « Linting and checking validity of types » de next build
+  // prenait ~15-20 min et faisait dépasser la limite de 45 min du plan Hobby Vercel
+  // (build tué = BUILD_FAILED). Décision 2026-05-30.
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
@@ -205,7 +212,13 @@ export default withSentryConfig(configWithSerwist, {
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
   silent: !process.env.CI,
-  widenClientFileUpload: true,
+  // Upload des source-maps Sentry DÉSACTIVÉ : sur ce projet (milliers de chunks)
+  // l'upload prenait ~20 min et faisait dépasser la limite de build Vercel 45 min.
+  // Sentry capture toujours les erreurs prod (via DSN), mais les stack traces sont
+  // minifiées. À ré-activer quand le build sera optimisé / sur un plan supérieur.
+  // Décision 2026-05-30.
+  sourcemaps: { disable: true },
+  widenClientFileUpload: false,
   tunnelRoute: '/monitoring',
   // Nouvelles APIs Sentry 9+ : options webpack regroupées sous `webpack`.
   webpack: {
