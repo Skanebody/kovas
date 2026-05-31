@@ -44,9 +44,11 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     }
   }
 
-  // Rate-limit scopé à l'email (anti credential-stuffing + spam signup)
-  // 10 tentatives / 15 min / email. Fail-closed en prod si Upstash absent.
-  const rl = await checkRateLimit('auth', `signup:${parsed.data.email.toLowerCase()}`)
+  // Rate-limit scopé à l'email (anti spam signup) — tier `signup` permissif :
+  // 30 tentatives / 10 min / email. Volontairement plus souple que le login
+  // (l'inscription a déjà l'unicité SIRET + validation email pro comme anti-abus).
+  // Fail-closed en prod si Upstash absent.
+  const rl = await checkRateLimit('signup', `signup:${parsed.data.email.toLowerCase()}`)
   if (!rl.success) {
     const retryMinutes = Math.max(1, Math.ceil((rl.reset - Date.now()) / 60_000))
     return {

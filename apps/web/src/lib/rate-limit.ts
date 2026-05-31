@@ -107,6 +107,24 @@ export const authLimiter = redis
   : null
 
 /**
+ * Tier signup — création de compte (inscription).
+ * Volontairement permissif : 30 tentatives / 10 min / email. L'inscription a
+ * déjà sa propre protection anti-abus (unicité SIRET = 1 essai par société +
+ * validation email pro), inutile d'être aussi strict que le login. Évite de
+ * bloquer un utilisateur qui corrige une typo, son SIRET ou son mot de passe
+ * pendant l'onboarding. Séparé du tier `auth` (login) qui reste strict contre
+ * le brute-force credentials. Décision 2026-05-30 (friction onboarding signalée).
+ */
+export const signupLimiter = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(30, '10 m'),
+      analytics: true,
+      prefix: 'kovas:rl:signup',
+    })
+  : null
+
+/**
  * Tier auth_strict — password reset, OTP send (email/SMS), claim KYC.
  * 3 requêtes par fenêtre glissante de 15 minutes / identifier.
  * Anti brute-force OTP + protection coût Brevo SMS.
@@ -120,7 +138,13 @@ export const authStrictLimiter = redis
     })
   : null
 
-export type RateLimitTier = 'public' | 'authenticated' | 'expensive' | 'auth' | 'auth_strict'
+export type RateLimitTier =
+  | 'public'
+  | 'authenticated'
+  | 'expensive'
+  | 'auth'
+  | 'signup'
+  | 'auth_strict'
 
 /**
  * Retourne le limiter correspondant au tier demandé, ou null si Redis
@@ -136,6 +160,8 @@ export function getLimiter(tier: RateLimitTier): Ratelimit | null {
       return expensiveLimiter
     case 'auth':
       return authLimiter
+    case 'signup':
+      return signupLimiter
     case 'auth_strict':
       return authStrictLimiter
   }
