@@ -58,26 +58,6 @@ export function SignupForm({ referralCode }: { referralCode?: string | null } = 
         />
       </FormField>
 
-      <FormField
-        label="Numéro SIRET du cabinet"
-        htmlFor="siret"
-        required
-        hint="14 chiffres — réservé aux cabinets de diagnostic immobilier"
-        error={errors.siret}
-      >
-        <Input
-          id="siret"
-          name="siret"
-          type="text"
-          inputMode="numeric"
-          autoComplete="off"
-          required
-          maxLength={17}
-          pattern="[\d\s]{14,17}"
-          placeholder="123 456 789 00012"
-        />
-      </FormField>
-
       <FormField label="Mot de passe" htmlFor="password" required error={errors.password}>
         <Input
           id="password"

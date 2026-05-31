@@ -1,13 +1,11 @@
 'use server'
 
-import { verifyDiagnosticActivityCached } from '@/lib/data-gouv/recherche-entreprises'
 import { joinFullName } from '@/lib/name-utils'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { isValidReferralCodeFormat } from '@/lib/referral/code-generator'
 import { applyReferralOnSignup } from '@/lib/referral/referral-engine'
 import { createClient } from '@/lib/supabase/server'
 import { getEmailValidationMessage, validateProEmail } from '@/lib/validation/email'
-import { isFakeSiretAllowed } from '@/lib/validation/siret'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
@@ -16,12 +14,19 @@ import { z } from 'zod'
 
 const REFERRAL_COOKIE = 'kovas_ref_code'
 
+/**
+ * Funnel sans friction (décision Benjamin 2026-05-30) : on ne demande PLUS le
+ * SIRET à l'inscription. La vérification SIRENE + l'unicité « 1 SIRET = 1 essai »
+ * + l'enregistrement `cabinet_trials` sont déplacés APRÈS le paiement, sur
+ * l'écran `/dashboard/account/verify-siret` (protégé par `siret-guard`). On
+ * facilite ainsi tout le parcours jusqu'au paiement, puis on exige le SIRET pour
+ * activer l'usage.
+ */
 const signupSchema = z.object({
   email: z.string().email('Email invalide'),
   password: z.string().min(8, '8 caractères minimum'),
   firstName: z.string().trim().min(1, 'Prénom requis').max(60),
   lastName: z.string().trim().min(1, 'Nom requis').max(60),
-  siret: z.string().min(1, 'SIRET requis'),
 })
 
 export type SignupState =
@@ -34,7 +39,6 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     password: formData.get('password'),
     firstName: formData.get('firstName'),
     lastName: formData.get('lastName'),
-    siret: formData.get('siret'),
   })
 
   if (!parsed.success) {
@@ -44,10 +48,7 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     }
   }
 
-  // Rate-limit scopé à l'email (anti spam signup) — tier `signup` permissif :
-  // 30 tentatives / 10 min / email. Volontairement plus souple que le login
-  // (l'inscription a déjà l'unicité SIRET + validation email pro comme anti-abus).
-  // Fail-closed en prod si Upstash absent.
+  // Rate-limit signup permissif (tier `signup` : 30 / 10 min / email).
   const rl = await checkRateLimit('signup', `signup:${parsed.data.email.toLowerCase()}`)
   if (!rl.success) {
     const retryMinutes = Math.max(1, Math.ceil((rl.reset - Date.now()) / 60_000))
@@ -56,23 +57,10 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     }
   }
 
-  // Protection 1 — Email pro obligatoire
+  // Protection — Email pro obligatoire (pas de gmail/yahoo perso).
   const emailCheck = validateProEmail(parsed.data.email)
   if (!emailCheck.valid) {
-    return {
-      fieldErrors: { email: getEmailValidationMessage(emailCheck.reason) },
-    }
-  }
-
-  // Protection 2 — Vérification SIRET réelle au registre SIRENE
-  // (remplace l'ancien check Luhn purement mathématique). On appelle
-  // l'API Recherche d'Entreprises (api.gouv.fr, open data, sans clé)
-  // pour confirmer que l'établissement existe vraiment et qu'il est actif.
-  const cleanedSiret = parsed.data.siret.replace(/\s/g, '')
-
-  // Format basique 14 chiffres — première barrière sans appel réseau
-  if (!/^\d{14}$/.test(cleanedSiret)) {
-    return { fieldErrors: { siret: 'Le SIRET doit contenir exactement 14 chiffres.' } }
+    return { fieldErrors: { email: getEmailValidationMessage(emailCheck.reason) } }
   }
 
   const admin = createAdminClient<Database>(
@@ -81,71 +69,11 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
-  // Bypass DEV (NEXT_PUBLIC_KOVAS_DEV_ALLOW_FAKE_SIRET=1) : on saute
-  // l'appel API mais on continue le signup (utile tests E2E).
-  let sireneVerification: Awaited<ReturnType<typeof verifyDiagnosticActivityCached>> | null = null
-  if (!isFakeSiretAllowed()) {
-    sireneVerification = await verifyDiagnosticActivityCached(admin, cleanedSiret)
-
-    // Erreur réseau / rate-limit / parse → on bloque le signup avec un message
-    // explicite. L'utilisateur peut retenter (le cache ne stockera rien).
-    if (sireneVerification.error === 'network' || sireneVerification.error === 'rate_limit') {
-      return {
-        error:
-          'Vérification SIRET temporairement indisponible. Merci de réessayer dans quelques minutes.',
-      }
-    }
-
-    if (sireneVerification.error === 'not_found' || !sireneVerification.found) {
-      return {
-        fieldErrors: {
-          siret:
-            'Votre SIRET ne correspond pas à un établissement enregistré au registre SIRENE. Vérifiez le numéro saisi ou contactez contact@kovas.fr.',
-        },
-      }
-    }
-
-    if (!sireneVerification.isActive) {
-      return {
-        fieldErrors: {
-          siret:
-            'Votre SIRET ne correspond pas à un établissement actif au registre SIRENE. Vérifiez le numéro saisi ou contactez contact@kovas.fr.',
-        },
-      }
-    }
-    // Si NAF mismatch : on laisse passer mais on flagge pour revue admin.
-    // Cas typique : nouveau cabinet pas encore catégorisé, ou multi-activités.
-  }
-
-  // Protection 3 — 1 SIRET = 1 essai à vie
-  const { data: existingTrial } = await admin
-    .from('cabinet_trials')
-    .select('id, converted_to_paid, blocked_reason')
-    .eq('siret', cleanedSiret)
-    .maybeSingle()
-
-  if (existingTrial) {
-    if (existingTrial.blocked_reason) {
-      return {
-        error:
-          'Ton cabinet a été suspendu suite à des comportements suspects. Contacte contact@kovas.fr.',
-      }
-    }
-    if (existingTrial.converted_to_paid) {
-      return {
-        error: 'Un compte payant existe déjà pour ce SIRET. Connecte-toi.',
-      }
-    }
-    return {
-      error:
-        "Ton cabinet a déjà bénéficié d'un essai KOVAS. Choisis un abonnement à partir de 29€/mois.",
-    }
-  }
-
-  // Recompose `full_name` pour compat schema legacy (cf. profiles trigger)
+  // Recompose `full_name` pour compat schema legacy (cf. profiles trigger).
   const fullName = joinFullName(parsed.data.firstName, parsed.data.lastName)
 
-  // Création user (auto-confirm en V1 dev — cf. CLAUDE.md §6)
+  // Création user (auto-confirm en V1 — cf. CLAUDE.md §6). Le trigger
+  // handle_new_user() crée l'organisation associée (sans SIRET, nullable).
   const { data: createdUser, error: adminError } = await admin.auth.admin.createUser({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -162,42 +90,6 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
       return { fieldErrors: { email: 'Un compte existe déjà avec cet email.' } }
     }
     return { error: adminError?.message ?? 'Création du compte impossible.' }
-  }
-
-  // Récupère l'organization auto-créée par le trigger handle_new_user()
-  const { data: profile } = await admin
-    .from('profiles')
-    .select('default_org_id')
-    .eq('id', createdUser.user.id)
-    .single()
-
-  // Enregistre le trial dans cabinet_trials avec les méta-données SIRENE
-  const signupAnomaly =
-    sireneVerification?.found && !sireneVerification.isDiagnosticNAF ? 'naf_mismatch' : null
-
-  const trialPayload: Record<string, unknown> = {
-    siret: cleanedSiret,
-    email: parsed.data.email,
-    user_id: createdUser.user.id,
-    organization_id: profile?.default_org_id ?? null,
-  }
-  if (sireneVerification?.found) {
-    trialPayload.sirene_verified_naf = sireneVerification.nafCode
-    trialPayload.sirene_verified_at = new Date().toISOString()
-    trialPayload.sirene_company_name = sireneVerification.companyName
-  }
-  if (signupAnomaly) {
-    trialPayload.signup_anomaly = signupAnomaly
-  }
-
-  const { error: trialError } = await admin
-    .from('cabinet_trials')
-    // biome-ignore lint/suspicious/noExplicitAny: colonnes ajoutées par migration 20260620300000, types pas régénérés
-    .insert(trialPayload as any)
-
-  if (trialError && !trialError.message.includes('duplicate')) {
-    // Non bloquant en V1 — log et continue
-    console.error('cabinet_trials insert failed:', trialError)
   }
 
   // Programme parrainage : si un code est porté par le cookie ou le formulaire,
@@ -219,13 +111,13 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
         referralCode: refCandidate,
       })
     } catch (refErr) {
-      // Non bloquant — on ne casse pas le signup si la table n'existe pas encore
+      // Non bloquant — on ne casse pas le signup si la table n'existe pas encore.
       console.warn('referral apply failed:', refErr)
     }
     cookieStore.delete(REFERRAL_COOKIE)
   }
 
-  // Connexion immédiate
+  // Connexion immédiate.
   const supabase = await createClient()
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,

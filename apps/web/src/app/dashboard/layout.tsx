@@ -16,6 +16,7 @@ import { UsageWidget } from '@/components/usage-widget'
 import { UserMenu } from '@/components/user-menu'
 import { getUserTrackAccess } from '@/lib/access/track-access'
 import { getCurrentUser } from '@/lib/auth/current-user'
+import { checkSiretGuard } from '@/lib/billing/siret-guard'
 import { checkTrialGuard, isPathWhitelisted } from '@/lib/billing/trial-guard'
 import { getMockNotifications } from '@/lib/notifications/mock'
 import { saveSidebarPreferencesAction } from '@/lib/sidebar/actions'
@@ -37,25 +38,34 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // Phase C — Dual track : charge également l'état Annuaire/Logiciel pour
   // adapter la sidebar (annuaire-only / logiciel-only / dual / free).
   // FIX-CC (2026-05-23) : charge les préférences sidebar + compteurs badges.
-  const [access, suggestions, trackAccess, trialVerdict, sidebarPrefs, badgeCounts] =
+  const [access, suggestions, trackAccess, trialVerdict, siretVerdict, sidebarPrefs, badgeCounts] =
     await Promise.all([
       loadUserAccess(supabase, orgId),
       loadPendingSuggestions(supabase, user.id),
       getUserTrackAccess(),
       checkTrialGuard(supabase, orgId),
+      checkSiretGuard(supabase, orgId),
       loadSidebarPreferences(user.id, supabase),
       loadSidebarBadgeCounts(supabase, orgId),
     ])
 
-  // Garde "essai expiré sans paiement" — redirige vers /dashboard/account?expired=1
-  // sauf si déjà sur une route whitelistée (account, billing, API, status, etc.).
-  if (trialVerdict.kind === 'expired') {
-    const h = await headers()
-    const pathname = h.get('x-invoke-path') ?? h.get('referer') ?? ''
-    const currentPath = pathname.startsWith('/dashboard') ? pathname : '/dashboard'
-    if (!isPathWhitelisted(currentPath)) {
-      redirect('/dashboard/account?expired=1')
-    }
+  // Chemin courant — partagé par les gardes ci-dessous. Les routes whitelistées
+  // (account, billing, API, status…) restent accessibles pour permettre la
+  // conversion / la saisie du SIRET. `/dashboard/account/verify-siret` est
+  // couvert par le préfixe `/dashboard/account`.
+  const h = await headers()
+  const rawPath = h.get('x-invoke-path') ?? h.get('referer') ?? ''
+  const currentPath = rawPath.startsWith('/dashboard') ? rawPath : '/dashboard'
+
+  // Garde "essai expiré sans paiement" — redirige vers /dashboard/account?expired=1.
+  if (trialVerdict.kind === 'expired' && !isPathWhitelisted(currentPath)) {
+    redirect('/dashboard/account?expired=1')
+  }
+
+  // Garde "SIRET obligatoire après paiement" — une fois la CB enregistrée, le
+  // SIRET est requis pour utiliser l'app (funnel sans friction avant paiement).
+  if (siretVerdict.kind === 'missing' && !isPathWhitelisted(currentPath)) {
+    redirect('/dashboard/account/verify-siret')
   }
 
   return (
