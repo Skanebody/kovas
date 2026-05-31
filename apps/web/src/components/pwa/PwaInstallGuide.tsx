@@ -20,6 +20,7 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
+  ArrowRight,
   CheckCircle2,
   Download,
   Monitor,
@@ -30,6 +31,7 @@ import {
   SquarePlus,
   WifiOff,
 } from 'lucide-react'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 /**
@@ -51,7 +53,7 @@ interface IosNavigator extends Navigator {
 type DeviceKind = 'loading' | 'installed' | 'ios-safari' | 'ios-other' | 'android' | 'desktop'
 
 interface PwaInstallGuideProps {
-  /** URL de l'app vers laquelle pointe le QR code desktop (ex. https://kovas.fr/dashboard/dashboard). */
+  /** URL PUBLIQUE d'installation vers laquelle pointe le QR desktop (https://kovas.fr/installer). */
   readonly appUrl: string
   /** QR code SVG pré-généré côté serveur (lib `qrcode`). `null` si la génération a échoué. */
   readonly qrSvg: string | null
@@ -172,15 +174,23 @@ function SkeletonState() {
 
 function InstalledState() {
   return (
-    <Card variant="flat" padding="default" className="space-y-2">
-      <div className="flex items-center gap-2">
-        <CheckCircle2 className="size-5 text-[#34C759]" aria-hidden />
-        <h2 className="text-[16px] font-semibold text-ink">KOVAS est déjà installée</h2>
+    <Card variant="flat" padding="default" className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="size-5 text-[#34C759]" aria-hidden />
+          <h2 className="text-[16px] font-semibold text-ink">KOVAS est déjà installée</h2>
+        </div>
+        <p className="text-[13px] text-ink-soft leading-relaxed">
+          Tu utilises déjà KOVAS en mode application sur cet appareil. Rien à faire — tu peux la
+          retrouver sur ton écran d&apos;accueil, même sans réseau.
+        </p>
       </div>
-      <p className="text-[13px] text-ink-soft leading-relaxed">
-        Tu utilises déjà KOVAS en mode application sur cet appareil. Rien à faire — tu peux la
-        retrouver sur ton écran d&apos;accueil, même sans réseau.
-      </p>
+      <Button asChild variant="accent" size="lg" className="w-full">
+        <Link href="/dashboard/dashboard">
+          Ouvrir KOVAS
+          <ArrowRight className="size-4" aria-hidden />
+        </Link>
+      </Button>
     </Card>
   )
 }
@@ -230,33 +240,37 @@ function IosSafariSteps() {
         <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-mute">
           Sur iPhone / iPad
         </p>
-        <h2 className="text-[18px] font-semibold text-ink">Ajoute KOVAS en 4 touchers</h2>
+        <h2 className="text-[18px] sm:text-[20px] font-semibold text-ink leading-snug">
+          Ajoute KOVAS à ton écran d&apos;accueil — 3 touchers, c&apos;est tout
+        </h2>
+        <p className="text-[13px] text-ink-soft leading-relaxed">
+          Aucun téléchargement, aucun compte App Store. Tu suis simplement ces étapes dans Safari.
+        </p>
       </div>
-      <ol className="space-y-5">
-        <StepRow n={1} icon={<Share className="size-4" aria-hidden />} title="Appuie sur Partager">
-          C&apos;est la petite icône carrée avec une flèche vers le haut, en bas de Safari.
+      <ol className="space-y-6">
+        <StepRow
+          n={1}
+          icon={<Share className="size-4" aria-hidden />}
+          title="Appuie sur le bouton Partager"
+        >
+          C&apos;est la petite icône carrée avec une flèche qui pointe vers le haut, tout en bas de
+          l&apos;écran de Safari.
         </StepRow>
         <StepRow
           n={2}
           icon={<SquarePlus className="size-4" aria-hidden />}
-          title={'Appuie sur « Sur l’écran d’accueil »'}
+          title={'Choisis « Sur l’écran d’accueil »'}
         >
-          Fais défiler la liste vers le bas si tu ne la vois pas tout de suite.
+          Un menu s&apos;ouvre : fais-le défiler vers le bas jusqu&apos;à voir cette ligne, puis
+          appuie dessus.
         </StepRow>
         <StepRow
           n={3}
           icon={<Plus className="size-4" aria-hidden />}
-          title={'Appuie sur « Ajouter » en haut à droite'}
+          title={'Appuie sur « Ajouter », en haut à droite'}
         >
-          Tu peux laisser le nom « KOVAS » tel quel.
-        </StepRow>
-        <StepRow
-          n={4}
-          icon={<CheckCircle2 className="size-4 text-[#34C759]" aria-hidden />}
-          title="C'est fait !"
-        >
-          L&apos;icône KOVAS est sur ton écran d&apos;accueil. Ouvre-la pour travailler comme une
-          vraie app, même sans réseau.
+          Tu peux laisser le nom « KOVAS » tel quel. C&apos;est terminé : l&apos;icône KOVAS
+          apparaît sur ton écran d&apos;accueil, comme une vraie app, même sans réseau.
         </StepRow>
       </ol>
     </Card>
@@ -371,15 +385,16 @@ function DesktopGuide({ appUrl, qrSvg }: { appUrl: string; qrSvg: string | null 
         {qrSvg ? (
           <div
             className="rounded-xl bg-white p-3 border border-[#0F1419]/[0.08] shadow-glass-sm shrink-0 [&>svg]:block [&>svg]:size-[180px]"
-            aria-label="QR code vers l'application KOVAS"
+            aria-label="QR code vers la page d'installation KOVAS"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: SVG généré côté serveur par la lib qrcode à partir d'une URL maîtrisée (aucune entrée utilisateur), pas de risque XSS.
             dangerouslySetInnerHTML={{ __html: qrSvg }}
           />
         ) : null}
         <div className="space-y-2 text-center sm:text-left">
           <p className="text-[13px] text-ink-soft leading-relaxed">
-            Scanne ce QR code avec l&apos;appareil photo de ton téléphone, puis suis les étapes
-            d&apos;installation qui s&apos;affichent.
+            Scanne ce QR code avec l&apos;appareil photo de ton téléphone&nbsp;: la page qui
+            s&apos;ouvre t&apos;expliquera, étape par étape, comment{' '}
+            <strong>ajouter KOVAS à ton écran d&apos;accueil</strong> (ça prend 15&nbsp;secondes).
           </p>
           <p className="text-[12px] text-ink-mute leading-relaxed">
             Pas de QR&nbsp;? Ouvre cette adresse sur ton téléphone :

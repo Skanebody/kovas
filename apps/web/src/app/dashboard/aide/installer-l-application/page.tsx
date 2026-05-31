@@ -17,8 +17,13 @@ import { ChevronLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-/** URL canonique de l'app installée (matche `start_url` du manifest). */
-const APP_URL = 'https://kovas.fr/dashboard/dashboard' as const
+/**
+ * URL de la page PUBLIQUE d'installation (sert au QR desktop + au lien
+ * « ouvre cette adresse sur ton téléphone »). PAS le `start_url` du manifest :
+ * scanner le QR depuis un desktop doit ouvrir une page SANS auth qui montre
+ * les étapes d'ajout à l'écran d'accueil — sinon le téléphone tombe sur le login.
+ */
+const INSTALL_URL = 'https://kovas.fr/installer' as const
 
 export const metadata: Metadata = buildNoindexMetadata({
   title: "Installer l'application sur ton téléphone — Aide",
@@ -35,7 +40,7 @@ export default async function AideInstallerApplicationPage() {
   let qrSvg: string | null = null
   try {
     const QRCode = await import('qrcode')
-    qrSvg = await QRCode.toString(APP_URL, {
+    qrSvg = await QRCode.toString(INSTALL_URL, {
       type: 'svg',
       margin: 1,
       width: 200,
@@ -62,7 +67,7 @@ export default async function AideInstallerApplicationPage() {
         description="KOVAS s'installe directement depuis ton navigateur, sans passer par un store. Suis le guide adapté à ton appareil."
       />
 
-      <PwaInstallGuide appUrl={APP_URL} qrSvg={qrSvg} />
+      <PwaInstallGuide appUrl={INSTALL_URL} qrSvg={qrSvg} />
     </div>
   )
 }
