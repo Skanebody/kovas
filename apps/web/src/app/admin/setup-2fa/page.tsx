@@ -45,14 +45,23 @@ export default async function SetupTwoFaPage() {
   const secret = generateSecret()
   const otpauthUrl = buildOtpauthUrl(secret, access.user.email)
 
-  // QR code généré côté serveur (data URL PNG) à partir du lien otpauth.
-  // `qrcode` dépend de modules Node → import dynamique, server-only.
-  const QRCode = await import('qrcode')
-  const qrDataUrl = await QRCode.toDataURL(otpauthUrl, {
-    width: 220,
-    margin: 1,
-    errorCorrectionLevel: 'M',
-  })
+  // QR code généré côté serveur en SVG (toString) — contrairement à toDataURL
+  // (PNG), le SVG ne dépend PAS du module natif `canvas`, indisponible sur le
+  // runtime serverless Vercel. Génération NON bloquante : si elle échoue pour
+  // une raison quelconque, la page s'affiche quand même (le secret + le lien
+  // otpauth restent affichés en fallback de saisie manuelle).
+  let qrSvg: string | null = null
+  try {
+    const QRCode = await import('qrcode')
+    qrSvg = await QRCode.toString(otpauthUrl, {
+      type: 'svg',
+      margin: 1,
+      width: 220,
+      errorCorrectionLevel: 'M',
+    })
+  } catch {
+    qrSvg = null
+  }
 
   return (
     <div className="min-h-dvh flex flex-col bg-fluid-light">
@@ -83,23 +92,22 @@ export default async function SetupTwoFaPage() {
             </p>
           </div>
 
-          {/* QR code à scanner (généré depuis le lien otpauth côté serveur) */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="rounded-xl bg-white p-3 border border-rule/60 shadow-glass-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={qrDataUrl}
-                alt="QR code de configuration 2FA — à scanner dans votre application d'authentification"
-                width={220}
-                height={220}
-                className="block size-[220px]"
+          {/* QR code à scanner (SVG généré côté serveur). Rendu seulement si la
+              génération a réussi — sinon on tombe sur la saisie manuelle du secret. */}
+          {qrSvg ? (
+            <div className="flex flex-col items-center gap-3">
+              <div
+                className="rounded-xl bg-white p-3 border border-rule/60 shadow-glass-sm [&>svg]:block [&>svg]:size-[220px]"
+                aria-label="QR code de configuration 2FA"
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: SVG généré par la lib qrcode à partir d'un lien otpauth maîtrisé (aucune entrée utilisateur), pas de risque XSS.
+                dangerouslySetInnerHTML={{ __html: qrSvg }}
               />
+              <p className="text-[12px] text-ink-mute text-center max-w-xs leading-relaxed">
+                Scannez ce QR dans Google Authenticator, Authy ou 1Password. Pas de caméra ?
+                Saisissez le secret ci-dessous manuellement.
+              </p>
             </div>
-            <p className="text-[12px] text-ink-mute text-center max-w-xs leading-relaxed">
-              Scannez ce QR dans Google Authenticator, Authy ou 1Password. Pas de caméra ? Saisissez
-              le secret ci-dessous manuellement.
-            </p>
-          </div>
+          ) : null}
 
           {/* Secret affiché en clair (font-mono, copiable) — fallback si pas de scan */}
           <div className="rounded-md bg-ink/5 px-4 py-4 space-y-2">
