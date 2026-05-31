@@ -45,6 +45,15 @@ export default async function SetupTwoFaPage() {
   const secret = generateSecret()
   const otpauthUrl = buildOtpauthUrl(secret, access.user.email)
 
+  // QR code généré côté serveur (data URL PNG) à partir du lien otpauth.
+  // `qrcode` dépend de modules Node → import dynamique, server-only.
+  const QRCode = await import('qrcode')
+  const qrDataUrl = await QRCode.toDataURL(otpauthUrl, {
+    width: 220,
+    margin: 1,
+    errorCorrectionLevel: 'M',
+  })
+
   return (
     <div className="min-h-dvh flex flex-col bg-fluid-light">
       <header className="px-6 py-5 flex items-center justify-between">
@@ -74,7 +83,25 @@ export default async function SetupTwoFaPage() {
             </p>
           </div>
 
-          {/* Secret affiché en clair (font-mono, copiable) */}
+          {/* QR code à scanner (généré depuis le lien otpauth côté serveur) */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="rounded-xl bg-white p-3 border border-rule/60 shadow-glass-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={qrDataUrl}
+                alt="QR code de configuration 2FA — à scanner dans votre application d'authentification"
+                width={220}
+                height={220}
+                className="block size-[220px]"
+              />
+            </div>
+            <p className="text-[12px] text-ink-mute text-center max-w-xs leading-relaxed">
+              Scannez ce QR dans Google Authenticator, Authy ou 1Password. Pas de caméra ? Saisissez
+              le secret ci-dessous manuellement.
+            </p>
+          </div>
+
+          {/* Secret affiché en clair (font-mono, copiable) — fallback si pas de scan */}
           <div className="rounded-md bg-ink/5 px-4 py-4 space-y-2">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-mute">
               Secret base32
