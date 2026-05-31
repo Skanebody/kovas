@@ -178,10 +178,16 @@ export interface RateLimitResult {
  * Vérifie le rate limit pour un identifiant (IP ou user_id selon le tier)
  * et retourne le résultat.
  *
- * Comportement si Redis absent :
- *  - production → FAIL-CLOSED (success=false). Une mauvaise config Vercel
- *    promue en prod doit faire échouer les appels au lieu de tout laisser passer.
- *  - dev / preview → FAIL-OPEN soft (success=true + log warn).
+ * Comportement si Redis absent : FAIL-OPEN (success=true) + log d'alerte.
+ *
+ * Décision 2026-05-30 : on NE fait PLUS fail-closed en prod. Le rate-limiting est
+ * une défense en profondeur (anti-brute-force / anti-spam) — pas la sécurité
+ * primaire de l'auth (Supabase Auth a ses propres protections). Un fail-closed
+ * quand Upstash n'est pas (encore) configuré bloquait TOUT signup ET login en
+ * production (« Trop de tentatives… réessayez dans 1 minute » systématique), ce
+ * qui est bien pire que l'absence de rate-limit. Pour réactiver le rate-limiting
+ * réel : configurer UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN sur Vercel
+ * (cf. docs/refonte-2026-05/UPSTASH-SETUP.md).
  */
 export async function checkRateLimit(
   tier: RateLimitTier,
@@ -191,19 +197,13 @@ export async function checkRateLimit(
   if (!limiter) {
     if (process.env.NODE_ENV === 'production') {
       console.error(
-        '[rate-limit] CRITICAL: Upstash Redis non configuré en production. ' +
-          'Toutes les requêtes rate-limitées sont rejetées (fail-closed). ' +
-          'Configurer UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN sur Vercel.',
+        '[rate-limit] Upstash Redis non configuré en PRODUCTION — rate-limiting DÉSACTIVÉ (fail-open). ' +
+          'Configurer UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN sur Vercel pour le réactiver.',
       )
-      return {
-        success: false,
-        limit: 0,
-        remaining: 0,
-        reset: Date.now() + 60_000,
-      }
+    } else {
+      console.warn('[rate-limit] Upstash Redis non configuré (dev/preview). Fail-open soft.')
     }
-    // dev / preview : fail-open soft
-    console.warn('[rate-limit] Upstash Redis non configuré (dev/preview). Fail-open soft.')
+    // Fail-OPEN : on laisse passer pour ne jamais bloquer les utilisateurs.
     return { success: true, limit: 0, remaining: 0, reset: 0 }
   }
 
