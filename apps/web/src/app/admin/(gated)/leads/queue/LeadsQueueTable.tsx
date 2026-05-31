@@ -190,25 +190,25 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
                 <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
                   Demandeur
                 </th>
-                <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute hidden sm:table-cell">
                   Ville
                 </th>
-                <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute hidden md:table-cell">
                   Type
                 </th>
-                <th className="text-right px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                <th className="text-right px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute hidden lg:table-cell">
                   m²
                 </th>
                 <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
                   Intent
                 </th>
-                <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute hidden md:table-cell">
                   Strategie
                 </th>
-                <th className="text-right px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                <th className="text-right px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute hidden lg:table-cell">
                   Acc/Ass
                 </th>
-                <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute hidden sm:table-cell">
                   Statut
                 </th>
                 <th className="text-right px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
@@ -235,23 +235,25 @@ export function LeadsQueueTable({ initialRows }: LeadsQueueTableProps) {
                     <td className="px-3 py-2 text-ink truncate max-w-[180px]">
                       {formatRequester(r.requesterFirstName, r.requesterLastName)}
                     </td>
-                    <td className="px-3 py-2 text-ink-mute">{r.city ?? '—'}</td>
-                    <td className="px-3 py-2 text-ink-mute font-mono text-[11px] uppercase">
+                    <td className="px-3 py-2 text-ink-mute hidden sm:table-cell">
+                      {r.city ?? '—'}
+                    </td>
+                    <td className="px-3 py-2 text-ink-mute font-mono text-[11px] uppercase hidden md:table-cell">
                       {r.certificationType ?? '—'}
                     </td>
-                    <td className="px-3 py-2 text-right text-ink-mute font-mono text-[11px]">
+                    <td className="px-3 py-2 text-right text-ink-mute font-mono text-[11px] hidden lg:table-cell">
                       {r.surfaceM2 ?? '—'}
                     </td>
                     <td className="px-3 py-2">
                       <IntentBadge bucket={r.intentBucket} score={r.intentScore} />
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 hidden md:table-cell">
                       <StrategyBadge strategy={r.routingStrategy} />
                     </td>
-                    <td className="px-3 py-2 text-right text-ink-mute font-mono text-[11px]">
+                    <td className="px-3 py-2 text-right text-ink-mute font-mono text-[11px] hidden lg:table-cell">
                       {r.acceptanceCount}/{r.assignedCount}
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 hidden sm:table-cell">
                       {r.closedAt ? (
                         <span className="text-ink-mute text-[11px]">Cloturé</span>
                       ) : (

@@ -58,7 +58,7 @@ export function RevenueByPeriod({ history }: RevenueByPeriodProps) {
 
   return (
     <Card variant="opaque" padding="default" className="col-span-full lg:col-span-2">
-      <header className="flex items-start justify-between gap-4 mb-4">
+      <header className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute">
             Revenue · par période
@@ -67,7 +67,7 @@ export function RevenueByPeriod({ history }: RevenueByPeriodProps) {
         </div>
         <nav
           aria-label="Sélection période"
-          className="inline-flex rounded-md bg-sage-alt p-0.5 text-[11px] font-mono uppercase tracking-wider"
+          className="inline-flex flex-wrap rounded-md bg-sage-alt p-0.5 text-[11px] font-mono uppercase tracking-wider"
         >
           {PERIODS.map((p) => (
             <button

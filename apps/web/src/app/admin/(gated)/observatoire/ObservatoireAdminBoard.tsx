@@ -203,72 +203,74 @@ export function ObservatoireAdminBoard({ reports, summary }: Props) {
         </Card>
       ) : (
         <Card className="p-0 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-cream-deep border-b border-rule">
-              <tr>
-                <th className="text-left px-4 py-3 font-semibold text-ink">Période</th>
-                <th className="text-left px-4 py-3 font-semibold text-ink">Statut</th>
-                <th className="text-right px-4 py-3 font-semibold text-ink">Envoyés</th>
-                <th className="text-right px-4 py-3 font-semibold text-ink">Ouverts</th>
-                <th className="text-right px-4 py-3 font-semibold text-ink">DL</th>
-                <th className="text-right px-4 py-3 font-semibold text-ink">Coût IA</th>
-                <th className="text-right px-4 py-3 font-semibold text-ink">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reports.map((r) => (
-                <tr key={r.id} className="border-b border-rule last:border-b-0">
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-ink">{r.periodLabel}</p>
-                    <p className="text-[11px] font-mono text-ink-faint">
-                      {formatBytes(r.pdfSizeBytes)} · {formatDate(r.generatedAt)}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3">{statusBadge(r.status)}</td>
-                  <td className="px-4 py-3 text-right font-mono text-ink">
-                    {r.emailsSent}
-                    {r.emailsFailed > 0 ? (
-                      <span className="text-red-600 text-xs ml-1">({r.emailsFailed} ✕)</span>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-ink">{r.emailsOpened}</td>
-                  <td className="px-4 py-3 text-right font-mono text-ink-mute">
-                    {r.downloadsDirect}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-ink-mute">
-                    {formatEur(r.aiCostEur)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="inline-flex items-center gap-1">
-                      {r.pdfUrl ? (
-                        <a
-                          href={r.pdfUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-ink-mute hover:text-ink px-2 py-1 rounded hover:bg-cream-deep"
-                        >
-                          <Download className="size-3.5" />
-                          PDF
-                        </a>
-                      ) : null}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleGenerate(true, r)}
-                        disabled={busy === `force-${r.id}`}
-                      >
-                        {busy === `force-${r.id}` ? (
-                          <Loader2 className="size-3.5 animate-spin" />
-                        ) : (
-                          <RefreshCw className="size-3.5" />
-                        )}
-                      </Button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[640px]">
+              <thead className="bg-cream-deep border-b border-rule">
+                <tr>
+                  <th className="text-left px-4 py-3 font-semibold text-ink">Période</th>
+                  <th className="text-left px-4 py-3 font-semibold text-ink">Statut</th>
+                  <th className="text-right px-4 py-3 font-semibold text-ink">Envoyés</th>
+                  <th className="text-right px-4 py-3 font-semibold text-ink">Ouverts</th>
+                  <th className="text-right px-4 py-3 font-semibold text-ink">DL</th>
+                  <th className="text-right px-4 py-3 font-semibold text-ink">Coût IA</th>
+                  <th className="text-right px-4 py-3 font-semibold text-ink">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {reports.map((r) => (
+                  <tr key={r.id} className="border-b border-rule last:border-b-0">
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-ink">{r.periodLabel}</p>
+                      <p className="text-[11px] font-mono text-ink-faint">
+                        {formatBytes(r.pdfSizeBytes)} · {formatDate(r.generatedAt)}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">{statusBadge(r.status)}</td>
+                    <td className="px-4 py-3 text-right font-mono text-ink">
+                      {r.emailsSent}
+                      {r.emailsFailed > 0 ? (
+                        <span className="text-red-600 text-xs ml-1">({r.emailsFailed} ✕)</span>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-ink">{r.emailsOpened}</td>
+                    <td className="px-4 py-3 text-right font-mono text-ink-mute">
+                      {r.downloadsDirect}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-ink-mute">
+                      {formatEur(r.aiCostEur)}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="inline-flex items-center gap-1">
+                        {r.pdfUrl ? (
+                          <a
+                            href={r.pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-ink-mute hover:text-ink px-2 py-1 rounded hover:bg-cream-deep"
+                          >
+                            <Download className="size-3.5" />
+                            PDF
+                          </a>
+                        ) : null}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleGenerate(true, r)}
+                          disabled={busy === `force-${r.id}`}
+                        >
+                          {busy === `force-${r.id}` ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <RefreshCw className="size-3.5" />
+                          )}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Card>
       )}
     </div>

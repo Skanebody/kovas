@@ -40,7 +40,7 @@ export default async function AdminGatedLayout({ children }: { children: ReactNo
       <div className="flex-1 flex flex-col min-w-0">
         <AdminHeader email={access.user.email} role={access.role} />
         {/* AdminAlertBanner — placeholder itération 2 (alertes critiques bandeau rouge) */}
-        <main className="flex-1 overflow-y-auto px-6 py-7">{children}</main>
+        <main className="flex-1 overflow-y-auto min-w-0 px-4 py-5 md:px-6 md:py-7">{children}</main>
       </div>
     </div>
   )

@@ -40,7 +40,7 @@ export function ProjectionsChart({ projections }: ProjectionsChartProps) {
 
   return (
     <Card variant="opaque" padding="default" className="col-span-full lg:col-span-2">
-      <header className="mb-4 flex items-baseline justify-between gap-4">
+      <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute">
             Projections · 6 mois à venir

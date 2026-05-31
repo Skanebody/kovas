@@ -253,11 +253,11 @@ export function GuidesRefreshBoard({ drafts, currentVersions, stats }: GuidesRef
 
           {/* Detail */}
           {selected && (
-            <section className="space-y-4">
+            <section className="space-y-4 min-w-0">
               <Card className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h2 className="text-xl font-bold">{selected.draftTitle}</h2>
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-bold break-words">{selected.draftTitle}</h2>
                     <p className="text-sm text-muted-foreground mt-1">
                       <code className="px-1 py-0.5 bg-muted rounded text-xs">
                         /guide/{selected.guideSlug}
@@ -317,13 +317,13 @@ export function GuidesRefreshBoard({ drafts, currentVersions, stats }: GuidesRef
                     )}
                     Re-générer
                   </Button>
-                  <div className="flex items-center gap-2 ml-auto">
+                  <div className="flex flex-1 sm:flex-none items-center gap-2 w-full sm:w-auto sm:ml-auto">
                     <input
                       type="text"
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
                       placeholder="Raison de rejet…"
-                      className="h-9 rounded-md border border-input bg-background px-3 text-sm w-64"
+                      className="h-9 rounded-md border border-input bg-background px-3 text-sm w-full sm:w-64 min-w-0"
                     />
                     <Button
                       variant="destructive"

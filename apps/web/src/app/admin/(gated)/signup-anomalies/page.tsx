@@ -56,50 +56,54 @@ export default async function SignupAnomaliesPage() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-rule">
-              <tr className="text-left font-mono text-[11px] uppercase tracking-[0.12em] text-ink-mute">
-                <th className="px-4 py-3">SIRET</th>
-                <th className="px-4 py-3">Entreprise</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">NAF déclaré</th>
-                <th className="px-4 py-3">Anomalie</th>
-                <th className="px-4 py-3">Date signup</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-rule">
-              {rows.map((row) => (
-                <tr key={row.id} className={row.bloked ? 'opacity-50' : ''}>
-                  <td className="px-4 py-3 font-mono text-xs">{row.siret}</td>
-                  <td className="px-4 py-3">
-                    {row.sireneCompanyName ?? <span className="text-ink-mute">—</span>}
-                  </td>
-                  <td className="px-4 py-3 text-ink-mute">{row.email}</td>
-                  <td className="px-4 py-3 font-mono text-xs">
-                    {row.sireneVerifiedNaf ?? <span className="text-ink-mute">—</span>}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
-                      {row.signupAnomaly
-                        ? (ANOMALY_LABELS[row.signupAnomaly] ?? row.signupAnomaly)
-                        : '—'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-ink-mute text-xs">{formatDate(row.createdAt)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end">
-                      {row.bloked ? (
-                        <span className="text-xs font-medium text-red-700">Déjà bloqué</span>
-                      ) : (
-                        <AnomalyRowActions trialId={row.id} />
-                      )}
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-rule">
+                <tr className="text-left font-mono text-[11px] uppercase tracking-[0.12em] text-ink-mute">
+                  <th className="px-4 py-3">SIRET</th>
+                  <th className="px-4 py-3 hidden md:table-cell">Entreprise</th>
+                  <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3 hidden lg:table-cell">NAF déclaré</th>
+                  <th className="px-4 py-3">Anomalie</th>
+                  <th className="px-4 py-3 hidden sm:table-cell">Date signup</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-rule">
+                {rows.map((row) => (
+                  <tr key={row.id} className={row.bloked ? 'opacity-50' : ''}>
+                    <td className="px-4 py-3 font-mono text-xs">{row.siret}</td>
+                    <td className="px-4 py-3 hidden md:table-cell">
+                      {row.sireneCompanyName ?? <span className="text-ink-mute">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-ink-mute">{row.email}</td>
+                    <td className="px-4 py-3 font-mono text-xs hidden lg:table-cell">
+                      {row.sireneVerifiedNaf ?? <span className="text-ink-mute">—</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                        {row.signupAnomaly
+                          ? (ANOMALY_LABELS[row.signupAnomaly] ?? row.signupAnomaly)
+                          : '—'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-ink-mute text-xs hidden sm:table-cell">
+                      {formatDate(row.createdAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end">
+                        {row.bloked ? (
+                          <span className="text-xs font-medium text-red-700">Déjà bloqué</span>
+                        ) : (
+                          <AnomalyRowActions trialId={row.id} />
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

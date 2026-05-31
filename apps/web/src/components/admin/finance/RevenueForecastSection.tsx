@@ -23,7 +23,7 @@ export function RevenueForecastSection({ forecast, realized }: RevenueForecastSe
 
   return (
     <section className="space-y-4" aria-label="Revenue forecast & realized">
-      <div className="flex items-baseline justify-between">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-[15px] font-semibold tracking-tight text-ink">
           📊 Revenue — prévisionnel & réalisé
         </h2>

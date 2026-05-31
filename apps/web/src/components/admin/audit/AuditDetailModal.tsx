@@ -57,7 +57,7 @@ export function AuditDetailModal({ row, onClose }: AuditDetailModalProps) {
             </DialogHeader>
 
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3 text-[12px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12px]">
                 <div>
                   <p className="text-[10px] font-mono uppercase tracking-wider text-ink-mute">
                     Admin

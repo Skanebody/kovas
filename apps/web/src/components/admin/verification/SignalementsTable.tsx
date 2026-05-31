@@ -98,7 +98,7 @@ export function SignalementsTable({ rows, currentFilter }: Props) {
               <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider">
                 Raison
               </th>
-              <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider">
+              <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider hidden md:table-cell">
                 Reporter
               </th>
               <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider">
@@ -139,7 +139,7 @@ export function SignalementsTable({ rows, currentFilter }: Props) {
                       </div>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2.5 text-ink-mute">
+                  <td className="px-3 py-2.5 text-ink-mute hidden md:table-cell">
                     {row.reporterEmail ?? <span className="italic">anonyme</span>}
                   </td>
                   <td className="px-3 py-2.5">

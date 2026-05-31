@@ -42,37 +42,41 @@ export function AnomalyConsumersTable({ anomalies }: AnomalyConsumersTableProps)
           Aucune anomalie détectée. Toutes les orgs restent sous 3× leur moyenne 30j.
         </p>
       ) : (
-        <table className="w-full text-[12px]">
-          <thead>
-            <tr className="text-left font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint border-b border-rule/60">
-              <th className="py-2 font-normal">Organisation</th>
-              <th className="py-2 font-normal text-right">24h</th>
-              <th className="py-2 font-normal text-right">Moy 30j</th>
-              <th className="py-2 font-normal text-right">×</th>
-            </tr>
-          </thead>
-          <tbody>
-            {anomalies.map((a) => (
-              <tr key={a.orgId} className="border-b border-rule/30 last:border-b-0">
-                <td className="py-2.5">
-                  <a
-                    href={`/admin/utilisateurs?org=${a.orgId}`}
-                    className="text-ink font-medium hover:underline"
-                  >
-                    {a.orgName}
-                  </a>
-                </td>
-                <td className="py-2.5 text-right font-mono text-ink">{formatEur(a.costLast24h)}</td>
-                <td className="py-2.5 text-right font-mono text-ink-mute">
-                  {formatEur(a.avg30dDaily)}
-                </td>
-                <td className="py-2.5 text-right font-mono font-semibold text-warning">
-                  {formatMultiplier(a.multiplier)}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[12px]">
+            <thead>
+              <tr className="text-left font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint border-b border-rule/60">
+                <th className="py-2 font-normal">Organisation</th>
+                <th className="py-2 font-normal text-right">24h</th>
+                <th className="py-2 font-normal text-right">Moy 30j</th>
+                <th className="py-2 font-normal text-right">×</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {anomalies.map((a) => (
+                <tr key={a.orgId} className="border-b border-rule/30 last:border-b-0">
+                  <td className="py-2.5">
+                    <a
+                      href={`/admin/utilisateurs?org=${a.orgId}`}
+                      className="text-ink font-medium hover:underline"
+                    >
+                      {a.orgName}
+                    </a>
+                  </td>
+                  <td className="py-2.5 text-right font-mono text-ink">
+                    {formatEur(a.costLast24h)}
+                  </td>
+                  <td className="py-2.5 text-right font-mono text-ink-mute">
+                    {formatEur(a.avg30dDaily)}
+                  </td>
+                  <td className="py-2.5 text-right font-mono font-semibold text-warning">
+                    {formatMultiplier(a.multiplier)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </Card>
   )

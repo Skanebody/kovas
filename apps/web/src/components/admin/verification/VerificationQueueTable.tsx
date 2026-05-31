@@ -209,25 +209,25 @@ export function VerificationQueueTable({ rows, currentFilter }: VerificationQueu
               <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider">
                 Diagnostiqueur
               </th>
-              <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider">
+              <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider hidden sm:table-cell">
                 Ville
               </th>
               <th className="px-3 py-2.5 text-left font-mono text-[10px] uppercase tracking-wider">
                 Statut global
               </th>
-              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider">
+              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider hidden md:table-cell">
                 Id.
               </th>
-              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider">
+              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider hidden md:table-cell">
                 COFRAC
               </th>
-              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider">
+              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider hidden lg:table-cell">
                 RC Pro
               </th>
-              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider">
+              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider hidden lg:table-cell">
                 SIRENE
               </th>
-              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider">
+              <th className="px-3 py-2.5 text-center font-mono text-[10px] uppercase tracking-wider hidden sm:table-cell">
                 Signal.
               </th>
               <th className="px-3 py-2.5 text-right font-mono text-[10px] uppercase tracking-wider">
@@ -261,7 +261,9 @@ export function VerificationQueueTable({ rows, currentFilter }: VerificationQueu
                       </span>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2.5 text-ink-mute">{row.city ?? '—'}</td>
+                  <td className="px-3 py-2.5 text-ink-mute hidden sm:table-cell">
+                    {row.city ?? '—'}
+                  </td>
                   <td className="px-3 py-2.5">
                     <span
                       className={cn(
@@ -272,19 +274,19 @@ export function VerificationQueueTable({ rows, currentFilter }: VerificationQueu
                       {row.overallStatus ?? 'pending'}
                     </span>
                   </td>
-                  <td className="px-3 py-2.5 text-center">
+                  <td className="px-3 py-2.5 text-center hidden md:table-cell">
                     <PhaseDot status={row.identityStatus} />
                   </td>
-                  <td className="px-3 py-2.5 text-center">
+                  <td className="px-3 py-2.5 text-center hidden md:table-cell">
                     <PhaseDot status={row.cofracStatus} />
                   </td>
-                  <td className="px-3 py-2.5 text-center">
+                  <td className="px-3 py-2.5 text-center hidden lg:table-cell">
                     <PhaseDot status={row.rcproStatus} />
                   </td>
-                  <td className="px-3 py-2.5 text-center">
+                  <td className="px-3 py-2.5 text-center hidden lg:table-cell">
                     <PhaseDot status={row.sireneStatus} />
                   </td>
-                  <td className="px-3 py-2.5 text-center">
+                  <td className="px-3 py-2.5 text-center hidden sm:table-cell">
                     {row.signalementsCount > 0 ? (
                       <span className="font-display font-bold text-coral-mist-foreground">
                         {row.signalementsCount}

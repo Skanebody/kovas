@@ -84,7 +84,7 @@ export function UsersFilters({ initialQ, initialPlan, initialStatus }: UsersFilt
       aria-label="Filtres utilisateurs"
     >
       {/* Search */}
-      <div className="relative flex-1 min-w-[220px]">
+      <div className="relative w-full md:flex-1 md:min-w-[220px]">
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-ink-faint pointer-events-none"
           aria-hidden

@@ -35,12 +35,12 @@ const COLS: HeaderCol[] = [
     label: 'Utilisateur',
     sortKey: { asc: 'created_at_asc', desc: 'created_at_desc' },
   },
-  { label: 'Organisation' },
+  { label: 'Organisation', className: 'hidden lg:table-cell' },
   { label: 'Plan', sortKey: 'mrr_desc' },
   { label: 'Statut' },
-  { label: 'Missions / mois', sortKey: 'missions_desc' },
-  { label: 'Revenue total' },
-  { label: 'Dernière activité', sortKey: 'last_activity_desc' },
+  { label: 'Missions / mois', sortKey: 'missions_desc', className: 'hidden sm:table-cell' },
+  { label: 'Revenue total', className: 'hidden lg:table-cell' },
+  { label: 'Dernière activité', sortKey: 'last_activity_desc', className: 'hidden md:table-cell' },
 ]
 
 function SortIndicator({

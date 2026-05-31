@@ -54,40 +54,42 @@ export function CapsManager({ caps }: CapsManagerProps) {
       {caps.length === 0 ? (
         <p className="text-sm text-ink-mute py-4">Aucun plafond personnalisé actif.</p>
       ) : (
-        <table className="w-full text-[12px]">
-          <thead>
-            <tr className="text-left font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint border-b border-rule/60">
-              <th className="py-2 font-normal">Organisation</th>
-              <th className="py-2 font-normal text-right">Plafond mensuel</th>
-              <th className="py-2 font-normal text-right">Dernière modif</th>
-              <th className="py-2 font-normal text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {caps.map((c) => (
-              <tr key={c.orgId} className="border-b border-rule/30 last:border-b-0">
-                <td className="py-2.5">
-                  <span className="text-ink font-medium">{c.orgName}</span>
-                </td>
-                <td className="py-2.5 text-right font-mono text-ink">
-                  {formatEur(c.monthlyCapEur)}
-                </td>
-                <td className="py-2.5 text-right font-mono text-ink-mute">
-                  {formatDate(c.lastModifiedIso)}
-                </td>
-                <td className="py-2.5 text-right">
-                  <a
-                    href={`/admin/utilisateurs?org=${c.orgId}`}
-                    className="inline-flex items-center gap-1 text-[11px] text-ink-mute hover:text-ink hover:underline"
-                  >
-                    Fiche
-                    <ExternalLink className="size-3" aria-hidden />
-                  </a>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[12px]">
+            <thead>
+              <tr className="text-left font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint border-b border-rule/60">
+                <th className="py-2 font-normal">Organisation</th>
+                <th className="py-2 font-normal text-right">Plafond mensuel</th>
+                <th className="py-2 font-normal text-right">Dernière modif</th>
+                <th className="py-2 font-normal text-right">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {caps.map((c) => (
+                <tr key={c.orgId} className="border-b border-rule/30 last:border-b-0">
+                  <td className="py-2.5">
+                    <span className="text-ink font-medium">{c.orgName}</span>
+                  </td>
+                  <td className="py-2.5 text-right font-mono text-ink">
+                    {formatEur(c.monthlyCapEur)}
+                  </td>
+                  <td className="py-2.5 text-right font-mono text-ink-mute">
+                    {formatDate(c.lastModifiedIso)}
+                  </td>
+                  <td className="py-2.5 text-right">
+                    <a
+                      href={`/admin/utilisateurs?org=${c.orgId}`}
+                      className="inline-flex items-center gap-1 text-[11px] text-ink-mute hover:text-ink hover:underline"
+                    >
+                      Fiche
+                      <ExternalLink className="size-3" aria-hidden />
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </Card>
   )

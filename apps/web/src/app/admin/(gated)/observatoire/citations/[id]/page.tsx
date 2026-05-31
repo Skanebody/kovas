@@ -53,8 +53,8 @@ export default async function AdminCitationPage({ params }: PageProps) {
   return (
     <div className="max-w-4xl space-y-6">
       {/* Header navigation */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-mute mb-2">
             Observatoire / Citations presse
           </p>
@@ -70,8 +70,8 @@ export default async function AdminCitationPage({ params }: PageProps) {
 
       {/* Carte métadonnées en lecture seule */}
       <Card variant="opaque" padding="default" className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
             {media?.logoPath ? (
               // biome-ignore lint/a11y/useAltText: alt is provided via plain attribute
               <img src={media.logoPath} alt={`Logo ${mediaName}`} className="h-7" />

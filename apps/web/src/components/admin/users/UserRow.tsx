@@ -54,7 +54,7 @@ export function UserRow({ user }: UserRowProps) {
       </td>
 
       {/* Org */}
-      <td className="px-4 py-3">
+      <td className="px-4 py-3 hidden lg:table-cell">
         <p className="text-[12px] text-ink truncate max-w-[200px]">
           {user.organization_name ?? <span className="text-ink-faint">—</span>}
         </p>
@@ -71,15 +71,17 @@ export function UserRow({ user }: UserRowProps) {
       </td>
 
       {/* Missions ce mois */}
-      <td className="px-4 py-3 font-mono text-[12px] text-ink">{user.missions_this_month}</td>
+      <td className="px-4 py-3 font-mono text-[12px] text-ink hidden sm:table-cell">
+        {user.missions_this_month}
+      </td>
 
       {/* Lifetime revenue */}
-      <td className="px-4 py-3 font-mono text-[12px] text-ink">
+      <td className="px-4 py-3 font-mono text-[12px] text-ink hidden lg:table-cell">
         {formatEur(user.lifetime_revenue_cents)}
       </td>
 
       {/* Last activity */}
-      <td className="px-4 py-3 text-[11px] text-ink-mute">
+      <td className="px-4 py-3 text-[11px] text-ink-mute hidden md:table-cell">
         {relativeTime(user.last_active_at ?? user.created_at)}
       </td>
     </>

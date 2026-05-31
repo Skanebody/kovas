@@ -46,7 +46,7 @@ export function PerformanceMetrics({
         Performance
       </h2>
 
-      <ul className="grid grid-cols-3 gap-3 text-[12px]">
+      <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[12px]">
         <li className="rounded-md border border-rule/60 bg-paper/60 px-3 py-2.5">
           <div className="flex items-center gap-1.5">
             <Timer className="size-3 text-ink-mute" aria-hidden />

@@ -273,7 +273,7 @@ export default async function AdminChurnPage() {
       </header>
 
       {/* KPIs urgence */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <BucketCard label="Critique (≥ 70)" value={counts.critical} variant="red" />
         <BucketCard label="Élevé (50-69)" value={counts.high} variant="orange" />
         <BucketCard label="Modéré (25-49)" value={counts.mid} variant="yellow" />
@@ -305,13 +305,13 @@ export default async function AdminChurnPage() {
                     <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
                       Diagnostiqueur
                     </th>
-                    <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                    <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute hidden sm:table-cell">
                       Tier
                     </th>
-                    <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                    <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute hidden md:table-cell">
                       Statut
                     </th>
-                    <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
+                    <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute hidden lg:table-cell">
                       Signal top
                     </th>
                     <th className="text-left px-3 py-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-mute">
@@ -337,8 +337,10 @@ export default async function AdminChurnPage() {
                           <span className="text-ink-mute ml-1 text-[11px]">— {r.city}</span>
                         ) : null}
                       </td>
-                      <td className="px-3 py-2 text-ink-mute font-mono text-[11px]">{r.tier}</td>
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-2 text-ink-mute font-mono text-[11px] hidden sm:table-cell">
+                        {r.tier}
+                      </td>
+                      <td className="px-3 py-2 hidden md:table-cell">
                         <Badge variant="muted">{r.status}</Badge>
                         {r.cancellationInitiated ? (
                           <Badge variant="red" className="ml-1">
@@ -346,7 +348,7 @@ export default async function AdminChurnPage() {
                           </Badge>
                         ) : null}
                       </td>
-                      <td className="px-3 py-2 text-ink-mute text-[12px] truncate max-w-[200px]">
+                      <td className="px-3 py-2 text-ink-mute text-[12px] truncate max-w-[200px] hidden lg:table-cell">
                         {r.topSignal ?? '—'}
                       </td>
                       <td className="px-3 py-2">

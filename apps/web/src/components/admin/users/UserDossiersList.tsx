@@ -42,7 +42,7 @@ export function UserDossiersList({ dossiers }: UserDossiersListProps) {
                 </th>
                 <th
                   scope="col"
-                  className="pb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute font-medium"
+                  className="pb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-mute font-medium hidden md:table-cell"
                 >
                   Adresse
                 </th>
