@@ -14,7 +14,7 @@ export default async function OnboardingPage() {
   const firstName = profile.full_name?.split(' ')[0] ?? ''
 
   return (
-    <div className="max-w-3xl space-y-8 animate-fade-in">
+    <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
       <AppPageHeader
         eyebrow="Bienvenue · 90 secondes pour démarrer"
         title={firstName ? `Bienvenue ${firstName}` : 'Bienvenue'}
@@ -117,7 +117,7 @@ function Step({
 }) {
   return (
     <Card variant="flat" padding="default">
-      <CardContent className="pt-6 flex gap-4">
+      <CardContent className="flex gap-4 items-start">
         <div className="shrink-0 size-9 rounded-full bg-[#0F1419] text-[#D4F542] flex items-center justify-center text-sm font-semibold">
           {n}
         </div>
