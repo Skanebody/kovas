@@ -157,8 +157,32 @@ async function fetchSchedulingOverview() {
   return { durationAccuracy, conflicts, dpeQuotaTop, clustering }
 }
 
+const EMPTY_METRICS = {
+  signupsToday: 0,
+  mrrEur: 0,
+  activeOrgs: 0,
+  missionsThisMonth: 0,
+  aiCostEur: 0,
+  marginPct: null,
+} as const
+
 export default async function AdminHomePage() {
-  const [metrics, scheduling] = await Promise.all([fetchMetrics(), fetchSchedulingOverview()])
+  // Résilience : un fetcher qui échoue (table/colonne/donnée inattendue) ne doit
+  // PAS faire planter tout le tableau de bord. On dégrade gracieusement — les
+  // métriques indisponibles affichent 0 / la section scheduling est masquée.
+  const [metricsRes, schedulingRes] = await Promise.allSettled([
+    fetchMetrics(),
+    fetchSchedulingOverview(),
+  ])
+
+  const metrics = metricsRes.status === 'fulfilled' ? metricsRes.value : EMPTY_METRICS
+  const scheduling = schedulingRes.status === 'fulfilled' ? schedulingRes.value : null
+  if (metricsRes.status === 'rejected') {
+    console.error('[admin/home] fetchMetrics failed:', metricsRes.reason)
+  }
+  if (schedulingRes.status === 'rejected') {
+    console.error('[admin/home] fetchSchedulingOverview failed:', schedulingRes.reason)
+  }
 
   return (
     <div className="space-y-7 max-w-7xl">
@@ -224,13 +248,16 @@ export default async function AdminHomePage() {
         <HealthChecksGrid />
       </section>
 
-      {/* Scheduling overview (30 derniers jours) */}
-      <SchedulingMetricsSection
-        durationAccuracy={scheduling.durationAccuracy}
-        conflicts={scheduling.conflicts}
-        dpeQuotaTop={scheduling.dpeQuotaTop}
-        clustering={scheduling.clustering}
-      />
+      {/* Scheduling overview (30 derniers jours) — masqué si les métriques
+          n'ont pas pu être chargées (dégradation gracieuse). */}
+      {scheduling ? (
+        <SchedulingMetricsSection
+          durationAccuracy={scheduling.durationAccuracy}
+          conflicts={scheduling.conflicts}
+          dpeQuotaTop={scheduling.dpeQuotaTop}
+          clustering={scheduling.clustering}
+        />
+      ) : null}
     </div>
   )
 }
