@@ -8,6 +8,10 @@
  *   - pause_mission   : UPDATE active session.paused_at = now()
  *   - resume_mission  : UPDATE active session.paused_at = null
  *   - cancel_mission  : UPDATE session.ended_at + dossiers.status='cancelled'
+ *   - finish_mission  : termine la session active + dossiers.status='done' (SANS validated_at)
+ *                       → résout l'état conceptuel 'a_valider' (cf. lib/dossier/states.ts L75).
+ *                       Distinct de 'validate' qui pose validated_at → état 'valide'.
+ *                       Déclenché par le tchat mission ("Terminer la mission").
  *   - validate        : UPDATE dossiers.validated_at + status='done'
  *                       (note : le brief mentionnait 'exported' mais le CHECK de dossiers.status
  *                        n'autorise que 'done' / 'archived' post-validation ; on respecte la BDD)
@@ -30,6 +34,7 @@ const SUPPORTED_ACTIONS = [
   'pause_mission',
   'resume_mission',
   'cancel_mission',
+  'finish_mission',
   'validate',
   'reopen',
   'archive',
@@ -123,6 +128,9 @@ export async function POST(
         break
       case 'cancel_mission':
         result = await handleCancelMission(supabase, orgId, id)
+        break
+      case 'finish_mission':
+        result = await handleFinishMission(supabase, orgId, id)
         break
       case 'validate':
         result = await handleValidate(supabase, orgId, id)
@@ -328,6 +336,51 @@ async function handleCancelMission(
     ok: true,
     action: 'cancel_mission',
     status: 'cancelled',
+    sessionId: active?.id,
+  }
+}
+
+async function handleFinishMission(
+  supabase: SupabaseLike,
+  orgId: string,
+  dossierId: string,
+): Promise<OkBody | ErrorBody> {
+  // Termine la session terrain active (si elle existe) puis bascule le dossier
+  // en status='done'. On ne pose PAS validated_at : l'état conceptuel résolu
+  // devient 'a_valider' (cf. lib/dossier/states.ts L75) — le diagnostiqueur
+  // valide ensuite manuellement depuis le hub. completed_at marque la fin terrain.
+  const active = await getActiveSession(supabase, orgId, dossierId)
+  const nowIso = new Date().toISOString()
+
+  if (active && !active.ended_at) {
+    const { error } = await supabase
+      .from('mission_sessions' as never)
+      .update({ ended_at: nowIso } as never)
+      .eq('id', active.id)
+      .eq('organization_id', orgId)
+
+    if (error) {
+      return { ok: false, error: `mission_sessions finish : ${error.message}` }
+    }
+  }
+
+  const { error } = await supabase
+    .from('dossiers')
+    .update({
+      completed_at: nowIso,
+      status: 'done',
+    } as never)
+    .eq('id', dossierId)
+    .eq('organization_id', orgId)
+
+  if (error) {
+    return { ok: false, error: `dossier finish : ${error.message}` }
+  }
+
+  return {
+    ok: true,
+    action: 'finish_mission',
+    status: 'done',
     sessionId: active?.id,
   }
 }

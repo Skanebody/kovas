@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { toast } from '@/components/ui/toaster'
 import { Inbox } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
+import { acceptLeadAssignment, declineLeadAssignment } from './actions'
 import { LeadFocalCard } from './lead-focal-card'
 import { LeadsQueueSheet } from './leads-queue-sheet'
 import type { LeadItem, PostCallOutcome } from './leads-types'
@@ -25,6 +27,8 @@ interface LeadsFocalClientProps {
  *  5. "Voir la file" → BottomSheet liste compacte
  */
 export function LeadsFocalClient({ leads }: LeadsFocalClientProps) {
+  const router = useRouter()
+  const [, startTransition] = useTransition()
   const pendingLeads = useMemo(() => leads.filter((l) => l.status === 'pending'), [leads])
 
   const [currentId, setCurrentId] = useState<string | null>(pendingLeads[0]?.id ?? null)
@@ -67,16 +71,32 @@ export function LeadsFocalClient({ leads }: LeadsFocalClientProps) {
 
   const handleSendQuote = useCallback(() => {
     if (!currentLead) return
-    toast.success('Devis à envoyer', {
-      description: `Préparez le devis pour ${currentLead.clientDisplayName}.`,
+    const lead = currentLead
+    // "Envoyer un devis" = accepter le lead : on débloque les coordonnées via
+    // acceptLeadAssignment (lead.id === lead_assignments.id côté page.tsx).
+    startTransition(async () => {
+      const res = await acceptLeadAssignment(lead.id)
+      if (res.ok) {
+        toast.success('Lead accepté', {
+          description: `Coordonnées débloquées — préparez le devis pour ${lead.clientDisplayName}.`,
+        })
+        moveToNext(lead.id)
+        router.refresh()
+      } else {
+        toast.error("Impossible d'accepter ce lead", {
+          description: res.error ?? 'Réessayez dans un instant.',
+        })
+      }
     })
-    moveToNext(currentLead.id)
-  }, [currentLead, moveToNext])
+  }, [currentLead, moveToNext, router])
 
   const handleDefer = useCallback(() => {
     if (!currentLead) return
+    // "Plus tard" = simple report local (aucune action DB destructrice :
+    // refuser supprimerait définitivement le lead). Le lead réapparaîtra au
+    // prochain chargement tant qu'il reste en statut pending.
     toast('Reporté à plus tard', {
-      description: 'Le lead réapparaîtra dans 24h.',
+      description: 'Le lead réapparaîtra à la prochaine ouverture.',
     })
     moveToNext(currentLead.id)
   }, [currentLead, moveToNext])
@@ -85,25 +105,43 @@ export function LeadsFocalClient({ leads }: LeadsFocalClientProps) {
     async ({
       leadId,
       outcome,
+      note,
     }: {
       leadId: string
       outcome: PostCallOutcome
       note: string
     }) => {
-      // Note : la table `lead_assignments` (Phase E) n'existe pas encore.
-      // Quand elle sera déployée, brancher ici l'update :
-      //   update lead_assignments set status='responded', responded_at=now(), response_note=note, outcome=outcome
-      const label =
-        outcome === 'quote_sent'
-          ? 'Devis à préparer'
-          : outcome === 'callback_later'
-            ? 'Rappel programmé'
-            : 'Lead clôturé'
-      toast.success(label)
-      setPostCallOpen(false)
-      moveToNext(leadId)
+      // Compte-rendu post-appel branché sur les server actions réelles :
+      //  - quote_sent / callback_later → on garde le lead → acceptLeadAssignment
+      //  - not_interested → on refuse le lead → declineLeadAssignment (note = motif)
+      if (outcome === 'not_interested') {
+        const res = await declineLeadAssignment(leadId, note)
+        if (res.ok) {
+          toast.success('Lead clôturé')
+          setPostCallOpen(false)
+          moveToNext(leadId)
+          router.refresh()
+        } else {
+          toast.error('Impossible de clôturer ce lead', {
+            description: res.error ?? 'Réessayez dans un instant.',
+          })
+        }
+        return
+      }
+
+      const res = await acceptLeadAssignment(leadId)
+      if (res.ok) {
+        toast.success(outcome === 'quote_sent' ? 'Devis à préparer' : 'Rappel programmé')
+        setPostCallOpen(false)
+        moveToNext(leadId)
+        router.refresh()
+      } else {
+        toast.error("Impossible d'enregistrer le compte-rendu", {
+          description: res.error ?? 'Réessayez dans un instant.',
+        })
+      }
     },
-    [moveToNext],
+    [moveToNext, router],
   )
 
   if (pendingLeads.length === 0) {

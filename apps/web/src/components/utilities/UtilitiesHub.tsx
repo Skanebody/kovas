@@ -1,5 +1,5 @@
 import { Card, CardDescription, CardTitle } from '@/components/ui/card'
-import { ClipboardList, FileCheck, MessageSquareText, Ruler, Sparkles } from 'lucide-react'
+import { ClipboardList, FileCheck, MessageSquareText, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 
@@ -26,13 +26,6 @@ const UTILITIES: readonly UtilityCardSpec[] = [
       'Le DPE de 2017 du client est-il encore opposable ? Et son CREP positif de 2021 ? Validité calculée selon le régime exact.',
   },
   {
-    slug: 'calculatrice-surface',
-    icon: Ruler,
-    title: 'Calculatrice surface multi-formes',
-    description:
-      'Rectangle, L, T, trapèze, triangle, cercle : entrez les cotes, le total Carrez/Boutin se calcule en direct.',
-  },
-  {
     slug: 'modeles-client',
     icon: MessageSquareText,
     title: 'Pré-formulaires client (email / SMS)',
@@ -49,7 +42,7 @@ const UTILITIES: readonly UtilityCardSpec[] = [
 ]
 
 /**
- * Hub des 5 utilities — grille 2×3 desktop, stack mobile.
+ * Hub des utilities — grille 2 colonnes desktop, stack mobile.
  * Design v5 : cards opaques, accent inline Instrument Serif italic sur le titre,
  * pas de chartreuse (réservé CTA primaires).
  */

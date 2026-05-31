@@ -3,10 +3,70 @@
 import { Badge } from '@/components/ui/badge'
 import { trackRecommendationChanged } from '@/lib/decouvrir/analytics'
 import { useIntentTracker, useTopRecommendations } from '@/lib/decouvrir/intent-tracker'
-import type { ScoredOffer, UserTrack } from '@/lib/decouvrir/recommendations'
+import type { OfferDescriptor, ScoredOffer, UserTrack } from '@/lib/decouvrir/recommendations'
 import { Sparkles } from 'lucide-react'
+import type { Route } from 'next'
 import { useEffect, useRef, useState } from 'react'
 import { OfferCard } from './OfferCard'
+
+/**
+ * Mapping code d'offre Découvrir → code attendu par l'endpoint Stripe Checkout.
+ * Aligné sur les grilles dédiées (LogicielPlansGrid / BundlesGrid) : on cible
+ * les alias `logiciel_*` / codes bundle Stripe qui partagent les Price IDs.
+ */
+const LOGICIEL_OFFER_TO_CHECKOUT: Readonly<Record<string, string>> = {
+  logiciel_solo_light: 'logiciel_starter',
+  logiciel_solo_pro: 'logiciel_active',
+  logiciel_cabinet: 'logiciel_cabinet',
+  logiciel_cabinet_plus: 'logiciel_enterprise',
+}
+
+const BUNDLE_OFFER_TO_CHECKOUT: Readonly<Record<string, string>> = {
+  bundle_solo_starter: 'bundle_solo_starter',
+  bundle_solo_pro_local: 'bundle_solo_performance',
+  bundle_solo_pro_regional: 'bundle_solo_regional',
+  bundle_cabinet_regional: 'bundle_cabinet_360',
+  bundle_cabinet_national: 'bundle_cabinet_national',
+}
+
+/**
+ * Construit le CTA d'une offre recommandée selon sa famille :
+ *   - logiciel gratuit (essai)   → /signup
+ *   - logiciel payant            → Stripe Checkout (?plan=logiciel_*)
+ *   - annuaire gratuit           → /dashboard/annuaire
+ *   - annuaire payant            → Stripe Checkout (?plan=annuaire_*)
+ *   - bundle                     → Stripe Checkout (?bundle=...)
+ *   - addon (inclus, prix null)  → page pré-validation ADEME
+ *   - sponsorisé                 → page d'upgrade annuaire (choix commune amont)
+ */
+function recommendedCtaHref(offer: OfferDescriptor): Route {
+  switch (offer.family) {
+    case 'logiciel': {
+      if (offer.priceMonthlyCents === 0) return '/signup' as Route
+      const code = LOGICIEL_OFFER_TO_CHECKOUT[offer.code]
+      return code
+        ? (`/api/stripe/checkout?plan=${code}&cycle=monthly` as Route)
+        : ('/dashboard/upgrade/logiciel' as Route)
+    }
+    case 'annuaire': {
+      if (offer.priceMonthlyCents === 0) return '/dashboard/annuaire' as Route
+      return `/api/stripe/checkout?plan=${offer.code}&cycle=monthly` as Route
+    }
+    case 'bundle': {
+      const code = BUNDLE_OFFER_TO_CHECKOUT[offer.code]
+      return code
+        ? (`/api/stripe/checkout?bundle=${code}&cycle=monthly` as Route)
+        : ('/dashboard/upgrade/bundle' as Route)
+    }
+    case 'addon':
+      return offer.code === 'addon_pack_conformite'
+        ? ('/dashboard/cockpit-ademe/prevalidation' as Route)
+        : ('/dashboard/upgrade/logiciel' as Route)
+    default:
+      // sponsorisé : choix de commune en amont du checkout
+      return '/dashboard/upgrade/annuaire' as Route
+  }
+}
 
 interface RecommendedOffersSectionProps {
   track: UserTrack
@@ -100,7 +160,7 @@ function RecommendedCard({ scored, isTop }: { scored: ScoredOffer; isTop: boolea
         offer={scored.offer}
         recommended={isTop}
         position="recommended"
-        ctaHref={scored.offer.priceMonthlyCents === 0 ? '/signup' : '/dashboard/account'}
+        ctaHref={recommendedCtaHref(scored.offer)}
         secondaryCtaLabel={scored.reasons[0] ?? 'Pourquoi cette offre ?'}
       />
     </div>

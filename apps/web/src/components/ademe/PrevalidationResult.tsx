@@ -12,8 +12,9 @@
  *   - yellow → "Retravailler" (dark) + "Publier quand même" (link)
  *   - red → "Annuler" (chartreuse) + "Voir les corrections suggérées" (link)
  *
- * Loggue la décision via PATCH /api/ademe/prevalidate/:id (V1 stub côté front,
- * la logique côté DB est posée par l'Edge Function lors du prevalidate).
+ * Loggue la décision via PATCH /api/ademe/prevalidate/:id/decision : le route
+ * handler marque la prévalidation comme acquittée (acknowledged) et enregistre
+ * le libellé de la décision côté DB (audit).
  */
 
 import { AlertTriangle, ArrowRight, CheckCircle2, Info, Lock, XCircle } from 'lucide-react'

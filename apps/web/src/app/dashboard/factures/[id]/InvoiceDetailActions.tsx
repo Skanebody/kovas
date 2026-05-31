@@ -59,10 +59,35 @@ export function InvoiceDetailActions({
 
   const handlePennylaneClick = () => {
     if (hasPennylaneSync) {
-      // Si l'addon est actif, redirige vers l'admin sync (action existante côté
-      // back-office Pennylane). Pour l'instant on affiche un toast — l'action
-      // réelle sera branchée quand la sync sera implémentée.
-      setFeedback({ kind: 'success', text: 'Synchronisation Pennylane en cours…' })
+      // Addon actif → synchronisation réelle vers Pennylane (PDP DGFiP).
+      startTransition(async () => {
+        try {
+          const res = await fetch(`/api/invoices/${invoiceId}/sync-pennylane`, {
+            method: 'POST',
+          })
+          const data = (await res.json().catch(() => null)) as {
+            ok?: boolean
+            already_synced?: boolean
+            message?: string
+          } | null
+          if (!res.ok) {
+            showFeedback('error', data?.message ?? 'Synchronisation Pennylane échouée.')
+            return
+          }
+          showFeedback(
+            'success',
+            data?.already_synced
+              ? 'Facture déjà synchronisée vers Pennylane.'
+              : 'Facture synchronisée vers Pennylane.',
+          )
+          router.refresh()
+        } catch (err) {
+          showFeedback(
+            'error',
+            err instanceof Error ? err.message : 'Synchronisation Pennylane échouée.',
+          )
+        }
+      })
       return
     }
     // Track attempt + ouvre modal upsell
@@ -159,7 +184,7 @@ export function InvoiceDetailActions({
     paidAmount: number
     paymentMethod: PaymentMethod
     paidAt: string
-  }): Promise<void | { error?: string }> => {
+  }): Promise<{ error?: string } | undefined> => {
     const result = await markInvoicePaidAction(input)
     if (result.error) {
       return { error: result.error }
@@ -250,12 +275,11 @@ export function InvoiceDetailActions({
       </div>
 
       {feedback ? (
-        <p
-          className={`text-[12px] ${feedback.kind === 'success' ? 'text-success' : 'text-danger'}`}
-          role="status"
+        <output
+          className={`block text-[12px] ${feedback.kind === 'success' ? 'text-success' : 'text-danger'}`}
         >
           {feedback.text}
-        </p>
+        </output>
       ) : null}
 
       <InvoicePaymentSheet

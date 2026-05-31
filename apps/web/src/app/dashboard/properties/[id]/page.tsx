@@ -1,3 +1,4 @@
+import { DangerZone } from '@/components/danger-zone'
 import {
   PropertyCaracteristiquesSection,
   type PropertyEssentialSpecs,
@@ -26,6 +27,7 @@ import { ArrowLeft, Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { softDeletePropertyAction } from '../actions'
 import type { PropertyRelationshipRole } from './stakeholders-actions'
 import { PropertyStakeholdersSection, type StakeholderRelationship } from './stakeholders-section'
 
@@ -235,10 +237,21 @@ export default async function PropertyDetailPage({
     }
   })
 
-  // 7. Photos pour la galerie (signature URL TODO — V1 utilise storage_path direct si pas de signed url helper)
-  const galleryPhotos: PropertyPhoto[] = photoRows.map((p) => ({
+  // 7. Photos pour la galerie — le bucket `mission-photos` est PRIVÉ : on signe
+  //    chaque chemin Storage (thumb prioritaire, sinon photo pleine) avant de le
+  //    passer aux <img>. Même mécanisme que la galerie du dossier
+  //    (createSignedUrls, TTL 1h), mais signé ici côté serveur.
+  const photoPaths = photoRows.map((p) => p.thumb_path ?? p.storage_path)
+  let signedPhotoUrls: (string | null)[] = []
+  if (photoPaths.length > 0) {
+    const { data: signed } = await supabase.storage
+      .from('mission-photos')
+      .createSignedUrls(photoPaths, 3600)
+    signedPhotoUrls = (signed ?? []).map((s) => s?.signedUrl ?? null)
+  }
+  const galleryPhotos: PropertyPhoto[] = photoRows.map((p, i) => ({
     id: p.id,
-    thumb_url: p.thumb_path ?? p.storage_path ?? null,
+    thumb_url: signedPhotoUrls[i] ?? null,
     caption: p.caption,
   }))
 
@@ -365,6 +378,11 @@ export default async function PropertyDetailPage({
         <PropertyDossiersSection dossiers={dossierItems} ademeDpeCount={0} />
 
         <PropertyGallerieSection photos={galleryPhotos} />
+
+        <DangerZone
+          entityLabel="bien"
+          onDelete={softDeletePropertyAction.bind(null, property.id)}
+        />
       </div>
 
       <PropertyFab propertyId={property.id} />

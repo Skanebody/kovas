@@ -3,10 +3,10 @@
 /**
  * KOVAS — Formulaire de création d'un litige.
  *
- * Appelé quand aucun `litigation_workflows` n'existe pour le dossier.
- * Soumet à POST /api/litigation (à créer par l'agent backend, hors scope ici).
- * Pour V1 on insère directement côté client via supabase ? Non — convention
- * projet : on POST une route Next. Si elle n'existe pas, on tombe en mock toast.
+ * Appelé quand aucun litige n'existe pour le dossier.
+ * Soumet à POST /api/litigation/create — body attendu : { missionId, reason }.
+ * Le type de litige (litigation_type) est préfixé à la raison pour ne pas
+ * perdre l'information côté serveur (la route create ne stocke qu'un champ libre).
  */
 
 import { Loader2 } from 'lucide-react'
@@ -19,6 +19,10 @@ import { Select } from '@/components/ui/select'
 import { toast } from '@/components/ui/toaster'
 
 export interface LitigationCreateFormProps {
+  /**
+   * Conservé pour la signature appelante (page litigation) mais non utilisé :
+   * la route /api/litigation/create rattache le litige via missionId uniquement.
+   */
   dossierId: string
   missionId: string | null
 }
@@ -35,25 +39,36 @@ const LITIGATION_TYPES = [
   { value: 'autre', label: 'Autre' },
 ] as const
 
-export function LitigationCreateForm({ dossierId, missionId }: LitigationCreateFormProps) {
+export function LitigationCreateForm({ missionId }: LitigationCreateFormProps) {
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
-    const payload = {
-      dossier_id: dossierId,
-      mission_id: missionId,
-      litigation_type: String(fd.get('litigation_type') ?? 'autre'),
-      client_complaint: String(fd.get('client_complaint') ?? ''),
-    }
-    if (!payload.client_complaint.trim()) {
+    const litigationType = String(fd.get('litigation_type') ?? 'autre')
+    const clientComplaint = String(fd.get('client_complaint') ?? '').trim()
+
+    if (!clientComplaint) {
       toast.error('Décrivez la plainte du client')
       return
     }
+    if (!missionId) {
+      toast.error('Aucune mission rattachée à ce dossier — impossible d’ouvrir un litige.')
+      return
+    }
+
+    // La route /api/litigation/create attend { missionId, reason }. On préfixe
+    // le type de litige à la raison pour conserver cette qualification.
+    const typeLabel =
+      LITIGATION_TYPES.find((t) => t.value === litigationType)?.label ?? litigationType
+    const payload = {
+      missionId,
+      reason: `[${typeLabel}] ${clientComplaint}`,
+    }
+
     setSubmitting(true)
     try {
-      const res = await fetch('/api/litigation', {
+      const res = await fetch('/api/litigation/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

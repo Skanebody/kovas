@@ -18,7 +18,8 @@ export async function POST(request: Request) {
   const wantsHtml = request.headers.get('accept')?.includes('text/html') ?? false
 
   if (!isStripeConfigured()) {
-    if (wantsHtml) return NextResponse.redirect(new URL('/app/account?stripe=stub', request.url))
+    if (wantsHtml)
+      return NextResponse.redirect(new URL('/dashboard/account?stripe=stub', request.url))
     return NextResponse.json({ error: 'Stripe not configured', stub: true }, { status: 503 })
   }
 
@@ -30,7 +31,8 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (!sub?.stripe_customer_id) {
-    if (wantsHtml) return NextResponse.redirect(new URL('/app/account?nocustomer=1', request.url))
+    if (wantsHtml)
+      return NextResponse.redirect(new URL('/dashboard/account?nocustomer=1', request.url))
     return NextResponse.json({ error: 'no customer' }, { status: 404 })
   }
 

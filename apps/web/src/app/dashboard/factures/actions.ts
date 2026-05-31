@@ -2,6 +2,10 @@
 
 import { getCurrentUser } from '@/lib/auth/current-user'
 import {
+  type OrganizationBranding,
+  getOrganizationBranding,
+} from '@/lib/branding/get-organization-branding'
+import {
   sendInvoiceIssuedEmail,
   sendReminderJ7Email,
   sendReminderJ15Email,
@@ -47,6 +51,26 @@ function toStr(value: FormDataEntryValue | null): string | null {
   if (typeof value !== 'string') return null
   const trimmed = value.trim()
   return trimmed.length === 0 ? null : trimmed
+}
+
+/**
+ * Télécharge le logo cabinet (signed URL 24h) et le convertit en data-URL pour
+ * jsPDF. Retourne null si pas de logo / mime non supporté par jsPDF (svg).
+ * Aligné sur le helper du module Devis (`devis/actions.ts`).
+ */
+async function fetchLogoDataUrl(branding: OrganizationBranding): Promise<string | null> {
+  if (!branding.logoSignedUrl) return null
+  if (branding.logoMime === 'image/svg+xml') return null // jsPDF ne sait pas faire
+  try {
+    const res = await fetch(branding.logoSignedUrl)
+    if (!res.ok) return null
+    const buffer = await res.arrayBuffer()
+    const base64 = Buffer.from(buffer).toString('base64')
+    const mime = branding.logoMime ?? 'image/png'
+    return `data:${mime};base64,${base64}`
+  } catch {
+    return null
+  }
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -244,18 +268,11 @@ export async function issueInvoiceAction(invoiceId: string): Promise<{
     .maybeSingle()
   if (!org) return { error: 'Organisation introuvable' }
 
-  // Charge éventuelles colonnes branding (Agent P1 — on lit avec defaults).
-  // On utilise .select() défensif via une 2e requête typed-loose.
-  const { data: orgBranding } = await supabase
-    .from('organizations')
-    .select('id')
-    .eq('id', orgId)
-    .maybeSingle()
-  // Si Agent P1 a ajouté logo_url + brand_color_hex, ils sont accessibles via
-  // un select dynamique. Pour V1, on évite la dépendance — defaults nulls.
-  void orgBranding
-  const logoUrl: string | null = null
-  const brandColorHex: string | null = null
+  // Branding cabinet (logo + couleur principale) — même helper que les devis
+  // (`getOrganizationBranding`). Le logo est converti en data-URL pour jsPDF.
+  const branding = await getOrganizationBranding(supabase, orgId)
+  const logoUrl: string | null = await fetchLogoDataUrl(branding)
+  const brandColorHex: string | null = branding.brandColorHex
 
   const issuerSnapshot: InvoiceIssuerSnapshot = {
     name: org.name,

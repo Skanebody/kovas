@@ -46,7 +46,9 @@ import {
   XCircle,
 } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState, useTransition } from 'react'
+
+import { toast } from '@/components/ui/toaster'
 
 import { AdemeForm } from './ademe-form'
 import { BaselineMinutesForm } from './baseline-minutes-form'
@@ -264,12 +266,7 @@ function SecuriteTab({ props }: { props: AccountSettingsClientProps }) {
           décret 2023-417 et au RGPD, une période de grâce de 90 jours s'applique avant suppression
           irréversible. Tes factures restent conservées 10 ans (obligation comptable L.123-22).
         </p>
-        <form action="/api/rgpd/request" method="POST">
-          <input type="hidden" name="type" value="export" />
-          <Button type="submit" variant="outline" size="default" className="w-full sm:w-auto">
-            <Download className="size-4" /> Exporter toutes mes données
-          </Button>
-        </form>
+        <ExportDataButton />
       </Card>
 
       <Card variant="opaque" padding="default" className="space-y-4">
@@ -913,6 +910,55 @@ function LegalLink({ href, label }: { href: string; label: string }): ReactNode 
       <span>{label}</span>
       <ExternalLink className="size-3.5 text-[#0F1419]/40" />
     </Link>
+  )
+}
+
+/**
+ * Bouton "Exporter toutes mes données (RGPD)".
+ * POST JSON /api/rgpd/request avec type='export' (la route attend du JSON,
+ * un form natif urlencodé renverrait 400). Même pattern que DeleteAccountButton.
+ */
+function ExportDataButton(): ReactNode {
+  const [pending, startTransition] = useTransition()
+
+  const handleExport = () => {
+    startTransition(async () => {
+      try {
+        const res = await fetch('/api/rgpd/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'export' }),
+        })
+        if (res.status === 409) {
+          toast.error("Une demande d'export est déjà en cours de traitement")
+          return
+        }
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string }
+          toast.error(data.error ?? "Erreur lors de la demande d'export")
+          return
+        }
+        toast.success(
+          'Demande enregistrée. Ton export sera prêt sous 30 jours — tu recevras un email avec le lien de téléchargement.',
+        )
+      } catch {
+        toast.error('Erreur réseau. Réessaie dans quelques instants.')
+      }
+    })
+  }
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="default"
+      className="w-full sm:w-auto"
+      onClick={handleExport}
+      disabled={pending}
+    >
+      <Download className="size-4" />
+      {pending ? 'Demande en cours…' : 'Exporter toutes mes données'}
+    </Button>
   )
 }
 

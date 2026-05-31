@@ -138,7 +138,7 @@ export default async function AccountLegalPage() {
         </p>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>
-            <Link href="/cgv/module-factures">
+            <Link href="/cgv">
               <FileText className="size-4" /> Lire les CGV module Factures
             </Link>
           </Button>
