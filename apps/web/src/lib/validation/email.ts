@@ -83,8 +83,30 @@ export function validateProEmail(rawEmail: string): EmailValidationResult {
   const match = email.match(EMAIL_REGEX)
   if (!match) return { valid: false, reason: 'invalid_format' }
 
-  const domain = match[1]!
+  const domain = match[1] ?? ''
   if (FREE_PROVIDERS.has(domain)) return { valid: false, reason: 'free_provider' }
+  if (DISPOSABLE_PROVIDERS.has(domain)) return { valid: false, reason: 'disposable_provider' }
+
+  return { valid: true, domain }
+}
+
+/**
+ * Validation email à l'INSCRIPTION — funnel sans friction (décision Benjamin
+ * 2026-05-30). Contrairement à `validateProEmail`, on ACCEPTE les adresses grand
+ * public (gmail, outlook, orange, free, icloud…) : beaucoup d'auto-entrepreneurs
+ * et de diagnostiqueurs indépendants n'ont pas d'email à leur nom de domaine.
+ * On bloque uniquement :
+ *   - le format invalide,
+ *   - les adresses jetables / temporaires (anti-spam).
+ * La vraie légitimité professionnelle est contrôlée par le SIRET (vérifié au
+ * registre SIRENE) demandé APRÈS le paiement, pas par le domaine de l'email.
+ */
+export function validateSignupEmail(rawEmail: string): EmailValidationResult {
+  const email = rawEmail.trim().toLowerCase()
+  const match = email.match(EMAIL_REGEX)
+  if (!match) return { valid: false, reason: 'invalid_format' }
+
+  const domain = match[1] ?? ''
   if (DISPOSABLE_PROVIDERS.has(domain)) return { valid: false, reason: 'disposable_provider' }
 
   return { valid: true, domain }

@@ -5,7 +5,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { isValidReferralCodeFormat } from '@/lib/referral/code-generator'
 import { applyReferralOnSignup } from '@/lib/referral/referral-engine'
 import { createClient } from '@/lib/supabase/server'
-import { getEmailValidationMessage, validateProEmail } from '@/lib/validation/email'
+import { getEmailValidationMessage, validateSignupEmail } from '@/lib/validation/email'
 import type { Database } from '@kovas/database/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
@@ -57,8 +57,11 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
     }
   }
 
-  // Protection — Email pro obligatoire (pas de gmail/yahoo perso).
-  const emailCheck = validateProEmail(parsed.data.email)
+  // Protection légère — on accepte les emails perso (gmail/outlook…) pour ne pas
+  // exclure les auto-entrepreneurs ; on bloque seulement le format invalide et
+  // les adresses jetables. La légitimité pro est vérifiée via le SIRET (SIRENE)
+  // après paiement.
+  const emailCheck = validateSignupEmail(parsed.data.email)
   if (!emailCheck.valid) {
     return { fieldErrors: { email: getEmailValidationMessage(emailCheck.reason) } }
   }

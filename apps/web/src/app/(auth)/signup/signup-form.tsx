@@ -42,10 +42,10 @@ export function SignupForm({ referralCode }: { referralCode?: string | null } = 
       </div>
 
       <FormField
-        label="Email professionnel"
+        label="Ton email"
         htmlFor="email"
         required
-        hint="Avec ton nom de domaine (pas gmail/yahoo)"
+        hint="Pro ou perso (gmail, outlook…) — on t'envoie les infos de ton compte ici"
         error={errors.email}
       >
         <Input
@@ -54,7 +54,7 @@ export function SignupForm({ referralCode }: { referralCode?: string | null } = 
           type="email"
           autoComplete="email"
           required
-          placeholder="nom@cabinet.fr"
+          placeholder="ton.email@exemple.fr"
         />
       </FormField>
 
