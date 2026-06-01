@@ -120,7 +120,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: ZAP baseline scan
-        uses: zaproxy/action-baseline@v0.10.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "https://kovas-staging.vercel.app"
           rules_file_name: ".zap/rules.tsv"
