@@ -74,7 +74,7 @@
     "react-konva": "^18.2.10",
     "react-leaflet": "^5.0.0",
     "recharts": "^3.8.1",
-    "schema-dts": "^1.1.2",
+    "schema-dts": "^2.0.0",
     "serwist": "^9.0.11",
     "sonner": "^2.0.7",
     "stripe": "^22.1.1",
